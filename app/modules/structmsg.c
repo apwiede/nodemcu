@@ -322,4 +322,4 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LNILKEY, LNILVAL }
 };
 
-NODEMCU_MODULE(STRUCT_MSG, "structmsg", structmsg_map, NULL);
+NODEMCU_MODULE(STRUCTMSG, "structmsg", structmsg_map, NULL);
