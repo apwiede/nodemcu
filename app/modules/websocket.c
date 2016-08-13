@@ -31,7 +31,14 @@
 *
 */
 
-// Module for handling structured messages
+/*
+ * this module is mostly derived from the net.c module in removing upd support 
+ * and adding websocket code parts from the arduino implementation of 
+ * Willem Routers:
+ * see: https://github.com/willemwouters/ESP8266/tree/master/projects/apps/websocket_example/src
+ */
+
+// Module for handling websockets
 
 #include "module.h"
 #include "lauxlib.h"
