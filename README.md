@@ -29,129 +29,129 @@ for making the modules active.
 
 ### client:
 
-> con=nil
-  function startTheWsClient()
+> con=nil <br />
+  function startTheWsClient() <br />
 
->   function connection(srv)
-    con=srv
-    print("==connection ready")
-    srv:on("receive", function(sck, c)
-      print("clnt receive: "..c)
-    end)
-    srv:on("sent", function(sck)
-      print("==clnt sent")
-    end)
-    srv:on("reconnection", function(sck)
-      print("==clnt reconnection")
-    end)
-    srv:on("disconnection", function(sck,c)
-      print("==clnt disconnection")
-    end)
-    srv:on("connection", function(sck,c)
-      print("==connection done")
-      sck:send("Hello Wordl\r\n")
-    end)
-    srv:send("GET /echo HTTP/1.1\
-Host: example.com:8000\
-Upgrade: websocket\
-Connection: Upgrade\
-Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\
-Sec-WebSocket-Version: 13\
-\
-")
-    tmr.alarm(0,2000,tmr.ALARM_SINGLE,function(srv)
-       con:send("Hello World Again\r\n")
-    end)
-  end
+>   function connection(srv) <br />
+    con=srv <br />
+    print("==connection ready") <br />
+    srv:on("receive", function(sck, c) <br />
+      print("clnt receive: "..c) <br />
+    end) <br />
+    srv:on("sent", function(sck) <br />
+      print("==clnt sent") <br />
+    end) <br />
+    srv:on("reconnection", function(sck) <br />
+      print("==clnt reconnection") <br />
+    end) <br />
+    srv:on("disconnection", function(sck,c) <br />
+      print("==clnt disconnection") <br />
+    end) <br />
+    srv:on("connection", function(sck,c) <br />
+      print("==connection done") <br />
+      sck:send("Hello Wordl\r\n") <br />
+    end) <br />
+    srv:send("GET /echo HTTP/1.1\ <br />
+Host: example.com:8000\ <br />
+Upgrade: websocket\ <br />
+Connection: Upgrade\ <br />
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\ <br />
+Sec-WebSocket-Version: 13\ <br />
+\ <br />
+") <br />
+    tmr.alarm(0,2000,tmr.ALARM_SINGLE,function(srv) <br />
+       con:send("Hello World Again\r\n") <br />
+    end) <br />
+  end <br />
 
->   function clntConnected(clnt)
-    print("==client is connected")
-    clnt:connect(8080,"192.168.4.1",connection)
-  end
+>   function clntConnected(clnt) <br />
+    print("==client is connected") <br />
+    clnt:connect(8080,"192.168.4.1",connection) <br />
+  end <br />
 
->   if (clnt ~= nil) then
-     clnt:close()
-  end
-  clnt=nil
-  wifi.setmode(wifi.STATION)
-  wifi.sta.config("your router","your passwd")
-  wifi.sta.connect()
-  tmr.alarm(0, 1000, tmr.ALARM_AUTO, function ()
-    local ip = wifi.sta.getip()
-    if ip then
-      tmr.stop(0)
-      print(ip)
-      clnt=websocket.createConnection(0,clntConnected)
-    end
-  end)
-end
+>   if (clnt ~= nil) then <br />
+     clnt:close() <br />
+  end <br />
+  clnt=nil <br />
+  wifi.setmode(wifi.STATION) <br />
+  wifi.sta.config("your router","your passwd") <br />
+  wifi.sta.connect() <br />
+  tmr.alarm(0, 1000, tmr.ALARM_AUTO, function () <br />
+    local ip = wifi.sta.getip() <br />
+    if ip then <br />
+      tmr.stop(0) <br />
+      print(ip) <br />
+      clnt=websocket.createConnection(0,clntConnected) <br />
+    end <br />
+  end) <br />
+end <br />
 
 ### server:
 
-> port=8080
-  useLineEnd=true
+> port=8080 <br />
+  useLineEnd=true <br />
 
-> host="192.168.4.1"
- router="your router"
- passwd="your passwd"
- isConnected=false
+> host="192.168.4.1" <br />
+ router="your router" <br />
+ passwd="your passwd" <br />
+ isConnected=false <br />
 
-> function chkConnected(sck)
-  dbgPrint("is connected\r\n")
-  isConnected=true
-  srv:send("GET /echo HTTP/1.1\
-Host: example.com:8000\
-Upgrade: websocket\
-Connection: Upgrade\
-Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\
-Sec-WebSocket-Version: 13\
-\
-")
-end
+> function chkConnected(sck) <br />
+  dbgPrint("is connected\r\n") <br />
+  isConnected=true <br />
+  srv:send("GET /echo HTTP/1.1\ <br />
+Host: example.com:8000\ <br />
+Upgrade: websocket\ <br />
+Connection: Upgrade\ <br />
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\ <br />
+Sec-WebSocket-Version: 13\ <br />
+\ <br />
+") <br />
+end <br />
 
->function WSSServerStart()
- wifi.setmode(wifi.STATION)
- wifi.sta.config(router,passwd)
-  if (srv ~= nil) then
-    srv:close()
-    srv = nil
-  end
+>function WSSServerStart() <br />
+ wifi.setmode(wifi.STATION) <br />
+ wifi.sta.config(router,passwd) <br />
+  if (srv ~= nil) then <br />
+    srv:close() <br />
+    srv = nil <br />
+  end <br />
 
->  wifi.sta.autoconnect(1)
-  srv = net.createConnection(net.TCP, 0)
+>  wifi.sta.autoconnect(1) <br />
+  srv = net.createConnection(net.TCP, 0) <br />
 
->  srv:on("receive", function(sck, c)
-    srv:send("Hello World")
-  end)
+>  srv:on("receive", function(sck, c) <br />
+    srv:send("Hello World") <br />
+  end) <br />
 
-> srv:on("reconnection", function(sck, c)
-    print("reconnected")
-  end)
+> srv:on("reconnection", function(sck, c) <br />
+    print("reconnected") <br />
+  end) <br />
 
->  srv:on("disconnection", function(sck, c)
-    print("disconnected: "..tostring(sck))
-  end)
+>  srv:on("disconnection", function(sck, c) <br />
+    print("disconnected: "..tostring(sck)) <br />
+  end) <br />
 
->  srv:on("sent", function(sck, c)
-    print("sent")
-  end)
+>  srv:on("sent", function(sck, c) <br />
+    print("sent") <br />
+  end) <br />
 
->  srv:on("connection", function(sck, c)
-    print("connected")
-  -- Wait for connection before sending.
-    srv:send("Hello World Again");
-  end)
+>  srv:on("connection", function(sck, c) <br />
+    print("connected") <br />
+  -- Wait for connection before sending. <br />
+    srv:send("Hello World Again"); <br />
+  end) <br />
 
->  tmr.alarm(0, 1000, tmr.ALARM_AUTO, function()
-    ip=wifi.sta.getip()
-    print("ip: "..tostring(ip))
-    if (ip ~= nil) then
-      tmr.stop(0)
-      srv:connect(port,host,chkConnected)
-    end
-  end)
+>  tmr.alarm(0, 1000, tmr.ALARM_AUTO, function() <br />
+    ip=wifi.sta.getip() <br />
+    print("ip: "..tostring(ip)) <br />
+    if (ip ~= nil) then <br />
+      tmr.stop(0) <br />
+      srv:connect(port,host,chkConnected) <br />
+    end <br />
+  end) <br />
 
-> end
+> end <br />
 
 
 ### structmsg message format:
@@ -161,80 +161,44 @@ uint16_t | uint16_t | uint16_t  | uint16_t | uint16_t | < uint32_t   | uint8_t\*
 
 ### short example Lua code:
 
-> function tststructmsg ()
->    sms=nil
-
->    sms=structmsg.create(5);
-
->    structmsg.addField(sms, "@randomNum", "uint32_t");
-
->    structmsg.addField(sms, "pwd", "uint8_t\*", 16);
-
->    structmsg.setFillerAndCrc(sms);
-
->    structmsg.setTargets(sms, 123, 456, 789);
-
->    structmsg.setFieldValue(sms, "pwd","/dir1/dir2/dir345");
-
->    structmsg.encode(sms);
-
->    encoded=structmsg.getencoded(sms);
-
->    sms2=structmsg.create(5);
-
->    structmsg.setTargets(sms2, 789, 456, 123);
-
->    structmsg.addField(sms2, "@randomNum", "uint32_t");
-
->    structmsg.addField(sms2, "pwd", "uint8_t\*", 16);
-
->    structmsg.setFillerAndCrc(sms2);
-
->    structmsg.decode(sms2,encoded);
-
->    structmsg.encode(sms2);
-
->    encoded2=structmsg.getencoded(sms2);
-
->    ch1=string.byte(encoded2,7);
-
->    ch2=string.byte(encoded2,8);
-
->    ch3=string.byte(encoded2,37);
-
->    ch4=string.byte(encoded2,38);
-
->    print("==enc: "..string.format("0x%02x 0x%02x 0x%02x 0x%02x",ch1,ch2,ch3,ch4));
-
->    encrypted=structmsg.encrypt(sms2,"a1b2c3d4e5f6g7h8");
-
->    decrypted=structmsg.decrypt(sms2,"a1b2c3d4e5f6g7h8");
-
->    ch1=string.byte(decrypted,7);
-
->    ch2=string.byte(decrypted,8);
-
->    ch3=string.byte(decrypted,37);
-
->    ch4=string.byte(decrypted,38);
-
->    print("==dec: "..string.format("0x%02x 0x%02x 0x%02x 0x%02x",ch1,ch2,ch3,ch4));
-
->    structmsg.delete(sms);
-
->    sms=nil;
-
->    structmsg.delete(sms2);
-
->    sms2=nil;
-
->    encrypted=nil;
-
->    decrypted=nil;
->    encoded=nil;
-
->    encoded2=nil;
-
->  end
+> function tststructmsg () <br />
+    sms=nil <br />
+    sms=structmsg.create(5); <br />
+    structmsg.addField(sms, "@randomNum", "uint32_t"); <br />
+    structmsg.addField(sms, "pwd", "uint8_t\*", 16); <br />
+    structmsg.setFillerAndCrc(sms); <br />
+    structmsg.setTargets(sms, 123, 456, 789); <br />
+    structmsg.setFieldValue(sms, "pwd","/dir1/dir2/dir345"); <br />
+    structmsg.encode(sms); <br />
+    encoded=structmsg.getencoded(sms); <br />
+    sms2=structmsg.create(5); <br />
+    structmsg.setTargets(sms2, 789, 456, 123); <br />
+    structmsg.addField(sms2, "@randomNum", "uint32_t"); <br />
+    structmsg.addField(sms2, "pwd", "uint8_t\*", 16); <br />
+    structmsg.setFillerAndCrc(sms2); <br />
+    structmsg.decode(sms2,encoded); <br />
+    structmsg.encode(sms2); <br />
+    encoded2=structmsg.getencoded(sms2); <br />
+    ch1=string.byte(encoded2,7); <br />
+    ch2=string.byte(encoded2,8); <br />
+    ch3=string.byte(encoded2,37); <br />
+    ch4=string.byte(encoded2,38); <br />
+    print("==enc: "..string.format("0x%02x 0x%02x 0x%02x 0x%02x",ch1,ch2,ch3,ch4)); <br />
+    encrypted=structmsg.encrypt(sms2,"a1b2c3d4e5f6g7h8"); <br />
+    decrypted=structmsg.decrypt(sms2,"a1b2c3d4e5f6g7h8"); <br />
+    ch1=string.byte(decrypted,7); <br />
+    ch2=string.byte(decrypted,8); <br />
+    ch3=string.byte(decrypted,37); <br />
+    ch4=string.byte(decrypted,38); <br />
+    print("==dec: "..string.format("0x%02x 0x%02x 0x%02x 0x%02x",ch1,ch2,ch3,ch4)); <br />
+    structmsg.delete(sms); <br />
+    sms=nil; <br />
+    structmsg.delete(sms2); <br />
+    sms2=nil; <br />
+    encrypted=nil; <br />
+    decrypted=nil; <br />
+    encoded=nil; <br />
+    encoded2=nil; <br />
+  end <br />
 
 ### More description of the interfaces following.
