@@ -156,8 +156,8 @@ end <br />
 
 ### structmsg message format:
 
-uint16_t | uint16_t | uint16_t  | uint16_t | uint16_t | < uint32_t   | uint8_t\* | uint8_t\* | ... > | uint8_t\* | uint16_t
-  src    |   dst    | totalLgth |    cmd   | cmdLgth  | < randomNNum |   fld1   |   fld2   | ... > | filler   |   crc
+uint16_t | uint16_t | uint16_t  | uint16_t | uint16_t | < uint32_t   | uint8_t\* | uint8_t\* | ... > | uint8_t\* | uint16_t <br />
+  src    |   dst    | totalLgth |    cmd   | cmdLgth  | < randomNNum |   fld1   |   fld2   | ... > | filler   |   crc <br />
 
 ### short example Lua code:
 
