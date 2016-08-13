@@ -16,4 +16,11 @@ app/modules/structmsg.c    a module for handling and building "structured messag
 app/structmsg/structmsg.c
 app/structmsg/structmsg.h
 
+You have to add structmsg to the SUBDIRS variable in app/Makefile
+
+You have to add WEBSOCKET and STRUCTMSG defines in app/include/user_modules.h 
+for making the modules active.
+
+Attention!! This is work in progress and not yet usefull for production!!
+
 More description of the interface following.
