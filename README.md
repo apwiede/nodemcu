@@ -201,13 +201,3 @@ encoded2=nil
 
 <<<<<<< HEAD
 ### More description of the interfaces following.
-=======
-You have to add structmsg to the SUBDIRS variable in app/Makefile
-
-You have to add WEBSOCKET and STRUCTMSG defines in app/include/user_modules.h 
-for making the modules active.
-
-Attention!! This is work in progress and not yet usefull for production!!
-
-More description of the interface following.
->>>>>>> 027c216aa04088bf514d0ac2896c5026d4980fdc
