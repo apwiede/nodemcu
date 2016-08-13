@@ -161,7 +161,7 @@ uint16_t | uint16_t | uint16_t  | uint16_t | uint16_t | < uint32_t   | uint8_t\*
 
 ### short example Lua code:
 
->sms=nil
+> sms=nil
   sms=structmsg.create(5)
   structmsg.addField(sms, "@randomNum", "uint32_t")
   structmsg.addField(sms, "pwd", "uint8_t\*", 16)
