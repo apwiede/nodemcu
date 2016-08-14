@@ -178,7 +178,7 @@ Sec-WebSocket-Version: 13\
     sms=nil
     sms=structmsg.create(5);
     structmsg.addField(sms, "@randomNum", "uint32_t");
-    structmsg.addField(sms, "pwd", "uint8_t\*", 16);
+    structmsg.addField(sms, "pwd", "uint8_t*", 16);
     structmsg.setFillerAndCrc(sms);
     --                        src  dst  cmd
     structmsg.setTargets(sms, 123, 456, 789);
@@ -189,8 +189,8 @@ Sec-WebSocket-Version: 13\
     structmsg.setTargets(sms2, 789, 456, 123);
     --                        @: fields that start with @ are specially handled
     structmsg.addField(sms2, "@randomNum", "uint32_t");
-    --                               uint8\_t\*: the type of the field determines its handling
-    structmsg.addField(sms2, "pwd", "uint8_t\*", 16);
+    --                               uint8_t*: the type of the field determines its handling
+    structmsg.addField(sms2, "pwd", "uint8_t*", 16);
     structmsg.setFillerAndCrc(sms2);
     structmsg.decode(sms2,encoded);
     structmsg.encode(sms2);
