@@ -100,8 +100,8 @@ Sec-WebSocket-Version: 13\
 ### server:
 
 ```lua
-  port=8080
-  host="192.168.4.1"
+  port=yourport
+  host="your host"
   router="your router"
   passwd="your passwd"
   isConnected=false
