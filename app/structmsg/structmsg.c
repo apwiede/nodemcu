@@ -69,7 +69,6 @@ static int addHandle(uint8_t *handle) {
 
   if (structmsg_userdata.handles == NULL) {
     structmsg_userdata.handles = os_malloc(sizeof(uint8_t *));
-ets_printf("os_malloc: %p %s %d\n", structmsg_userdata.handles, __FILE__, __LINE__);
     if (structmsg_userdata.handles == NULL) {
       return STRUCT_MSG_ERR_OUT_OF_MEMORY;
     } else {
@@ -86,7 +85,6 @@ ets_printf("os_malloc: %p %s %d\n", structmsg_userdata.handles, __FILE__, __LINE
       idx++;
     }
     structmsg_userdata.handles = os_realloc(structmsg_userdata.handles, sizeof(uint8_t *)*(structmsg_userdata.numHandles+1));
-ets_printf("os_realloc: %p %s %d\n", structmsg_userdata.handles, __FILE__, __LINE__);
     if (structmsg_userdata.handles == NULL) {
       return STRUCT_MSG_ERR_OUT_OF_MEMORY;
     } else {
@@ -252,6 +250,58 @@ static int int8VectorEncode(uint8_t *data, int offset, int8_t *value, uint16_t l
   return offset;
 }
 
+// ============================= uint16VectorEncode ========================
+
+static int uint16VectorEncode(uint8_t *data, int offset, uint16_t *value, uint16_t lgth) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = uint16Encode(data, offset, value[idx]);
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= int16VectorEncode ========================
+
+static int int16VectorEncode(uint8_t *data, int offset, int16_t *value, uint16_t lgth) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = int16Encode(data, offset, value[idx]);
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= uint32VectorEncode ========================
+
+static int uint32VectorEncode(uint8_t *data, int offset, uint32_t *value, uint16_t lgth) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = uint32Encode(data, offset, value[idx]);
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= int32VectorEncode ========================
+
+static int int32VectorEncode(uint8_t *data, int offset, int32_t *value, uint16_t lgth) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = int32Encode(data, offset, value[idx]);
+    idx++;
+  }
+  return offset;
+}
+
 // ============================= uint8Decode ========================
 
 static int uint8Decode(const uint8_t *data, int offset, uint8_t *value) {
@@ -319,6 +369,58 @@ static int uint8VectorDecode(const uint8_t *data, int offset, uint16_t lgth, uin
 static int int8VectorDecode(const uint8_t *data, int offset, uint16_t lgth, int8_t **value) {
   c_memcpy(*value,data+offset,lgth);
   offset += lgth;
+  return offset;
+}
+
+// ============================= uint16VectorDecode ========================
+
+static int uint16VectorDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t **value) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = uint16Decode(data, offset, &((*value)[idx]));
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= int16VectorDecode ========================
+
+static int int16VectorDecode(const uint8_t *data, int offset, uint16_t lgth, int16_t **value) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = int16Decode(data, offset, &((*value)[idx]));
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= uint32VectorDecode ========================
+
+static int uint32VectorDecode(const uint8_t *data, int offset, uint16_t lgth, uint32_t **value) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = uint32Decode(data, offset, &((*value)[idx]));
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= int32VectorDecode ========================
+
+static int int32VectorDecode(const uint8_t *data, int offset, uint16_t lgth, int32_t **value) {
+  int idx;
+
+  idx = 0;
+  while (idx < lgth) {
+    offset = int32Decode(data, offset, &((*value)[idx]));
+    idx++;
+  }
   return offset;
 }
 
@@ -424,7 +526,6 @@ static int crcDecode(const uint8_t *data, int offset, uint8_t *startData, uint16
 static fieldInfo_t *newFieldInfos(uint8_t numFieldInfos)
 {
   fieldInfo_t *ptr = (fieldInfo_t *)os_malloc (sizeof(fieldInfo_t) * numFieldInfos);
-ets_printf("os_malloc: %p %s %d\n", ptr, __FILE__, __LINE__);
   return ptr;
 }
 
@@ -467,12 +568,11 @@ int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, 
   fieldKey = structmsg->msg.numFieldInfos;
   fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
   fieldInfo->fieldStr = os_malloc(os_strlen(fieldStr) + 1);
-ets_printf("os_malloc: %p %s %d\n", fieldInfo->fieldStr, __FILE__, __LINE__);
   fieldInfo->fieldStr[os_strlen(fieldStr)] = '\0';
   os_memcpy(fieldInfo->fieldStr, fieldStr, os_strlen(fieldStr));
   fieldInfo->fieldKey = fieldKey;
   fieldInfo->fieldType = fieldType;
-  fieldInfo->value.vector = NULL;
+  fieldInfo->value.byteVector = NULL;
   fieldInfo->flags = 0;
   switch (fieldType) {
     case STRUCT_MSG_FIELD_UINT8_T:
@@ -494,11 +594,34 @@ ets_printf("os_malloc: %p %s %d\n", fieldInfo->fieldStr, __FILE__, __LINE__);
       fieldLgth = 4;
       break;
     case STRUCT_MSG_FIELD_UINT8_VECTOR:
+      structmsg->totalLgth += fieldLgth;
+      structmsg->msg.cmdLgth += fieldLgth;
+      fieldInfo->value.ubyteVector = (uint8_t *)os_malloc(fieldLgth);
+      break;
     case STRUCT_MSG_FIELD_INT8_VECTOR:
       structmsg->totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
-      fieldInfo->value.vector = (uint8_t *)os_malloc(fieldLgth);
-ets_printf("os_malloc: %p %s %d\n", fieldInfo->value.vector, __FILE__, __LINE__);
+      fieldInfo->value.byteVector = (int8_t *)os_malloc(fieldLgth);
+      break;
+    case STRUCT_MSG_FIELD_UINT16_VECTOR:
+      structmsg->totalLgth += fieldLgth;
+      structmsg->msg.cmdLgth += fieldLgth;
+      fieldInfo->value.ushortVector = (uint16_t *)os_malloc(fieldLgth*sizeof(uint16_t));
+      break;
+    case STRUCT_MSG_FIELD_INT16_VECTOR:
+      structmsg->totalLgth += fieldLgth;
+      structmsg->msg.cmdLgth += fieldLgth;
+      fieldInfo->value.shortVector = (int16_t *)os_malloc(fieldLgth*sizeof(int16_t));
+      break;
+    case STRUCT_MSG_FIELD_UINT32_VECTOR:
+      structmsg->totalLgth += fieldLgth;
+      structmsg->msg.cmdLgth += fieldLgth;
+      fieldInfo->value.uint32Vector = (uint32_t *)os_malloc(fieldLgth*sizeof(uint32_t));
+      break;
+    case STRUCT_MSG_FIELD_INT32_VECTOR:
+      structmsg->totalLgth += fieldLgth;
+      structmsg->msg.cmdLgth += fieldLgth;
+      fieldInfo->value.int32Vector = (int32_t *)os_malloc(fieldLgth*sizeof(int32_t));
       break;
   }
   fieldInfo->fieldLgth = fieldLgth;
@@ -514,6 +637,10 @@ int dump_structmsg(const uint8_t *handle) {
   int valueIdx;
   uint8_t uch;
   int8_t ch;
+  uint16_t ush;
+  int16_t sh;
+  uint32_t uval;
+  int32_t val;
   structmsg_t *structmsg;
 
   structmsg = get_structmsg_ptr(handle);
@@ -553,7 +680,7 @@ int dump_structmsg(const uint8_t *handle) {
         valueIdx = 0;
         ets_printf("      values:");
         while (valueIdx < fieldInfo->fieldLgth) {
-          ch = fieldInfo->value.vector[valueIdx];
+          ch = fieldInfo->value.byteVector[valueIdx];
           ets_printf("        idx: %d value: %c 0x%02x\n", valueIdx, (char)ch, (uint8_t)(ch & 0xFF));
           valueIdx++;
         }
@@ -563,8 +690,46 @@ int dump_structmsg(const uint8_t *handle) {
         valueIdx = 0;
         ets_printf("      values:\n");
         while (valueIdx < fieldInfo->fieldLgth) {
-          uch = fieldInfo->value.uvector[valueIdx];
+          uch = fieldInfo->value.ubyteVector[valueIdx];
           ets_printf("        idx: %d value: %c 0x%02x\n", valueIdx, (char)uch, (uint8_t)(uch & 0xFF));
+          valueIdx++;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT16_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          sh = fieldInfo->value.shortVector[valueIdx];
+          ets_printf("        idx: %d value: 0x%04x\n", valueIdx, (int16_t)(sh & 0xFFFF));
+          valueIdx++;
+        }
+        ets_printf("\n");
+        break;
+      case STRUCT_MSG_FIELD_UINT16_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:\n");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          ush = fieldInfo->value.ushortVector[valueIdx];
+          ets_printf("        idx: %d value: 0x%04x\n", valueIdx, (uint16_t)(ush & 0xFFFF));
+          valueIdx++;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT32_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          val = fieldInfo->value.int32Vector[valueIdx];
+          ets_printf("        idx: %d value: 0x%08x\n", valueIdx, (int32_t)(val & 0xFFFFFFFF));
+          valueIdx++;
+        }
+        ets_printf("\n");
+        break;
+      case STRUCT_MSG_FIELD_UINT32_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:\n");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          uval = fieldInfo->value.uint32Vector[valueIdx];
+          ets_printf("        idx: %d value: 0x%08x\n", valueIdx, (uint32_t)(uval & 0xFFFFFFFF));
           valueIdx++;
         }
         break;
@@ -634,13 +799,37 @@ int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericV
         break;
       case STRUCT_MSG_FIELD_INT8_VECTOR:
         if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
-          *stringValue = fieldInfo->value.vector;
+          *stringValue = fieldInfo->value.byteVector;
           return STRUCT_MSG_ERR_OK;
         }
         break;
       case STRUCT_MSG_FIELD_UINT8_VECTOR:
         if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
-          *stringValue = fieldInfo->value.uvector;
+          *stringValue = fieldInfo->value.ubyteVector;
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT16_VECTOR:
+        if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
+          *stringValue = (uint8_t *)fieldInfo->value.shortVector;
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_UINT16_VECTOR:
+        if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
+          *stringValue = (uint8_t *)fieldInfo->value.ushortVector;
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT32_VECTOR:
+        if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
+          *stringValue = (uint8_t *)fieldInfo->value.int32Vector;
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_UINT32_VECTOR:
+        if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
+          *stringValue = (uint8_t *)fieldInfo->value.uint32Vector;
           return STRUCT_MSG_ERR_OK;
         }
         break;
@@ -741,7 +930,7 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
         break;
       case STRUCT_MSG_FIELD_INT8_VECTOR:
         if (stringValue != NULL) {
-          os_memcpy(fieldInfo->value.uvector, stringValue, fieldInfo->fieldLgth);
+          os_memcpy(fieldInfo->value.ubyteVector, stringValue, fieldInfo->fieldLgth);
           fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
           return STRUCT_MSG_ERR_OK;
         }
@@ -749,7 +938,35 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
       case STRUCT_MSG_FIELD_UINT8_VECTOR:
         if (stringValue != NULL) {
           fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-          os_memcpy(fieldInfo->value.vector, stringValue, fieldInfo->fieldLgth);
+          os_memcpy(fieldInfo->value.byteVector, stringValue, fieldInfo->fieldLgth);
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT16_VECTOR:
+        if (stringValue != NULL) {
+          os_memcpy((int8_t *)fieldInfo->value.shortVector, stringValue, fieldInfo->fieldLgth);
+          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_UINT16_VECTOR:
+        if (stringValue != NULL) {
+          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+          os_memcpy((uint8_t *)fieldInfo->value.ushortVector, stringValue, fieldInfo->fieldLgth);
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT32_VECTOR:
+        if (stringValue != NULL) {
+          os_memcpy((int8_t *)fieldInfo->value.int32Vector, stringValue, fieldInfo->fieldLgth);
+          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+          return STRUCT_MSG_ERR_OK;
+        }
+        break;
+      case STRUCT_MSG_FIELD_UINT32_VECTOR:
+        if (stringValue != NULL) {
+          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+          os_memcpy((uint8_t *)fieldInfo->value.uint32Vector, stringValue, fieldInfo->fieldLgth);
           return STRUCT_MSG_ERR_OK;
         }
         break;
@@ -790,7 +1007,6 @@ int encodeMsg(const uint8_t *handle) {
     os_free(structmsg->encoded);
   }
   structmsg->encoded = (uint8_t *)os_malloc(structmsg->totalLgth);
-ets_printf("os_malloc: %p %s %d\n", structmsg->encoded, __FILE__, __LINE__);
   msgPtr = structmsg->encoded;
   offset = 0;
   offset = uint16Encode(msgPtr,offset,structmsg->src);
@@ -817,9 +1033,9 @@ ets_printf("os_malloc: %p %s %d\n", structmsg->encoded, __FILE__, __LINE__);
         }
       } else {
         if (c_strcmp(fieldInfo->fieldStr, "@filler") == 0) {
-          offset = fillerEncode(msgPtr, offset, fieldInfo->fieldLgth, fieldInfo->value.uvector);
+          offset = fillerEncode(msgPtr, offset, fieldInfo->fieldLgth, fieldInfo->value.ubyteVector);
           checkEncodeOffset(offset);
-          result = setFieldValue(handle, "@filler", 0, fieldInfo->value.uvector);
+          result = setFieldValue(handle, "@filler", 0, fieldInfo->value.ubyteVector);
           if (result != STRUCT_MSG_ERR_OK) {
             return result;
           }
@@ -860,14 +1076,42 @@ ets_printf("os_malloc: %p %s %d\n", structmsg->encoded, __FILE__, __LINE__);
         case STRUCT_MSG_FIELD_INT8_VECTOR:
           fieldIdx = 0;
           while (fieldIdx < fieldInfo->fieldLgth) {
-            offset = int8Encode(msgPtr,offset,fieldInfo->value.vector[fieldIdx]);
+            offset = int8Encode(msgPtr,offset,fieldInfo->value.byteVector[fieldIdx]);
             fieldIdx++;
           }
           break;
         case STRUCT_MSG_FIELD_UINT8_VECTOR:
           fieldIdx = 0;
           while (fieldIdx < fieldInfo->fieldLgth) {
-            offset = uint8Encode(msgPtr,offset,fieldInfo->value.uvector[fieldIdx]);
+            offset = uint8Encode(msgPtr,offset,fieldInfo->value.ubyteVector[fieldIdx]);
+            fieldIdx++;
+          }
+          break;
+        case STRUCT_MSG_FIELD_INT16_VECTOR:
+          fieldIdx = 0;
+          while (fieldIdx < fieldInfo->fieldLgth) {
+            offset = int16Encode(msgPtr,offset,fieldInfo->value.shortVector[fieldIdx]);
+            fieldIdx++;
+          }
+          break;
+        case STRUCT_MSG_FIELD_UINT16_VECTOR:
+          fieldIdx = 0;
+          while (fieldIdx < fieldInfo->fieldLgth) {
+            offset = uint16Encode(msgPtr,offset,fieldInfo->value.ushortVector[fieldIdx]);
+            fieldIdx++;
+          }
+          break;
+        case STRUCT_MSG_FIELD_INT32_VECTOR:
+          fieldIdx = 0;
+          while (fieldIdx < fieldInfo->fieldLgth) {
+            offset = int32Encode(msgPtr,offset,fieldInfo->value.int32Vector[fieldIdx]);
+            fieldIdx++;
+          }
+          break;
+        case STRUCT_MSG_FIELD_UINT32_VECTOR:
+          fieldIdx = 0;
+          while (fieldIdx < fieldInfo->fieldLgth) {
+            offset = uint32Encode(msgPtr,offset,fieldInfo->value.uint32Vector[fieldIdx]);
             fieldIdx++;
           }
           break;
@@ -919,7 +1163,6 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
     os_free(structmsg->todecode);
   }
   structmsg->todecode = (uint8_t *)os_malloc(structmsg->totalLgth);
-ets_printf("os_malloc: %p %s %d\n", structmsg->todecode, __FILE__, __LINE__);
   msgPtr = data; // data starts at structmsg->msg.cmdKey!!
   offset = 0;
   offset = uint16Decode(msgPtr,offset,&structmsg->src);
@@ -942,7 +1185,7 @@ ets_printf("os_malloc: %p %s %d\n", structmsg->todecode, __FILE__, __LINE__);
         checkDecodeOffset(offset);
       } else {
         if (c_strcmp(fieldInfo->fieldStr, "@filler") == 0) {
-          offset = fillerDecode(msgPtr, offset, fieldInfo->fieldLgth, &fieldInfo->value.uvector);
+          offset = fillerDecode(msgPtr, offset, fieldInfo->fieldLgth, &fieldInfo->value.ubyteVector);
           checkDecodeOffset(offset);
         } else {
           if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
@@ -983,11 +1226,27 @@ ets_printf("os_malloc: %p %s %d\n", structmsg->todecode, __FILE__, __LINE__);
           checkDecodeOffset(offset);
           break;
         case STRUCT_MSG_FIELD_INT8_VECTOR:
-          offset = int8VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.vector);
+          offset = int8VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.byteVector);
           checkDecodeOffset(offset);
           break;
         case STRUCT_MSG_FIELD_UINT8_VECTOR:
-          offset = uint8VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.uvector);
+          offset = uint8VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.ubyteVector);
+          checkDecodeOffset(offset);
+          break;
+        case STRUCT_MSG_FIELD_INT16_VECTOR:
+          offset = int16VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.shortVector);
+          checkDecodeOffset(offset);
+          break;
+        case STRUCT_MSG_FIELD_UINT16_VECTOR:
+          offset = uint16VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.ushortVector);
+          checkDecodeOffset(offset);
+          break;
+        case STRUCT_MSG_FIELD_INT32_VECTOR:
+          offset = int32VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.int32Vector);
+          checkDecodeOffset(offset);
+          break;
+        case STRUCT_MSG_FIELD_UINT32_VECTOR:
+          offset = uint32VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.uint32Vector);
           checkDecodeOffset(offset);
           break;
       }
@@ -996,25 +1255,6 @@ ets_printf("os_malloc: %p %s %d\n", structmsg->todecode, __FILE__, __LINE__);
     idx++;
   }
   structmsg->flags |= STRUCT_MSG_DECODED;
-  return STRUCT_MSG_ERR_OK;
-}
-
-// ============================= freeEncDecBuf ========================
-
-int freeEncDecBuf(const uint8_t *handle, uint8_t *buf, bool enc) {
-  structmsg_t *structmsg;
-
-  structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
-  os_free (buf);
-ets_printf("free: buf: %p structmsg->encrypted: %p structmsg->decrypted: %p enc: %d\n", buf, structmsg->encrypted, structmsg->decrypted, enc);
-  if (enc) {
-    structmsg->encrypted = NULL;
-  } else {
-    structmsg->decrypted = NULL;
-  }
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -1054,7 +1294,6 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
     structmsg->encryptedLgth = *lgth;
     *lgth += sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth;
     structmsg->encrypted = (char *)os_zalloc (*lgth);
-ets_printf("os_zalloc: %p %s %d\n", structmsg->encrypted, __FILE__, __LINE__);
     if (!structmsg->encrypted) {
       return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
     } 
@@ -1070,7 +1309,6 @@ ets_printf("os_zalloc: %p %s %d\n", structmsg->encrypted, __FILE__, __LINE__);
     structmsg->decryptedLgth = *lgth;
     *lgth += sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth;
     structmsg->decrypted = (char *)os_zalloc (*lgth);
-ets_printf("os_zalloc: %p %s %d\n", structmsg->decrypted, __FILE__, __LINE__);
     if (!structmsg->decrypted) {
       return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
     } 
@@ -1161,7 +1399,6 @@ int new_structmsg(uint8_t numFieldInfos, uint8_t **handle) {
   int result;
 
   structmsg_t *structmsg = (void *)os_malloc (sizeof(structmsg_t));
-ets_printf("os_malloc: %p %s %d\n", structmsg, __FILE__, __LINE__);
   if (structmsg == NULL) {
     return STRUCT_MSG_ERR_OUT_OF_MEMORY;
   }
@@ -1192,47 +1429,62 @@ int delete_structmsg(const uint8_t *handle) {
   structmsg_t *structmsg;
   int idx;
 
-ets_printf("delete: %s\n", handle);
   structmsg = get_structmsg_ptr(handle);
   if (structmsg == NULL) {
     return STRUCT_MSG_ERR_BAD_HANDLE;
   }
-ets_printf("delete: fields\n");
   idx = 0;
   while (idx < structmsg->msg.numFieldInfos) {
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[idx];
     os_free(fieldInfo->fieldStr);
     switch (fieldInfo->fieldType) {
     case STRUCT_MSG_FIELD_INT8_VECTOR:
-    case STRUCT_MSG_FIELD_UINT8_VECTOR:
-      if (fieldInfo->value.vector != NULL) {
-        os_free(fieldInfo->value.vector);
+      if (fieldInfo->value.byteVector != NULL) {
+        os_free(fieldInfo->value.byteVector);
       }
+      break;
+    case STRUCT_MSG_FIELD_UINT8_VECTOR:
+      if (fieldInfo->value.byteVector != NULL) {
+        os_free(fieldInfo->value.ubyteVector);
+      }
+      break;
+    case STRUCT_MSG_FIELD_INT16_VECTOR:
+      if (fieldInfo->value.shortVector != NULL) {
+        os_free(fieldInfo->value.shortVector);
+      }
+      break;
+    case STRUCT_MSG_FIELD_UINT16_VECTOR:
+      if (fieldInfo->value.ushortVector != NULL) {
+        os_free(fieldInfo->value.ushortVector);
+      }
+      break;
+    case STRUCT_MSG_FIELD_INT32_VECTOR:
+      if (fieldInfo->value.int32Vector != NULL) {
+        os_free(fieldInfo->value.int32Vector);
+      }
+      break;
+    case STRUCT_MSG_FIELD_UINT32_VECTOR:
+      if (fieldInfo->value.uint32Vector != NULL) {
+        os_free(fieldInfo->value.uint32Vector);
+      }
+      break;
     }
     idx++;
   }
-ets_printf("delete: fieldInfos\n");
   os_free(structmsg->msg.fieldInfos);
   if (structmsg->encoded != NULL) {
-ets_printf("delete: encoded\n");
     os_free(structmsg->encoded);
   }
   if (structmsg->todecode != NULL) {
-ets_printf("delete: todecode\n");
     os_free(structmsg->todecode);
   }
   if (structmsg->encrypted != NULL) {
-ets_printf("delete: encrypted\n");
     os_free(structmsg->encrypted);
   }
   if (structmsg->decrypted != NULL) {
-ets_printf("delete: decrypted\n");
     os_free(structmsg->decrypted);
   }
-ets_printf("delete: handle\n");
   deleteHandle(handle);
-ets_printf("delete: structmsg\n");
   os_free(structmsg);
-ets_printf("delete: done\n");
   return STRUCT_MSG_ERR_OK;
 }

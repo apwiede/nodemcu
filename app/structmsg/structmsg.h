@@ -46,7 +46,7 @@ extern "C" {
 */
 
 
-#define HANDLE_PREFIX "sms_"
+#define HANDLE_PREFIX "stmsg_"
 
 enum structmsg_field_type
 {
@@ -58,6 +58,10 @@ enum structmsg_field_type
   STRUCT_MSG_FIELD_INT32_T,
   STRUCT_MSG_FIELD_UINT8_VECTOR,
   STRUCT_MSG_FIELD_INT8_VECTOR,
+  STRUCT_MSG_FIELD_UINT16_VECTOR,
+  STRUCT_MSG_FIELD_INT16_VECTOR,
+  STRUCT_MSG_FIELD_UINT32_VECTOR,
+  STRUCT_MSG_FIELD_INT32_VECTOR,
 };
 
 enum structmsg_error_code
@@ -107,8 +111,12 @@ typedef struct fieldInfo
     uint16_t ushortVal;
     int32_t val;
     uint32_t uval;
-    int8_t *vector;
-    uint8_t *uvector;
+    int8_t *byteVector;
+    uint8_t *ubyteVector;
+    int16_t *shortVector;
+    uint16_t *ushortVector;
+    int32_t *int32Vector;
+    uint32_t *uint32Vector;
   } value ;
   uint8_t flags;
 } fieldInfo_t;
@@ -144,7 +152,6 @@ uint8_t *getStructMsgFieldTypeStr(uint8_t key);
 int encodeMsg(const uint8_t *handle);
 int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth);
 int decodeMsg(const uint8_t *handle, const uint8_t *data);
-int freeEncDecBuf(const uint8_t *handle, uint8_t *buf, bool enc);
 int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
 int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
 int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
