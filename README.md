@@ -29,62 +29,67 @@ for making the modules active.
 
 ### client:
 
-> con=nil <br />
-  function startTheWsClient() <br />
+```lua
+    con=nil
+    router="your router"
+    passwd="your password"
 
->   function connection(srv) <br />
-    con=srv <br />
-    print("==connection ready") <br />
-    srv:on("receive", function(sck, c) <br />
-      print("clnt receive: "..c) <br />
-    end) <br />
-    srv:on("sent", function(sck) <br />
-      print("==clnt sent") <br />
-    end) <br />
-    srv:on("reconnection", function(sck) <br />
-      print("==clnt reconnection") <br />
-    end) <br />
-    srv:on("disconnection", function(sck,c) <br />
-      print("==clnt disconnection") <br />
-    end) <br />
-    srv:on("connection", function(sck,c) <br />
-      print("==connection done") <br />
-      sck:send("Hello Wordl\r\n") <br />
-    end) <br />
-    srv:send("GET /echo HTTP/1.1\ <br />
-Host: example.com:8000\ <br />
-Upgrade: websocket\ <br />
-Connection: Upgrade\ <br />
-Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\ <br />
-Sec-WebSocket-Version: 13\ <br />
-\ <br />
-") <br />
-    tmr.alarm(0,2000,tmr.ALARM_SINGLE,function(srv) <br />
-       con:send("Hello World Again\r\n") <br />
-    end) <br />
-  end <br />
+    function startTheWsClient()
 
->   function clntConnected(clnt) <br />
-    print("==client is connected") <br />
-    clnt:connect(8080,"192.168.4.1",connection) <br />
-  end <br />
+      function connection(srv)
+        con=srv
+        print("==connection ready")
+        srv:on("receive", function(sck, c)
+          print("clnt receive: "..c)
+        end)
+        srv:on("sent", function(sck)
+          print("==clnt sent")
+        end)
+        srv:on("reconnection", function(sck)
+          print("==clnt reconnection")
+        end)
+        srv:on("disconnection", function(sck,c)
+          print("==clnt disconnection")
+        end)
+        srv:on("connection", function(sck,c)
+          print("==connection done")
+          sck:send("Hello Wordl\r\n")
+        end)
+        srv:send("GET /echo HTTP/1.1\
+Host: example.com:8000\
+Upgrade: websocket\
+Connection: Upgrade\
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\
+Sec-WebSocket-Version: 13\
+\
+")
+        tmr.alarm(0,2000,tmr.ALARM_SINGLE,function(srv)
+           con:send("Hello World Again\r\n")
+        end)
+      end
 
->   if (clnt ~= nil) then <br />
-     clnt:close() <br />
-  end <br />
-  clnt=nil <br />
-  wifi.setmode(wifi.STATION) <br />
-  wifi.sta.config("your router","your passwd") <br />
-  wifi.sta.connect() <br />
-  tmr.alarm(0, 1000, tmr.ALARM_AUTO, function () <br />
-    local ip = wifi.sta.getip() <br />
-    if ip then <br />
-      tmr.stop(0) <br />
-      print(ip) <br />
-      clnt=websocket.createConnection(0,clntConnected) <br />
-    end <br />
-  end) <br />
-end <br />
+      function clntConnected(clnt)
+        print("==client is connected")
+        clnt:connect(8080,"192.168.4.1",connection)
+      end
+
+       if (clnt ~= nil) then
+         clnt:close()
+      end
+      clnt=nil
+      wifi.setmode(wifi.STATION)
+      wifi.sta.config(router,passwd)
+      wifi.sta.connect()
+      tmr.alarm(0, 1000, tmr.ALARM_AUTO, function ()
+        local ip = wifi.sta.getip()
+        if ip then
+          tmr.stop(0)
+          print(ip)
+          clnt=websocket.createConnection(0,clntConnected)
+        end
+      end)
+    end
+```
 
 ### server:
 
