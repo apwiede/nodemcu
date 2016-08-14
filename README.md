@@ -23,6 +23,12 @@ for making the modules active.
 
 ## Attention!! This is work in progress and not yet usefull for production!!
 
+## Useful links
+
+| Resource | Location |
+| -------------- | -------------- |
+| Developer Wiki       | https://github.com/nodemcu/nodemcu-firmware/wiki |
+
 ## websocket: tested with a Tcl websocket server/client
 
 ### short example Lua code:
