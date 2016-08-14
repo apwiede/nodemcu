@@ -136,6 +136,10 @@ enum structmsg_error_code
   WEBSOCKET_ERR_OUT_OF_MEMORY = -1,
   WEBSOCKET_ERR_TOO_MUCH_DATA = -2,
   WEBSOCKET_ERR_INVALID_FRAME_TYPE = -3,
+  WEBSOCKET_ERR_USERDATA_IS_NIL = -4,
+  WEBSOCKET_ERR_WRONG_METATABLE = -5,
+  WEBSOCKET_ERR_PESP_CONN_IS_NIL = -6,
+  WEBSOCKET_ERR_MAX_SOCKET_REACHED = -7,
 };
 
 // ============================= checkErrOK ========================
@@ -153,6 +157,18 @@ static int checkErrOK( lua_State* L, int result , const char *where ) {
     break;
   case WEBSOCKET_ERR_INVALID_FRAME_TYPE:
     luaL_error(L, "invalid frame type (%s)", where);
+    break;
+  case WEBSOCKET_ERR_USERDATA_IS_NIL:
+    luaL_error(L, "userdata is nil (%s)", where);
+    break;
+  case WEBSOCKET_ERR_WRONG_METATABLE:
+    luaL_error(L, "wrong metatable (%s)", where);
+    break;
+  case WEBSOCKET_ERR_PESP_CONN_IS_NIL:
+    luaL_error(L, "pesp_conn is nil (%s)", where);
+    break;
+  case WEBSOCKET_ERR_MAX_SOCKET_REACHED:
+    luaL_error(L, "max socket reached (%s)", where);
     break;
   default:
     luaL_error(L, "error in %s: result: %d", where, result);
@@ -328,13 +344,18 @@ static void websocket_server_disconnected(void *arg)    // for tcp server only
 ets_printf("websocket_server_disconnected is called.\n");
   NODE_DBG("websocket_server_disconnected is called.\n");
   struct espconn *pesp_conn = arg;
-  if(pesp_conn == NULL)
+  if(gL == NULL) {
     return;
+  }
+  if(pesp_conn == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_server_disconnected");
+    return;
+  }
   lnet_userdata *nud = (lnet_userdata *)pesp_conn->reverse;
-  if(nud == NULL)
+  if(nud == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_server_disconnected");
     return;
-  if(gL == NULL)
-    return;
+  }
 #if 0
   char temp[20] = {0};
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
@@ -374,11 +395,15 @@ static void websocket_socket_disconnected(void *arg)    // tcp only
 ets_printf("websocket_socket_disconnected is called.\n");
   NODE_DBG("websocket_socket_disconnected is called.\n");
   struct espconn *pesp_conn = arg;
-  if(pesp_conn == NULL)
+  if(pesp_conn == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_socket_disconnected");
     return;
+  }
   lnet_userdata *nud = (lnet_userdata *)pesp_conn->reverse;
-  if(nud == NULL)
+  if(nud == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_socket_disconnected");
     return;
+  }
   if(nud->cb_disconnect_ref != LUA_NOREF && nud->self_ref != LUA_NOREF)
   {
     lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->cb_disconnect_ref);
@@ -425,11 +450,15 @@ static void websocket_socket_received(void *arg, char *pdata, unsigned short len
 ets_printf("websocket_socket_received is called.\n");
   NODE_DBG("websocket_socket_received is called.\n");
   struct espconn *pesp_conn = arg;
-  if(pesp_conn == NULL)
+  if(pesp_conn == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_socket_received");
     return;
+  }
   lnet_userdata *nud = (lnet_userdata *)pesp_conn->reverse;
-  if(nud == NULL)
+  if(nud == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_socket_received");
     return;
+  }
   if(nud->cb_receive_ref == LUA_NOREF)
     return;
   if(nud->self_ref == LUA_NOREF)
@@ -490,11 +519,15 @@ static void websocket_socket_sent(void *arg)
 ets_printf("websocket_socket_sent is called.\n");
   // NODE_DBG("websocket_socket_sent is called.\n");
   struct espconn *pesp_conn = arg;
-  if(pesp_conn == NULL)
+  if(pesp_conn == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_socket_sent");
     return;
+  }
   lnet_userdata *nud = (lnet_userdata *)pesp_conn->reverse;
-  if(nud == NULL)
+  if(nud == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_socket_sent");
     return;
+  }
   if(nud->cb_send_ref == LUA_NOREF)
     return;
   if(nud->self_ref == LUA_NOREF)
@@ -509,11 +542,15 @@ ets_printf("websocket_socket_sent is called.\n");
 static void socket_connect(struct espconn *pesp_conn)
 {
 ets_printf("socket_connect\n");
-  if(pesp_conn == NULL)
+  if(pesp_conn == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "socket_connect");
     return;
+  }
   lnet_userdata *nud = (lnet_userdata *)pesp_conn->reverse;
-  if(nud == NULL)
+  if(nud == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "socket_connect");
     return;
+  }
 
 #ifdef CLIENT_SSL_ENABLE
   if(nud->secure){
@@ -540,11 +577,13 @@ static void socket_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
   struct espconn *pesp_conn = arg;
   if(pesp_conn == NULL){
     NODE_DBG("pesp_conn null.\n");
+    checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "socket_dns_found");
     return;
   }
   lnet_userdata *nud = (lnet_userdata *)pesp_conn->reverse;
   if(nud == NULL){
     NODE_DBG("nud null.\n");
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "socket_dns_found");
     return;
   }
   if(nud->cb_dns_found_ref == LUA_NOREF){
@@ -618,8 +657,10 @@ ets_printf("websocket_server_connected is called.\n");
   struct espconn *pesp_conn = arg;
   int i = 0;
   lnet_userdata *skt = NULL;
-  if(pesp_conn == NULL)
+  if(pesp_conn == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_server_connected");
     return;
+  }
 
 #if 0
   char temp[20] = {0};
@@ -643,6 +684,7 @@ ets_printf("websocket_server_connected is called.\n");
     pesp_conn->reverse = NULL;    // not accept this conn
     if(pesp_conn->proto.tcp->remote_port || pesp_conn->proto.tcp->local_port)
       espconn_disconnect(pesp_conn);
+    checkErrOK(gL, WEBSOCKET_ERR_MAX_SOCKET_REACHED, "websocket_server_connected");
     return;
   }
 
@@ -700,11 +742,15 @@ static void websocket_socket_connected(void *arg)
 ets_printf("websocket_socket_connected is called.\n");
   NODE_DBG("websocket_socket_connected is called.\n");
   struct espconn *pesp_conn = arg;
-  if(pesp_conn == NULL)
+  if(pesp_conn == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_connected");
     return;
+  }
   lnet_userdata *nud = (lnet_userdata *)pesp_conn->reverse;
-  if(nud == NULL)
+  if(nud == NULL) {
+    checkErrOK(gL, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_connected");
     return;
+  }
   // can receive and send data, even if there is no connected callback in lua.
   espconn_regist_recvcb(pesp_conn, websocket_socket_received);
   espconn_regist_sentcb(pesp_conn, websocket_socket_sent);
@@ -743,6 +789,7 @@ static int websocket_create( lua_State* L, const char *mt )
   {
 ets_printf("wrong metatable for websocket_create.\n");
     NODE_DBG("wrong metatable for websocket_create.\n");
+    checkErrOK(L, WEBSOCKET_ERR_WRONG_METATABLE, "websocket_create");
     return 0;
   }
 
@@ -883,6 +930,7 @@ static int websocket_start( lua_State* L, const char *mt )
   {
 ets_printf("wrong metatable for websocket_start.\n");
     NODE_DBG("wrong metatable for websocket_start.\n");
+    checkErrOK(L, WEBSOCKET_ERR_WRONG_METATABLE, "websocket_start");
     return 0;
   }
   nud = (lnet_userdata *)luaL_checkudata(L, stack, mt);
@@ -892,12 +940,14 @@ ets_printf("wrong metatable for websocket_start.\n");
   if(nud==NULL){
 ets_printf("userdata is nil.\n");
     NODE_DBG("userdata is nil.\n");
+    checkErrOK(L, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_start");
     return 0;
   }
 
   if(nud->pesp_conn == NULL){
 ets_printf("nud->pesp_conn is NULL.\n");
     NODE_DBG("nud->pesp_conn is NULL.\n");
+    checkErrOK(L, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_start");
     return 0;
   }
   pesp_conn = nud->pesp_conn;
@@ -1022,11 +1072,15 @@ ets_printf("websocket_close is called\r\n");
 
   nud = (lnet_userdata *)luaL_checkudata(L, 1, mt);
   luaL_argcheck(L, nud, 1, "Server/Socket expected");
-  if(nud == NULL)
+  if(nud == NULL) {
+    checkErrOK(L, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_close");
     return 0;
+  }
 
-  if(nud->pesp_conn == NULL)
+  if(nud->pesp_conn == NULL) {
+    checkErrOK(L, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_close");
     return 0;
+  }
 
   if (mt!=NULL && c_strcmp(mt, "websocket.server")==0)
     isserver = true;
@@ -1035,6 +1089,7 @@ ets_printf("websocket_close is called\r\n");
   else
   {
     NODE_DBG("wrong metatable for websocket_close.\n");
+    checkErrOK(L, WEBSOCKET_ERR_WRONG_METATABLE, "websocket_close");
     return 0;
   }
 
@@ -1128,6 +1183,7 @@ ets_printf("websocket_delete is called\r\n");
   else
   {
     NODE_DBG("wrong metatable for websocket_delete.\n");
+    checkErrOK(L, WEBSOCKET_ERR_WRONG_METATABLE, "websocket_delete");
     return 0;
   }
 
@@ -1138,6 +1194,7 @@ ets_printf("websocket_delete is called\r\n");
   if(nud==NULL){
 ets_printf("userdata is nil.\n");
     NODE_DBG("userdata is nil.\n");
+    checkErrOK(L, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_delete");
     return 0;
   }
   if(nud->pesp_conn){     // for client connected to tcp server, this should set NULL in disconnect cb
@@ -1200,8 +1257,8 @@ static int websocket_on( lua_State* L, const char *mt )
   nud = (lnet_userdata *)luaL_checkudata(L, 1, mt);
   luaL_argcheck(L, nud, 1, "Server/Socket expected");
   if(nud==NULL){
-  	NODE_DBG("userdata is nil.\n");
-  	return 0;
+    NODE_DBG("userdata is nil.\n");
+    return 0;
   }
 
   if (mt!=NULL && c_strcmp(mt, "websocket.server")==0)
@@ -1302,8 +1359,8 @@ ets_printf("websocket_send is called\r\n");
   nud = (lnet_userdata *)luaL_checkudata(L, 1, mt);
   luaL_argcheck(L, nud, 1, "Server/Socket expected");
   if(nud==NULL){
-  	NODE_DBG("userdata is nil.\n");
-  	return 0;
+    NODE_DBG("userdata is nil.\n");
+    return 0;
   }
 
   if(nud->pesp_conn == NULL){
