@@ -58,7 +58,6 @@
 #include "lwip/dns.h" 
 
 #define TCP ESPCONN_TCP
-#define UDP ESPCONN_UDP
 
 static ip_addr_t host_ip; // for dns
 
@@ -91,31 +90,31 @@ typedef struct lnet_userdata
 
 // Websocket
 //void websocket_init(websocket_gotdata call);
-int ICACHE_FLASH_ATTR websocket_writedata(char * data);
-void ICACHE_FLASH_ATTR websocket_recv(char * string,char*url, lnet_userdata *nud, char **resData, int *len);
-void ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len);
+int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url, lnet_userdata *nud, char **resData, int *len);
+int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len);
+static int websocket_write( const char *payload, struct espconn *pesp_conn );
 
 static const char *header_key = "Sec-WebSocket-Key: ";
-static const char  *ws_uuid ="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+static const char *ws_uuid ="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-static const char * HEADER_WEBSOCKETLINE = "Upgrade: websocket";
+static const char *HEADER_WEBSOCKETLINE = "Upgrade: websocket";
 
-static char * HEADER_OK = "HTTP/1.x 200 OK \r\n\
+static char *HEADER_OK = "HTTP/1.x 200 OK \r\n\
 Server: ESP \r\n\
 Connection: close \r\n\
 Cache-Control: max-age=3600, public \r\n\
 Content-Type: text/html \r\n\
 Content-Encoding: gzip \r\n\r\n";
 
-static char * HEADER_WEBSOCKET_1 = "\
+static char *HEADER_WEBSOCKET_START = "\
 HTTP/1.1 101 WebSocket Protocol Handshake\r\n\
 Connection: Upgrade\r\n\
 Upgrade: WebSocket\r\n\
 Access-Control-Allow-Origin: http://";
 
-static char * HEADER_WEBSOCKET_2 = "192.168.178.67";
+static char *HEADER_WEBSOCKET_URL = "192.168.178.67";
 
-static char * HEADER_WEBSOCKET_3 = "\r\n\
+static char *HEADER_WEBSOCKET_END = "\r\n\
 Access-Control-Allow-Credentials: true\r\n\
 Access-Control-Allow-Headers: content-type \r\n\
 Sec-WebSocket-Accept: ";
@@ -128,124 +127,178 @@ static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 // End Websocket
 
+#define checkAllocgLOK(addr) if(addr == NULL) checkErrOK(gL, WEBSOCKET_ERR_OUT_OF_MEMORY, "")
+#define checkAllocOK(addr) if(addr == NULL) checkErrOK(L, WEBSOCKET_ERR_OUT_OF_MEMORY, "")
+
+enum structmsg_error_code
+{
+  WEBSOCKET_ERR_OK = 0,
+  WEBSOCKET_ERR_OUT_OF_MEMORY = -1,
+  WEBSOCKET_ERR_TOO_MUCH_DATA = -2,
+  WEBSOCKET_ERR_INVALID_FRAME_TYPE = -3,
+};
+
+// ============================= checkErrOK ========================
+
+static int checkErrOK( lua_State* L, int result , const char *where ) {
+  if (result == WEBSOCKET_ERR_OK) {
+    return 1;
+  }
+  switch (result) {
+  case WEBSOCKET_ERR_OUT_OF_MEMORY:
+    luaL_error(L, "out of memory (%s)", where);
+    break;
+  case WEBSOCKET_ERR_TOO_MUCH_DATA:
+    luaL_error(L, "too much data (%s)", where);
+    break;
+  case WEBSOCKET_ERR_INVALID_FRAME_TYPE:
+    luaL_error(L, "invalid frame type (%s)", where);
+    break;
+  default:
+    luaL_error(L, "error in %s: result: %d", where, result);
+    break;
+  }
+  return 0;
+}
+
 // ============================ websocket_parse =========================================
 
-void ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len) {
+int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len) {
 ets_printf("websocket_parse: %s\n", data);
-    uint8_t byte = data[0];
-    int FIN = byte & 0x80;
-    int TYPE = byte & 0x0F;
-ets_printf("frame type %02X %02X \r\n", TYPE, FIN);
-ets_printf("%02X %02X %02X %02X \r\n", data[0], data[1], data[2], data[3]);
-    if ((TYPE > 0x03 && TYPE < 0x08) || TYPE > 0x0B) {
-        ets_printf("Invalid frame type %02X \r\n", TYPE);
-        return;
+  uint8_t byte = data[0];
+  int FIN = byte & 0x80;
+  int TYPE = byte & 0x0F;
+//ets_printf("frame type %02X %02X \r\n", TYPE, FIN);
+//ets_printf("%02X %02X %02X %02X \r\n", data[0], data[1], data[2], data[3]);
+
+  if ((TYPE > 0x03 && TYPE < 0x08) || TYPE > 0x0B) {
+    ets_printf("Invalid frame type %02X \r\n", TYPE);
+    return WEBSOCKET_ERR_INVALID_FRAME_TYPE;
+  }
+
+  byte = data[1];
+
+  int MASKED = byte & 0x80;
+  int SIZE = byte & 0x7F;
+  int offset = 2;
+
+  if (SIZE == 126) {
+    SIZE = 0;
+    SIZE = data[3];                  //LSB
+    SIZE |= (uint64_t) data[2] << 8; //MSB
+    offset = 4;
+  } else if (SIZE == 127) {
+    SIZE = 0;
+    SIZE |= (uint64_t) data[2] << 56;
+    SIZE |= (uint64_t) data[3] << 48;
+    SIZE |= (uint64_t) data[4] << 40;
+    SIZE |= (uint64_t) data[5] << 32;
+    SIZE |= (uint64_t) data[6] << 24;
+    SIZE |= (uint64_t) data[7] << 16;
+    SIZE |= (uint64_t) data[8] << 8;
+    SIZE |= (uint64_t) data[9];
+    offset = 10;
+  }
+
+  if (MASKED) {
+    //read mask key
+    char mask[4];
+    uint64_t i;
+    char * DATA;
+
+    mask[0] = data[offset];
+    mask[1] = data[offset + 1];
+    mask[2] = data[offset + 2];
+    mask[3] = data[offset + 3];
+    offset += 4;
+    for (i = 0; i < SIZE; i++) {
+      data[i + offset] ^= mask[i % 4];
     }
+    DATA = &data[offset];
+    *resData = DATA;
+    *len = SIZE;
+    DATA[SIZE] = 0;
+    ets_printf("SIZE: %d  tSIZE: %d, DATA: =%s=  \r\n", SIZE, dataLenb, DATA);
 
-    byte = data[1];
-    int MASKED = byte & 0x80;
-    int SIZE = byte & 0x7F;
+//  data_callback(DATA, SIZE);
 
-    int offset = 2;
-    if (SIZE == 126) {
-        SIZE = 0;
-        SIZE = data[3];                 //LSB
-        SIZE |= (uint64_t) data[2] << 8; //MSB
-        offset = 4;
-    } else if (SIZE == 127) {
-        SIZE = 0;
-        SIZE |= (uint64_t) data[2] << 56;
-        SIZE |= (uint64_t) data[3] << 48;
-        SIZE |= (uint64_t) data[4] << 40;
-        SIZE |= (uint64_t) data[5] << 32;
-        SIZE |= (uint64_t) data[6] << 24;
-        SIZE |= (uint64_t) data[7] << 16;
-        SIZE |= (uint64_t) data[8] << 8;
-        SIZE |= (uint64_t) data[9];
-        offset = 10;
+    if (SIZE + offset < dataLenb) {
+      websocket_parse(&data[SIZE + offset], dataLenb - (SIZE + offset), resData, len);
     }
-
-    if (MASKED) {
-        //read mask key
-        char mask[4];
-        mask[0] = data[offset];
-        mask[1] = data[offset + 1];
-        mask[2] = data[offset + 2];
-        mask[3] = data[offset + 3];
-        offset += 4;
-        uint64_t i;
-        for (i = 0; i < SIZE; i++) {
-            data[i + offset] ^= mask[i % 4];
-        }
-        char * DATA = &data[offset];
-        *resData = DATA;
-        *len = SIZE;
-        DATA[SIZE] = 0;
-        ets_printf("SIZE: %d  tSIZE: %d, DATA: =%s=  \r\n", SIZE, dataLenb, DATA);
-
-//        data_callback(DATA, SIZE);
-
-        if (SIZE + offset < dataLenb) {
-            websocket_parse(&data[SIZE + offset], dataLenb - (SIZE + offset), resData, len);
-        }
-    }
+  }
+  return WEBSOCKET_ERR_OK;
 }
+
+// ============================ toBase64 =========================================
+
+static uint8 *toBase64 ( const uint8 *msg, size_t *len){
+  size_t i, n = *len;
+
+  if (!n)  // handle empty string case 
+    return NULL;
+
+  uint8 * q, *out = (uint8 *)os_malloc((n + 2) / 3 * 4);
+  if (out == NULL) {
+    return NULL;
+  }
+  uint8 bytes64[sizeof(b64)];
+  c_memcpy(bytes64, b64, sizeof(b64));   //Avoid lots of flash unaligned fetches
+
+  for (i = 0, q = out; i < n; i += 3) {
+    int a = msg[i];
+    int b = (i + 1 < n) ? msg[i + 1] : 0;
+    int c = (i + 2 < n) ? msg[i + 2] : 0;
+    *q++ = bytes64[a >> 2];
+    *q++ = bytes64[((a & 3) << 4) | (b >> 4)];
+    *q++ = (i + 1 < n) ? bytes64[((b & 15) << 2) | (c >> 6)] : BASE64_PADDING;
+    *q++ = (i + 2 < n) ? bytes64[(c & 63)] : BASE64_PADDING;
+  }
+  *len = q - out;
+  return out;
+}
+
 
 // ============================ websocket_recv =========================================
 
-void ICACHE_FLASH_ATTR websocket_recv(char * string,char*url,lnet_userdata *nud, char **data, int *lgth) {
+int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url,lnet_userdata *nud, char **data, int *lgth) {
 ets_printf("websocket_recv: %s\n", string);
-    if (strstr(string, "/echo") != 0) {
-        char * key;
-        if (strstr(string, header_key) != 0) {
-            char * begin = strstr(string, header_key) + os_strlen(header_key);
-            char * end = strstr(begin, "\r");
-            key = os_malloc((end - begin) + 1);
-            os_memcpy(key, begin, end - begin);
-            key[end - begin] = 0;
-        }
-        const char *trailer = "\r\n\r\n";
-        int trailerLen = os_strlen(trailer);
-        uint8_t digestLen = 20; //sha1 is always 20 byte long
-        uint8_t digest[digestLen];
-        uint8_t i;
-        uint8_t len;
-        uint8_t n = digestLen;
-        uint8_t base64DigestLen = ((n + 2) / 3 * 4) + 1;
-        uint8_t base64Digest[base64DigestLen]; 
-        uint8_t * q = base64Digest;
-        uint8_t bytes64[sizeof(b64)];
-        int payloadLen;
-        char *payload;
-        SHA1_CTX ctx;
-        // Use the SHA* functions in the rom
-        SHA1Init(&ctx);
-        SHA1Update(&ctx, key, os_strlen(key));
-        SHA1Update(&ctx, ws_uuid, os_strlen(ws_uuid));
-        SHA1Final(digest, &ctx);
-        c_memcpy(bytes64, b64, sizeof(b64));   //Avoid lots of flash unaligned fetches
+  if (strstr(string, nud->url) != 0) {
+    char * key;
+    if (strstr(string, header_key) != 0) {
+      char * begin = strstr(string, header_key) + os_strlen(header_key);
+      char * end = strstr(begin, "\r");
+      key = os_malloc((end - begin) + 1);
+      checkAllocgLOK(key);
+      os_memcpy(key, begin, end - begin);
+      key[end - begin] = 0;
+    }
+    const char *trailer = "\r\n\r\n";
+    int trailerLen = os_strlen(trailer);
+    size_t digestLen = 20; //sha1 is always 20 byte long
+    uint8_t digest[digestLen];
+    uint8_t len;
+    int payloadLen;
+    char *payload;
+    uint8_t *base64Digest;
+    SHA1_CTX ctx;
+    // Use the SHA* functions in the rom
+    SHA1Init(&ctx);
+    SHA1Update(&ctx, key, os_strlen(key));
+    SHA1Update(&ctx, ws_uuid, os_strlen(ws_uuid));
+    SHA1Final(digest, &ctx);
 
-        for (i = 0; i < n; i += 3) {
-          int a = digest[i];
-          int b = (i + 1 < n) ? digest[i + 1] : 0;
-          int c = (i + 2 < n) ? digest[i + 2] : 0;
-          *q++ = bytes64[a >> 2];
-          *q++ = bytes64[((a & 3) << 4) | (b >> 4)];
-          *q++ = (i + 1 < n) ? bytes64[((b & 15) << 2) | (c >> 6)] : BASE64_PADDING;
-          *q++ = (i + 2 < n) ? bytes64[(c & 63)] : BASE64_PADDING;
-        } 
-        len = q - base64Digest;
-        *q = '\0';
-//ets_printf("base64Digest: %s len: %d b64Len: %d\n", base64Digest, len, base64DigestLen);
-
-        payloadLen = os_strlen(HEADER_WEBSOCKET_1) + os_strlen(HEADER_WEBSOCKET_2) +os_strlen(HEADER_WEBSOCKET_3) + len + trailerLen;
-//ets_printf("l1: %d l2: %d l3: %d l: %d\n", os_strlen(HEADER_WEBSOCKET_1), os_strlen(HEADER_WEBSOCKET_2), os_strlen(HEADER_WEBSOCKET_3), os_strlen(HEADER_WEBSOCKET_1) + os_strlen(HEADER_WEBSOCKET_2) +os_strlen(HEADER_WEBSOCKET_3) + len + trailerLen);
-        payload = os_malloc(payloadLen);
-        os_sprintf(payload, "%s%s%s%s%s", HEADER_WEBSOCKET_1, HEADER_WEBSOCKET_2, HEADER_WEBSOCKET_3, base64Digest, trailer);
+    base64Digest = toBase64(digest, &digestLen);
+    checkAllocgLOK(base64Digest);
+    payloadLen = os_strlen(HEADER_WEBSOCKET_START) + os_strlen(HEADER_WEBSOCKET_URL) +os_strlen(HEADER_WEBSOCKET_END) + len + trailerLen;
+    payload = os_malloc(payloadLen);
+    checkAllocgLOK(payload);
+    os_sprintf(payload, "%s%s%s%s%s", HEADER_WEBSOCKET_START, HEADER_WEBSOCKET_URL, HEADER_WEBSOCKET_END, base64Digest, trailer);
+    os_free(base64Digest);
 ets_printf("d: %p payloadLen: %d %d\n", payload, payloadLen, os_strlen(payload));
-        struct espconn *pesp_conn = NULL;
-        pesp_conn = nud->pesp_conn;
+    struct espconn *pesp_conn = NULL;
+    pesp_conn = nud->pesp_conn;
 ets_printf("Handshake completed: payload: \r\n%s! \r\n", payload);
+
 //ets_printf("nud: %p len: %d total: %d\n", nud, len, os_strlen(payload));
 //ets_printf("pesp_conn: %p\n", nud->pesp_conn);
 //  char temp[25] = {0};
@@ -256,14 +309,16 @@ ets_printf("Handshake completed: payload: \r\n%s! \r\n", payload);
 //  ets_printf("%d",pesp_conn->proto.tcp->remote_port);
 //  ets_printf(" sending data.\n");
 
-        int result = espconn_sent(nud->pesp_conn, (unsigned char *)payload, payloadLen);
-        os_free(key);
+    int result = espconn_sent(nud->pesp_conn, (unsigned char *)payload, payloadLen);
+    os_free(key);
 ets_printf("espconn_sent done result: %d\n", result);
-        nud->websocket = 1;
-    } else if (nud->websocket == 1) {
-        ets_printf("WEBSOCKET MESSAGE \r\n");
-        websocket_parse(string, os_strlen(string), data, lgth);
-    }
+    checkErrOK(gL, result, "espconn_sent");
+    nud->websocket = 1;
+  } else if (nud->websocket == 1) {
+    ets_printf("WEBSOCKET MESSAGE \r\n");
+    websocket_parse(string, os_strlen(string), data, lgth);
+  }
+  return WEBSOCKET_ERR_OK;
 }
 
 // ============================ websocket_server_disconnected =======================
@@ -395,7 +450,10 @@ ets_printf("pdata: %s %s %d\n", pdata, HEADER_WEBSOCKETLINE, nud->websocket);
   if(nud->websocket == 1) {
     char *data = "";
     int lgth = 0;
-    websocket_recv(pdata,url,nud, &data, &lgth);
+    int result;
+
+    result = websocket_recv(pdata,url,nud, &data, &lgth);
+    checkErrOK(gL,result,"websocket_recv");
 // End Websocket
     if (lgth > 0) {
       lua_rawgeti(gL, LUA_REGISTRYINDEX, nud->cb_receive_ref);
@@ -663,7 +721,7 @@ ets_printf("websocket_socket_connected is called.\n");
 
 // ============================ websocket_create =======================
 
-// Lua: s = websocket.create(secure/timeout, function(conn))
+// Lua: s = websocket.create(secure/timeout,url,function(conn))
 static int websocket_create( lua_State* L, const char *mt )
 {
 //ets_printf("websocket_create is called.\n");
@@ -747,8 +805,7 @@ ets_printf("wrong metatable for websocket_create.\n");
     pesp_conn = nud->pesp_conn = pTcpServer;
   } else {
     pesp_conn = nud->pesp_conn = (struct espconn *)c_zalloc(sizeof(struct espconn));
-    if(!pesp_conn)
-      return luaL_error(L, "not enough memory");
+    checkAllocgLOK(pesp_conn);
 
     pesp_conn->proto.tcp = NULL;
     pesp_conn->proto.udp = NULL;
@@ -757,7 +814,7 @@ ets_printf("wrong metatable for websocket_create.\n");
     if(!pesp_conn->proto.tcp){
       c_free(pesp_conn);
       pesp_conn = nud->pesp_conn = NULL;
-      return luaL_error(L, "not enough memory");
+      checkErrOK(L, WEBSOCKET_ERR_OUT_OF_MEMORY, "");
     }
 //ets_printf("TCP server/socket is set.\n");
     NODE_DBG("TCP server/socket is set.\n");
@@ -769,6 +826,21 @@ ets_printf("wrong metatable for websocket_create.\n");
 
   if(isserver && pTcpServer==NULL){
     pTcpServer = pesp_conn;
+  }
+
+  if(isserver){
+    if ( lua_isstring(L, stack) )
+    {
+      // we have an url for the path otherwise use "/echo"
+      const uint8_t *url = lua_tostring(L, stack);
+      stack++;
+      nud->url = os_malloc(c_strlen(url)+1); // default to /echo
+      checkAllocOK(nud->url);
+      c_memcpy(nud->url,url,c_strlen(url));
+      nud->url[c_strlen(url)] = '\0';
+    } else {
+      nud->url = "/echo"; // default to /echo
+    }
   }
 
   gL = L;   // global L for net module.
@@ -1183,32 +1255,35 @@ static int websocket_on( lua_State* L, const char *mt )
 
 // ============================ websocket_write =======================
 
-static void websocket_write( const char *payload, struct espconn *pesp_conn );
-static void websocket_write( const char *payload, struct espconn *pesp_conn )
+static int websocket_write( const char *payload, struct espconn *pesp_conn )
 {
 ets_printf("websocket_write is called\r\n");
     uint8_t byte;
     int fsize = os_strlen(payload) + 2;
     char * buff = os_malloc(fsize);
+    int SIZE;
+
+    if (buff == NULL) {
+      return WEBSOCKET_ERR_OUT_OF_MEMORY;
+    }
     byte = 0x80; //set first bit
     byte |= 0x01; //frame->TYPE; //set op code
     buff[0] = byte;
     byte = 0;
-    int SIZE = os_strlen(payload);
+    SIZE = os_strlen(payload);
     if (SIZE < 126) {
         byte = os_strlen(payload);
-
         buff[1] = byte;
-
     } else {
-
-        ets_printf("Too much data \r\n");
+ets_printf("Too much data \r\n");
+        return WEBSOCKET_ERR_TOO_MUCH_DATA;
     }
 
     os_memcpy(&buff[2], payload, byte);
     espconn_sent(pesp_conn, (unsigned char *)buff, fsize);
     os_free(buff);
 ets_printf("websocket_write is done\r\n");
+    return WEBSOCKET_ERR_OK;
 }
 
 // ============================ websocket_send =======================
@@ -1222,6 +1297,7 @@ ets_printf("websocket_send is called\r\n");
   struct espconn *pesp_conn = NULL;
   lnet_userdata *nud;
   size_t l;
+  int result;
   
   nud = (lnet_userdata *)luaL_checkudata(L, 1, mt);
   luaL_argcheck(L, nud, 1, "Server/Socket expected");
@@ -1271,16 +1347,22 @@ ets_printf("websocket_send is called\r\n");
     nud->cb_send_ref = luaL_ref(L, LUA_REGISTRYINDEX);
   }
 #ifdef CLIENT_SSL_ENABLE
-  if(nud->secure)
-    espconn_secure_sent(pesp_conn, (unsigned char *)payload, l);
-  else
+  if(nud->secure) {
+    result = espconn_secure_sent(pesp_conn, (unsigned char *)payload, l);
+    checkErrOK(L, result, "espconn_sent");
+  } else {
 #endif
 ets_printf("websocket_send: nud->web_socket: %d payload: %s\n", nud->websocket, payload);
     if (nud->websocket == 1) {
-      websocket_write(payload, pesp_conn);
+      result = websocket_write(payload, pesp_conn);
+      checkErrOK(L, result, "websocket_write");
     } else {
-      espconn_sent(pesp_conn, (unsigned char *)payload, l);
+      result = espconn_sent(pesp_conn, (unsigned char *)payload, l);
+      checkErrOK(L, result, "espconn_sent");
     }
+#ifdef CLIENT_SSL_ENABLE
+  }
+#endif
   if (strstr(payload, HEADER_WEBSOCKETLINE) != 0) {
     nud->websocket = 1;
   }
