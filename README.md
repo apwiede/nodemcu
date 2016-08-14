@@ -169,7 +169,7 @@ Sec-WebSocket-Version: 13\
 
 | uint16\_t | uint16\_t | uint16\_t  | uint16\_t | uint16\_t | \< uint32\_t   | uint8\_t\* | uint8\_t\* | ... \> | uint8\_t\* | uint16\_t |
 | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
-|   src    |   dst    | totalLgth |    cmd   | cmdLgth  | < randomNNum |   fld1    |   fld2    | ... > | filler   |   crc     |
+|   src    |   dst    | totalLgth |    cmd   | cmdLgth  | < randomNum |   fld1    |   fld2    | ... > | filler   |   crc     |
 
 ### short example Lua code:
 
