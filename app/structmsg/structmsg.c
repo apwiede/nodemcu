@@ -864,21 +864,19 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
       switch (fieldInfo->fieldType) {
       case STRUCT_MSG_FIELD_INT8_T:
         if (stringValue == NULL) {
-          if ((numericValue > -128) || (numericValue < 128)) {
+          if ((numericValue > -128) && (numericValue < 128)) {
             fieldInfo->value.byteVal = (int8_t)numericValue;
-            fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-            return STRUCT_MSG_ERR_OK;
           } else {
             return STRUCT_MSG_ERR_VALUE_TOO_BIG;
           }
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_UINT8_T:
         if (stringValue == NULL) {
-          if ((numericValue >= 0) || (numericValue <= 256)) {
+          if ((numericValue >= 0) && (numericValue <= 256)) {
             fieldInfo->value.ubyteVal = (uint8_t)numericValue;
-            fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-            return STRUCT_MSG_ERR_OK;
           }
         } else {
           return STRUCT_MSG_ERR_BAD_VALUE;
@@ -886,95 +884,102 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
         break;
       case STRUCT_MSG_FIELD_INT16_T:
         if (stringValue == NULL) {
-          if ((numericValue > -32767) || (numericValue < 32767)) {
+          if ((numericValue > -32767) && (numericValue < 32767)) {
             fieldInfo->value.shortVal = (int16_t)numericValue;
-            fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-            return STRUCT_MSG_ERR_OK;
           } else {
             return STRUCT_MSG_ERR_VALUE_TOO_BIG;
           }
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_UINT16_T:
         if (stringValue == NULL) {
-          if ((numericValue >= 0) || (numericValue <= 65535)) {
+          if ((numericValue >= 0) && (numericValue <= 65535)) {
             fieldInfo->value.ushortVal = (uint16_t)numericValue;
-            fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-            return STRUCT_MSG_ERR_OK;
           } else {
             return STRUCT_MSG_ERR_VALUE_TOO_BIG;
           }
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_INT32_T:
         if (stringValue == NULL) {
-          if ((numericValue > -0x7FFFFFFF) || (numericValue <= 0x7FFFFFFF)) {
+          if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
             fieldInfo->value.val = (int32_t)numericValue;
-            fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-            return STRUCT_MSG_ERR_OK;
           } else {
             return STRUCT_MSG_ERR_VALUE_TOO_BIG;
           }
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_UINT32_T:
         if (stringValue == NULL) {
-          if ((numericValue >= 0) || (numericValue <= 65535)) {
+          if ((numericValue >= 0) && (numericValue <= 0xFFFFFFFF)) {
             fieldInfo->value.uval = (uint32_t)numericValue;
-            fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-            return STRUCT_MSG_ERR_OK;
           } else {
             return STRUCT_MSG_ERR_VALUE_TOO_BIG;
           }
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_INT8_VECTOR:
         if (stringValue != NULL) {
+          // check for length needed!!
           os_memcpy(fieldInfo->value.ubyteVector, stringValue, fieldInfo->fieldLgth);
-          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-          return STRUCT_MSG_ERR_OK;
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_UINT8_VECTOR:
         if (stringValue != NULL) {
-          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+          // check for length needed!!
           os_memcpy(fieldInfo->value.byteVector, stringValue, fieldInfo->fieldLgth);
-          return STRUCT_MSG_ERR_OK;
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_INT16_VECTOR:
         if (stringValue != NULL) {
+          // check for length needed!!
           os_memcpy((int8_t *)fieldInfo->value.shortVector, stringValue, fieldInfo->fieldLgth);
-          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-          return STRUCT_MSG_ERR_OK;
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_UINT16_VECTOR:
         if (stringValue != NULL) {
-          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+          // check for length needed!!
           os_memcpy((uint8_t *)fieldInfo->value.ushortVector, stringValue, fieldInfo->fieldLgth);
-          return STRUCT_MSG_ERR_OK;
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_INT32_VECTOR:
         if (stringValue != NULL) {
+          // check for length needed!!
           os_memcpy((int8_t *)fieldInfo->value.int32Vector, stringValue, fieldInfo->fieldLgth);
-          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-          return STRUCT_MSG_ERR_OK;
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       case STRUCT_MSG_FIELD_UINT32_VECTOR:
         if (stringValue != NULL) {
-          fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+          // check for length needed!!
           os_memcpy((uint8_t *)fieldInfo->value.uint32Vector, stringValue, fieldInfo->fieldLgth);
-          return STRUCT_MSG_ERR_OK;
+        } else {
+          return STRUCT_MSG_ERR_BAD_VALUE;
         }
         break;
       default:
         return STRUCT_MSG_ERR_BAD_FIELD_TYPE;
         break;
       }
-      return STRUCT_MSG_ERR_BAD_VALUE;
+      fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
+      return STRUCT_MSG_ERR_OK;
     }
     idx++;
   }
