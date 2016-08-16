@@ -421,23 +421,12 @@ proc encode_msg {handle} {
   set encoded [list]
   set offset 0
   set offset [uint16Encode encoded $offset [dict get $myDict src]]
-#puts stderr "src offset: $offset!len: [string length $encoded]!"
   set offset [uint16Encode encoded $offset [dict get $myDict dst]]
-#puts stderr "dst offset: $offset!len: [string length $encoded]!"
   set offset [uint16Encode encoded $offset [dict get $myDict totalLgth]]
-#puts stderr "totalLgth offset: $offset!len: [string length $encoded]!"
   set offset [uint16Encode encoded $offset [dict get $myDict msg cmdKey]]
-#puts stderr "cmdKey offset: $offset!len: [string length $encoded]!"
   set offset [uint16Encode encoded $offset [dict get $myDict msg cmdLgth]]
-#puts stderr "cmdLgth offset: $offset!len: [string length $encoded]!"
   dict set myDict encoded $encoded
   set ::structmsg($handle) $myDict
-set crypted [dict get $myDict encoded]
-binary scan $crypted x0c ch0
-binary scan $crypted x1c ch1
-binary scan $crypted x2c ch2
-binary scan $crypted x3c ch3
-puts stderr "ch encst: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
   set idx 0
   set numEntries [dict get $myDict msg numFieldInfos]
   while {$idx < $numEntries} {
@@ -449,17 +438,14 @@ puts stderr "ch encst: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3
       switch $fieldName {
         "@randomNum" {
           set offset [randomNumEncode encoded $offset randomNum]
-#puts stderr "randomNum offset: $offset!len: [string length $encoded]!"
           set_fieldValue $handle "@randomNum" $randomNum
         }
         "@filler" {
           set offset [fillerEncode encoded $offset [dict get $fieldInfo fieldLgth] value]
-#puts stderr "filler offset: $offset!len: [string length $encoded]!"
           set_fieldValue $handle "@filler" $value
         }
         "@crc" {
           set offset [crcEncode encoded $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict headerLgth]]
-#puts stderr "crc offset: $offset!len: [string length $encoded]!"
           set_fieldValue $handle "@crc" $crc
         }
         default {
@@ -472,7 +458,6 @@ puts stderr "ch encst: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3
     } else {
      set fieldType [dict get $fieldInfo fieldType]
       set fieldName [dict get $fieldInfo fieldStr]
-#puts stderr "fld: $fieldName!$fieldType!"
       switch $fieldType {
         int8_t {
           set offset [int8Encode encoded $offset [dict get $fieldInfo value]]
@@ -502,7 +487,6 @@ puts stderr "ch encst: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3
         uint8_t* {
           append encoded [dict get $fieldInfo value]
           set offset [expr {$offset + [dict get $fieldInfo fieldLgth]}]
-#puts stderr "[dict get $fieldInfo fieldStr] offset: $offset!len: [string length $encoded]!"
         }
         int16_t* {
           set fieldIdx 0
@@ -548,12 +532,6 @@ puts stderr "ch encst: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3
     dict lappend myDict flags ENCODED
   }
   dict set myDict encoded $encoded
-set crypted [dict get $myDict encoded]
-binary scan $crypted x0c ch0
-binary scan $crypted x1c ch1
-binary scan $crypted x2c ch2
-binary scan $crypted x3c ch3
-puts stderr "ch enc: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
   set ::structmsg($handle) $myDict
 }
 
@@ -636,7 +614,6 @@ proc decode_msg {handle todecode} {
     } else {
      set fieldType [dict get $fieldInfo fieldType]
       set fieldName [dict get $fieldInfo fieldStr]
-#puts stderr "fld: $fieldName!$fieldType!"
       switch $fieldType {
         int8_t {
           set offset [int8Decode $todecode $offset [dict get $fieldInfo value]]
@@ -724,35 +701,17 @@ proc encrypt_payload {handle cryptKey} {
   set encoded [get_encoded $handle]
   set lgth [dict get $myDict msg cmdLgth]
   set offset $headerLgth
-puts stderr "offset: $offset!lgth: $lgth!"
   set tocrypt [string range $encoded $offset [expr {$offset + $lgth - 1}]]
   set encryptedData [aes::aes -dir encrypt -key $cryptKey $tocrypt]
   set len [string length $encryptedData]
   dict set myDict encrypted $encryptedData
   dict set myDict encryptedLgth $len
-#puts stderr "len: $len!"
-#set cnt 0
-#while {$cnt < $len} {
-#    set ch1 0
-#    set ch2 0
-#    set ch3 0
-#    set ch4 0
-#    set scanLen [binary scan $encryptedData x${cnt}cccc ch1 ch2 ch3 ch4]
-#    puts stderr [format "cnt: $cnt: 0x%02x 0x%02x 0x%02x 0x%02x" [expr {$ch1 & 0xFF}] [expr {$ch2 & 0xFF}] [expr {$ch3 & 0xFF}] [expr {$ch4 & 0xFF}]]
-#    incr cnt 4 
-#}
   dict set myDict encryptedMsg [string range $encoded 0 [expr {$headerLgth - 1}]]
   dict append myDict encryptedMsg $encryptedData
   if {[lsearch [dict get $myDict flags] "ENCRYPTED"] < 0} {
     dict lappend myDict flags ENCRYPTED
   }
   set ::structmsg($handle) $myDict
-set crypted [dict get $myDict encryptedMsg]
-binary scan $crypted x0c ch0
-binary scan $crypted x1c ch1
-binary scan $crypted x2c ch2
-binary scan $crypted x3c ch3
-puts stderr "ch enmsg: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
   return [dict get $myDict encryptedMsg]
 }
 
@@ -762,32 +721,15 @@ proc decrypt_payload {handle cryptKey crypted} {
   if {![info exists ::structmsg($handle)]} {
     puts stderr "no such structmsg: $handle"
   }
-binary scan $crypted x0c ch0
-binary scan $crypted x1c ch1
-binary scan $crypted x2c ch2
-binary scan $crypted x3c ch3
-puts stderr "ch: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
   set myDict $::structmsg($handle)
   set headerLgth [dict get $myDict headerLgth]
   set lgth [dict get $myDict msg cmdLgth]
   set offset $headerLgth
-puts stderr "offset: $offset!lgth: $lgth!"
   set todecrypt [string range $crypted $offset [expr {$offset + $lgth - 1}]]
   set decryptedData [aes::aes -dir decrypt -key $cryptKey $todecrypt]
   set len [string length $decryptedData]
   dict set myDict decrypted $decryptedData
   dict set myDict decryptedLgth $len
-#puts stderr "len: $len!"
-#set cnt 0
-#while {$cnt < $len} {
-#    set ch1 0
-#    set ch2 0
-#    set ch3 0
-#    set ch4 0
-#    set scanLen [binary scan $decryptedData x${cnt}cccc ch1 ch2 ch3 ch4]
-#    puts stderr [format "cnt: $cnt: 0x%02x 0x%02x 0x%02x 0x%02x" [expr {$ch1 & 0xFF}] [expr {$ch2 & 0xFF}] [expr {$ch3 & 0xFF}] [expr {$ch4 & 0xFF}]]
-#    incr cnt 4 
-#}
   dict set myDict decryptedMsg [string range $crypted 0 [expr {$headerLgth - 1}]]
   dict append myDict decryptedMsg $decryptedData
   if {[lsearch [dict get $myDict flags] "DECRYPTED"] < 0} {
