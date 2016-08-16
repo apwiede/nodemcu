@@ -1,6 +1,8 @@
 source pdict.tcl
 source structmsgEncodeDecode.tcl
 
+package require aes
+
 set ::structmsg(prefix) "stmsg_"
 set ::structmsg(numHandles) 1
 set ::structmsg(handles) [list]
@@ -12,8 +14,14 @@ proc dump_structmsg {handle} {
     puts stderr "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
-  puts stderr [format "handle: %s src: %d dst: %d totalLgth: %d" $handle [dict get $myDict src] [dict get $myDict dst] [dict get $myDict totalLgth]]
-  puts stderr [format "  cmdKey: %d cmdLgth: %d" [dict get $myDict msg cmdKey] [dict get $myDict msg cmdLgth]]
+  set src [expr {[dict get $myDict src] & 0xFFFF}]
+  set dst [expr {[dict get $myDict dst] & 0xFFFF}]
+  set totalLgth [expr {[dict get $myDict totalLgth] & 0xFFFF}]
+  puts stderr [format "handle: %s src: %d 0x%04x dst: %d 0x%04x totalLgth: %d 0x%04x" $handle $src $src $dst $dst $totalLgth $totalLgth]
+
+  set cmdKey [expr {[dict get $myDict msg cmdKey] & 0xFFFF}]
+  set cmdLgth [expr {[dict get $myDict msg cmdLgth] & 0xFFFF}]
+  puts stderr [format "  cmdKey: %d 0x%04x cmdLgth: %d 0x%04x" $cmdKey $cmdKey $cmdLgth $cmdLgth]
   set numEntries [dict get $myDict msg numFieldInfos]
   puts stderr [format "  numFieldInfos: %d max: %d" $numEntries [dict get $myDict msg maxFieldInfos]]
   set idx 0
@@ -78,6 +86,7 @@ proc dump_structmsg {handle} {
     }
     incr idx
   }
+  # encoded
   if {[lsearch [dict get $myDict flags] ENCODED] >= 0} {
     set encoded [dict get $myDict encoded]
     puts stderr "  encoded: $encoded"
@@ -101,6 +110,7 @@ puts stderr "\n!${ch}!${pch}!"
 }
     puts stderr ""
   }
+  # decoded
   if {[lsearch [dict get $myDict flags] DECODED] >= 0} {
     set todecode [dict get $myDict todecode]
     puts stderr "  todecode: $todecode"
@@ -118,6 +128,54 @@ if {[catch {
 } msg]} {
     puts stderr "\nMSG: $msg!"
     foreach ch [split $todecode ""] {
+      scan $ch %c pch
+puts stderr "\n!${ch}!${pch}!"
+    }
+}
+    puts stderr ""
+  }
+  # encryptedMsg
+  if {[lsearch [dict get $myDict flags] ENCRYPTED] >= 0} {
+    set encryptedMsg [dict get $myDict encryptedMsg]
+    puts stderr "  encryptedMsg: $encryptedMsg"
+    puts -nonewline stderr "      values: "
+    set cnt 0
+if {[catch {
+    foreach ch [split $encryptedMsg ""] {
+      scan $ch %c pch
+      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
+      incr cnt
+      if {($cnt > 0) && (($cnt % 10) == 0)} {
+        puts -nonewline stderr "\n              "
+      }
+    }
+} msg]} {
+    puts stderr "\nMSG: $msg!"
+    foreach ch [split $encryptedMsg ""] {
+      scan $ch %c pch
+puts stderr "\n!${ch}!${pch}!"
+    }
+}
+    puts stderr ""
+  }
+  # decryptedMsg
+  if {[lsearch [dict get $myDict flags] DECRYPTED] >= 0} {
+    set decryptedMsg [dict get $myDict decryptedMsg]
+    puts stderr "  decryptedMsg: $decryptedMsg"
+    puts -nonewline stderr "      values: "
+    set cnt 0
+if {[catch {
+    foreach ch [split $decryptedMsg ""] {
+      scan $ch %c pch
+      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
+      incr cnt
+      if {($cnt > 0) && (($cnt % 10) == 0)} {
+        puts -nonewline stderr "\n              "
+      }
+    }
+} msg]} {
+    puts stderr "\nMSG: $msg!"
+    foreach ch [split $decryptedMsg ""] {
       scan $ch %c pch
 puts stderr "\n!${ch}!${pch}!"
     }
@@ -352,6 +410,393 @@ proc set_fillerAndCrc {handle} {
   ::addField $handle "@crc" uint16_t 1
 }
 
+# ============================= encode_msg ========================
+
+proc encode_msg {handle} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  dict set myDict encoded [list]
+  set encoded [list]
+  set offset 0
+  set offset [uint16Encode encoded $offset [dict get $myDict src]]
+#puts stderr "src offset: $offset!len: [string length $encoded]!"
+  set offset [uint16Encode encoded $offset [dict get $myDict dst]]
+#puts stderr "dst offset: $offset!len: [string length $encoded]!"
+  set offset [uint16Encode encoded $offset [dict get $myDict totalLgth]]
+#puts stderr "totalLgth offset: $offset!len: [string length $encoded]!"
+  set offset [uint16Encode encoded $offset [dict get $myDict msg cmdKey]]
+#puts stderr "cmdKey offset: $offset!len: [string length $encoded]!"
+  set offset [uint16Encode encoded $offset [dict get $myDict msg cmdLgth]]
+#puts stderr "cmdLgth offset: $offset!len: [string length $encoded]!"
+  dict set myDict encoded $encoded
+  set ::structmsg($handle) $myDict
+set crypted [dict get $myDict encoded]
+binary scan $crypted x0c ch0
+binary scan $crypted x1c ch1
+binary scan $crypted x2c ch2
+binary scan $crypted x3c ch3
+puts stderr "ch encst: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
+  set idx 0
+  set numEntries [dict get $myDict msg numFieldInfos]
+  while {$idx < $numEntries} {
+    set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfo [lindex $fieldInfos $idx]
+    if {[string range [dict get $fieldInfo fieldStr] 0 0] == "@"} {
+      set fieldName [dict get $fieldInfo fieldStr]
+      switch $fieldName {
+        "@randomNum" {
+          set offset [randomNumEncode encoded $offset randomNum]
+#puts stderr "randomNum offset: $offset!len: [string length $encoded]!"
+          set_fieldValue $handle "@randomNum" $randomNum
+        }
+        "@filler" {
+          set offset [fillerEncode encoded $offset [dict get $fieldInfo fieldLgth] value]
+#puts stderr "filler offset: $offset!len: [string length $encoded]!"
+          set_fieldValue $handle "@filler" $value
+        }
+        "@crc" {
+          set offset [crcEncode encoded $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict headerLgth]]
+#puts stderr "crc offset: $offset!len: [string length $encoded]!"
+          set_fieldValue $handle "@crc" $crc
+        }
+        default {
+          error "BAD_SPECIAL_FIELD: $fieldName!"
+        }
+      }
+      set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
+      set fieldInfos [dict get $myDict msg fieldInfos]
+      set fieldInfo [lindex $fieldInfos $idx]
+    } else {
+     set fieldType [dict get $fieldInfo fieldType]
+      set fieldName [dict get $fieldInfo fieldStr]
+#puts stderr "fld: $fieldName!$fieldType!"
+      switch $fieldType {
+        int8_t {
+          set offset [int8Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        uint8_t {
+          set offset [uint8Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        int16_t {
+          set offset [int16Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        uint16_t {
+          set offset [uint16Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        int32_t {
+          set offset [int32Encode encoded $$offset [dict get $fieldInfo value]]
+        }
+        uint32_t {
+          set offset [uint32Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        int8_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int8Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint8_t* {
+          append encoded [dict get $fieldInfo value]
+          set offset [expr {$offset + [dict get $fieldInfo fieldLgth]}]
+#puts stderr "[dict get $fieldInfo fieldStr] offset: $offset!len: [string length $encoded]!"
+        }
+        int16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        int32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+      }
+    }
+    set myDict $::structmsg($handle)
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
+    dict set myDict msg fieldInfos $fieldInfos
+    dict set myDict encoded $encoded
+    set ::structmsg($handle) $myDict
+    incr idx
+  }
+  set myDict $::structmsg($handle)
+  dict set myDict msg fieldInfos $fieldInfos
+  if {[lsearch [dict get $myDict flags] "ENCODED"] < 0} {
+    dict lappend myDict flags ENCODED
+  }
+  dict set myDict encoded $encoded
+set crypted [dict get $myDict encoded]
+binary scan $crypted x0c ch0
+binary scan $crypted x1c ch1
+binary scan $crypted x2c ch2
+binary scan $crypted x3c ch3
+puts stderr "ch enc: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
+  set ::structmsg($handle) $myDict
+}
+
+# ============================= get_encoded ========================
+
+proc get_encoded {handle} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  if {[lsearch [dict get $myDict flags] ENCODED] < 0} {
+    error "handle: $handle is not encoded!"
+  }
+  return [dict get $myDict encoded]
+}
+
+
+# ============================= get_encodedMsg ========================
+
+proc get_encodedMsg {handle} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  if {[lsearch [dict get $myDict flags] ENCODED] < 0} {
+    error "handle: $handle is not encoded!"
+  }
+  set encoded [dict get $myDict encoded]
+
+}
+
+# ============================= decode_msg ========================
+
+proc decode_msg {handle todecode} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  dict set myDict todecode $todecode
+  set offset 0
+  set offset [uint16Decode $todecode $offset src]
+  dict set myDict src $src
+  set offset [uint16Decode $todecode $offset dst]
+  dict set myDict dst $dst
+  set offset [uint16Decode $todecode $offset totalLgth]
+  dict set myDict totalLgth $totalLgth
+  set offset [uint16Decode $todecode $offset cmdKey]
+  dict set myDict msg cmdKey $cmdKey
+  set offset [uint16Decode $todecode $offset cmdLgth]
+  dict set myDict msg cmdLgth $cmdLgth
+  set ::structmsg($handle) $myDict
+  set idx 0
+  set numEntries [dict get $myDict msg numFieldInfos]
+  while {$idx < $numEntries} {
+    set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfo [lindex $fieldInfos $idx]
+    if {[string range [dict get $fieldInfo fieldStr] 0 0] == "@"} {
+      set fieldName [dict get $fieldInfo fieldStr]
+      switch $fieldName {
+        "@randomNum" {
+          set offset [randomNumDecode $todecode $offset randomNum]
+          dict set fieldInfo value $randomNum
+        }
+        "@filler" {
+          set offset [fillerDecode $todecode $offset [dict get $fieldInfo fieldLgth] value]
+          dict set fieldInfo value $value
+        }
+        "@crc" {
+          set offset [crcDecode $todecode $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict headerLgth]]
+          dict set fieldInfo value $crc
+        }
+        default {
+          error "BAD_SPECIAL_FIELD: $fieldName!"
+        }
+      }
+      set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
+      set fieldInfos [dict get $myDict msg fieldInfos]
+      set fieldInfo [lindex $fieldInfos $idx]
+    } else {
+     set fieldType [dict get $fieldInfo fieldType]
+      set fieldName [dict get $fieldInfo fieldStr]
+#puts stderr "fld: $fieldName!$fieldType!"
+      switch $fieldType {
+        int8_t {
+          set offset [int8Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        uint8_t {
+          set offset [uint8Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        int16_t {
+          set offset [int16Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        uint16_t {
+          set offset [uint16Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        int32_t {
+          set offset [int32Decode $todecode $$offset [dict get $fieldInfo value]]
+        }
+        uint32_t {
+          set offset [uint32Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        int8_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int8Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint8_t* {
+          set lgth [dict get $fieldInfo fieldLgth]
+          dict set $fieldInfo value [string range $todecode $offset [expr {$offset + $lgth - 1}]]
+          incr offset $lgth
+        }
+        int16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int16Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint16Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        int32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int32Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint32Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+      }
+    }
+    set myDict $::structmsg($handle)
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
+    dict set myDict msg fieldInfos $fieldInfos
+    set ::structmsg($handle) $myDict
+    incr idx
+  }
+  set myDict $::structmsg($handle)
+  dict set myDict msg fieldInfos $fieldInfos
+  if {[lsearch [dict get $myDict flags] "DECODED"] < 0} {
+    dict lappend myDict flags DECODED
+  }
+  set ::structmsg($handle) $myDict
+}
+
+# ===================== encrypt_payload =================================
+
+proc encrypt_payload {handle cryptKey} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  set headerLgth [dict get $myDict headerLgth]
+  set encoded [get_encoded $handle]
+  set lgth [dict get $myDict msg cmdLgth]
+  set offset $headerLgth
+puts stderr "offset: $offset!lgth: $lgth!"
+  set tocrypt [string range $encoded $offset [expr {$offset + $lgth - 1}]]
+  set encryptedData [aes::aes -dir encrypt -key $cryptKey $tocrypt]
+  set len [string length $encryptedData]
+  dict set myDict encrypted $encryptedData
+  dict set myDict encryptedLgth $len
+#puts stderr "len: $len!"
+#set cnt 0
+#while {$cnt < $len} {
+#    set ch1 0
+#    set ch2 0
+#    set ch3 0
+#    set ch4 0
+#    set scanLen [binary scan $encryptedData x${cnt}cccc ch1 ch2 ch3 ch4]
+#    puts stderr [format "cnt: $cnt: 0x%02x 0x%02x 0x%02x 0x%02x" [expr {$ch1 & 0xFF}] [expr {$ch2 & 0xFF}] [expr {$ch3 & 0xFF}] [expr {$ch4 & 0xFF}]]
+#    incr cnt 4 
+#}
+  dict set myDict encryptedMsg [string range $encoded 0 [expr {$headerLgth - 1}]]
+  dict append myDict encryptedMsg $encryptedData
+  if {[lsearch [dict get $myDict flags] "ENCRYPTED"] < 0} {
+    dict lappend myDict flags ENCRYPTED
+  }
+  set ::structmsg($handle) $myDict
+set crypted [dict get $myDict encryptedMsg]
+binary scan $crypted x0c ch0
+binary scan $crypted x1c ch1
+binary scan $crypted x2c ch2
+binary scan $crypted x3c ch3
+puts stderr "ch enmsg: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
+  return [dict get $myDict encryptedMsg]
+}
+
+# ===================== decrypt_payload =================================
+
+proc decrypt_payload {handle cryptKey crypted} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+binary scan $crypted x0c ch0
+binary scan $crypted x1c ch1
+binary scan $crypted x2c ch2
+binary scan $crypted x3c ch3
+puts stderr "ch: [format {0x%02x 0x%02x 0x%02x 0x%02x} $ch0 $ch1 $ch2 $ch3]!"
+  set myDict $::structmsg($handle)
+  set headerLgth [dict get $myDict headerLgth]
+  set lgth [dict get $myDict msg cmdLgth]
+  set offset $headerLgth
+puts stderr "offset: $offset!lgth: $lgth!"
+  set todecrypt [string range $crypted $offset [expr {$offset + $lgth - 1}]]
+  set decryptedData [aes::aes -dir decrypt -key $cryptKey $todecrypt]
+  set len [string length $decryptedData]
+  dict set myDict decrypted $decryptedData
+  dict set myDict decryptedLgth $len
+#puts stderr "len: $len!"
+#set cnt 0
+#while {$cnt < $len} {
+#    set ch1 0
+#    set ch2 0
+#    set ch3 0
+#    set ch4 0
+#    set scanLen [binary scan $decryptedData x${cnt}cccc ch1 ch2 ch3 ch4]
+#    puts stderr [format "cnt: $cnt: 0x%02x 0x%02x 0x%02x 0x%02x" [expr {$ch1 & 0xFF}] [expr {$ch2 & 0xFF}] [expr {$ch3 & 0xFF}] [expr {$ch4 & 0xFF}]]
+#    incr cnt 4 
+#}
+  dict set myDict decryptedMsg [string range $crypted 0 [expr {$headerLgth - 1}]]
+  dict append myDict decryptedMsg $decryptedData
+  if {[lsearch [dict get $myDict flags] "DECRYPTED"] < 0} {
+    dict lappend myDict flags DECRYPTED
+  }
+  set ::structmsg($handle) $myDict
+  return [dict get $myDict decryptedMsg]
+}
+
 # ===================== create_structmsg =============================
 
 proc create_structmsg {numFieldInfos} {
@@ -359,18 +804,23 @@ proc create_structmsg {numFieldInfos} {
   lappend ::structmsg(handles) $handle
   incr ::structmsg(numHandles)
   set myDict [dict create]
-  dict set myDict msg cmdLgth 4; # uint16_t cmdKey + unit16_t cmdLgth
-  dict set myDict totalLgth 10;  # cmdLgth + uint16_t src + uint16_t dst + uint16_t totalLgth
+  set headerLgth 6; # uint16_t src + uint16_t dst + uint16_t totalLgth
+  set cmdLgth 4;    # uint16_t cmdKey + unit16_t cmdLgth
+  dict set myDict headerLgth $headerLgth
+  dict set myDict totalLgth [expr {$headerLgth + $cmdLgth}]
+  dict set myDict msg cmdLgth $cmdLgth
+  dict set myDict msg fieldInfos [list]
   dict set myDict msg maxFieldInfos $numFieldInfos
   dict set myDict msg numFieldInfos 0
-  dict set myDict msg fieldInfos [list]
   dict set myDict flags [list]
   dict set myDict encoded [list]
   dict set myDict todecode [list]
   dict set myDict encrypted [list]
   dict set myDict encryptedLgth 0
+  dict set myDict encryptedMsg [list]
   dict set myDict decrypted [list]
   dict set myDict decryptedLgth 0
+  dict set myDict decryptedMsg [list]
   set ::structmsg($handle) $myDict
   return $handle
 }
