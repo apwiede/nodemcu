@@ -185,9 +185,11 @@ proc uint16Decode {data offset val} {
   upvar $val value
 
   set value 0
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 8}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 0}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
   incr offset
   return $offset;
 }
@@ -198,9 +200,11 @@ proc int16Decode {data offset val} {
   upvar $val value
 
   set value 0
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 8}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 0}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
   incr offset
   return $offset;
 }
@@ -211,13 +215,17 @@ proc uint32Decode {data offset val} {
   upvar $val value
 
   set value 0
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 24}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 24)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 16}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 16)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 8}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 0}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
   incr offset
   return $offset;
 }
@@ -228,13 +236,18 @@ proc int32Decode {data offset val} {
   upvar $val value
 
   set value 0
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 24}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 24)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 16}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 16)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 8}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
   incr offset
-  set value [expr {$value + ([expr {[string range $data $offset $offset] & 0xFF}]) << 0}]
+  binary scan [string range $data $offset $offset] c ch
+  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
+  incr offset
   incr offset
   return $offset;
 }
@@ -336,10 +349,10 @@ proc randomNumEncode {dat offset val} {
 # ============================= randomNumDecode ========================
 
 proc randomNumDecode {data offset val} {
-  int result;
+  upvar $val value
 
-  offset = uint32Decode(data, offset, value);
-  return offset;
+  set offset [uint32Decode $data $offset value]
+  return $offset
 }
 
 # ============================= fillerEncode ========================
@@ -377,12 +390,12 @@ proc fillerEncode {dat offset lgth val} {
 
 # ============================= fillerDecode ========================
  
-proc fillerDecode {data offset len val} {
-  int idx;
+proc fillerDecode {data offset lgth val} {
+  upvar $val value
 
-  c_memcpy(*value,data+offset,lgth);
-  offset += lgth;
-  return offset;
+  set value [string range $data $offset [expr {$offset + $lgth - 1}]]
+  incr offset $lgth
+  return $offset
 }
 
 # ============================= crcEncode ========================
@@ -392,18 +405,16 @@ proc crcEncode {dat offset lgth val} {
   upvar $val value
 
   set lgth [expr {$lgth - 2}]   ;# uint16_t crc
-#set lgth [expr {[string length $data] - 2}]
   set crc  0
   set idx [expr {2 * 3}]; # uint16_t src + uint16_t dst + uint16_t totalLgth
-  set str [string range $data $idx [expr {$idx + $lgth}]]
+  set str [string range $data $idx [expr {$idx + $lgth - 1}]]
 set cnt 0
-    foreach ch [split $str ""] {
-        binary scan $ch c pch
-#puts stderr "build crc: $cnt $ch![format 0x%02x [expr {$pch & 0xFF}]]![format 0x%04x $crc]!"
-        scan $ch %c ch2
-        set crc [expr {$crc + [format "%d" $ch2]}]
+  foreach ch [split $str ""] {
+    binary scan $ch c pch
+#puts stderr "encode crc: $cnt $ch![format 0x%02x [expr {$pch & 0xFF}]]![format 0x%04x $crc]!"
+    set crc [expr {$crc + [format "%d" $pch]}]
 incr cnt
-    }
+  }
 puts stderr "crc: $crc![format 0x%04x $crc]!"
   set crc [expr {~$crc & 0xFFFF}]
 puts stderr "crc2: $crc![format 0x%04x $crc]!"
@@ -414,22 +425,31 @@ puts stderr "crc2: $crc![format 0x%04x $crc]!"
 
 # ============================= crcDecode ========================
 
-proc crcDecode {data offset startData len val} {
-  uint16_t crcVal;
-  int idx;
+proc crcDecode {data offset lgth val} {
+  upvar $val value
 
-  lgth -= sizeof(uint16_t);   // uint16_t crc
-  crcVal = 0;
-  idx = sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
-  while (idx < lgth) {
-    crcVal += data[idx++];
+  set value ""
+  set lgth [expr {$lgth - 2}]; # uint16_t crc
+  set crcVal 0
+  set idx [expr {2 * 3}]; # uint16_t src + uint16_t dst + uint16_t totalLgth
+  set str [string range $data $idx [expr {$idx + $lgth - 1}]]
+set cnt 0
+  foreach ch [split $str ""] {
+    binary scan $ch c pch
+#puts stderr "decode crc: $cnt $ch![format 0x%02x [expr {$pch & 0xFF}]]![format 0x%04x $crcVal]!"
+    set crcVal [expr {$crcVal + [format "%d" $pch]}]
+incr cnt
+    incr idx
   }
-  crcVal = ~crcVal;
-  offset = uint16Decode(data, offset, crc);
-  if (crcVal != *crc) {
-    return -1;
-     }
-  return offset;
+puts stderr "crcVal end: $crcVal!"
+  set crcVal [expr {~$crcVal & 0xFFFF}]
+  set offset [uint16Decode $data $offset crc]
+puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
+  if {$crcVal != $crc} {
+    return -1
+  }
+  set value $crc
+  return $offset;
 }
 
 # ============================= encodeMsg ========================
@@ -564,3 +584,143 @@ puts stderr "crc offset: $offset!len: [string length $encoded]!"
   set ::structmsg($handle) $myDict
 }
 
+# ============================= getEncoded ========================
+
+proc getEncoded {handle} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  if {[lsearch [dict get $myDict flags] ENCODED] < 0} {
+    error "handle: $handle is not encoded!"
+  }
+  return [dict get $myDict encoded]
+}
+
+# ============================= decodeMsg ========================
+
+proc decodeMsg {handle todecode} {
+  if {![info exists ::structmsg($handle)]} {
+    puts stderr "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  dict set myDict todecode $todecode
+  set offset 0
+  set offset [uint16Decode $todecode $offset src]
+  dict set myDict src $src
+  set offset [uint16Decode $todecode $offset dst]
+  dict set myDict dst $dst
+  set offset [uint16Decode $todecode $offset totalLgth]
+  dict set myDict totalLgth $totalLgth
+  set offset [uint16Decode $todecode $offset cmdKey]
+  dict set myDict msg cmdKey $cmdKey
+  set offset [uint16Decode $todecode $offset cmdLgth]
+  dict set myDict msg cmdLgth $cmdLgth
+  set ::structmsg($handle) $myDict
+  set idx 0
+  set numEntries [dict get $myDict msg numFieldInfos]
+  while {$idx < $numEntries} {
+    set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfo [lindex $fieldInfos $idx]
+    if {[string range [dict get $fieldInfo fieldStr] 0 0] == "@"} {
+      set fieldName [dict get $fieldInfo fieldStr]
+      switch $fieldName {
+        "@randomNum" {
+          set offset [randomNumDecode $todecode $offset randomNum]
+          dict set fieldInfo value $randomNum
+        }
+        "@filler" {
+          set offset [fillerDecode $todecode $offset [dict get $fieldInfo fieldLgth] value]
+          dict set fieldInfo value $value
+        }
+        "@crc" {
+          set offset [crcDecode $todecode $offset [dict get $myDict msg cmdLgth] crc]
+          dict set fieldInfo value $crc
+        }
+        default {
+          error "BAD_SPECIAL_FIELD: $fieldName!"
+        }
+      }
+      set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
+      set fieldInfos [dict get $myDict msg fieldInfos]
+      set fieldInfo [lindex $fieldInfos $idx]
+    } else {
+     set fieldType [dict get $fieldInfo fieldType]
+      set fieldName [dict get $fieldInfo fieldStr]
+#puts stderr "fld: $fieldName!$fieldType!"
+      switch $fieldType {
+        int8_t {
+          set offset [int8Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        uint8_t {
+          set offset [uint8Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        int16_t {
+          set offset [int16Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        uint16_t {
+          set offset [uint16Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        int32_t {
+          set offset [int32Decode $todecode $$offset [dict get $fieldInfo value]]
+        }
+        uint32_t {
+          set offset [uint32Decode $todecode $offset [dict get $fieldInfo value]]
+        }
+        int8_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int8Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint8_t* {
+          set lgth [dict get $fieldInfo fieldLgth]
+          dict set $fieldInfo value [string range $todecode $offset [expr {$offset + $lgth - 1}]]
+          incr offset $lgth
+        }
+        int16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int16Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint16Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        int32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int32Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint32Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+      }
+    }
+    set myDict $::structmsg($handle)
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
+    dict set myDict msg fieldInfos $fieldInfos
+    set ::structmsg($handle) $myDict
+    incr idx
+  }
+  set myDict $::structmsg($handle)
+  dict set myDict msg fieldInfos $fieldInfos
+  if {[lsearch [dict get $myDict flags] "DECODED"] < 0} {
+    dict lappend myDict flags DECODED
+  }
+  set ::structmsg($handle) $myDict
+}
