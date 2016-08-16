@@ -42,7 +42,22 @@ proc dump_structmsg {handle} {
           puts stderr [format "      value: 0x%08x" [dict get $fieldInfo value]]
         }
         uint8_t* {
-          puts stderr [format "      value: %s" [dict get $fieldInfo value]]
+          set val [dict get $fieldInfo value]
+          if {[string is print $val]} {
+            puts stderr [format "      value: %s" $val]
+          }
+          set lgth [string length $val]
+          puts -nonewline stderr "      values: "
+          set cnt 0
+          foreach ch [split $val ""] {
+            scan $ch %c pch
+            puts -nonewline stderr [format "  $ch 0x%02x" $pch]
+            incr cnt
+            if {($cnt > 0) && (($cnt % 10) == 0)} {
+              puts -nonewline stderr "\n              "
+            }
+          }
+          puts stderr ""
         }
         int8_t* {
           puts stderr [format "      value: %s" [dict get $fieldInfo value]]
@@ -62,6 +77,52 @@ proc dump_structmsg {handle} {
       }
     }
     incr idx
+  }
+  if {[lsearch [dict get $myDict flags] ENCODED] >= 0} {
+    set encoded [dict get $myDict encoded]
+    puts stderr "  encoded: $encoded"
+    puts -nonewline stderr "      values: "
+    set cnt 0
+if {[catch {
+    foreach ch [split $encoded ""] {
+      scan $ch %c pch
+      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
+      incr cnt
+      if {($cnt > 0) && (($cnt % 10) == 0)} {
+        puts -nonewline stderr "\n              "
+      }
+    }
+} msg]} {
+    puts stderr "\nMSG: $msg!"
+    foreach ch [split $encoded ""] {
+      scan $ch %c pch
+puts stderr "\n!${ch}!${pch}!"
+    }
+}
+    puts stderr ""
+  }
+  if {[lsearch [dict get $myDict flags] DECODED] >= 0} {
+    set todecode [dict get $myDict todecode]
+    puts stderr "  todecode: $todecode"
+    puts -nonewline stderr "      values: "
+    set cnt 0
+if {[catch {
+    foreach ch [split $todecode ""] {
+      scan $ch %c pch
+      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
+      incr cnt
+      if {($cnt > 0) && (($cnt % 10) == 0)} {
+        puts -nonewline stderr "\n              "
+      }
+    }
+} msg]} {
+    puts stderr "\nMSG: $msg!"
+    foreach ch [split $todecode ""] {
+      scan $ch %c pch
+puts stderr "\n!${ch}!${pch}!"
+    }
+}
+    puts stderr ""
   }
 }
 
@@ -160,7 +221,7 @@ proc set_fieldValue {handle fieldName value} {
           }
         }
         int8_t* {
-          if {[string length $value] == [dict get $fieldInfo fieldLgth]} {
+          if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 2}]} {
             dict set fieldInfo value $value
           } else {
             error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
@@ -303,7 +364,7 @@ proc create_structmsg {numFieldInfos} {
   dict set myDict msg maxFieldInfos $numFieldInfos
   dict set myDict msg numFieldInfos 0
   dict set myDict msg fieldInfos [list]
-  dict set myDict flags 0
+  dict set myDict flags [list]
   dict set myDict encoded [list]
   dict set myDict todecode [list]
   dict set myDict encrypted [list]
@@ -315,12 +376,6 @@ proc create_structmsg {numFieldInfos} {
 }
 
 set offset 0
-set str ""
-set offset [uint8Encode str $offset 0x41]
-set offset [uint8Encode str $offset 0x42]
-set offset [uint8Encode str $offset 0x43]
-set offset [uint8VectorEncode str $offset "\x44\x45\x46\x47\x48\x49\x4A\x4B\x4C\x4E" 10]
-puts stderr "offset: $offset!$str!"
 set handle [create_structmsg 5]
 set_targets $handle 123 456 789
 addField $handle "@randomNum" uint32_t 4
@@ -328,3 +383,7 @@ addField $handle "pwd" uint8_t* 16
 set_fieldValue $handle "pwd" "/dir1/dir2/dir34"
 set_fillerAndCrc $handle
 dump_structmsg $handle
+encodeMsg $handle
+dump_structmsg $handle
+puts stderr "DICT:"
+pdict [set ::structmsg($handle)]
