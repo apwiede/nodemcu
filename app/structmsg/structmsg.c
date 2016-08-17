@@ -431,6 +431,7 @@ static int randomNumEncode(uint8_t *data, int offset, uint32_t *value) {
   
   val = (uint32_t)(rand() & RAND_MAX);
   *value = val;
+ets_printf("randomNum: 0x%08x\n", val);
   return uint32Encode(data, offset, val);
 }
 
@@ -494,6 +495,7 @@ static int crcEncode(uint8_t *data, int offset, uint8_t *startData, uint16_t lgt
   *crc = 0;
   idx = sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
   while (idx < lgth) {
+ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-sizeof(uint16_t) * 3, data[idx], *crc);
     *crc += data[idx++];
   }
   *crc = ~(*crc);
@@ -1046,7 +1048,7 @@ int encodeMsg(const uint8_t *handle) {
           }
         } else {
           if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
-            offset = crcEncode(structmsg->encoded, offset, structmsg->encoded, structmsg->msg.cmdLgth, &crc);
+            offset = crcEncode(structmsg->encoded, offset, structmsg->encoded, structmsg->totalLgth, &crc);
             checkEncodeOffset(offset);
             result = setFieldValue(handle, "@crc", crc, NULL);
             if (result != STRUCT_MSG_ERR_OK) {
@@ -1143,7 +1145,6 @@ int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth) {
   }
   *encoded = structmsg->encoded;
   *lgth = structmsg->totalLgth;
-    return STRUCT_MSG_ERR_OK;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -1291,7 +1292,7 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
     data += sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
     dlen = structmsg->msg.cmdLgth;
 //ets_printf("enc structmsg: %p %p %d\n", structmsg, data, dlen);
-//ets_printf("enc ch: 0x%02x 0x%02x 0x%02x 0x%02x\n", data[0], data[1], data[2], data[3]);
+ets_printf("enc ch: 0x%02x 0x%02x 0x%02x 0x%02x\n", data[10], data[11], data[12], data[13]);
     if (structmsg->encrypted != NULL) {
       os_free(structmsg->encrypted);
     }

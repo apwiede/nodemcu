@@ -202,6 +202,27 @@ static int structmsg_set_fieldValue( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_get_fieldValue ========================
+
+static int structmsg_get_fieldValue( lua_State* L ) {
+  const char *handle;
+  const uint8_t *fieldName;
+  int numericValue = 0;
+  uint8_t *stringValue = NULL;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  fieldName = luaL_checkstring( L, 2 );
+  result = getFieldValue(handle, fieldName, &numericValue, &stringValue);
+  checkErrOK(L, result, "getFieldValue", fieldName);
+  if (stringValue == NULL) {
+    lua_pushinteger(L, numericValue);
+  } else {
+    lua_pushstring(L, stringValue);
+  }
+  return 1;
+}
+
 // ============================= structmsg_encdec ========================
 
 static int structmsg_encdec (lua_State *L, bool enc) { 
@@ -319,6 +340,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "setTargets" ),      LFUNCVAL( structmsg_set_targets ) },
   { LSTRKEY( "setFillerAndCrc" ), LFUNCVAL( structmsg_set_fillerAndCrc ) },
   { LSTRKEY( "setFieldValue" ),   LFUNCVAL( structmsg_set_fieldValue ) },
+  { LSTRKEY( "getFieldValue" ),   LFUNCVAL( structmsg_get_fieldValue ) },
   { LNILKEY, LNILVAL }
 };
 

@@ -411,7 +411,8 @@ proc crcEncode {dat offset lgth val headerOffset} {
 set cnt 0
   foreach ch [split $str ""] {
     binary scan $ch c pch
-#puts stderr "encode crc: $cnt $ch![format 0x%02x [expr {$pch & 0xFF}]]![format 0x%04x $crc]!"
+    set pch [expr {$pch & 0xFF}]
+#puts stderr "encode crc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
     set crc [expr {$crc + [format "%d" $pch]}]
 incr cnt
   }
@@ -436,7 +437,8 @@ proc crcDecode {data offset lgth val headerOffset} {
 set cnt 0
   foreach ch [split $str ""] {
     binary scan $ch c pch
-#puts stderr "decode crc: $cnt $ch![format 0x%02x [expr {$pch & 0xFF}]]![format 0x%04x $crcVal]!"
+    set pch [expr {$pch & 0xFF}]
+#puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
     set crcVal [expr {$crcVal + [format "%d" $pch]}]
 incr cnt
     incr idx

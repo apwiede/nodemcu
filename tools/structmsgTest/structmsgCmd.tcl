@@ -11,7 +11,7 @@ set ::structmsg(handles) [list]
 
 proc dump_structmsg {handle} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   set src [expr {[dict get $myDict src] & 0xFFFF}]
@@ -188,7 +188,7 @@ puts stderr "\n!${ch}!${pch}!"
 
 proc set_targets {handle src dst cmdKey} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   dict set myDict src $src
@@ -201,7 +201,7 @@ proc set_targets {handle src dst cmdKey} {
 
 proc set_fieldValue {handle fieldName value} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   set numEntries [dict get $myDict msg numFieldInfos]
@@ -334,11 +334,59 @@ proc set_fieldValue {handle fieldName value} {
   error "field $fieldName not found"
 }
 
+# ===================== get_fieldValue =============================
+
+proc get_fieldValue {handle fieldName val} {
+  upvar $val value
+
+  if {![info exists ::structmsg($handle)]} {
+    error "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  switch $fieldName {
+    @src {
+      set value [ dict get $myDict src]
+      return
+    }
+    @dst {
+      set value [dict get $myDict dst]
+      return
+    }
+    @totalLgth {
+      set value [dict get $myDict totalLgth]
+      return
+    }
+    @cmdKey {
+      set value [dict get $myDict msg cmdKey]
+      return
+    }
+    @cmdLgth {
+      set value [dict get $myDict msg cmdLgth]
+      return
+    }
+  }
+  set numEntries [dict get $myDict msg numFieldInfos]
+  set idx 0
+  set fieldInfos [dict get $myDict msg fieldInfos]
+  while {$idx < $numEntries} {
+    set fieldInfo [lindex $fieldInfos $idx]
+    if {$fieldName eq [dict get $fieldInfo fieldStr]} {
+      if {[lsearch [dict get $fieldInfo flags] FIELD_IS_SET] < 0} {
+        error "field: $fieldName is not set!"
+      }
+      set value [dict get $fieldInfo value]
+      return
+    }
+    incr idx
+  }
+  error "field $fieldName not found"
+}
+
 # ===================== addField =============================
 
 proc addField {handle name fieldType fieldLgth} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   set fieldKey [dict get $myDict msg numFieldInfos]
@@ -397,7 +445,7 @@ proc addField {handle name fieldType fieldLgth} {
 
 proc set_fillerAndCrc {handle} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   set fillerLgth 0
@@ -414,7 +462,7 @@ proc set_fillerAndCrc {handle} {
 
 proc encode_msg {handle} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   dict set myDict encoded [list]
@@ -539,7 +587,7 @@ proc encode_msg {handle} {
 
 proc get_encoded {handle} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   if {[lsearch [dict get $myDict flags] ENCODED] < 0} {
@@ -553,7 +601,7 @@ proc get_encoded {handle} {
 
 proc get_encodedMsg {handle} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   if {[lsearch [dict get $myDict flags] ENCODED] < 0} {
@@ -567,7 +615,7 @@ proc get_encodedMsg {handle} {
 
 proc decode_msg {handle todecode} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   dict set myDict todecode $todecode
@@ -610,28 +658,36 @@ proc decode_msg {handle todecode} {
       }
       set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
       set fieldInfos [dict get $myDict msg fieldInfos]
-      set fieldInfo [lindex $fieldInfos $idx]
+      set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
+      dict set myDict msg fieldInfos $fieldInfos
+      set ::structmsg($handle) $myDict
     } else {
-     set fieldType [dict get $fieldInfo fieldType]
+      set fieldType [dict get $fieldInfo fieldType]
       set fieldName [dict get $fieldInfo fieldStr]
       switch $fieldType {
         int8_t {
           set offset [int8Decode $todecode $offset [dict get $fieldInfo value]]
+          dict set fieldInfo value $value
         }
         uint8_t {
           set offset [uint8Decode $todecode $offset [dict get $fieldInfo value]]
+          dict set fieldInfo value $value
         }
         int16_t {
           set offset [int16Decode $todecode $offset [dict get $fieldInfo value]]
+          dict set fieldInfo value $value
         }
         uint16_t {
           set offset [uint16Decode $todecode $offset [dict get $fieldInfo value]]
+          dict set fieldInfo value $value
         }
         int32_t {
           set offset [int32Decode $todecode $$offset [dict get $fieldInfo value]]
+          dict set fieldInfo value $value
         }
         uint32_t {
           set offset [uint32Decode $todecode $offset [dict get $fieldInfo value]]
+          dict set fieldInfo value $value
         }
         int8_t* {
           set fieldIdx 0
@@ -642,7 +698,7 @@ proc decode_msg {handle todecode} {
         }
         uint8_t* {
           set lgth [dict get $fieldInfo fieldLgth]
-          dict set $fieldInfo value [string range $todecode $offset [expr {$offset + $lgth - 1}]]
+          dict set fieldInfo value [string range $todecode $offset [expr {$offset + $lgth - 1}]]
           incr offset $lgth
         }
         int16_t* {
@@ -675,6 +731,9 @@ proc decode_msg {handle todecode} {
         }
       }
     }
+    if {[lsearch [dict get $fieldInfo flags] "FIELD_IS_SET"] < 0} {
+      dict lappend fieldInfo flags FIELD_IS_SET
+    }
     set myDict $::structmsg($handle)
     set fieldInfos [dict get $myDict msg fieldInfos]
     set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
@@ -694,7 +753,7 @@ proc decode_msg {handle todecode} {
 
 proc encrypt_payload {handle cryptKey} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   set headerLgth [dict get $myDict headerLgth]
@@ -719,7 +778,7 @@ proc encrypt_payload {handle cryptKey} {
 
 proc decrypt_payload {handle cryptKey crypted} {
   if {![info exists ::structmsg($handle)]} {
-    puts stderr "no such structmsg: $handle"
+    error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
   set headerLgth [dict get $myDict headerLgth]
