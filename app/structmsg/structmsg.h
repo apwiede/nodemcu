@@ -84,6 +84,7 @@ enum structmsg_error_code
   STRUCT_MSG_ERR_CRYPTO_INIT_FAILED = -15,
   STRUCT_MSG_ERR_CRYPTO_OP_FAILED = -16,
   STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM = -17,
+  STRUCT_MSG_ERR_NOT_ENCRYPTED = -18,
 };
 
 #define STRUCT_MSG_ENCODED      (1 << 0)
@@ -131,11 +132,17 @@ typedef struct msg
   uint8_t maxFieldInfos;
 } msg_t;
 
-typedef struct structmsg
+typedef struct hdr 
 {
   uint16_t src;
   uint16_t dst;
   uint16_t totalLgth;
+  uint8_t headerLgth;
+} hdr_t;
+
+typedef struct structmsg
+{
+  hdr_t hdr;
   msg_t msg;
   char handle[16];
   uint8_t flags;
@@ -155,6 +162,7 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data);
 int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
 int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
 int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
+int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
 int setFillerAndCrc(const uint8_t *handle);
 int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth);
 int dump_structmsg(const uint8_t *handle);

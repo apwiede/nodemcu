@@ -39,6 +39,7 @@
 
 #include "c_types.h"
 #include "c_string.h"
+#include "c_stdarg.h"
 #include "rom.h"
 #include "structmsg.h"
 #include "osapi.h"
@@ -46,6 +47,18 @@
 #include "mem.h"
 
 static lua_State *gL = NULL;
+static const uint8_t *errStr;
+
+// ============================= structmsg_error ========================
+
+static int structmsg_error( lua_State* L, const char *fmt, ... ) {
+  va_list argp;
+
+  va_start(argp, fmt);
+  lua_pushfstring(L, fmt, argp );
+  va_end(argp);
+  return 0;
+}
 
 // ============================= checkErrOK ========================
 
@@ -53,48 +66,52 @@ static int checkErrOK( lua_State* L, int result, const uint8_t *where, const uin
   if (result == STRUCT_MSG_ERR_OK) {
     return 1;
   }
+  errStr = "ERROR";
   switch (result) {
   case STRUCT_MSG_ERR_VALUE_NOT_SET:
-    luaL_error(L, "%s: value for field: %s not set", where, fieldName);
+    lua_pushfstring(L, "%s: %s: value for field: %s not set", errStr, where, fieldName);
     break;
   case STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE:
-    luaL_error(L, "%s: field: '%s' value out of range", where, fieldName);
+    lua_pushfstring(L, "%s: %s: field: '%s' value out of range", errStr, where, fieldName);
     break;
   case STRUCT_MSG_ERR_BAD_VALUE:
-    luaL_error(L, "%s: field: '%s' bad value", where, fieldName);
+    lua_pushfstring(L, "%s: %s: field: '%s' bad value", errStr, where, fieldName);
     break;
   case STRUCT_MSG_ERR_BAD_FIELD_TYPE:
-    luaL_error(L, "%s: field: '%s' bad field type", where, fieldName);
+    lua_pushfstring(L, "%s: %s: field: '%s' bad field type", errStr, where, fieldName);
     break;
   case STRUCT_MSG_ERR_FIELD_NOT_FOUND:
-    luaL_error(L, "%s: field: '%s' not found", where, fieldName);
+    lua_pushfstring(L, "%s: %s: field: '%s' not found", errStr, where, fieldName);
     break;
   case STRUCT_MSG_ERR_BAD_HANDLE:
-    luaL_error(L, "bad handle");
+    lua_pushfstring(L, "%s: bad handle", errStr);
     break;
   case STRUCT_MSG_ERR_OUT_OF_MEMORY:
     luaL_error(L, "out of memory");
     break;
   case STRUCT_MSG_ERR_HANDLE_NOT_FOUND:
-    luaL_error(L, "handle not found");
+    lua_pushfstring(L, "%s: handle not found", errStr);
     break;
   case STRUCT_MSG_ERR_NOT_ENCODED:
-    luaL_error(L, "not encoded");
+    lua_pushfstring(L, "%s: not encoded", errStr);
     break;
   case STRUCT_MSG_ERR_DECODE_ERROR:
-    luaL_error(L, "decode error");
+    lua_pushfstring(L, "%s: decode error", errStr);
     break;
   case STRUCT_MSG_ERR_BAD_CRC_VALUE:
-    luaL_error(L, "bad crc val");
+    lua_pushfstring(L, "%s: bad crc val", errStr);
     break;
   case STRUCT_MSG_ERR_CRYPTO_INIT_FAILED:
-    luaL_error(L, "crypto init failed");
+    lua_pushfstring(L, "%s: crypto init failed", errStr);
     break;
   case STRUCT_MSG_ERR_CRYPTO_OP_FAILED:
-    luaL_error(L, "crypto op failed");
+    lua_pushfstring(L, "%s: crypto op failed", errStr);
     break;
   case STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM:
-    luaL_error(L, "crypto bad mechanism");
+    lua_pushfstring(L, "%s: crypto bad mechanism", errStr);
+    break;
+  case STRUCT_MSG_ERR_NOT_ENCRYPTED:
+    lua_pushfstring(L, "%s: not encrypted", errStr);
     break;
   }
   return 0;
@@ -199,6 +216,22 @@ static int structmsg_set_fieldValue( lua_State* L ) {
   }
   result = setFieldValue(handle, fieldName, numericValue, stringValue);
   checkErrOK(L, result, "setFieldValue", fieldName);
+  return 1;
+}
+
+// ============================= structmsg_set_crypted ========================
+
+static int structmsg_set_crypted( lua_State* L ) {
+  const char *handle;
+  const uint8_t *fieldName;
+  int cryptedLen;
+  const uint8_t *crypted;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  crypted = luaL_checklstring( L, 2, &cryptedLen );
+  result = setCrypted(handle, crypted, cryptedLen);
+  checkErrOK(L, result, "setcrypted", "");
   return 1;
 }
 
@@ -341,6 +374,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "setFillerAndCrc" ), LFUNCVAL( structmsg_set_fillerAndCrc ) },
   { LSTRKEY( "setFieldValue" ),   LFUNCVAL( structmsg_set_fieldValue ) },
   { LSTRKEY( "getFieldValue" ),   LFUNCVAL( structmsg_get_fieldValue ) },
+  { LSTRKEY( "setcrypted" ),      LFUNCVAL( structmsg_set_crypted ) },
   { LNILKEY, LNILVAL }
 };
 

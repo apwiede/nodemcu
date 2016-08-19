@@ -40,6 +40,8 @@
 
 #define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
 #define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
+#define checkAllocOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_OUT_OF_MEMORY
+#define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
 
 str2key_t structmsgFieldTypes[] = {
   {"uint8_t", STRUCT_MSG_FIELD_UINT8_T},
@@ -61,6 +63,19 @@ typedef struct lstructmsg_userdata
 
   // create a object
 static lstructmsg_userdata structmsg_userdata = { NULL, 0};
+
+// ============================= dumpBinary ========================
+
+static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
+  int idx;
+
+  ets_printf("%s\n", where);
+  idx = 0;
+  while (idx < lgth) {
+     ets_printf("idx: %d ch: 0x%02x\n", idx, data[idx] & 0xFF);
+    idx++;
+  }
+}
 
 // ============================= addHandle ========================
 
@@ -85,11 +100,8 @@ static int addHandle(uint8_t *handle) {
       idx++;
     }
     structmsg_userdata.handles = os_realloc(structmsg_userdata.handles, sizeof(uint8_t *)*(structmsg_userdata.numHandles+1));
-    if (structmsg_userdata.handles == NULL) {
-      return STRUCT_MSG_ERR_OUT_OF_MEMORY;
-    } else {
-      structmsg_userdata.handles[structmsg_userdata.numHandles++] = handle;
-    }
+    checkAllocOK(structmsg_userdata.handles);
+    structmsg_userdata.handles[structmsg_userdata.numHandles++] = handle;
   }
   return STRUCT_MSG_ERR_OK;
 }
@@ -488,14 +500,14 @@ static int fillerDecode(const uint8_t *data, int offset, uint16_t lgth, uint8_t 
 
 // ============================= crcEncode ========================
 
-static int crcEncode(uint8_t *data, int offset, uint8_t *startData, uint16_t lgth, uint16_t *crc) {
+static int crcEncode(uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth) {
   int idx;
 
   lgth -= sizeof(uint16_t);   // uint16_t crc
   *crc = 0;
-  idx = sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
+  idx = headerLgth;
   while (idx < lgth) {
-ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-sizeof(uint16_t) * 3, data[idx], *crc);
+//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-headerLgth, data[idx], *crc);
     *crc += data[idx++];
   }
   *crc = ~(*crc);
@@ -505,18 +517,20 @@ ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-sizeof(uint16_t) * 3, dat
 
 // ============================= crcDecode ========================
 
-static int crcDecode(const uint8_t *data, int offset, uint8_t *startData, uint16_t lgth, uint16_t *crc) {
+static int crcDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth) {
   uint16_t crcVal;
   int idx;
 
   lgth -= sizeof(uint16_t);   // uint16_t crc
   crcVal = 0;
-  idx = sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
-  while (idx < lgth) {
+  idx = headerLgth;
+  while (idx < lgth + headerLgth) {
+//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-headerLgth, data[idx], crcVal);
     crcVal += data[idx++];
   }
   crcVal = ~crcVal;
   offset = uint16Decode(data, offset, crc);
+ets_printf("crcVal: 0x%04x crc: 0x%04x\n", crcVal, *crc);
   if (crcVal != *crc) {
     return -1;
   }
@@ -564,9 +578,7 @@ int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, 
   structmsg_t *structmsg;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   fieldKey = structmsg->msg.numFieldInfos;
   fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
   fieldInfo->fieldStr = os_malloc(os_strlen(fieldStr) + 1);
@@ -579,49 +591,49 @@ int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, 
   switch (fieldType) {
     case STRUCT_MSG_FIELD_UINT8_T:
     case STRUCT_MSG_FIELD_INT8_T:
-      structmsg->totalLgth += 1;
+      structmsg->hdr.totalLgth += 1;
       structmsg->msg.cmdLgth += 1;
       fieldLgth = 1;
       break;
     case STRUCT_MSG_FIELD_UINT16_T:
     case STRUCT_MSG_FIELD_INT16_T:
-      structmsg->totalLgth += 2;
+      structmsg->hdr.totalLgth += 2;
       structmsg->msg.cmdLgth += 2;
       fieldLgth = 2;
       break;
     case STRUCT_MSG_FIELD_UINT32_T:
     case STRUCT_MSG_FIELD_INT32_T:
-      structmsg->totalLgth += 4;
+      structmsg->hdr.totalLgth += 4;
       structmsg->msg.cmdLgth += 4;
       fieldLgth = 4;
       break;
     case STRUCT_MSG_FIELD_UINT8_VECTOR:
-      structmsg->totalLgth += fieldLgth;
+      structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
       fieldInfo->value.ubyteVector = (uint8_t *)os_malloc(fieldLgth);
       break;
     case STRUCT_MSG_FIELD_INT8_VECTOR:
-      structmsg->totalLgth += fieldLgth;
+      structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
       fieldInfo->value.byteVector = (int8_t *)os_malloc(fieldLgth);
       break;
     case STRUCT_MSG_FIELD_UINT16_VECTOR:
-      structmsg->totalLgth += fieldLgth;
+      structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
       fieldInfo->value.ushortVector = (uint16_t *)os_malloc(fieldLgth*sizeof(uint16_t));
       break;
     case STRUCT_MSG_FIELD_INT16_VECTOR:
-      structmsg->totalLgth += fieldLgth;
+      structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
       fieldInfo->value.shortVector = (int16_t *)os_malloc(fieldLgth*sizeof(int16_t));
       break;
     case STRUCT_MSG_FIELD_UINT32_VECTOR:
-      structmsg->totalLgth += fieldLgth;
+      structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
       fieldInfo->value.uint32Vector = (uint32_t *)os_malloc(fieldLgth*sizeof(uint32_t));
       break;
     case STRUCT_MSG_FIELD_INT32_VECTOR:
-      structmsg->totalLgth += fieldLgth;
+      structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
       fieldInfo->value.int32Vector = (int32_t *)os_malloc(fieldLgth*sizeof(int32_t));
       break;
@@ -646,10 +658,8 @@ int dump_structmsg(const uint8_t *handle) {
   structmsg_t *structmsg;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
-  ets_printf("handle: %s src: %d dst: %d totalLgth: %d\r\n", structmsg->handle, (int)structmsg->src, (int)structmsg->dst, (int)structmsg->totalLgth);
+  checkHandleOK(structmsg);
+  ets_printf("handle: %s src: %d dst: %d totalLgth: %d\r\n", structmsg->handle, (int)structmsg->hdr.src, (int)structmsg->hdr.dst, (int)structmsg->hdr.totalLgth);
   ets_printf("  cmdKey: %d cmdLgth: %d\r\n", (int)structmsg->msg.cmdKey, (int)structmsg->msg.cmdLgth);
   numEntries = structmsg->msg.numFieldInfos;
   ets_printf("  numFieldInfos: %d max: %d\r\n", numEntries, (int)structmsg->msg.maxFieldInfos);
@@ -751,9 +761,7 @@ int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericV
   int numEntries;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   *numericValue = 0;
   *stringValue = NULL;
   idx = 0;
@@ -855,9 +863,7 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
   int numEntries;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   idx = 0;
   numEntries = structmsg->msg.numFieldInfos;
   while (idx < numEntries) {
@@ -988,6 +994,21 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
   return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
 
+// ============================= setCrypted ========================
+
+int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth) {
+  structmsg_t *structmsg;
+  fieldInfo_t *fieldInfo;
+
+  structmsg = get_structmsg_ptr(handle);
+  checkHandleOK(structmsg);
+  structmsg->encrypted = (uint8_t *)os_malloc(cryptedLgth);
+  checkAllocOK(structmsg->encrypted);
+  c_memcpy(structmsg->encrypted, crypted, cryptedLgth);
+  structmsg->encryptedLgth = cryptedLgth;
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ============================= encodeMsg ========================
 
 int encodeMsg(const uint8_t *handle) {
@@ -1007,20 +1028,18 @@ int encodeMsg(const uint8_t *handle) {
   fieldInfo_t *fieldInfo;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   if (structmsg->encoded != NULL) {
     os_free(structmsg->encoded);
   }
-  structmsg->encoded = (uint8_t *)os_malloc(structmsg->totalLgth);
+  structmsg->encoded = (uint8_t *)os_malloc(structmsg->hdr.totalLgth);
   msgPtr = structmsg->encoded;
   offset = 0;
-  offset = uint16Encode(msgPtr,offset,structmsg->src);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.src);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->dst);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.dst);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->totalLgth);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.totalLgth);
   checkEncodeOffset(offset);
   offset = uint16Encode(msgPtr,offset,structmsg->msg.cmdKey);
   checkEncodeOffset(offset);
@@ -1048,7 +1067,7 @@ int encodeMsg(const uint8_t *handle) {
           }
         } else {
           if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
-            offset = crcEncode(structmsg->encoded, offset, structmsg->encoded, structmsg->totalLgth, &crc);
+            offset = crcEncode(structmsg->encoded, offset, structmsg->hdr.totalLgth, &crc, structmsg->hdr.headerLgth);
             checkEncodeOffset(offset);
             result = setFieldValue(handle, "@crc", crc, NULL);
             if (result != STRUCT_MSG_ERR_OK) {
@@ -1137,14 +1156,12 @@ int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth) {
   structmsg_t *structmsg;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   if (structmsg->encoded == NULL) {
     return STRUCT_MSG_ERR_NOT_ENCODED;
   }
   *encoded = structmsg->encoded;
-  *lgth = structmsg->totalLgth;
+  *lgth = structmsg->hdr.totalLgth;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -1162,20 +1179,19 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
   fieldInfo_t *fieldInfo;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   if (structmsg->todecode != NULL) {
     os_free(structmsg->todecode);
   }
-  structmsg->todecode = (uint8_t *)os_malloc(structmsg->totalLgth);
-  msgPtr = data; // data starts at structmsg->msg.cmdKey!!
+// FIXME need to fill todecode too!!
+  structmsg->todecode = (uint8_t *)os_malloc(structmsg->hdr.totalLgth);
+  msgPtr = data;
   offset = 0;
-  offset = uint16Decode(msgPtr,offset,&structmsg->src);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.src);
   checkDecodeOffset(offset);
-  offset = uint16Decode(msgPtr,offset,&structmsg->dst);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.dst);
   checkDecodeOffset(offset);
-  offset = uint16Decode(msgPtr,offset,&structmsg->totalLgth);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.totalLgth);
   checkDecodeOffset(offset);
   offset = uint16Decode(msgPtr,offset,&structmsg->msg.cmdKey);
   checkDecodeOffset(offset);
@@ -1195,10 +1211,10 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
           checkDecodeOffset(offset);
         } else {
           if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
-            offset = crcDecode(msgPtr, offset, structmsg->todecode, structmsg->msg.cmdLgth, &fieldInfo->value.ushortVal);
-            if (offset < 0) {
+            offset = crcDecode(msgPtr, offset, structmsg->msg.cmdLgth, &fieldInfo->value.ushortVal, structmsg->hdr.headerLgth);
+//            if (offset < 0) {
               return STRUCT_MSG_ERR_BAD_CRC_VALUE;
-            }
+//            }
           } else {
             return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
           }
@@ -1274,63 +1290,64 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
   size_t bs;
   uint8_t *crypted;
   int offset;
+  const uint8_t *what;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
-  if (structmsg->encoded == NULL) {
-    return STRUCT_MSG_ERR_NOT_ENCODED;
-  }
+  checkHandleOK(structmsg);
   mech = crypto_encryption_mech ("AES-CBC");
   if (mech == NULL) {
     return STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM;
   }
   bs = mech->block_size;
+  what = enc ? "encrypt": "decrypt";
+//ets_printf("encdec bs: %d what: %s\n", bs, what);
   if (enc) {
-    data = structmsg->encoded;
-    data += sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
+    if (structmsg->encoded == NULL) {
+      return STRUCT_MSG_ERR_NOT_ENCODED;
+    }
+    data = structmsg->encoded + structmsg->hdr.headerLgth;
     dlen = structmsg->msg.cmdLgth;
-//ets_printf("enc structmsg: %p %p %d\n", structmsg, data, dlen);
-ets_printf("enc ch: 0x%02x 0x%02x 0x%02x 0x%02x\n", data[10], data[11], data[12], data[13]);
     if (structmsg->encrypted != NULL) {
       os_free(structmsg->encrypted);
     }
-    *lgth = ((dlen + bs -1) / bs) * bs;
+    *lgth = ((dlen + bs - 1) / bs) * bs;
     structmsg->encryptedLgth = *lgth;
-    *lgth += sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth;
+    *lgth += structmsg->hdr.headerLgth;
     structmsg->encrypted = (char *)os_zalloc (*lgth);
     if (!structmsg->encrypted) {
       return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
     } 
     *buf = structmsg->encrypted;
+    crypted = structmsg->encrypted;
+    offset = 0;
+    offset = uint16Encode(crypted, offset, structmsg->hdr.src);
+    checkEncodeOffset(offset);
+    offset = uint16Encode(crypted, offset, structmsg->hdr.dst);
+    checkEncodeOffset(offset);
+    offset = uint16Encode(crypted, offset, structmsg->hdr.totalLgth);
+    checkEncodeOffset(offset);
   } else {
-    data = structmsg->encrypted;
-    data += sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
-    dlen = structmsg->encryptedLgth;
+    if (structmsg->encrypted == NULL) {
+      return STRUCT_MSG_ERR_NOT_ENCRYPTED;
+    }
     if (structmsg->decrypted != NULL) {
       os_free(structmsg->decrypted);
     }
+    dlen = structmsg->msg.cmdLgth;
     *lgth = ((dlen + bs -1) / bs) * bs;
+    *lgth += structmsg->hdr.headerLgth;
     structmsg->decryptedLgth = *lgth;
-    *lgth += sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth;
     structmsg->decrypted = (char *)os_zalloc (*lgth);
     if (!structmsg->decrypted) {
       return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
     } 
     *buf = structmsg->decrypted;
+    crypted = structmsg->decrypted;
+    data = structmsg->encrypted;
+    c_memcpy(crypted, data, structmsg->hdr.headerLgth);
+    data += structmsg->hdr.headerLgth;
   }
-  offset = 0;
-  crypted = *buf;
-  offset = uint16Encode(crypted, offset, structmsg->src);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(crypted, offset, structmsg->dst);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(crypted, offset, structmsg->totalLgth);
-  checkEncodeOffset(offset);
-  crypted = *buf+sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
-//ets_printf("buf0: 0x%02x crpto0: 0x%02x\n", (*buf)[0], crypted[0]);
-//ets_printf("key: %s klen: %d iv: %s ivlen: %d data: %p dlen: %d\n", key, klen, iv, ivlen, data, dlen);
+  crypted += structmsg->hdr.headerLgth;
   crypto_op_t op =
   { 
     key, klen,
@@ -1348,9 +1365,6 @@ ets_printf("enc ch: 0x%02x 0x%02x 0x%02x 0x%02x\n", data[10], data[11], data[12]
     }
     return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
   } else { 
-if (!enc) {
-//ets_printf("dec ch: 0x%02x 0x%02x 0x%02x 0x%02x\n", crypted[0], crypted[1], crypted[2], crypted[3]);
-}
     return STRUCT_MSG_ERR_OK;
   }
 }
@@ -1364,9 +1378,7 @@ int setFillerAndCrc(const uint8_t *handle) {
   int result;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   myLgth = structmsg->msg.cmdLgth + 2;
   while ((myLgth % 16) != 0) {
     myLgth++;
@@ -1389,11 +1401,9 @@ int set_targets(const uint8_t *handle, uint16_t src, uint16_t dst, uint16_t cmdK
   structmsg_t *structmsg;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
-  structmsg->src = src;
-  structmsg->dst = dst;
+  checkHandleOK(structmsg);
+  structmsg->hdr.src = src;
+  structmsg->hdr.dst = dst;
   structmsg->msg.cmdKey = cmdKey;
   return STRUCT_MSG_ERR_OK;
 }
@@ -1405,11 +1415,10 @@ int new_structmsg(uint8_t numFieldInfos, uint8_t **handle) {
   int result;
 
   structmsg_t *structmsg = (void *)os_malloc (sizeof(structmsg_t));
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_OUT_OF_MEMORY;
-  }
+  checkAllocOK(structmsg);
   structmsg->msg.cmdLgth = 4; // uint16_t cmdKey + unit16_t cmdLgth
-  structmsg->totalLgth = 10; // cmdLgth + uint16_t src + uint16_t dst + uint16_t totalLgth
+  structmsg->hdr.headerLgth = sizeof(uint16_t) * 3; // uint16_t src + uint16_t dst + uint16_t totalLgth
+  structmsg->hdr.totalLgth = structmsg->hdr.headerLgth + structmsg->msg.cmdLgth;
   structmsg->msg.maxFieldInfos = numFieldInfos;
   structmsg->msg.numFieldInfos = 0;
   structmsg->msg.fieldInfos = newFieldInfos(numFieldInfos);
@@ -1436,9 +1445,7 @@ int delete_structmsg(const uint8_t *handle) {
   int idx;
 
   structmsg = get_structmsg_ptr(handle);
-  if (structmsg == NULL) {
-    return STRUCT_MSG_ERR_BAD_HANDLE;
-  }
+  checkHandleOK(structmsg);
   idx = 0;
   while (idx < structmsg->msg.numFieldInfos) {
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[idx];
