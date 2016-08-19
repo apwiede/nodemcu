@@ -76,6 +76,7 @@ static lua_State *gL = NULL;
 static int tcpserver_cb_connect_ref = LUA_NOREF;  // for tcp server connected callback
 static uint16_t tcp_server_timeover = 30;
 static const uint8_t *errStr = "ERROR";
+static uint8_t err_opcode[5] = {0};
 
 static struct espconn *pTcpServer = NULL;
 static struct espconn *pUdpServer = NULL;
@@ -191,16 +192,15 @@ static int checkErrOK( lua_State* L, int result , const char *where ) {
 // ============================ websocket_parse =========================================
 
 int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len, lwebsocket_userdata *wud) {
-//ets_printf("websocket_parse: %s\n", data);
   uint8_t byte = data[0];
-  int FIN = byte & 0x80;
-  int opcode = byte & 0x0F;
+  uint8_t FIN = byte & 0x80;
+  uint8_t opcode = byte & 0x0F;
 
 //ets_printf("frame opcode: %02X FIN: %02X len: %d\r\n", opcode, FIN, dataLenb);
 
   if ((opcode > 0x03 && opcode < 0x08) || opcode > 0x0B) {
-    ets_printf("Invalid frame type %02X \r\n", opcode);
-    return WEBSOCKET_ERR_INVALID_FRAME_OPCODE;
+    ets_sprintf(err_opcode, "%d", opcode);
+    checkErrOK(gL, WEBSOCKET_ERR_INVALID_FRAME_OPCODE, err_opcode);
   }
 
   //   opcodes: {1 text 2 binary 8 close 9 ping 10 pong}
@@ -262,7 +262,7 @@ int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resDa
     *resData = DATA;
     *len = SIZE;
     DATA[SIZE] = 0;
-    ets_printf("SIZE: %d  len: %d, DATA: =%s=  \r\n", SIZE, dataLenb, DATA);
+//    ets_printf("SIZE: %d  len: %d, \r\n", SIZE, dataLenb);
 
     if (SIZE > 0) {
       if(wud->cb_receive_ref != LUA_NOREF && wud->self_ref != LUA_NOREF) {
@@ -319,8 +319,6 @@ static uint8 *toBase64 ( const uint8 *msg, size_t *len){
 // ============================ websocket_recv =========================================
 
 int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url,lwebsocket_userdata *wud, char **data, int *lgth) {
-ets_printf("websocket_recv: %s\n", string);
-//ets_printf("websocket_recv: wud: %p wud->url: %p %s wud->isWebsocket: %d\n", wud, wud->url, wud->url, wud->isWebsocket);
   if (strstr(string, wud->url) != 0) {
     char * key;
     if (strstr(string, header_key) != 0) {
@@ -355,27 +353,18 @@ ets_printf("websocket_recv: %s\n", string);
     struct espconn *pesp_conn = NULL;
     pesp_conn = wud->pesp_conn;
 
-    // FIXME!! reboot if setting here for socket!!
+    // FIXME!! reboot called if setting here for socket!!
     if (wud->isWebsocket != 1) {
       wud->isWebsocket = 1;
     }
-//  char temp[25] = {0};
-//  os_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
-//  ets_printf("remote ");
-//  ets_printf(temp);
-//  ets_printf(":");
-//  ets_printf("%d",pesp_conn->proto.tcp->remote_port);
-//  ets_printf(" sending data.\n");
 
     int result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
-ets_printf("espconn_sent done result: %d\n", result);
     os_free(key);
     checkErrOK(gL, result, "espconn_sent");
   } else if (wud->isWebsocket == 1) {
-    ets_printf("WEBSOCKET MESSAGE \r\n");
+//    ets_printf("WEBSOCKET MESSAGE \r\n");
     websocket_parse(string, os_strlen(string), data, lgth, wud);
   }
-ets_printf("websocket_recv done\n");
   return WEBSOCKET_ERR_OK;
 }
 
@@ -471,7 +460,6 @@ ets_printf("websocket_socket_disconnected is called.\n");
 
 static void websocket_server_reconnected(void *arg, sint8_t err)
 {
-ets_printf("websocket_server_reconnected is called.\n");
   NODE_DBG("websocket_server_reconnected is called.\n");
   websocket_server_disconnected(arg);
 }
@@ -480,7 +468,6 @@ ets_printf("websocket_server_reconnected is called.\n");
 
 static void websocket_socket_reconnected(void *arg, sint8_t err)
 {
-ets_printf("websocket_socket_reconnected is called.\n");
   NODE_DBG("websocket_socket_reconnected is called.\n");
   websocket_socket_disconnected(arg);
 }
@@ -489,7 +476,6 @@ ets_printf("websocket_socket_reconnected is called.\n");
 
 static void websocket_socket_received(void *arg, char *pdata, unsigned short len)
 {
-ets_printf("websocket_socket_received is called.\n");
   NODE_DBG("websocket_socket_received is called.\n");
   struct espconn *pesp_conn = arg;
   if(pesp_conn == NULL) {
@@ -527,7 +513,7 @@ ets_printf("websocket_socket_received is called.\n");
 // End Websocket
 // Websocket
   } else {
-ets_printf("NORMAL MESSAGE \r\n");
+//ets_printf("NORMAL MESSAGE \r\n");
 // End Websocket
     if ((strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
       wud->isWebsocket = 1;
@@ -539,14 +525,12 @@ ets_printf("NORMAL MESSAGE \r\n");
 // Websocket
   }
 // End Websocket
-ets_printf("websocket_socket_received done\n");
 }
 
 // ============================ websocket_socket_sent =======================
 
 static void websocket_socket_sent(void *arg)
 {
-ets_printf("websocket_socket_sent is called.\n");
   // NODE_DBG("websocket_socket_sent is called.\n");
   struct espconn *pesp_conn = arg;
   if(pesp_conn == NULL) {
@@ -571,7 +555,6 @@ ets_printf("websocket_socket_sent is called.\n");
 
 static void socket_connect(struct espconn *pesp_conn)
 {
-ets_printf("socket_connect\n");
   if(pesp_conn == NULL) {
     checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "socket_connect");
     return;
@@ -592,7 +575,6 @@ ets_printf("socket_connect\n");
   {
     espconn_connect(pesp_conn);
   }
-ets_printf("socket_connect is called.\n");
   NODE_DBG("socket_connect is called.\n");
 }
 
@@ -602,7 +584,6 @@ static void socket_dns_found(const char *name, ip_addr_t *ipaddr, void *arg);
 static int dns_reconn_count = 0;
 static void socket_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
 {
-//ets_printf("websocket_dns_found is called.\n");
   NODE_DBG("websocket_dns_found is called.\n");
   struct espconn *pesp_conn = arg;
   if(pesp_conn == NULL){
@@ -662,7 +643,6 @@ end:
 
 static void websocket_server_connected(void *arg) // for tcp only
 {
-ets_printf("websocket_server_connected is called.\n");
   NODE_DBG("websocket_server_connected is called.\n");
   struct espconn *pesp_conn = arg;
   lwebsocket_userdata *wud = (lwebsocket_userdata *)pesp_conn->reverse;
@@ -733,8 +713,8 @@ ets_printf("websocket_server_connected is called.\n");
 #ifdef CLIENT_SSL_ENABLE
   skt->secure = 0;    // as a server SSL is not supported.
 #endif
-skt->isWebsocket = wud->isWebsocket;
-skt->url = wud->url;
+  skt->isWebsocket = wud->isWebsocket;
+  skt->url = wud->url;
 
   skt->pesp_conn = pesp_conn;   // point to the espconn made by low level sdk
   pesp_conn->reverse = skt;   // let espcon carray the info of this userdata(net.socket)
@@ -752,7 +732,6 @@ skt->url = wud->url;
 
 static void websocket_socket_connected(void *arg)
 {
-ets_printf("websocket_socket_connected is called.\n");
   NODE_DBG("websocket_socket_connected is called.\n");
   struct espconn *pesp_conn = arg;
   if(pesp_conn == NULL) {
@@ -783,7 +762,6 @@ ets_printf("websocket_socket_connected is called.\n");
 // Lua: s = websocket.create(secure/timeout,url,function(conn))
 static int websocket_create( lua_State* L, const char *mt )
 {
-ets_printf("websocket_create is called.\n");
   NODE_DBG("websocket_create is called.\n");
   struct espconn *pesp_conn = NULL;
   lwebsocket_userdata *wud, *temp = NULL;
@@ -800,7 +778,6 @@ ets_printf("websocket_create is called.\n");
     isserver = false;
   else
   {
-ets_printf("wrong metatable for websocket_create.\n");
     NODE_DBG("wrong metatable for websocket_create.\n");
     checkErrOK(L, WEBSOCKET_ERR_WRONG_METATABLE, "websocket_create");
     return 0;
@@ -877,7 +854,6 @@ ets_printf("wrong metatable for websocket_create.\n");
       pesp_conn = wud->pesp_conn = NULL;
       checkErrOK(L, WEBSOCKET_ERR_OUT_OF_MEMORY, "");
     }
-//ets_printf("TCP server/socket is set.\n");
     NODE_DBG("TCP server/socket is set.\n");
   }
   pesp_conn->type = type;
@@ -912,7 +888,6 @@ ets_printf("wrong metatable for websocket_create.\n");
     lua_call(L, 1, 0);
   }
 
-//ets_printf("websocket_create end.\n");
   return 1; 
 }
 
@@ -923,7 +898,6 @@ ets_printf("wrong metatable for websocket_create.\n");
 static int websocket_start( lua_State* L, const char *mt )
 {
 
-//ets_printf("websocket_start is called.\n");
   NODE_DBG("websocket_start is called.\n");
   struct espconn *pesp_conn = NULL;
   lwebsocket_userdata *wud;
@@ -940,7 +914,6 @@ static int websocket_start( lua_State* L, const char *mt )
     isserver = false;
   else
   {
-ets_printf("wrong metatable for websocket_start.\n");
     NODE_DBG("wrong metatable for websocket_start.\n");
     checkErrOK(L, WEBSOCKET_ERR_WRONG_METATABLE, "websocket_start");
     return 0;
@@ -950,14 +923,12 @@ ets_printf("wrong metatable for websocket_start.\n");
   stack++;
 
   if(wud==NULL){
-ets_printf("userdata is nil.\n");
     NODE_DBG("userdata is nil.\n");
     checkErrOK(L, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_start");
     return 0;
   }
 
   if(wud->pesp_conn == NULL){
-ets_printf("wud->pesp_conn is NULL.\n");
     NODE_DBG("wud->pesp_conn is NULL.\n");
     checkErrOK(L, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_start");
     return 0;
@@ -971,7 +942,6 @@ ets_printf("wud->pesp_conn is NULL.\n");
     pesp_conn->proto.tcp->remote_port = port;
     pesp_conn->proto.tcp->local_port = espconn_port();
   }
-//ets_printf("TCP port is set to: %d.\n", port);
   NODE_DBG("TCP port is set to: %d.\n", port);
 
   if( lua_isstring(L,stack) )   // deal with the domain string
@@ -1062,7 +1032,6 @@ ets_printf("wud->pesp_conn is NULL.\n");
       socket_connect(pesp_conn);
     }
   }
-//ets_printf("websocket_start return 0\n");
   return 0;  
 }
 
@@ -1182,7 +1151,6 @@ ets_printf("userdata is nil.\n");
 // socket: unref everything
 static int websocket_delete( lua_State* L, const char *mt )
 {
-ets_printf("websocket_delete is called\r\n");
   NODE_DBG("websocket_delete is called.\n");
   bool isserver = false;
   if (mt!=NULL && c_strcmp(mt, "websocket.server")==0)
@@ -1201,7 +1169,6 @@ ets_printf("websocket_delete is called\r\n");
   lwebsocket_userdata *wud = (lwebsocket_userdata *)luaL_checkudata(L, 1, mt);
   luaL_argcheck(L, wud, 1, "Server/Socket expected");
   if(wud==NULL){
-ets_printf("userdata is nil.\n");
     NODE_DBG("userdata is nil.\n");
     checkErrOK(L, WEBSOCKET_ERR_USERDATA_IS_NIL, "websocket_delete");
     return 0;
@@ -1257,7 +1224,6 @@ ets_printf("userdata is nil.\n");
 // Lua: socket/udpserver:on( "method", function(s) )
 static int websocket_on( lua_State* L, const char *mt )
 {
-ets_printf("websocket_on is called.%s\n", mt);
   NODE_DBG("websocket_on is called.\n");
   bool isserver = false;
   lwebsocket_userdata *wud;
@@ -1316,7 +1282,6 @@ ets_printf("websocket_on is called.%s\n", mt);
     return luaL_error( L, "method not supported" );
   }
 
-ets_printf("websocket_on done\n");
   return 0;  
 }
 
@@ -1324,7 +1289,6 @@ ets_printf("websocket_on done\n");
 
 static int websocket_writeData( const char *payload, int size, lwebsocket_userdata *wud, int opcode )
 {
-ets_printf("websocket_writeData is called\r\n");
   uint8_t byte;
   int fsize = size + 2;
   char * buff = os_malloc(fsize);
@@ -1342,14 +1306,12 @@ ets_printf("websocket_writeData is called\r\n");
     byte = size;
     buff[1] = byte;
   } else {
-ets_printf("Too much data \r\n");
     return WEBSOCKET_ERR_TOO_MUCH_DATA;
   }
 
   os_memcpy(&buff[2], payload, byte);
   espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
   os_free(buff);
-ets_printf("websocket_writeData is done\r\n");
   return WEBSOCKET_ERR_OK;
 }
 
@@ -1358,7 +1320,6 @@ ets_printf("websocket_writeData is done\r\n");
 // Lua: server/socket:send( string, function(sent) )
 static int websocket_send( lua_State* L, const char *mt )
 {
-ets_printf("websocket_send is called\r\n");
   // NODE_DBG("websocket_send is called.\n");
   bool isserver = false;
   struct espconn *pesp_conn = NULL;
