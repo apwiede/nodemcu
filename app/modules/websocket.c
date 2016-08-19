@@ -75,12 +75,12 @@ static int socket[MAX_SOCKET];
 static lua_State *gL = NULL;
 static int tcpserver_cb_connect_ref = LUA_NOREF;  // for tcp server connected callback
 static uint16_t tcp_server_timeover = 30;
+static const uint8_t *errStr = "ERROR";
 
 static struct espconn *pTcpServer = NULL;
 static struct espconn *pUdpServer = NULL;
 
 struct lwebsocket_userdata;
-typedef void  (*websocket_gotdata)(char *data, int size, struct lwebsocket_userdata *wud, int opcode);
 
 typedef struct lwebsocket_userdata
 {
@@ -96,7 +96,6 @@ typedef struct lwebsocket_userdata
   uint8_t secure;
 #endif
   uint8_t isWebsocket;
-  websocket_gotdata data_callback;
   char *url;
 }lwebsocket_userdata;
 
@@ -165,50 +164,39 @@ static int checkErrOK( lua_State* L, int result , const char *where ) {
     luaL_error(L, "out of memory (%s)", where);
     break;
   case WEBSOCKET_ERR_TOO_MUCH_DATA:
-    luaL_error(L, "too much data (%s)", where);
+    lua_pushfstring(L, "%s: too much data (%s)", errStr, where);
     break;
   case WEBSOCKET_ERR_INVALID_FRAME_OPCODE:
-    luaL_error(L, "invalid frame opcode (%s)", where);
+    lua_pushfstring(L, "%s: invalid frame opcode (%s)", errStr, where);
     break;
   case WEBSOCKET_ERR_USERDATA_IS_NIL:
-    luaL_error(L, "userdata is nil (%s)", where);
+    lua_pushfstring(L, "%s: userdata is nil (%s)", errStr, where);
     break;
   case WEBSOCKET_ERR_WRONG_METATABLE:
-    luaL_error(L, "wrong metatable (%s)", where);
+    lua_pushfstring(L, "%s: wrong metatable (%s)", errStr, where);
     break;
   case WEBSOCKET_ERR_PESP_CONN_IS_NIL:
-    luaL_error(L, "pesp_conn is nil (%s)", where);
+    lua_pushfstring(L, "%s: pesp_conn is nil (%s)", errStr, where);
     break;
   case WEBSOCKET_ERR_MAX_SOCKET_REACHED:
-    luaL_error(L, "max socket reached (%s)", where);
+    lua_pushfstring(L, "%s: max socket reached (%s)", errStr, where);
     break;
   default:
-    luaL_error(L, "error in %s: result: %d", where, result);
+    lua_pushfstring(L, "%s: error in %s: result: %d", errStr, where, result);
     break;
   }
   return 0;
 }
 
-// ============================ websocket_data =========================================
-
-void  ICACHE_FLASH_ATTR websocket_data(char *data, int size, lwebsocket_userdata *wud, int opcode) {
-  char *cp = "Hello Answer from Server\n";
-ets_printf("websocket_data: data: %s size: %d opcode: %d\n", data, size, opcode);
-  websocket_writeData(cp, c_strlen(cp), wud, OPCODE_TEXT);
-}
-
 // ============================ websocket_parse =========================================
 
 int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len, lwebsocket_userdata *wud) {
-ets_printf("websocket_parse: %s\n", data);
+//ets_printf("websocket_parse: %s\n", data);
   uint8_t byte = data[0];
   int FIN = byte & 0x80;
   int opcode = byte & 0x0F;
 
-ets_printf("frame opcode: %02X FIN: %02X len: %d\r\n", opcode, FIN, dataLenb);
-if (dataLenb > 0) {
-ets_printf("%02X %02X %02X %02X \r\n", data[0], data[1], data[2], data[3]);
-}
+//ets_printf("frame opcode: %02X FIN: %02X len: %d\r\n", opcode, FIN, dataLenb);
 
   if ((opcode > 0x03 && opcode < 0x08) || opcode > 0x0B) {
     ets_printf("Invalid frame type %02X \r\n", opcode);
@@ -277,18 +265,13 @@ ets_printf("%02X %02X %02X %02X \r\n", data[0], data[1], data[2], data[3]);
     ets_printf("SIZE: %d  len: %d, DATA: =%s=  \r\n", SIZE, dataLenb, DATA);
 
     if (SIZE > 0) {
-ets_printf("++call lua callback \r\n");
-ets_printf("++call lua callback wud: %p cb: %p self: %p\r\n", wud, wud->cb_receive_ref, wud->self_ref);
       if(wud->cb_receive_ref != LUA_NOREF && wud->self_ref != LUA_NOREF) {
         lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->cb_receive_ref);
         lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->self_ref);  // pass the userdata(server) to callback func in lua
-ets_printf("SIZE: %d\n", SIZE);
         lua_pushlstring(gL, DATA, SIZE);
         lua_call(gL, 2, 0);
       }
     }
-
-//    wud->data_callback(DATA, SIZE, wud, opcode);
 
     if (SIZE + offset < dataLenb) {
       websocket_parse(&data[SIZE + offset], dataLenb - (SIZE + offset), resData, len, wud);
@@ -337,9 +320,8 @@ static uint8 *toBase64 ( const uint8 *msg, size_t *len){
 
 int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url,lwebsocket_userdata *wud, char **data, int *lgth) {
 ets_printf("websocket_recv: %s\n", string);
-ets_printf("websocket_recv: wud: %p wud->url: %p %s wud->isWebsocket: %d\n", wud, wud->url, wud->url, wud->isWebsocket);
+//ets_printf("websocket_recv: wud: %p wud->url: %p %s wud->isWebsocket: %d\n", wud, wud->url, wud->url, wud->isWebsocket);
   if (strstr(string, wud->url) != 0) {
-ets_printf("websocket_recv: wud->url found\n");
     char * key;
     if (strstr(string, header_key) != 0) {
       char * begin = strstr(string, header_key) + os_strlen(header_key);
@@ -364,24 +346,19 @@ ets_printf("websocket_recv: wud->url found\n");
     SHA1Final(digest, &ctx);
 
     base64Digest = toBase64(digest, &digestLen);
-ets_printf("base64Digest: len: %d digestLen. %d\n", os_strlen(base64Digest), digestLen);
     checkAllocgLOK(base64Digest);
     payloadLen = os_strlen(HEADER_WEBSOCKET_START) + os_strlen(HEADER_WEBSOCKET_URL) +os_strlen(HEADER_WEBSOCKET_END) + digestLen + trailerLen;
     payload = os_malloc(payloadLen);
     checkAllocgLOK(payload);
     os_sprintf(payload, "%s%s%s%s%s\0", HEADER_WEBSOCKET_START, HEADER_WEBSOCKET_URL, HEADER_WEBSOCKET_END, base64Digest, trailer);
     os_free(base64Digest);
-ets_printf("d: %p payloadLen: %d os_strlen(payload): %d\n", payload, payloadLen, os_strlen(payload));
     struct espconn *pesp_conn = NULL;
     pesp_conn = wud->pesp_conn;
-ets_printf("Handshake completed: payload: %s!\r\n", payload);
 
-ets_printf("wud: %p wud->isWebsocket: %d digestLen: %d total: %d\n", wud, wud->isWebsocket, digestLen, os_strlen(payload));
     // FIXME!! reboot if setting here for socket!!
     if (wud->isWebsocket != 1) {
       wud->isWebsocket = 1;
     }
-ets_printf("pesp_conn: %p\n", wud->pesp_conn);
 //  char temp[25] = {0};
 //  os_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
 //  ets_printf("remote ");
@@ -539,7 +516,6 @@ ets_printf("websocket_socket_received is called.\n");
   if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
     wud->isWebsocket = 1;
   }
-ets_printf("pdata: %s %s wud->isWebsocket: %d\n", pdata, HEADER_WEBSOCKETLINE, wud->isWebsocket);
 
   if(wud->isWebsocket == 1) {
     char *data = "";
@@ -547,28 +523,18 @@ ets_printf("pdata: %s %s wud->isWebsocket: %d\n", pdata, HEADER_WEBSOCKETLINE, w
     int result;
 
     result = websocket_recv(pdata,url,wud, &data, &lgth);
-ets_printf("after websocket_recv: result: %d\n", result);
     checkErrOK(gL,result,"websocket_recv");
 // End Websocket
 // Websocket
   } else {
 ets_printf("NORMAL MESSAGE \r\n");
-//    int err = send_chunk(pcb, 0, 0);
-//    if (err == 0) {
-//      server_close(pcb);
-//    }
 // End Websocket
     if ((strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
       wud->isWebsocket = 1;
     }
     lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->cb_receive_ref);
     lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->self_ref);  // pass the userdata(server) to callback func in lua
-    // expose_array(gL, pdata, len);
-    // *(pdata+len) = 0;
-    // NODE_DBG(pdata);
-    // NODE_DBG("\n");
     lua_pushlstring(gL, pdata, len);
-    // lua_pushinteger(gL, len);
     lua_call(gL, 2, 0);
 // Websocket
   }
@@ -659,26 +625,6 @@ static void socket_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
     NODE_DBG("self_ref null.\n");
     return;
   }
-/* original
-  if(ipaddr == NULL)
-  {
-    NODE_ERR( "DNS Fail!\n" );
-    goto end;
-  }
-  // ipaddr->addr is a uint32_t ip
-  char ip_str[20];
-  c_memset(ip_str, 0, sizeof(ip_str));
-  if(ipaddr->addr != 0)
-  {
-    c_sprintf(ip_str, IPSTR, IP2STR(&(ipaddr->addr)));
-  }
-
-  lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->cb_dns_found_ref);    // the callback function
-  //lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->self_ref);  // pass the userdata(conn) to callback func in lua
-  lua_pushstring(gL, ip_str);   // the ip para
-*/
-
-  // "enhanced"
 
   lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->cb_dns_found_ref);    // the callback function
   lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->self_ref);  // pass the userdata(conn) to callback func in lua
@@ -720,7 +666,6 @@ ets_printf("websocket_server_connected is called.\n");
   NODE_DBG("websocket_server_connected is called.\n");
   struct espconn *pesp_conn = arg;
   lwebsocket_userdata *wud = (lwebsocket_userdata *)pesp_conn->reverse;
-ets_printf("websocket_start: wud: %p wud->url: %p\n", wud, wud->url);
   int i = 0;
   lwebsocket_userdata *skt = NULL;
   if(pesp_conn == NULL) {
@@ -789,7 +734,6 @@ ets_printf("websocket_start: wud: %p wud->url: %p\n", wud, wud->url);
   skt->secure = 0;    // as a server SSL is not supported.
 #endif
 skt->isWebsocket = wud->isWebsocket;
-skt->data_callback = wud->data_callback;;
 skt->url = wud->url;
 
   skt->pesp_conn = pesp_conn;   // point to the espconn made by low level sdk
@@ -894,7 +838,6 @@ ets_printf("wrong metatable for websocket_create.\n");
 
   // create a object
   wud = (lwebsocket_userdata *)lua_newuserdata(L, sizeof(lwebsocket_userdata));
-ets_printf("wud0: %p\n", wud);
   // pre-initialize it, in case of errors
   wud->self_ref = LUA_NOREF;
   wud->cb_connect_ref = LUA_NOREF;
@@ -909,7 +852,6 @@ ets_printf("wud0: %p\n", wud);
 #endif
   wud->isWebsocket = 0;
   wud->url = NULL;
-  wud->data_callback = websocket_data;
 
   // set its metatable
   luaL_getmetatable(L, mt);
@@ -947,23 +889,18 @@ ets_printf("wud0: %p\n", wud);
     pTcpServer = pesp_conn;
   }
 
-//  if(isserver){
-    if ( lua_isstring(L, stack) )
-    {
-      // we have an url for the path otherwise use "/echo"
-      const uint8_t *url = lua_tostring(L, stack);
-ets_printf("++url: %p %s\n", url, url);
-      stack++;
-      wud->url = os_malloc(c_strlen(url)+1); // default to /echo
-ets_printf("++wud->url1: %p %d\n", wud->url, c_strlen(url));
-      checkAllocOK(wud->url);
-      c_memcpy(wud->url,url,c_strlen(url));
-      wud->url[c_strlen(url)] = '\0';
-    } else {
-      wud->url = "/echo"; // default to /echo
-    }
-ets_printf("++wud->url2: wud: %p wud->url: %p %s\n", wud, wud->url, wud->url);
-//  }
+  if ( lua_isstring(L, stack) )
+  {
+    // we have an url for the path otherwise use "/echo"
+    const uint8_t *url = lua_tostring(L, stack);
+    stack++;
+    wud->url = os_malloc(c_strlen(url)+1); // default to /echo
+    checkAllocOK(wud->url);
+    c_memcpy(wud->url,url,c_strlen(url));
+    wud->url[c_strlen(url)] = '\0';
+  } else {
+    wud->url = "/echo"; // default to /echo
+  }
 
   gL = L;   // global L for net module.
 
@@ -1009,7 +946,6 @@ ets_printf("wrong metatable for websocket_start.\n");
     return 0;
   }
   wud = (lwebsocket_userdata *)luaL_checkudata(L, stack, mt);
-ets_printf("websocket_start: wud: %p wud->url: %p\n", wud, wud->url);
   luaL_argcheck(L, wud, stack, "Server/Socket expected");
   stack++;
 
@@ -1054,9 +990,6 @@ ets_printf("wud->pesp_conn is NULL.\n");
       c_memcpy(pesp_conn->proto.tcp->local_ip, &ipaddr.addr, 4);
     else
       c_memcpy(pesp_conn->proto.tcp->remote_ip, &ipaddr.addr, 4);
-ets_printf("TCP ip is set: ");
-ets_printf(IPSTR, IP2STR(&ipaddr.addr));
-ets_printf("\n");
     NODE_DBG("TCP ip is set: ");
     NODE_DBG(IPSTR, IP2STR(&ipaddr.addr));
     NODE_DBG("\n");
@@ -1370,7 +1303,6 @@ ets_printf("websocket_on is called.%s\n", mt);
     if(wud->cb_receive_ref != LUA_NOREF)
       luaL_unref(L, LUA_REGISTRYINDEX, wud->cb_receive_ref);
     wud->cb_receive_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-ets_printf("+++receiveref: wud: %p cb_receive_ref: %p\n", wud, wud->cb_receive_ref);
   }else if((!isserver || wud->pesp_conn->type == ESPCONN_UDP) && sl == 4 && c_strcmp(method, "sent") == 0){
     if(wud->cb_send_ref != LUA_NOREF)
       luaL_unref(L, LUA_REGISTRYINDEX, wud->cb_send_ref);
@@ -1394,7 +1326,6 @@ static int websocket_writeData( const char *payload, int size, lwebsocket_userda
 {
 ets_printf("websocket_writeData is called\r\n");
   uint8_t byte;
-//  int fsize = os_strlen(payload) + 2;
   int fsize = size + 2;
   char * buff = os_malloc(fsize);
   int SIZE;
@@ -1406,12 +1337,9 @@ ets_printf("websocket_writeData is called\r\n");
   byte |= opcode; //frame->opcode; //set op code
   buff[0] = byte;
   byte = 0;
-//  SIZE = os_strlen(payload);
   SIZE = size;
   if (SIZE < 126) {
-//    byte = os_strlen(payload);
     byte = size;
-ets_printf("writeData: len: %d\n", byte);
     buff[1] = byte;
   } else {
 ets_printf("Too much data \r\n");
@@ -1479,14 +1407,12 @@ ets_printf("websocket_send is called\r\n");
 #endif
 
   const char *payload = luaL_checklstring( L, stack, &l );
-ets_printf("payload: %d %s\n", l, payload);
   if (l>1460 || payload == NULL)
     return luaL_error( L, "need <1460 payload" );
 
   stack++;
   if (lua_isnumber( L, stack )) {
     opcode = lua_tointeger(L, stack);
-ets_printf("send: opcode: %d\n", opcode);
     if ((opcode > 0x03 && opcode < 0x08) || opcode > 0x0B) {
       return luaL_error( L, "bad opcode" );
     }
@@ -1505,7 +1431,6 @@ ets_printf("send: opcode: %d\n", opcode);
     checkErrOK(L, result, "espconn_sent");
   } else {
 #endif
-ets_printf("websocket_send: wud->isWebsocket: %d payload: %s\n", wud->isWebsocket, payload);
     if (wud->isWebsocket == 1) {
       result = websocket_writeData(payload, l, wud, opcode);
       checkErrOK(L, result, "websocket_write");
@@ -1517,7 +1442,6 @@ ets_printf("websocket_send: wud->isWebsocket: %d payload: %s\n", wud->isWebsocke
   }
 #endif
   if (isserver && (strstr(payload, HEADER_WEBSOCKETLINE) != 0)) {
-ets_printf("++setting wud->isWebsocket\n");
     wud->isWebsocket = 1;
   }
 
