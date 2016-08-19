@@ -610,12 +610,14 @@ int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, 
     case STRUCT_MSG_FIELD_UINT8_VECTOR:
       structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
-      fieldInfo->value.ubyteVector = (uint8_t *)os_malloc(fieldLgth);
+      fieldInfo->value.ubyteVector = (uint8_t *)os_malloc(fieldLgth + 1);
+      fieldInfo->value.ubyteVector[fieldLgth] = '\0';
       break;
     case STRUCT_MSG_FIELD_INT8_VECTOR:
       structmsg->hdr.totalLgth += fieldLgth;
       structmsg->msg.cmdLgth += fieldLgth;
-      fieldInfo->value.byteVector = (int8_t *)os_malloc(fieldLgth);
+      fieldInfo->value.byteVector = (int8_t *)os_malloc(fieldLgth + 1);
+      fieldInfo->value.ubyteVector[fieldLgth] = '\0';
       break;
     case STRUCT_MSG_FIELD_UINT16_VECTOR:
       structmsg->hdr.totalLgth += fieldLgth;
@@ -1005,7 +1007,6 @@ int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth) {
   structmsg->encrypted = (uint8_t *)os_malloc(cryptedLgth);
   checkAllocOK(structmsg->encrypted);
   c_memcpy(structmsg->encrypted, crypted, cryptedLgth);
-  structmsg->encryptedLgth = cryptedLgth;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -1183,9 +1184,9 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
   if (structmsg->todecode != NULL) {
     os_free(structmsg->todecode);
   }
-// FIXME need to fill todecode too!!
   structmsg->todecode = (uint8_t *)os_malloc(structmsg->hdr.totalLgth);
-  msgPtr = data;
+  c_memcpy(structmsg->todecode, data, structmsg->hdr.totalLgth);
+  msgPtr = structmsg->todecode;
   offset = 0;
   offset = uint16Decode(msgPtr,offset,&structmsg->hdr.src);
   checkDecodeOffset(offset);
@@ -1212,9 +1213,9 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
         } else {
           if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
             offset = crcDecode(msgPtr, offset, structmsg->msg.cmdLgth, &fieldInfo->value.ushortVal, structmsg->hdr.headerLgth);
-//            if (offset < 0) {
+            if (offset < 0) {
               return STRUCT_MSG_ERR_BAD_CRC_VALUE;
-//            }
+            }
           } else {
             return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
           }
@@ -1311,7 +1312,6 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
       os_free(structmsg->encrypted);
     }
     *lgth = ((dlen + bs - 1) / bs) * bs;
-    structmsg->encryptedLgth = *lgth;
     *lgth += structmsg->hdr.headerLgth;
     structmsg->encrypted = (char *)os_zalloc (*lgth);
     if (!structmsg->encrypted) {
@@ -1330,19 +1330,15 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
     if (structmsg->encrypted == NULL) {
       return STRUCT_MSG_ERR_NOT_ENCRYPTED;
     }
-    if (structmsg->decrypted != NULL) {
-      os_free(structmsg->decrypted);
-    }
     dlen = structmsg->msg.cmdLgth;
     *lgth = ((dlen + bs -1) / bs) * bs;
     *lgth += structmsg->hdr.headerLgth;
-    structmsg->decryptedLgth = *lgth;
-    structmsg->decrypted = (char *)os_zalloc (*lgth);
-    if (!structmsg->decrypted) {
+    structmsg->todecode = (char *)os_zalloc (*lgth);
+    if (!structmsg->todecode) {
       return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
     } 
-    *buf = structmsg->decrypted;
-    crypted = structmsg->decrypted;
+    *buf = structmsg->todecode;
+    crypted = structmsg->todecode;
     data = structmsg->encrypted;
     c_memcpy(crypted, data, structmsg->hdr.headerLgth);
     data += structmsg->hdr.headerLgth;
@@ -1361,7 +1357,7 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
     if (enc) {
       structmsg->encrypted = NULL;
     } else {
-      structmsg->decrypted = NULL;
+      structmsg->todecode = NULL;
     }
     return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
   } else { 
@@ -1426,9 +1422,6 @@ int new_structmsg(uint8_t numFieldInfos, uint8_t **handle) {
   structmsg->encoded = NULL;
   structmsg->todecode = NULL;
   structmsg->encrypted = NULL;
-  structmsg->encryptedLgth = 0;
-  structmsg->decrypted = NULL;
-  structmsg->decryptedLgth = 0;
   os_sprintf(structmsg->handle, "%s%p", HANDLE_PREFIX, structmsg);
   result = addHandle(structmsg->handle);
   if (result != STRUCT_MSG_ERR_OK) {
@@ -1493,9 +1486,6 @@ int delete_structmsg(const uint8_t *handle) {
   }
   if (structmsg->encrypted != NULL) {
     os_free(structmsg->encrypted);
-  }
-  if (structmsg->decrypted != NULL) {
-    os_free(structmsg->decrypted);
   }
   deleteHandle(handle);
   os_free(structmsg);

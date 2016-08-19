@@ -149,9 +149,6 @@ typedef struct structmsg
   uint8_t *encoded;
   uint8_t *todecode;
   uint8_t *encrypted;
-  uint8_t *decrypted;
-  uint8_t encryptedLgth;
-  uint8_t decryptedLgth;
 } structmsg_t;
 
 int getFieldTypeKey(const uint8_t *str);
