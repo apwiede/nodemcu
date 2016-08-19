@@ -6,7 +6,7 @@ package require websocket
 
 source structmsgCmd.tcl
 
-set ts_fd ""
+::websocket::loglevel debug
 
 set PORT 8080
 set path "/echo"
@@ -116,6 +116,13 @@ puts stderr "wsLiveCB: $op $par"
 puts stderr "op: $op! cs: $cs!"
 puts stderr "par: $par!"
 puts stderr "args: $args!"
+set idx 0
+foreach ch [split $par ""] {
+  binary scan $ch c pch
+  set pch [expr {$pch & 0xFF}]
+#puts stderr [format "idx: $idx pch: 0x%02x!" $pch]
+  incr idx
+}
         decryptMsg $par
       }
     } 

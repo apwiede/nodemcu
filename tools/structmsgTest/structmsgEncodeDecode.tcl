@@ -214,8 +214,10 @@ proc int16Decode {data offset val} {
 proc uint32Decode {data offset val} {
   upvar $val value
 
+puts stderr "uint32Decode: offset: $offset!"
   set value 0
   binary scan [string range $data $offset $offset] c ch
+puts stderr [format "ch: 0x%02x" $ch]
   set value [expr {$value + ([expr {$ch & 0xFF}] << 24)}]
   incr offset
   binary scan [string range $data $offset $offset] c ch

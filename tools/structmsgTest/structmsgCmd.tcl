@@ -7,6 +7,19 @@ set ::structmsg(prefix) "stmsg_"
 set ::structmsg(numHandles) 1
 set ::structmsg(handles) [list]
 
+# ===================== dump_binary =============================
+
+proc dump_binary {data where} {
+  puts stderr "$where"
+  set idx 0
+  foreach ch [split $data ""] {
+    binary scan $ch c pch
+    set pch [expr {$pch & 0xFF}]
+    puts stderr [format "idx: 0x%02x" $pch]
+    incr idx
+  }
+}
+
 # ===================== dump_structmsg =============================
 
 proc dump_structmsg {handle} {
@@ -14,9 +27,9 @@ proc dump_structmsg {handle} {
     error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
-  set src [expr {[dict get $myDict src] & 0xFFFF}]
-  set dst [expr {[dict get $myDict dst] & 0xFFFF}]
-  set totalLgth [expr {[dict get $myDict totalLgth] & 0xFFFF}]
+  set src [expr {[dict get $myDict hdr src] & 0xFFFF}]
+  set dst [expr {[dict get $myDict hdr dst] & 0xFFFF}]
+  set totalLgth [expr {[dict get $myDict hdr totalLgth] & 0xFFFF}]
   puts stderr [format "handle: %s src: %d 0x%04x dst: %d 0x%04x totalLgth: %d 0x%04x" $handle $src $src $dst $dst $totalLgth $totalLgth]
 
   set cmdKey [expr {[dict get $myDict msg cmdKey] & 0xFFFF}]
@@ -191,8 +204,8 @@ proc set_targets {handle src dst cmdKey} {
     error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
-  dict set myDict src $src
-  dict set myDict dst $dst
+  dict set myDict hdr src $src
+  dict set myDict hdr dst $dst
   dict set myDict msg cmdKey $cmdKey
   set ::structmsg($handle) $myDict
 }
@@ -345,15 +358,15 @@ proc get_fieldValue {handle fieldName val} {
   set myDict $::structmsg($handle)
   switch $fieldName {
     @src {
-      set value [ dict get $myDict src]
+      set value [ dict get $myDict hdr src]
       return
     }
     @dst {
-      set value [dict get $myDict dst]
+      set value [dict get $myDict hdr dst]
       return
     }
     @totalLgth {
-      set value [dict get $myDict totalLgth]
+      set value [dict get $myDict hdr totalLgth]
       return
     }
     @cmdKey {
@@ -400,37 +413,37 @@ proc addField {handle name fieldType fieldLgth} {
   switch $fieldType {
     uint8_t -
     int8_t {
-      dict set myDict totalLgth [expr {[dict get $myDict totalLgth] + 1}]
+      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + 1}]
       dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + 1}]
       dict set fieldInfo fieldLgth 1
     }
     uint16_t -
     int16_t {
-      dict set myDict totalLgth [expr {[dict get $myDict totalLgth] + 2}]
+      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + 2}]
       dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + 2}]
       dict set fieldInfo fieldLgth 2
     }
     uint32_t -
     int32_t {
-      dict set myDict totalLgth [expr {[dict get $myDict totalLgth] + 4}]
+      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + 4}]
       dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + 4}]
       dict set fieldInfo fieldLgth 4
     }
     uint8_t* -
     int8_t* {
-      dict set myDict totalLgth [expr {[dict get $myDict totalLgth] + $fieldLgth}]
+      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + $fieldLgth}]
       dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + $fieldLgth}]
       dict set fieldInfo fieldLgth $fieldLgth
     }
     uint16_t* -
     int16_t* {
-      dict set myDict totalLgth [expr {[dict get $myDict totalLgth] + [expr {$fieldLgth * 2}]}]
+      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + [expr {$fieldLgth * 2}]}]
       dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + [expr {$fieldLgth * 2}]}]
       dict set fieldInfo fieldLgth $fieldLgth
     }
     uint32_t* -
     int32_t* {
-      dict set myDict totalLgth [expr {[dict get $myDict totalLgth] + [expr {$fieldLgth * 4}]}]
+      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + [expr {$fieldLgth * 4}]}]
       dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + [expr {$fieldLgth * 4}]}]
       dict set fieldInfo fieldLgth $fieldLgth
     }
@@ -468,9 +481,9 @@ proc encode_msg {handle} {
   dict set myDict encoded [list]
   set encoded [list]
   set offset 0
-  set offset [uint16Encode encoded $offset [dict get $myDict src]]
-  set offset [uint16Encode encoded $offset [dict get $myDict dst]]
-  set offset [uint16Encode encoded $offset [dict get $myDict totalLgth]]
+  set offset [uint16Encode encoded $offset [dict get $myDict hdr src]]
+  set offset [uint16Encode encoded $offset [dict get $myDict hdr dst]]
+  set offset [uint16Encode encoded $offset [dict get $myDict hdr totalLgth]]
   set offset [uint16Encode encoded $offset [dict get $myDict msg cmdKey]]
   set offset [uint16Encode encoded $offset [dict get $myDict msg cmdLgth]]
   dict set myDict encoded $encoded
@@ -493,7 +506,7 @@ proc encode_msg {handle} {
           set_fieldValue $handle "@filler" $value
         }
         "@crc" {
-          set offset [crcEncode encoded $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict headerLgth]]
+          set offset [crcEncode encoded $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict hdr headerLgth]]
           set_fieldValue $handle "@crc" $crc
         }
         default {
@@ -621,11 +634,11 @@ proc decode_msg {handle todecode} {
   dict set myDict todecode $todecode
   set offset 0
   set offset [uint16Decode $todecode $offset src]
-  dict set myDict src $src
+  dict set myDict hdr src $src
   set offset [uint16Decode $todecode $offset dst]
-  dict set myDict dst $dst
+  dict set myDict hdr dst $dst
   set offset [uint16Decode $todecode $offset totalLgth]
-  dict set myDict totalLgth $totalLgth
+  dict set myDict hdr totalLgth $totalLgth
   set offset [uint16Decode $todecode $offset cmdKey]
   dict set myDict msg cmdKey $cmdKey
   set offset [uint16Decode $todecode $offset cmdLgth]
@@ -633,6 +646,7 @@ proc decode_msg {handle todecode} {
   set ::structmsg($handle) $myDict
   set idx 0
   set numEntries [dict get $myDict msg numFieldInfos]
+puts stderr "offset: $offset!todecode len: [string length $todecode]!"
   while {$idx < $numEntries} {
     set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
     set fieldInfos [dict get $myDict msg fieldInfos]
@@ -642,6 +656,7 @@ proc decode_msg {handle todecode} {
       switch $fieldName {
         "@randomNum" {
           set offset [randomNumDecode $todecode $offset randomNum]
+puts stderr "randomNum: $randomNum!"
           dict set fieldInfo value $randomNum
         }
         "@filler" {
@@ -649,7 +664,7 @@ proc decode_msg {handle todecode} {
           dict set fieldInfo value $value
         }
         "@crc" {
-          set offset [crcDecode $todecode $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict headerLgth]]
+          set offset [crcDecode $todecode $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict hdr headerLgth]]
           dict set fieldInfo value $crc
         }
         default {
@@ -756,7 +771,7 @@ proc encrypt_payload {handle cryptKey} {
     error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
-  set headerLgth [dict get $myDict headerLgth]
+  set headerLgth [dict get $myDict hdr headerLgth]
   set encoded [get_encoded $handle]
   set lgth [dict get $myDict msg cmdLgth]
   set offset $headerLgth
@@ -781,7 +796,8 @@ proc decrypt_payload {handle cryptKey crypted} {
     error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
-  set headerLgth [dict get $myDict headerLgth]
+  set headerLgth [dict get $myDict hdr headerLgth]
+puts stderr "headerLgth: $headerLgth!cryptKey: $cryptKey!"
   set lgth [dict get $myDict msg cmdLgth]
   set offset $headerLgth
   set todecrypt [string range $crypted $offset [expr {$offset + $lgth - 1}]]
@@ -807,8 +823,8 @@ proc create_structmsg {numFieldInfos} {
   set myDict [dict create]
   set headerLgth 6; # uint16_t src + uint16_t dst + uint16_t totalLgth
   set cmdLgth 4;    # uint16_t cmdKey + unit16_t cmdLgth
-  dict set myDict headerLgth $headerLgth
-  dict set myDict totalLgth [expr {$headerLgth + $cmdLgth}]
+  dict set myDict hdr headerLgth $headerLgth
+  dict set myDict hdr totalLgth [expr {$headerLgth + $cmdLgth}]
   dict set myDict msg cmdLgth $cmdLgth
   dict set myDict msg fieldInfos [list]
   dict set myDict msg maxFieldInfos $numFieldInfos
