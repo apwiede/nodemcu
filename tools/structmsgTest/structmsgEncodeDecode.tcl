@@ -357,6 +357,30 @@ proc randomNumDecode {data offset val} {
   return $offset
 }
 
+# ============================= sequenceNumEncode ========================
+
+proc sequenceNumEncode {dat offset dictVar val} {
+  upvar $dat data
+  upvar $val value
+  upvar $dictVar myDict
+
+puts stderr "sequenceNumEncode: seq: [dict get $myDict sequenceNum]!"
+  dict set myDict sequenceNum [expr {[dict get $myDict sequenceNum] + 1}]
+puts stderr "sequenceNumEncode: seq2: [dict get $myDict sequenceNum]!"
+  set myVal [dict get $myDict sequenceNum]
+  set value $myVal
+  return [uint32Encode data $offset $myVal]
+}
+
+# ============================= sequenceNumDecode ========================
+
+proc sequenceNumDecode {data offset val} {
+  upvar $val value
+
+  set offset [uint32Decode $data $offset value]
+  return $offset
+}
+
 # ============================= fillerEncode ========================
 
 proc fillerEncode {dat offset lgth val} {

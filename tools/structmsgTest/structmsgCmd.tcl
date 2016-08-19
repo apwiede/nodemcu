@@ -7,6 +7,14 @@ set ::structmsg(prefix) "stmsg_"
 set ::structmsg(numHandles) 1
 set ::structmsg(handles) [list]
 
+# ============================= binaryScanChar ========================
+
+proc binaryScanChar {ch} {
+    binary scan $ch c pch
+    set pch [expr {$pch & 0xFF}]
+    return $pch
+}
+
 # ===================== dump_binary =============================
 
 proc dump_binary {data where} {
@@ -18,6 +26,33 @@ proc dump_binary {data where} {
     puts stderr [format "idx: 0x%02x" $pch]
     incr idx
   }
+}
+
+# ===================== dump_values =============================
+
+proc dump_values {data} {
+    puts -nonewline stderr "      values: "
+    set cnt 0
+if {[catch {
+    foreach ch [split $data ""] {
+      set pch [binaryScanChar $ch]
+      if {$ch eq "%"} {
+        set ch "%%"
+      }
+      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
+      incr cnt
+      if {($cnt > 0) && (($cnt % 10) == 0)} {
+        puts -nonewline stderr "\n              "
+      }
+    }
+} msg]} {
+    puts stderr "\nMSG: $msg!"
+    foreach ch [split $data ""] {
+      set pch [binaryScanChar $ch]
+puts stderr "\n!${ch}!${pch}!"
+    }
+}
+    puts stderr ""
 }
 
 # ===================== dump_structmsg =============================
@@ -68,17 +103,7 @@ proc dump_structmsg {handle} {
             puts stderr [format "      value: %s" $val]
           }
           set lgth [string length $val]
-          puts -nonewline stderr "      values: "
-          set cnt 0
-          foreach ch [split $val ""] {
-            scan $ch %c pch
-            puts -nonewline stderr [format "  $ch 0x%02x" $pch]
-            incr cnt
-            if {($cnt > 0) && (($cnt % 10) == 0)} {
-              puts -nonewline stderr "\n              "
-            }
-          }
-          puts stderr ""
+          dump_values $val
         }
         int8_t* {
           puts stderr [format "      value: %s" [dict get $fieldInfo value]]
@@ -103,97 +128,25 @@ proc dump_structmsg {handle} {
   if {[lsearch [dict get $myDict flags] ENCODED] >= 0} {
     set encoded [dict get $myDict encoded]
     puts stderr "  encoded: $encoded"
-    puts -nonewline stderr "      values: "
-    set cnt 0
-if {[catch {
-    foreach ch [split $encoded ""] {
-      scan $ch %c pch
-      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
-      incr cnt
-      if {($cnt > 0) && (($cnt % 10) == 0)} {
-        puts -nonewline stderr "\n              "
-      }
-    }
-} msg]} {
-    puts stderr "\nMSG: $msg!"
-    foreach ch [split $encoded ""] {
-      scan $ch %c pch
-puts stderr "\n!${ch}!${pch}!"
-    }
-}
-    puts stderr ""
+    dump_values $encoded
   }
   # decoded
   if {[lsearch [dict get $myDict flags] DECODED] >= 0} {
     set todecode [dict get $myDict todecode]
     puts stderr "  todecode: $todecode"
-    puts -nonewline stderr "      values: "
-    set cnt 0
-if {[catch {
-    foreach ch [split $todecode ""] {
-      scan $ch %c pch
-      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
-      incr cnt
-      if {($cnt > 0) && (($cnt % 10) == 0)} {
-        puts -nonewline stderr "\n              "
-      }
-    }
-} msg]} {
-    puts stderr "\nMSG: $msg!"
-    foreach ch [split $todecode ""] {
-      scan $ch %c pch
-puts stderr "\n!${ch}!${pch}!"
-    }
-}
-    puts stderr ""
+    dump_values $todecode
   }
   # encryptedMsg
   if {[lsearch [dict get $myDict flags] ENCRYPTED] >= 0} {
     set encryptedMsg [dict get $myDict encryptedMsg]
     puts stderr "  encryptedMsg: $encryptedMsg"
-    puts -nonewline stderr "      values: "
-    set cnt 0
-if {[catch {
-    foreach ch [split $encryptedMsg ""] {
-      scan $ch %c pch
-      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
-      incr cnt
-      if {($cnt > 0) && (($cnt % 10) == 0)} {
-        puts -nonewline stderr "\n              "
-      }
-    }
-} msg]} {
-    puts stderr "\nMSG: $msg!"
-    foreach ch [split $encryptedMsg ""] {
-      scan $ch %c pch
-puts stderr "\n!${ch}!${pch}!"
-    }
-}
-    puts stderr ""
+    dump_values $encryptedMsg
   }
   # decryptedMsg
   if {[lsearch [dict get $myDict flags] DECRYPTED] >= 0} {
     set decryptedMsg [dict get $myDict decryptedMsg]
     puts stderr "  decryptedMsg: $decryptedMsg"
-    puts -nonewline stderr "      values: "
-    set cnt 0
-if {[catch {
-    foreach ch [split $decryptedMsg ""] {
-      scan $ch %c pch
-      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
-      incr cnt
-      if {($cnt > 0) && (($cnt % 10) == 0)} {
-        puts -nonewline stderr "\n              "
-      }
-    }
-} msg]} {
-    puts stderr "\nMSG: $msg!"
-    foreach ch [split $decryptedMsg ""] {
-      scan $ch %c pch
-puts stderr "\n!${ch}!${pch}!"
-    }
-}
-    puts stderr ""
+    dump_values $decryptedMsg
   }
 }
 
@@ -217,6 +170,23 @@ proc set_fieldValue {handle fieldName value} {
     error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
+  switch $fieldName {
+    @src {
+      dict set myDict hdr src $value
+      set ::structmsg($handle) $myDict
+      return
+    }
+    @dst {
+      dict set myDict hdr dst $value
+      set ::structmsg($handle) $myDict
+      return
+    }
+    @cmdKey {
+      dict set myDict msg cmdKey $value
+      set ::structmsg($handle) $myDict
+      return
+    }
+  }
   set numEntries [dict get $myDict msg numFieldInfos]
   set idx 0
   set fieldInfos [dict get $myDict msg fieldInfos]
@@ -501,6 +471,11 @@ proc encode_msg {handle} {
           set offset [randomNumEncode encoded $offset randomNum]
           set_fieldValue $handle "@randomNum" $randomNum
         }
+        "@sequenceNum" {
+          set offset [sequenceNumEncode encoded $offset myDict sequenceNum]
+          set ::structmsg($handle) $myDict ; # needed because set_fieldValue changes the dict!!
+          set_fieldValue $handle "@sequenceNum" $sequenceNum
+        }
         "@filler" {
           set offset [fillerEncode encoded $offset [dict get $fieldInfo fieldLgth] value]
           set_fieldValue $handle "@filler" $value
@@ -659,6 +634,11 @@ puts stderr "offset: $offset!todecode len: [string length $todecode]!"
 puts stderr "randomNum: $randomNum!"
           dict set fieldInfo value $randomNum
         }
+        "@sequenceNum" {
+          set offset [sequenceNumDecode $todecode $offset sequenceNum]
+puts stderr "sequenceNum: $sequenceNum!"
+          dict set fieldInfo value $sequenceNum
+        }
         "@filler" {
           set offset [fillerDecode $todecode $offset [dict get $fieldInfo fieldLgth] value]
           dict set fieldInfo value $value
@@ -779,7 +759,6 @@ proc encrypt_payload {handle cryptKey} {
   set encryptedData [aes::aes -dir encrypt -key $cryptKey $tocrypt]
   set len [string length $encryptedData]
   dict set myDict encrypted $encryptedData
-  dict set myDict encryptedLgth $len
   dict set myDict encryptedMsg [string range $encoded 0 [expr {$headerLgth - 1}]]
   dict append myDict encryptedMsg $encryptedData
   if {[lsearch [dict get $myDict flags] "ENCRYPTED"] < 0} {
@@ -804,7 +783,6 @@ puts stderr "headerLgth: $headerLgth!cryptKey: $cryptKey!"
   set decryptedData [aes::aes -dir decrypt -key $cryptKey $todecrypt]
   set len [string length $decryptedData]
   dict set myDict decrypted $decryptedData
-  dict set myDict decryptedLgth $len
   dict set myDict decryptedMsg [string range $crypted 0 [expr {$headerLgth - 1}]]
   dict append myDict decryptedMsg $decryptedData
   if {[lsearch [dict get $myDict flags] "DECRYPTED"] < 0} {
@@ -833,11 +811,10 @@ proc create_structmsg {numFieldInfos} {
   dict set myDict encoded [list]
   dict set myDict todecode [list]
   dict set myDict encrypted [list]
-  dict set myDict encryptedLgth 0
   dict set myDict encryptedMsg [list]
   dict set myDict decrypted [list]
-  dict set myDict decryptedLgth 0
   dict set myDict decryptedMsg [list]
+  dict set myDict sequenceNum 0
   set ::structmsg($handle) $myDict
   return $handle
 }
