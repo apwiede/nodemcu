@@ -87,10 +87,25 @@ enum structmsg_error_code
   STRUCT_MSG_ERR_NOT_ENCRYPTED = -18,
 };
 
+enum structmsg_special_fields
+{
+  STRUCT_MSG_FIELD_SRC = 1,
+  STRUCT_MSG_FIELD_DST = 2,
+  STRUCT_MSG_FIELD_TOTAL_LGTH = 3,
+  STRUCT_MSG_FIELD_CMD_KEY = 4,
+  STRUCT_MSG_FIELD_CMD_LGTH = 5,
+};
+
 #define STRUCT_MSG_ENCODED      (1 << 0)
 #define STRUCT_MSG_DECODED      (1 << 1)
 #define STRUCT_MSG_FIELD_IS_SET (1 << 2)
 #define STRUCT_MSG_HAS_CRC      (1 << 3)
+
+// header length: uint16_t src + uint16_t dst + uint16_t totalLgth
+#define STRUCT_MSG_HEADER_LENGTH (sizeof(uint16_t) * 3)
+// cmd header length uint16_t cmdKey + unit16_t cmdLgth
+#define STRUCT_MSG_CMD_HEADER_LENGTH (4)
+#define STRUCT_MSG_TOTAL_HEADER_LENGTH (STRUCT_MSG_HEADER_LENGTH + STRUCT_MSG_CMD_HEADER_LENGTH)
 
 typedef int  (*structmsgCodingFcn)(uint8_t *data, int offset);
 
@@ -123,22 +138,32 @@ typedef struct fieldInfo
 } fieldInfo_t;
 
 
-typedef struct msg
-{
-  uint16_t cmdKey;
-  uint16_t cmdLgth;
-  fieldInfo_t *fieldInfos;
-  uint8_t numFieldInfos;
-  uint8_t maxFieldInfos;
-} msg_t;
-
-typedef struct hdr 
+typedef struct hdrKeys
 {
   uint16_t src;
   uint16_t dst;
   uint16_t totalLgth;
+  uint16_t cmdKey;
+  uint16_t cmdLgth;
+} hdrKeys_t;
+
+typedef union keyInfo {
+  hdrKeys_t hdrKeys;
+  uint16_t keyId[5];
+} keyInfo_t;
+
+typedef struct hdr
+{
+  keyInfo_t keyInfo;
   uint8_t headerLgth;
 } hdr_t;
+
+typedef struct msg
+{
+  fieldInfo_t *fieldInfos;
+  uint8_t numFieldInfos;
+  uint8_t maxFieldInfos;
+} msg_t;
 
 typedef struct structmsg
 {
@@ -150,26 +175,23 @@ typedef struct structmsg
   uint8_t *todecode;
   uint8_t *encrypted;
   uint32_t sequenceNum;
+  keyInfo_t *handleKeyInfoPtr;
 } structmsg_t;
 
 int getFieldTypeKey(const uint8_t *str);
-uint8_t *getStructMsgFieldTypeStr(uint8_t key);
+int createMsg(uint8_t numFieldInfos, uint8_t **handle);
+int deleteMsg(const uint8_t *handle);
 int encodeMsg(const uint8_t *handle);
 int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth);
 int decodeMsg(const uint8_t *handle, const uint8_t *data);
+int dumpMsg(const uint8_t *handle);
 int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
-int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
-int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
-int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
-int setFillerAndCrc(const uint8_t *handle);
 int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth);
-int dump_structmsg(const uint8_t *handle);
-//structmsgCodingFcn getStructMsgFieldEncodeFcn(int key);
-//structmsgCodingFcn getStructMsgFieldDecodeFcn(int key);
-int set_targets(const uint8_t *handle, uint16_t src, uint16_t dst, uint16_t cmdKey);
-int new_structmsg(uint8_t numFieldInfos, uint8_t **handle);
-int delete_structmsg(const uint8_t *handle);
-
+int setFillerAndCrc(const uint8_t *handle);
+int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
+int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
+int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
+int decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle);
 #ifdef	__cplusplus
 }
 #endif
