@@ -18,33 +18,35 @@ set srvSock [socket -server handleConnect $PORT]
 
 proc decryptMsg {payload} {
   set offset 0
-  set handle [create_structmsg 5]
-  set_targets $handle 123 456 789
-  addField $handle "@randomNum" uint32_t 4
-  addField $handle "pwd" uint8_t* 16
-  set_fillerAndCrc $handle
-  set decryptedMsg [decrypt_payload $handle "a1b2c3d4e5f6g7h8" $payload]
+  set handle [structmsg_create 5]
+  structmsg_set_fieldValue $handle "@src" 123
+  structmsg_set_fieldValue $handle "@dst" 456
+  structmsg_set_fieldValue $handle "@cmdKey" 789
+  structmsg_add_field $handle "@randomNum" uint32_t 4
+  structmsg_add_field $handle "pwd" uint8_t* 16
+  structmsg_set_fillerAndCrc $handle
+  set decryptedMsg [structmsg_decrypt $handle "a1b2c3d4e5f6g7h8" $payload]
 puts stderr "decryptMsg2 len: [string length $decryptedMsg]!len2: [string length $payload]!"
-#  dump_structmsg $handle
-  decode_msg $handle $decryptedMsg
-  dump_structmsg $handle
+#  structmsg_dump $handle
+  structmsg_decode $handle $decryptedMsg
+  structmsg_dump $handle
 #  puts stderr "DICT:"
 #  pdict [set ::structmsg($handle)]
-  get_fieldValue $handle pwd pwd
+  structmsg_get_fieldValue $handle pwd pwd
 puts stderr "PWD: $pwd!"
-  get_fieldValue $handle @randomNum value
+  structmsg_get_fieldValue $handle @randomNum value
 puts stderr "randomNum: [format 0x%08x $value]!"
-  get_fieldValue $handle @filler value
+  structmsg_get_fieldValue $handle @filler value
 puts stderr "filler: $value!"
-  get_fieldValue $handle @crc value
+  structmsg_get_fieldValue $handle @crc value
 puts stderr "crc: [format 0x%04x $value]!"
-  get_fieldValue $handle @src value
+  structmsg_get_fieldValue $handle @src value
 puts stderr "src: [format {%d 0x%02x} $value $value]!"
-  get_fieldValue $handle @dst value
+  structmsg_get_fieldValue $handle @dst value
 puts stderr "dst: [format {%d 0x%02x} $value $value]!"
-  get_fieldValue $handle @totalLgth value
+  structmsg_get_fieldValue $handle @totalLgth value
 puts stderr "totalLgth: [format {%d 0x%02x} $value $value]!"
-  get_fieldValue $handle @cmdKey value
+  structmsg_get_fieldValue $handle @cmdKey value
 puts stderr "cmdKey: [format {%d 0x%02x} $value $value]!"
 }
 

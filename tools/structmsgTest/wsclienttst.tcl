@@ -35,17 +35,19 @@ puts stderr "clientHandler: $type $msg!"
 
 proc encryptMsg {pwd} {
   set offset 0
-  set handle [create_structmsg 5]
-  set_targets $handle 123 456 789
-  addField $handle "@randomNum" uint32_t 4
-  addField $handle "pwd" uint8_t* 16
-  set_fieldValue $handle "pwd" $pwd
-  set_fillerAndCrc $handle
-  encode_msg $handle
-  set encryptedMsg [encrypt_payload $handle "a1b2c3d4e5f6g7h8"]
+  set handle [structmsg_create 5]
+  structmsg_set_fieldValue $handle "@src" 123
+  structmsg_set_fieldValue $handle "@dst" 456
+  structmsg_set_fieldValue $handle "@cmdKey" 789
+  structmsg_add_field $handle "@randomNum" uint32_t 4
+  structmsg_add_field $handle "pwd" uint8_t* 16
+  structmsg_set_fieldValue $handle "pwd" $pwd
+  structmsg_set_fillerAndCrc $handle
+  structmsg_encode $handle
+  set encryptedMsg [structmsg_encrypt $handle "a1b2c3d4e5f6g7h8"]
 
-#  dump_structmsg $handle
-#  dump_structmsg $handle
+#  structmsg_dump $handle
+#  structmsg_dump $handle
 #  puts stderr "DICT:"
 #  pdict [set ::structmsg($handle)]
   return $encryptedMsg

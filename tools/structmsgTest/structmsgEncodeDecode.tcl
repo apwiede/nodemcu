@@ -214,10 +214,8 @@ proc int16Decode {data offset val} {
 proc uint32Decode {data offset val} {
   upvar $val value
 
-puts stderr "uint32Decode: offset: $offset!"
   set value 0
   binary scan [string range $data $offset $offset] c ch
-puts stderr [format "ch: 0x%02x" $ch]
   set value [expr {$value + ([expr {$ch & 0xFF}] << 24)}]
   incr offset
   binary scan [string range $data $offset $offset] c ch
@@ -364,9 +362,7 @@ proc sequenceNumEncode {dat offset dictVar val} {
   upvar $val value
   upvar $dictVar myDict
 
-puts stderr "sequenceNumEncode: seq: [dict get $myDict sequenceNum]!"
   dict set myDict sequenceNum [expr {[dict get $myDict sequenceNum] + 1}]
-puts stderr "sequenceNumEncode: seq2: [dict get $myDict sequenceNum]!"
   set myVal [dict get $myDict sequenceNum]
   set value $myVal
   return [uint32Encode data $offset $myVal]
@@ -442,9 +438,9 @@ set cnt 0
     set crc [expr {$crc + [format "%d" $pch]}]
 incr cnt
   }
-puts stderr "crc: $crc![format 0x%04x $crc]!"
+#puts stderr "crc1: $crc![format 0x%04x $crc]!"
   set crc [expr {~$crc & 0xFFFF}]
-puts stderr "crc2: $crc![format 0x%04x $crc]!"
+puts stderr "crc: $crc![format 0x%04x $crc]!"
   set offset [uint16Encode data $offset $crc]
   set value $crc
   return $offset
@@ -469,7 +465,7 @@ set cnt 0
 incr cnt
     incr idx
   }
-puts stderr "crcVal end: $crcVal!"
+#puts stderr "crcVal end: $crcVal!"
   set crcVal [expr {~$crcVal & 0xFFFF}]
   set offset [uint16Decode $data $offset crc]
 puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
