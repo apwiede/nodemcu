@@ -17,7 +17,7 @@ print("decrypted pwd: "..tostring(structmsg.getFieldValue(pwdStmsg,"pwd")))
   end)
 end
 
-function startTheWebsocket()
+function startTheWsServer()
   function srvConnected(srv)
     print("==srv is connected")
     srv:listen(port,listenConnected)
