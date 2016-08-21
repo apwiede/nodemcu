@@ -56,15 +56,15 @@ str2key_t structmsgFieldTypes[] = {
   {NULL, -1},
 };
 
-typedef struct handleKey 
+typedef struct handle2Hdr 
 {
   uint8_t *handle;
-  keyInfo_t keyInfo;
-} handleKey_t;
+  hdrInfo_t hdrInfo;
+} handle2Hdr_t;
 
 typedef struct lstructmsg_userdata
 {
-  handleKey_t *handles;
+  handle2Hdr_t *handles;
   int numHandles;
 } lstructmsg_userdata;
 
@@ -142,26 +142,26 @@ static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) 
   }
 }
 
-// ============================= fillKeyInfo ========================
+// ============================= fillHdrInfo ========================
 
-static int  fillKeyInfo(const uint8_t *handle, structmsg_t *structmsg) {
-  keyInfo_t *keyInfoPtr;
+static int  fillHdrInfo(const uint8_t *handle, structmsg_t *structmsg) {
+  hdrInfo_t *hdrInfoPtr;
   int offset;
 
-  // fill the keyInfo
+  // fill the hdrInfo
   structmsg = get_structmsg_ptr(handle);
-  keyInfoPtr = structmsg->handleKeyInfoPtr;
-  *keyInfoPtr = *(&structmsg->hdr.keyInfo);
+  hdrInfoPtr = structmsg->handleHdrInfoPtr;
+  *hdrInfoPtr = *(&structmsg->hdr.hdrInfo);
   offset = 0;
-  offset = uint16Encode((uint8_t *)&keyInfoPtr->keyId, offset, structmsg->hdr.keyInfo.hdrKeys.src);
+  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.src);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&keyInfoPtr->keyId, offset, structmsg->hdr.keyInfo.hdrKeys.dst);
+  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.dst);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&keyInfoPtr->keyId, offset, structmsg->hdr.keyInfo.hdrKeys.totalLgth);
+  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&keyInfoPtr->keyId, offset, structmsg->hdr.keyInfo.hdrKeys.cmdKey);
+  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&keyInfoPtr->keyId, offset, structmsg->hdr.keyInfo.hdrKeys.cmdLgth);
+  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   checkEncodeOffset(offset);
   return STRUCT_MSG_ERR_OK;
 }
@@ -178,7 +178,7 @@ static int getHandle(uint8_t *hdrkey, uint8_t **handle) {
     idx = 0;
     while (idx < structmsg_userdata.numHandles) {
       if (structmsg_userdata.handles[idx].handle != NULL) {
-        if (c_memcmp(&structmsg_userdata.handles[idx].keyInfo.keyId, hdrkey, 10) == 0) {
+        if (c_memcmp(&structmsg_userdata.handles[idx].hdrInfo.hdrId, hdrkey, 10) == 0) {
           *handle = structmsg_userdata.handles[idx].handle;
           return STRUCT_MSG_ERR_OK;
         }
@@ -191,16 +191,16 @@ static int getHandle(uint8_t *hdrkey, uint8_t **handle) {
 
 // ============================= addHandle ========================
 
-static int addHandle(uint8_t *handle, keyInfo_t **keyInfo) {
+static int addHandle(uint8_t *handle, hdrInfo_t **hdrInfo) {
   int idx;
 
   if (structmsg_userdata.handles == NULL) {
-    structmsg_userdata.handles = os_malloc(sizeof(handleKey_t));
+    structmsg_userdata.handles = os_malloc(sizeof(handle2Hdr_t));
     if (structmsg_userdata.handles == NULL) {
       return STRUCT_MSG_ERR_OUT_OF_MEMORY;
     } else {
       structmsg_userdata.handles[structmsg_userdata.numHandles].handle = handle;
-      *keyInfo = &structmsg_userdata.handles[structmsg_userdata.numHandles++].keyInfo;
+      *hdrInfo = &structmsg_userdata.handles[structmsg_userdata.numHandles++].hdrInfo;
       return STRUCT_MSG_ERR_OK;
     }
   } else {
@@ -209,15 +209,15 @@ static int addHandle(uint8_t *handle, keyInfo_t **keyInfo) {
     while (idx < structmsg_userdata.numHandles) {
       if (structmsg_userdata.handles[idx].handle == NULL) {
         structmsg_userdata.handles[idx].handle = handle;
-        *keyInfo = &structmsg_userdata.handles[idx].keyInfo;
+        *hdrInfo = &structmsg_userdata.handles[idx].hdrInfo;
         return STRUCT_MSG_ERR_OK;
       }
       idx++;
     }
-    structmsg_userdata.handles = os_realloc(structmsg_userdata.handles, sizeof(handleKey_t)*(structmsg_userdata.numHandles+1));
+    structmsg_userdata.handles = os_realloc(structmsg_userdata.handles, sizeof(handle2Hdr_t)*(structmsg_userdata.numHandles+1));
     checkAllocOK(structmsg_userdata.handles);
     structmsg_userdata.handles[structmsg_userdata.numHandles].handle = handle;
-    *keyInfo = &structmsg_userdata.handles[structmsg_userdata.numHandles++].keyInfo;
+    *hdrInfo = &structmsg_userdata.handles[structmsg_userdata.numHandles++].hdrInfo;
   }
   return STRUCT_MSG_ERR_OK;
 }
@@ -664,19 +664,19 @@ int setHandleField(const uint8_t *handle, int fieldKey, int fieldValue) {
     if ((structmsg_userdata.handles[idx].handle != NULL) && (c_strcmp(structmsg_userdata.handles[idx].handle, handle) == 0)) {
       switch (fieldKey) {
       case STRUCT_MSG_FIELD_SRC:
-        structmsg_userdata.handles[idx].keyInfo.hdrKeys.src = (uint16_t)fieldValue;
+        structmsg_userdata.handles[idx].hdrInfo.hdrKeys.src = (uint16_t)fieldValue;
         break;
       case STRUCT_MSG_FIELD_DST:
-        structmsg_userdata.handles[idx].keyInfo.hdrKeys.dst = (uint16_t)fieldValue;
+        structmsg_userdata.handles[idx].hdrInfo.hdrKeys.dst = (uint16_t)fieldValue;
         break;
       case STRUCT_MSG_FIELD_TOTAL_LGTH:
-        structmsg_userdata.handles[idx].keyInfo.hdrKeys.totalLgth = (uint16_t)fieldValue;
+        structmsg_userdata.handles[idx].hdrInfo.hdrKeys.totalLgth = (uint16_t)fieldValue;
         break;
       case STRUCT_MSG_FIELD_CMD_KEY:
-        structmsg_userdata.handles[idx].keyInfo.hdrKeys.cmdKey = (uint16_t)fieldValue;
+        structmsg_userdata.handles[idx].hdrInfo.hdrKeys.cmdKey = (uint16_t)fieldValue;
         break;
       case STRUCT_MSG_FIELD_CMD_LGTH:
-        structmsg_userdata.handles[idx].keyInfo.hdrKeys.cmdLgth = (uint16_t)fieldValue;
+        structmsg_userdata.handles[idx].hdrInfo.hdrKeys.cmdLgth = (uint16_t)fieldValue;
         break;
       }
       return result;
@@ -736,17 +736,17 @@ int encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size
 
 int createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   uint8_t *ptr;
-  keyInfo_t *keyInfo;
+  hdrInfo_t *hdrInfo;
   int result;
 
   structmsg_t *structmsg = (void *)os_malloc (sizeof(structmsg_t));
   checkAllocOK(structmsg);
-  structmsg->hdr.keyInfo.hdrKeys.src = 0;
-  structmsg->hdr.keyInfo.hdrKeys.dst = 0;
-  structmsg->hdr.keyInfo.hdrKeys.cmdKey = 0;
-  structmsg->hdr.keyInfo.hdrKeys.cmdLgth = STRUCT_MSG_CMD_HEADER_LENGTH;
+  structmsg->hdr.hdrInfo.hdrKeys.src = 0;
+  structmsg->hdr.hdrInfo.hdrKeys.dst = 0;
+  structmsg->hdr.hdrInfo.hdrKeys.cmdKey = 0;
+  structmsg->hdr.hdrInfo.hdrKeys.cmdLgth = STRUCT_MSG_CMD_HEADER_LENGTH;
   structmsg->hdr.headerLgth = STRUCT_MSG_HEADER_LENGTH;
-  structmsg->hdr.keyInfo.hdrKeys.totalLgth = STRUCT_MSG_TOTAL_HEADER_LENGTH;
+  structmsg->hdr.hdrInfo.hdrKeys.totalLgth = STRUCT_MSG_TOTAL_HEADER_LENGTH;
   structmsg->msg.maxFieldInfos = numFieldInfos;
   structmsg->msg.numFieldInfos = 0;
   structmsg->msg.fieldInfos = newFieldInfos(numFieldInfos);
@@ -754,18 +754,18 @@ int createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   structmsg->encoded = NULL;
   structmsg->todecode = NULL;
   structmsg->encrypted = NULL;
-  structmsg->handleKeyInfoPtr = NULL;
+  structmsg->handleHdrInfoPtr = NULL;
   os_sprintf(structmsg->handle, "%s%p", HANDLE_PREFIX, structmsg);
-  result = addHandle(structmsg->handle, &structmsg->handleKeyInfoPtr);
+  result = addHandle(structmsg->handle, &structmsg->handleHdrInfoPtr);
   if (result != STRUCT_MSG_ERR_OK) {
     os_free(structmsg->msg.fieldInfos);
     deleteHandle(structmsg->handle);
     os_free(structmsg);
     return result;
   }
-  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg->hdr.keyInfo.hdrKeys.cmdLgth);
-  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg->hdr.keyInfo.hdrKeys.totalLgth);
-  result = fillKeyInfo(structmsg->handle, structmsg);
+  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+  result = fillHdrInfo(structmsg->handle, structmsg);
   if (result != STRUCT_MSG_ERR_OK) {
     os_free(structmsg->msg.fieldInfos);
     deleteHandle(structmsg->handle);
@@ -861,18 +861,18 @@ int encodeMsg(const uint8_t *handle) {
   if (structmsg->encoded != NULL) {
     os_free(structmsg->encoded);
   }
-  structmsg->encoded = (uint8_t *)os_zalloc(structmsg->hdr.keyInfo.hdrKeys.totalLgth);
+  structmsg->encoded = (uint8_t *)os_zalloc(structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   msgPtr = structmsg->encoded;
   offset = 0;
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.keyInfo.hdrKeys.src);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.src);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.keyInfo.hdrKeys.dst);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.dst);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.keyInfo.hdrKeys.totalLgth);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.keyInfo.hdrKeys.cmdKey);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.keyInfo.hdrKeys.cmdLgth);
+  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   checkEncodeOffset(offset);
   idx = 0;
   numEntries = structmsg->msg.numFieldInfos;
@@ -904,7 +904,7 @@ int encodeMsg(const uint8_t *handle) {
             }
           } else {
             if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
-              offset = crcEncode(structmsg->encoded, offset, structmsg->hdr.keyInfo.hdrKeys.totalLgth, &crc, structmsg->hdr.headerLgth);
+              offset = crcEncode(structmsg->encoded, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, &crc, structmsg->hdr.headerLgth);
               checkEncodeOffset(offset);
               result = setFieldValue(handle, "@crc", crc, NULL);
               if (result != STRUCT_MSG_ERR_OK) {
@@ -999,7 +999,7 @@ int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth) {
     return STRUCT_MSG_ERR_NOT_ENCODED;
   }
   *encoded = structmsg->encoded;
-  *lgth = structmsg->hdr.keyInfo.hdrKeys.totalLgth;
+  *lgth = structmsg->hdr.hdrInfo.hdrKeys.totalLgth;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -1013,7 +1013,7 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
   int idx;
   int fieldIdx;
   int numEntries;
-  int result;
+  int result = STRUCT_MSG_ERR_OK;
   fieldInfo_t *fieldInfo;
 
   structmsg = get_structmsg_ptr(handle);
@@ -1021,29 +1021,29 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
   if (structmsg->todecode != NULL) {
     os_free(structmsg->todecode);
   }
-  structmsg->todecode = (uint8_t *)os_zalloc(structmsg->hdr.keyInfo.hdrKeys.totalLgth);
-  c_memcpy(structmsg->todecode, data, structmsg->hdr.keyInfo.hdrKeys.totalLgth);
+  structmsg->todecode = (uint8_t *)os_zalloc(structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+  c_memcpy(structmsg->todecode, data, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   msgPtr = structmsg->todecode;
   offset = 0;
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.keyInfo.hdrKeys.src);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.src);
   checkDecodeOffset(offset);
-  result = fillKeyInfo(handle, structmsg);
+//  result = fillHdrInfo(handle, structmsg);
   checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.keyInfo.hdrKeys.dst);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.dst);
   checkDecodeOffset(offset);
-  result = fillKeyInfo(handle, structmsg);
+//  result = fillHdrInfo(handle, structmsg);
   checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.keyInfo.hdrKeys.totalLgth);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkDecodeOffset(offset);
-  result = fillKeyInfo(handle, structmsg);
+//  result = fillHdrInfo(handle, structmsg);
   checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.keyInfo.hdrKeys.cmdKey);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
   checkDecodeOffset(offset);
-  result = fillKeyInfo(handle, structmsg);
+//  result = fillHdrInfo(handle, structmsg);
   checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.keyInfo.hdrKeys.cmdLgth);
+  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   checkDecodeOffset(offset);
-  result = fillKeyInfo(handle, structmsg);
+  result = fillHdrInfo(handle, structmsg);
   idx = 0;
   numEntries = structmsg->msg.numFieldInfos;
   while (idx < numEntries) {
@@ -1062,7 +1062,7 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
             checkDecodeOffset(offset);
           } else {
             if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
-              offset = crcDecode(msgPtr, offset, structmsg->hdr.keyInfo.hdrKeys.cmdLgth, &fieldInfo->value.ushortVal, structmsg->hdr.headerLgth);
+              offset = crcDecode(msgPtr, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, &fieldInfo->value.ushortVal, structmsg->hdr.headerLgth);
               if (offset < 0) {
                 return STRUCT_MSG_ERR_BAD_CRC_VALUE;
               }
@@ -1148,8 +1148,8 @@ int dumpMsg(const uint8_t *handle) {
 
   structmsg = get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
-  ets_printf("handle: %s src: %d dst: %d totalLgth: %d\r\n", structmsg->handle, (int)structmsg->hdr.keyInfo.hdrKeys.src, (int)structmsg->hdr.keyInfo.hdrKeys.dst, (int)structmsg->hdr.keyInfo.hdrKeys.totalLgth);
-  ets_printf("  cmdKey: %d cmdLgth: %d\r\n", (int)structmsg->hdr.keyInfo.hdrKeys.cmdKey, (int)structmsg->hdr.keyInfo.hdrKeys.cmdLgth);
+  ets_printf("handle: %s src: %d dst: %d totalLgth: %d\r\n", structmsg->handle, (int)structmsg->hdr.hdrInfo.hdrKeys.src, (int)structmsg->hdr.hdrInfo.hdrKeys.dst, (int)structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+  ets_printf("  cmdKey: %d cmdLgth: %d\r\n", (int)structmsg->hdr.hdrInfo.hdrKeys.cmdKey, (int)structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   numEntries = structmsg->msg.numFieldInfos;
   ets_printf("  numFieldInfos: %d max: %d\r\n", numEntries, (int)structmsg->msg.maxFieldInfos);
   idx = 0;
@@ -1256,13 +1256,13 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
     if (structmsg->encoded == NULL) {
       return STRUCT_MSG_ERR_NOT_ENCODED;
     }
-    result = encryptdecrypt(structmsg->encoded, structmsg->hdr.keyInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->encrypted, lgth);
+    result = encryptdecrypt(structmsg->encoded, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->encrypted, lgth);
     *buf = structmsg->encrypted;
   } else {
     if (structmsg->encrypted == NULL) {
       return STRUCT_MSG_ERR_NOT_ENCRYPTED;
     }
-    result = encryptdecrypt(structmsg->encrypted, structmsg->hdr.keyInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->todecode, lgth);
+    result = encryptdecrypt(structmsg->encrypted, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->todecode, lgth);
     *buf = structmsg->todecode;
   }
   return result;
@@ -1289,56 +1289,58 @@ int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, 
   switch (fieldType) {
     case STRUCT_MSG_FIELD_UINT8_T:
     case STRUCT_MSG_FIELD_INT8_T:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += 1;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += 1;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 1;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 1;
       fieldLgth = 1;
       break;
     case STRUCT_MSG_FIELD_UINT16_T:
     case STRUCT_MSG_FIELD_INT16_T:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += 2;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += 2;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 2;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 2;
       fieldLgth = 2;
       break;
     case STRUCT_MSG_FIELD_UINT32_T:
     case STRUCT_MSG_FIELD_INT32_T:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += 4;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += 4;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 4;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 4;
       fieldLgth = 4;
       break;
     case STRUCT_MSG_FIELD_UINT8_VECTOR:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
       fieldInfo->value.ubyteVector = (uint8_t *)os_malloc(fieldLgth + 1);
       fieldInfo->value.ubyteVector[fieldLgth] = '\0';
       break;
     case STRUCT_MSG_FIELD_INT8_VECTOR:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
       fieldInfo->value.byteVector = (int8_t *)os_malloc(fieldLgth + 1);
       fieldInfo->value.ubyteVector[fieldLgth] = '\0';
       break;
     case STRUCT_MSG_FIELD_UINT16_VECTOR:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
       fieldInfo->value.ushortVector = (uint16_t *)os_malloc(fieldLgth*sizeof(uint16_t));
       break;
     case STRUCT_MSG_FIELD_INT16_VECTOR:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
       fieldInfo->value.shortVector = (int16_t *)os_malloc(fieldLgth*sizeof(int16_t));
       break;
     case STRUCT_MSG_FIELD_UINT32_VECTOR:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
       fieldInfo->value.uint32Vector = (uint32_t *)os_malloc(fieldLgth*sizeof(uint32_t));
       break;
     case STRUCT_MSG_FIELD_INT32_VECTOR:
-      structmsg->hdr.keyInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.keyInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
       fieldInfo->value.int32Vector = (int32_t *)os_malloc(fieldLgth*sizeof(int32_t));
       break;
   }
-  result = fillKeyInfo(handle, structmsg);
+  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+  result = fillHdrInfo(handle, structmsg);
   fieldInfo->fieldLgth = fieldLgth;
   structmsg->msg.numFieldInfos++;
   return result;
@@ -1354,7 +1356,7 @@ int setFillerAndCrc(const uint8_t *handle) {
 
   structmsg = get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
-  myLgth = structmsg->hdr.keyInfo.hdrKeys.cmdLgth + 2;
+  myLgth = structmsg->hdr.hdrInfo.hdrKeys.cmdLgth + 2;
   while ((myLgth % 16) != 0) {
     myLgth++;
     fillerLgth++;
@@ -1384,9 +1386,9 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
   if (c_strcmp(fieldName, "@src") == 0) {
     if (stringValue == NULL) {
       if ((numericValue >= 0) && (numericValue <= 65535)) {
-        structmsg->hdr.keyInfo.hdrKeys.src = (uint16_t)numericValue;
-        setHandleField(handle, STRUCT_MSG_FIELD_SRC, structmsg->hdr.keyInfo.hdrKeys.src);
-        result = fillKeyInfo(handle, structmsg);
+        structmsg->hdr.hdrInfo.hdrKeys.src = (uint16_t)numericValue;
+        setHandleField(handle, STRUCT_MSG_FIELD_SRC, structmsg->hdr.hdrInfo.hdrKeys.src);
+        result = fillHdrInfo(handle, structmsg);
         return result;
       } else {
         return STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -1398,9 +1400,9 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
     if (c_strcmp(fieldName, "@dst") == 0) {
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 65535)) {
-          structmsg->hdr.keyInfo.hdrKeys.dst = (uint16_t)numericValue;
-          setHandleField(handle, STRUCT_MSG_FIELD_DST, structmsg->hdr.keyInfo.hdrKeys.dst);
-          result = fillKeyInfo(handle, structmsg);
+          structmsg->hdr.hdrInfo.hdrKeys.dst = (uint16_t)numericValue;
+          setHandleField(handle, STRUCT_MSG_FIELD_DST, structmsg->hdr.hdrInfo.hdrKeys.dst);
+          result = fillHdrInfo(handle, structmsg);
           return result;
         } else {
           return STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -1412,9 +1414,9 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
       if (c_strcmp(fieldName, "@cmdKey") == 0) {
         if (stringValue == NULL) {
           if ((numericValue >= 0) && (numericValue <= 65535)) {
-            structmsg->hdr.keyInfo.hdrKeys.cmdKey = (uint16_t)numericValue;
-            setHandleField(handle, STRUCT_MSG_FIELD_CMD_KEY, structmsg->hdr.keyInfo.hdrKeys.cmdKey);
-            result = fillKeyInfo(handle, structmsg);
+            structmsg->hdr.hdrInfo.hdrKeys.cmdKey = (uint16_t)numericValue;
+            setHandleField(handle, STRUCT_MSG_FIELD_CMD_KEY, structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
+            result = fillHdrInfo(handle, structmsg);
             return result;
           } else {
             return STRUCT_MSG_ERR_VALUE_TOO_BIG;

@@ -147,14 +147,14 @@ typedef struct hdrKeys
   uint16_t cmdLgth;
 } hdrKeys_t;
 
-typedef union keyInfo {
+typedef union hdrInfo {
   hdrKeys_t hdrKeys;
-  uint16_t keyId[5];
-} keyInfo_t;
+  uint8_t hdrId[sizeof(hdrKeys_t)];
+} hdrInfo_t;
 
 typedef struct hdr
 {
-  keyInfo_t keyInfo;
+  hdrInfo_t hdrInfo;
   uint8_t headerLgth;
 } hdr_t;
 
@@ -175,7 +175,7 @@ typedef struct structmsg
   uint8_t *todecode;
   uint8_t *encrypted;
   uint32_t sequenceNum;
-  keyInfo_t *handleKeyInfoPtr;
+  hdrInfo_t *handleHdrInfoPtr;
 } structmsg_t;
 
 int getFieldTypeKey(const uint8_t *str);

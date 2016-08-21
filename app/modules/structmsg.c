@@ -301,22 +301,6 @@ static int structmsg_set_fieldValue( lua_State* L ) {
   return 1;
 }
 
-// ============================= structmsg_set_crypted ========================
-
-static int structmsg_set_crypted( lua_State* L ) {
-  const char *handle;
-  const uint8_t *fieldName;
-  int cryptedLen;
-  const uint8_t *crypted;
-  int result;
-
-  handle = luaL_checkstring( L, 1 );
-  crypted = luaL_checklstring( L, 2, &cryptedLen );
-  result = setCrypted(handle, crypted, cryptedLen);
-  checkErrOK(L, result, "setcrypted", "");
-  return 1;
-}
-
 // ============================= structmsg_get_fieldValue ========================
 
 static int structmsg_get_fieldValue( lua_State* L ) {
@@ -335,6 +319,22 @@ static int structmsg_get_fieldValue( lua_State* L ) {
   } else {
     lua_pushstring(L, stringValue);
   }
+  return 1;
+}
+
+// ============================= structmsg_set_crypted ========================
+
+static int structmsg_set_crypted( lua_State* L ) {
+  const char *handle;
+  const uint8_t *fieldName;
+  int cryptedLen;
+  const uint8_t *crypted;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  crypted = luaL_checklstring( L, 2, &cryptedLen );
+  result = setCrypted(handle, crypted, cryptedLen);
+  checkErrOK(L, result, "setcrypted", "");
   return 1;
 }
 
