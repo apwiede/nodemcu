@@ -178,20 +178,20 @@ typedef struct structmsg
   hdrInfo_t *handleHdrInfoPtr;
 } structmsg_t;
 
-int getFieldTypeKey(const uint8_t *str);
-int createMsg(uint8_t numFieldInfos, uint8_t **handle);
-int deleteMsg(const uint8_t *handle);
-int encodeMsg(const uint8_t *handle);
-int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth);
-int decodeMsg(const uint8_t *handle, const uint8_t *data);
-int dumpMsg(const uint8_t *handle);
-int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
-int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth);
-int setFillerAndCrc(const uint8_t *handle);
-int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
-int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
-int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
-int decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle);
+int stmsg_getFieldTypeKey(const uint8_t *str);
+int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle);
+int stmsg_deleteMsg(const uint8_t *handle);
+int stmsg_encodeMsg(const uint8_t *handle);
+int stmsg_getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth);
+int stmsg_decodeMsg(const uint8_t *handle, const uint8_t *data);
+int stmsg_dumpMsg(const uint8_t *handle);
+int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
+int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth);
+int stmsg_setFillerAndCrc(const uint8_t *handle);
+int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
+int stmsg_getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
+int stmsg_setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
+int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle);
 #ifdef	__cplusplus
 }
 #endif

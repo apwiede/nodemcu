@@ -626,7 +626,7 @@ static fieldInfo_t *newFieldInfos(uint8_t numFieldInfos)
 
 // ============================= getFieldTypeKey ========================
 
-int getFieldTypeKey(const uint8_t *str) {
+int stmsg_getFieldTypeKey(const uint8_t *str) {
   str2key_t *entry = &structmsgFieldTypes[0];
   while (entry->str != NULL) {
     if (c_strcmp(entry->str, str) == 0) {
@@ -639,7 +639,7 @@ int getFieldTypeKey(const uint8_t *str) {
 
 // ============================= getFieldTypeStr ========================
 
-uint8_t *getFieldTypeStr(uint8_t key) {
+static uint8_t *getFieldTypeStr(uint8_t key) {
   str2key_t *entry = &structmsgFieldTypes[0];
   while (entry->str != NULL) {
     if (entry->key == key) {
@@ -652,7 +652,7 @@ uint8_t *getFieldTypeStr(uint8_t key) {
 
 // ============================= setHandleField ========================
 
-int setHandleField(const uint8_t *handle, int fieldKey, int fieldValue) {
+static int setHandleField(const uint8_t *handle, int fieldKey, int fieldValue) {
   int idx;
   int result = STRUCT_MSG_ERR_OK;
 
@@ -688,7 +688,7 @@ int setHandleField(const uint8_t *handle, int fieldKey, int fieldValue) {
 
 // ============================= encryptdecrypt ========================
 
-int encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
+static int encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
   const crypto_mech_t *mech;
   const char *data;
   size_t dlen;
@@ -732,9 +732,9 @@ int encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size
   }
 }
 
-// ============================= createMsg ========================
+// ============================= stmsg_createMsg ========================
 
-int createMsg(uint8_t numFieldInfos, uint8_t **handle) {
+int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   uint8_t *ptr;
   hdrInfo_t *hdrInfo;
   int result;
@@ -776,9 +776,9 @@ int createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   return result;
 }
 
-// ============================= deleteMsg ========================
+// ============================= stmsg_deleteMsg ========================
 
-int deleteMsg(const uint8_t *handle) {
+int stmsg_deleteMsg(const uint8_t *handle) {
   structmsg_t *structmsg;
   int idx;
 
@@ -837,9 +837,9 @@ int deleteMsg(const uint8_t *handle) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= encodeMsg ========================
+// ============================= stmsg_encodeMsg ========================
 
-int encodeMsg(const uint8_t *handle) {
+int stmsg_encodeMsg(const uint8_t *handle) {
   structmsg_t *structmsg;
   uint8_t *msgPtr;
   uint16_t *ushortPtr;
@@ -882,7 +882,7 @@ int encodeMsg(const uint8_t *handle) {
       if (c_strcmp(fieldInfo->fieldStr, "@randomNum") == 0) {
         offset = randomNumEncode(msgPtr, offset, &randomNum);
         checkEncodeOffset(offset);
-        result = setFieldValue(handle, "@randomNum", randomNum, NULL);
+        result = stmsg_setFieldValue(handle, "@randomNum", randomNum, NULL);
         if (result != STRUCT_MSG_ERR_OK) {
           return result;
         }
@@ -890,7 +890,7 @@ int encodeMsg(const uint8_t *handle) {
         if (c_strcmp(fieldInfo->fieldStr, "@sequenceNum") == 0) {
           offset = sequenceNumEncode(msgPtr, offset, structmsg, &sequenceNum);
           checkEncodeOffset(offset);
-          result = setFieldValue(handle, "@sequenceNum", sequenceNum, NULL);
+          result = stmsg_setFieldValue(handle, "@sequenceNum", sequenceNum, NULL);
           if (result != STRUCT_MSG_ERR_OK) {
             return result;
           }
@@ -898,7 +898,7 @@ int encodeMsg(const uint8_t *handle) {
           if (c_strcmp(fieldInfo->fieldStr, "@filler") == 0) {
             offset = fillerEncode(msgPtr, offset, fieldInfo->fieldLgth, fieldInfo->value.ubyteVector);
             checkEncodeOffset(offset);
-            result = setFieldValue(handle, "@filler", 0, fieldInfo->value.ubyteVector);
+            result = stmsg_setFieldValue(handle, "@filler", 0, fieldInfo->value.ubyteVector);
             if (result != STRUCT_MSG_ERR_OK) {
               return result;
             }
@@ -906,7 +906,7 @@ int encodeMsg(const uint8_t *handle) {
             if (c_strcmp(fieldInfo->fieldStr, "@crc") == 0) {
               offset = crcEncode(structmsg->encoded, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, &crc, structmsg->hdr.headerLgth);
               checkEncodeOffset(offset);
-              result = setFieldValue(handle, "@crc", crc, NULL);
+              result = stmsg_setFieldValue(handle, "@crc", crc, NULL);
               if (result != STRUCT_MSG_ERR_OK) {
                 return result;
               }
@@ -988,9 +988,9 @@ int encodeMsg(const uint8_t *handle) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= getEncoded ========================
+// ============================= stmsg_getEncoded ========================
 
-int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth) {
+int stmsg_getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth) {
   structmsg_t *structmsg;
 
   structmsg = get_structmsg_ptr(handle);
@@ -1003,9 +1003,9 @@ int getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= decodeMsg ========================
+// ============================= stmsg_decodeMsg ========================
 
-int decodeMsg(const uint8_t *handle, const uint8_t *data) {
+int stmsg_decodeMsg(const uint8_t *handle, const uint8_t *data) {
   structmsg_t *structmsg;
   const uint8_t *msgPtr;
   uint16_t crc;
@@ -1132,9 +1132,9 @@ int decodeMsg(const uint8_t *handle, const uint8_t *data) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= dumpMsg ========================
+// ============================= stmsg_dumpMsg ========================
 
-int dumpMsg(const uint8_t *handle) {
+int stmsg_dumpMsg(const uint8_t *handle) {
   int numEntries;
   int idx;
   int valueIdx;
@@ -1241,9 +1241,9 @@ int dumpMsg(const uint8_t *handle) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= encdec ========================
+// ============================= stmsg_encdec ========================
 
-int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
+int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
   structmsg_t *structmsg;
   int result;
 
@@ -1268,9 +1268,9 @@ int encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t
   return result;
 } 
 
-// ============================= addField ========================
+// ============================= stmsg_addField ========================
 
-int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth) {
+int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth) {
   uint16_t fieldKey;
   int result;
   structmsg_t *structmsg;
@@ -1346,9 +1346,9 @@ int addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, 
   return result;
 }
 
-// ============================= setFillerAndCrc ========================
+// ============================= stmsg_setFillerAndCrc ========================
 
-int setFillerAndCrc(const uint8_t *handle) {
+int stmsg_setFillerAndCrc(const uint8_t *handle) {
   structmsg_t *structmsg;
   int16_t fillerLgth = 0;
   int16_t myLgth = 0;
@@ -1361,20 +1361,20 @@ int setFillerAndCrc(const uint8_t *handle) {
     myLgth++;
     fillerLgth++;
   }
-  result = addField(handle, "@filler", STRUCT_MSG_FIELD_UINT8_VECTOR, fillerLgth);
+  result = stmsg_addField(handle, "@filler", STRUCT_MSG_FIELD_UINT8_VECTOR, fillerLgth);
   if (result != STRUCT_MSG_ERR_OK) {
     return result;
   }
-  result = addField(handle, "@crc", STRUCT_MSG_FIELD_UINT16_T, 1);
+  result = stmsg_addField(handle, "@crc", STRUCT_MSG_FIELD_UINT16_T, 1);
   if (result != STRUCT_MSG_ERR_OK) {
     return result;
   }
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= setFieldValue ========================
+// ============================= stmsg_setFieldValue ========================
 
-int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
+int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
   structmsg_t *structmsg;
   fieldInfo_t *fieldInfo;
   int idx;
@@ -1557,9 +1557,9 @@ int setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericVa
   return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
 
-// ============================= getFieldValue ========================
+// ============================= stmsg_getFieldValue ========================
 
-int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
+int stmsg_getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
   structmsg_t *structmsg;
   fieldInfo_t *fieldInfo;
   int idx;
@@ -1659,9 +1659,9 @@ int getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericV
   return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
 
-// ============================= setCrypted ========================
+// ============================= stmsg_setCrypted ========================
 
-int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth) {
+int stmsg_setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth) {
   structmsg_t *structmsg;
   fieldInfo_t *fieldInfo;
 
@@ -1673,9 +1673,9 @@ int setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= decryptGetHandle ========================
+// ============================= stmsg_decryptGetHandle ========================
 
-int decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle) {
+int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle) {
   uint8_t *decrypted;
   size_t lgth;
   int result;
