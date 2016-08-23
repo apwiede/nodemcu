@@ -1,5 +1,6 @@
 source pdict.tcl
 source structmsgEncodeDecode.tcl
+source structmsgDescription.tcl
 
 package require aes
 
@@ -336,7 +337,7 @@ proc structmsg_get_encodedMsg {handle} {
 
 }
 
-# ============================= strucmsg_decode ========================
+# ============================= structmsg_decode ========================
 
 proc structmsg_decode {handle todecode} {
   if {![info exists ::structmsg($handle)]} {
