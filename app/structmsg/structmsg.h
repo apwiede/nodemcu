@@ -50,50 +50,65 @@ extern "C" {
 
 enum structmsg_field_type
 {
-  STRUCT_MSG_FIELD_UINT8_T,
-  STRUCT_MSG_FIELD_INT8_T,
-  STRUCT_MSG_FIELD_UINT16_T,
-  STRUCT_MSG_FIELD_INT16_T,
-  STRUCT_MSG_FIELD_UINT32_T,
-  STRUCT_MSG_FIELD_INT32_T,
-  STRUCT_MSG_FIELD_UINT8_VECTOR,
-  STRUCT_MSG_FIELD_INT8_VECTOR,
-  STRUCT_MSG_FIELD_UINT16_VECTOR,
-  STRUCT_MSG_FIELD_INT16_VECTOR,
-  STRUCT_MSG_FIELD_UINT32_VECTOR,
-  STRUCT_MSG_FIELD_INT32_VECTOR,
+  STRUCT_MSG_FIELD_UINT8_T       = 1,
+  STRUCT_MSG_FIELD_INT8_T        = 2,
+  STRUCT_MSG_FIELD_UINT16_T      = 3,
+  STRUCT_MSG_FIELD_INT16_T       = 4,
+  STRUCT_MSG_FIELD_UINT32_T      = 5,
+  STRUCT_MSG_FIELD_INT32_T       = 6,
+  STRUCT_MSG_FIELD_UINT8_VECTOR  = 7,
+  STRUCT_MSG_FIELD_INT8_VECTOR   = 8,
+  STRUCT_MSG_FIELD_UINT16_VECTOR = 9,
+  STRUCT_MSG_FIELD_INT16_VECTOR  = 10,
+  STRUCT_MSG_FIELD_UINT32_VECTOR = 11,
+  STRUCT_MSG_FIELD_INT32_VECTOR  = 12,
+};
+
+enum structmsg_special_field_names
+{
+  STRUCT_MSG_SPEC_FIELD_SRC          = -1,
+  STRUCT_MSG_SPEC_FIELD_DST          = -2,
+  STRUCT_MSG_SPEC_FIELD_TARGET_CMD   = -3,
+  STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH   = -4,
+  STRUCT_MSG_SPEC_FIELD_CMD_KEY      = -5,
+  STRUCT_MSG_SPEC_FIELD_CMD_LGTH     = -6,
+  STRUCT_MSG_SPEC_FIELD_RANDOM_NUM   = -7,
+  STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM = -8,
+  STRUCT_MSG_SPEC_FIELD_FILLER       = -9,
+  STRUCT_MSG_SPEC_FIELD_CRC          = -10,
+  STRUCT_MSG_SPEC_FIELD_ID           = -11,
 };
 
 enum structmsg_error_code
 {
-  STRUCT_MSG_ERR_OK = 0,
-  STRUCT_MSG_ERR_VALUE_NOT_SET = -1,
-  STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE = -2,
-  STRUCT_MSG_ERR_BAD_VALUE = -3,
-  STRUCT_MSG_ERR_BAD_FIELD_TYPE = -4,
-  STRUCT_MSG_ERR_FIELD_NOT_FOUND = -5,
-  STRUCT_MSG_ERR_VALUE_TOO_BIG = -6,
-  STRUCT_MSG_ERR_BAD_SPECIAL_FIELD = -7,
-  STRUCT_MSG_ERR_BAD_HANDLE = -8,
-  STRUCT_MSG_ERR_OUT_OF_MEMORY = -9,
-  STRUCT_MSG_ERR_HANDLE_NOT_FOUND = -10,
-  STRUCT_MSG_ERR_NOT_ENCODED = -11,
-  STRUCT_MSG_ERR_ENCODE_ERROR = -12,
-  STRUCT_MSG_ERR_DECODE_ERROR = -13,
-  STRUCT_MSG_ERR_BAD_CRC_VALUE = -14,
-  STRUCT_MSG_ERR_CRYPTO_INIT_FAILED = -15,
-  STRUCT_MSG_ERR_CRYPTO_OP_FAILED = -16,
+  STRUCT_MSG_ERR_OK                   = 0,
+  STRUCT_MSG_ERR_VALUE_NOT_SET        = -1,
+  STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE   = -2,
+  STRUCT_MSG_ERR_BAD_VALUE            = -3,
+  STRUCT_MSG_ERR_BAD_FIELD_TYPE       = -4,
+  STRUCT_MSG_ERR_FIELD_NOT_FOUND      = -5,
+  STRUCT_MSG_ERR_VALUE_TOO_BIG        = -6,
+  STRUCT_MSG_ERR_BAD_SPECIAL_FIELD    = -7,
+  STRUCT_MSG_ERR_BAD_HANDLE           = -8,
+  STRUCT_MSG_ERR_OUT_OF_MEMORY        = -9,
+  STRUCT_MSG_ERR_HANDLE_NOT_FOUND     = -10,
+  STRUCT_MSG_ERR_NOT_ENCODED          = -11,
+  STRUCT_MSG_ERR_ENCODE_ERROR         = -12,
+  STRUCT_MSG_ERR_DECODE_ERROR         = -13,
+  STRUCT_MSG_ERR_BAD_CRC_VALUE        = -14,
+  STRUCT_MSG_ERR_CRYPTO_INIT_FAILED   = -15,
+  STRUCT_MSG_ERR_CRYPTO_OP_FAILED     = -16,
   STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM = -17,
-  STRUCT_MSG_ERR_NOT_ENCRYPTED = -18,
+  STRUCT_MSG_ERR_NOT_ENCRYPTED        = -18,
 };
 
 enum structmsg_special_fields
 {
-  STRUCT_MSG_FIELD_SRC = 1,
-  STRUCT_MSG_FIELD_DST = 2,
-  STRUCT_MSG_FIELD_TOTAL_LGTH = 3,
-  STRUCT_MSG_FIELD_CMD_KEY = 4,
-  STRUCT_MSG_FIELD_CMD_LGTH = 5,
+  STRUCT_MSG_FIELD_SRC                = 1,
+  STRUCT_MSG_FIELD_DST                = 2,
+  STRUCT_MSG_FIELD_TOTAL_LGTH         = 3,
+  STRUCT_MSG_FIELD_CMD_KEY            = 4,
+  STRUCT_MSG_FIELD_CMD_LGTH           = 5,
 };
 
 #define STRUCT_MSG_ENCODED      (1 << 0)
@@ -107,12 +122,46 @@ enum structmsg_special_fields
 #define STRUCT_MSG_CMD_HEADER_LENGTH (4)
 #define STRUCT_MSG_TOTAL_HEADER_LENGTH (STRUCT_MSG_HEADER_LENGTH + STRUCT_MSG_CMD_HEADER_LENGTH)
 
-typedef int  (*structmsgCodingFcn)(uint8_t *data, int offset);
+#define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
+#define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
+#define checkAllocOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_OUT_OF_MEMORY
+#define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
+#define checkErrOK(result) if(result != STRUCT_MSG_ERR_OK) return result
+
+//typedef int  (*structmsgCodingFcn)(uint8_t *data, int offset);
 
 typedef struct str2key {
   uint8_t *str;
   uint8_t key;
 } str2key_t;
+
+typedef struct fieldInfoDefinition
+{
+  uint8_t fieldKey;
+  uint8_t fieldType;
+  uint16_t fieldLgth;
+} fieldInfoDefinition_t;
+
+typedef struct stmsgDefinition
+{
+  size_t numFields;
+  uint8_t *name;
+  fieldInfoDefinition_t *fieldInfos;
+} stmsgDefinition_t;
+
+typedef struct fieldNameDefinitions
+{
+  size_t numDefinitions;
+  size_t maxDefinitions;
+  str2key_t *definitions;
+} fieldNameDefinitions_t;
+
+typedef struct stmsgDefinitions
+{
+  size_t numDefinitions;
+  size_t maxDefinitions;
+  stmsgDefinition_t *definitions;
+} stmsgDefinitions_t;
 
 typedef struct fieldInfo
 {
@@ -178,7 +227,10 @@ typedef struct structmsg
   hdrInfo_t *handleHdrInfoPtr;
 } structmsg_t;
 
+extern str2key_t structmsgFieldTypes[];
+
 int stmsg_getFieldTypeKey(const uint8_t *str);
+uint8_t *stmsg_getFieldTypeStr(uint8_t key);
 int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle);
 int stmsg_deleteMsg(const uint8_t *handle);
 int stmsg_encodeMsg(const uint8_t *handle);

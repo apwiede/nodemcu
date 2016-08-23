@@ -60,9 +60,9 @@ static int structmsg_error( lua_State* L, const char *fmt, ... ) {
   return 0;
 }
 
-// ============================= checkErrOK ========================
+// ============================= checkOKOrErr ========================
 
-static int checkErrOK( lua_State* L, int result, const uint8_t *where, const uint8_t *fieldName ) {
+static int checkOKOrErr( lua_State* L, int result, const uint8_t *where, const uint8_t *fieldName ) {
   if (result == STRUCT_MSG_ERR_OK) {
     return 1;
   }
@@ -137,7 +137,7 @@ static int structmsg_encdec (lua_State *L, bool enc) {
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushlstring (L, buf, lgth);
   }
-  checkErrOK(L, result, "encrypt/decrypt", "");
+  checkOKOrErr(L, result, "encrypt/decrypt", "");
   return 1;
 }
 
@@ -151,7 +151,7 @@ static int structmsg_create( lua_State* L )
 
   numFieldInfos = luaL_checkinteger( L, 1 );
   result = stmsg_createMsg ( numFieldInfos, &handle);
-  if (checkErrOK(L, result, "new", "")) {
+  if (checkOKOrErr(L, result, "new", "")) {
     lua_pushstring( L, handle );
   }
   return 1;
@@ -167,7 +167,7 @@ static int structmsg_delete( lua_State* L )
 ets_printf("structmsg_delete called\n");
   handle = luaL_checkstring( L, 1 );
   result = stmsg_deleteMsg(handle);
-  checkErrOK(L, result, "delete", "");
+  checkOKOrErr(L, result, "delete", "");
   return 1;
 }
 
@@ -179,7 +179,7 @@ static int structmsg_encode( lua_State* L ) {
 
   handle = luaL_checkstring( L, 1 );
   result = stmsg_encodeMsg(handle);
-  checkErrOK(L, result, "encode", "");
+  checkOKOrErr(L, result, "encode", "");
   return 1;
 }
 
@@ -193,7 +193,7 @@ static int structmsg_get_encoded( lua_State* L ) {
 
   handle = luaL_checkstring( L, 1 );
   result = stmsg_getEncoded(handle, &encoded, &lgth);
-  if (checkErrOK(L, result, "getencoded", "")) {
+  if (checkOKOrErr(L, result, "getencoded", "")) {
     lua_pushlstring(L, encoded, lgth);
   }
   return 1;
@@ -209,7 +209,7 @@ static int structmsg_decode( lua_State* L ) {
   handle = luaL_checkstring( L, 1 );
   data = luaL_checkstring( L, 2 );
   result = stmsg_decodeMsg(handle, data);
-  checkErrOK(L, result, "decode", "");
+  checkOKOrErr(L, result, "decode", "");
   return 1;
 }
 
@@ -222,7 +222,7 @@ static int structmsg_dump( lua_State* L )
 
   handle = luaL_checkstring( L, 1 );
   result = stmsg_dumpMsg(handle);
-  checkErrOK(L, result, "dump", "");
+  checkOKOrErr(L, result, "dump", "");
   return 1;
 }
 
@@ -258,7 +258,7 @@ static int structmsg_add_field( lua_State* L ) {
       fieldLgth = 1;
   }
   result = stmsg_addField(handle, fieldStr, fieldType, fieldLgth);
-  checkErrOK(L, result, "addField", "");
+  checkOKOrErr(L, result, "addField", "");
   return 1;
 }
 
@@ -274,7 +274,7 @@ static int structmsg_set_fillerAndCrc( lua_State* L )
 
   handle = luaL_checkstring( L, 1 );
   result = stmsg_setFillerAndCrc ( handle );
-  checkErrOK(L, result, "setFillerAndCrc", "");
+  checkOKOrErr(L, result, "setFillerAndCrc", "");
   return 1;
 }
 
@@ -297,7 +297,7 @@ static int structmsg_set_fieldValue( lua_State* L ) {
     stringValue = lua_tostring(L, 3);
   }
   result = stmsg_setFieldValue(handle, fieldName, numericValue, stringValue);
-  checkErrOK(L, result, "setFieldValue", fieldName);
+  checkOKOrErr(L, result, "setFieldValue", fieldName);
   return 1;
 }
 
@@ -313,7 +313,7 @@ static int structmsg_get_fieldValue( lua_State* L ) {
   handle = luaL_checkstring( L, 1 );
   fieldName = luaL_checkstring( L, 2 );
   result = stmsg_getFieldValue(handle, fieldName, &numericValue, &stringValue);
-  checkErrOK(L, result, "getFieldValue", fieldName);
+  checkOKOrErr(L, result, "getFieldValue", fieldName);
   if (stringValue == NULL) {
     lua_pushinteger(L, numericValue);
   } else {
@@ -334,7 +334,7 @@ static int structmsg_set_crypted( lua_State* L ) {
   handle = luaL_checkstring( L, 1 );
   crypted = luaL_checklstring( L, 2, &cryptedLen );
   result = stmsg_setCrypted(handle, crypted, cryptedLen);
-  checkErrOK(L, result, "setcrypted", "");
+  checkOKOrErr(L, result, "setcrypted", "");
   return 1;
 }
 
@@ -357,7 +357,7 @@ static int structmsg_decrypt_getHandle( lua_State* L ) {
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushstring (L, handle);
   }
-  checkErrOK(L, result, "decryptgethandle", "");
+  checkOKOrErr(L, result, "decryptgethandle", "");
   return 1;
 }
 

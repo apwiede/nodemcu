@@ -38,24 +38,6 @@
 #include "structmsg.h"
 #include "../crypto/mech.h"
 
-#define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
-#define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
-#define checkAllocOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_OUT_OF_MEMORY
-#define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
-#define checkErrOK(result) if(result != STRUCT_MSG_ERR_OK) return result
-
-str2key_t structmsgFieldTypes[] = {
-  {"uint8_t", STRUCT_MSG_FIELD_UINT8_T},
-  {"int8_t", STRUCT_MSG_FIELD_INT8_T},
-  {"uint16_t", STRUCT_MSG_FIELD_UINT16_T},
-  {"int16_t", STRUCT_MSG_FIELD_INT16_T},
-  {"uint32_t", STRUCT_MSG_FIELD_UINT32_T},
-  {"int32_t", STRUCT_MSG_FIELD_INT32_T},
-  {"uint8_t*", STRUCT_MSG_FIELD_UINT8_VECTOR},
-  {"int8_t*", STRUCT_MSG_FIELD_INT8_VECTOR},
-  {NULL, -1},
-};
-
 typedef struct handle2Hdr 
 {
   uint8_t *handle;
@@ -153,15 +135,15 @@ static int  fillHdrInfo(const uint8_t *handle, structmsg_t *structmsg) {
   hdrInfoPtr = structmsg->handleHdrInfoPtr;
   *hdrInfoPtr = *(&structmsg->hdr.hdrInfo);
   offset = 0;
-  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.src);
+  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.src);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.dst);
+  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.dst);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
+  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
   checkEncodeOffset(offset);
-  offset = uint16Encode((uint8_t *)&hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   checkEncodeOffset(offset);
   return STRUCT_MSG_ERR_OK;
 }
@@ -178,7 +160,7 @@ static int getHandle(uint8_t *hdrkey, uint8_t **handle) {
     idx = 0;
     while (idx < structmsg_userdata.numHandles) {
       if (structmsg_userdata.handles[idx].handle != NULL) {
-        if (c_memcmp(&structmsg_userdata.handles[idx].hdrInfo.hdrId, hdrkey, 10) == 0) {
+        if (c_memcmp(structmsg_userdata.handles[idx].hdrInfo.hdrId, hdrkey, STRUCT_MSG_TOTAL_HEADER_LENGTH) == 0) {
           *handle = structmsg_userdata.handles[idx].handle;
           return STRUCT_MSG_ERR_OK;
         }
@@ -622,32 +604,6 @@ static fieldInfo_t *newFieldInfos(uint8_t numFieldInfos)
 {
   fieldInfo_t *ptr = (fieldInfo_t *)os_malloc (sizeof(fieldInfo_t) * numFieldInfos);
   return ptr;
-}
-
-// ============================= getFieldTypeKey ========================
-
-int stmsg_getFieldTypeKey(const uint8_t *str) {
-  str2key_t *entry = &structmsgFieldTypes[0];
-  while (entry->str != NULL) {
-    if (c_strcmp(entry->str, str) == 0) {
-      return entry->key;
-    }
-    entry++;
-  }
-  return -1;
-}
-
-// ============================= getFieldTypeStr ========================
-
-static uint8_t *getFieldTypeStr(uint8_t key) {
-  str2key_t *entry = &structmsgFieldTypes[0];
-  while (entry->str != NULL) {
-    if (entry->key == key) {
-      return entry->str;
-    }
-    entry++;
-  }
-  return NULL;
 }
 
 // ============================= setHandleField ========================
@@ -1155,7 +1111,7 @@ int stmsg_dumpMsg(const uint8_t *handle) {
   idx = 0;
   while (idx < numEntries) {
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[idx];
-    ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, getFieldTypeStr(fieldInfo->fieldType), fieldInfo->fieldLgth);
+    ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, stmsg_getFieldTypeStr(fieldInfo->fieldType), fieldInfo->fieldLgth);
 //ets_printf("isSet: %s 0x%02x %d\n", fieldInfo->fieldStr, fieldInfo->flags, (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET));
     if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
       switch (fieldInfo->fieldType) {
