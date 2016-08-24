@@ -703,9 +703,13 @@ int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   structmsg->hdr.hdrInfo.hdrKeys.cmdLgth = STRUCT_MSG_CMD_HEADER_LENGTH;
   structmsg->hdr.headerLgth = STRUCT_MSG_HEADER_LENGTH;
   structmsg->hdr.hdrInfo.hdrKeys.totalLgth = STRUCT_MSG_TOTAL_HEADER_LENGTH;
-  structmsg->msg.maxFieldInfos = numFieldInfos;
   structmsg->msg.numFieldInfos = 0;
+  structmsg->msg.maxFieldInfos = numFieldInfos;
+  structmsg->msg.numTableRows = 0;
+  structmsg->msg.numTableRowFields = 0;
+  structmsg->msg.numRowFields = 0;
   structmsg->msg.fieldInfos = newFieldInfos(numFieldInfos);
+  structmsg->msg.tableFieldInfos = NULL;
   structmsg->flags = 0;
   structmsg->encoded = NULL;
   structmsg->todecode = NULL;
@@ -1088,6 +1092,12 @@ int stmsg_decodeMsg(const uint8_t *handle, const uint8_t *data) {
   return STRUCT_MSG_ERR_OK;
 }
 
+// ============================= dumpTableRowFields ========================
+
+static int dumpTableRowFields(structmsg_t *structmsg) {
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ============================= stmsg_dumpMsg ========================
 
 int stmsg_dumpMsg(const uint8_t *handle) {
@@ -1111,6 +1121,17 @@ int stmsg_dumpMsg(const uint8_t *handle) {
   idx = 0;
   while (idx < numEntries) {
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[idx];
+    if (c_strcmp(fieldInfo->fieldStr, "@tablerows") == 0) {
+      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, stmsg_getFieldTypeStr(fieldInfo->fieldType), fieldInfo->fieldLgth);
+      idx++;
+      continue;
+    }
+    if (c_strcmp(fieldInfo->fieldStr, "@tablerowfields") == 0) {
+      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, stmsg_getFieldTypeStr(fieldInfo->fieldType), fieldInfo->fieldLgth);
+      dumpTableRowFields(structmsg);
+      idx++;
+      continue;
+    }
     ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, stmsg_getFieldTypeStr(fieldInfo->fieldType), fieldInfo->fieldLgth);
 //ets_printf("isSet: %s 0x%02x %d\n", fieldInfo->fieldStr, fieldInfo->flags, (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET));
     if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
@@ -1224,17 +1245,9 @@ int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const u
   return result;
 } 
 
-// ============================= stmsg_addField ========================
+// ============================= fixHeaderInfo ========================
 
-int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth) {
-  uint16_t fieldKey;
-  int result;
-  structmsg_t *structmsg;
-
-  structmsg = get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
-  fieldKey = structmsg->msg.numFieldInfos;
-  fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
+static int fixHeaderInfo(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const uint8_t *fieldStr, uint8_t fieldKey, uint8_t fieldType, uint8_t fieldLgth, uint8_t numTableRows) {
   fieldInfo->fieldStr = os_malloc(os_strlen(fieldStr) + 1);
   fieldInfo->fieldStr[os_strlen(fieldStr)] = '\0';
   os_memcpy(fieldInfo->fieldStr, fieldStr, os_strlen(fieldStr));
@@ -1245,60 +1258,112 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
   switch (fieldType) {
     case STRUCT_MSG_FIELD_UINT8_T:
     case STRUCT_MSG_FIELD_INT8_T:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 1;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 1;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 1 * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 1 * numTableRows;
       fieldLgth = 1;
       break;
     case STRUCT_MSG_FIELD_UINT16_T:
     case STRUCT_MSG_FIELD_INT16_T:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 2;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 2;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 2 * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 2 * numTableRows;
       fieldLgth = 2;
       break;
     case STRUCT_MSG_FIELD_UINT32_T:
     case STRUCT_MSG_FIELD_INT32_T:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 4;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 4;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += 4 * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += 4 * numTableRows;
       fieldLgth = 4;
       break;
     case STRUCT_MSG_FIELD_UINT8_VECTOR:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
       fieldInfo->value.ubyteVector = (uint8_t *)os_malloc(fieldLgth + 1);
       fieldInfo->value.ubyteVector[fieldLgth] = '\0';
       break;
     case STRUCT_MSG_FIELD_INT8_VECTOR:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
       fieldInfo->value.byteVector = (int8_t *)os_malloc(fieldLgth + 1);
       fieldInfo->value.ubyteVector[fieldLgth] = '\0';
       break;
     case STRUCT_MSG_FIELD_UINT16_VECTOR:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
       fieldInfo->value.ushortVector = (uint16_t *)os_malloc(fieldLgth*sizeof(uint16_t));
       break;
     case STRUCT_MSG_FIELD_INT16_VECTOR:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
       fieldInfo->value.shortVector = (int16_t *)os_malloc(fieldLgth*sizeof(int16_t));
       break;
     case STRUCT_MSG_FIELD_UINT32_VECTOR:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
       fieldInfo->value.uint32Vector = (uint32_t *)os_malloc(fieldLgth*sizeof(uint32_t));
       break;
     case STRUCT_MSG_FIELD_INT32_VECTOR:
-      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth;
-      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth;
+      structmsg->hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
+      structmsg->hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
       fieldInfo->value.int32Vector = (int32_t *)os_malloc(fieldLgth*sizeof(int32_t));
       break;
   }
   setHandleField(structmsg->handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   setHandleField(structmsg->handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  result = fillHdrInfo(handle, structmsg);
   fieldInfo->fieldLgth = fieldLgth;
-  structmsg->msg.numFieldInfos++;
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= stmsg_addField ========================
+
+int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth) {
+  uint16_t fieldKey;
+  uint8_t numTableFields;
+  uint8_t numTableRowFields;
+  uint8_t numTableRows;
+  int row;
+  int cellIdx;
+  int result;
+  structmsg_t *structmsg;
+  fieldInfo_t *fieldInfo;
+
+  structmsg = get_structmsg_ptr(handle);
+  checkHandleOK(structmsg);
+  if (c_strcmp(fieldStr, "@tablerows") == 0) {
+    structmsg->msg.numTableRows = fieldLgth;
+    return STRUCT_MSG_ERR_OK;
+  }
+  if (c_strcmp(fieldStr, "@tablerowfields") == 0) {
+    structmsg->msg.numTableRowFields = fieldLgth;
+    numTableFields = structmsg->msg.numTableRows * structmsg->msg.numTableRowFields;
+    if ((structmsg->msg.tableFieldInfos == NULL) && (numTableFields != 0)) {
+      structmsg->msg.tableFieldInfos = newFieldInfos(numTableFields);
+    }
+    return STRUCT_MSG_ERR_OK;
+  }
+  numTableRowFields = structmsg->msg.numTableRowFields;
+  numTableRows = structmsg->msg.numTableRows;
+  numTableFields = numTableRows * numTableRowFields;
+  if (!((numTableFields > 0) && (structmsg->msg.numRowFields < numTableRowFields))) {
+    fieldKey = structmsg->msg.numFieldInfos;
+    fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
+    numTableFields = 0;
+    numTableRows = 1;
+    numTableRowFields = 0;
+    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, fieldLgth, numTableRows);
+    result = fillHdrInfo(handle, structmsg);
+    structmsg->msg.numFieldInfos++;
+  } else {
+    row = 0;
+    while (row < numTableRows) {
+      cellIdx = structmsg->msg.numRowFields + row * numTableRowFields;;
+ets_printf("cellIdx: %d\n", cellIdx);
+      fieldKey = structmsg->msg.numRowFields + 1;
+      fieldInfo_t *fieldInfo = &structmsg->msg.tableFieldInfos[cellIdx];
+      fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, fieldLgth, numTableRows);
+      row++;
+    }
+    structmsg->msg.numRowFields++;  
+  } 
   return result;
 }
 

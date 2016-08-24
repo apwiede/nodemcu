@@ -66,19 +66,19 @@ enum structmsg_field_type
 
 enum structmsg_special_field_names
 {
-  STRUCT_MSG_SPEC_FIELD_SRC          = -1,
-  STRUCT_MSG_SPEC_FIELD_DST          = -2,
-  STRUCT_MSG_SPEC_FIELD_TARGET_CMD   = -3,
-  STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH   = -4,
-  STRUCT_MSG_SPEC_FIELD_CMD_KEY      = -5,
-  STRUCT_MSG_SPEC_FIELD_CMD_LGTH     = -6,
-  STRUCT_MSG_SPEC_FIELD_RANDOM_NUM   = -7,
-  STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM = -8,
-  STRUCT_MSG_SPEC_FIELD_FILLER       = -9,
-  STRUCT_MSG_SPEC_FIELD_CRC          = -10,
-  STRUCT_MSG_SPEC_FIELD_ID           = -11,
-  STRUCT_MSG_SPEC_FIELD_LIST_LEN     = -12,
-  STRUCT_MSG_SPEC_FIELD_LSTGRP_LEN   = -13,
+  STRUCT_MSG_SPEC_FIELD_SRC              = -1,
+  STRUCT_MSG_SPEC_FIELD_DST              = -2,
+  STRUCT_MSG_SPEC_FIELD_TARGET_CMD       = -3,
+  STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH       = -4,
+  STRUCT_MSG_SPEC_FIELD_CMD_KEY          = -5,
+  STRUCT_MSG_SPEC_FIELD_CMD_LGTH         = -6,
+  STRUCT_MSG_SPEC_FIELD_RANDOM_NUM       = -7,
+  STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM     = -8,
+  STRUCT_MSG_SPEC_FIELD_FILLER           = -9,
+  STRUCT_MSG_SPEC_FIELD_CRC              = -10,
+  STRUCT_MSG_SPEC_FIELD_ID               = -11,
+  STRUCT_MSG_SPEC_FIELD_TABLE_ROWS       = -12,
+  STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS = -13,
 };
 
 enum structmsg_error_code
@@ -216,8 +216,12 @@ typedef struct hdr
 typedef struct msg
 {
   fieldInfo_t *fieldInfos;
+  fieldInfo_t *tableFieldInfos;
   uint8_t numFieldInfos;
   uint8_t maxFieldInfos;
+  uint8_t numTableRows;         // number of list rows
+  uint8_t numTableRowFields;    // number of fields within a table row
+  uint8_t numRowFields;         // for checking how many tableRowFields have been processed
 } msg_t;
 
 typedef struct structmsg
