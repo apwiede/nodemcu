@@ -68,6 +68,8 @@ str2key_t structmsgSpecialFieldNames[] = {
   {"@filler",      STRUCT_MSG_SPEC_FIELD_FILLER},
   {"@crc",         STRUCT_MSG_SPEC_FIELD_CRC},
   {"@id",          STRUCT_MSG_SPEC_FIELD_ID},
+  {"@listlen",     STRUCT_MSG_SPEC_FIELD_LIST_LEN},
+  {"@lstgrplen",   STRUCT_MSG_SPEC_FIELD_LSTGRP_LEN},
   {NULL, -1},
 };
 
@@ -98,16 +100,115 @@ uint8_t *stmsg_getFieldTypeStr(uint8_t key) {
   return NULL;
 }
 
+// ============================= structmsg_getFieldNameIdStr ========================
+
+static int structmsg_getFieldNameIdStr (int key, uint8_t **fieldName) {
+  *fieldName = NULL;
+  // first try to find special field name
+  str2key_t *entry = &structmsgSpecialFieldNames[0];
+  while (entry->str != NULL) {
+    if (entry->key == key) {
+      *fieldName = entry->str;
+      return STRUCT_MSG_ERR_OK;
+    }
+    entry++;
+  }
+  // find field name
+  int idx = 0;
+
+  while (idx < fieldNameDefinitions.numDefinitions) {
+    entry = &fieldNameDefinitions.definitions[idx];
+    if (entry->key == key) {
+      *fieldName = entry->str;
+      return STRUCT_MSG_ERR_OK;
+    }
+    entry++;
+    idx++;
+  }
+  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ============================= structmsg_getFieldNameId ========================
+
+static int structmsg_getFieldNameId (const uint8_t *fieldName, int *key) {
+  int fieldNameId = 0;
+  int found = 0;
+  str2key_t definition;
+  str2key_t *newDefinition;
+
+  if (fieldName[0] == '@') {
+    // find special field name
+    str2key_t *entry = &structmsgSpecialFieldNames[0];
+    while (entry->str != NULL) {
+      if (c_strcmp(entry->str, fieldName) == 0) {
+        *key = entry->key;
+        return STRUCT_MSG_ERR_OK;
+      }
+      entry++;
+    }
+    return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
+  } else {
+    if (fieldNameDefinitions.numDefinitions >= fieldNameDefinitions.maxDefinitions) {
+      if (fieldNameDefinitions.maxDefinitions == 0) {
+        fieldNameDefinitions.maxDefinitions = 4;
+        fieldNameDefinitions.definitions = (str2key_t *)os_zalloc(fieldNameDefinitions.maxDefinitions * sizeof(str2key_t));
+        checkAllocOK(fieldNameDefinitions.definitions);
+      } else {
+        fieldNameDefinitions.maxDefinitions += 2;
+        fieldNameDefinitions.definitions = (str2key_t *)os_realloc(fieldNameDefinitions.definitions, (fieldNameDefinitions.maxDefinitions * sizeof(str2key_t)));
+        checkAllocOK(fieldNameDefinitions.definitions);
+      }
+    }
+    if (fieldNameDefinitions.numDefinitions > 0) {
+      // find field name
+      int idx = 0;
+
+      while (idx < fieldNameDefinitions.numDefinitions) {
+        str2key_t *entry = &fieldNameDefinitions.definitions[idx];
+        if (c_strcmp(entry->str, fieldName) == 0) {
+          *key = entry->key;
+        }
+        entry++;
+        idx++;
+      }
+    }
+    newDefinition = &fieldNameDefinitions.definitions[fieldNameDefinitions.numDefinitions];
+    newDefinition->key = fieldNameDefinitions.numDefinitions + 1;
+    newDefinition->str = os_malloc(c_strlen(fieldName) + 1);
+    newDefinition->str[c_strlen(fieldName)] = '\0';
+    c_memcpy(newDefinition->str, fieldName, c_strlen(fieldName));
+    fieldNameDefinitions.numDefinitions++;
+    *key = newDefinition->key;
+  }
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= structmsg_getFieldTypeId ========================
+
+static int structmsg_getFieldTypeId (const uint8_t *fieldTypeStr, int *key) {
+  // find field type
+  str2key_t *entry = &structmsgFieldTypes[0];
+
+  while (entry->str != NULL) {
+    if (c_strcmp(entry->str, fieldTypeStr) == 0) {
+      *key = entry->key;
+      return STRUCT_MSG_ERR_OK;
+    }
+    entry++;
+  }
+  return STRUCT_MSG_ERR_BAD_FIELD_TYPE;
+}
+
 // ============================= structmsg_createStructmsgDefinition ========================
 
 int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields) {
-  stmsgDefinition_t definition;
+  stmsgDefinition_t *definition;
   size_t lgth;
 
   if (structmsgDefinitions.numDefinitions >= structmsgDefinitions.maxDefinitions) {
     if (structmsgDefinitions.maxDefinitions == 0) {
       structmsgDefinitions.maxDefinitions = 4;
-      structmsgDefinitions.definitions = (stmsgDefinition_t *)os_malloc(structmsgDefinitions.maxDefinitions * sizeof(stmsgDefinition_t));
+      structmsgDefinitions.definitions = (stmsgDefinition_t *)os_zalloc(structmsgDefinitions.maxDefinitions * sizeof(stmsgDefinition_t));
       checkAllocOK(structmsgDefinitions.definitions);
     } else {
       structmsgDefinitions.maxDefinitions += 2;
@@ -115,68 +216,97 @@ int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields) 
       checkAllocOK(structmsgDefinitions.definitions);
     }
   }
-  definition = structmsgDefinitions.definitions[structmsgDefinitions.numDefinitions];
-  definition.numFields = numFields;
-  definition.fieldInfos = (fieldInfoDefinition_t *)os_malloc(numFields * sizeof(fieldInfoDefinition_t));
-  checkAllocOK(definition.fieldInfos);
+  definition = &structmsgDefinitions.definitions[structmsgDefinitions.numDefinitions];
+  definition->numFields = 0;
+  definition->maxFields = numFields;
+  definition->fieldInfos = (fieldInfoDefinition_t *)os_zalloc(numFields * sizeof(fieldInfoDefinition_t));
+  checkAllocOK(definition->fieldInfos);
   structmsgDefinitions.numDefinitions++;
   lgth = c_strlen(name);
-  definition.name = os_malloc(lgth + 1);
-  definition.name[lgth] = '\0';
-  checkAllocOK(definition.name);
-  c_memcpy(definition.name, name, lgth);
-  return STRUCT_MSG_ERR_OK;
-}
-
-// ============================= structmsg_getFieldNameId ========================
-
-int structmsg_getFieldNameId (const uint8_t *fieldName) {
-#ifdef NOTDEF
-    set fieldNameDefinesDict $::structmsg(fieldNameDefines)
-    switch -glob -- $fieldName {
-      "@*" {
-        if {![dict exists $fieldNameDefinesDict $fieldName]} {
-          error "bad special field name: $fieldName!"
-        } else {
-          set fieldNameId [dict get $fieldNameDefinesDict $fieldName]
-        }
-      }
-      default {
-        if {![dict exists $fieldNameDefinesDict $fieldName]} {
-          incr ::structmsg(numFieldNameIds)
-          set fieldNameId  $::structmsg(numFieldNameIds)
-          dict set fieldNameDefinesDict $fieldName $fieldNameId
-        } else {
-          set fieldNameId [dict get $fieldNameDefinesDict $fieldName]
-        }
-      }
-    }
-    set ::structmsg(fieldNameDefines) $fieldNameDefinesDict 
-    return $fieldNameId
-#endif
+  definition->name = os_malloc(lgth + 1);
+  definition->name[lgth] = '\0';
+  checkAllocOK(definition->name);
+  c_memcpy(definition->name, name, lgth);
   return STRUCT_MSG_ERR_OK;
 }
 
 // ============================= structmsg_addFieldDefinition ========================
 
-int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName, int fieldType, size_t fieldLgth) {
-#ifdef NOTDEF
-    set fieldDefinitionDict [dict create]
-    set structmsgDefinitionsDict $::structmsg(structmsgDefinitions)
-    if {![dict exists $::structmsg(structmsgDefinitions) $name]} {
-      error "structmsg definition for $name does not exist"
-    } else {
-      set fieldInfos [dict get $structmsgDefinitionsDict $name fieldInfos]
-      set fieldNameId [structmsg_getFieldNameId $fieldName]
-      set fieldTypeId [structmsg_getFieldTypeId $fieldType]
-      set fielNameDict [dict create]
-      dict set fieldNameDict nameId $fieldNameId
-      dict set fieldNameDict typeId $fieldTypeId
-      dict set fieldNameDict length $fieldLgth
-      lappend fieldInfos $fieldNameDict
-      dict set ::structmsg(structmsgDefinitions) $name fieldInfos $fieldInfos
+int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName, const uint8_t *fieldTypeStr, size_t fieldLgth) {
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  int fieldId;
+  int fieldType;
+  int idx = 0;
+  int found = 0;
+  int result;
+
+//ets_printf("addFieldDefinition: %s %s %s %d\n", name, fieldName, fieldTypeStr, fieldLgth);
+  while (idx < structmsgDefinitions.numDefinitions) {
+    definition = &structmsgDefinitions.definitions[idx];
+    if (c_strcmp(name, definition->name) == 0) {
+      found = 1;
+      break;
     }
-#endif
+    definition++;
+    idx++;
+  }
+  if (!found) {
+    return STRUCT_MSG_DEFINITION_NOT_FOUND;
+  }
+  if (definition->numFields >= definition->maxFields) {
+    return STRUCT_MSG_DEFINITION_TOO_MANY_FIELDS;
+  }
+  fieldInfo = &definition->fieldInfos[definition->numFields];
+  result = structmsg_getFieldNameId(fieldName, &fieldId);
+  checkErrOK(result);
+  fieldInfo->fieldId = fieldId;
+  result = structmsg_getFieldTypeId(fieldTypeStr, &fieldType);
+  checkErrOK(result);
+  fieldInfo->fieldType = fieldType;
+  fieldInfo->fieldLgth = fieldLgth;
+//ets_printf("add field: %s id: %d type: %d lgth: %d numFields: %d\n", fieldName, fieldId, fieldType, fieldLgth, definition->numFields);
+  definition->numFields++;
   return STRUCT_MSG_ERR_OK;
 }
 
+// ============================= structmsg_dumpFieldDefinition ========================
+
+int structmsg_dumpFieldDefinition (const uint8_t *name) {
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  uint8_t *fieldIdStr;
+  uint8_t *fieldTypeStr;
+  int fieldType;
+  int idx = 0;
+  int found = 0;
+  int result;
+
+ets_printf("dumpFieldDefinition: %s\n", name);
+  while (idx < structmsgDefinitions.numDefinitions) {
+    definition = &structmsgDefinitions.definitions[idx];
+    if (c_strcmp(name, definition->name) == 0) {
+      found = 1;
+      break;
+    }
+    definition++;
+    idx++;
+  }
+  if (!found) {
+    return STRUCT_MSG_DEFINITION_NOT_FOUND;
+  }
+  ets_printf("definition: %s numFields: %d\n", name, definition->numFields);
+  idx = 0;
+  while (idx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[idx];
+    result = structmsg_getFieldNameIdStr(fieldInfo->fieldId, &fieldIdStr);
+    checkErrOK(result);
+    fieldTypeStr = stmsg_getFieldTypeStr(fieldInfo->fieldType);
+    if (fieldTypeStr == NULL) {
+      return STRUCT_MSG_ERR_BAD_FIELD_TYPE;
+    }
+    ets_printf("  idx: %d id: %d %s type: %d %s lgth: %d\n", idx, fieldInfo->fieldId, fieldIdStr, fieldInfo->fieldType, fieldTypeStr, fieldInfo->fieldLgth);
+    idx++;
+  }
+  return STRUCT_MSG_ERR_OK;
+}

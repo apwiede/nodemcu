@@ -77,6 +77,8 @@ enum structmsg_special_field_names
   STRUCT_MSG_SPEC_FIELD_FILLER       = -9,
   STRUCT_MSG_SPEC_FIELD_CRC          = -10,
   STRUCT_MSG_SPEC_FIELD_ID           = -11,
+  STRUCT_MSG_SPEC_FIELD_LIST_LEN     = -12,
+  STRUCT_MSG_SPEC_FIELD_LSTGRP_LEN   = -13,
 };
 
 enum structmsg_error_code
@@ -100,6 +102,8 @@ enum structmsg_error_code
   STRUCT_MSG_ERR_CRYPTO_OP_FAILED     = -16,
   STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM = -17,
   STRUCT_MSG_ERR_NOT_ENCRYPTED        = -18,
+  STRUCT_MSG_DEFINITION_NOT_FOUND     = -19,
+  STRUCT_MSG_DEFINITION_TOO_MANY_FIELDS = -20,
 };
 
 enum structmsg_special_fields
@@ -140,11 +144,13 @@ typedef struct fieldInfoDefinition
   uint8_t fieldKey;
   uint8_t fieldType;
   uint16_t fieldLgth;
+  uint8_t fieldId;
 } fieldInfoDefinition_t;
 
 typedef struct stmsgDefinition
 {
   size_t numFields;
+  size_t maxFields;
   uint8_t *name;
   fieldInfoDefinition_t *fieldInfos;
 } stmsgDefinition_t;
@@ -231,6 +237,10 @@ extern str2key_t structmsgFieldTypes[];
 
 int stmsg_getFieldTypeKey(const uint8_t *str);
 uint8_t *stmsg_getFieldTypeStr(uint8_t key);
+int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields);
+int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName, const uint8_t *fieldTypeStr, size_t fieldLgth);
+int structmsg_dumpFieldDefinition (const uint8_t *name);
+
 int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle);
 int stmsg_deleteMsg(const uint8_t *handle);
 int stmsg_encodeMsg(const uint8_t *handle);
