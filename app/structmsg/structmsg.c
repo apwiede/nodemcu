@@ -1328,21 +1328,33 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
 
   structmsg = get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
+ets_printf("field: %s\n", fieldStr);
   if (c_strcmp(fieldStr, "@tablerows") == 0) {
     structmsg->msg.numTableRows = fieldLgth;
+ets_printf("tablerows: %d\n", structmsg->msg.numTableRows);
+    fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
+    // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
+    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, fieldLgth, 0);
+    structmsg->msg.numFieldInfos++;
     return STRUCT_MSG_ERR_OK;
   }
   if (c_strcmp(fieldStr, "@tablerowfields") == 0) {
     structmsg->msg.numTableRowFields = fieldLgth;
     numTableFields = structmsg->msg.numTableRows * structmsg->msg.numTableRowFields;
+ets_printf("tablerowfields: %d\n", structmsg->msg.numTableRows);
+    fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
+    // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
+    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, fieldLgth, 0);
     if ((structmsg->msg.tableFieldInfos == NULL) && (numTableFields != 0)) {
       structmsg->msg.tableFieldInfos = newFieldInfos(numTableFields);
     }
+    structmsg->msg.numFieldInfos++;
     return STRUCT_MSG_ERR_OK;
   }
   numTableRowFields = structmsg->msg.numTableRowFields;
   numTableRows = structmsg->msg.numTableRows;
   numTableFields = numTableRows * numTableRowFields;
+ets_printf("numTableFields: %d numTableRowFields: %d numRowFields: %d\n", numTableFields, numTableRowFields, structmsg->msg.numRowFields);
   if (!((numTableFields > 0) && (structmsg->msg.numRowFields < numTableRowFields))) {
     fieldKey = structmsg->msg.numFieldInfos;
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
