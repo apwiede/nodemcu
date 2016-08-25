@@ -57,7 +57,7 @@ str2key_t structmsgFieldTypes[] = {
 };
 
 str2key_t structmsgSpecialFieldNames[] = {
-  {"@src",         STRUCT_MSG_SPEC_FIELD_SRC},
+  {"@src",            STRUCT_MSG_SPEC_FIELD_SRC},
   {"@dst",            STRUCT_MSG_SPEC_FIELD_DST},
   {"@targetCmd",      STRUCT_MSG_SPEC_FIELD_TARGET_CMD},
   {"@totalLgth",      STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH},
@@ -74,9 +74,9 @@ str2key_t structmsgSpecialFieldNames[] = {
 };
 
 
-// ============================= stmsg_getFieldTypeKey ========================
+// ============================= structmsg_getFieldTypeKey ========================
 
-int stmsg_getFieldTypeKey(const uint8_t *str) {
+int structmsg_getFieldTypeKey(const uint8_t *str) {
   str2key_t *entry = &structmsgFieldTypes[0];
   while (entry->str != NULL) {
     if (c_strcmp(entry->str, str) == 0) {
@@ -87,9 +87,9 @@ int stmsg_getFieldTypeKey(const uint8_t *str) {
   return -1;
 }
 
-// ============================= stmsg_getFieldTypeStr ========================
+// ============================= structmsg_getFieldTypeStr ========================
 
-uint8_t *stmsg_getFieldTypeStr(uint8_t key) {
+uint8_t *structmsg_getFieldTypeStr(uint8_t key) {
   str2key_t *entry = &structmsgFieldTypes[0];
   while (entry->str != NULL) {
     if (entry->key == key) {
@@ -130,7 +130,7 @@ static int structmsg_getFieldNameIdStr (int key, uint8_t **fieldName) {
 
 // ============================= structmsg_getFieldNameId ========================
 
-static int structmsg_getFieldNameId (const uint8_t *fieldName, int *key) {
+int structmsg_getFieldNameId (const uint8_t *fieldName, int *key) {
   int fieldNameId = 0;
   int found = 0;
   str2key_t definition;
@@ -252,10 +252,10 @@ int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName,
     idx++;
   }
   if (!found) {
-    return STRUCT_MSG_DEFINITION_NOT_FOUND;
+    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
   }
   if (definition->numFields >= definition->maxFields) {
-    return STRUCT_MSG_DEFINITION_TOO_MANY_FIELDS;
+    return STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS;
   }
   fieldInfo = &definition->fieldInfos[definition->numFields];
   result = structmsg_getFieldNameId(fieldName, &fieldId);
@@ -293,7 +293,7 @@ ets_printf("dumpFieldDefinition: %s\n", name);
     idx++;
   }
   if (!found) {
-    return STRUCT_MSG_DEFINITION_NOT_FOUND;
+    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
   }
   ets_printf("definition: %s numFields: %d\n", name, definition->numFields);
   idx = 0;
@@ -301,7 +301,7 @@ ets_printf("dumpFieldDefinition: %s\n", name);
     fieldInfo = &definition->fieldInfos[idx];
     result = structmsg_getFieldNameIdStr(fieldInfo->fieldId, &fieldIdStr);
     checkErrOK(result);
-    fieldTypeStr = stmsg_getFieldTypeStr(fieldInfo->fieldType);
+    fieldTypeStr = structmsg_getFieldTypeStr(fieldInfo->fieldType);
     if (fieldTypeStr == NULL) {
       return STRUCT_MSG_ERR_BAD_FIELD_TYPE;
     }

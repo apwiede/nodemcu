@@ -115,14 +115,20 @@ ets_printf("error result: %d\n", result);
   case STRUCT_MSG_ERR_NOT_ENCRYPTED:
     lua_pushfstring(L, "%s: not encrypted", errStr);
     break;
-  case STRUCT_MSG_DEFINITION_NOT_FOUND:
+  case STRUCT_MSG_ERR_DEFINITION_NOT_FOUND:
     lua_pushfstring(L, "%s: definiton not found", errStr);
     break;
   case STRUCT_MSG_ERR_BAD_SPECIAL_FIELD:
     lua_pushfstring(L, "%s: bad special field", errStr);
     break;
-  case STRUCT_MSG_DEFINITION_TOO_MANY_FIELDS:
+  case STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS:
     lua_pushfstring(L, "%s: definition too many fields", errStr);
+    break;
+  case STRUCT_MSG_ERR_BAD_TABLE_ROW:
+    lua_pushfstring(L, "%s: bad table row", errStr);
+    break;
+  case STRUCT_MSG_ERR_TOO_MANY_FIELDS:
+    lua_pushfstring(L, "%s: too many fields", errStr);
     break;
   default:
     lua_pushfstring(L, "%s: funny result error code", errStr);
@@ -151,8 +157,9 @@ static int structmsg_encdec (lua_State *L, bool enc) {
   result = stmsg_encdec(handle, key, klen, iv, ivlen, enc, &buf, &lgth);
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushlstring (L, buf, lgth);
+  } else {
+    checkOKOrErr(L, result, "encrypt/decrypt", "");
   }
-  checkOKOrErr(L, result, "encrypt/decrypt", "");
   return 1;
 }
 
@@ -266,12 +273,8 @@ static int structmsg_add_field( lua_State* L ) {
   handle = luaL_checkstring( L, 1 );
   fieldStr = luaL_checkstring( L, 2 );
   fieldTypeStr = luaL_checkstring( L, 3 );
-  fieldType = stmsg_getFieldTypeKey(fieldTypeStr);
-  if (fieldType == STRUCT_MSG_FIELD_UINT8_VECTOR) {
-      fieldLgth = luaL_checkinteger( L, 4 );
-  } else {
-      fieldLgth = 1;
-  }
+  fieldType = structmsg_getFieldTypeKey(fieldTypeStr);
+  fieldLgth = luaL_optinteger( L, 4, 1 );
   result = stmsg_addField(handle, fieldStr, fieldType, fieldLgth);
   checkOKOrErr(L, result, "addField", "");
   return 1;
@@ -316,6 +319,31 @@ static int structmsg_set_fieldValue( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_set_tableFieldValue ========================
+
+static int structmsg_set_tableFieldValue( lua_State* L ) {
+  const char *handle;
+  const uint8_t *fieldName;
+  int row;
+  int numericValue;
+  const uint8_t *stringValue;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  fieldName = luaL_checkstring( L, 2 );
+  row = luaL_checkinteger(L, 3);
+  if ( lua_isnumber(L, 4) ){
+    numericValue = lua_tointeger(L, 4);
+    stringValue = NULL;
+  } else {
+    numericValue = 0;
+    stringValue = lua_tostring(L, 4);
+  }
+  result = stmsg_setTableFieldValue(handle, fieldName, row, numericValue, stringValue);
+  checkOKOrErr(L, result, "setFieldValue", fieldName);
+  return 1;
+}
+
 // ============================= structmsg_get_fieldValue ========================
 
 static int structmsg_get_fieldValue( lua_State* L ) {
@@ -328,6 +356,29 @@ static int structmsg_get_fieldValue( lua_State* L ) {
   handle = luaL_checkstring( L, 1 );
   fieldName = luaL_checkstring( L, 2 );
   result = stmsg_getFieldValue(handle, fieldName, &numericValue, &stringValue);
+  checkOKOrErr(L, result, "getFieldValue", fieldName);
+  if (stringValue == NULL) {
+    lua_pushinteger(L, numericValue);
+  } else {
+    lua_pushstring(L, stringValue);
+  }
+  return 1;
+}
+
+// ============================= structmsg_get_tableFieldValue ========================
+
+static int structmsg_get_tableFieldValue( lua_State* L ) {
+  const char *handle;
+  const uint8_t *fieldName;
+  int numericValue = 0;
+  int row;
+  uint8_t *stringValue = NULL;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  fieldName = luaL_checkstring( L, 2 );
+  row = luaL_checkinteger( L, 3 );
+  result = stmsg_getTableFieldValue(handle, fieldName, row, &numericValue, &stringValue);
   checkOKOrErr(L, result, "getFieldValue", fieldName);
   if (stringValue == NULL) {
     lua_pushinteger(L, numericValue);
@@ -371,8 +422,9 @@ static int structmsg_decrypt_getHandle( lua_State* L ) {
   result = stmsg_decryptGetHandle(encryptedMsg, mlen, key, klen, iv, ivlen, &handle);
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushstring (L, handle);
+  } else {
+	  checkOKOrErr(L, result, "decryptgethandle", "");
   }
-  checkOKOrErr(L, result, "decryptgethandle", "");
   return 1;
 }
 
@@ -422,24 +474,26 @@ static int structmsg_dump_fieldDefinition( lua_State* L ) {
 
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
-  { LSTRKEY( "create" ),           LFUNCVAL( structmsg_create ) },
-  { LSTRKEY( "delete" ),           LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "__gc" ),             LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "encode" ),           LFUNCVAL( structmsg_encode ) },
-  { LSTRKEY( "getencoded" ),       LFUNCVAL( structmsg_get_encoded ) },
-  { LSTRKEY( "decode" ),           LFUNCVAL( structmsg_decode ) },
-  { LSTRKEY( "dump" ),             LFUNCVAL( structmsg_dump ) },
-  { LSTRKEY( "encrypt" ),          LFUNCVAL( structmsg_encrypt ) },
-  { LSTRKEY( "decrypt" ),          LFUNCVAL( structmsg_decrypt ) },
-  { LSTRKEY( "addField" ),         LFUNCVAL( structmsg_add_field ) },
-  { LSTRKEY( "setFillerAndCrc" ),  LFUNCVAL( structmsg_set_fillerAndCrc ) },
-  { LSTRKEY( "setFieldValue" ),    LFUNCVAL( structmsg_set_fieldValue ) },
-  { LSTRKEY( "getFieldValue" ),    LFUNCVAL( structmsg_get_fieldValue ) },
-  { LSTRKEY( "setcrypted" ),       LFUNCVAL( structmsg_set_crypted ) },
-  { LSTRKEY( "decryptgethandle" ), LFUNCVAL( structmsg_decrypt_getHandle ) },
-  { LSTRKEY( "createmsgdef" ),     LFUNCVAL( structmsg_create_msgDefinition ) },
-  { LSTRKEY( "addfielddef" ),      LFUNCVAL( structmsg_add_fieldDefinition ) },
-  { LSTRKEY( "dumpfielddef" ),     LFUNCVAL( structmsg_dump_fieldDefinition ) },
+  { LSTRKEY( "create" ),             LFUNCVAL( structmsg_create ) },
+  { LSTRKEY( "delete" ),             LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "__gc" ),               LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "encode" ),             LFUNCVAL( structmsg_encode ) },
+  { LSTRKEY( "getencoded" ),         LFUNCVAL( structmsg_get_encoded ) },
+  { LSTRKEY( "decode" ),             LFUNCVAL( structmsg_decode ) },
+  { LSTRKEY( "dump" ),               LFUNCVAL( structmsg_dump ) },
+  { LSTRKEY( "encrypt" ),            LFUNCVAL( structmsg_encrypt ) },
+  { LSTRKEY( "decrypt" ),            LFUNCVAL( structmsg_decrypt ) },
+  { LSTRKEY( "addField" ),           LFUNCVAL( structmsg_add_field ) },
+  { LSTRKEY( "setFillerAndCrc" ),    LFUNCVAL( structmsg_set_fillerAndCrc ) },
+  { LSTRKEY( "setFieldValue" ),      LFUNCVAL( structmsg_set_fieldValue ) },
+  { LSTRKEY( "setTableFieldValue" ), LFUNCVAL( structmsg_set_tableFieldValue ) },
+  { LSTRKEY( "getFieldValue" ),      LFUNCVAL( structmsg_get_fieldValue ) },
+  { LSTRKEY( "getTableFieldValue" ), LFUNCVAL( structmsg_get_tableFieldValue ) },
+  { LSTRKEY( "setcrypted" ),         LFUNCVAL( structmsg_set_crypted ) },
+  { LSTRKEY( "decryptgethandle" ),   LFUNCVAL( structmsg_decrypt_getHandle ) },
+  { LSTRKEY( "createmsgdef" ),       LFUNCVAL( structmsg_create_msgDefinition ) },
+  { LSTRKEY( "addfielddef" ),        LFUNCVAL( structmsg_add_fieldDefinition ) },
+  { LSTRKEY( "dumpfielddef" ),       LFUNCVAL( structmsg_dump_fieldDefinition ) },
   { LNILKEY, LNILVAL }
 };
 
