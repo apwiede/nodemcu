@@ -79,33 +79,35 @@ enum structmsg_special_field_names
   STRUCT_MSG_SPEC_FIELD_ID               = 245,
   STRUCT_MSG_SPEC_FIELD_TABLE_ROWS       = 244,
   STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS = 243,
+  STRUCT_MSG_SPEC_FIELD_LOW              = 242,         // this must be the last entry!!
 };
 
 enum structmsg_error_code
 {
-  STRUCT_MSG_ERR_OK                   = 0,
-  STRUCT_MSG_ERR_VALUE_NOT_SET        = 255,
-  STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE   = 254,
-  STRUCT_MSG_ERR_BAD_VALUE            = 253,
-  STRUCT_MSG_ERR_BAD_FIELD_TYPE       = 252,
-  STRUCT_MSG_ERR_FIELD_NOT_FOUND      = 251,
-  STRUCT_MSG_ERR_VALUE_TOO_BIG        = 250,
-  STRUCT_MSG_ERR_BAD_SPECIAL_FIELD    = 249,
-  STRUCT_MSG_ERR_BAD_HANDLE           = 248,
-  STRUCT_MSG_ERR_OUT_OF_MEMORY        = 247,
-  STRUCT_MSG_ERR_HANDLE_NOT_FOUND     = 246,
-  STRUCT_MSG_ERR_NOT_ENCODED          = 245,
-  STRUCT_MSG_ERR_ENCODE_ERROR         = 244,
-  STRUCT_MSG_ERR_DECODE_ERROR         = 243,
-  STRUCT_MSG_ERR_BAD_CRC_VALUE        = 242,
-  STRUCT_MSG_ERR_CRYPTO_INIT_FAILED   = 241,
-  STRUCT_MSG_ERR_CRYPTO_OP_FAILED     = 240,
-  STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM = 239,
-  STRUCT_MSG_ERR_NOT_ENCRYPTED        = 238,
-  STRUCT_MSG_ERR_DEFINITION_NOT_FOUND = 237,
+  STRUCT_MSG_ERR_OK                    = 0,
+  STRUCT_MSG_ERR_VALUE_NOT_SET         = 255,
+  STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE    = 254,
+  STRUCT_MSG_ERR_BAD_VALUE             = 253,
+  STRUCT_MSG_ERR_BAD_FIELD_TYPE        = 252,
+  STRUCT_MSG_ERR_FIELD_NOT_FOUND       = 251,
+  STRUCT_MSG_ERR_VALUE_TOO_BIG         = 250,
+  STRUCT_MSG_ERR_BAD_SPECIAL_FIELD     = 249,
+  STRUCT_MSG_ERR_BAD_HANDLE            = 248,
+  STRUCT_MSG_ERR_OUT_OF_MEMORY         = 247,
+  STRUCT_MSG_ERR_HANDLE_NOT_FOUND      = 246,
+  STRUCT_MSG_ERR_NOT_ENCODED           = 245,
+  STRUCT_MSG_ERR_ENCODE_ERROR          = 244,
+  STRUCT_MSG_ERR_DECODE_ERROR          = 243,
+  STRUCT_MSG_ERR_BAD_CRC_VALUE         = 242,
+  STRUCT_MSG_ERR_CRYPTO_INIT_FAILED    = 241,
+  STRUCT_MSG_ERR_CRYPTO_OP_FAILED      = 240,
+  STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM  = 239,
+  STRUCT_MSG_ERR_NOT_ENCRYPTED         = 238,
+  STRUCT_MSG_ERR_DEFINITION_NOT_FOUND  = 237,
   STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS = 236,
-  STRUCT_MSG_ERR_BAD_TABLE_ROW        = 235,
-  STRUCT_MSG_ERR_TOO_MANY_FIELDS      = 234,
+  STRUCT_MSG_ERR_BAD_TABLE_ROW         = 235,
+  STRUCT_MSG_ERR_TOO_MANY_FIELDS       = 234,
+  STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY = 233,
 };
 
 enum structmsg_special_fields
@@ -127,12 +129,18 @@ enum structmsg_special_fields
 // cmd header length uint16_t cmdKey + unit16_t cmdLgth
 #define STRUCT_MSG_CMD_HEADER_LENGTH (sizeof(uint16_t) * 2)
 #define STRUCT_MSG_TOTAL_HEADER_LENGTH (STRUCT_MSG_HEADER_LENGTH + STRUCT_MSG_CMD_HEADER_LENGTH)
+#define STRUCT_MSG_DEFINITION_CMD_KEY 0xFFFF
 
 #define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
 #define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
 #define checkAllocOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_OUT_OF_MEMORY
 #define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
 #define checkErrOK(result) if(result != STRUCT_MSG_ERR_OK) return result
+
+typedef struct id2offset {
+  uint16_t id;
+  uint16_t offset;
+} id2offset_t;
 
 typedef struct str2key {
   uint8_t *str;
@@ -148,7 +156,7 @@ typedef struct fieldNameDefinitions
 
 typedef struct fieldInfoDefinition
 {
-  uint8_t fieldId;
+  uint16_t fieldId;
   uint8_t fieldType;
   uint16_t fieldLgth;
 } fieldInfoDefinition_t;
@@ -263,9 +271,11 @@ int stmsg_getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *nu
 int stmsg_getTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
 int stmsg_setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
 int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle);
-int structmsg_buildFieldDefinitionMessage (const uint8_t *name);
+int structmsg_encodeFieldDefinitionMessage (const uint8_t *name, uint8_t **data, int *lgth);
+int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *data);
 int structmsg_fillHdrInfo(const uint8_t *handle, structmsg_t *structmsg);
-int structmsg_encodeDefinitions (const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
+int structmsg_encodeDefinitions (const uint8_t *name, uint8_t **data, int *lgth, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
+int structmsg_decodeDefinitions (const uint8_t *name, const uint8_t *data, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
 #ifdef	__cplusplus
 }
 #endif

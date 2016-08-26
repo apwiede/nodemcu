@@ -325,14 +325,26 @@ ets_printf("dumpFieldDefinition: %s\n", name);
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= structmsg_buildFieldDefinitionMessage ========================
+// ============================= structmsg_encodeFieldDefinitionMessage ========================
 
-int structmsg_buildFieldDefinitionMessage (const uint8_t *name) {
+int structmsg_encodeFieldDefinitionMessage (const uint8_t *name, uint8_t **data, int *lgth) {
   // FIXME!!
   uint16_t src = 123;
   uint16_t dst = 987;
 
-  return structmsg_encodeDefinitions(name, &structmsgDefinitions, &fieldNameDefinitions);
+  return structmsg_encodeDefinitions(name, data, lgth, &structmsgDefinitions, &fieldNameDefinitions);
 }
+
+// ============================= structmsg_decodeFieldDefinitionMessage ========================
+
+int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *data) {
+  // FIXME!!
+  uint16_t src = 123;
+  uint16_t dst = 987;
+
+  return structmsg_decodeDefinitions(name, data, &structmsgDefinitions, &fieldNameDefinitions);
+}
+
+
 
 

@@ -130,6 +130,9 @@ ets_printf("error result: %d\n", result);
   case STRUCT_MSG_ERR_TOO_MANY_FIELDS:
     lua_pushfstring(L, "%s: too many fields", errStr);
     break;
+  case STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY:
+    lua_pushfstring(L, "%s: bad definition cmd key", errStr);
+    break;
   default:
     lua_pushfstring(L, "%s: funny result error code", errStr);
 ets_printf("funny result: %d\n", result);
@@ -423,7 +426,7 @@ static int structmsg_decrypt_getHandle( lua_State* L ) {
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushstring (L, handle);
   } else {
-	  checkOKOrErr(L, result, "decryptgethandle", "");
+    checkOKOrErr(L, result, "decryptgethandle", "");
   }
   return 1;
 }
@@ -473,18 +476,39 @@ static int structmsg_dump_fieldDefinition( lua_State* L ) {
 }
 
 
-// ============================= structmsg_build_fieldDefinitionMessage =================
+// ============================= structmsg_encode_fieldDefinitionMessage =================
 
-static int structmsg_build_fieldDefinitionMessage( lua_State* L ) {
+static int structmsg_encode_fieldDefinitionMessage( lua_State* L ) {
   const uint8_t *name;
+  uint8_t *data;
+  int lgth;
   int result;
 
   name = luaL_checkstring( L, 1 );
-  result =  structmsg_buildFieldDefinitionMessage (name);
-  checkOKOrErr(L, result, "buildfielddefmsg", "");
+  result =  structmsg_encodeFieldDefinitionMessage (name, &data, &lgth);
+  if (result == STRUCT_MSG_ERR_OK) {
+    lua_pushlstring (L, data, lgth);
+  } else {
+    checkOKOrErr(L, result, "encodefielddefmsg", "");
+  }
   return 1;
 }
 
+// ============================= structmsg_decode_fieldDefinitionMessage =================
+
+static int structmsg_decode_fieldDefinitionMessage( lua_State* L ) {
+  const uint8_t *name;
+  const uint8_t *encoded;
+  int result;
+
+  name = luaL_checkstring( L, 1 );
+  encoded = luaL_checkstring( L, 2 );
+  result =  structmsg_decodeFieldDefinitionMessage (name, encoded);
+  checkOKOrErr(L, result, "decodefielddefmsg", "");
+  return 1;
+}
+
+#ifdef NOTDEF
 // ============================= structmsg_init_structures =================
 
 static int structmsg_init_structures( lua_State * L ) {
@@ -494,6 +518,7 @@ static int structmsg_init_structures( lua_State * L ) {
   checkOKOrErr(L, result, "initstructures", "");
   return 1;
 }
+#endif
 
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
@@ -517,7 +542,8 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "createmsgdef" ),       LFUNCVAL( structmsg_create_msgDefinition ) },
   { LSTRKEY( "addfielddef" ),        LFUNCVAL( structmsg_add_fieldDefinition ) },
   { LSTRKEY( "dumpfielddef" ),       LFUNCVAL( structmsg_dump_fieldDefinition ) },
-  { LSTRKEY( "buildfielddefmsg" ),   LFUNCVAL( structmsg_build_fieldDefinitionMessage ) },
+  { LSTRKEY( "encodefielddefmsg" ),  LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
+  { LSTRKEY( "decodefielddefmsg" ),  LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
   { LNILKEY, LNILVAL }
 };
 

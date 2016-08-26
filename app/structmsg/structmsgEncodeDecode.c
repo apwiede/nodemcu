@@ -92,7 +92,7 @@ static int int32Encode(uint8_t *data, int offset, int32_t value) {
 
 // ============================= uint8VectorEncode ========================
 
-static int uint8VectorEncode(uint8_t *data, int offset, uint8_t *value, uint16_t lgth) {
+static int uint8VectorEncode(uint8_t *data, int offset, const uint8_t *value, uint16_t lgth) {
   c_memcpy(data+offset,value,lgth);
   offset += lgth;
   return offset;
@@ -397,6 +397,167 @@ ets_printf("crcVal: 0x%04x crc: 0x%04x\n", crcVal, *crc);
   if (crcVal != *crc) {
     return -1;
   }
+  return offset;
+}
+
+// ============================= getFieldIdName ========================
+
+static int getFieldIdName (uint8_t key, fieldNameDefinitions_t *fieldNameDefinitions, uint8_t **fieldName) {
+  // find field name
+  int idx = 0;
+  while (idx < fieldNameDefinitions->numDefinitions) {
+    str2key_t *entry = &fieldNameDefinitions->definitions[idx];
+    if (entry->key == key) {
+       *fieldName = entry->str;
+       return STRUCT_MSG_ERR_OK;
+    }
+    entry++;
+    idx++;
+  }
+  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ============================= specialFieldNamesEncode ========================
+
+static int specialFieldNamesEncode(uint8_t *data, int offset, int numEntries, int size) {
+  str2key_t *entry;
+  int idx;
+
+  // first the keys
+  offset = uint8Encode(data, offset, numEntries);
+  entry = &structmsgSpecialFieldNames[0];
+  while (entry->str != NULL) {
+    offset = uint8Encode(data, offset, entry->key);
+    entry++;
+  }
+  // and now the names
+  idx = 1;
+  offset = uint8Encode(data, offset, size+numEntries); // add a "," to each name as separator
+  entry = &structmsgSpecialFieldNames[0];
+  while (entry->str != NULL) {
+    offset = uint8VectorEncode(data, offset, entry->str, c_strlen(entry->str));
+    if (idx < numEntries) {
+      offset = uint8Encode(data, offset, ',');
+    } else {
+      offset = uint8Encode(data, offset, '\0');
+    }
+    entry++;
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= specialFieldNamesDecode ========================
+
+static int specialFieldNamesDecode(const uint8_t *data, int offset) {
+  return offset;
+}
+
+// ============================= normalFieldNamesEncode ========================
+
+static int normalFieldNamesEncode(uint8_t *data, int offset, stmsgDefinition_t *definition, fieldNameDefinitions_t *fieldNameDefinitions, id2offset_t **normNameOffsets, int numEntries, int size) {
+  int idx;
+  int namesOffset = 0;
+  fieldInfoDefinition_t *fieldInfo;
+  int result;
+  int nameIdx;
+  uint8_t *fieldName;
+  id2offset_t *normNameOffset;
+
+  // first the keys
+  offset = uint8Encode(data, offset, numEntries);
+  idx = 0;
+  normNameOffset = normNameOffsets[0];
+  while (idx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[idx];
+    if (fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW) { 
+      result = getFieldIdName(fieldInfo->fieldId, fieldNameDefinitions, &fieldName);
+      checkErrOK(result);
+      offset = uint16Encode(data, offset, namesOffset);
+      normNameOffset->id = fieldInfo->fieldId;
+      normNameOffset->offset = namesOffset;
+      normNameOffset++;
+      namesOffset += c_strlen(fieldName) + 1;
+    }
+    idx++;
+  }
+  // and now the names
+  offset = uint16Encode(data, offset, size);
+  idx = 0;
+  nameIdx = 1;
+  while (idx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[idx];
+    if (fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW) { 
+      result = getFieldIdName(fieldInfo->fieldId, fieldNameDefinitions, &fieldName);
+      checkErrOK(result);
+      offset = uint8VectorEncode(data, offset, fieldName, c_strlen(fieldName));
+      if (nameIdx < numEntries) {
+        offset = uint8Encode(data, offset, ',');
+      } else {
+        offset = uint8Encode(data, offset, '\0');
+      }
+      nameIdx++;
+    }
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= normalFieldNamesDecode ========================
+
+static int normalFieldNamesDecode(const uint8_t *data, int offset) {
+  return offset;
+}
+
+// ============================= definitionsEncode ========================
+
+static int definitionsEncode(uint8_t *data, int offset, stmsgDefinition_t *definition, fieldNameDefinitions_t *fieldNameDefinitions, id2offset_t *normNamesOffsets) {
+  int idx;
+  int idIdx;
+  int nameOffset;
+  int found;
+  fieldInfoDefinition_t *fieldInfo;
+
+  uint8_t fieldId;
+  uint8_t fieldType;
+  uint16_t fieldLgth;
+
+  idx= 0;
+  fieldInfo = &definition->fieldInfos[0];
+  while (idx < definition->numFields) {
+    if (fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW) {
+      idIdx = 0;
+      found = 0;
+      while (idIdx < definition->numFields) {
+        if (normNamesOffsets[idIdx].id == 0) {
+          // id 0 is not used to be able to stop here!!
+          break;
+        }
+        if (fieldInfo->fieldId == normNamesOffsets[idIdx].id) {
+          nameOffset = normNamesOffsets[idIdx].offset;
+          found = 1;
+          break;
+        }
+        idIdx++;
+      }
+      if (!found) {
+        return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+      }
+      offset = uint16Encode(data, offset, nameOffset);
+    } else {
+      offset = uint16Encode(data, offset, fieldInfo->fieldId);
+    }
+    offset = uint8Encode(data, offset, fieldInfo->fieldType);
+    offset = uint16Encode(data, offset, fieldInfo->fieldLgth);
+    fieldInfo++;
+    idx++;
+  }
+  return offset;
+}
+
+// ============================= definitionsDecode ========================
+
+static int definitionsDecode(const uint8_t *data, int offset, stmsgDefinition_t *definition, fieldNameDefinitions_t *fieldNameDefinitions) {
   return offset;
 }
 
@@ -802,32 +963,120 @@ static int getSpecFieldSizes(size_t *numFields, size_t *namesSize) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= getFieldIdName ========================
-
-static int getFieldIdName (uint8_t key, fieldNameDefinitions_t *fieldNameDefinitions, uint8_t **fieldName) {
-  // find field name
-  int idx = 0;
-  while (idx < fieldNameDefinitions->numDefinitions) {
-    str2key_t *entry = &fieldNameDefinitions->definitions[idx];
-    if (entry->key == key) {
-       *fieldName = entry->str;
-       return STRUCT_MSG_ERR_OK;
-    }
-    entry++;
-    idx++;
-  }
-  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
-}
-
 // ============================= structmsg_encodeDefinitions ========================
 
-int structmsg_encodeDefinitions (const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
+int structmsg_encodeDefinitions (const uint8_t *name, uint8_t **data, int *lgth, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
+  size_t numSpecFields;
+  size_t namesSpecSize;
+  size_t numNormFields;
+  size_t normNamesSize;
+  uint16_t totalLgth;
+  uint16_t cmdLgth;
+  uint16_t cmdKey = STRUCT_MSG_DEFINITION_CMD_KEY;
+  size_t fillerSize;
+  int result;
+  int idx;
+  int found = 0;
+  uint8_t *fieldName;
+  size_t definitionPayloadSize;
+  size_t payloadSize;
+  size_t myLgth;
+  uint32_t randomNum;
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  uint8_t *encoded;
+  int offset;
+  uint16_t crc;
+  id2offset_t *normNamesOffsets;
+  // FIXME!!
+  uint16_t src = 123;
+  uint16_t dst = 987;
+
+
+ets_printf("structmsgDefinitions: %p fieldNameDefinitions: %p\n", structmsgDefinitions, fieldNameDefinitions);
+  idx = 0;
+  while (idx < structmsgDefinitions->numDefinitions) {
+    definition = &structmsgDefinitions->definitions[idx];
+    if (c_strcmp(name, definition->name) == 0) {
+      found = 1;
+      break;
+    }
+    idx++;
+  }
+  if (!found) {
+    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
+  }
+  numNormFields = 0;
+  normNamesSize = 0;
+  idx = 0;
+  while (idx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[idx];
+    if (fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW) {
+      result = getFieldIdName(fieldInfo->fieldId, fieldNameDefinitions, &fieldName);
+      checkErrOK(result);
+//ets_printf("fieldName: %s\n", fieldName);
+      numNormFields++;
+      normNamesSize += c_strlen(fieldName) + 1;
+    }
+    idx++;
+  }
+  normNamesOffsets = os_zalloc(numNormFields * sizeof(id2offset_t) + 1);
+  checkAllocOK(normNamesOffsets);
+  // nameLgth + name of Definition
+  definitionPayloadSize = sizeof(uint8_t) + (c_strlen(name) + 1);
+  // fieldId uint16_t, fieldType uint8_t, fieldLgth uint16_t
+  definitionPayloadSize += definition->numFields * (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
+  payloadSize = STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  // randomNum
+  payloadSize += sizeof(uint32_t);
+  // len ids + ids (numNormFields * (uint16_t)) + len Names + names size
+  payloadSize += sizeof(uint8_t) + numNormFields * sizeof(uint16_t) + sizeof(uint16_t) + normNamesSize;
+  // size definitionPayload + definitionPayload
+  payloadSize += sizeof(uint16_t) + definitionPayloadSize;
+  fillerSize = 0;
+  myLgth = payloadSize + sizeof(uint16_t); // sizeof(uint16_t) for CRC
+  while ((myLgth % 16) != 0) {
+    myLgth++;
+    fillerSize++;
+  }
+ets_printf("fillerSize: %d\n", fillerSize);
+  cmdLgth = payloadSize + fillerSize + sizeof(uint16_t);
+  totalLgth = STRUCT_MSG_HEADER_LENGTH + cmdLgth;
+ets_printf("cmdLgth : %d totalLgth: %d\n", cmdLgth, totalLgth);
+  definition->encoded = os_zalloc(totalLgth);
+  checkAllocOK(definition->encoded);
+  encoded = definition->encoded;
+  offset = 0;
+  offset = uint16Encode(encoded, offset, src); 
+  offset = uint16Encode(encoded, offset, dst); 
+  offset = uint16Encode(encoded, offset, totalLgth); 
+  offset = uint16Encode(encoded, offset, cmdKey); 
+  offset = uint16Encode(encoded, offset, cmdLgth); 
+  offset = randomNumEncode(encoded, offset, &randomNum); 
+  offset = normalFieldNamesEncode(encoded, offset, definition, fieldNameDefinitions, &normNamesOffsets, numNormFields, normNamesSize);
+  offset = uint16Encode(encoded, offset, definitionPayloadSize); 
+  offset = uint8Encode(encoded, offset, c_strlen(name)+1); 
+  offset = uint8VectorEncode(encoded, offset, name, c_strlen(name)); 
+  offset = uint8Encode(encoded, offset, '\0'); 
+  offset = definitionsEncode(encoded, offset, definition, fieldNameDefinitions, normNamesOffsets);
+  uint8_t dummy[fillerSize];
+  offset = fillerEncode(encoded, offset, fillerSize, &dummy[0]);
+  offset = crcEncode(encoded, offset, totalLgth, &crc, STRUCT_MSG_HEADER_LENGTH);
+ets_printf("after crc offset: %d totalLgth :%d crc: 0x%04x\n", offset, totalLgth, crc);
+  *data = encoded;
+  *lgth = totalLgth;
+ets_printf("definitionsEncode done\n");
+  return STRUCT_MSG_ERR_OK;
+
+}
+
+// ============================= structmsg_decodeDefinitions ========================
+
+int structmsg_decodeDefinitions (const uint8_t *name, const uint8_t *data, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
   size_t numSpecFields;
   size_t namesSpecSize;
   size_t numNormFields;
   size_t namesNormSize;
-  uint16_t totalLgth;
-  uint16_t cmdLgth;
   size_t fillerSize;
   int result;
   int idx;
@@ -838,9 +1087,27 @@ int structmsg_encodeDefinitions (const uint8_t *name, stmsgDefinitions_t *struct
   size_t myLgth;
   stmsgDefinition_t *definition;
   fieldInfoDefinition_t *fieldInfo;
-  uint8_t *encoded;
   int offset;
+  uint16_t src;
+  uint16_t dst;
+  uint16_t totalLgth;
+  uint16_t cmdKey;
+  uint16_t cmdLgth;
 
+ets_printf("decode: name: %p data: %p\n", name, data);
+  offset = 0;
+  offset = uint16Decode(data, offset, &src); 
+  offset = uint16Decode(data, offset, &dst); 
+  offset = uint16Decode(data, offset, &totalLgth); 
+  offset = uint16Decode(data, offset, &cmdKey); 
+  if (cmdKey != STRUCT_MSG_DEFINITION_CMD_KEY) {
+    return STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY;
+  }
+  offset = uint16Decode(data, offset, &cmdLgth); 
+  offset = specialFieldNamesDecode(data, offset);
+  offset = normalFieldNamesDecode(data, offset);
+structmsg_dumpBinary(data, 10, "DECODED");
+#ifdef NOTDEF
 ets_printf("structmsgDefinitions: %p fieldNameDefinitions: %p\n", structmsgDefinitions, fieldNameDefinitions);
   result = getSpecFieldSizes(&numSpecFields, &namesSpecSize);
 ets_printf("buildFieldDefMsg: numSpecFields: %d namesSpecSize: %d\n", numSpecFields, namesSpecSize);
@@ -862,7 +1129,7 @@ ets_printf("buildFieldDefMsg: numSpecFields: %d namesSpecSize: %d\n", numSpecFie
   idx = 0;
   while (idx < definition->numFields) {
     fieldInfo = &definition->fieldInfos[idx];
-    if (fieldInfo->fieldId < 200) { // FIXME should be a CONSTANT!! spec keys have Id's > 200
+    if (fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW) {
       result = getFieldIdName(fieldInfo->fieldId, fieldNameDefinitions, &fieldName);
       checkErrOK(result);
 //ets_printf("fieldName: %s\n", fieldName);
@@ -887,18 +1154,7 @@ ets_printf("numFields: %d definitionPayloadSize: %d payloadSize: %d\n", definiti
   cmdLgth = payloadSize + fillerSize + sizeof(uint16_t);
   totalLgth = STRUCT_MSG_HEADER_LENGTH + cmdLgth;
 ets_printf("cmdLgth : %d totalLgth: %d\n", cmdLgth, totalLgth);
-  definition->encoded = os_zalloc(totalLgth);
-  checkAllocOK(definition->encoded);
-  encoded = definition->encoded;
-  // FIXME!!
-  uint16_t src = 123;
-  uint16_t dst = 987;
-
-  offset = 0;
-  offset = uint16Encode(encoded, offset, src); 
-  offset = uint16Encode(encoded, offset, dst); 
-  offset = uint16Encode(encoded, offset, totalLgth); 
-structmsg_dumpBinary(encoded, 6, "ENCODED");
+#endif
   return STRUCT_MSG_ERR_OK;
 
 }
