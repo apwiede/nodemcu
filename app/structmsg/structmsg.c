@@ -53,7 +53,6 @@ typedef struct lstructmsg_userdata
 // create an object
 static lstructmsg_userdata structmsg_userdata = { NULL, 0};
 
-static int uint16Encode(uint8_t *data, int offset, uint16_t value);
 
 // ============================= checkHandle ========================
 
@@ -73,9 +72,9 @@ static int checkHandle(const uint8_t *handle) {
   return STRUCT_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
-// ============================= get_structmsg_ptr ========================
+// ============================= structmsg_get_structmsg_ptr ========================
 
-static structmsg_t *get_structmsg_ptr( const uint8_t *handle )
+structmsg_t *structmsg_get_structmsg_ptr( const uint8_t *handle )
 {
   int id;
   const char hex[] = "0123456789abcdef\0";
@@ -111,9 +110,9 @@ static structmsg_t *get_structmsg_ptr( const uint8_t *handle )
   return (structmsg_t *)id;
 }
 
-// ============================= dumpBinary ========================
+// ============================= structmsg_dumpBinary ========================
 
-static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
+void structmsg_dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
   int idx;
 
   ets_printf("%s\n", where);
@@ -122,30 +121,6 @@ static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) 
      ets_printf("idx: %d ch: 0x%02x\n", idx, data[idx] & 0xFF);
     idx++;
   }
-}
-
-// ============================= fillHdrInfo ========================
-
-static int  fillHdrInfo(const uint8_t *handle, structmsg_t *structmsg) {
-  hdrInfo_t *hdrInfoPtr;
-  int offset;
-
-  // fill the hdrInfo
-  structmsg = get_structmsg_ptr(handle);
-  hdrInfoPtr = structmsg->handleHdrInfoPtr;
-  *hdrInfoPtr = *(&structmsg->hdr.hdrInfo);
-  offset = 0;
-  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.src);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.dst);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(hdrInfoPtr->hdrId, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
-  checkEncodeOffset(offset);
-  return STRUCT_MSG_ERR_OK;
 }
 
 // ============================= getHandle ========================
@@ -236,366 +211,6 @@ static int deleteHandle(const uint8_t *handle) {
       return STRUCT_MSG_ERR_OK;
   }
   return STRUCT_MSG_ERR_HANDLE_NOT_FOUND;
-}
-
-// ============================= uint8Encode ========================
-
-static int uint8Encode(uint8_t *data, int offset, uint8_t value) {
-  data[offset++] = value & 0xFF;
-  return offset;
-}
-
-// ============================= int8Encode ========================
-
-static int int8Encode(uint8_t *data, int offset, int8_t value) {
-  data[offset++] = value & 0xFF;
-  return offset;
-}
-
-// ============================= uint16Encode ========================
-
-static int uint16Encode(uint8_t *data, int offset, uint16_t value) {
-  data[offset++] = (value >> 8) & 0xFF;
-  data[offset++] = value & 0xFF;
-  return offset;
-}
-
-// ============================= int16Encode ========================
-
-static int int16Encode(uint8_t *data, int offset, int16_t value) {
-  data[offset++] = (value >> 8) & 0xFF;
-  data[offset++] = value & 0xFF;
-  return offset;
-}
-
-// ============================= uint32Encode ========================
-
-static int uint32Encode(uint8_t *data, int offset, uint32_t value) {
-  data[offset++] = (value >> 24) & 0xFF;
-  data[offset++] = (value >> 16) & 0xFF;
-  data[offset++] = (value >> 8) & 0xFF;
-  data[offset++] = value & 0xFF;
-  return offset;
-}
-
-// ============================= int32Encode ========================
-
-static int int32Encode(uint8_t *data, int offset, int32_t value) {
-  data[offset++] = (value >> 24) & 0xFF;
-  data[offset++] = (value >> 16) & 0xFF;
-  data[offset++] = (value >> 8) & 0xFF;
-  data[offset++] = value & 0xFF;
-  return offset;
-}
-
-// ============================= uint8VectorEncode ========================
-
-static int uint8VectorEncode(uint8_t *data, int offset, uint8_t *value, uint16_t lgth) {
-  c_memcpy(data+offset,value,lgth);
-  offset += lgth;
-  return offset;
-}
-
-// ============================= int8VectorEncode ========================
-
-static int int8VectorEncode(uint8_t *data, int offset, int8_t *value, uint16_t lgth) {
-  c_memcpy(data+offset,value,lgth);
-  offset += lgth;
-  return offset;
-}
-
-// ============================= uint16VectorEncode ========================
-
-static int uint16VectorEncode(uint8_t *data, int offset, uint16_t *value, uint16_t lgth) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = uint16Encode(data, offset, value[idx]);
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= int16VectorEncode ========================
-
-static int int16VectorEncode(uint8_t *data, int offset, int16_t *value, uint16_t lgth) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = int16Encode(data, offset, value[idx]);
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= uint32VectorEncode ========================
-
-static int uint32VectorEncode(uint8_t *data, int offset, uint32_t *value, uint16_t lgth) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = uint32Encode(data, offset, value[idx]);
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= int32VectorEncode ========================
-
-static int int32VectorEncode(uint8_t *data, int offset, int32_t *value, uint16_t lgth) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = int32Encode(data, offset, value[idx]);
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= uint8Decode ========================
-
-static int uint8Decode(const uint8_t *data, int offset, uint8_t *value) {
-  *value = data[offset++] & 0xFF;
-  return offset;
-}
-
-// ============================= int8Decode ========================
-
-static int int8Decode(const uint8_t *data, int offset, int8_t *value) {
-  *value = data[offset++] & 0xFF;
-  return offset;
-}
-
-// ============================= uint16Decode ========================
-
-static int uint16Decode(const uint8_t *data, int offset, uint16_t *value) {
-  *value = 0;
-  *value += (data[offset++] & 0xFF) << 8;
-  *value += (data[offset++] & 0xFF) << 0;
-  return offset;
-}
-
-// ============================= int16Decode ========================
-
-static int int16Decode(const uint8_t *data, int offset, int16_t *value) {
-  *value = 0;
-  *value += (data[offset++] & 0xFF) << 8;
-  *value += (data[offset++] & 0xFF) << 0;
-  return offset;
-}
-
-// ============================= uint32Decode ========================
-
-static int uint32Decode(const uint8_t *data, int offset, uint32_t *value) {
-  *value = 0;
-  *value += (data[offset++] & 0xFF) << 24;
-  *value += (data[offset++] & 0xFF) << 16;
-  *value += (data[offset++] & 0xFF) << 8;
-  *value += (data[offset++] & 0xFF) << 0;
-  return offset;
-}
-
-// ============================= int32Decode ========================
-
-static int int32Decode(const uint8_t *data, int offset, int32_t *value) {
-  *value = 0;
-  *value += (data[offset++] & 0xFF) << 24;
-  *value += (data[offset++] & 0xFF) << 16;
-  *value += (data[offset++] & 0xFF) << 8;
-  *value += (data[offset++] & 0xFF) << 0;
-  return offset;
-}
-
-// ============================= uint8VectorDecode ========================
-
-static int uint8VectorDecode(const uint8_t *data, int offset, uint16_t lgth, uint8_t **value) {
-  c_memcpy(*value,data+offset,lgth);
-  offset += lgth;
-  return offset;
-}
-
-// ============================= int8VectorDecode ========================
-
-static int int8VectorDecode(const uint8_t *data, int offset, uint16_t lgth, int8_t **value) {
-  c_memcpy(*value,data+offset,lgth);
-  offset += lgth;
-  return offset;
-}
-
-// ============================= uint16VectorDecode ========================
-
-static int uint16VectorDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t **value) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = uint16Decode(data, offset, &((*value)[idx]));
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= int16VectorDecode ========================
-
-static int int16VectorDecode(const uint8_t *data, int offset, uint16_t lgth, int16_t **value) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = int16Decode(data, offset, &((*value)[idx]));
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= uint32VectorDecode ========================
-
-static int uint32VectorDecode(const uint8_t *data, int offset, uint16_t lgth, uint32_t **value) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = uint32Decode(data, offset, &((*value)[idx]));
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= int32VectorDecode ========================
-
-static int int32VectorDecode(const uint8_t *data, int offset, uint16_t lgth, int32_t **value) {
-  int idx;
-
-  idx = 0;
-  while (idx < lgth) {
-    offset = int32Decode(data, offset, &((*value)[idx]));
-    idx++;
-  }
-  return offset;
-}
-
-// ============================= randomNumEncode ========================
-
-static int randomNumEncode(uint8_t *data, int offset, uint32_t *value) {
-  uint32_t val;
-  
-  val = (uint32_t)(rand() & RAND_MAX);
-  *value = val;
-  return uint32Encode(data, offset, val);
-}
-
-// ============================= randomNumDecode ========================
-
-static int randomNumDecode(const uint8_t *data, int offset, uint32_t *value) {
-  int result;
-
-  offset = uint32Decode(data, offset, value);
-  return offset;
-}
-
-// ============================= sequenceNumEncode ========================
-
-static int sequenceNumEncode(uint8_t *data, int offset, structmsg_t *structmsg, uint32_t *value) {
-  uint32_t val;
-  
-  val = ++structmsg->sequenceNum;
-  *value = val;
-ets_printf("sequenceNum: 0x%08x\n", val);
-  return uint32Encode(data, offset, val);
-}
-
-// ============================= sequenceNumDecode ========================
-
-static int sequenceNumDecode(const uint8_t *data, int offset, uint32_t *value) {
-  int result;
-
-  offset = uint32Decode(data, offset, value);
-  return offset;
-}
-
-// ============================= fillerEncode ========================
-
-static int fillerEncode(uint8_t *data, int offset, uint16_t lgth, uint8_t *value) {
-  uint32_t val;
-  int idx;
-
-  idx = 0;
-  while (lgth >= 4) {
-    val = (uint32_t)(rand() & RAND_MAX);
-    value[idx++] = (val >> 24) & 0xFF;
-    value[idx++] = (val >> 16) & 0xFF;
-    value[idx++] = (val >> 8) & 0xFF;
-    value[idx++] = (val >> 0) & 0xFF;
-    offset = uint32Encode(data, offset, val);
-    lgth -= 4;
-  }
-  while (lgth >= 2) {
-    val = (uint16_t)((rand() & RAND_MAX) & 0xFFFF);
-    value[idx++] = (val >> 8) & 0xFF;
-    value[idx++] = (val >> 0) & 0xFF;
-    offset = uint16Encode(data, offset, val);
-    lgth -= 2;
-  }
-  while (lgth >= 1) {
-    val = (uint8_t)((rand() & RAND_MAX) & 0xFF);
-    offset = uint8Encode(data, offset, val);
-    value[idx++] = (val >> 0) & 0xFF;
-    lgth -= 1;
-  }
-  return offset;
-}
-
-// ============================= fillerDecode ========================
-
-static int fillerDecode(const uint8_t *data, int offset, uint16_t lgth, uint8_t **value) {
-  int idx;
-
-  c_memcpy(*value,data+offset,lgth);
-  offset += lgth;
-  return offset;
-}
-
-// ============================= crcEncode ========================
-
-static int crcEncode(uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth) {
-  int idx;
-
-  lgth -= sizeof(uint16_t);   // uint16_t crc
-  *crc = 0;
-  idx = headerLgth;
-  while (idx < lgth) {
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-headerLgth, data[idx], *crc);
-    *crc += data[idx++];
-  }
-  *crc = ~(*crc);
-  offset = uint16Encode(data,offset,*crc);
-  return offset;
-}
-
-// ============================= crcDecode ========================
-
-static int crcDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth) {
-  uint16_t crcVal;
-  int idx;
-
-  lgth -= sizeof(uint16_t);   // uint16_t crc
-  crcVal = 0;
-  idx = headerLgth;
-  while (idx < lgth + headerLgth) {
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-headerLgth, data[idx], crcVal);
-    crcVal += data[idx++];
-  }
-  crcVal = ~crcVal;
-  offset = uint16Decode(data, offset, crc);
-ets_printf("crcVal: 0x%04x crc: 0x%04x\n", crcVal, *crc);
-  if (crcVal != *crc) {
-    return -1;
-  }
-  return offset;
 }
 
 // ============================= newFieldInfos ========================
@@ -966,134 +581,6 @@ static int getFieldValue(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const u
   return STRUCT_MSG_ERR_VALUE_NOT_SET;
 }
 
-// ============================= encodeField ========================
-
-static int encodeField(uint8_t *msgPtr, fieldInfo_t *fieldInfo, int offset) {
-  int fieldIdx;
-
-  switch (fieldInfo->fieldType) {
-    case STRUCT_MSG_FIELD_INT8_T:
-      offset = int8Encode(msgPtr,offset,fieldInfo->value.byteVal);
-      break;
-    case STRUCT_MSG_FIELD_UINT8_T:
-      offset = uint8Encode(msgPtr,offset,fieldInfo->value.ubyteVal);
-      break;
-    case STRUCT_MSG_FIELD_INT16_T:
-      offset = int16Encode(msgPtr,offset,fieldInfo->value.shortVal);
-      break;
-    case STRUCT_MSG_FIELD_UINT16_T:
-      offset = uint16Encode(msgPtr,offset,fieldInfo->value.ushortVal);
-      break;
-    case STRUCT_MSG_FIELD_INT32_T:
-      offset = int32Encode(msgPtr,offset,fieldInfo->value.val);
-      break;
-    case STRUCT_MSG_FIELD_UINT32_T:
-      offset = uint32Encode(msgPtr,offset,fieldInfo->value.uval);
-      break;
-    case STRUCT_MSG_FIELD_INT8_VECTOR:
-      fieldIdx = 0;
-      while (fieldIdx < fieldInfo->fieldLgth) {
-        offset = int8Encode(msgPtr,offset,fieldInfo->value.byteVector[fieldIdx]);
-        fieldIdx++;
-      }
-      break;
-    case STRUCT_MSG_FIELD_UINT8_VECTOR:
-      fieldIdx = 0;
-      while (fieldIdx < fieldInfo->fieldLgth) {
-        offset = uint8Encode(msgPtr,offset,fieldInfo->value.ubyteVector[fieldIdx]);
-        fieldIdx++;
-      }
-      break;
-    case STRUCT_MSG_FIELD_INT16_VECTOR:
-      fieldIdx = 0;
-      while (fieldIdx < fieldInfo->fieldLgth) {
-        offset = int16Encode(msgPtr,offset,fieldInfo->value.shortVector[fieldIdx]);
-        fieldIdx++;
-      }
-      break;
-    case STRUCT_MSG_FIELD_UINT16_VECTOR:
-      fieldIdx = 0;
-      while (fieldIdx < fieldInfo->fieldLgth) {
-        offset = uint16Encode(msgPtr,offset,fieldInfo->value.ushortVector[fieldIdx]);
-        fieldIdx++;
-      }
-      break;
-    case STRUCT_MSG_FIELD_INT32_VECTOR:
-      fieldIdx = 0;
-      while (fieldIdx < fieldInfo->fieldLgth) {
-        offset = int32Encode(msgPtr,offset,fieldInfo->value.int32Vector[fieldIdx]);
-        fieldIdx++;
-      }
-      break;
-    case STRUCT_MSG_FIELD_UINT32_VECTOR:
-      fieldIdx = 0;
-      while (fieldIdx < fieldInfo->fieldLgth) {
-        offset = uint32Encode(msgPtr,offset,fieldInfo->value.uint32Vector[fieldIdx]);
-        fieldIdx++;
-      }
-      break;
-  }
-  return offset;
-}
-
-// ============================= decodeField ========================
-
-static int decodeField(const uint8_t *msgPtr, fieldInfo_t *fieldInfo, int offset) {
-  int fieldIdx;
-
-  switch (fieldInfo->fieldType) {
-    case STRUCT_MSG_FIELD_INT8_T:
-      offset = int8Decode(msgPtr,offset,&fieldInfo->value.byteVal);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_UINT8_T:
-      offset = uint8Decode(msgPtr,offset,&fieldInfo->value.ubyteVal);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_INT16_T:
-      offset = int16Decode(msgPtr,offset,&fieldInfo->value.shortVal);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_UINT16_T:
-      offset = uint16Decode(msgPtr,offset,&fieldInfo->value.ushortVal);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_INT32_T:
-      offset = int32Decode(msgPtr,offset,&fieldInfo->value.val);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_UINT32_T:
-      offset = uint32Decode(msgPtr,offset,&fieldInfo->value.uval);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_INT8_VECTOR:
-      offset = int8VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.byteVector);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_UINT8_VECTOR:
-      offset = uint8VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.ubyteVector);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_INT16_VECTOR:
-      offset = int16VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.shortVector);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_UINT16_VECTOR:
-      offset = uint16VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.ushortVector);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_INT32_VECTOR:
-      offset = int32VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.int32Vector);
-      checkDecodeOffset(offset);
-      break;
-    case STRUCT_MSG_FIELD_UINT32_VECTOR:
-      offset = uint32VectorDecode(msgPtr,offset,fieldInfo->fieldLgth, &fieldInfo->value.uint32Vector);
-      checkDecodeOffset(offset);
-      break;
-  }
-  return offset;
-}
-
 // ============================= stmsg_createMsg ========================
 
 int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle) {
@@ -1131,7 +618,7 @@ int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   }
   setHandleField(structmsg->handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   setHandleField(structmsg->handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  result = fillHdrInfo(structmsg->handle, structmsg);
+  result = structmsg_fillHdrInfo(structmsg->handle, structmsg);
   if (result != STRUCT_MSG_ERR_OK) {
     os_free(structmsg->msg.fieldInfos);
     deleteHandle(structmsg->handle);
@@ -1148,7 +635,7 @@ int stmsg_deleteMsg(const uint8_t *handle) {
   structmsg_t *structmsg;
   int idx;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   idx = 0;
   while (idx < structmsg->msg.numFieldInfos) {
@@ -1200,241 +687,6 @@ int stmsg_deleteMsg(const uint8_t *handle) {
   }
   deleteHandle(handle);
   os_free(structmsg);
-  return STRUCT_MSG_ERR_OK;
-}
-
-// ============================= stmsg_encodeMsg ========================
-
-int stmsg_encodeMsg(const uint8_t *handle) {
-  structmsg_t *structmsg;
-  uint8_t *msgPtr;
-  uint16_t *ushortPtr;
-  int16_t *shortPtr;
-  uint32_t *uintPtr;
-  int32_t *intPtr;
-  int32_t randomNum;
-  int32_t sequenceNum;
-  uint16_t crc;
-  int offset;
-  int idx;
-  int fieldIdx;
-  int numEntries;
-  int result;
-  int fieldId = 0;
-  fieldInfo_t *fieldInfo;
-
-  structmsg = get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
-  if (structmsg->encoded != NULL) {
-    os_free(structmsg->encoded);
-  }
-  structmsg->encoded = (uint8_t *)os_zalloc(structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  msgPtr = structmsg->encoded;
-  offset = 0;
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.src);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.dst);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
-  checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
-  checkEncodeOffset(offset);
-  idx = 0;
-  numEntries = structmsg->msg.numFieldInfos;
-  while (idx < numEntries) {
-    fieldInfo = &structmsg->msg.fieldInfos[idx];
-    if (fieldInfo->fieldStr[0] == '@') {
-      result = structmsg_getFieldNameId(fieldInfo->fieldStr, &fieldId);
-      checkErrOK(result);
-      switch (fieldId) {
-      case STRUCT_MSG_SPEC_FIELD_SRC:
-      case STRUCT_MSG_SPEC_FIELD_DST:
-      case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
-      case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-      case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
-      case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-ets_printf("funny should encode: %s\n", fieldInfo->fieldStr);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
-        offset = randomNumEncode(msgPtr, offset, &randomNum);
-        checkEncodeOffset(offset);
-        result = stmsg_setFieldValue(handle, "@randomNum", randomNum, NULL);
-        checkErrOK(result);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
-        offset = sequenceNumEncode(msgPtr, offset, structmsg, &sequenceNum);
-        checkEncodeOffset(offset);
-        result = stmsg_setFieldValue(handle, "@sequenceNum", sequenceNum, NULL);
-        checkErrOK(result);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_FILLER:
-        offset = fillerEncode(msgPtr, offset, fieldInfo->fieldLgth, fieldInfo->value.ubyteVector);
-        checkEncodeOffset(offset);
-        result = stmsg_setFieldValue(handle, "@filler", 0, fieldInfo->value.ubyteVector);
-        checkErrOK(result);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_CRC:
-        offset = crcEncode(structmsg->encoded, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, &crc, structmsg->hdr.headerLgth);
-        checkEncodeOffset(offset);
-        result = stmsg_setFieldValue(handle, "@crc", crc, NULL);
-        checkErrOK(result);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_ID:
-        return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
-        break;
-      case STRUCT_MSG_SPEC_FIELD_TABLE_ROWS:
-        break;
-      case STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
-        if (structmsg->msg.numTableRows > 0) {
-          int row = 0;
-          int col = 0;
-          int cell = 0;
-          while (row < structmsg->msg.numTableRows) {
-            while (col < structmsg->msg.numRowFields) {
-               cell = col + row * structmsg->msg.numRowFields;
-               fieldInfo = &structmsg->msg.tableFieldInfos[cell];
-               offset = encodeField(msgPtr, fieldInfo, offset);
-               checkEncodeOffset(offset);
-               col++;
-            }
-            row++;
-            col = 0;
-          }
-        }
-        break;
-      }
-    } else {
-      offset = encodeField(msgPtr, fieldInfo, offset);
-      checkEncodeOffset(offset);
-    }
-    idx++;
-  }
-  structmsg->flags |= STRUCT_MSG_ENCODED;
-  return STRUCT_MSG_ERR_OK;
-}
-
-// ============================= stmsg_getEncoded ========================
-
-int stmsg_getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth) {
-  structmsg_t *structmsg;
-
-  structmsg = get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
-  if (structmsg->encoded == NULL) {
-    return STRUCT_MSG_ERR_NOT_ENCODED;
-  }
-  *encoded = structmsg->encoded;
-  *lgth = structmsg->hdr.hdrInfo.hdrKeys.totalLgth;
-  return STRUCT_MSG_ERR_OK;
-}
-
-// ============================= stmsg_decodeMsg ========================
-
-int stmsg_decodeMsg(const uint8_t *handle, const uint8_t *data) {
-  structmsg_t *structmsg;
-  const uint8_t *msgPtr;
-  uint16_t crc;
-  int offset;
-  int idx;
-  int fieldIdx;
-  int fieldId;
-  int numEntries;
-  int result = STRUCT_MSG_ERR_OK;
-  fieldInfo_t *fieldInfo;
-
-  structmsg = get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
-  if (structmsg->todecode != NULL) {
-    os_free(structmsg->todecode);
-  }
-  structmsg->todecode = (uint8_t *)os_zalloc(structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  c_memcpy(structmsg->todecode, data, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  msgPtr = structmsg->todecode;
-  offset = 0;
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.src);
-  checkDecodeOffset(offset);
-  checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.dst);
-  checkDecodeOffset(offset);
-  checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  checkDecodeOffset(offset);
-  checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
-  checkDecodeOffset(offset);
-  checkErrOK(result);
-  offset = uint16Decode(msgPtr,offset,&structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
-  checkDecodeOffset(offset);
-  result = fillHdrInfo(handle, structmsg);
-  idx = 0;
-  numEntries = structmsg->msg.numFieldInfos;
-  while (idx < numEntries) {
-    fieldInfo = &structmsg->msg.fieldInfos[idx];
-    if (fieldInfo->fieldStr[0] == '@') {
-      result = structmsg_getFieldNameId(fieldInfo->fieldStr, &fieldId);
-      checkErrOK(result);
-      switch (fieldId) {
-      case STRUCT_MSG_SPEC_FIELD_SRC:
-      case STRUCT_MSG_SPEC_FIELD_DST:
-      case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
-      case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-      case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
-      case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-ets_printf("funny should decode: %s\n", fieldInfo->fieldStr);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
-        offset = randomNumDecode(msgPtr, offset, &fieldInfo->value.uval);
-        checkDecodeOffset(offset);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
-        offset = sequenceNumDecode(msgPtr, offset, &fieldInfo->value.uval);
-        checkDecodeOffset(offset);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_FILLER:
-        offset = fillerDecode(msgPtr, offset, fieldInfo->fieldLgth, &fieldInfo->value.ubyteVector);
-        checkDecodeOffset(offset);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_CRC:
-        offset = crcDecode(msgPtr, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, &fieldInfo->value.ushortVal, structmsg->hdr.headerLgth);
-        if (offset < 0) {
-          return STRUCT_MSG_ERR_BAD_CRC_VALUE;
-        }
-        break;
-      case STRUCT_MSG_SPEC_FIELD_ID:
-        return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
-        break;
-      case STRUCT_MSG_SPEC_FIELD_TABLE_ROWS:
-        break;
-      case STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
-        if (structmsg->msg.numTableRows > 0) {
-          int row = 0;
-          int col = 0;
-          int cell = 0;
-          while (row < structmsg->msg.numTableRows) {
-            while (col < structmsg->msg.numRowFields) {
-               cell = col + row * structmsg->msg.numRowFields;
-               fieldInfo = &structmsg->msg.tableFieldInfos[cell];
-               offset = decodeField(msgPtr, fieldInfo, offset);
-               checkEncodeOffset(offset);
-               col++;
-            }
-            row++;
-            col = 0;
-          }
-        }
-        break;
-      }
-      fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-    } else {
-      offset = decodeField(msgPtr, fieldInfo, offset);
-      checkEncodeOffset(offset);
-      fieldInfo->flags |= STRUCT_MSG_FIELD_IS_SET;
-    }
-    idx++;
-  }
-  structmsg->flags |= STRUCT_MSG_DECODED;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -1565,7 +817,7 @@ int stmsg_dumpMsg(const uint8_t *handle) {
   int32_t val;
   structmsg_t *structmsg;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   ets_printf("handle: %s src: %d dst: %d totalLgth: %d\r\n", structmsg->handle, (int)structmsg->hdr.hdrInfo.hdrKeys.src, (int)structmsg->hdr.hdrInfo.hdrKeys.dst, (int)structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   ets_printf("  cmdKey: %d cmdLgth: %d\r\n", (int)structmsg->hdr.hdrInfo.hdrKeys.cmdKey, (int)structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
@@ -1679,7 +931,7 @@ int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const u
 
   *buf = NULL;
   *lgth = 0;
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
 
   if (enc) {
@@ -1711,7 +963,7 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
   structmsg_t *structmsg;
   fieldInfo_t *fieldInfo;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   if (c_strcmp(fieldStr, "@tablerows") == 0) {
     structmsg->msg.numTableRows = fieldLgth;
@@ -1751,7 +1003,7 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
     numTableRowFields = 0;
     fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, fieldLgth, numTableRows);
 //ets_printf("field2: %s totalLgth: %d cmdLgth: %d\n", fieldInfo->fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
-    result = fillHdrInfo(handle, structmsg);
+    result = structmsg_fillHdrInfo(handle, structmsg);
     structmsg->msg.numFieldInfos++;
   } else {
     row = 0;
@@ -1777,7 +1029,7 @@ int stmsg_setFillerAndCrc(const uint8_t *handle) {
   int16_t myLgth = 0;
   int result;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   myLgth = structmsg->hdr.hdrInfo.hdrKeys.cmdLgth + 2;
 ets_printf("setfac: myLgth: %d\n", myLgth);
@@ -1801,14 +1053,14 @@ int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int num
   int result;
   int numEntries;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   if (c_strcmp(fieldName, "@src") == 0) {
     if (stringValue == NULL) {
       if ((numericValue >= 0) && (numericValue <= 65535)) {
         structmsg->hdr.hdrInfo.hdrKeys.src = (uint16_t)numericValue;
         setHandleField(handle, STRUCT_MSG_FIELD_SRC, structmsg->hdr.hdrInfo.hdrKeys.src);
-        result = fillHdrInfo(handle, structmsg);
+        result = structmsg_fillHdrInfo(handle, structmsg);
         return result;
       } else {
         return STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -1822,7 +1074,7 @@ int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int num
         if ((numericValue >= 0) && (numericValue <= 65535)) {
           structmsg->hdr.hdrInfo.hdrKeys.dst = (uint16_t)numericValue;
           setHandleField(handle, STRUCT_MSG_FIELD_DST, structmsg->hdr.hdrInfo.hdrKeys.dst);
-          result = fillHdrInfo(handle, structmsg);
+          result = structmsg_fillHdrInfo(handle, structmsg);
           return result;
         } else {
           return STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -1836,7 +1088,7 @@ int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int num
           if ((numericValue >= 0) && (numericValue <= 65535)) {
             structmsg->hdr.hdrInfo.hdrKeys.cmdKey = (uint16_t)numericValue;
             setHandleField(handle, STRUCT_MSG_FIELD_CMD_KEY, structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
-            result = fillHdrInfo(handle, structmsg);
+            result = structmsg_fillHdrInfo(handle, structmsg);
             return result;
           } else {
             return STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -1867,7 +1119,7 @@ int stmsg_setTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, in
   int idx;
   int cell;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   if (row >= structmsg->msg.numTableRows) {
     return STRUCT_MSG_ERR_BAD_TABLE_ROW;
@@ -1894,7 +1146,7 @@ int stmsg_getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *nu
   int idx;
   int numEntries;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   *numericValue = 0;
   *stringValue = NULL;
@@ -1919,7 +1171,7 @@ int stmsg_getTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, in
   int idx;
   int cell;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   if (row >= structmsg->msg.numTableRows) {
     return STRUCT_MSG_ERR_BAD_TABLE_ROW;
@@ -1946,7 +1198,7 @@ int stmsg_setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedL
   structmsg_t *structmsg;
   fieldInfo_t *fieldInfo;
 
-  structmsg = get_structmsg_ptr(handle);
+  structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   structmsg->encrypted = (uint8_t *)os_malloc(cryptedLgth);
   checkAllocOK(structmsg->encrypted);

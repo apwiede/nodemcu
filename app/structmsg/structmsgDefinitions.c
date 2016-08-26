@@ -74,6 +74,21 @@ str2key_t structmsgSpecialFieldNames[] = {
 };
 
 
+// ============================= getNormFieldSizes ========================
+
+static int getNormFieldSizes(size_t *numFields, size_t *namesSize) {
+  *numFields = 0;
+  *namesSize = 0;
+  str2key_t *entry = &structmsgSpecialFieldNames[0];
+  while (entry->str != NULL) {
+    (*numFields)++;
+    *namesSize += c_strlen(entry->str) + 1;  // +1 for "," as separator
+ets_printf("%s: %d %d\n", entry->str, *numFields, *namesSize);
+    entry++;
+  }
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ============================= structmsg_getFieldTypeKey ========================
 
 int structmsg_getFieldTypeKey(const uint8_t *str) {
@@ -162,7 +177,6 @@ int structmsg_getFieldNameId (const uint8_t *fieldName, int *key) {
     if (fieldNameDefinitions.numDefinitions > 0) {
       // find field name
       int idx = 0;
-
       while (idx < fieldNameDefinitions.numDefinitions) {
         str2key_t *entry = &fieldNameDefinitions.definitions[idx];
         if (c_strcmp(entry->str, fieldName) == 0) {
@@ -310,3 +324,15 @@ ets_printf("dumpFieldDefinition: %s\n", name);
   }
   return STRUCT_MSG_ERR_OK;
 }
+
+// ============================= structmsg_buildFieldDefinitionMessage ========================
+
+int structmsg_buildFieldDefinitionMessage (const uint8_t *name) {
+  // FIXME!!
+  uint16_t src = 123;
+  uint16_t dst = 987;
+
+  return structmsg_encodeDefinitions(name, &structmsgDefinitions, &fieldNameDefinitions);
+}
+
+

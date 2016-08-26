@@ -472,6 +472,29 @@ static int structmsg_dump_fieldDefinition( lua_State* L ) {
   return 1;
 }
 
+
+// ============================= structmsg_build_fieldDefinitionMessage =================
+
+static int structmsg_build_fieldDefinitionMessage( lua_State* L ) {
+  const uint8_t *name;
+  int result;
+
+  name = luaL_checkstring( L, 1 );
+  result =  structmsg_buildFieldDefinitionMessage (name);
+  checkOKOrErr(L, result, "buildfielddefmsg", "");
+  return 1;
+}
+
+// ============================= structmsg_init_structures =================
+
+static int structmsg_init_structures( lua_State * L ) {
+  int result;
+
+//  result = structmsg_initStructures();
+  checkOKOrErr(L, result, "initstructures", "");
+  return 1;
+}
+
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "create" ),             LFUNCVAL( structmsg_create ) },
@@ -494,6 +517,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "createmsgdef" ),       LFUNCVAL( structmsg_create_msgDefinition ) },
   { LSTRKEY( "addfielddef" ),        LFUNCVAL( structmsg_add_fieldDefinition ) },
   { LSTRKEY( "dumpfielddef" ),       LFUNCVAL( structmsg_dump_fieldDefinition ) },
+  { LSTRKEY( "buildfielddefmsg" ),   LFUNCVAL( structmsg_build_fieldDefinitionMessage ) },
   { LNILKEY, LNILVAL }
 };
 

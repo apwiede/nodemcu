@@ -38,4 +38,4 @@ result=structmsg.addfielddef(def, "@crc", "uint16_t", 2)
 checkOK(result,"@crc")
 result=structmsg.dumpfielddef(def)
 print(tostring(result))
-
+structmsg.buildfielddefmsg(def)
