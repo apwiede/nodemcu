@@ -551,48 +551,57 @@ static int definitionDecode(const uint8_t *data, int offset, stmsgDefinition_t *
 ets_printf("=== definitionDecode start: offset: %d\n", offset);
   // first the keys
   offset = uint8Decode(data, offset, &numNameEntries);
+  checkBadOffset(offset);
   idsStart = (uint16_t *)(data + offset);
   offset += numNameEntries * sizeof(uint16_t);
   idsEnd = (uint16_t *)(data + offset);
 ets_printf("numNameEntries: %d idsStart: %d idsEnd: %d\n", numNameEntries, ((uint8_t *)idsStart-data), ((uint8_t *)idsEnd-data));
   // and now the names
   offset = uint16Decode(data, offset, &namesSize);
+  checkBadOffset(offset);
   namesStart = data + offset;
   offset += namesSize;
   definitionStart = (namesStart + namesSize);
 ets_printf("namesStart: %d namesSize: %d definitionStart: %d\n", namesStart-data, namesSize, definitionStart-data);
   offset = uint16Decode(data, offset, &definitionLgth);
+  checkBadOffset(offset);
 ets_printf("definitionLgth: %d offset: %d\n", definitionLgth, offset);
   offset = uint8Decode(data, offset, &nameLgth);
+  checkBadOffset(offset);
 ets_printf("nameLgth: %d offset: %d\n", nameLgth, offset);
   name = data+offset;
   offset += nameLgth;
 ets_printf("name: %s length: %d offset: %d\n", name, nameLgth, offset);
   offset = uint8Decode(data, offset, &numFields);
+  checkBadOffset(offset);
 ets_printf("===definitionDecode: name: %s numFields: %d offset: %d\n", name, numFields, offset);
   result = structmsg_createStructmsgDefinition (name, numFields);
-  checkErrOK(result);
+  checkOffsetErrOK(result);
   definitionIdx = 0;
   namesIdx = 0;
 //  numFields = definitionLgth / (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
   while (definitionIdx < numFields) { 
     offset = uint16Decode(data, offset, &fieldId);
+    checkBadOffset(offset);
     if (fieldId > STRUCT_MSG_SPEC_FIELD_LOW) {
       result = structmsg_getIdFieldNameStr(fieldId, &fieldName);
-      checkErrOK(result);
+      checkOffsetErrOK(result);
     } else {
+      fieldId = namesIdx + 1;
       myOffset = ((uint8_t *)idsStart - data) + (namesIdx * sizeof(uint16_t));
       myOffset = uint16Decode(data, myOffset, &nameOffset);
       fieldName = (uint8_t *)(namesStart+nameOffset);
       namesIdx++;
     }
     offset = uint8Decode(data, offset, &fieldTypeId);
+    checkBadOffset(offset);
     result = structmsg_getFieldTypeStr(fieldTypeId, &fieldType);
-    checkErrOK(result);
+    checkOffsetErrOK(result);
     offset = uint16Decode(data, offset, &fieldLgth);
+    checkBadOffset(offset);
 //ets_printf("add field: %s fieldId: %d fieldType: %d  %s fieldLgth: %d offset: %d\n", fieldName, fieldId, fieldTypeId, fieldType, fieldLgth, offset);  
     result = structmsg_addFieldDefinition (name, fieldName, fieldType, fieldLgth);
-    checkErrOK(result);
+    checkOffsetErrOK(result);
     definitionIdx++;
   }
   return offset;
@@ -1156,15 +1165,21 @@ int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgD
 ets_printf("decode: name: %p data: %p\n", name, data);
   offset = 0;
   offset = uint16Decode(data, offset, &src); 
+  checkDecodeOffset(offset);
   offset = uint16Decode(data, offset, &dst); 
+  checkDecodeOffset(offset);
   offset = uint16Decode(data, offset, &totalLgth); 
+  checkDecodeOffset(offset);
   offset = uint16Decode(data, offset, &cmdKey); 
+  checkDecodeOffset(offset);
   if (cmdKey != STRUCT_MSG_DEFINITION_CMD_KEY) {
     return STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY;
   }
   offset = uint16Decode(data, offset, &cmdLgth); 
+  checkDecodeOffset(offset);
 ets_printf("cmdLgth: %d numEntries: %d\n", cmdLgth, numEntries);
   offset = uint32Decode(data, offset, &randomNum); 
+  checkDecodeOffset(offset);
 ets_printf("after randomNum: offset: %d\n", offset);
   // now check the crc
   crcOffset = totalLgth - sizeof(uint16_t);
@@ -1174,6 +1189,7 @@ structmsg_dumpBinary(data+crcOffset, 2, "CRC");
 ets_printf("crc: 0x%04x\n", crc);
 //  offset = normalFieldNamesDecode(data, offset);
   offset = definitionDecode(data, offset, definition, fieldNameDefinitions);
+  checkDecodeOffset(offset);
   myLgth = offset + sizeof(uint16_t);
   fillerSize = 0;
   while ((myLgth % 16) != 0) {
@@ -1181,6 +1197,7 @@ ets_printf("crc: 0x%04x\n", crc);
     fillerSize++;
   }
   offset = fillerDecode(data, offset, fillerSize, &filler);
+  checkDecodeOffset(offset);
 ets_printf("fillerSize2: %d offset: %d\n", fillerSize, offset);
   return STRUCT_MSG_ERR_OK;
 

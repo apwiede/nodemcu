@@ -137,6 +137,7 @@ int structmsg_getFieldNameId (const uint8_t *fieldName, int *id, int incrRefCnt)
   int fieldNameId = 0;
   int found = 0;
   int nameIdx = 0;
+  int firstFreeEntryId;
   name2id_t definition;
   str2key_t *entry;
   name2id_t *newDefinition;
@@ -168,6 +169,7 @@ ets_printf("ALLOC!!\n");
       }
     }
     firstFreeEntry = NULL;
+    firstFreeEntryId = 0;
     if (fieldNameDefinitions.numDefinitions > 0) {
       // find field name
       nameIdx = 0;
@@ -207,7 +209,7 @@ ets_printf("ALLOC!!\n");
         return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
       } else {
         if (firstFreeEntry != NULL) {
-//ets_printf("firstFreeEntry: %p %s incrRefCnt: %d\n", firstFreeEntry, fieldName, incrRefCnt);
+          *id = firstFreeEntry->id;
           firstFreeEntry->refCnt = 1;
           firstFreeEntry->str = os_malloc(c_strlen(fieldName) + 1);
           firstFreeEntry->str[c_strlen(fieldName)] = '\0';
@@ -221,7 +223,6 @@ ets_printf("ALLOC!!\n");
           c_memcpy(newDefinition->str, fieldName, c_strlen(fieldName));
           fieldNameDefinitions.numDefinitions++;
           *id = newDefinition->id;
-//ets_printf("newDefinition: %s id: %d\n", fieldName, newDefinition->id);
         }
       }
     }

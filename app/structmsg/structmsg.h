@@ -136,6 +136,8 @@ enum structmsg_special_fields
 #define STRUCT_MSG_INCR    1
 #define STRUCT_MSG_DECR    -1
 
+#define checkOffsetErrOK(result) if (result != STRUCT_MSG_ERR_OK) return -result
+#define checkBadOffset(val) if (val < 0) return val
 #define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
 #define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
 #define checkAllocOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_OUT_OF_MEMORY
