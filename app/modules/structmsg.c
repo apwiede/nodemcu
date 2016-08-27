@@ -133,6 +133,9 @@ ets_printf("error result: %d\n", result);
   case STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY:
     lua_pushfstring(L, "%s: bad definition cmd key", errStr);
     break;
+  case STRUCT_MSG_ERR_NO_SLOT_FOUND:
+    lua_pushfstring(L, "%s: no slot found", errStr);
+    break;
   default:
     lua_pushfstring(L, "%s: funny result error code", errStr);
 ets_printf("funny result: %d\n", result);
@@ -508,17 +511,18 @@ static int structmsg_decode_fieldDefinitionMessage( lua_State* L ) {
   return 1;
 }
 
-#ifdef NOTDEF
-// ============================= structmsg_init_structures =================
+// ============================= structmsg_delete_msgDefinition ========================
 
-static int structmsg_init_structures( lua_State * L ) {
+static int structmsg_delete_msgDefinition( lua_State* L ) {
+  const uint8_t *name;
+  uint8_t numFields;
   int result;
 
-//  result = structmsg_initStructures();
-  checkOKOrErr(L, result, "initstructures", "");
+  name = luaL_checkstring (L, 1);
+  result = structmsg_deleteStructmsgDefinition(name);
+  checkOKOrErr(L, result, "deletemsgdef", "");
   return 1;
 }
-#endif
 
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
@@ -544,6 +548,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "dumpfielddef" ),       LFUNCVAL( structmsg_dump_fieldDefinition ) },
   { LSTRKEY( "encodefielddefmsg" ),  LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
   { LSTRKEY( "decodefielddefmsg" ),  LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
+  { LSTRKEY( "deletemsgdef" ),       LFUNCVAL( structmsg_delete_msgDefinition ) },
   { LNILKEY, LNILVAL }
 };
 

@@ -696,6 +696,7 @@ static int dumpTableRowFields(structmsg_t *structmsg) {
   int numEntries;
   int idx;
   int valueIdx;
+  int result;
   uint8_t uch;
   int8_t ch;
   uint16_t ush;
@@ -704,6 +705,7 @@ static int dumpTableRowFields(structmsg_t *structmsg) {
   int32_t val;
   int row;
   int col;
+  uint8_t *fieldType;
 
   numEntries = structmsg->msg.numTableRows * structmsg->msg.numRowFields;
   ets_printf("    numTableFieldInfos: %d\r\n", numEntries);
@@ -712,7 +714,9 @@ static int dumpTableRowFields(structmsg_t *structmsg) {
   col = 0;
   while (idx < numEntries) {
     fieldInfo_t *fieldInfo = &structmsg->msg.tableFieldInfos[idx];
-    ets_printf("      row %d: col: %d key: %-20s type: %-8s lgth: %.5d\r\n", row, col, fieldInfo->fieldStr, structmsg_getFieldTypeStr(fieldInfo->fieldType), fieldInfo->fieldLgth);
+    result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+    checkErrOK(result);
+    ets_printf("      row %d: col: %d key: %-20s type: %-8s lgth: %.5d\r\n", row, col, fieldInfo->fieldStr, fieldType, fieldInfo->fieldLgth);
 //ets_printf("isSet: %s 0x%02x %d\n", fieldInfo->fieldStr, fieldInfo->flags, (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET));
     if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
       switch (fieldInfo->fieldType) {
@@ -809,12 +813,14 @@ int stmsg_dumpMsg(const uint8_t *handle) {
   int numEntries;
   int idx;
   int valueIdx;
+  int result;
   uint8_t uch;
   int8_t ch;
   uint16_t ush;
   int16_t sh;
   uint32_t uval;
   int32_t val;
+  uint8_t *fieldType;
   structmsg_t *structmsg;
 
   structmsg = structmsg_get_structmsg_ptr(handle);
@@ -827,17 +833,23 @@ int stmsg_dumpMsg(const uint8_t *handle) {
   while (idx < numEntries) {
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[idx];
     if (c_strcmp(fieldInfo->fieldStr, "@tablerows") == 0) {
-      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, structmsg_getFieldTypeStr(fieldInfo->fieldType), structmsg->msg.numTableRows);
+      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+      checkErrOK(result);
+      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldType, structmsg->msg.numTableRows);
       idx++;
       continue;
     }
     if (c_strcmp(fieldInfo->fieldStr, "@tablerowfields") == 0) {
-      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, structmsg_getFieldTypeStr(fieldInfo->fieldType), structmsg->msg.numRowFields);
+      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+      checkErrOK(result);
+      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldType, structmsg->msg.numRowFields);
       dumpTableRowFields(structmsg);
       idx++;
       continue;
     }
-    ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, structmsg_getFieldTypeStr(fieldInfo->fieldType), fieldInfo->fieldLgth);
+    result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+    checkErrOK(result);
+    ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldInfo->fieldLgth);
 //ets_printf("isSet: %s 0x%02x %d\n", fieldInfo->fieldStr, fieldInfo->flags, (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET));
     if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
       switch (fieldInfo->fieldType) {
