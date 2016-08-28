@@ -524,31 +524,43 @@ static int structmsg_delete_msgDefinition( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_delete_msgDefinition2 ========================
+
+static int structmsg_delete_msgDefinitions( lua_State* L ) {
+  uint8_t numFields;
+  int result;
+
+  result = structmsg_deleteStructmsgDefinitions();
+  checkOKOrErr(L, result, "deletemsgdefinitions", "");
+  return 1;
+}
+
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
-  { LSTRKEY( "create" ),             LFUNCVAL( structmsg_create ) },
-  { LSTRKEY( "delete" ),             LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "__gc" ),               LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "encode" ),             LFUNCVAL( structmsg_encode ) },
-  { LSTRKEY( "getencoded" ),         LFUNCVAL( structmsg_get_encoded ) },
-  { LSTRKEY( "decode" ),             LFUNCVAL( structmsg_decode ) },
-  { LSTRKEY( "dump" ),               LFUNCVAL( structmsg_dump ) },
-  { LSTRKEY( "encrypt" ),            LFUNCVAL( structmsg_encrypt ) },
-  { LSTRKEY( "decrypt" ),            LFUNCVAL( structmsg_decrypt ) },
-  { LSTRKEY( "addField" ),           LFUNCVAL( structmsg_add_field ) },
-  { LSTRKEY( "setFillerAndCrc" ),    LFUNCVAL( structmsg_set_fillerAndCrc ) },
-  { LSTRKEY( "setFieldValue" ),      LFUNCVAL( structmsg_set_fieldValue ) },
-  { LSTRKEY( "setTableFieldValue" ), LFUNCVAL( structmsg_set_tableFieldValue ) },
-  { LSTRKEY( "getFieldValue" ),      LFUNCVAL( structmsg_get_fieldValue ) },
-  { LSTRKEY( "getTableFieldValue" ), LFUNCVAL( structmsg_get_tableFieldValue ) },
-  { LSTRKEY( "setcrypted" ),         LFUNCVAL( structmsg_set_crypted ) },
-  { LSTRKEY( "decryptgethandle" ),   LFUNCVAL( structmsg_decrypt_getHandle ) },
-  { LSTRKEY( "createmsgdef" ),       LFUNCVAL( structmsg_create_msgDefinition ) },
-  { LSTRKEY( "addfielddef" ),        LFUNCVAL( structmsg_add_fieldDefinition ) },
-  { LSTRKEY( "dumpfielddef" ),       LFUNCVAL( structmsg_dump_fieldDefinition ) },
-  { LSTRKEY( "encodefielddefmsg" ),  LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
-  { LSTRKEY( "decodefielddefmsg" ),  LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
-  { LSTRKEY( "deletemsgdef" ),       LFUNCVAL( structmsg_delete_msgDefinition ) },
+  { LSTRKEY( "create" ),               LFUNCVAL( structmsg_create ) },
+  { LSTRKEY( "delete" ),               LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "__gc" ),                 LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "encode" ),               LFUNCVAL( structmsg_encode ) },
+  { LSTRKEY( "getencoded" ),           LFUNCVAL( structmsg_get_encoded ) },
+  { LSTRKEY( "decode" ),               LFUNCVAL( structmsg_decode ) },
+  { LSTRKEY( "dump" ),                 LFUNCVAL( structmsg_dump ) },
+  { LSTRKEY( "encrypt" ),              LFUNCVAL( structmsg_encrypt ) },
+  { LSTRKEY( "decrypt" ),              LFUNCVAL( structmsg_decrypt ) },
+  { LSTRKEY( "addField" ),             LFUNCVAL( structmsg_add_field ) },
+  { LSTRKEY( "setFillerAndCrc" ),      LFUNCVAL( structmsg_set_fillerAndCrc ) },
+  { LSTRKEY( "setFieldValue" ),        LFUNCVAL( structmsg_set_fieldValue ) },
+  { LSTRKEY( "setTableFieldValue" ),   LFUNCVAL( structmsg_set_tableFieldValue ) },
+  { LSTRKEY( "getFieldValue" ),        LFUNCVAL( structmsg_get_fieldValue ) },
+  { LSTRKEY( "getTableFieldValue" ),   LFUNCVAL( structmsg_get_tableFieldValue ) },
+  { LSTRKEY( "setcrypted" ),           LFUNCVAL( structmsg_set_crypted ) },
+  { LSTRKEY( "decryptgethandle" ),     LFUNCVAL( structmsg_decrypt_getHandle ) },
+  { LSTRKEY( "createmsgdef" ),         LFUNCVAL( structmsg_create_msgDefinition ) },
+  { LSTRKEY( "addfielddef" ),          LFUNCVAL( structmsg_add_fieldDefinition ) },
+  { LSTRKEY( "dumpfielddef" ),         LFUNCVAL( structmsg_dump_fieldDefinition ) },
+  { LSTRKEY( "encodefielddefmsg" ),    LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
+  { LSTRKEY( "decodefielddefmsg" ),    LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
+  { LSTRKEY( "deletemsgdef" ),         LFUNCVAL( structmsg_delete_msgDefinition ) },
+  { LSTRKEY( "deletemsgdefinitions" ), LFUNCVAL( structmsg_delete_msgDefinitions ) },
   { LNILKEY, LNILVAL }
 };
 

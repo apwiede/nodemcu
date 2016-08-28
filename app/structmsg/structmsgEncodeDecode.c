@@ -488,7 +488,6 @@ static int definitionEncode(uint8_t *data, int offset, stmsgDefinition_t *defini
 
   idx= 0;
   fieldInfo = &definition->fieldInfos[0];
-ets_printf("definitionEncode: offset: %d, numFields: %d\n", offset, definition->numFields);
   offset = uint8Encode(data, offset, definition->numFields); 
   checkEncodeOffset(offset);
   while (idx < definition->numFields) {
@@ -519,7 +518,6 @@ ets_printf("definitionEncode: offset: %d, numFields: %d\n", offset, definition->
     fieldInfo++;
     idx++;
   }
-ets_printf("definitionEncode End offset: %d\n", offset);
   return offset;
 }
 
@@ -548,38 +546,30 @@ static int definitionDecode(const uint8_t *data, int offset, stmsgDefinition_t *
   int myOffset;
   int namesIdx;
 
-ets_printf("=== definitionDecode start: offset: %d\n", offset);
   // first the keys
   offset = uint8Decode(data, offset, &numNameEntries);
   checkBadOffset(offset);
   idsStart = (uint16_t *)(data + offset);
   offset += numNameEntries * sizeof(uint16_t);
   idsEnd = (uint16_t *)(data + offset);
-ets_printf("numNameEntries: %d idsStart: %d idsEnd: %d\n", numNameEntries, ((uint8_t *)idsStart-data), ((uint8_t *)idsEnd-data));
   // and now the names
   offset = uint16Decode(data, offset, &namesSize);
   checkBadOffset(offset);
   namesStart = data + offset;
   offset += namesSize;
   definitionStart = (namesStart + namesSize);
-ets_printf("namesStart: %d namesSize: %d definitionStart: %d\n", namesStart-data, namesSize, definitionStart-data);
   offset = uint16Decode(data, offset, &definitionLgth);
   checkBadOffset(offset);
-ets_printf("definitionLgth: %d offset: %d\n", definitionLgth, offset);
   offset = uint8Decode(data, offset, &nameLgth);
   checkBadOffset(offset);
-ets_printf("nameLgth: %d offset: %d\n", nameLgth, offset);
   name = data+offset;
   offset += nameLgth;
-ets_printf("name: %s length: %d offset: %d\n", name, nameLgth, offset);
   offset = uint8Decode(data, offset, &numFields);
   checkBadOffset(offset);
-ets_printf("===definitionDecode: name: %s numFields: %d offset: %d\n", name, numFields, offset);
   result = structmsg_createStructmsgDefinition (name, numFields);
   checkOffsetErrOK(result);
   definitionIdx = 0;
   namesIdx = 0;
-//  numFields = definitionLgth / (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
   while (definitionIdx < numFields) { 
     offset = uint16Decode(data, offset, &fieldId);
     checkBadOffset(offset);
@@ -1088,10 +1078,8 @@ int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, 
     myLgth++;
     fillerSize++;
   }
-ets_printf("fillerSize: %d\n", fillerSize);
   cmdLgth = payloadSize + fillerSize + sizeof(uint16_t);
   totalLgth = STRUCT_MSG_HEADER_LENGTH + cmdLgth;
-ets_printf("cmdLgth : %d totalLgth: %d\n", cmdLgth, totalLgth);
   definition->encoded = os_zalloc(totalLgth);
   checkAllocOK(definition->encoded);
   encoded = definition->encoded;
@@ -1119,6 +1107,7 @@ ets_printf("cmdLgth : %d totalLgth: %d\n", cmdLgth, totalLgth);
   checkEncodeOffset(offset);
   offset = definitionEncode(encoded, offset, definition, fieldNameDefinitions, normNamesOffsets);
   checkEncodeOffset(offset);
+  os_free(normNamesOffsets); // no longer needed
   uint8_t dummy[fillerSize];
   offset = fillerEncode(encoded, offset, fillerSize, &dummy[0]);
   checkEncodeOffset(offset);
@@ -1127,7 +1116,6 @@ ets_printf("cmdLgth : %d totalLgth: %d\n", cmdLgth, totalLgth);
 ets_printf("after crc offset: %d totalLgth :%d crc: 0x%04x\n", offset, totalLgth, crc);
   *data = encoded;
   *lgth = totalLgth;
-ets_printf("definitionEncode done\n");
   return STRUCT_MSG_ERR_OK;
 
 }
@@ -1162,7 +1150,6 @@ int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgD
   uint8_t *filler = fillerStr;;
   uint8_t numEntries;
 
-ets_printf("decode: name: %p data: %p\n", name, data);
   offset = 0;
   offset = uint16Decode(data, offset, &src); 
   checkDecodeOffset(offset);
@@ -1177,17 +1164,11 @@ ets_printf("decode: name: %p data: %p\n", name, data);
   }
   offset = uint16Decode(data, offset, &cmdLgth); 
   checkDecodeOffset(offset);
-ets_printf("cmdLgth: %d numEntries: %d\n", cmdLgth, numEntries);
   offset = uint32Decode(data, offset, &randomNum); 
   checkDecodeOffset(offset);
-ets_printf("after randomNum: offset: %d\n", offset);
   // now check the crc
   crcOffset = totalLgth - sizeof(uint16_t);
-ets_printf("crcOffset: %d\n", crcOffset);
-structmsg_dumpBinary(data+crcOffset, 2, "CRC");
   crcOffset = crcDecode(data, crcOffset, cmdLgth, &crc, STRUCT_MSG_HEADER_LENGTH);
-ets_printf("crc: 0x%04x\n", crc);
-//  offset = normalFieldNamesDecode(data, offset);
   offset = definitionDecode(data, offset, definition, fieldNameDefinitions);
   checkDecodeOffset(offset);
   myLgth = offset + sizeof(uint16_t);
@@ -1198,9 +1179,7 @@ ets_printf("crc: 0x%04x\n", crc);
   }
   offset = fillerDecode(data, offset, fillerSize, &filler);
   checkDecodeOffset(offset);
-ets_printf("fillerSize2: %d offset: %d\n", fillerSize, offset);
   return STRUCT_MSG_ERR_OK;
-
 }
 
 // ============================= structmsg_deleteDefinition ========================
@@ -1216,12 +1195,11 @@ int structmsg_deleteDefinition(const uint8_t *name, stmsgDefinitions_t *structms
   int result;
   int fieldId;
 
-ets_printf("deleteDefinition: %s\n", name);
   idx = 0;
   found = 0;
   while (idx < structmsgDefinitions->numDefinitions) {
     definition = &structmsgDefinitions->definitions[idx];
-    if (c_strcmp(name, definition->name) == 0) {
+    if ((definition->name != NULL) && (c_strcmp(name, definition->name) == 0)) {
       found = 1;
       break;
     }
@@ -1253,15 +1231,56 @@ ets_printf("deleteDefinition: %s\n", name);
     idx++;
   }
   // nameDefinitions deleted
+
   definition->numFields = 0;
   definition->maxFields = 0;
   os_free(definition->name);
   definition->name = NULL;
-  os_free(definition->encoded);
-  definition->encoded = NULL;
+  if (definition->encoded != NULL) {
+    os_free(definition->encoded);
+    definition->encoded = NULL;
+  }
   os_free(definition->fieldInfos);
   definition->fieldInfos = NULL;
   // definition deleted
-ets_printf("deletion done\n");
+
   return STRUCT_MSG_ERR_OK;
 }
+
+// ============================= structmsg_deleteDefinitions ========================
+
+int structmsg_deleteDefinitions(stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
+  // delete the whole structmsgDefinitions info, including fieldNameDefinitions info
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  name2id_t *nameEntry;
+  uint8_t *name;
+  int idx;
+  int nameIdx;
+  int found;
+  int nameFound;
+  int result;
+  int fieldId;
+
+  idx = 0;
+  while (idx < structmsgDefinitions->numDefinitions) {
+    definition = &structmsgDefinitions->definitions[idx];
+    if (definition->name != NULL) {
+      structmsg_deleteDefinition(definition->name, structmsgDefinitions, fieldNameDefinitions);
+    }
+    idx++;
+  }
+  structmsgDefinitions->numDefinitions = 0;
+  structmsgDefinitions->maxDefinitions = 0;
+  os_free(structmsgDefinitions->definitions);
+  structmsgDefinitions->definitions = NULL;
+
+  fieldNameDefinitions->numDefinitions = 0;
+  fieldNameDefinitions->maxDefinitions = 0;
+  os_free(fieldNameDefinitions->definitions);
+  fieldNameDefinitions->definitions = NULL;
+
+  // all deleted/reset
+  return STRUCT_MSG_ERR_OK;
+}
+

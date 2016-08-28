@@ -39,9 +39,10 @@ checkOK(result,"@crc")
 result=structmsg.dumpfielddef(def)
 print(tostring(result))
 encoded=structmsg.encodefielddefmsg(def)
-print("encoded len: "..tostring(string.len(encoded)))
+--print("encoded len: "..tostring(string.len(encoded)))
 result=structmsg.deletemsgdef(def)
 checkOK(result,"delete")
+def= nil
 if (true) then
 def="pwd2"
 structmsg.createmsgdef(def, 15)
@@ -78,11 +79,15 @@ checkOK(result,"@crc")
 result=structmsg.dumpfielddef(def)
 print(tostring(result))
 end
-encoded2=structmsg.encodefielddefmsg(def)
-print("encoded2 len: "..tostring(string.len(encoded2)))
+encoded2=structmsg.encodefielddefmsg(def)--
+--print("encoded2 len: "..tostring(string.len(encoded2)))
 structmsg.decodefielddefmsg(def,encoded)
 result=structmsg.dumpfielddef(def)
 print(tostring(result))
 result=structmsg.deletemsgdef(def)
+checkOK(result,"deletemsgdef")
 encoded=nil
 encoded2=nil
+result=structmsg.deletemsgdefinitions()
+checkOK(result,"deletemsgdefinitions")
+def=nil

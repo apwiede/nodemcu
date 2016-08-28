@@ -270,9 +270,11 @@ int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields);
 int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName, const uint8_t *fieldTypeStr, size_t fieldLgth);
 int structmsg_dumpFieldDefinition (const uint8_t *name);
 int structmsg_deleteStructmsgDefinition(const uint8_t *name);
+int structmsg_deleteStructmsgDefinitions();
 int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
 int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
 int structmsg_deleteDefinition (const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
+int structmsg_deleteDefinitions (stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
 
 int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle);
 int stmsg_deleteMsg(const uint8_t *handle);

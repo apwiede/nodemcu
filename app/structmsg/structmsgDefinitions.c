@@ -157,14 +157,13 @@ int structmsg_getFieldNameId (const uint8_t *fieldName, int *id, int incrRefCnt)
     return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
   } else {
     if ((incrRefCnt == STRUCT_MSG_INCR) && (fieldNameDefinitions.numDefinitions >= fieldNameDefinitions.maxDefinitions)) {
-ets_printf("ALLOC!!\n");
       if (fieldNameDefinitions.maxDefinitions == 0) {
         fieldNameDefinitions.maxDefinitions = 4;
-        fieldNameDefinitions.definitions = (name2id_t *)os_zalloc(fieldNameDefinitions.maxDefinitions * sizeof(name2id_t));
+        fieldNameDefinitions.definitions = (name2id_t *)os_zalloc((fieldNameDefinitions.maxDefinitions * sizeof(name2id_t)));
         checkAllocOK(fieldNameDefinitions.definitions);
       } else {
         fieldNameDefinitions.maxDefinitions += 2;
-        fieldNameDefinitions.definitions = (name2id_t *)os_realloc(fieldNameDefinitions.definitions, (fieldNameDefinitions.maxDefinitions * sizeof(name2id_t)));
+        fieldNameDefinitions.definitions = (name2id_t *)os_realloc((fieldNameDefinitions.definitions), (fieldNameDefinitions.maxDefinitions * sizeof(name2id_t)));
         checkAllocOK(fieldNameDefinitions.definitions);
       }
     }
@@ -281,7 +280,6 @@ int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields) 
       definition->name[lgth] = '\0';
       checkAllocOK(definition->name);
       c_memcpy(definition->name, name, lgth);
-ets_printf("create use slot: %d \n", definitionIdx);
       return STRUCT_MSG_ERR_OK;
     }
     definitionIdx++;
@@ -325,7 +323,7 @@ int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName,
   checkErrOK(result);
   fieldInfo->fieldType = fieldType;
   fieldInfo->fieldLgth = fieldLgth;
-ets_printf("add field: %s id: %d type: %d lgth: %d numFields: %d\n", fieldName, fieldId, fieldType, fieldLgth, definition->numFields);
+//ets_printf("add field: %s id: %d type: %d lgth: %d numFields: %d\n", fieldName, fieldId, fieldType, fieldLgth, definition->numFields);
   definition->numFields++;
   return STRUCT_MSG_ERR_OK;
 }
@@ -342,7 +340,6 @@ int structmsg_dumpFieldDefinition (const uint8_t *name) {
   int found = 0;
   int result;
 
-ets_printf("dumpFieldDefinition: %s\n", name);
   while (idx < structmsgDefinitions.numDefinitions) {
     definition = &structmsgDefinitions.definitions[idx];
     if (c_strcmp(name, definition->name) == 0) {
@@ -393,5 +390,12 @@ int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *
 
 int structmsg_deleteStructmsgDefinition(const uint8_t *name) {
   return structmsg_deleteDefinition(name, &structmsgDefinitions, &fieldNameDefinitions);
+}
+
+// ============================= structmsg_deleteStructmsgDefinitions ========================
+
+int structmsg_deleteStructmsgDefinitions() {
+  // delete the whole structmsgDefinitions info, including fieldNameDefinitions info
+  return structmsg_deleteDefinitions(&structmsgDefinitions, &fieldNameDefinitions);
 }
 
