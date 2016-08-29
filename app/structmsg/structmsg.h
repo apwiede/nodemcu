@@ -1,19 +1,5 @@
-/* 
- * File:   structmsg.h
- * Author: Arnulf Wiedemann
- *
- * Created on August 1, 2016
- */
-
-#ifndef STRUCTMSG_H
-#define	STRUCTMSG_H
-#include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 /*
-* Copyright (c) 2016, Arnulf Wiedemann
+* Copyright (c) 2016, Arnulf P. Wiedemann (arnulf@wiedemann-pri.de)
 * All rights reserved.
 *
 * License: BSD/MIT
@@ -44,6 +30,20 @@ extern "C" {
 * POSSIBILITY OF SUCH DAMAGE.
 *
 */
+
+/* 
+ * File:   structmsg.h
+ * Author: Arnulf P. Wiedemann
+ *
+ * Created on August 1, 2016
+ */
+
+#ifndef STRUCTMSG_H
+#define	STRUCTMSG_H
+#include "c_types.h"
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 
 #define HANDLE_PREFIX "stmsg_"

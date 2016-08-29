@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2016, Arnulf Wiedemann
+* Copyright (c) 2016, Arnulf P. Wiedemann (arnulf@wiedemann-pri.de)
 * All rights reserved.
 *
 * License: BSD/MIT
