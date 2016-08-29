@@ -66,20 +66,20 @@ proc structmsg_initFieldTypeDefines {} {
 
 proc structmsg_initSpecialFieldNames {} {
   set specialFieldNamesDict [dict create]
-  dict set specialFieldNamesDict "@src"           255
-  dict set specialFieldNamesDict "@dst"           254
-  dict set specialFieldNamesDict "@targetCmd"     253
-  dict set specialFieldNamesDict "@totalLgth"     252
-  dict set specialFieldNamesDict "@cmdKey"        251
-  dict set specialFieldNamesDict "@cmdLgth"       250
-  dict set specialFieldNamesDict "@randomNum"     249
-  dict set specialFieldNamesDict "@sequenceNum"   248
-  dict set specialFieldNamesDict "@filler"        247
-  dict set specialFieldNamesDict "@crc"           246
-  dict set specialFieldNamesDict "@id"            245
-  dict set specialFieldNamesDict "@tablerows"     244
-  dict set specialFieldNamesDict "@tablerowfield" 243
-  dict set specialFieldNamesDict "@low"           242
+  dict set specialFieldNamesDict "@src"            255
+  dict set specialFieldNamesDict "@dst"            254
+  dict set specialFieldNamesDict "@targetCmd"      253
+  dict set specialFieldNamesDict "@totalLgth"      252
+  dict set specialFieldNamesDict "@cmdKey"         251
+  dict set specialFieldNamesDict "@cmdLgth"        250
+  dict set specialFieldNamesDict "@randomNum"      249
+  dict set specialFieldNamesDict "@sequenceNum"    248
+  dict set specialFieldNamesDict "@filler"         247
+  dict set specialFieldNamesDict "@crc"            246
+  dict set specialFieldNamesDict "@id"             245
+  dict set specialFieldNamesDict "@tablerows"      244
+  dict set specialFieldNamesDict "@tablerowfields" 243
+  dict set specialFieldNamesDict "@low"            242
   set ::structmsg(specialFieldNames) $specialFieldNamesDict
 }
 
@@ -93,10 +93,10 @@ proc structmsg_getFieldTypeStr {id fieldTypeVar} {
     set fieldId [dict get $fieldTypes $name]
     if {$fieldId == $id} {
       set fieldType $name
-      return STRUCT_MSG_ERR_OK;
+      return $::STRUCT_MSG_ERR_OK;
     }
   }
-  return STRUCT_MSG_ERR_BAD_FIELD_TYPE
+  return $::STRUCT_MSG_ERR_BAD_FIELD_TYPE
 }
 
 # ============================= structmsg_getFieldNameId ========================
@@ -128,7 +128,7 @@ proc structmsg_getFieldNameId {fieldName id_var incrVal} {
                 dict set entry refCnt [expr {[dict get $entry refCnt] - 1}]
               }
               if {[dict get $entry refCnt] == 0} {
-                dict set entry id STRUCT_MSG_FREE_FIELD_ID
+                dict set entry id $::STRUCT_MSG_FREE_FIELD_ID
                 dict set entry fieldName ""
               }
             } else {
@@ -139,19 +139,19 @@ proc structmsg_getFieldNameId {fieldName id_var incrVal} {
               }
             }
             set id [dict get $entry id]
-            return STRUCT_MSG_ERR_OK
+            return $::STRUCT_MSG_ERR_OK
           }
-          if {$incrVal eq" STRUCT_MSG_INCR") && ([dict get $entry id] eq "STRUCT_MSG_FREE_FIELD_ID") && ($firstFreeEntry eq "")} {
+          if {($incrVal == $::STRUCT_MSG_INCR) && ([dict get $entry id] eq $::STRUCT_MSG_FREE_FIELD_ID) && ($firstFreeEntry eq "")} {
             dict set firstFreeEntry id [expr {$nameIdx + 1}]
           }
           incr nameIdx
         }
       }
-      if {$incrVal eq "STRUCT_MSG_DECR"} {
-        return STRUCT_MSG_ERR_OK ; # sjust ignore silently
+      if {$incrVal == $::STRUCT_MSG_DECR} {
+        return $::STRUCT_MSG_ERR_OK ; # sjust ignore silently
       } else {
-        if {$incrVal eq "STRUCT_MSG_NO_INCR"} {
-          return STRUCT_MSG_ERR_FIELD_NOT_FOUND
+        if {$incrVal == $::STRUCT_MSG_NO_INCR} {
+          return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
         } else {
 puts stderr "firstFreeEntry: $firstFreeEntry!"
           if {$firstFreeEntry ne ""} {
@@ -174,7 +174,7 @@ puts stderr "firstFreeEntry: $firstFreeEntry!"
       dict set ::structmsg(fieldNameDefinitions) definitions $definitions
     }
   }
-  return STRUCT_MSG_ERR_OK
+  return $::STRUCT_MSG_ERR_OK
 }
 
 # ============================= structmsg_getIdFieldNameStr ========================
@@ -188,7 +188,7 @@ proc structmsg_getIdFieldNameStr {id fieldNameVar} {
     set fieldId [dict get $specialFieldNames $name]
     if {$fieldId == $id} {
       set fieldName $name
-      return STRUCT_MSG_ERR_OK;
+      return $::STRUCT_MSG_ERR_OK;
     }
   }
   # find field name
@@ -198,11 +198,11 @@ proc structmsg_getIdFieldNameStr {id fieldNameVar} {
     set nameEntry [lindex  [dict get $fieldNameDefinitions definitions] $idx]
     if {[dict get $nameEntry id] == $id} {
       set fieldName [dict get $nameEntry fieldName]
-      return STRUCT_MSG_ERR_OK;
+      return $::STRUCT_MSG_ERR_OK;
     }
     incr idx
   }
-  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+  return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
 
 
@@ -213,12 +213,12 @@ proc structmsg_getFieldTypeId {fieldType fieldTypeVar} {
 
   set fieldTypeDefinesDict $::structmsg(fieldTypeDefines)
   if {![dict exists $fieldTypeDefinesDict $fieldType]} {
-#  return STRUCT_MSG_ERR_BAD_FIELD_TYPE;
+#  return $::STRUCT_MSG_ERR_BAD_FIELD_TYPE;
       error "bad field type: $fieldType!"
   } else {
       set fieldTypeId [dict get $fieldTypeDefinesDict $fieldType]
   }
-  return STRUCT_MSG_ERR_OK
+  return $::STRUCT_MSG_ERR_OK
 }
 
 # ============================= structmsg_createStructmsgDefinition ========================
@@ -248,11 +248,11 @@ if {0} {
       definition->name[lgth] = '\0';
       checkAllocOK(definition->name);
       c_memcpy(definition->name, name, lgth);
-      return STRUCT_MSG_ERR_OK;
+      return $::STRUCT_MSG_ERR_OK;
     }
     definitionIdx++;
   }
-  return STRUCT_MSG_ERR_NO_SLOT_FOUND;
+  return $::STRUCT_MSG_ERR_NO_SLOT_FOUND;
 }
 }
 
@@ -263,14 +263,14 @@ proc structmsg_addFieldDefinition {name fieldName fieldType fieldLgth} {
   set structmsgDefinitionsDict $::structmsg(structmsgDefinitions)
   if {![dict exists $::structmsg(structmsgDefinitions) $name]} {
     error "structmsg definition for $name does not exist"
-#    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
+#    return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
   }
 #  if (definition->numFields >= definition->maxFields) {
-#    return STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS;
+#    return $::STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS;
 #  }
 puts stderr "add_field: fieldName: $fieldName fieldtype: $fieldType fieldLgth: $fieldLgth!"
   set fieldInfos [dict get $structmsgDefinitionsDict $name fieldInfos]
-  set result [structmsg_getFieldNameId $fieldName fieldNameId STRUCT_MSG_INCR]
+  set result [structmsg_getFieldNameId $fieldName fieldNameId $::STRUCT_MSG_INCR]
   set result [structmsg_getFieldTypeId $fieldType fieldTypeId]
   set fielNameDict [dict create]
   dict set fieldNameDict fieldId $fieldNameId
@@ -279,7 +279,7 @@ puts stderr "add_field: fieldName: $fieldName fieldtype: $fieldType fieldLgth: $
   lappend fieldInfos $fieldNameDict
   dict set ::structmsg(structmsgDefinitions) $name numFields [expr {[dict get $::structmsg(structmsgDefinitions) $name numFields] + 1}]
   dict set ::structmsg(structmsgDefinitions) $name fieldInfos $fieldInfos
-  return STRUCT_MSG_ERR_OK
+  return $::STRUCT_MSG_ERR_OK
 }
 
 
@@ -291,7 +291,7 @@ proc structmsg_dumpFieldDefinition {name} {
   set structmsgDefinitionsDict $::structmsg(structmsgDefinitions)
   if {![dict exists $::structmsg(structmsgDefinitions) $name]} {
     error "structmsg definition for $name does not exist"
-#    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
+#    return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
   }
   set definition [dict get $::structmsg(structmsgDefinitions) $name]
   puts [format "definition: %s numFields: %d" $name [dict get $definition numFields]]
@@ -306,17 +306,20 @@ pdict $definition
     puts [format "  idx: %d id: %d %s type: %d %s lgth: %d" $idx [dict get $fieldInfo fieldId] $fieldIdStr [dict get $fieldInfo fieldType] $fieldTypeStr [dict get $fieldInfo fieldLgth]]
     incr idx
   }
-  return STRUCT_MSG_ERR_OK;
+  return $::STRUCT_MSG_ERR_OK;
 }
 
 # ============================= structmsg_encodeFieldDefinitionMessage ========================
 
-proc structmsg_encodeFieldDefinitionMessage {name data lgth} {
-  // FIXME!!
-  uint16_t src = 123;
-  uint16_t dst = 987;
+proc structmsg_encodeFieldDefinitionMessage {name dataVar lgthVar} {
+  upvar $dataVar data
+  upvar $lgthVar lgth
 
-  return [structmsg_encodeDefinition $name $data $lgth]
+  # FIXME!!
+  set src 123
+  set dst 987
+
+  return [structmsg_encodeDefinition $name data lgth]
 }
 
 # ============================= structmsg_decodeFieldDefinitionMessage ========================
@@ -342,27 +345,3 @@ proc structmsg_deleteStructmsgDefinitions {} {
   return [structmsg_deleteDefinitions
 }
 
-
-
-
-structmsg_initFieldTypeDefines
-structmsg_initSpecialFieldNames
-structmsg_createStructmsgDefinition "pwd" 5
-structmsg_addFieldDefinition "pwd" @randomNum uint32_t 4
-structmsg_addFieldDefinition "pwd" @sequenceNum uint32_t 4
-structmsg_addFieldDefinition "pwd" pwd uint8_t* 16
-structmsg_addFieldDefinition "pwd" @filler uint8_t* -1
-structmsg_addFieldDefinition "pwd" @crc uint16_t -1
-puts stderr "structmsgDefinitions:"
-pdict $::structmsg(structmsgDefinitions)
-puts stderr "names:"
-pdict $::structmsg(fieldNameDefinitions)
-structmsg_createStructmsgDefinition "pwd2" 5
-structmsg_addFieldDefinition "pwd2" @randomNum uint32_t 4
-structmsg_addFieldDefinition "pwd2" @sequenceNum uint32_t 4
-structmsg_addFieldDefinition "pwd2" pwd uint8_t* 16
-structmsg_addFieldDefinition "pwd2" @filler uint8_t* -1
-structmsg_addFieldDefinition "pwd2" @crc uint16_t -1
-structmsg_dumpFieldDefinition "pwd2"
-puts stderr "Definitions"
-pdict $::structmsg(structmsgDefinitions)
