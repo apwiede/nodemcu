@@ -1,7 +1,7 @@
 #!/usr/bin/env tclsh8.6
 
 # ===========================================================================
-# * Copyright (c) 2016, Arnulf Wiedemann
+# * Copyright (c) 2016, Arnulf P. Wiedemann (arnulf@wiedemann-pri.de)
 # * All rights reserved.
 # *
 # * License: BSD/MIT
@@ -32,8 +32,6 @@
 # * POSSIBILITY OF SUCH DAMAGE.
 # *
 # ==========================================================================
-
-source pdict.tcl
 
 set ::structmsg(numStructmsgDefinitions) 0
 set ::structmsg(structmsgDefinitions) [dict create]
@@ -153,7 +151,6 @@ proc structmsg_getFieldNameId {fieldName id_var incrVal} {
         if {$incrVal == $::STRUCT_MSG_NO_INCR} {
           return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
         } else {
-puts stderr "firstFreeEntry: $firstFreeEntry!"
           if {$firstFreeEntry ne ""} {
             set id [dict get $firstFreeEntry id]
             dict set firstFreeEntry refCnt 1
@@ -224,52 +221,63 @@ proc structmsg_getFieldTypeId {fieldType fieldTypeVar} {
 # ============================= structmsg_createStructmsgDefinition ========================
 
 proc structmsg_createStructmsgDefinition {name numFields} {
-  set structmsgDefinitionDict [dict create]
-  dict set structmsgDefinitionDict maxFields $numFields
-  dict set structmsgDefinitionDict numFields 0
-  dict set structmsgDefinitionDict fieldInfos [list]
-  incr ::structmsg(numStructmsgDefinitions)
-  lappend ::structmsg(structmsgDefinitions) $name $structmsgDefinitionDict
-if {0} {
-  // check for unused slot!
-  definitionIdx = 0;
-  while (definitionIdx < structmsgDefinitions.maxDefinitions) {
-    definition = &structmsgDefinitions.definitions[definitionIdx];
-    if (definition->name == NULL) {
-      definition->numFields = 0;
-      definition->maxFields = numFields;
-      definition->fieldInfos = (fieldInfoDefinition_t *)os_zalloc(numFields * sizeof(fieldInfoDefinition_t));
-      checkAllocOK(definition->fieldInfos);
-      if (definitionIdx >= structmsgDefinitions.numDefinitions) {
-        structmsgDefinitions.numDefinitions++;
-      }
-      lgth = c_strlen(name);
-      definition->name = os_malloc(lgth + 1);
-      definition->name[lgth] = '\0';
-      checkAllocOK(definition->name);
-      c_memcpy(definition->name, name, lgth);
-      return $::STRUCT_MSG_ERR_OK;
-    }
-    definitionIdx++;
+  if {![dict exists $::structmsg(structmsgDefinitions) numDefinitions]} {
+    dict set ::structmsg(structmsgDefinitions) numDefinitions 0
+    dict set ::structmsg(structmsgDefinitions) maxDefinitions 0
+    dict set ::structmsg(structmsgDefinitions) definitions [list]
   }
-  return $::STRUCT_MSG_ERR_NO_SLOT_FOUND;
-}
+  # check for unused slot!
+  set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
+  set definitionIdx 0
+  while {$definitionIdx < [dict get $::structmsg(structmsgDefinitions) maxDefinitions]} {
+    set definition [lindex $definitions $definitionIdx]
+    if {[dict get $definition name] eq ""} {
+      dict set definition numFields 0
+      dict set definition maxFields $numFields
+      dict set definition name $name
+      dict set definition fieldInfos [list]
+      set definitions [lreplace $definitions $definitionIdx $definitionIdx $definition]
+      dict set ::structmsg(structmsgDefinitions) definitions $definitions
+      return $::STRUCT_MSG_ERR_OK;
+    } 
+    incr definitionIdx
+  }
+  if {$definitionIdx >= [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
+    dict set ::structmsg(structmsgDefinitions) numDefinitions [expr {[dict get $::structmsg(structmsgDefinitions) numDefinitions] + 1}]
+    dict set ::structmsg(structmsgDefinitions) maxDefinitions [expr {[dict get $::structmsg(structmsgDefinitions) maxDefinitions] + 1}]
+  }
+  dict set definition numFields 0
+  dict set definition maxFields $numFields
+  dict set definition name $name
+  dict set definition fieldInfos [list]
+  lappend definitions $definition    
+  dict set ::structmsg(structmsgDefinitions) definitions $definitions
+  return $::STRUCT_MSG_ERR_OK;
 }
 
 # ============================= structmsg_addFieldDefinition ========================
 
 proc structmsg_addFieldDefinition {name fieldName fieldType fieldLgth} {
   set fieldDefinitionDict [dict create]
-  set structmsgDefinitionsDict $::structmsg(structmsgDefinitions)
-  if {![dict exists $::structmsg(structmsgDefinitions) $name]} {
+  set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
+  set definitionIdx 0
+  set found 0
+  foreach definition $definitions {
+    if {[dict get $definition name] eq $name} {
+      set found 1
+      break
+    }
+    incr definitionIdx
+  } 
+  if {!$found} {
     error "structmsg definition for $name does not exist"
 #    return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
   }
-#  if (definition->numFields >= definition->maxFields) {
-#    return $::STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS;
-#  }
-puts stderr "add_field: fieldName: $fieldName fieldtype: $fieldType fieldLgth: $fieldLgth!"
-  set fieldInfos [dict get $structmsgDefinitionsDict $name fieldInfos]
+  if {[dict get $definition numFields] >= [dict get $definition maxFields]} {
+    return $::STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS
+  }
+#puts stderr "add_field: fieldName: $fieldName fieldtype: $fieldType fieldLgth: $fieldLgth!"
+  set fieldInfos [dict get $definition fieldInfos]
   set result [structmsg_getFieldNameId $fieldName fieldNameId $::STRUCT_MSG_INCR]
   set result [structmsg_getFieldTypeId $fieldType fieldTypeId]
   set fielNameDict [dict create]
@@ -277,8 +285,10 @@ puts stderr "add_field: fieldName: $fieldName fieldtype: $fieldType fieldLgth: $
   dict set fieldNameDict fieldType $fieldTypeId
   dict set fieldNameDict fieldLgth $fieldLgth
   lappend fieldInfos $fieldNameDict
-  dict set ::structmsg(structmsgDefinitions) $name numFields [expr {[dict get $::structmsg(structmsgDefinitions) $name numFields] + 1}]
-  dict set ::structmsg(structmsgDefinitions) $name fieldInfos $fieldInfos
+  dict set definition fieldInfos $fieldInfos
+  dict set definition numFields [expr {[dict get $definition numFields] + 1}]
+  set definitions [lreplace $definitions $definitionIdx $definitionIdx $definition]
+  dict set ::structmsg(structmsgDefinitions) definitions $definitions
   return $::STRUCT_MSG_ERR_OK
 }
 
@@ -288,14 +298,21 @@ puts stderr "add_field: fieldName: $fieldName fieldtype: $fieldType fieldLgth: $
 # ============================= structmsg_dumpFieldDefinition ========================
 
 proc structmsg_dumpFieldDefinition {name} {
-  set structmsgDefinitionsDict $::structmsg(structmsgDefinitions)
-  if {![dict exists $::structmsg(structmsgDefinitions) $name]} {
+  set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
+  set definitionIdx 0
+  set found 0
+  foreach definition $definitions {
+    if {[dict get $definition name] eq $name} {
+      set found 1
+      break
+    }
+    incr definitionIdx
+  } 
+  if {!$found} {
     error "structmsg definition for $name does not exist"
 #    return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
   }
-  set definition [dict get $::structmsg(structmsgDefinitions) $name]
   puts [format "definition: %s numFields: %d" $name [dict get $definition numFields]]
-pdict $definition
   set idx 0
   while {$idx < [dict get $definition numFields]} {
     set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
@@ -324,12 +341,12 @@ proc structmsg_encodeFieldDefinitionMessage {name dataVar lgthVar} {
 
 # ============================= structmsg_decodeFieldDefinitionMessage ========================
 
-proc structmsg_decodeFieldDefinitionMessage {name data} {
-  // FIXME!!
-  uint16_t src = 123;
-  uint16_t dst = 987;
+proc structmsg_decodeFieldDefinitionMessage {data} {
+  # FIXME!!
+  set src 123
+  set dst 987
 
-  return [structmsg_decodeDefinition $name data]
+  return [structmsg_decodeDefinition $data]
 }
 
 # ============================= structmsg_deleteStructmsgDefinition ========================

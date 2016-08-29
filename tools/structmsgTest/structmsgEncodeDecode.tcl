@@ -1,5 +1,5 @@
 # ===========================================================================
-# * Copyright (c) 2016, Arnulf Wiedemann
+# * Copyright (c) 2016, Arnulf P. Wiedemann (arnulf@wiedemann-pri.de)
 # * All rights reserved.
 # *
 # * License: BSD/MIT
@@ -285,7 +285,12 @@ proc int32VectorEncode {dat offset value lgth} {
 proc uint8Decode {data offset val} {
   upvar $val value
 
-  set value [expr {[string range $data $offset $offset] & 0xFF}]
+  set ch [string range $data $offset $offset]
+  set pch $ch
+  if {![string is integer $ch]} {
+    binary scan $ch c pch
+  }
+  set value [expr {$pch & 0xFF}]
   incr offset
   return $offset
 }
@@ -608,10 +613,10 @@ proc getFieldIdName {id fieldNameVar} {
   # find field name
   set idx 0
   set fieldNameDefinitions $::structmsg(fieldNameDefinitions)
-  while {$idx < [dict get $$fieldNameDefinitions numDefinitions]} {
+  while {$idx < [dict get $fieldNameDefinitions numDefinitions]} {
     set entry [lindex [dict get $fieldNameDefinitions definitions] $idx]
     if {[dict get $entry id] == $id} {
-       set fieldName [dict get $entry str]
+       set fieldName [dict get $entry fieldName]
        return $::STRUCT_MSG_ERR_OK
     }
     incr idx
@@ -622,21 +627,26 @@ proc getFieldIdName {id fieldNameVar} {
 
 # ============================= normalFieldNamesEncode ========================
 
-proc normalFieldNamesEncode {data offset normNameOffsets numEntries size} {
+proc normalFieldNamesEncode {dataVar offset definition normNameOffsetsVar numEntries size} {
+  upvar $dataVar data
+  upvar $normNameOffsetsVar normNameOffsets
+
+  set normNameOffsets [list]
   # first the keys
+  set namesOffset 0
   set offset [uint8Encode data $offset $numEntries]
   set idx 0
-  set normNameOffset [lindex $normNameOffsets 0]
   while {$idx < [dict get $definition numFields]} {
+    set normNameOffset [lindex $normNameOffsets $idx]
     set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
     if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} { 
       set result [getFieldIdName [dict get $fieldInfo fieldId] fieldName]
 #      checkErrOK(result)
-      iset offset [uint16Encode data $offset $namesOffset]
+      set offset [uint16Encode data $offset $namesOffset]
       dict set normNameOffset id [dict get $fieldInfo fieldId]
       dict set normNameOffset offset $namesOffset
-      incr normNameOffset
-      inct namesOffset [expr {[string length $fieldName] + 1}]
+      lappend normNameOffsets $normNameOffset
+      incr namesOffset [expr {[string length $fieldName] + 1}]
     }
     incr idx
   }
@@ -649,11 +659,11 @@ proc normalFieldNamesEncode {data offset normNameOffsets numEntries size} {
     if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} { 
       set result [getFieldIdName [dict get $fieldInfo fieldId] fieldName]
 #      checkErrOK(result)
-      set offset [uint8VectorEncode(data $offset $fieldName [string length $fieldName]]
+      set offset [uint8VectorEncode data $offset $fieldName [string length $fieldName]]
       if {$nameIdx < $numEntries} {
-        set offset [uint8Encode data $offset "\0"]
+        set offset [uint8Encode data $offset 0]
       } else {
-        set offset [uint8Encode data $offset "\0"]
+        set offset [uint8Encode data $offset 0]
       }
       incr nameIdx
     }
@@ -670,12 +680,14 @@ proc normalFieldNamesDecode {data offset} {
 
 # ============================= definitionEncode ========================
 
-proc definitionEncode {data offset normNamesOffsets} {
+proc definitionEncode {dataVar offset definition normNamesOffsets} {
+  upvar $dataVar data
+
   set idx 0
-  set fieldInfo [lindex [dict get $definition fieldInfos] 0]
   set offset [uint8Encode data $offset [dict get $definition numFields]]
 #  checkEncodeOffset(offset)
   while {$idx < [dict get $definition numFields]} {
+    set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
     if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
       set idIdx 0
       set found 0
@@ -684,8 +696,8 @@ proc definitionEncode {data offset normNamesOffsets} {
           # id 0 is not used to be able to stop here!!
           break
         }
-        if {[dict get fieldInfo fieldId] == [dict get [lindex $normNamesOffsets $idIdx] id]} {
-          set nameOffset [lindex $normNamesOffsets $idIdx] offset]
+        if {[dict get $fieldInfo fieldId] == [dict get [lindex $normNamesOffsets $idIdx] id]} {
+          set nameOffset [dict get [lindex $normNamesOffsets $idIdx] offset]
           set found 1
           break
         }
@@ -700,7 +712,6 @@ proc definitionEncode {data offset normNamesOffsets} {
     }
     set offset [uint8Encode data $offset [dict get $fieldInfo fieldType]]
     set offset [uint16Encode data $offset [dict get $fieldInfo fieldLgth]]
-    incr fieldInfo
     incr idx
   }
   return $offset
@@ -725,7 +736,8 @@ proc definitionDecode {data offset} {
 #  checkBadOffset(offset)
   set offset [uint8Decode $data $offset nameLgth]
 #  checkBadOffset(offset)
-  set name [string range $data $offset [expr {$offset + $nameLgth - 1}]]
+  set name [string range $data $offset [expr {$offset + $nameLgth - 2}]]
+puts stderr "DEF NAME: $name!"
   incr offset $nameLgth
   set offset [uint8Decode $data $offset numFields]
 #  checkBadOffset(offset)
@@ -745,8 +757,14 @@ proc definitionDecode {data offset} {
       set myOffset [uint16Decode $data $myOffset nameOffset]
       set myStartIdx [expr {$namesStart + $nameOffset}]
       set myEndIdx $myStartIdx
-      incr myEndIdx xxx
-      set fieldName [string range $data [expr {$namesStart + $nameOffset}] $myEndidx]
+      while {true} {
+        set myEndIdx [uint8Decode $data $myEndIdx ch]
+        if {$ch == 0} {
+          incr myEndIdx -2 ; # the 0 char and the offset has been moved after the 0 char
+          break
+        }
+      }
+      set fieldName [string range $data $myStartIdx $myEndIdx]
       incr namesIdx
     }
     set offset [uint8Decode $data $offset fieldTypeId]
@@ -984,7 +1002,7 @@ puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldStr]]
           set row 0
           set col 0
           set cell 0
-          while (row < structmsg->msg.numTableRows) {
+          while (row < [dict get $structmsg msg numTableRows) {
             while {$col < [dict get $structmsg msg numRowFields]} {
                set cell [expr {$col + $row * [dict get $structmsg msg numRowFields]}]
                set fieldInfo [lindex [dict get $structmsg msg tableFieldInfos] $cell]
@@ -1144,13 +1162,17 @@ proc getSpecFieldSizes {numFieldsVar namesSizeVar} {
 
 # ============================= structmsg_encodeDefinition ========================
 
-proc structmsg_encodeDefinition {name data lgth} {
+proc structmsg_encodeDefinition {name dataVar lgthVar} {
+  upvar $dataVar data
+  upvar $lgthVar lgth
+
   set src 123
   set dst 987
+  set cmdKey $::STRUCT_MSG_DEFINITION_CMD_KEY
 
   set idx 0
-  while {$idx < [dict get $::strucmsg(structmsgDefinitions) numDefinitions]} {
-    set definition [lindex [dict get $::strucmsg(structmsgDefinitions) definitions] idx]
+  while {$idx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
+    set definition [lindex [dict get $::structmsg(structmsgDefinitions) definitions] $idx]
     if {$name  eq [dict get $definition name]} {
       set found 1
       break
@@ -1170,23 +1192,22 @@ proc structmsg_encodeDefinition {name data lgth} {
 #      checkErrOK(result)
 #puts stderr [format "fieldName: %s" $fieldName]
       incr numNormFields
-      set normNamesSize [expr {$normnamesSize + [string length $fieldName] + 1}]
+      set normNamesSize [expr {$normNamesSize + [string length $fieldName] + 1}]
     }
     incr idx
   }
   set normNamesOffsets [list]
-#  checkAllocOK(normNamesOffsets)
   # nameLgth + name of Definition
   set definitionPayloadSize [expr {[sizeof uint8_t] + [string length $name] + 1}]
   # fieldId uint16_t, fieldType uint8_t, fieldLgth uint16_t
-  set definitionPayloadSize [expr {$definitionPayloadSize + [dict get $definition numFields] * [sizeof uint16_t] + [sizeof uint8_t] + [sizeof uint16_t]}]
+  set definitionPayloadSize [expr {$definitionPayloadSize + [dict get $definition numFields] * ([sizeof uint16_t] + [sizeof uint8_t] + [sizeof uint16_t])}]
   set payloadSize $::STRUCT_MSG_CMD_HEADER_LENGTH ; # cmdKey + cmdLgth
   # numEntries uint8_t randomNum
-  set payloadSize [expr {$paylaodSize + [sizeof uint8_t] + [sizeof uint32_t]}]
+  set payloadSize [expr {$payloadSize + [sizeof uint8_t] + [sizeof uint32_t]}]
   # len ids + ids (numNormFields * (uint16_t)) + len Names + names size
-  set payloadSize [expr {$paylaodSize + [sizeof uint8_t] + $numNormFields * [sizeof uint16_t] + [sizeof uint16_t] + $normNamesSize}]
+  set payloadSize [expr {$payloadSize + [sizeof uint8_t] + $numNormFields * [sizeof uint16_t] + [sizeof uint16_t] + $normNamesSize}]
   # size definitionPayload + definitionPayload
-  set payloadSize [expr {$payloadSize + [sizeof uint16_t] + $definitionPayloadSize]}]
+  set payloadSize [expr {$payloadSize + [sizeof uint16_t] + $definitionPayloadSize}]
   set fillerSize 0
   set myLgth [expr {$payloadSize + [sizeof uint16_t]}] ; # sizeof(uint16_t) for CRC
   while {($myLgth % 16) != 0} {
@@ -1195,30 +1216,30 @@ proc structmsg_encodeDefinition {name data lgth} {
   }
   set cmdLgth [expr {$payloadSize + $fillerSize + [sizeof uint16_t]}]
   set totalLgth [expr {$::STRUCT_MSG_HEADER_LENGTH + $cmdLgth}]
-  dict set definition encoded [lsit]
-#  checkAllocOK(definition->encoded)
-  set encoded [dict get $definition encoded]
+puts stderr [format "cmdLgth: %d totalLgth: %d" $cmdLgth $totalLgth]
+  dict set definition encoded [list]
+  set encoded ""
   set offset 0
-  set offset [uint16Encode encoded $offset src]
+  set offset [uint16Encode encoded $offset $src]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode encoded $offset dst]
+  set offset [uint16Encode encoded $offset $dst]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode encoded $offset totalLgth]
+  set offset [uint16Encode encoded $offset $totalLgth]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode encoded $offset cmdKey]
+  set offset [uint16Encode encoded $offset $cmdKey]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode encoded $offset cmdLgth]
+  set offset [uint16Encode encoded $offset $cmdLgth]
 #  checkEncodeOffset(offset)
   set offset [randomNumEncode encoded $offset randomNum]
 #  checkEncodeOffset(offset)
   set offset [normalFieldNamesEncode encoded $offset $definition normNamesOffsets $numNormFields $normNamesSize]
   set offset [uint16Encode encoded $offset $definitionPayloadSize]
 #  checkEncodeOffset(offset)
-  set offset [uint8Encode encoded $offset [exxpr {[string length $name] + 1}]]
+  set offset [uint8Encode encoded $offset [expr {[string length $name] + 1}]]
 #  checkEncodeOffset(offset)
   set offset [uint8VectorEncode encoded $offset $name [string length $name ]]
 #  checkEncodeOffset(offset)
-  set offset [uint8Encode encoded $offset "\0"]
+  set offset [uint8Encode encoded $offset 0]
 #  checkEncodeOffset(offset)
   set offset [definitionEncode encoded $offset $definition $normNamesOffsets]
 #  checkEncodeOffset(offset)
@@ -1226,15 +1247,16 @@ proc structmsg_encodeDefinition {name data lgth} {
 #  checkEncodeOffset(offset)
   set offset [crcEncode encoded $offset $totalLgth crc $::STRUCT_MSG_HEADER_LENGTH]
 #  checkEncodeOffset(offset)
-pust stderr [format "after crc offset: %d totalLgth :%d crc: 0x%04x" $offset $totalLgth $crc]
+puts stderr [format "after crc offset: %d totalLgth :%d crc: 0x%04x" $offset $totalLgth $crc]
   set data $encoded
   set lgth $totalLgth
+#dump_binary $encoded "encoded"
   return $::STRUCT_MSG_ERR_OK
 }
 
 # ============================= structmsg_decodeDefinition ========================
 
-proc structmsg_decodeDefinition {name data} {
+proc structmsg_decodeDefinition {data} {
   set offset 0
   set offset [uint16Decode $data $offset src]
 #  checkDecodeOffset(offset)
@@ -1254,9 +1276,10 @@ proc structmsg_decodeDefinition {name data} {
   # now check the crc
   set crcOffset [expr {$totalLgth - [sizeof uint16_t]}]
   set crcOffset [crcDecode $data $crcOffset $cmdLgth crc $::STRUCT_MSG_HEADER_LENGTH]
-  set offset [definitionDecode $ddata $offset]
+puts stderr "crcOffset: $crcOffset!offset: $offset!"
+  set offset [definitionDecode $data $offset]
 #  checkDecodeOffset(offset)
-  set myLgth [expr {$offset + [sizeof uint16_t]}]
+  set myLgth [expr {$offset - $::STRUCT_MSG_HEADER_LENGTH + [sizeof uint16_t]}]
   set fillerSize 0
   while {($myLgth % 16) != 0} {
     incr myLgth
@@ -1270,26 +1293,27 @@ proc structmsg_decodeDefinition {name data} {
 # ============================= structmsg_deleteDefinition ========================
 
 proc structmsg_deleteDefinition {name} {
-  set idx 0
+  set definitionsIdx 0
   set found 0
-  while {$idx < [dict get $::strucmsg(structmsgDefinitions) numDefinitions]} {
-    set definition [lindex [dict get $::structmsg(structmsgDefinitions) definitions] $idx]
-    if {([dict get $definition name] ne "") && ($name ne [dict get $definition name]} {
+  set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
+  while {$definitionsIdx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
+    set definition [lindex $definitions $definitionsIdx]
+    if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
       set found 1
       break
     }
-    incr idx
+    incr definitionsIdx
   }
   if {!$found} {
     return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND
   }
-  set idx 0
-  while {$idx < [dict get $definition numFields]} {
-    set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
+  set definitionIdx 0
+  while {$definitionIdx < [dict get $definition numFields]} {
+    set fieldInfo [lindex [dict get $definition fieldInfos] $definitionIdx]
     set nameIdx 0
     set nameFound 0
     if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
-      while {$nameIdx < [dict get $::strucmsg(fieldNameDefinitions) numDefinitions]} {
+      while {$nameIdx < [dict get $::structmsg(fieldNameDefinitions) numDefinitions]} {
         set nameEntry [lindex [dict get $::structmsg(fieldNameDefinitions) definitions] $nameIdx]
         if {[dict get $fieldInfo fieldId] == [dict get $nameEntry id]} {
           set result [structmsg_getFieldNameId [dict get $nameEntry fieldName] fieldId $::STRUCT_MSG_DECR]
@@ -1303,17 +1327,19 @@ proc structmsg_deleteDefinition {name} {
         return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
       }
     }
-    incr idx
+    incr definitionIdx
   }
   # nameDefinitions deleted
 
-  dict set definition->numFields 0
-  dict set definition->maxFields 0
+  dict set definition numFields 0
+  dict set definition maxFields 0
   dict set definition name ""
-  if {[dict get $definition encoded] ne ""} {
+  if {[dict exists $definition encoded]} {
     dict set definition encoded ""
   }
   dict set definition fieldInfos ""
+  set definitions [lreplace $definitions $definitionsIdx $definitionsIdx $definition]
+  dict set ::structmsg(structmsgDefinitions) definitions $definitions
   # definition deleted
 
   return $::STRUCT_MSG_ERR_OK

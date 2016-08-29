@@ -1,5 +1,5 @@
 # ===========================================================================
-# * Copyright (c) 2016, Arnulf Wiedemann
+# * Copyright (c) 2016, Arnulf P. Wiedemann (arnulf@wiedemann-pri.de)
 # * All rights reserved.
 # *
 # * License: BSD/MIT
@@ -31,10 +31,6 @@
 # *
 # ==========================================================================
 
-source pdict.tcl
-source structmsgEncodeDecode.tcl
-source structmsgDescription.tcl
-
 package require aes
 
 set ::structmsg(prefix) "stmsg_"
@@ -57,10 +53,11 @@ proc binaryScanChar {ch} {
 proc dump_binary {data where} {
   puts stderr "$where"
   set idx 0
+puts stderr "lgth: [string length $data]!"
   foreach ch [split $data ""] {
     binary scan $ch c pch
     set pch [expr {$pch & 0xFF}]
-    puts stderr [format "idx: 0x%02x" $pch]
+    puts stderr [format "idx: %d 0x%02x" $idx $pch]
     incr idx
   }
 }
