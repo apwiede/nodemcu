@@ -268,6 +268,9 @@ int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields) 
   while (definitionIdx < structmsgDefinitions.maxDefinitions) {
     definition = &structmsgDefinitions.definitions[definitionIdx];
     if (definition->name == NULL) {
+      definition->encoded = NULL;
+      definition->todecode = NULL;
+      definition->encrypted = NULL;
       definition->numFields = 0;
       definition->maxFields = numFields;
       definition->fieldInfos = (fieldInfoDefinition_t *)os_zalloc(numFields * sizeof(fieldInfoDefinition_t));
@@ -384,6 +387,68 @@ int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *
   uint16_t dst = 987;
 
   return structmsg_decodeDefinition(name, data, &structmsgDefinitions, &fieldNameDefinitions);
+}
+
+
+// ============================= structmsg_encdecDefinition ========================
+
+int structmsg_encdecDefinition(const uint8_t *name, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
+  stmsgDefinition_t *definition;
+  int result;
+
+  *buf = NULL;
+  *lgth = 0;
+  result = structmsg_getDefinitionPtr(name, &structmsgDefinitions, &definition);
+  checkErrOK(result);
+
+  if (enc) {
+    if (definition->encoded == NULL) {
+      return STRUCT_MSG_ERR_NOT_ENCODED;
+    }
+    result = structmsg_encryptdecrypt(definition->encoded, definition->totalLgth, key, klen, iv, ivlen, enc, &definition->encrypted, lgth);
+    *buf = definition->encrypted;
+  } else {
+    if (definition->encrypted == NULL) {
+      return STRUCT_MSG_ERR_NOT_ENCRYPTED;
+    }
+    result = structmsg_encryptdecrypt(definition->encrypted, definition->totalLgth, key, klen, iv, ivlen, enc, &definition->todecode, lgth);
+    *buf = definition->todecode;
+  }
+  return result;
+} 
+
+// ============================= stmsg_setCryptedDefinition ========================
+
+int stmsg_setCryptedDefinition(const uint8_t *name, const uint8_t *crypted, int cryptedLgth) {
+  stmsgDefinition_t *definition;
+  int result;
+
+  result = structmsg_getDefinitionPtr(name, &structmsgDefinitions, &definition);
+  checkErrOK(result);
+  if (definition->encrypted != NULL) {
+    os_free(definition->encrypted);
+  }
+  definition->encrypted = (uint8_t *)os_malloc(cryptedLgth);
+  checkAllocOK(definition->encrypted);
+  c_memcpy(definition->encrypted, crypted, cryptedLgth);
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= stmsg_decryptGetDefinitionName  ========================
+
+int stmsg_decryptGetDefinitionName(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **name) {
+  uint8_t *decrypted;
+  size_t lgth;
+  int result;
+
+   decrypted = NULL;
+   lgth = 0; 
+   result = structmsg_encryptdecrypt(encryptedMsg, mlen, key, klen, iv, ivlen, false, &decrypted, &lgth);
+   if (result != STRUCT_MSG_ERR_OK) {
+     return result;
+   }
+   result = stmsg_getDefinitionName(decrypted, name);
+   return result;
 }
 
 // ============================= structmsg_deleteStructmsgDefinition ========================

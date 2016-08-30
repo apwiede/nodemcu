@@ -988,6 +988,27 @@ ets_printf("funny should decode: %s\n", fieldInfo->fieldStr);
   return STRUCT_MSG_ERR_OK;
 }
 
+// ============================= structmsg_getDefinitionPtr ========================
+
+int structmsg_getDefinitionPtr(const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, stmsgDefinition_t **stmsgDefinition) {
+  stmsgDefinition_t *definition;
+  int idx;
+  int found;
+
+  idx = 0;
+  found = 0;
+  while (idx < structmsgDefinitions->numDefinitions) {
+    definition = &structmsgDefinitions->definitions[idx];
+    if ((definition->name != NULL) && (c_strcmp(name, definition->name) == 0)) {
+      found = 1;
+      *stmsgDefinition = definition;
+      return STRUCT_MSG_ERR_OK;
+    }
+    idx++;
+  }
+  return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
+}
+
 // ============================= getSpecFieldSizes ========================
 
 static int getSpecFieldSizes(size_t *numFields, size_t *namesSize) {
@@ -1032,19 +1053,8 @@ int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, 
   uint16_t src = 123;
   uint16_t dst = 987;
 
-
-  idx = 0;
-  while (idx < structmsgDefinitions->numDefinitions) {
-    definition = &structmsgDefinitions->definitions[idx];
-    if (c_strcmp(name, definition->name) == 0) {
-      found = 1;
-      break;
-    }
-    idx++;
-  }
-  if (!found) {
-    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
-  }
+  result =  structmsg_getDefinitionPtr(name, structmsgDefinitions, &definition);
+  checkErrOK(result);
   numNormFields = 0;
   normNamesSize = 0;
   idx = 0;
@@ -1061,17 +1071,19 @@ int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, 
   }
   normNamesOffsets = os_zalloc(numNormFields * sizeof(id2offset_t) + 1);
   checkAllocOK(normNamesOffsets);
-  // nameLgth + name of Definition
-  definitionPayloadSize = sizeof(uint8_t) + (c_strlen(name) + 1);
-  // fieldId uint16_t, fieldType uint8_t, fieldLgth uint16_t
-  definitionPayloadSize += definition->numFields * (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
   payloadSize = STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
-  // numEntries uint8_t randomNum
-  payloadSize += sizeof(uint8_t) + sizeof(uint32_t);
+  // randomNum
+  payloadSize += sizeof(uint32_t);
   // len ids + ids (numNormFields * (uint16_t)) + len Names + names size
-  payloadSize += sizeof(uint8_t) + numNormFields * sizeof(uint16_t) + sizeof(uint16_t) + normNamesSize;
-  // size definitionPayload + definitionPayload
-  payloadSize += sizeof(uint16_t) + definitionPayloadSize;
+  payloadSize += sizeof(uint8_t) + (numNormFields * sizeof(uint16_t)) + sizeof(uint16_t) + normNamesSize;
+  // definitionPayloadSize
+
+  // definitionLgth + nameLgth + name of Definition
+  definitionPayloadSize = sizeof(uint16_t) + sizeof(uint8_t) + (c_strlen(name) + 1);
+  // numFields (uint8_t) + numFields * (fieldId uint16_t, fieldType uint8_t, fieldLgth uint16_t)
+  definitionPayloadSize += sizeof(uint8_t) + definition->numFields * (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
+
+  payloadSize += definitionPayloadSize;
   fillerSize = 0;
   myLgth = payloadSize + sizeof(uint16_t); // sizeof(uint16_t) for CRC
   while ((myLgth % 16) != 0) {
@@ -1080,6 +1092,7 @@ int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, 
   }
   cmdLgth = payloadSize + fillerSize + sizeof(uint16_t);
   totalLgth = STRUCT_MSG_HEADER_LENGTH + cmdLgth;
+  definition->totalLgth = totalLgth;
   definition->encoded = os_zalloc(totalLgth);
   checkAllocOK(definition->encoded);
   encoded = definition->encoded;
@@ -1182,6 +1195,35 @@ int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgD
   return STRUCT_MSG_ERR_OK;
 }
 
+// ============================= stmsg_getDefinitionName ========================
+
+int stmsg_getDefinitionName(uint8_t *decrypted, uint8_t **name) {
+  int nameOffset;
+  uint8_t numNormFields;
+  uint16_t normNamesSize;
+  uint8_t nameLgth;
+  uint8_t numEntries;
+
+  *name = NULL;
+  nameOffset = STRUCT_MSG_HEADER_LENGTH; // src + dst + totalLgth
+  nameOffset += STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  // randomNum
+  nameOffset += sizeof(uint32_t);
+  // len ids 
+  nameOffset = uint8Decode(decrypted, nameOffset, &numNormFields);
+  // ids vector
+  nameOffset += numNormFields * sizeof(uint16_t);
+  // size of name strings (normnamesSize)
+  nameOffset = uint16Decode(decrypted, nameOffset, &normNamesSize);
+  // names vector
+  nameOffset += normNamesSize; 
+  // definitionSize + nameLgth
+  nameOffset += sizeof(uint16_t) + sizeof(uint8_t);
+  // here the name starts
+  *name = decrypted + nameOffset;
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ============================= structmsg_deleteDefinition ========================
 
 int structmsg_deleteDefinition(const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
@@ -1190,24 +1232,12 @@ int structmsg_deleteDefinition(const uint8_t *name, stmsgDefinitions_t *structms
   name2id_t *nameEntry;
   int idx;
   int nameIdx;
-  int found;
   int nameFound;
   int result;
   int fieldId;
 
-  idx = 0;
-  found = 0;
-  while (idx < structmsgDefinitions->numDefinitions) {
-    definition = &structmsgDefinitions->definitions[idx];
-    if ((definition->name != NULL) && (c_strcmp(name, definition->name) == 0)) {
-      found = 1;
-      break;
-    }
-    idx++;
-  }
-  if (!found) {
-    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
-  }
+  result =  structmsg_getDefinitionPtr(name, structmsgDefinitions, &definition);
+  checkErrOK(result);
   idx = 0;
   while (idx < definition->numFields) {
     fieldInfo = &definition->fieldInfos[idx];
@@ -1242,6 +1272,19 @@ int structmsg_deleteDefinition(const uint8_t *name, stmsgDefinitions_t *structms
   }
   os_free(definition->fieldInfos);
   definition->fieldInfos = NULL;
+  if (definition->encoded != NULL) {
+    os_free(definition->encoded);
+    definition->encoded = NULL;
+  }
+  if (definition->encrypted != NULL) {
+    os_free(definition->encrypted);
+    definition->encrypted = NULL;
+  }
+  if (definition->todecode != NULL) {
+    os_free(definition->todecode);
+    definition->todecode = NULL;
+  }
+  definition->totalLgth = 0;
   // definition deleted
 
   return STRUCT_MSG_ERR_OK;

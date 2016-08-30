@@ -257,9 +257,9 @@ static int setHandleField(const uint8_t *handle, int fieldKey, int fieldValue) {
   return STRUCT_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
-// ============================= encryptdecrypt ========================
+// ============================= structmsg_encryptdecrypt ========================
 
-static int encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
+int structmsg_encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
   const crypto_mech_t *mech;
   const char *data;
   size_t dlen;
@@ -950,13 +950,13 @@ int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const u
     if (structmsg->encoded == NULL) {
       return STRUCT_MSG_ERR_NOT_ENCODED;
     }
-    result = encryptdecrypt(structmsg->encoded, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->encrypted, lgth);
+    result = structmsg_encryptdecrypt(structmsg->encoded, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->encrypted, lgth);
     *buf = structmsg->encrypted;
   } else {
     if (structmsg->encrypted == NULL) {
       return STRUCT_MSG_ERR_NOT_ENCRYPTED;
     }
-    result = encryptdecrypt(structmsg->encrypted, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->todecode, lgth);
+    result = structmsg_encryptdecrypt(structmsg->encrypted, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->todecode, lgth);
     *buf = structmsg->todecode;
   }
   return result;
@@ -1208,7 +1208,6 @@ int stmsg_getTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, in
 
 int stmsg_setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth) {
   structmsg_t *structmsg;
-  fieldInfo_t *fieldInfo;
 
   structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
@@ -1227,7 +1226,7 @@ int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8
 
    decrypted = NULL;
    lgth = 0; 
-   result = encryptdecrypt(encryptedMsg, mlen, key, klen, iv, ivlen, false, &decrypted, &lgth);
+   result = structmsg_encryptdecrypt(encryptedMsg, mlen, key, klen, iv, ivlen, false, &decrypted, &lgth);
    if (result != STRUCT_MSG_ERR_OK) {
      return result;
    }

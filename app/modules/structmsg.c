@@ -169,6 +169,31 @@ static int structmsg_encdec (lua_State *L, bool enc) {
   return 1;
 }
 
+// ============================= structmsg_encdec_msgDefinition ========================
+
+static int structmsg_encdec_msgDefinition (lua_State *L, bool enc) { 
+  const char *handle;
+  const char *key;
+  size_t klen;
+  const char *data;
+  const char *iv;
+  size_t ivlen;
+  uint8_t *buf;
+  size_t lgth;
+  int result;
+  
+  handle = luaL_checkstring( L, 1 );
+  key = luaL_checklstring (L, 2, &klen);
+  iv = luaL_optlstring (L, 3, "", &ivlen);
+  result = structmsg_encdecDefinition(handle, key, klen, iv, ivlen, enc, &buf, &lgth);
+  if (result == STRUCT_MSG_ERR_OK) {
+    lua_pushlstring (L, buf, lgth);
+  } else {
+    checkOKOrErr(L, result, "encryptdef/decryptdef", "");
+  }
+  return 1;
+}
+
 // ============================= structmsg_create ========================
 
 static int structmsg_create( lua_State* L )
@@ -511,6 +536,58 @@ static int structmsg_decode_fieldDefinitionMessage( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_set_crypted_msgDefinition ========================
+
+static int structmsg_set_crypted_msgDefinition( lua_State* L ) {
+  const char *handle;
+  const uint8_t *fieldName;
+  int cryptedLen;
+  const uint8_t *crypted;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  crypted = luaL_checklstring( L, 2, &cryptedLen );
+  result = stmsg_setCryptedDefinition(handle, crypted, cryptedLen);
+  checkOKOrErr(L, result, "setcrypteddef", "");
+  return 1;
+}
+
+// ============================= structmsg_decrypt_getDefinitionName ========================
+
+static int structmsg_decrypt_getDefinitionName( lua_State* L ) {
+  const uint8_t *encryptedMsg;
+  size_t mlen;
+  const uint8_t *key;
+  size_t klen;
+  const uint8_t *iv;
+  size_t ivlen;
+  uint8_t *handle;
+  int result;
+
+  encryptedMsg = luaL_checklstring( L, 1, &mlen );
+  key = luaL_checklstring (L, 2, &klen);
+  iv = luaL_optlstring (L, 3, "", &ivlen);
+  result = stmsg_decryptGetDefinitionName(encryptedMsg, mlen, key, klen, iv, ivlen, &handle);
+  if (result == STRUCT_MSG_ERR_OK) {
+    lua_pushstring (L, handle);
+  } else {
+    checkOKOrErr(L, result, "decryptgetdefname", "");
+  }
+  return 1;
+}
+
+// ============================= structmsg_encrypt_msgDefinition ========================
+
+static int structmsg_encrypt_msgDefinition( lua_State* L ) {
+  return structmsg_encdec_msgDefinition (L, true);
+}
+
+// ============================= structmsg_decrypt_msgDefinition ========================
+
+static int structmsg_decrypt_msgDefinition( lua_State* L ) {
+  return structmsg_encdec_msgDefinition (L, false);
+}
+
 // ============================= structmsg_delete_msgDefinition ========================
 
 static int structmsg_delete_msgDefinition( lua_State* L ) {
@@ -537,30 +614,34 @@ static int structmsg_delete_msgDefinitions( lua_State* L ) {
 
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
-  { LSTRKEY( "create" ),               LFUNCVAL( structmsg_create ) },
-  { LSTRKEY( "delete" ),               LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "__gc" ),                 LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "encode" ),               LFUNCVAL( structmsg_encode ) },
-  { LSTRKEY( "getencoded" ),           LFUNCVAL( structmsg_get_encoded ) },
-  { LSTRKEY( "decode" ),               LFUNCVAL( structmsg_decode ) },
-  { LSTRKEY( "dump" ),                 LFUNCVAL( structmsg_dump ) },
-  { LSTRKEY( "encrypt" ),              LFUNCVAL( structmsg_encrypt ) },
-  { LSTRKEY( "decrypt" ),              LFUNCVAL( structmsg_decrypt ) },
-  { LSTRKEY( "addField" ),             LFUNCVAL( structmsg_add_field ) },
-  { LSTRKEY( "setFillerAndCrc" ),      LFUNCVAL( structmsg_set_fillerAndCrc ) },
-  { LSTRKEY( "setFieldValue" ),        LFUNCVAL( structmsg_set_fieldValue ) },
-  { LSTRKEY( "setTableFieldValue" ),   LFUNCVAL( structmsg_set_tableFieldValue ) },
-  { LSTRKEY( "getFieldValue" ),        LFUNCVAL( structmsg_get_fieldValue ) },
-  { LSTRKEY( "getTableFieldValue" ),   LFUNCVAL( structmsg_get_tableFieldValue ) },
-  { LSTRKEY( "setcrypted" ),           LFUNCVAL( structmsg_set_crypted ) },
-  { LSTRKEY( "decryptgethandle" ),     LFUNCVAL( structmsg_decrypt_getHandle ) },
-  { LSTRKEY( "createmsgdef" ),         LFUNCVAL( structmsg_create_msgDefinition ) },
-  { LSTRKEY( "addfielddef" ),          LFUNCVAL( structmsg_add_fieldDefinition ) },
-  { LSTRKEY( "dumpfielddef" ),         LFUNCVAL( structmsg_dump_fieldDefinition ) },
-  { LSTRKEY( "encodefielddefmsg" ),    LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
-  { LSTRKEY( "decodefielddefmsg" ),    LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
-  { LSTRKEY( "deletemsgdef" ),         LFUNCVAL( structmsg_delete_msgDefinition ) },
-  { LSTRKEY( "deletemsgdefinitions" ), LFUNCVAL( structmsg_delete_msgDefinitions ) },
+  { LSTRKEY( "create" ),             LFUNCVAL( structmsg_create ) },
+  { LSTRKEY( "delete" ),             LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "__gc" ),               LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "encode" ),             LFUNCVAL( structmsg_encode ) },
+  { LSTRKEY( "getencoded" ),         LFUNCVAL( structmsg_get_encoded ) },
+  { LSTRKEY( "decode" ),             LFUNCVAL( structmsg_decode ) },
+  { LSTRKEY( "dump" ),               LFUNCVAL( structmsg_dump ) },
+  { LSTRKEY( "encrypt" ),            LFUNCVAL( structmsg_encrypt ) },
+  { LSTRKEY( "decrypt" ),            LFUNCVAL( structmsg_decrypt ) },
+  { LSTRKEY( "addField" ),           LFUNCVAL( structmsg_add_field ) },
+  { LSTRKEY( "setFillerAndCrc" ),    LFUNCVAL( structmsg_set_fillerAndCrc ) },
+  { LSTRKEY( "setFieldValue" ),      LFUNCVAL( structmsg_set_fieldValue ) },
+  { LSTRKEY( "setTableFieldValue" ), LFUNCVAL( structmsg_set_tableFieldValue ) },
+  { LSTRKEY( "getFieldValue" ),      LFUNCVAL( structmsg_get_fieldValue ) },
+  { LSTRKEY( "getTableFieldValue" ), LFUNCVAL( structmsg_get_tableFieldValue ) },
+  { LSTRKEY( "setcrypted" ),         LFUNCVAL( structmsg_set_crypted ) },
+  { LSTRKEY( "decryptgethandle" ),   LFUNCVAL( structmsg_decrypt_getHandle ) },
+  { LSTRKEY( "createdef" ),          LFUNCVAL( structmsg_create_msgDefinition ) },
+  { LSTRKEY( "adddeffield" ),        LFUNCVAL( structmsg_add_fieldDefinition ) },
+  { LSTRKEY( "dumpdef" ),            LFUNCVAL( structmsg_dump_fieldDefinition ) },
+  { LSTRKEY( "encodedef" ),          LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
+  { LSTRKEY( "decodedef" ),          LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
+  { LSTRKEY( "encryptdef" ),         LFUNCVAL( structmsg_encrypt_msgDefinition ) },
+  { LSTRKEY( "decryptdef" ),         LFUNCVAL( structmsg_decrypt_msgDefinition ) },
+  { LSTRKEY( "setcrypteddef" ),      LFUNCVAL( structmsg_set_crypted_msgDefinition ) },
+  { LSTRKEY( "decryptdefgetname" ),  LFUNCVAL( structmsg_decrypt_getDefinitionName ) },
+  { LSTRKEY( "deletedef" ),          LFUNCVAL( structmsg_delete_msgDefinition ) },
+  { LSTRKEY( "deletedefinitions" ),  LFUNCVAL( structmsg_delete_msgDefinitions ) },
   { LNILKEY, LNILVAL }
 };
 
