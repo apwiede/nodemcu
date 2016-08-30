@@ -130,6 +130,8 @@ enum structmsg_special_fields
 // cmd header length uint16_t cmdKey + unit16_t cmdLgth
 #define STRUCT_MSG_CMD_HEADER_LENGTH (sizeof(uint16_t) * 2)
 #define STRUCT_MSG_TOTAL_HEADER_LENGTH (STRUCT_MSG_HEADER_LENGTH + STRUCT_MSG_CMD_HEADER_LENGTH)
+#define STRUCT_MSG_NUM_HEADER_FIELDS 3
+#define STRUCT_MSG_NUM_CMD_HEADER_FIELDS 2
 #define STRUCT_MSG_DEFINITION_CMD_KEY 0xFFFF
 #define STRUCT_MSG_FREE_FIELD_ID 0xFF
 #define STRUCT_MSG_NO_INCR 0
@@ -303,6 +305,8 @@ int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8
 int structmsg_encodeFieldDefinitionMessage (const uint8_t *name, uint8_t **data, int *lgth);
 int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *data);
 int structmsg_fillHdrInfo(const uint8_t *handle, structmsg_t *structmsg);
+int structmsg_createMsgFromDefinition(const uint8_t *name);
+
 #ifdef	__cplusplus
 }
 #endif

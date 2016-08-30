@@ -612,6 +612,19 @@ static int structmsg_delete_msgDefinitions( lua_State* L ) {
   return 1;
 }
 
+
+// ============================= structmsg_create_msgFromDefinition ========================
+
+static int structmsg_create_msgFromDefinition( lua_State* L ) {
+  const uint8_t *name;
+  int result;
+
+  name = luaL_checkstring (L, 1);
+  result = structmsg_createMsgFromDefinition(name);
+  checkOKOrErr(L, result, "createmsgfromdef", "");
+  return 1;
+}
+
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "create" ),             LFUNCVAL( structmsg_create ) },
@@ -642,6 +655,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "decryptdefgetname" ),  LFUNCVAL( structmsg_decrypt_getDefinitionName ) },
   { LSTRKEY( "deletedef" ),          LFUNCVAL( structmsg_delete_msgDefinition ) },
   { LSTRKEY( "deletedefinitions" ),  LFUNCVAL( structmsg_delete_msgDefinitions ) },
+  { LSTRKEY( "createmsgfromdef" ),   LFUNCVAL( structmsg_create_msgFromDefinition ) },
   { LNILKEY, LNILVAL }
 };
 

@@ -431,7 +431,8 @@ static int setFieldValue(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const u
       break;
     case STRUCT_MSG_FIELD_UINT32_T:
       if (stringValue == NULL) {
-        if ((numericValue >= 0) && (numericValue <= 0xFFFFFFFF)) {
+        // we have to do the signed check as numericValue is a sigend integer!!
+        if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
           fieldInfo->value.uval = (uint32_t)numericValue;
         } else {
           return STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -604,6 +605,7 @@ int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   structmsg->msg.fieldInfos = newFieldInfos(numFieldInfos);
   structmsg->msg.tableFieldInfos = NULL;
   structmsg->flags = 0;
+  structmsg->sequenceNum = 0;
   structmsg->encoded = NULL;
   structmsg->todecode = NULL;
   structmsg->encrypted = NULL;
@@ -849,8 +851,7 @@ int stmsg_dumpMsg(const uint8_t *handle) {
     }
     result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
     checkErrOK(result);
-    ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldInfo->fieldLgth);
-//ets_printf("isSet: %s 0x%02x %d\n", fieldInfo->fieldStr, fieldInfo->flags, (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET));
+    ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldType, fieldInfo->fieldLgth);
     if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
       switch (fieldInfo->fieldType) {
       case STRUCT_MSG_FIELD_INT8_T:
@@ -976,6 +977,7 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
   fieldInfo_t *fieldInfo;
 
   structmsg = structmsg_get_structmsg_ptr(handle);
+//ets_printf("addfield: %s totalLgth: %d\n", fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkHandleOK(structmsg);
   if (c_strcmp(fieldStr, "@tablerows") == 0) {
     structmsg->msg.numTableRows = fieldLgth;
@@ -1043,8 +1045,11 @@ int stmsg_setFillerAndCrc(const uint8_t *handle) {
 
   structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
+  // space for the numEntries field!!
+  structmsg->hdr.hdrInfo.hdrKeys.cmdLgth++;
+  structmsg->hdr.hdrInfo.hdrKeys.totalLgth++;
+  // end space for the numEntries field!!
   myLgth = structmsg->hdr.hdrInfo.hdrKeys.cmdLgth + 2;
-ets_printf("setfac: myLgth: %d\n", myLgth);
   while ((myLgth % 16) != 0) {
     myLgth++;
     fillerLgth++;

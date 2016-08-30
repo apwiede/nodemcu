@@ -319,7 +319,7 @@ int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName,
     return STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS;
   }
   fieldInfo = &definition->fieldInfos[definition->numFields];
-  result = structmsg_getFieldNameId(fieldName, &fieldId, +1);
+  result = structmsg_getFieldNameId(fieldName, &fieldId, STRUCT_MSG_INCR);
   checkErrOK(result);
   fieldInfo->fieldId = fieldId;
   result = structmsg_getFieldTypeId(fieldTypeStr, &fieldType);
@@ -462,5 +462,46 @@ int structmsg_deleteStructmsgDefinition(const uint8_t *name) {
 int structmsg_deleteStructmsgDefinitions() {
   // delete the whole structmsgDefinitions info, including fieldNameDefinitions info
   return structmsg_deleteDefinitions(&structmsgDefinitions, &fieldNameDefinitions);
+}
+
+// ============================= structmsg_createMsgFromDefinition ========================
+
+int structmsg_createMsgFromDefinition(const uint8_t *name) {
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  uint8_t *fieldName;
+  uint8_t *fieldType;
+  uint8_t *handle;
+  int fieldIdx;
+  int result;
+
+  result = structmsg_getDefinitionPtr(name, &structmsgDefinitions, &definition);
+  checkErrOK(result);
+  result = stmsg_createMsg(definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS, &handle);
+//ets_printf("create: handle: %s numFields: %d\n", handle, definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS);
+  checkErrOK(result);
+  while (fieldIdx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[fieldIdx];
+    switch (fieldInfo->fieldId) {
+    case STRUCT_MSG_SPEC_FIELD_SRC:
+    case STRUCT_MSG_SPEC_FIELD_DST:
+    case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
+    case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
+    case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+    case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
+      // nothing to do!
+      break;
+    default:
+      result = structmsg_getIdFieldNameStr(fieldInfo->fieldId, &fieldName);
+      checkErrOK(result);
+      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+      checkErrOK(result);
+//ets_printf("addfield: %s %s %d\n", fieldName, fieldType, fieldInfo->fieldLgth);
+      result = stmsg_addField(handle, fieldName, fieldInfo->fieldType, fieldInfo->fieldLgth);
+       break;
+    } 
+    fieldIdx++;
+  }
+  return STRUCT_MSG_ERR_OK;
 }
 

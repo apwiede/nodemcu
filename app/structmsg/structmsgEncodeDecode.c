@@ -306,7 +306,6 @@ static int sequenceNumEncode(uint8_t *data, int offset, structmsg_t *structmsg, 
   
   val = ++structmsg->sequenceNum;
   *value = val;
-ets_printf("sequenceNum: 0x%08x\n", val);
   return uint32Encode(data, offset, val);
 }
 
