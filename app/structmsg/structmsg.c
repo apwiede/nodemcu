@@ -223,7 +223,7 @@ static fieldInfo_t *newFieldInfos(uint8_t numFieldInfos)
 
 // ============================= setHandleField ========================
 
-static int setHandleField(const uint8_t *handle, int fieldKey, int fieldValue) {
+static int setHandleField(const uint8_t *handle, int fieldId, int fieldValue) {
   int idx;
   int result = STRUCT_MSG_ERR_OK;
 
@@ -233,7 +233,7 @@ static int setHandleField(const uint8_t *handle, int fieldKey, int fieldValue) {
   idx = 0;
   while (idx < structmsg_userdata.numHandles) {
     if ((structmsg_userdata.handles[idx].handle != NULL) && (c_strcmp(structmsg_userdata.handles[idx].handle, handle) == 0)) {
-      switch (fieldKey) {
+      switch (fieldId) {
       case STRUCT_MSG_FIELD_SRC:
         structmsg_userdata.handles[idx].hdrInfo.hdrKeys.src = (uint16_t)fieldValue;
         break;
@@ -305,11 +305,10 @@ int structmsg_encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t 
 
 // ============================= fixHeaderInfo ========================
 
-static int fixHeaderInfo(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const uint8_t *fieldStr, uint8_t fieldKey, uint8_t fieldType, uint8_t fieldLgth, uint8_t numTableRows) {
+static int fixHeaderInfo(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const uint8_t *fieldStr, uint8_t fieldType, uint8_t fieldLgth, uint8_t numTableRows) {
   fieldInfo->fieldStr = os_malloc(os_strlen(fieldStr) + 1);
   fieldInfo->fieldStr[os_strlen(fieldStr)] = '\0';
   os_memcpy(fieldInfo->fieldStr, fieldStr, os_strlen(fieldStr));
-  fieldInfo->fieldKey = fieldKey;
   fieldInfo->fieldType = fieldType;
   fieldInfo->value.byteVector = NULL;
   fieldInfo->flags = 0;
@@ -966,7 +965,6 @@ int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const u
 // ============================= stmsg_addField ========================
 
 int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth) {
-  uint16_t fieldKey;
   uint8_t numTableFields;
   uint8_t numTableRowFields;
   uint8_t numTableRows;
@@ -984,7 +982,7 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
 //ets_printf("tablerows1: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
-    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, 0, 0);
+    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, 0, 0);
 //ets_printf("tablerows2: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     structmsg->msg.numFieldInfos++;
     return STRUCT_MSG_ERR_OK;
@@ -995,7 +993,7 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
 //ets_printf("tablerowfields1: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
-    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, 0, 0);
+    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, 0, 0);
 //ets_printf("tablerowfields2: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     if ((structmsg->msg.tableFieldInfos == NULL) && (numTableFields != 0)) {
       structmsg->msg.tableFieldInfos = newFieldInfos(numTableFields);
@@ -1007,7 +1005,6 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
   numTableRows = structmsg->msg.numTableRows;
   numTableFields = numTableRows * numTableRowFields;
   if (!((numTableFields > 0) && (structmsg->msg.numRowFields < numTableRowFields))) {
-    fieldKey = structmsg->msg.numFieldInfos;
     if (structmsg->msg.numFieldInfos >= structmsg->msg.maxFieldInfos) {
       return STRUCT_MSG_ERR_TOO_MANY_FIELDS;
     }
@@ -1015,7 +1012,7 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
     numTableFields = 0;
     numTableRows = 1;
     numTableRowFields = 0;
-    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, fieldLgth, numTableRows);
+    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, fieldLgth, numTableRows);
 //ets_printf("field2: %s totalLgth: %d cmdLgth: %d\n", fieldInfo->fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     result = structmsg_fillHdrInfo(handle, structmsg);
     structmsg->msg.numFieldInfos++;
@@ -1023,10 +1020,9 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
     row = 0;
     while (row < numTableRows) {
       cellIdx = structmsg->msg.numRowFields + row * numTableRowFields;;
-      fieldKey = structmsg->msg.numRowFields + 1;
       fieldInfo_t *fieldInfo = &structmsg->msg.tableFieldInfos[cellIdx];
 //ets_printf("table field1: %s totalLgth: %d cmdLgth: %d\n", fieldInfo->fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
-      fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldKey, fieldType, fieldLgth, 1);
+      fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, fieldLgth, 1);
 //ets_printf("table field2: %s totalLgth: %d cmdLgth: %d\n", fieldInfo->fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
       row++;
     }

@@ -198,7 +198,6 @@ typedef struct stmsgDefinitions
 typedef struct fieldInfo
 {
   uint8_t *fieldStr;
-  uint8_t fieldKey;
   uint8_t fieldType;
   uint16_t fieldLgth;
   union {
