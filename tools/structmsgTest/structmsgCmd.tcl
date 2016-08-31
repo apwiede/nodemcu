@@ -65,28 +65,28 @@ puts stderr "lgth: [string length $data]!"
 # ===================== dump_values =============================
 
 proc dump_values {data} {
-    puts -nonewline stderr "      values: "
-    set cnt 0
+  puts -nonewline stderr "      values: "
+  set cnt 0
 if {[catch {
-    foreach ch [split $data ""] {
-      set pch [binaryScanChar $ch]
-      if {$ch eq "%"} {
-        set ch "%%"
-      }
-      puts -nonewline stderr [format "  $ch 0x%02x" $pch]
-      incr cnt
-      if {($cnt > 0) && (($cnt % 10) == 0)} {
-        puts -nonewline stderr "\n              "
-      }
+  foreach ch [split $data ""] {
+    set pch [binaryScanChar $ch]
+    if {$ch eq "%"} {
+      set ch "%%"
     }
+    puts -nonewline stderr [format "  $ch 0x%02x" $pch]
+    incr cnt
+    if {($cnt > 0) && (($cnt % 10) == 0)} {
+      puts -nonewline stderr "\n              "
+    }
+  }
 } msg]} {
-    puts stderr "\nMSG: $msg!"
-    foreach ch [split $data ""] {
-      set pch [binaryScanChar $ch]
+  puts stderr "\nMSG: $msg!"
+  foreach ch [split $data ""] {
+    set pch [binaryScanChar $ch]
 puts stderr "\n!${ch}!${pch}!"
-    }
+  }
 }
-    puts stderr ""
+  puts stderr ""
 }
 
 # ===================== fillHdrInfo =============================
@@ -140,6 +140,76 @@ proc setHandleField {handle fieldName value} {
   }
 }
 
+# ============================= fixHeaderInfo ========================
+
+proc fixHeaderInfo {myDictVar fieldInfoVar fieldName fieldType fieldLgth numTableRows} {
+  upvar $myDictVar myDict
+  upvar $fieldInfoVar fieldInfo
+
+  dict set fieldInfo fieldName $fieldName
+  dict set fieldInfo fieldType $fieldType
+  dict set fieldInfo value [list]
+  dict set fieldInfo flags [list]
+  set totalLgth [dict get $myDict hdr hdrInfo hdrKeys totalLgth]
+  set cmdLgth [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]
+  set value [list]
+  switch $fieldType {
+    uint8_t -
+    int8_t {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + 1 * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + 1 * $numTableRows}]
+      set fieldLgth 1
+    }
+    uint16_t -
+    int16_t {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + 2 * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + 2 * $numTableRows}]
+      set fieldLgth 2
+    }
+    uint32_t -
+    int32_t {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + 4 * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + 4 * $numTableRows}]
+      set fieldLgth 4
+    }
+    uint8_t* {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + $fieldLgth * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + $fieldLgth * $numTableRows}]
+      dict set fieldInfo value $value
+      dict set fieldInfo value $value
+    }
+    int8_t* {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + $fieldLgth * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + $fieldLgth * $numTableRows}]
+      dict set fieldInfo value $value
+      dict set fieldInfo value $value
+    }
+    unit16_t* {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + $fieldLgth * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + $fieldLgth * $numTableRows}]
+      dict set fieldInfo value $value
+    }
+    int16_t* {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + $fieldLgth * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + $fieldLgth * $numTableRows}]
+      dict set fieldInfo value $value
+    }
+    uint32_t* {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + $fieldLgth * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + $fieldLgth * $numTableRows}]
+      dict set fieldInfo value $value
+    }
+    int32_t* {
+      dict set myDict hdr hdrInfo hdrKeys totalLgth [expr {$totalLgth + $fieldLgth * $numTableRows}]
+      dict set myDict hdr hdrInfo hdrKeys cmdLgth [expr {$cmdLgth + $fieldLgth * $numTableRows}]
+      dict set fieldInfo value $value
+    }
+  }
+  setHandleField [dict get $myDict handle] $::STRUCT_MSG_FIELD_CMD_LGTH [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]
+  setHandleField [dict get $myDict handle] $::STRUCT_MSG_FIELD_TOTAL_LGTH [dict get $myDict hdr hdrInfo hdrKeys totalLgth]
+  dict set fieldInfo fieldLgth $fieldLgth
+  return $::STRUCT_MSG_ERR_OK
+}
 # ===================== addHandle =============================
 
 proc addHandle {handle} {
@@ -176,23 +246,30 @@ proc getHandle {decrypted handleVal} {
 
 # ===================== structmsg_create =============================
 
-proc structmsg_create {numFieldInfos} {
+proc structmsg_create {numFieldInfos handleVar} {
+  upvar $handleVar handle
 
   set myDict [dict create]
-  dict set myDict hdr headerLgth $::headerLgth
-  dict set myDict hdr totalLgth [expr {$::headerLgth + $::cmdLgth}]
+  dict set myDict hdr hdrInfo hdrKeys src 0
+  dict set myDict hdr hdrInfo hdrKeys dst 0
+  dict set myDict hdr hdrInfo hdrKeys cmdKey 0
+  dict set myDict hdr hdrInfo hdrKeys cmdLgth $::STRUCT_MSG_CMD_HEADER_LENGTH
+  dict set myDict hdr headerLgth $::STRUCT_MSG_HEADER_LENGTH
+  dict set myDict hdr hdrInfo hdrKeys totalLgth $::STRUCT_MSG_TOTAL_HEADER_LENGTH
   dict set myDict msg cmdLgth $::cmdLgth
   dict set myDict msg fieldInfos [list]
-  dict set myDict msg maxFieldInfos $numFieldInfos
   dict set myDict msg numFieldInfos 0
+  dict set myDict msg maxFieldInfos $numFieldInfos
+  dict set myDict msg numTableRows 0
+  dict set myDict msg numTableRowFields 0
+  dict set myDict msg numRowFields 0
+  dict set myDict msg tableFieldInfos [list]
   dict set myDict flags [list]
+  dict set myDict sequenceNum 0
   dict set myDict encoded [list]
   dict set myDict todecode [list]
   dict set myDict encrypted [list]
-  dict set myDict encryptedMsg [list]
-  dict set myDict decrypted [list]
-  dict set myDict decryptedMsg [list]
-  dict set myDict sequenceNum 0
+  dict set myDict handleHdrInfoPtr [list]
   set handle $::structmsg(prefix)ffef[format "%04d" $::structmsg(numHandles)]
   dict set myDict handle $handle
   addHandle $handle
@@ -200,7 +277,7 @@ proc structmsg_create {numFieldInfos} {
   setHandleField $handle totalLgth [expr {$::headerLgth + $::cmdLgth}]
   setHandleField $handle cmdLgth $::cmdLgth
   fillHdrInfo $handle
-  return $handle
+  return $::STRUCT_MSG_ERR_OK
 }
 
 # ===================== structmsg_delete =============================
@@ -221,122 +298,98 @@ proc structmsg_encode {handle} {
   set offset 0
   set offset [uint16Encode encoded $offset [dict get $myDict hdr src]]
   set offset [uint16Encode encoded $offset [dict get $myDict hdr dst]]
-  set offset [uint16Encode encoded $offset [dict get $myDict hdr totalLgth]]
+  set offset [uint16Encode encoded $offset [dict get $myDict hdr hdrInfo hdrKeys totalLgth]]
   set offset [uint16Encode encoded $offset [dict get $myDict msg cmdKey]]
   set offset [uint16Encode encoded $offset [dict get $myDict msg cmdLgth]]
-  dict set myDict encoded $encoded
-  set ::structmsg($handle) $myDict
-  set idx 0
   set numEntries [dict get $myDict msg numFieldInfos]
+  set offset [uint8Encode encoded $offset $numEntries]
+
+  set idx 0
   while {$idx < $numEntries} {
-    set myDict $::structmsg($handle) ; # needed because structmsg_set_fieldValue changes the dict!!
     set fieldInfos [dict get $myDict msg fieldInfos]
     set fieldInfo [lindex $fieldInfos $idx]
-    if {[string range [dict get $fieldInfo fieldStr] 0 0] == "@"} {
-      set fieldName [dict get $fieldInfo fieldStr]
-      switch $fieldName {
-        "@randomNum" {
+    if {[string range [dict get $fieldInfo fieldName] 0 0] eq "@"} {
+      set result [structmsg_getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
+#      checkErrOK(result);
+puts stderr "offset0: $offset![dict get $fieldInfo fieldName]!fieldId: $fieldId!"
+      set specFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
+      switch $specFieldName { 
+        @src -
+        @dst -
+        @targetCmd -
+        @totalLgth -
+        @cmdKey -
+        @cmdLgth {
+puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldName]]
+        }
+        @randomNum {
           set offset [randomNumEncode encoded $offset randomNum]
-          structmsg_set_fieldValue $handle "@randomNum" $randomNum
+#        checkEncodeOffset(offset);
+          set result [structmsg_set_fieldValue $handle {@randomNum} randomNum]
+#        checkErrOK(result);
         }
-        "@sequenceNum" {
+        @sequenceNum {
           set offset [sequenceNumEncode encoded $offset myDict sequenceNum]
-          set ::structmsg($handle) $myDict ; # needed because structmsg_set_fieldValue changes the dict!!
-          structmsg_set_fieldValue $handle "@sequenceNum" $sequenceNum
+#        checkEncodeOffset(offset);
+          set result [structmsg_set_fieldValue $handle {@sequenceNum} $sequenceNum]
+#        checkErrOK(result);
         }
-        "@filler" {
+        @filler {
           set offset [fillerEncode encoded $offset [dict get $fieldInfo fieldLgth] value]
-          structmsg_set_fieldValue $handle "@filler" $value
+#        checkEncodeOffset(offset);
+          set result [structmsg_set_fieldValue $handle {@filler} $value]
+#        checkErrOK(result);
         }
-        "@crc" {
-          set offset [crcEncode encoded $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict hdr headerLgth]]
-          structmsg_set_fieldValue $handle "@crc" $crc
+        @crc {
+          set offset [crcEncode encoded $offset [dict get $myDict hdr hdrInfo hdrKeys totalLgth] crc [dict get $myDict hdr headerLgth]]
+#        checkEncodeOffset(offset);
+          set result [structmsg_set_fieldValue $handle {@crc} $crc]
+#        checkErrOK(result);
+        }
+        @id {
+          return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD
+        }
+        @tablerows {
+        }
+        @tablerowfields {
+          if {[dict get $myDict msg numTableRows] > 0} {
+            set row 0
+            set col 0
+            set cell 0
+            while {$row < [dict get $myDict msg numTableRows]} {
+              while {$col < [dict get $myDict msg numTableRowFields]} {
+                 set cell [expr {$col + $row * [dict get $myDict msg numTableRowFields]}]
+                 set fieldInfos [dict get $myDict msg tableFieldInfos]
+                 set fieldInfo [lindex $fieldInfos $cell]
+puts stderr "fieldInfo: $fieldInfo!row: $row!col: $col!cell: $cell!"
+                 set offset [encodeField encoded $fieldInfo $offset]
+puts stderr "offset1: $offset![dict get $fieldInfo fieldName]!lgth: [string length $encoded]!"
+#               checkEncodeOffset(offset)
+                 incr col
+              }
+              incr row
+              set col 0
+            }
+          }
         }
         default {
-          error "BAD_SPECIAL_FIELD: $fieldName!"
+puts stderr "fieldId: $fieldId ($specFieldName) not in switch!"
         }
       }
-      set myDict $::structmsg($handle) ; # needed because structmsg_set_fieldValue changes the dict!!
-      set fieldInfos [dict get $myDict msg fieldInfos]
-      set fieldInfo [lindex $fieldInfos $idx]
     } else {
-     set fieldType [dict get $fieldInfo fieldType]
-      set fieldName [dict get $fieldInfo fieldStr]
-      switch $fieldType {
-        int8_t {
-          set offset [int8Encode encoded $offset [dict get $fieldInfo value]]
-        }
-        uint8_t {
-          set offset [uint8Encode encoded $offset [dict get $fieldInfo value]]
-        }
-        int16_t {
-          set offset [int16Encode encoded $offset [dict get $fieldInfo value]]
-        }
-        uint16_t {
-          set offset [uint16Encode encoded $offset [dict get $fieldInfo value]]
-        }
-        int32_t {
-          set offset [int32Encode encoded $$offset [dict get $fieldInfo value]]
-        }
-        uint32_t {
-          set offset [uint32Encode encoded $offset [dict get $fieldInfo value]]
-        }
-        int8_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [int8Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        uint8_t* {
-          append encoded [dict get $fieldInfo value]
-          set offset [expr {$offset + [dict get $fieldInfo fieldLgth]}]
-        }
-        int16_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [int16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        uint16_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [uint16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        int32_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [int32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        uint32_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [uint32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-      }
+      set offset [encodeField encoded $fieldInfo $offset]
+#      checkEncodeOffset(offset);
     }
-    set myDict $::structmsg($handle)
-    set fieldInfos [dict get $myDict msg fieldInfos]
-    set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
-    dict set myDict msg fieldInfos $fieldInfos
-    dict set myDict encoded $encoded
-    set ::structmsg($handle) $myDict
+puts stderr "offset2: $offset![dict get $fieldInfo fieldName]!fieldId: $fieldId!lgth: [string length $encoded]!"
     incr idx
   }
-  set myDict $::structmsg($handle)
-  dict set myDict msg fieldInfos $fieldInfos
   if {[lsearch [dict get $myDict flags] "ENCODED"] < 0} {
     dict lappend myDict flags ENCODED
   }
   dict set myDict encoded $encoded
+puts stderr "ENCODING END: offset: $offset lgth: [string length $encoded]!"
   set ::structmsg($handle) $myDict
+  return $::STRUCT_MSG_ERR_OK
 }
 
 # ============================= structmsg_get_encoded ========================
@@ -373,6 +426,7 @@ proc structmsg_decode {handle todecode} {
   if {![info exists ::structmsg($handle)]} {
     error "no such structmsg: $handle"
   }
+puts stderr "DECODE: lgth: [string length $todecode]!$handle!"
   set myDict $::structmsg($handle)
   dict set myDict todecode $todecode
   set offset 0
@@ -388,110 +442,82 @@ proc structmsg_decode {handle todecode} {
   dict set myDict msg cmdLgth $cmdLgth
   set ::structmsg($handle) $myDict
   fillHdrInfo $handle
+  set offset [uint8Decode $todecode $offset numEntries]
+#  set numEntries [dict get $myDict msg numFieldInfos]
+puts stderr "offset0: $offset!numEntries: $numEntries!"
   set idx 0
-  set numEntries [dict get $myDict msg numFieldInfos]
   while {$idx < $numEntries} {
     set myDict $::structmsg($handle) ; # needed because structmsg_set_fieldValue changes the dict!!
     set fieldInfos [dict get $myDict msg fieldInfos]
     set fieldInfo [lindex $fieldInfos $idx]
-    if {[string range [dict get $fieldInfo fieldStr] 0 0] == "@"} {
-      set fieldName [dict get $fieldInfo fieldStr]
-      switch $fieldName {
-        "@randomNum" {
-          set offset [randomNumDecode $todecode $offset randomNum]
-          dict set fieldInfo value $randomNum
+    if {[string range [dict get $fieldInfo fieldName] 0 0] == "@"} {
+      set result [structmsg_getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
+      set specialFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
+#      checkErrOK(result);
+puts stderr "specialFieldName: $specialFieldName!fieldId: $fieldId!"
+      switch $specialFieldName {
+        @src -
+        @dst -
+        @targetCmd -
+        cmdKey -
+        @cmdLgth {
+puts stderr [format "funny should decode: %s" [dict get $fieldInfo fieldName]]
         }
-        "@sequenceNum" {
-          set offset [sequenceNumDecode $todecode $offset sequenceNum]
-          dict set fieldInfo value $sequenceNum
+        @randomNum {
+          set offset [randomNumDecode $todecode $offset value]
+puts stderr "after randomNum: offset: $offset!value: [format 0x%08x $value]"
+#        checkDecodeOffset(offset);
         }
-        "@filler" {
-          set offset [fillerDecode $todecode $offset [dict get $fieldInfo fieldLgth] value]
-          dict set fieldInfo value $value
+        @sequenceNum {
+          set offset [sequenceNumDecode $todecode $offset fieldInfo]
+puts stderr "after sequenceNum: offset: $offset!value: [format 0x%08x $value]"
+#        checkDecodeOffset(offset);
         }
-        "@crc" {
-          set offset [crcDecode $todecode $offset [dict get $myDict msg cmdLgth] crc [dict get $myDict hdr headerLgth]]
-          dict set fieldInfo value $crc
+        @filler {
+          offset = fillerDecode(msgPtr, offset, fieldInfo->fieldLgth, &fieldInfo->value.ubyteVector);
+#        checkDecodeOffset(offset);
         }
-        default {
-          error "BAD_SPECIAL_FIELD: $fieldName!"
+        @crc {
+          set offset [crcDecode $todecode $offset [dict get $myDict hdr hdrInfo hdrKeys cmdLgth] fieldInfo [dict get $myDict hdr headerLgth]]
+          if {$offset < 0} {
+            return $::STRUCT_MSG_ERR_BAD_CRC_VALUE;
+          }
+        }
+        @id {
+          return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
+        }
+        @tablerows {
+        }
+        @tablerowfields {
+          if {[dict get $myDict msg numTableRows] > 0} {
+puts stderr "tabelrowfields: offset: $offset!"
+            set row 0
+            set col 0
+            set cell 0
+            while {$row < [dict get $myDict msg numTableRows]} {
+              while {$col < [dict get $myDict msg numTableRowFields} {
+                 set cell [expr {$col + $row * [dict get $myDict msg numTableRowFields]}]
+                 set fieldInfos [dict get $myDict msg tableFieldInfos]
+                 set fieldInfo [lindex $fieldInfos $cell]
+                 set offset [decodeField $todecode fieldInfo $offset]
+#               checkEncodeOffset(offset);
+                 incr col
+              }
+              incr row
+              set col 0
+            }
+          }
         }
       }
-      set myDict $::structmsg($handle) ; # needed because structmsg_set_fieldValue changes the dict!!
-      set fieldInfos [dict get $myDict msg fieldInfos]
-      set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
-      dict set myDict msg fieldInfos $fieldInfos
-      set ::structmsg($handle) $myDict
+puts stderr "fieldInfo1: $fieldInfo!"
     } else {
-      set fieldType [dict get $fieldInfo fieldType]
-      set fieldName [dict get $fieldInfo fieldStr]
-      switch $fieldType {
-        int8_t {
-          set offset [int8Decode $todecode $offset [dict get $fieldInfo value]]
-          dict set fieldInfo value $value
-        }
-        uint8_t {
-          set offset [uint8Decode $todecode $offset [dict get $fieldInfo value]]
-          dict set fieldInfo value $value
-        }
-        int16_t {
-          set offset [int16Decode $todecode $offset [dict get $fieldInfo value]]
-          dict set fieldInfo value $value
-        }
-        uint16_t {
-          set offset [uint16Decode $todecode $offset [dict get $fieldInfo value]]
-          dict set fieldInfo value $value
-        }
-        int32_t {
-          set offset [int32Decode $todecode $$offset [dict get $fieldInfo value]]
-          dict set fieldInfo value $value
-        }
-        uint32_t {
-          set offset [uint32Decode $todecode $offset [dict get $fieldInfo value]]
-          dict set fieldInfo value $value
-        }
-        int8_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [int8Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        uint8_t* {
-          set lgth [dict get $fieldInfo fieldLgth]
-          dict set fieldInfo value [string range $todecode $offset [expr {$offset + $lgth - 1}]]
-          incr offset $lgth
-        }
-        int16_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [int16Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        uint16_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [uint16Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        int32_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [int32Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-        uint32_t* {
-          set fieldIdx 0
-          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-            set offset [uint32Decode $todecode $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-            incr fieldIdx
-          }
-        }
-      }
+puts stderr "fieldInfo2a: $fieldInfo!"
+      set offset [decodeField $todecoe fieldInfo $offset]
+puts stderr "fieldInfo2b: $fieldInfo!"
+#      checkEncodeOffset(offset);
     }
+    incr idx
+puts stderr "fieldInfo3: $fieldInfo!"
     if {[lsearch [dict get $fieldInfo flags] "FIELD_IS_SET"] < 0} {
       dict lappend fieldInfo flags FIELD_IS_SET
     }
@@ -499,15 +525,13 @@ proc structmsg_decode {handle todecode} {
     set fieldInfos [dict get $myDict msg fieldInfos]
     set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
     dict set myDict msg fieldInfos $fieldInfos
-    set ::structmsg($handle) $myDict
-    incr idx
   }
-  set myDict $::structmsg($handle)
   dict set myDict msg fieldInfos $fieldInfos
   if {[lsearch [dict get $myDict flags] "DECODED"] < 0} {
     dict lappend myDict flags DECODED
   }
   set ::structmsg($handle) $myDict
+  return STRUCT_MSG_ERR_OK;
 }
 
 # ===================== structmsg_dump =============================
@@ -531,7 +555,7 @@ proc structmsg_dump {handle} {
   set fieldInfos [dict get $myDict msg fieldInfos]
   while {$idx < $numEntries} {
     set fieldInfo [lindex $fieldInfos $idx]
-    puts stderr [format "    idx %d: key: %-20s type: %-8s lgth: %.5d" $idx [dict get $fieldInfo fieldStr] [dict get $fieldInfo fieldType] [dict get $fieldInfo fieldLgth]]
+    puts stderr [format "    idx %d: key: %-20s type: %-8s lgth: %.5d" $idx [dict get $fieldInfo fieldName] [dict get $fieldInfo fieldType] [dict get $fieldInfo fieldLgth]]
     if {[lsearch [dict get $fieldInfo flags] "FIELD_IS_SET"] >= 0} {
       switch [dict get $fieldInfo fieldType] {
         uint8_t {
@@ -655,63 +679,117 @@ proc structmsg_decrypt {handle cryptKey crypted} {
 # ===================== structmsg_add_field =============================
 
 proc structmsg_add_field {handle name fieldType fieldLgth} {
+  set result $::STRUCT_MSG_ERR_OK
   if {![info exists ::structmsg($handle)]} {
     error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
-  set fieldKey [dict get $myDict msg numFieldInfos]
-  set fieldInfos [dict get $myDict msg fieldInfos]
-  set fieldInfo [dict create]
-  dict set fieldInfo fieldStr $name
-  dict set fieldInfo fieldKey $fieldKey
-  dict set fieldInfo fieldType $fieldType;
-  dict set fieldInfo value [list]
-  dict set fieldInfo flags [list]
-  switch $fieldType {
-    uint8_t -
-    int8_t {
-      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + 1}]
-      dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + 1}]
-      dict set fieldInfo fieldLgth 1
+  if {$name eq "@tablerows"} {
+    dict set myDict msg numTableRows $fieldLgth
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfoIdx [dict get $myDict msg numFieldInfos]
+    set fieldInfo [list]
+#puts stderr [format "tablerows1: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+    # we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
+    fixHeaderInfo myDict fieldInfo $name $fieldType 0 0
+    lappend fieldInfos $fieldInfo
+    dict set myDict msg fieldInfos $fieldInfos
+#puts stderr [format "tablerows2: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+    dict set myDict msg numFieldInfos [expr {[dict get $myDict msg numFieldInfos] + 1}]
+    set ::structmsg($handle) $myDict
+    return $::STRUCT_MSG_ERR_OK
+  }
+  if {$name eq "@tablerowfields"} {
+    dict set myDict msg numTableRowFields $fieldLgth
+    set numTableFields [expr {[dict get $myDict msg numTableRows] * [dict get $myDict msg numTableRowFields]}]
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfoIdx [dict get $myDict msg numFieldInfos]
+    set fieldInfo [list]
+#puts stderr [format "tablerowfields1: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+    # we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
+    fixHeaderInfo myDict fieldInfo $name $fieldType 0 0
+    lappend fieldInfos $fieldInfo
+    dict set myDict msg fieldInfos $fieldInfos
+#puts stderr [format "tablerowfields2: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $mmyDict hdr hdrInfo hdrKeys cmdLgth]]
+    if {([dict get $myDict msg tableFieldInfos] eq [list]) && ($numTableFields != 0)} {
+      # build dummy entries
+      set cellIdx 0
+      set fieldInfos [list]
+      while {$cellIdx < $numTableFields} {
+        lappend fieldInfos [list]
+        incr cellIdx
+      }
+      dict set myDict msg tableFieldInfos $fieldInfos
     }
-    uint16_t -
-    int16_t {
-      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + 2}]
-      dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + 2}]
-      dict set fieldInfo fieldLgth 2
+    dict set myDict msg numFieldInfos [expr {[dict get $myDict msg numFieldInfos] + 1}]
+    set ::structmsg($handle) $myDict
+    return $::STRUCT_MSG_ERR_OK
+  }
+  set numTableRowFields [dict get $myDict msg numTableRowFields]
+  set numTableRows [dict get $myDict msg numTableRows]
+  set numTableFields [expr {$numTableRows * $numTableRowFields}]
+
+  if {!(($numTableFields > 0) && ([dict get $myDict msg numRowFields] < $numTableRowFields))} {
+    if {[dict get $myDict msg numFieldInfos] >= [dict get $myDict msg maxFieldInfos]} {
+      return $::STRUCT_MSG_ERR_TOO_MANY_FIELDS
     }
-    uint32_t -
-    int32_t {
-      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + 4}]
-      dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + 4}]
-      dict set fieldInfo fieldLgth 4
+    set fieldInfos [dict get $myDict msg fieldInfos]
+    set fieldInfoIdx [dict get $myDict msg numFieldInfos]
+    set fieldInfo [list]
+    set numTableFields 0
+    set numTableRows 1
+    set numTableRowFields 0
+    fixHeaderInfo myDict fieldInfo $name $fieldType $fieldLgth $numTableRows
+#puts stderr [format "field2: %s totalLgth: %d cmdLgth: %d" [dict get $fieldInfo fieldName] [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+    lappend fieldInfos $fieldInfo
+    dict set myDict msg fieldInfos $fieldInfos
+    dict set myDict msg numFieldInfos [expr {[dict get $myDict msg numFieldInfos] + 1}]
+    set ::structmsg($handle) $myDict
+    set result [structmsg_fillHdrInfo $handle]
+  } else {
+    set numRowFields [dict get $myDict msg numRowFields]
+    set cellIdx $numRowFields
+    # fill the row fields until we heve filled up one row
+    # at that point add automatically the other rows!!
+    if {$cellIdx < $numTableRowFields} {
+      set fieldInfos [dict get $myDict msg tableFieldInfos]
+      set fieldInfo [lindex $fieldInfos $cellIdx]
+#puts stderr [format "table field1: %s totalLgth: %d cmdLgth: %d" [dict get $fieldInfo fieldName] [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+      fixHeaderInfo myDict fieldInfo $name $fieldType $fieldLgth 1
+      set fieldInfos [lreplace $fieldInfos $cellIdx $cellIdx $fieldInfo]
+      dict set myDict msg tableFieldInfos $fieldInfos
+#puts stderr [format "table field2: %s totalLgth: %d cmdLgth: %d" [dict get $fieldInfo fieldName] [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+      dict set myDict msg numRowFields [expr {[dict get $myDict msg numRowFields] + 1}]
+      set ::structmsg($handle) $myDict
+    } 
+    if {[dict get $myDict msg numRowFields] >= $numTableRowFields} {
+      # one row ist filled, add the other rows
+      set row 1
+      set cellIdx $numTableRowFields
+      while {$row < $numTableRows} {
+        set col 0
+        while {$col < $numTableRowFields} {
+          set fieldInfos [dict get $myDict msg tableFieldInfos]
+          set fieldInfo [lindex $fieldInfos $col]
+#puts stderr [format "table field1: %s totalLgth: %d cmdLgth: %d" [dict get $fieldInfo fieldName] [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+          set name [dict get $fieldInfo fieldName]
+          set fieldType [dict get $fieldInfo fieldType]
+          set fieldLgth [dict get $fieldInfo fieldLgth]
+          fixHeaderInfo myDict fieldInfo $name $fieldType $fieldLgth 1
+          set fieldInfos [lreplace $fieldInfos $cellIdx $cellIdx $fieldInfo]
+          dict set myDict msg tableFieldInfos $fieldInfos
+#puts stderr [format "table field2: %s totalLgth: %d cmdLgth: %d" [dict get $fieldInfo fieldName] [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
+          dict set myDict msg numRowFields [expr {[dict get $myDict msg numRowFields] + 1}]
+          set ::structmsg($handle) $myDict
+          incr col
+          incr cellIdx
+        }
+        incr row
+      }
     }
-    uint8_t* -
-    int8_t* {
-      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + $fieldLgth}]
-      dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + $fieldLgth}]
-      dict set fieldInfo fieldLgth $fieldLgth
-    }
-    uint16_t* -
-    int16_t* {
-      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + [expr {$fieldLgth * 2}]}]
-      dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + [expr {$fieldLgth * 2}]}]
-      dict set fieldInfo fieldLgth $fieldLgth
-    }
-    uint32_t* -
-    int32_t* {
-      dict set myDict hdr totalLgth [expr {[dict get $myDict hdr totalLgth] + [expr {$fieldLgth * 4}]}]
-      dict set myDict msg cmdLgth [expr {[dict get $myDict msg cmdLgth] + [expr {$fieldLgth * 4}]}]
-      dict set fieldInfo fieldLgth $fieldLgth
-    }
-  } 
-  lappend fieldInfos $fieldInfo
-  dict set myDict msg fieldInfos $fieldInfos
-  dict set myDict msg numFieldInfos [expr {[dict get $myDict msg numFieldInfos] + 1}]
+  }
   set ::structmsg($handle) $myDict
-  setHandleField $handle totalLgth [dict get $myDict hdr totalLgth]
-  setHandleField $handle cmdLgth [dict get $myDict msg cmdLgth]
-  fillHdrInfo $handle
+  return $result
 }
 
 # ===================== structmsg_set_fillerAndCrc =============================
@@ -721,14 +799,149 @@ proc structmsg_set_fillerAndCrc {handle} {
     error "no such structmsg: $handle"
   }
   set myDict $::structmsg($handle)
+  set hdrDict [dict get $myDict hdr]
+  set msgDict [dict get $myDict msg]
+  # for the internal numEntries field
+  dict set msgDict cmdLgth [expr {[dict get $msgDict cmdLgth] + 1}]
+  dict set hdrDict hdrInfo hdrKeys totalLgth [expr {[dict get $hdrDict hdrInfo hdrKeys totalLgth] + 1}]
+  # end for the internal numEntries field
   set fillerLgth 0
-  set myLgth [expr {[dict get $myDict msg cmdLgth] + 2}]
+  set myLgth [expr {[dict get $msgDict cmdLgth] + 2}]
   while {[expr {$myLgth % 16}] != 0} {
     incr myLgth
     incr fillerLgth
   }
+  dict set myDict msg $msgDict
+  dict set myDict hdr $hdrDict
+  set ::structmsg($handle) $myDict
+puts stderr "fillerLgth: $fillerLgth!"
   ::structmsg_add_field $handle "@filler" uint8_t* $fillerLgth
   ::structmsg_add_field $handle "@crc" uint16_t 1
+}
+
+# ===================== setFieldValue =============================
+
+proc setFieldValue {fieldInfoVar fieldName value} {
+  upvar $fieldInfoVar fieldInfo
+  set fieldType [dict get $fieldInfo fieldType]
+  switch $fieldType {
+    int8_t {
+      if {[string is integer $value]} {
+        if {($value > -128) && ($value < 128)} {
+          dict set fieldInfo value $value
+        } else {
+          error "value ($value)too small/big for type: $fieldType"
+        }
+      } else {
+        error "need integer for type: $fieldType"
+      }
+    }
+    uint8_t {
+      if {[string is integer $value]} {
+        if {($value >= 0) && ($value < 255)} {
+          dict set fieldInfo value $value
+        } else {
+          error "value ($value)too small/big for type: $fieldType"
+        }
+      } else {
+        error "need integer for type: $fieldType"
+      }
+    }
+    int16_t {
+      if {[string is integer $value]} {
+        if {($value > -32767) && ($value < 32767)} {
+          dict set fieldInfo value $value
+        } else {
+          error "value ($value)too small/big for type: $fieldType"
+        }
+      } else {
+        error "need integer for type: $fieldType"
+      }
+    }
+    uint16_t {
+      if {[string is integer $value]} {
+        if {($value >= 0) && ($value <= 65535)} {
+          dict set fieldInfo value $value
+        } else {
+          error "value ($value)too small/big for type: $fieldType"
+        }
+      } else {
+        error "need integer for type: $fieldType"
+      }
+    }
+    int32_t {
+      if {[string is integer $value]} {
+        if {($value > -0x7FFFFFFFFF) && ($value < 0x7FFFFFFF)} {
+          dict set fieldInfo value $value
+        } else {
+          error "value ($value)too small/big for type: $fieldType"
+        }
+      } else {
+        error "need integer for type: $fieldType"
+      }
+    }
+    uint32_t {
+      if {![string is integer $value]} {
+        binary scan $value I val
+        set value $val
+      }
+      if {[string is integer $value]} {
+        if {($value >= 0) && ($value <= 0xFFFFFFFF)} {
+          dict set fieldInfo value $value
+        } else {
+          error "value ($value)too small/big for type: $fieldType"
+        }
+      } else {
+        error "need integer for type: $fieldType"
+      }
+    }
+    int8_t* {
+      if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 2}]} {
+        dict set fieldInfo value $value
+      } else {
+        error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
+      }
+    }
+    uint8_t* {
+      if {([string length $value] == [dict get $fieldInfo fieldLgth]) || ($fieldName eq "@filler")} {
+        dict set fieldInfo value $value
+      } else {
+        error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
+      }
+    }
+    int16_t* {
+      if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 2}]} {
+        dict set fieldInfo value $value
+      } else {
+        error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
+      }
+    }
+    uint16_t* {
+      if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 2}]} {
+        dict set fieldInfo value $value
+      } else {
+        error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
+      }
+    }
+    int32_t* {
+      if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 4}]} {
+        dict set fieldInfo value $value
+      } else {
+        error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
+      }
+    }
+    uint32_t* {
+      if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 4}]} {
+        dict set fieldInfo value $value
+      } else {
+        error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
+      }
+    }
+  }
+  if {[lsearch [dict get $fieldInfo flags] FIELD_IS_SET] < 0} {
+    dict lappend fieldInfo flags FIELD_IS_SET
+  }
+  return $::STRUCT_MSG_ERR_OK
 }
 
 # ===================== structmsg_set_fieldValue =============================
@@ -766,129 +979,44 @@ proc structmsg_set_fieldValue {handle fieldName value} {
   set fieldInfos [dict get $myDict msg fieldInfos]
   while {$idx < $numEntries} {
     set fieldInfo [lindex $fieldInfos $idx]
-    if {$fieldName eq [dict get $fieldInfo fieldStr]} {
-      set fieldType [dict get $fieldInfo fieldType]
-      switch $fieldType {
-        int8_t {
-          if {[string is integer $value]} {
-            if {($value > -128) && ($value < 128)} {
-              dict set fieldInfo value $value
-            } else {
-              error "value ($value)too small/big for type: $fieldType"
-            }
-          } else {
-            error "need integer for type: $fieldType"
-          }
-        }
-        uint8_t {
-          if {[string is integer $value]} {
-            if {($value >= 0) && ($value < 255)} {
-              dict set fieldInfo value $value
-            } else {
-              error "value ($value)too small/big for type: $fieldType"
-            }
-          } else {
-            error "need integer for type: $fieldType"
-          }
-        }
-        int16_t {
-          if {[string is integer $value]} {
-            if {($value > -32767) && ($value < 32767)} {
-              dict set fieldInfo value $value
-            } else {
-              error "value ($value)too small/big for type: $fieldType"
-            }
-          } else {
-            error "need integer for type: $fieldType"
-          }
-        }
-        uint16_t {
-          if {[string is integer $value]} {
-            if {($value >= 0) && ($value <= 65535)} {
-              dict set fieldInfo value $value
-            } else {
-              error "value ($value)too small/big for type: $fieldType"
-            }
-          } else {
-            error "need integer for type: $fieldType"
-          }
-        }
-        int32_t {
-          if {[string is integer $value]} {
-            if {($value > -0x7FFFFFFFFF) && ($value < 0x7FFFFFFF)} {
-              dict set fieldInfo value $value
-            } else {
-              error "value ($value)too small/big for type: $fieldType"
-            }
-          } else {
-            error "need integer for type: $fieldType"
-          }
-        }
-        uint32_t {
-          if {[string is integer $value]} {
-            if {($value >= 0) && ($value <= 0xFFFFFFFF)} {
-              dict set fieldInfo value $value
-            } else {
-              error "value ($value)too small/big for type: $fieldType"
-            }
-          } else {
-            error "need integer for type: $fieldType"
-          }
-        }
-        int8_t* {
-          if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 2}]} {
-            dict set fieldInfo value $value
-          } else {
-            error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
-          }
-        }
-        uint8_t* {
-          if {[string length $value] == [dict get $fieldInfo fieldLgth]} {
-            dict set fieldInfo value $value
-          } else {
-            error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
-          }
-        }
-        int16_t* {
-          if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 2}]} {
-            dict set fieldInfo value $value
-          } else {
-            error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
-          }
-        }
-        uint16_t* {
-          if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 2}]} {
-            dict set fieldInfo value $value
-          } else {
-            error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
-          }
-        }
-        int32_t* {
-          if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 4}]} {
-            dict set fieldInfo value $value
-          } else {
-            error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
-          }
-        }
-        uint32_t* {
-          if {[string length $value] == [expr {[dict get $fieldInfo fieldLgth] * 4}]} {
-            dict set fieldInfo value $value
-          } else {
-            error "field is too short/long: $fieldName: $fieldType [string length $value] should be [dict get $fieldInfo fieldLgth]!"
-          }
-        }
-      }
-      if {[lsearch [dict get $fieldInfo flags] FIELD_IS_SET] < 0} {
-        dict lappend fieldInfo flags FIELD_IS_SET
-      }
+    if {$fieldName eq [dict get $fieldInfo fieldName]} {
+      set result [setFieldValue fieldInfo $fieldName $value]
       set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
       dict set myDict msg fieldInfos $fieldInfos
       set ::structmsg($handle) $myDict
-      return
+      return $result
     }
     incr idx
   }
   error "field $fieldName not found"
+}
+
+# ============================= structmsg_set_tableFieldValue ========================
+
+proc structmsg_set_tableFieldValue {handle fieldName row value} {
+  if {![info exists ::structmsg($handle)]} {
+    error "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  if {$row >= [dict get $myDict msg numTableRows]} {
+    return $::STRUCT_MSG_ERR_BAD_TABLE_ROW
+  }
+  set idx 0
+  set cell [expr {0 + $row * [dict get $myDict msg numTableRowFields]}]
+  set tableFieldInfos [dict get $myDict msg tableFieldInfos]
+  while {$idx < [dict get $myDict msg numRowFields]} {
+    set fieldInfo [lindex $tableFieldInfos $cell]
+    if {$fieldName eq [dict get $fieldInfo fieldName]} {
+      set result [setFieldValue fieldInfo $fieldName $value]
+      set tableFieldInfos [lreplace $tableFieldInfos $cell $cell $fieldInfo]
+      dict set myDict msg tableFieldInfos $tableFieldInfos
+      set ::structmsg($handle) $myDict
+      return $result
+    }
+    incr idx
+    incr cell
+  }
+  return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
 }
 
 # ===================== structmsg_get_fieldValue =============================
@@ -927,7 +1055,7 @@ proc structmsg_get_fieldValue {handle fieldName val} {
   set fieldInfos [dict get $myDict msg fieldInfos]
   while {$idx < $numEntries} {
     set fieldInfo [lindex $fieldInfos $idx]
-    if {$fieldName eq [dict get $fieldInfo fieldStr]} {
+    if {$fieldName eq [dict get $fieldInfo fieldName]} {
       if {[lsearch [dict get $fieldInfo flags] FIELD_IS_SET] < 0} {
         error "field: $fieldName is not set!"
       }
@@ -937,6 +1065,33 @@ proc structmsg_get_fieldValue {handle fieldName val} {
     incr idx
   }
   error "field $fieldName not found"
+}
+
+# ============================= structmsg_get_tableFieldValue ========================
+
+proc structmsg_get_tableFieldValue {handle fieldName row valueVar} {
+  upvar $valueVar value
+
+  if {![info exists ::structmsg($handle)]} {
+    error "no such structmsg: $handle"
+  }
+  set myDict $::structmsg($handle)
+  if {$row >= [dict get $myDict msg numTableRows]} {
+    return $::STRUCT_MSG_ERR_BAD_TABLE_ROW
+  }
+  set idx 0
+  set cell = [expr {0 + $row * [dict get $myDict msg numRowFields]}]
+  set tableFieldInfos [dict get $myDict msg tableFieldInfos]
+  while {$idx < [dict get $myDict msg numRowFields]} {
+    set fieldInfo [lindex $tableFieldInfos cell]
+    if {$fieldName eq [dict get $fieldInfo fieldName]} {
+      set value [dict get $fieldInfo value]
+      return $::STRUCT_MSG_ERR_OK
+    }
+    incr idx
+    incr cell
+  }
+  return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
 }
 
 # ===================== structmsg_set_crypted =============================

@@ -108,11 +108,19 @@ set STRUCT_MSG_ERR_TOO_MANY_FIELDS       234
 set STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY 233
 set STRUCT_MSG_ERR_NO_SLOT_FOUND         232
 
+set STRUCT_MSG_FIELD_SRC                 1
+set STRUCT_MSG_FIELD_DST                 2
+set STRUCT_MSG_FIELD_TOTAL_LGTH          3
+set STRUCT_MSG_FIELD_CMD_KEY             4
+set STRUCT_MSG_FIELD_CMD_LGTH            5
+
 # header length: uint16_t src + uint16_t dst + uint16_t totalLgth
 set STRUCT_MSG_HEADER_LENGTH [expr {[sizeof uint16_t] * 3}]
 # cmd header length uint16_t cmdKey + unit16_t cmdLgth
 set STRUCT_MSG_CMD_HEADER_LENGTH [expr {[sizeof uint16_t] * 2}]
 set STRUCT_MSG_TOTAL_HEADER_LENGTH [expr {$::STRUCT_MSG_HEADER_LENGTH + $::STRUCT_MSG_CMD_HEADER_LENGTH}]
+set STRUCT_MSG_NUM_HEADER_FIELDS 3
+set STRUCT_MSG_NUM_CMD_HEADER_FIELDS 2
 set STRUCT_MSG_DEFINITION_CMD_KEY 0xFFFF
 set STRUCT_MSG_FREE_FIELD_ID 0xFF
 
@@ -311,11 +319,19 @@ proc uint16Decode {data offset val} {
   upvar $val value
 
   set value 0
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
+  set ch [string range $data $offset $offset]
+  set pch $ch
+  if {![string is integer $ch]} {
+    binary scan $ch c pch
+  }
+  set value [expr {$value + ([expr {$pch & 0xFF}] << 8)}]
   incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
+  set ch [string range $data $offset $offset]
+  set pch $ch
+  if {![string is integer $ch]} {
+    binary scan $ch c pch
+  }
+  set value [expr {$value + ([expr {$pch & 0xFF}] << 0)}]
   incr offset
   return $offset
 }
@@ -341,17 +357,33 @@ proc uint32Decode {data offset val} {
   upvar $val value
 
   set value 0
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 24)}]
+  set ch [string range $data $offset $offset]
+  set pch $ch
+  if {![string is integer $ch]} {
+    binary scan $ch c pch
+  }
+  set value [expr {$value + ([expr {$pch & 0xFF}] << 24)}]
   incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 16)}]
+  set ch [string range $data $offset $offset]
+  set pch $ch
+  if {![string is integer $ch]} {
+    binary scan $ch c pch
+  }
+  set value [expr {$value + ([expr {$pch & 0xFF}] << 16)}]
   incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
+  set ch [string range $data $offset $offset]
+  set pch $ch
+  if {![string is integer $ch]} {
+    binary scan $ch c pch
+  }
+  set value [expr {$value + ([expr {$pch & 0xFF}] << 8)}]
   incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
+  set ch [string range $data $offset $offset]
+  set pch $ch
+  if {![string is integer $ch]} {
+    binary scan $ch c pch
+  }
+  set value [expr {$value + ([expr {$pch & 0xFF}] << 0)}]
   incr offset
   return $offset
 }
@@ -783,157 +815,156 @@ puts stderr "DEF NAME: $name!"
 
 # ============================= structmsg_fillHdrInfo ========================
 
-proc structmsg_fillHdrInfo {handle structmsg} {
+proc structmsg_fillHdrInfo {handle} {
   # fill the hdrInfo
-  set structmsg [structmsg_get_structmsg_ptr $handle]
-  hdrInfoPtr [dict get $structmsg handleHdrInfoPtr]
-  set hdrInfoPtr [dict get structmsg hdr hdrInfo]
+  set hdrInfo [dict get $::structmsg($handle) hdr hdrInfo]
+  set hdrKeys [dict get $hdrInfo hdrKeys]
+  set hdrId ""
   set offset 0
-  set offset [uint16Encode hdrInfoPtr->hdrId $offset [dict get $structmsg hdr hdrInfo hdrKeys src]]
+  set offset [uint16Encode hdrId $offset [dict get $hdrKeys src]]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode hdrInfoPtr->hdrId $offset [dict get $structmsg hdr hdrInfo hdrKeys dst]]
+  set offset [uint16Encode hdrId $offset [dict get $hdrKeys dst]]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode hdrInfoPtr->hdrId $offset [dict get $structmsg hdr hdrInfo hdrKeys totalLgth]]
+  set offset [uint16Encode hdrId $offset [dict get $hdrKeys totalLgth]]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode hdrInfoPtr->hdrId $offset [dict get $structmsg hdr hdrInfo hdrKeys cmdKey]]
+  set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdKey]]
 #  checkEncodeOffset(offset)
-  set offset [uint16Encode hdrInfoPtr->hdrId $offset [dict get $structmsg hdr hdrInfo hdrKeys cmdLgth]]
+  set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdLgth]]
 #  checkEncodeOffset(offset)
+  dict set ::::structmsg($handle) hdr hdrInfo hdrId $hdrId
   return $::STRUCT_MSG_ERR_OK
 }
 
 # ============================= encodeField ========================
 
-proc encodeField {msgPtr fieldInf offset} {
-  set cmd "
+proc encodeField {encodedVar fieldInfo offset} {
+  upvar $encodedVar encoded
+
   switch [dict get $fieldInfo fieldType] {
-    $::STRUCT_MSG_FIELD_INT8_T {
-      set offset [int8Encode msgPtr $offset [dict get $fieldInfo value byteVal]]
+    int8_t {
+      set offset [int8Encode encoded $offset [dict get $fieldInfo value]]
     }
-    $::STRUCT_MSG_FIELD_UINT8_T {
-      set offset [uint8Encode msgPtr $offset [dict get $fieldInfo value ubyteVal]]
+    uint8_t {
+      set offset [uint8Encode encoded $offset [dict get $fieldInfo value]]
     }
-    $::STRUCT_MSG_FIELD_INT16_T {
-      set offset [int16Encode msgPtr $offset [dict get $fieldInfo value shortVal]]
+    int16_t {
+      set offset [int16Encode encoded $offset [dict get $fieldInfo value]]
     }
-    $::STRUCT_MSG_FIELD_UINT16_T {
-      set offset [uint16Encode msgPtr $offset [dict get $fieldInfo value ushortVal]]
+    uint16_t {
+      set offset [uint16Encode encoded $offset [dict get $fieldInfo value]]
     }
-    $::STRUCT_MSG_FIELD_INT32_T {
-      set offset [int32Encode msgPtr $offset [dict get $fieldInfo value val]]
+    int32_t {
+      set offset [int32Encode encoded $$offset [dict get $fieldInfo value]]
     }
-    $::STRUCT_MSG_FIELD_UINT32_T {
-      set offset [uint32Encode msgPtr $offset [dict get $fieldInfo value uval]]
+    uint32_t {
+      set offset [uint32Encode encoded $offset [dict get $fieldInfo value]]
     }
-    $::STRUCT_MSG_FIELD_INT8_VECTOR {
+    int8_t* {
       set fieldIdx 0
       while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [int8Encode msgPtr $offset [string range [dict get $fieldInfo value byteVector] $fieldIdx $fieldIdx]]
+        set offset [int8Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
         incr fieldIdx
       }
     }
-    $::STRUCT_MSG_FIELD_UINT8_VECTOR {
+    uint8_t* {
+      append encoded [dict get $fieldInfo value]
+      set offset [expr {$offset + [dict get $fieldInfo fieldLgth]}]
+    }
+    int16_t* {
       set fieldIdx 0
       while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [uint8Encode msgPtr $offset [string range [dict get $fieldInfo value ubyteVector] $fieldIdx $fieldIdx]]
+        set offset [int16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
         incr fieldIdx
       }
     }
-    $::STRUCT_MSG_FIELD_INT16_VECTOR {
+    uint16_t* {
       set fieldIdx 0
       while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [int16Encode msgPtr $offset [string range [dict get $fieldInfo value shortVector] $fieldIdx $fieldIdx]]
+        set offset [uint16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
         incr fieldIdx
       }
     }
-    $::STRUCT_MSG_FIELD_UINT16_VECTOR {
+    int32_t* {
       set fieldIdx 0
       while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        offset [uint16Encode msgPtr $offset [string range [dict get $fieldInfo value ushortVector] $fieldIdx $fieldIdx]]
+        set offset [int32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
         incr fieldIdx
       }
     }
-    $::STRUCT_MSG_FIELD_INT32_VECTOR {
+    uint32_t* {
       set fieldIdx 0
       while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [int32Encode msgPtr $offset [string range [dict get $fieldInfo value int32Vector] $fieldIdx $fieldIdx]]
+        set offset [uint32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
         incr fieldIdx
       }
     }
-    $::STRUCT_MSG_FIELD_UINT32_VECTOR {
-      set fieldIdx 0
-      while {$fieldIdx < [dict get $fieldInfo->fieldLgth]} {
-        set offset [uint32Encode msgPtr $offset [string range [dict get $fieldInfo value uint32Vector] $fieldIdx $fieldIdx]]
-        incr fieldIdx
-      }
-    }
-  }"
-  uplevel 0 $cmd
-  return $offset
+  }
 }
 
 # ============================= decodeField ========================
 
-proc decodeField {msgPtr fieldInfo offset} {
-  set cmd "
-  switch [dict get $fieldInfo fieldType] {
-    $::STRUCT_MSG_FIELD_INT8_T {
-      set offset [int8Decode $msgPtr $offset fieldInfo->value.byteVal]
+proc decodeField {todecode fieldInfo offset} {
+  upvar $fieldInfoVar fieldInfo
+
+  set fieldTypeName [dict get $::structmsg(fieldTypeIds) [dict get $fieldInfo fieldType]]
+  switch fieldTypeName {
+    int8_t {
+      set offset [int8Decode $todecode $offset value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_UINT8_T {
-      set offset [uint8Decode $msgPtr $offset fieldInfo->value.ubyteVal]
+    unit8_t {
+      set offset [uint8Decode $todecode $offset value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_INT16_T {
-      set offset [int16Decode $msgPtr $offset fieldInfo->value.shortVal]
+    int16_t {
+      set offset [int16Decode $todecode $offset value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_UINT16_T {
-      set offset [uint16Decode $msgPtr $offset fieldInfo->value.ushortVal]
+    unit16_t {
+      set offset [uint16Decode $todecode $offset value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_INT32_T {
-      set offset [int32Decode $msgPtr $offset fieldInfo->value.val]
+    int32_t {
+      set offset [int32Decode $todecode $offset value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_UINT32_T {
-      set offset [uint32Decode $msgPtr $offset fieldInfo->value.uval]
+    uint32_tT {
+      set offset [uint32Decode $todecode $offset value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_INT8_VECTOR {
-      set offset [int8VectorDecode $msgPtr $offset [dict get $fieldInfo->fieldLgth] fieldInfo->value.byteVector]
+    int8_t* {
+      set offset [int8VectorDecode $todecode $offset [dict get $fieldInfo->fieldLgth] value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_UINT8_VECTOR {
-      set offset [uint8VectorDecode $msgPtr $offset [dict get $fieldInfo->fieldLgth] fieldInfo->value.ubyteVector]
+    uint8_t* {
+      set offset [uint8VectorDecode $todecode $offset [dict get $fieldInfo->fieldLgth] value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_INT16_VECTOR {
-      set offset [int16VectorDecode $msgPtr $offset [dict get $fieldInfo->fieldLgth] fieldInfo->value.shortVector]
+    int16_t* {
+      set offset [int16VectorDecode $todecode $offset [dict get $fieldInfo->fieldLgth] value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_UINT16_VECTOR {
-      set offset [uint16VectorDecode $msgPtr $offset [dict get $fieldInfo->fieldLgth] fieldInfo->value.ushortVector]
+    uint16_t* {
+      set offset [uint16VectorDecode $todecode $offset [dict get $fieldInfo->fieldLgth] value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_INT32_VECTOR {
-      set offset [int32VectorDecode $msgPtr $offset [dict get $fieldInfo->fieldLgth] fieldInfo->value.int32Vector]
+    int32_t* {
+      set offset [int32VectorDecode $todecode $offset [dict get $fieldInfo->fieldLgth] value]
 #      checkDecodeOffset(offset)
     }
-    $::STRUCT_MSG_FIELD_UINT32_VECTOR {
-      set offset [uint32VectorDecode $msgPtr $offset [dict get $fieldInfo->fieldLgth] fieldInfo->value.uint32Vector]
+    unit32_t* {
+      set offset [uint32VectorDecode $todecode $offset [dict get $fieldInfo->fieldLgth] value]
 #      checkDecodeOffset(offset)
     }
+    dict set fieldInfo value $value
   }
-  "
-  uplevel 0 $cmd
   return $offset
 }
 
 # ============================= stmsg_encodeMsg ========================
 
 proc stmsg_encodeMsg {handle} {
+puts stderr "stmsg_encodeMsg!"
   set structmsg [structmsg_get_structmsg_ptr $handle]
 #  checkHandleOK(structmsg)
   dict set structmsg encoded [list]
@@ -955,49 +986,52 @@ proc stmsg_encodeMsg {handle} {
   set idx 0
   while {$idx < $numEntries} {
     set fieldInfo [lindex [dict get $structmsg msg fieldInfos] $idx]
-    if {[string range [dict get $fieldInfo fieldStr] 0 0] eq "@"} {
-      set result [structmsg_getFieldNameId [dict get $fieldInfo fieldStr] fieldId $::STRUCT_MSG_NO_INCR]
+    if {[string range [dict get $fieldInfo fieldName] 0 0] eq "@"} {
+      set result [structmsg_getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
 #      checkErrOK(result)
-      set cmd "
-      switch $fieldId {
-      $::STRUCT_MSG_SPEC_FIELD_SRC -
-      $::STRUCT_MSG_SPEC_FIELD_DST -
-      $::STRUCT_MSG_SPEC_FIELD_TARGET_CMD -
-      $::STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH -
-      $::STRUCT_MSG_SPEC_FIELD_CMD_KEY -
-      $::STRUCT_MSG_SPEC_FIELD_CMD_LGTH {
-puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldStr]]
+      set specFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
+      switch $specFieldName { 
+      @src -
+      @dst -
+      @targetCmd -
+      @totalLgth -
+      @cmdKey -
+      @cmdLgth {
+puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldName]]
       }
-      $::STRUCT_MSG_SPEC_FIELD_RANDOM_NUM {
+      @randomNum {
         set offset [randomNumEncode msgPtr $offset randomNum]
 #        checkEncodeOffset(offset)
         set result [stmsg_setFieldValue $handle "@randomNum" $randomNum ""]
 #        checkErrOK(result)
       }
-      $::STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM {
+      @sequenceNum {
         set offset [sequenceNumEncode msgPtr $offset $structmsg $sequenceNum]
 #        checkEncodeOffset(offset)
         set result [stmsg_setFieldValue $handle "@sequenceNum" $sequenceNum ""]
 #        checkErrOK(result)
       }
-      $::STRUCT_MSG_SPEC_FIELD_FILLER {
+      @filler {
         set offset [fillerEncode $msgPtr $offset [dict get $fieldInfo fieldLgth] [dict get $fieldInfo value ubyteVector]]
 #        checkEncodeOffset(offset)
         set result [stmsg_setFieldValue $handle "@filler" 0 [dict get $fieldInfo valuer .ubyteVector]]
 #        checkErrOK(result)
       }
-      $::STRUCT_MSG_SPEC_FIELD_CRC {
+      @crc {
+puts stderr CRC_ENCODE
         set offset [crcEncode structmsg->encoded $offset [dict get $structmsg hdr hdrInfo hdrKeys totalLgth] crc [dict get $structmsg hdr headerLgth]]
 #        checkEncodeOffset(offset)
         set result [stmsg_setFieldValue $handle "@crc" $crc ""]
 #        checkErrOK(result)
+puts stderr CRC_ENCODE_END
       }
-      $::STRUCT_MSG_SPEC_FIELD_ID {
+      @id {
+puts stderr return2
         return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD
       }
-      $::STRUCT_MSG_SPEC_FIELD_TABLE_ROWS {
+      @tablerows {
       }
-      $::STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
+      @tablerowfields {
         if {[dict get $structmsg msg numTableRows] > 0} {
           set row 0
           set col 0
@@ -1016,8 +1050,6 @@ puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldStr]]
         }
       }
       }
-      "
-      uplevel 0 $cmd
     } else {
       set offset [encodeField msgPtr $fieldInfo $offset]
 #      checkEncodeOffset(offset)
@@ -1025,6 +1057,7 @@ puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldStr]]
     incr idx
   }
   dict lappend structmsg flags STRUCT_MSG_ENCODED
+puts stderr "ENCODING DONE offset: $offset!"
   return $::STRUCT_MSG_ERR_OK
 }
 
@@ -1073,43 +1106,43 @@ proc stmsg_decodeMsg {handle data} {
 #  numEntries = structmsg->msg.numFieldInfos
   while {$idx < $numEntries} {
     set fieldInfo [lindex [dict get $structmsg msg fieldInfos] $idx]
-    if {[string range [dict get $fieldInfo fieldStr] 0 0] eq "@"} {
+    if {[string range [dict get $fieldInfo fieldName] 0 0] eq "@"} {
       set result [structmsg_getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
 #      checkErrOK(result)
-      set cmd "
-      switch $fieldId {
-      $::STRUCT_MSG_SPEC_FIELD_SRC -
-      $::STRUCT_MSG_SPEC_FIELD_DST -
-      $::STRUCT_MSG_SPEC_FIELD_TARGET_CMD -
-      $::STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH -
-      $::STRUCT_MSG_SPEC_FIELD_CMD_KEY -
-      $::STRUCT_MSG_SPEC_FIELD_CMD_LGTH {
+      set specFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
+      switch $specFieldName { 
+      @src -
+      @dst -
+      @targetCmd -
+      @totalLgth -
+      @cmdKey -
+      @cmdLgth {
 puts stderr [format "funny should decode: %s" [dict get $fieldInfo fieldName]]
       }
-      $::STRUCT_MSG_SPEC_FIELD_RANDOM_NUM {
+      @randomNum {
         set offset [randomNumDecode $msgPtr $offset fieldInfo->value.uval]
 #        checkDecodeOffset(offset)
       }
-      $::STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM {
+      @sequenceNum {
         set offset [sequenceNumDecode $msgPtr $offset fieldInfo->value.uval]
 #        checkDecodeOffset(offset)
       }
-      $::STRUCT_MSG_SPEC_FIELD_FILLER {
+      @filler {
         set offset [fillerDecode $msgPtr $offset [dict get $fieldInfo fieldLgth] fieldInfo->value.ubyteVector]
 #        checkDecodeOffset(offset)
       }
-      $::STRUCT_MSG_SPEC_FIELD_CRC {
+      @crc {
         set offset [crcDecode $msgPtr $offset [dict get $structmsg hdr hdrInfo hdrKeys cmdLgth] fieldInfo->value.ushortVal [dict get $structmsg hdr headerLgth]]
         if {$offset < 0} {
           return $::STRUCT_MSG_ERR_BAD_CRC_VALUE
         }
       }
-      $::STRUCT_MSG_SPEC_FIELD_ID {
+      @id {
         return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD
       }
-      $::STRUCT_MSG_SPEC_FIELD_TABLE_ROWS {
+      @tablerows {
       }
-      $::STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
+      @tablerowfields {
         if {[dict get $structmsg msg numTableRows] > 0} {
           set row 0
           set col 0
@@ -1128,8 +1161,6 @@ puts stderr [format "funny should decode: %s" [dict get $fieldInfo fieldName]]
         }
       }
       }
-      "
-      uplevel 0 $cmd
       dict lappend fieldInfo flags STRUCT_MSG_FIELD_IS_SET
     } else {
       set offset [decodeField $msgPtr $fieldInfo $offset]
@@ -1142,6 +1173,21 @@ puts stderr [format "funny should decode: %s" [dict get $fieldInfo fieldName]]
   return $::STRUCT_MSG_ERR_OK
 }
 
+
+# ============================= structmsg_getDefinitionDict ========================
+
+proc structmsg_getDefinitionDict {name stmsgDefinitionVar} {
+  upvar $stmsgDefinitionVar stmsgDefinition
+
+  set idx 0
+  foreach definition [dict get $::structmsg(structmsgDefinitions) definitions] {
+    if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
+      set stmsgDefinition $definition
+      return $::STRUCT_MSG_ERR_OK
+    }
+  }
+  return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
+}
 # ============================= getSpecFieldSizes ========================
 
 proc getSpecFieldSizes {numFieldsVar namesSizeVar} {

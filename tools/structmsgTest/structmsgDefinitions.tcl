@@ -58,6 +58,20 @@ proc structmsg_initFieldTypeDefines {} {
   dict set fieldTypeDefinesDict "uint32_t*"  11
   dict set fieldTypeDefinesDict "int32_t*"   12
   set ::structmsg(fieldTypeDefines) $fieldTypeDefinesDict
+  set fieldTypeIdsDict [dict create]
+  dict set fieldTypeIdsDict 1  "uint8_t"
+  dict set fieldTypeIdsDict 2  "int8_t"
+  dict set fieldTypeIdsDict 3  "uint16_t"
+  dict set fieldTypeIdsDict 4  "int16_t"
+  dict set fieldTypeIdsDict 5  "uint32_t"
+  dict set fieldTypeIdsDict 6  "int32_t"
+  dict set fieldTypeIdsDict 7  "uint8_t*"
+  dict set fieldTypeIdsDict 8  "int8_t*"
+  dict set fieldTypeIdsDict 9  "uint16_t*"
+  dict set fieldTypeIdsDict 10 "int16_t*"
+  dict set fieldTypeIdsDict 11 "uint32_t*"
+  dict set fieldTypeIdsDict 12 "int32_t*"
+  set ::structmsg(fieldTypeIds) $fieldTypeIdsDict
 }
 
 # ============================= structmsg_initFieldNameDefines ========================
@@ -79,6 +93,22 @@ proc structmsg_initSpecialFieldNames {} {
   dict set specialFieldNamesDict "@tablerowfields" 243
   dict set specialFieldNamesDict "@low"            242
   set ::structmsg(specialFieldNames) $specialFieldNamesDict
+  set specialFieldIdsDict [dict create]
+  dict set specialFieldIdsDict 255 "@src"
+  dict set specialFieldIdsDict 254 "@dst"
+  dict set specialFieldIdsDict 253 "@targetCmd"
+  dict set specialFieldIdsDict 252 "@totalLgth"
+  dict set specialFieldIdsDict 251 "@cmdKey"
+  dict set specialFieldIdsDict 250 "@cmdLgth"
+  dict set specialFieldIdsDict 249 "@randomNum"
+  dict set specialFieldIdsDict 248 "@sequenceNum"
+  dict set specialFieldIdsDict 247 "@filler"
+  dict set specialFieldIdsDict 246 "@crc"
+  dict set specialFieldIdsDict 245 "@id"
+  dict set specialFieldIdsDict 244 "@tablerows"
+  dict set specialFieldIdsDict 243 "@tablerowfields"
+  dict set specialFieldIdsDict 242 "@low"
+  set ::structmsg(specialFieldIds) $specialFieldIdsDict
 }
 
 # ============================= structmsg_getFieldTypeStr ========================
@@ -362,3 +392,45 @@ proc structmsg_deleteStructmsgDefinitions {} {
   return [structmsg_deleteDefinitions
 }
 
+# ============================= structmsg_createMsgFromDefinition ========================
+
+proc structmsg_createMsgFromDefinition {name} {
+  set result [structmsg_getDefinitionDict $name definition]
+#  checkErrOK(result);
+puts stderr "DEF2: $definition!"
+  set result [structmsg_create [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}] handle]
+puts stderr [format "create: handle: %s numFields: %d" $handle [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}]]
+#  checkErrOK(result);
+  set fieldIdx 0
+  while {$fieldIdx < [dict get $definition numFields]} {
+    set fieldInfos [dict get $definition fieldInfos]
+    set fieldInfo [lindex $fieldInfos $fieldIdx]
+puts stderr "fieldInfo: $fieldInfo!$fieldIdx!"
+    set fieldId [dict get $fieldInfo fieldId]
+    set fieldName "??"
+    if {[dict exists $::structmsg(specialFieldIds) $fieldId]} {
+      set fieldName [dict get $::structmsg(specialFieldIds) $fieldId]
+puts stderr "fieldName: $fieldName!"
+    }
+    switch $fieldName { 
+      @src -
+      @dst -
+      @targetCmd -
+      @totalLgth -
+      @cmdKey -
+      @cmdLgth {
+        # nothing to do!
+      }
+      default {
+        set result [structmsg_getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
+#      checkErrOK(result);
+        set result [structmsg_getFieldTypeStr [dict get $fieldInfo fieldType] fieldType]
+#      checkErrOK(result);
+#puts stderr [format {addfield: %s %s %d} $fieldName $fieldType [dict get $fieldInfo fieldLgth]]
+        set result [structmsg_add_field $handle $fieldName [dict get $fieldInfo fieldType] [dict get $fieldInfo fieldLgth]]
+      }
+    } 
+    incr fieldIdx
+  }
+  return $::STRUCT_MSG_ERR_OK
+}

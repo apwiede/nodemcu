@@ -33,20 +33,31 @@
 # *
 # ==========================================================================
 
-source structmsgCmd.tcl
-
-set offset 0
-structmsg_create 5 handle
-structmsg_set_fieldValue $handle "@src" "234"
-structmsg_set_fieldValue $handle "@dst" "567"
-structmsg_set_fieldValue $handle "@cmdKey" "890"
+structmsg_create 10 handle
 structmsg_add_field $handle "@randomNum" uint32_t 4
 structmsg_add_field $handle "@sequenceNum" uint32_t 4
-structmsg_add_field $handle "pwd" uint8_t* 16
-structmsg_set_fieldValue $handle "pwd" "/dir1/dir2/dir34"
+structmsg_add_field $handle "pwd1" uint8_t* 16
+structmsg_add_field $handle "@tablerows" uint8_t 2
+structmsg_add_field $handle "@tablerowfields" uint8_t 3
+structmsg_add_field $handle "ssid1" "uint8_t*" 16
+structmsg_add_field $handle "rssid1" "uint8_t*" 6
+structmsg_add_field $handle "channel1" "uint8_t*" 6
 structmsg_set_fillerAndCrc $handle
+structmsg_set_fieldValue $handle "@src" 123
+structmsg_set_fieldValue $handle "@dst" 456
+structmsg_set_fieldValue $handle "@cmdKey" 789
+structmsg_set_fieldValue $handle "pwd1" "/dir1/dir2/dir34"
+structmsg_set_tableFieldValue $handle "ssid1" 0 "xx1234567890abcd"
+structmsg_set_tableFieldValue $handle "rssid1" 0 "yy1234"
+structmsg_set_tableFieldValue $handle "channel1" 0 "z1234w"
+structmsg_set_tableFieldValue $handle "ssid1" 1 "aa1234567890abcd"
+structmsg_set_tableFieldValue $handle "rssid1" 1 "bb1234"
+structmsg_set_tableFieldValue $handle "channel1" 1 "q1234r"
 structmsg_encode $handle
 set encoded [structmsg_get_encoded $handle]
+
+if {0} {
+structmsg_encode $handle
 structmsg_decode $handle $encoded
 set encryptedMsg [structmsg_encrypt $handle "a1b2c3d4e5f6g7h8"]
 structmsg_decrypt_getHandle $encryptedMsg "a1b2c3d4e5f6g7h8" handle1
@@ -63,3 +74,4 @@ structmsg_dump $handle
 
 #puts stderr "DICT:"
 #pdict [set ::structmsg($handle)]
+}

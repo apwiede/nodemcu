@@ -51,7 +51,7 @@ set srvSock [socket -server handleConnect $PORT]
 
 proc decryptMsg {payload} {
   set offset 0
-  set handle [structmsg_create 5]
+  structmsg_create 5 handle
   structmsg_set_fieldValue $handle "@src" 123
   structmsg_set_fieldValue $handle "@dst" 456
   structmsg_set_fieldValue $handle "@cmdKey" 789

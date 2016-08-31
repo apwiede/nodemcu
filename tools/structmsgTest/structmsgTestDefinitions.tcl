@@ -40,6 +40,10 @@ source structmsgDefinitions.tcl
 
 structmsg_initFieldTypeDefines
 structmsg_initSpecialFieldNames
+
+source structmsgTest2.tcl
+
+if {0} {
 set def "pwd1"
 structmsg_createStructmsgDefinition $def 15
 structmsg_addFieldDefinition $def "@src" "uint16_t" 2
@@ -57,6 +61,8 @@ structmsg_addFieldDefinition $def "rssid1" "uint8_t*" 6
 structmsg_addFieldDefinition $def "channel1" "uint8_t*" 6
 structmsg_addFieldDefinition $def "@filler" "uint8_t*" 1
 structmsg_addFieldDefinition $def "@crc" "uint16_t" 2
+}
+if {1} {
 set def "pwd2"
 structmsg_createStructmsgDefinition "pwd2" 15
 structmsg_addFieldDefinition $def "@src" "uint16_t" 2
@@ -82,3 +88,8 @@ set def pwd2
 structmsg_deleteDefinition $def
 structmsg_decodeFieldDefinitionMessage $data
 structmsg_dumpFieldDefinition $def
+}
+
+structmsg_createMsgFromDefinition $def
+puts stderr "msgfromdef done"
+structmsg_decode $handle $encoded
