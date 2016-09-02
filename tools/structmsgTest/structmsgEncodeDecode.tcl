@@ -46,7 +46,7 @@ namespace eval structmsg {
     namespace export uint32Decode int32Decode uint8VectorDecode int8VectorDecode
     namespace export uint16VectorDecode int16VectorDecode uint32VectorDecode int32VectorDecode
     namespace export randomNumEncode randomNumDecode sequenceNumEncode sequenceNumDecode
-    namespace export fillerEncode fillerDecode crcEncode crcDecode fillHdrInfo
+    namespace export fillerEncode fillerDecode crcEncode crcDecode fillHdrId
     namespace export encodeField decodeField getFieldIdName normalFieldNamesEncode
     namespace export definitionEncode definitionDecode
 
@@ -418,6 +418,7 @@ namespace eval structmsg {
       upvar $val value
     
       set myVal [getRandom]
+puts stderr "randomnumEncode: myVal: [format 0x%08x $myVal]!"
       set value $myVal
       return [uint32Encode data $offset $myVal]
     }
@@ -506,18 +507,22 @@ namespace eval structmsg {
       set crc  0
       set idx $headerOffset
       set str [string range $data $idx [expr {$idx + $lgth - 1}]]
-    set cnt 0
+set cnt 0
       foreach ch [split $str ""] {
         binary scan $ch c pch
         set pch [expr {$pch & 0xFF}]
-    puts stderr "encode crc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
+if {$::crcDebug} {
+puts stderr "encode crc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
+}
         set crc [expr {$crc + [format "%d" $pch]}]
-    incr cnt
+incr cnt
       }
-    puts stderr "crc1: $crc![format 0x%04x $crc]!"
+if {$::crcDebug} {
+puts stderr "crc1: $crc![format 0x%04x $crc]!"
+}
       set crc [expr {~$crc & 0xFFFF}]
-    puts stderr "crc: $crc![format 0x%04x $crc]!"
       set offset [uint16Encode data $offset $crc]
+puts stderr "crc: $crc![format 0x%04x $crc]!offset: $offset!"
       set value $crc
       return $offset
     }
@@ -532,19 +537,23 @@ namespace eval structmsg {
       set crcVal 0
       set idx $headerOffset
       set str [string range $data $idx [expr {$idx + $lgth - 1}]]
-    set cnt 0
+set cnt 0
       foreach ch [split $str ""] {
         binary scan $ch c pch
         set pch [expr {$pch & 0xFF}]
-    puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
+if {$::crcDebug} {
+puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
+}
         set crcVal [expr {$crcVal + [format "%d" $pch]}]
-    incr cnt
+incr cnt
         incr idx
       }
-    puts stderr "crcVal end: $crcVal!"
+if {$::crcDebug} {
+puts stderr "crcVal end: $crcVal!"
+}
       set crcVal [expr {~$crcVal & 0xFFFF}]
       set offset [uint16Decode $data $offset crc]
-    puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
+puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
       if {$crcVal != $crc} {
         return -1
       }
@@ -727,9 +736,39 @@ namespace eval structmsg {
       return $offset
     }
     
-    # ============================= fillHdrInfo ========================
+    # ===================== fillHdrId =============================
     
-    proc fillHdrInfo {handle} {
+    proc fillHdrId {handle} {
+      if {![info exists ::structmsg($handle)]} {
+        error "no such structmsg: $handle"
+      }
+      set idx 0
+      set myDict $::structmsg($handle)
+      set myHandles $::structmsg(hdrId2Handles)
+      foreach hdrId2Handle $myHandles {
+        if {[dict get $hdrId2Handle handle] eq $handle} {
+          set hdrKeys [dict get $myDict hdr hdrInfo hdrKeys]
+          set hdrId ""
+          set offset 0
+          set offset [uint16Encode hdrId $offset [dict get $hdrKeys src]]
+          set offset [uint16Encode hdrId $offset [dict get $hdrKeys dst]]
+          set offset [uint16Encode hdrId $offset [dict get $hdrKeys totalLgth]]
+          set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdKey]]
+          set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdLgth]]
+          dict set hdrId2Handle hdrId $hdrId
+          set myHandles [lreplace $myHandles $idx $idx $hdrId2Handle]
+          set ::structmsg(hdrId2Handles) $myHandles
+          break
+        }
+        incr idx
+      }
+      return $::STRUCT_MSG_ERR_OK
+    }
+    
+    
+    # ============================= fillHdrInfoXX ========================
+    
+    proc fillHdrInfoXX {handle} {
       # fill the hdrInfo
       set hdrInfo [dict get $::structmsg($handle) hdr hdrInfo]
       set hdrKeys [dict get $hdrInfo hdrKeys]

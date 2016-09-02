@@ -85,12 +85,19 @@ set result [structmsg set_tableFieldValue $handle "rssid1" 1 "bb1234"]
 checkErrOK $result
 set result [structmsg set_tableFieldValue $handle "channel1" 1 "q1234r"]
 puts stderr "SET VALUES END"
+puts stderr "++ ENCODE1 $handle!"
+structmsg dump $handle
 set result [structmsg encode $handle]
 checkErrOK $result
+puts stderr "++ ENCODE1 $handle DONE!"
+structmsg dump $handle
 set encoded [structmsg get_encoded $handle]
 
 if {1} {
-structmsg encode $handle
+puts stderr "++ ENCODE2 $handle!"
+set result [structmsg encode $handle]
+checkErrOK $result
+puts stderr "++ ENCODE2 $handle DONE!"
 set encryptedMsg [structmsg encrypt $handle "a1b2c3d4e5f6g7h8"]
 set result [structmsg decrypt_getHandle $encryptedMsg "a1b2c3d4e5f6g7h8" "" handle1]
 checkErrOK $result
@@ -99,14 +106,16 @@ puts stderr "found handle: $handle1!"
 }
 set decryptedMsg [structmsg decrypt $handle "a1b2c3d4e5f6g7h8" "" $encryptedMsg]
 structmsg dump $handle
-structmsg decode $handle $encoded
+puts stderr "after Dump 2"
+set result [structmsg decode $handle $encoded]
+checkErrOK $result
 
 structmsg encode $handle
 set encoded [structmsg get_encoded $handle]
-structmsg_decode $handle $encoded
+structmsg decode $handle $encoded
 set encryptedMsg [structmsg encrypt $handle "a1b2c3d4e5f6g7h8" ""]
 set decryptedMsg [structmsg decrypt $handle "a1b2c3d4e5f6g7h8" "" $encryptedMsg]
-structmsg_dump $handle
+structmsg dump $handle
 
 #puts stderr "DICT:"
 #pdict [set ::structmsg($handle)]

@@ -43,15 +43,17 @@ structmsg def initFieldTypeDefines
 structmsg def initSpecialFieldNames
 
 proc checkErrOK {result} {
-  puts stderr "result: $result!"
+  if {$result ne "OK"} {
+    puts stderr "result: $result!"
+  }
 }
 
 source structmsgTest2.tcl
 
-if {0} {
+if {1} {
 set def "pwd1"
 set result [structmsg create_definition $def 15]
-set result [structmsg add_fieldDefinition $def "@src" "uint16_t" 2
+set result [structmsg add_fieldDefinition $def "@src" "uint16_t" 2]
 checkErrOK $result
 set result [structmsg add_fieldDefinition $def "@dst" "uint16_t" 2]
 checkErrOK $result
@@ -84,6 +86,7 @@ checkErrOK $result
 }
 if {1} {
 set def "pwd2"
+puts stderr "++ $def START"
 set result [structmsg create_definition "pwd2" 15]
 set result [structmsg add_fieldDefinition $def "@src" "uint16_t" 2]
 checkErrOK $result
@@ -118,6 +121,7 @@ checkErrOK $result
 set result [structmsg dump_fieldDefinition $def]
 checkErrOK $result
 set encoded [structmsg encode_fieldDefinition $def]
+puts stderr "++ $def ENCODED"
 set def pwd1
 set result [structmsg delete_fieldDefinition $def]
 checkErrOK $result
@@ -129,6 +133,7 @@ set result [structmsg dump_fieldDefinition $def]
 checkErrOK $result
 }
 
+puts stderr "==createMsgFromDefinition"
 set result [structmsg create_msgFromDefinition $def]
 checkErrOK $result
 puts stderr "msgfromdef done"

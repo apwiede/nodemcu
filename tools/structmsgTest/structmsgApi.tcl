@@ -35,9 +35,8 @@
 # 
 # ::structmsg(prefix)
 # ::structmsg(numFieldNameIds)
-# ::structmsg(numHandles)
 # ::structmsg(numStructmsgDefinitions)
-# ::structmsg(handles)
+# ::structmsg(numHandles)
 # 
 # ::structmsg(specialFieldIds)
 # ::structmsg(specialFieldNames)
@@ -66,10 +65,6 @@
 #      ]
 #    ]
 # 
-# 
-# 
-# 
-# 
 # ::structmsg(<handle>)
 #  hdr
 #    headerLgth
@@ -96,18 +91,12 @@
 #  encoded
 #  todecode
 #  encrypted
+#  hasBeenEncoded
 # 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
+# ::structmsg(hdrId2Handles) [list
+#  hdrId
+#  handle
+# ] 
 # 
 
 # ============================= sizeof ========================
@@ -186,6 +175,7 @@ set STRUCT_MSG_ERR_BAD_TABLE_ROW         235
 set STRUCT_MSG_ERR_TOO_MANY_FIELDS       234
 set STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY 233
 set STRUCT_MSG_ERR_NO_SLOT_FOUND         232
+set STRUCT_MSG_ERR_DUPLICATE_FIELD       231
 
 set ::structmsg(structmsgErrId2Str) [dict create]
 dict set ::structmsg(structmsgErrId2Str) 0   ERR_OK
@@ -213,6 +203,7 @@ dict set ::structmsg(structmsgErrId2Str) 235 ERR_BAD_TABLE_ROW
 dict set ::structmsg(structmsgErrId2Str) 234 ERR_TOO_MANY_FIELDS
 dict set ::structmsg(structmsgErrId2Str) 233 ERR_BAD_DEFINTION_CMD_KEY
 dict set ::structmsg(structmsgErrId2Str) 232 ERR_NO_SLOT_FOUND
+dict set ::structmsg(structmsgErrId2Str) 231 ERR_DUPLICATE_FIELD
 
 set STRUCT_MSG_FIELD_SRC                 1
 set STRUCT_MSG_FIELD_DST                 2
@@ -235,8 +226,13 @@ set STRUCT_MSG_INCR    1
 set STRUCT_MSG_DECR    -1
 
 set ::structmsg(prefix) "stmsg_"
+#set ::structmsg(handles) [list]
 set ::structmsg(numHandles) 1
-set ::structmsg(handles) [list]
+set ::structmsg(hdrId2Handles) [list]
+set ::structmsg(fieldNameDefinitions) [dict create]
+dict set ::structmsg(fieldNameDefinitions) numDefinitions 0
+dict set ::structmsg(fieldNameDefinitions) maxDefinitions 0
+set ::structmsg(structmsgDefinitions) [dict create]
 
 
 namespace eval structmsg {
@@ -327,6 +323,9 @@ proc checkOKOrErr {result {where ""} {fieldName ""}}  {
     ERR_NO_SLOT_FOUND {
       return [format "%s: no slot found"  $errStr]
     }
+    ERR_DUPLICATE_FIELD {
+      return [format "%s: duplicate field"  $errStr]
+    }
     default {
       return [format "%s: funny result error code"  $errStr]
     }
@@ -405,8 +404,8 @@ proc encrypt {handle key {iv ""}} {
 
 # ============================= decrypt ========================
 
-proc decrypt {handle key {iv ""}} {
-  set result [cmd decrypt $handle [list] 0 $key $iv buf lgth]
+proc decrypt {handle key iv crypted} {
+  set result [cmd decrypt $handle [list] 0 $key $iv $crypted buf lgth]
   if {$result eq $::STRUCT_MSG_ERR_OK}  {
     return $buf
   }
@@ -431,7 +430,6 @@ proc set_fillerAndCrc {handle} {
 
 proc set_fieldValue {handle fieldName value} {
   set result [cmd set_fieldValue $handle $fieldName $value]
-puts stderr "api set_fieldValue: result:$result!"
   return [checkOKOrErr $result "set_fieldValue" $fieldName]
 }
 

@@ -146,7 +146,6 @@ namespace eval structmsg {
     proc getFieldNameId {fieldName id_var incrVal} {
       upvar $id_var id
     
-puts stderr "getFieldNameId: $fieldName!"
       set fieldNameDefinitionsDict $::structmsg(fieldNameDefinitions)
       switch -glob -- $fieldName {
         "@*" {
@@ -409,6 +408,7 @@ puts stderr "fieldName: $fieldName!"
         incr fieldIdx
       }
 puts stderr "createMsgFromDefinition END"
+::structmsg cmd dump $handle
       return $::STRUCT_MSG_ERR_OK
     }
     
