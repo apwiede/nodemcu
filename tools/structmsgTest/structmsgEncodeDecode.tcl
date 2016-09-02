@@ -31,1365 +31,856 @@
 # *
 # ==========================================================================
 
-# ============================= sizeof ========================
+namespace eval structmsg {
+  namespace ensemble create
 
-proc sizeof {type} {
-  switch $type {
-    int8_t -
-    uint8_t {
-      return 1
+    namespace export encdec
+
+  namespace eval encdec {
+    namespace ensemble create
+      
+    namespace export uint8Encode int8Encode uint16Encode int16Encode
+    namespace export uint32Encode int32Encode uint8VectorEncode int8VectorEncode
+    namespace export uint16VectorEncode int16VectorEncode uint32VectorEncode int32VectorEncode
+    namespace export uint8Decode int8Decode uint16Decode int16Decode
+    namespace export uint32Decode int32Decode uint8VectorDecode int8VectorDecode
+    namespace export uint16VectorDecode int16VectorDecode uint32VectorDecode int32VectorDecode
+    namespace export randomNumEncode randomNumDecode sequenceNumEncode sequenceNumDecode
+    namespace export fillerEncode fillerDecode crcEncode crcDecode fillHdrInfo
+    namespace export encodeField decodeField getFieldIdName normalFieldNamesEncode
+    namespace export definitionEncode definitionDecode
+
+    # ============================= uint8Encode ========================
+    
+    proc uint8Encode {dat offset value} {
+      upvar $dat data
+    
+      set ch [binary format c $value]
+      set data [append data $ch]
+      incr offset
+      return $offset
     }
-    int16_t -
-    uint16_t {
-      return 2
+    
+    
+    # ============================= int8Encode ========================
+    
+    proc int8Encode {dat offset value} {
+      upvar $dat data
+    
+      set ch [binary format c $value]
+      set data [append data $ch]
+      incr offset
+      return offset
     }
-    int32_t -
-    uint32_t {
-      return 4
+    
+    # ============================= uint16Encode ========================
+    
+    proc uint16Encode {dat offset value} {
+      upvar $dat data
+    
+      set ch [binary format c [expr {($value >> 8) & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      set ch [binary format c [expr {$value & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      return $offset
     }
-  }
-  error "bad type in sizeof: $type"
-}
-
-set RAND_MAX 0x7FFFFFFF
-
-set STRUCT_MSG_FIELD_UINT8_T       1
-set STRUCT_MSG_FIELD_INT8_T        2
-set STRUCT_MSG_FIELD_UINT16_T      3
-set STRUCT_MSG_FIELD_INT16_T       4
-set STRUCT_MSG_FIELD_UINT32_T      5
-set STRUCT_MSG_FIELD_INT32_T       6
-set STRUCT_MSG_FIELD_UINT8_VECTOR  7
-set STRUCT_MSG_FIELD_INT8_VECTOR   8
-set STRUCT_MSG_FIELD_UINT16_VECTOR 9
-set STRUCT_MSG_FIELD_INT16_VECTOR  10
-set STRUCT_MSG_FIELD_UINT32_VECTOR 11
-set STRUCT_MSG_FIELD_INT32_VECTOR  12
-
-set STRUCT_MSG_SPEC_FIELD_SRC              255
-set STRUCT_MSG_SPEC_FIELD_DST              254
-set STRUCT_MSG_SPEC_FIELD_TARGET_CMD       253
-set STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH       252
-set STRUCT_MSG_SPEC_FIELD_CMD_KEY          251
-set STRUCT_MSG_SPEC_FIELD_CMD_LGTH         250
-set STRUCT_MSG_SPEC_FIELD_RANDOM_NUM       249
-set STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM     248
-set STRUCT_MSG_SPEC_FIELD_FILLER           247
-set STRUCT_MSG_SPEC_FIELD_CRC              246
-set STRUCT_MSG_SPEC_FIELD_ID               245
-set STRUCT_MSG_SPEC_FIELD_ID               245
-set STRUCT_MSG_SPEC_FIELD_TABLE_ROWS       244
-set STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS 243
-set STRUCT_MSG_SPEC_FIELD_LOW              242  ; # this must be the last entry!!
-
-set STRUCT_MSG_ERR_OK                    0
-set STRUCT_MSG_ERR_VALUE_NOT_SET         255
-set STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE    254
-set STRUCT_MSG_ERR_BAD_VALUE             253
-set STRUCT_MSG_ERR_BAD_FIELD_TYPE        252
-set STRUCT_MSG_ERR_FIELD_NOT_FOUND       251
-set STRUCT_MSG_ERR_VALUE_TOO_BIG         250
-set STRUCT_MSG_ERR_BAD_SPECIAL_FIELD     249
-set STRUCT_MSG_ERR_BAD_HANDLE            248
-set STRUCT_MSG_ERR_OUT_OF_MEMORY         247
-set STRUCT_MSG_ERR_HANDLE_NOT_FOUND      246
-set STRUCT_MSG_ERR_NOT_ENCODED           245
-set STRUCT_MSG_ERR_ENCODE_ERROR          244
-set STRUCT_MSG_ERR_DECODE_ERROR          243
-set STRUCT_MSG_ERR_BAD_CRC_VALUE         242
-set STRUCT_MSG_ERR_CRYPTO_INIT_FAILED    241
-set STRUCT_MSG_ERR_CRYPTO_OP_FAILED      240
-set STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM  239
-set STRUCT_MSG_ERR_NOT_ENCRYPTED         238
-set STRUCT_MSG_ERR_DEFINITION_NOT_FOUND  237
-set STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS 236
-set STRUCT_MSG_ERR_BAD_TABLE_ROW         235
-set STRUCT_MSG_ERR_TOO_MANY_FIELDS       234
-set STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY 233
-set STRUCT_MSG_ERR_NO_SLOT_FOUND         232
-
-set STRUCT_MSG_FIELD_SRC                 1
-set STRUCT_MSG_FIELD_DST                 2
-set STRUCT_MSG_FIELD_TOTAL_LGTH          3
-set STRUCT_MSG_FIELD_CMD_KEY             4
-set STRUCT_MSG_FIELD_CMD_LGTH            5
-
-# header length: uint16_t src + uint16_t dst + uint16_t totalLgth
-set STRUCT_MSG_HEADER_LENGTH [expr {[sizeof uint16_t] * 3}]
-# cmd header length uint16_t cmdKey + unit16_t cmdLgth
-set STRUCT_MSG_CMD_HEADER_LENGTH [expr {[sizeof uint16_t] * 2}]
-set STRUCT_MSG_TOTAL_HEADER_LENGTH [expr {$::STRUCT_MSG_HEADER_LENGTH + $::STRUCT_MSG_CMD_HEADER_LENGTH}]
-set STRUCT_MSG_NUM_HEADER_FIELDS 3
-set STRUCT_MSG_NUM_CMD_HEADER_FIELDS 2
-set STRUCT_MSG_DEFINITION_CMD_KEY 0xFFFF
-set STRUCT_MSG_FREE_FIELD_ID 0xFF
-
-set STRUCT_MSG_NO_INCR 0
-set STRUCT_MSG_INCR    1
-set STRUCT_MSG_DECR    -1
-
-
-# ============================= uint8Encode ========================
-
-proc uint8Encode {dat offset value} {
-  upvar $dat data
-
-  set ch [binary format c $value]
-  set data [append data $ch]
-  incr offset
-  return $offset
-}
-
-
-# ============================= int8Encode ========================
-
-proc int8Encode {dat offset value} {
-  upvar $dat data
-
-  set ch [binary format c $value]
-  set data [append data $ch]
-  incr offset
-  return offset
-}
-
-# ============================= uint16Encode ========================
-
-proc uint16Encode {dat offset value} {
-  upvar $dat data
-
-  set ch [binary format c [expr {($value >> 8) & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  set ch [binary format c [expr {$value & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  return $offset
-}
-
-# ============================= int16Encode ========================
-
-proc int16Encode {dat offset value} {
-  upvar $dat data
-
-  set ch [binary format c [expr {($value >> 8) & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  set ch [binary format c [expr {$value & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  return $offset
-}
-
-# ============================= uint32Encode ========================
-
-proc uint32Encode {dat offset value} {
-  upvar $dat data
-
-  append data [binary format c [expr {($value >> 24) & 0xFF}]]
-  incr offset
-  append data [binary format c [expr {($value >> 16) & 0xFF}]]
-  incr offset
-  append data [binary format c [expr {($value >> 8) & 0xFF}]]
-  incr offset
-  append data [binary format c [expr {$value & 0xFF}]]
-  incr offset
-  return $offset
-}
-
-# ============================= int32Encode ========================
-
-proc int32Encode {dat offset value} {
-  upvar $dat data
-
-  set ch [binary format c [expr {($value >> 24) & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  set ch [binary format c [expr {($value >> 16) & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  set ch [binary format c [expr {($value >> 8) & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  set ch [binary format c [expr {$value & 0xFF}]]
-  set data [append data $ch]
-  incr offset
-  return $offset
-}
-
-# ============================= uint8VectorEncode ========================
-
-proc uint8VectorEncode {dat offset value lgth} {
-  upvar $dat data
-
-  append data [string range $value 0 [expr {$lgth - 1}]]
-  incr offset $lgth
-  return $offset
-}
-
-# ============================= int8VectorEncode ========================
-
-proc int8VectorEncode {dat offset value lgth} {
-  upvar $dat data
-
-  append data [string range $value 0 [expr {$lgth - 1}]]
-  incr offset $lgth
-  return offset
-}
-
-# ============================= uint16VectorEncode ========================
-
-proc uint16VectorEncode {dat offset value lgth} {
-  upvar $dat data
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [uint16Encode data $offset [lindex $value $idx]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= int16VectorEncode ========================
-
-proc int16VectorEncode {dat offset value lgth} {
-  upvar $dat data
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [uint16Encode data $offset [lindex $value $idx]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= uint32VectorEncode ========================
-
-proc uint32VectorEncode {dat offset value lgth} {
-  upvar $dat data
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [uint16Encode data $offset [lindex $value $idx]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= int32VectorEncode ========================
-
-proc int32VectorEncode {dat offset value lgth} {
-  upvar $dat data
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [uint16Encode data $offset [lindex $value $idx]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= uint8Decode ========================
-
-proc uint8Decode {data offset val} {
-  upvar $val value
-
-  set ch [string range $data $offset $offset]
-  set pch $ch
-  if {![string is integer $ch]} {
-    binary scan $ch c pch
-  }
-  set value [expr {$pch & 0xFF}]
-  incr offset
-  return $offset
-}
-
-# ============================= int8Decode ========================
-
-proc int8Decode {data offset val} {
-  upvar $val value
-
-  set value [expr {[string range $data $offset $offset] & 0xFF}]
-  incr offset
-  return $offset
-}
-
-# ============================= uint16Decode ========================
-
-proc uint16Decode {data offset val} {
-  upvar $val value
-
-  set value 0
-  set ch [string range $data $offset $offset]
-  set pch $ch
-  if {![string is integer $ch]} {
-    binary scan $ch c pch
-  }
-  set value [expr {$value + ([expr {$pch & 0xFF}] << 8)}]
-  incr offset
-  set ch [string range $data $offset $offset]
-  set pch $ch
-  if {![string is integer $ch]} {
-    binary scan $ch c pch
-  }
-  set value [expr {$value + ([expr {$pch & 0xFF}] << 0)}]
-  incr offset
-  return $offset
-}
-
-# ============================= int16Decode ========================
-
-proc int16Decode {data offset val} {
-  upvar $val value
-
-  set value 0
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
-  incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
-  incr offset
-  return $offset
-}
-
-# ============================= uint32Decode ========================
-
-proc uint32Decode {data offset val} {
-  upvar $val value
-
-  set value 0
-  set ch [string range $data $offset $offset]
-  set pch $ch
-  if {![string is integer $ch]} {
-    binary scan $ch c pch
-  }
-  set value [expr {$value + ([expr {$pch & 0xFF}] << 24)}]
-  incr offset
-  set ch [string range $data $offset $offset]
-  set pch $ch
-  if {![string is integer $ch]} {
-    binary scan $ch c pch
-  }
-  set value [expr {$value + ([expr {$pch & 0xFF}] << 16)}]
-  incr offset
-  set ch [string range $data $offset $offset]
-  set pch $ch
-  if {![string is integer $ch]} {
-    binary scan $ch c pch
-  }
-  set value [expr {$value + ([expr {$pch & 0xFF}] << 8)}]
-  incr offset
-  set ch [string range $data $offset $offset]
-  set pch $ch
-  if {![string is integer $ch]} {
-    binary scan $ch c pch
-  }
-  set value [expr {$value + ([expr {$pch & 0xFF}] << 0)}]
-  incr offset
-  return $offset
-}
-
-# ============================= int32Decode ========================
-
-proc int32Decode {data offset val} {
-  upvar $val value
-
-  set value 0
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 24)}]
-  incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 16)}]
-  incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
-  incr offset
-  binary scan [string range $data $offset $offset] c ch
-  set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
-  incr offset
-  incr offset
-  return $offset
-}
-
-# ============================= uint8VectorDecode ========================
-
-proc uint8VectorDecode {data offset val lgth} {
-  upvar $val value
-
-  set value [string range $data $offset [expr {$offset + $lgth - 1}]]
-  incr offset $lgth
-  return $offset
-}
-
-# ============================= int8VectorDecode ========================
-
-proc int8VectorDecode {data offset val lgth} {
-  upvar $val value
-
-  set value [string range $data $offset [expr {$offset + $lgth - 1}]]
-  incr offset $lgth
-  return $offset
-}
-
-# ============================= uint16VectorDecode ========================
-
-proc uint16VectorDecode {data offset val lgth} {
-  upvar $val value
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [uint16Decode data $offset, value+idx]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= int16VectorDecode ========================
-
-proc int16VectorDecode {data offset val lgth} {
-  upvar $val value
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [int16Decode data $offset [lindex $value $idx]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= uint32VectorDecode ========================
-
-proc uint32VectorDecode {data offset val lgth} {
-  upvar $val value
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [uint32Decode data $offset [lindex $value $idx]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= int32VectorDecode ========================
-
-proc int32VectorDecode {data offset val lgth} {
-  upvar $val value
-
-  set idx 0
-  while {$idx < $lgth} {
-    set offset [int32Decode data $offset [lindex value $idx]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= getRandom ========================
-
-proc getRandom {} {
-  set val [string trimleft [lindex [split [expr {rand()}] {.}] 1] 0]
-  set myVal [expr {$val & $::RAND_MAX}]
-  return $myVal
-}
-
-# ============================= randomNumEncode ========================
-
-proc randomNumEncode {dat offset val} {
-  upvar $dat data
-  upvar $val value
-
-  set myVal [getRandom]
-  set value $myVal
-  return [uint32Encode data $offset $myVal]
-}
-
-# ============================= randomNumDecode ========================
-
-proc randomNumDecode {data offset val} {
-  upvar $val value
-
-  set offset [uint32Decode $data $offset value]
-  return $offset
-}
-
-# ============================= sequenceNumEncode ========================
-
-proc sequenceNumEncode {dat offset dictVar val} {
-  upvar $dat data
-  upvar $val value
-  upvar $dictVar myDict
-
-  dict set myDict sequenceNum [expr {[dict get $myDict sequenceNum] + 1}]
-  set myVal [dict get $myDict sequenceNum]
-  set value $myVal
-  return [uint32Encode data $offset $myVal]
-}
-
-# ============================= sequenceNumDecode ========================
-
-proc sequenceNumDecode {data offset val} {
-  upvar $val value
-
-  set offset [uint32Decode $data $offset value]
-  return $offset
-}
-
-# ============================= fillerEncode ========================
-
-proc fillerEncode {dat offset lgth val} {
-  upvar $dat data
-  upvar $val value
-
-  set idx 0
-  set value ""
-  while {$lgth >= 4} {
-    set myVal [expr {[getRandom] &0xFFFFFFFF}]
-    append value [binary format c [expr {($myVal >> 24) & 0xFF}]]
-    append value [binary format c [expr {($myVal >> 16) & 0xFF}]]
-    append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
-    append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-    set offset [uint32Encode data $offset $myVal]
-    incr lgth -4
-  }
-  while {$lgth >= 2} {
-    set myVal [expr {[getRandom] & 0xFFFF}]
-    append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
-    append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-    set offset [uint16Encode data $offset $myVal]
-    incr lgth -2
-  }
-  while {$lgth >= 1} {
-    set myVal [expr {[getRandom] & 0xFF}]
-    append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-    set offset [uint8Encode data $offset $myVal]
-    incr lgth -1
-  }
-  return $offset
-}
-
-# ============================= fillerDecode ========================
- 
-proc fillerDecode {data offset lgth val} {
-  upvar $val value
-
-  set value [string range $data $offset [expr {$offset + $lgth - 1}]]
-  incr offset $lgth
-  return $offset
-}
-
-# ============================= crcEncode ========================
-
-proc crcEncode {dat offset lgth val headerOffset} {
-  upvar $dat data
-  upvar $val value
-
-  set lgth [expr {$lgth - 2}]   ; # uint16_t crc
-  set crc  0
-  set idx $headerOffset
-  set str [string range $data $idx [expr {$idx + $lgth - 1}]]
-set cnt 0
-  foreach ch [split $str ""] {
-    binary scan $ch c pch
-    set pch [expr {$pch & 0xFF}]
-#puts stderr "encode crc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
-    set crc [expr {$crc + [format "%d" $pch]}]
-incr cnt
-  }
-#puts stderr "crc1: $crc![format 0x%04x $crc]!"
-  set crc [expr {~$crc & 0xFFFF}]
-puts stderr "crc: $crc![format 0x%04x $crc]!"
-  set offset [uint16Encode data $offset $crc]
-  set value $crc
-  return $offset
-}
-
-# ============================= crcDecode ========================
-
-proc crcDecode {data offset lgth val headerOffset} {
-  upvar $val value
-
-  set value ""
-  set lgth [expr {$lgth - 2}] ; # uint16_t crc
-  set crcVal 0
-  set idx $headerOffset
-  set str [string range $data $idx [expr {$idx + $lgth - 1}]]
-set cnt 0
-  foreach ch [split $str ""] {
-    binary scan $ch c pch
-    set pch [expr {$pch & 0xFF}]
-#puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
-    set crcVal [expr {$crcVal + [format "%d" $pch]}]
-incr cnt
-    incr idx
-  }
-#puts stderr "crcVal end: $crcVal!"
-  set crcVal [expr {~$crcVal & 0xFFFF}]
-  set offset [uint16Decode $data $offset crc]
-puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
-  if {$crcVal != $crc} {
-    return -1
-  }
-  set value $crc
-  return $offset
-}
-
-# ============================= getFieldIdName ========================
-
-proc getFieldIdName {id fieldNameVar} {
-  upvar $fieldNameVar fieldName
-
-  # find field name
-  set idx 0
-  set fieldNameDefinitions $::structmsg(fieldNameDefinitions)
-  while {$idx < [dict get $fieldNameDefinitions numDefinitions]} {
-    set entry [lindex [dict get $fieldNameDefinitions definitions] $idx]
-    if {[dict get $entry id] == $id} {
-       set fieldName [dict get $entry fieldName]
-       return $::STRUCT_MSG_ERR_OK
+    
+    # ============================= int16Encode ========================
+    
+    proc int16Encode {dat offset value} {
+      upvar $dat data
+    
+      set ch [binary format c [expr {($value >> 8) & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      set ch [binary format c [expr {$value & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      return $offset
     }
-    incr idx
-  }
-  error "field not found"
-#  return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
-}
-
-# ============================= normalFieldNamesEncode ========================
-
-proc normalFieldNamesEncode {dataVar offset definition normNameOffsetsVar numEntries size} {
-  upvar $dataVar data
-  upvar $normNameOffsetsVar normNameOffsets
-
-  set normNameOffsets [list]
-  # first the keys
-  set namesOffset 0
-  set offset [uint8Encode data $offset $numEntries]
-  set idx 0
-  while {$idx < [dict get $definition numFields]} {
-    set normNameOffset [lindex $normNameOffsets $idx]
-    set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
-    if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} { 
-      set result [getFieldIdName [dict get $fieldInfo fieldId] fieldName]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return -1 }
-      set offset [uint16Encode data $offset $namesOffset]
-      dict set normNameOffset id [dict get $fieldInfo fieldId]
-      dict set normNameOffset offset $namesOffset
-      lappend normNameOffsets $normNameOffset
-      incr namesOffset [expr {[string length $fieldName] + 1}]
+    
+    # ============================= uint32Encode ========================
+    
+    proc uint32Encode {dat offset value} {
+      upvar $dat data
+    
+      append data [binary format c [expr {($value >> 24) & 0xFF}]]
+      incr offset
+      append data [binary format c [expr {($value >> 16) & 0xFF}]]
+      incr offset
+      append data [binary format c [expr {($value >> 8) & 0xFF}]]
+      incr offset
+      append data [binary format c [expr {$value & 0xFF}]]
+      incr offset
+      return $offset
     }
-    incr idx
-  }
-  # and now the names
-  set offset [uint16Encode data $offset $size]
-  set idx 0
-  set nameIdx 1
-  while {$idx < [dict get $definition numFields]} {
-    set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
-    if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} { 
-      set result [getFieldIdName [dict get $fieldInfo fieldId] fieldName]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return -1 }
-      set offset [uint8VectorEncode data $offset $fieldName [string length $fieldName]]
-      if {$nameIdx < $numEntries} {
-        set offset [uint8Encode data $offset 0]
-      } else {
-        set offset [uint8Encode data $offset 0]
+    
+    # ============================= int32Encode ========================
+    
+    proc int32Encode {dat offset value} {
+      upvar $dat data
+    
+      set ch [binary format c [expr {($value >> 24) & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      set ch [binary format c [expr {($value >> 16) & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      set ch [binary format c [expr {($value >> 8) & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      set ch [binary format c [expr {$value & 0xFF}]]
+      set data [append data $ch]
+      incr offset
+      return $offset
+    }
+    
+    # ============================= uint8VectorEncode ========================
+    
+    proc uint8VectorEncode {dat offset value lgth} {
+      upvar $dat data
+    
+      append data [string range $value 0 [expr {$lgth - 1}]]
+      incr offset $lgth
+      return $offset
+    }
+    
+    # ============================= int8VectorEncode ========================
+    
+    proc int8VectorEncode {dat offset value lgth} {
+      upvar $dat data
+    
+      append data [string range $value 0 [expr {$lgth - 1}]]
+      incr offset $lgth
+      return offset
+    }
+    
+    # ============================= uint16VectorEncode ========================
+    
+    proc uint16VectorEncode {dat offset value lgth} {
+      upvar $dat data
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [uint16Encode data $offset [lindex $value $idx]]
+        incr idx
       }
-      incr nameIdx
+      return $offset
     }
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= normalFieldNamesDecode ========================
-
-proc normalFieldNamesDecode {data offset} {
-  return offset
-}
-
-# ============================= definitionEncode ========================
-
-proc definitionEncode {dataVar offset definition normNamesOffsets} {
-  upvar $dataVar data
-
-  set idx 0
-  set offset [uint8Encode data $offset [dict get $definition numFields]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  while {$idx < [dict get $definition numFields]} {
-    set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
-    if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
-      set idIdx 0
-      set found 0
-      while {$idIdx < [dict get $definition numFields]} {
-        if {[dict get [lindex $normNamesOffsets $idIdx] id] == 0} {
-          # id 0 is not used to be able to stop here!!
-          break
+    
+    # ============================= int16VectorEncode ========================
+    
+    proc int16VectorEncode {dat offset value lgth} {
+      upvar $dat data
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [uint16Encode data $offset [lindex $value $idx]]
+        incr idx
+      }
+      return $offset
+    }
+    
+    # ============================= uint32VectorEncode ========================
+    
+    proc uint32VectorEncode {dat offset value lgth} {
+      upvar $dat data
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [uint16Encode data $offset [lindex $value $idx]]
+        incr idx
+      }
+      return $offset
+    }
+    
+    # ============================= int32VectorEncode ========================
+    
+    proc int32VectorEncode {dat offset value lgth} {
+      upvar $dat data
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [uint16Encode data $offset [lindex $value $idx]]
+        incr idx
+      }
+      return $offset
+    }
+    
+    # ============================= uint8Decode ========================
+    
+    proc uint8Decode {data offset val} {
+      upvar $val value
+    
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value [expr {$pch & 0xFF}]
+      incr offset
+      return $offset
+    }
+    
+    # ============================= int8Decode ========================
+    
+    proc int8Decode {data offset val} {
+      upvar $val value
+    
+      set value [expr {[string range $data $offset $offset] & 0xFF}]
+      incr offset
+      return $offset
+    }
+    
+    # ============================= uint16Decode ========================
+    
+    proc uint16Decode {data offset val} {
+      upvar $val value
+    
+      set value 0
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value [expr {$value + ([expr {$pch & 0xFF}] << 8)}]
+      incr offset
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value [expr {$value + ([expr {$pch & 0xFF}] << 0)}]
+      incr offset
+      return $offset
+    }
+    
+    # ============================= int16Decode ========================
+    
+    proc int16Decode {data offset val} {
+      upvar $val value
+    
+      set value 0
+      binary scan [string range $data $offset $offset] c ch
+      set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
+      incr offset
+      binary scan [string range $data $offset $offset] c ch
+      set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
+      incr offset
+      return $offset
+    }
+    
+    # ============================= uint32Decode ========================
+    
+    proc uint32Decode {data offset val} {
+      upvar $val value
+    
+      set value 0
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value [expr {$value + ([expr {$pch & 0xFF}] << 24)}]
+      incr offset
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value [expr {$value + ([expr {$pch & 0xFF}] << 16)}]
+      incr offset
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value [expr {$value + ([expr {$pch & 0xFF}] << 8)}]
+      incr offset
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value [expr {$value + ([expr {$pch & 0xFF}] << 0)}]
+      incr offset
+      return $offset
+    }
+    
+    # ============================= int32Decode ========================
+    
+    proc int32Decode {data offset val} {
+      upvar $val value
+    
+      set value 0
+      binary scan [string range $data $offset $offset] c ch
+      set value [expr {$value + ([expr {$ch & 0xFF}] << 24)}]
+      incr offset
+      binary scan [string range $data $offset $offset] c ch
+      set value [expr {$value + ([expr {$ch & 0xFF}] << 16)}]
+      incr offset
+      binary scan [string range $data $offset $offset] c ch
+      set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
+      incr offset
+      binary scan [string range $data $offset $offset] c ch
+      set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
+      incr offset
+      incr offset
+      return $offset
+    }
+    
+    # ============================= uint8VectorDecode ========================
+    
+    proc uint8VectorDecode {data offset val lgth} {
+      upvar $val value
+    
+      set value [string range $data $offset [expr {$offset + $lgth - 1}]]
+      incr offset $lgth
+      return $offset
+    }
+    
+    # ============================= int8VectorDecode ========================
+    
+    proc int8VectorDecode {data offset val lgth} {
+      upvar $val value
+    
+      set value [string range $data $offset [expr {$offset + $lgth - 1}]]
+      incr offset $lgth
+      return $offset
+    }
+    
+    # ============================= uint16VectorDecode ========================
+    
+    proc uint16VectorDecode {data offset val lgth} {
+      upvar $val value
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [uint16Decode data $offset, value+idx]
+        incr idx
+      }
+      return $offset
+    }
+    
+    # ============================= int16VectorDecode ========================
+    
+    proc int16VectorDecode {data offset val lgth} {
+      upvar $val value
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [int16Decode data $offset [lindex $value $idx]]
+        incr idx
+      }
+      return $offset
+    }
+    
+    # ============================= uint32VectorDecode ========================
+    
+    proc uint32VectorDecode {data offset val lgth} {
+      upvar $val value
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [uint32Decode data $offset [lindex $value $idx]]
+        incr idx
+      }
+      return $offset
+    }
+    
+    # ============================= int32VectorDecode ========================
+    
+    proc int32VectorDecode {data offset val lgth} {
+      upvar $val value
+    
+      set idx 0
+      while {$idx < $lgth} {
+        set offset [int32Decode data $offset [lindex value $idx]]
+        incr idx
+      }
+      return $offset
+    }
+    
+    # ============================= getRandom ========================
+    
+    proc getRandom {} {
+      set val [string trimleft [lindex [split [expr {rand()}] {.}] 1] 0]
+      set myVal [expr {$val & $::RAND_MAX}]
+      return $myVal
+    }
+    
+    # ============================= randomNumEncode ========================
+    
+    proc randomNumEncode {dat offset val} {
+      upvar $dat data
+      upvar $val value
+    
+      set myVal [getRandom]
+      set value $myVal
+      return [uint32Encode data $offset $myVal]
+    }
+    
+    # ============================= randomNumDecode ========================
+    
+    proc randomNumDecode {data offset val} {
+      upvar $val value
+    
+      set offset [uint32Decode $data $offset value]
+      return $offset
+    }
+    
+    # ============================= sequenceNumEncode ========================
+    
+    proc sequenceNumEncode {dat offset dictVar val} {
+      upvar $dat data
+      upvar $val value
+      upvar $dictVar myDict
+    
+      dict set myDict sequenceNum [expr {[dict get $myDict sequenceNum] + 1}]
+      set myVal [dict get $myDict sequenceNum]
+      set value $myVal
+      return [uint32Encode data $offset $myVal]
+    }
+    
+    # ============================= sequenceNumDecode ========================
+    
+    proc sequenceNumDecode {data offset val} {
+      upvar $val value
+    
+      set offset [uint32Decode $data $offset value]
+      return $offset
+    }
+    
+    # ============================= fillerEncode ========================
+    
+    proc fillerEncode {dat offset lgth val} {
+      upvar $dat data
+      upvar $val value
+    
+      set idx 0
+      set value ""
+      while {$lgth >= 4} {
+        set myVal [expr {[getRandom] &0xFFFFFFFF}]
+        append value [binary format c [expr {($myVal >> 24) & 0xFF}]]
+        append value [binary format c [expr {($myVal >> 16) & 0xFF}]]
+        append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
+        append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
+        set offset [uint32Encode data $offset $myVal]
+        incr lgth -4
+      }
+      while {$lgth >= 2} {
+        set myVal [expr {[getRandom] & 0xFFFF}]
+        append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
+        append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
+        set offset [uint16Encode data $offset $myVal]
+        incr lgth -2
+      }
+      while {$lgth >= 1} {
+        set myVal [expr {[getRandom] & 0xFF}]
+        append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
+        set offset [uint8Encode data $offset $myVal]
+        incr lgth -1
+      }
+      return $offset
+    }
+    
+    # ============================= fillerDecode ========================
+     
+    proc fillerDecode {data offset lgth val} {
+      upvar $val value
+    
+      set value [string range $data $offset [expr {$offset + $lgth - 1}]]
+      incr offset $lgth
+      return $offset
+    }
+    
+    # ============================= crcEncode ========================
+    
+    proc crcEncode {dat offset lgth val headerOffset} {
+      upvar $dat data
+      upvar $val value
+    
+      set lgth [expr {$lgth - 2}]   ; # uint16_t crc
+      set crc  0
+      set idx $headerOffset
+      set str [string range $data $idx [expr {$idx + $lgth - 1}]]
+    set cnt 0
+      foreach ch [split $str ""] {
+        binary scan $ch c pch
+        set pch [expr {$pch & 0xFF}]
+    puts stderr "encode crc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
+        set crc [expr {$crc + [format "%d" $pch]}]
+    incr cnt
+      }
+    puts stderr "crc1: $crc![format 0x%04x $crc]!"
+      set crc [expr {~$crc & 0xFFFF}]
+    puts stderr "crc: $crc![format 0x%04x $crc]!"
+      set offset [uint16Encode data $offset $crc]
+      set value $crc
+      return $offset
+    }
+    
+    # ============================= crcDecode ========================
+    
+    proc crcDecode {data offset lgth val headerOffset} {
+      upvar $val value
+    
+      set value ""
+      set lgth [expr {$lgth - 2}] ; # uint16_t crc
+      set crcVal 0
+      set idx $headerOffset
+      set str [string range $data $idx [expr {$idx + $lgth - 1}]]
+    set cnt 0
+      foreach ch [split $str ""] {
+        binary scan $ch c pch
+        set pch [expr {$pch & 0xFF}]
+    puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
+        set crcVal [expr {$crcVal + [format "%d" $pch]}]
+    incr cnt
+        incr idx
+      }
+    puts stderr "crcVal end: $crcVal!"
+      set crcVal [expr {~$crcVal & 0xFFFF}]
+      set offset [uint16Decode $data $offset crc]
+    puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
+      if {$crcVal != $crc} {
+        return -1
+      }
+      set value $crc
+      return $offset
+    }
+    
+    # ============================= getFieldIdName ========================
+    
+    proc getFieldIdName {id fieldNameVar} {
+      upvar $fieldNameVar fieldName
+    
+      # find field name
+      set idx 0
+      set fieldNameDefinitions $::structmsg(fieldNameDefinitions)
+      while {$idx < [dict get $fieldNameDefinitions numDefinitions]} {
+        set entry [lindex [dict get $fieldNameDefinitions definitions] $idx]
+        if {[dict get $entry id] == $id} {
+           set fieldName [dict get $entry fieldName]
+           return $::STRUCT_MSG_ERR_OK
         }
-        if {[dict get $fieldInfo fieldId] == [dict get [lindex $normNamesOffsets $idIdx] id]} {
-          set nameOffset [dict get [lindex $normNamesOffsets $idIdx] offset]
-          set found 1
-          break
+        incr idx
+      }
+      error "field not found"
+    #  return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
+    }
+    
+    # ============================= normalFieldNamesEncode ========================
+    
+    proc normalFieldNamesEncode {dataVar offset definition normNameOffsetsVar numEntries size} {
+      upvar $dataVar data
+      upvar $normNameOffsetsVar normNameOffsets
+    
+      set normNameOffsets [list]
+      # first the keys
+      set namesOffset 0
+      set offset [uint8Encode data $offset $numEntries]
+      set idx 0
+      while {$idx < [dict get $definition numFields]} {
+        set normNameOffset [lindex $normNameOffsets $idx]
+        set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
+        if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} { 
+          set result [getFieldIdName [dict get $fieldInfo fieldId] fieldName]
+          if {$result != $::STRUCT_MSG_ERR_OK} { return -1 }
+          set offset [uint16Encode data $offset $namesOffset]
+          dict set normNameOffset id [dict get $fieldInfo fieldId]
+          dict set normNameOffset offset $namesOffset
+          lappend normNameOffsets $normNameOffset
+          incr namesOffset [expr {[string length $fieldName] + 1}]
         }
-        incr idIdx
+        incr idx
       }
-      if {!$found} {
-        return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
-      }
-      set offset [uint16Encode data $offset $nameOffset]
-    } else {
-      set offset [uint16Encode data $offset [dict get $fieldInfo fieldId]]
-    }
-    set offset [uint8Encode data $offset [dict get $fieldInfo fieldType]]
-    set offset [uint16Encode data $offset [dict get $fieldInfo fieldLgth]]
-    incr idx
-  }
-  return $offset
-}
-
-# ============================= definitionDecode ========================
-
-proc definitionDecode {data offset} {
-  # first the keys
-  set offset [uint8Decode $data $offset numNameEntries]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set idsStart $offset
-  incr offset [expr {$numNameEntries * [sizeof uint16_t]}]
-  set idsEnd $offset
-  # and now the names
-  set offset [uint16Decode $data $offset namesSize]
-  if {$offset < 0} { return $offset }
-  set namesStart $offset
-  incr offset $namesSize
-  set definitionStart [expr {$namesStart + $namesSize}]
-  set offset [uint16Decode $data $offset definitionLgth]
-  if {$offset < 0} { return $offset }
-  set offset [uint8Decode $data $offset nameLgth]
-  if {$offset < 0} { return $offset }
-  set name [string range $data $offset [expr {$offset + $nameLgth - 2}]]
-  incr offset $nameLgth
-  set offset [uint8Decode $data $offset numFields]
-  if {$offset < 0} { return $offset }
-  set result [structmsg_createStructmsgDefinition $name $numFields]
-#  checkOffsetErrOK(result)
-  set definitionIdx 0
-  set namesIdx 0
-  while {$definitionIdx < $numFields} { 
-    set offset [uint16Decode $data $offset fieldId]
-    if {$offset < 0} { return $offset }
-    if {$fieldId > $::STRUCT_MSG_SPEC_FIELD_LOW} {
-      set result [structmsg_getIdFieldNameStr $fieldId fieldName]
-#      checkOffsetErrOK(result)
-    } else {
-      set fieldId [expr {$namesIdx + 1}]
-      set myOffset [expr {$idsStart + ($namesIdx * [sizeof uint16_t])}]
-      set myOffset [uint16Decode $data $myOffset nameOffset]
-      set myStartIdx [expr {$namesStart + $nameOffset}]
-      set myEndIdx $myStartIdx
-      while {true} {
-        set myEndIdx [uint8Decode $data $myEndIdx ch]
-        if {$ch == 0} {
-          incr myEndIdx -2 ; # the 0 char and the offset has been moved after the 0 char
-          break
-        }
-      }
-      set fieldName [string range $data $myStartIdx $myEndIdx]
-      incr namesIdx
-    }
-    set offset [uint8Decode $data $offset fieldTypeId]
-    if {$offset < 0} { return $offset }
-    set result [structmsg_getFieldTypeStr $fieldTypeId fieldType]
-    if {$result < 0} { return -1 }
-    set offset [uint16Decode $data $offset fieldLgth]
-    if {$offset < 0} { return $offset }
-#puts stderr [format "add field: %s fieldId: %d fieldType: %d  %s fieldLgth: %d offset: %d" $fieldName $fieldId $fieldTypeId $fieldType $fieldLgth $offset]
-    set result [structmsg_addFieldDefinition  $name $fieldName $fieldType $fieldLgth]
-    if {$result < 0} { return -1 }
-    incr definitionIdx
-  }
-  return $offset
-}
-
-# ============================= structmsg_fillHdrInfo ========================
-
-proc structmsg_fillHdrInfo {handle} {
-  # fill the hdrInfo
-  set hdrInfo [dict get $::structmsg($handle) hdr hdrInfo]
-  set hdrKeys [dict get $hdrInfo hdrKeys]
-  set hdrId ""
-  set offset 0
-  set offset [uint16Encode hdrId $offset [dict get $hdrKeys src]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode hdrId $offset [dict get $hdrKeys dst]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode hdrId $offset [dict get $hdrKeys totalLgth]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdKey]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdLgth]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  dict set ::::structmsg($handle) hdr hdrInfo hdrId $hdrId
-  return $::STRUCT_MSG_ERR_OK
-}
-
-# ============================= encodeField ========================
-
-proc encodeField {encodedVar fieldInfo offset} {
-  upvar $encodedVar encoded
-
-  switch [dict get $fieldInfo fieldType] {
-    int8_t {
-      set offset [int8Encode encoded $offset [dict get $fieldInfo value]]
-    }
-    uint8_t {
-      set offset [uint8Encode encoded $offset [dict get $fieldInfo value]]
-    }
-    int16_t {
-      set offset [int16Encode encoded $offset [dict get $fieldInfo value]]
-    }
-    uint16_t {
-      set offset [uint16Encode encoded $offset [dict get $fieldInfo value]]
-    }
-    int32_t {
-      set offset [int32Encode encoded $$offset [dict get $fieldInfo value]]
-    }
-    uint32_t {
-      set offset [uint32Encode encoded $offset [dict get $fieldInfo value]]
-    }
-    int8_t* {
-      set fieldIdx 0
-      while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [int8Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-        incr fieldIdx
-      }
-    }
-    uint8_t* {
-      append encoded [dict get $fieldInfo value]
-      set offset [expr {$offset + [dict get $fieldInfo fieldLgth]}]
-    }
-    int16_t* {
-      set fieldIdx 0
-      while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [int16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-        incr fieldIdx
-      }
-    }
-    uint16_t* {
-      set fieldIdx 0
-      while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [uint16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-        incr fieldIdx
-      }
-    }
-    int32_t* {
-      set fieldIdx 0
-      while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [int32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-        incr fieldIdx
-      }
-    }
-    uint32_t* {
-      set fieldIdx 0
-      while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
-        set offset [uint32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
-        incr fieldIdx
-      }
-    }
-  }
-  return $offset
-}
-
-# ============================= decodeField ========================
-
-proc decodeField {todecode fieldInfoVar offset} {
-  upvar $fieldInfoVar fieldInfo
-
-  set fieldTypeName [dict get $fieldInfo fieldType]
-  switch $fieldTypeName {
-    int8_t {
-      set offset [int8Decode $todecode $offset value]
-    }
-    unit8_t {
-      set offset [uint8Decode $todecode $offset value]
-    }
-    int16_t {
-      set offset [int16Decode $todecode $offset value]
-    }
-    unit16_t {
-      set offset [uint16Decode $todecode $offset value]
-    }
-    int32_t {
-      set offset [int32Decode $todecode $offset value]
-    }
-    uint32_tT {
-      set offset [uint32Decode $todecode $offset value]
-    }
-    int8_t* {
-      set offset [int8VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
-    }
-    uint8_t* {
-      set offset [uint8VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
-    }
-    int16_t* {
-      set offset [int16VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
-    }
-    uint16_t* {
-      set offset [uint16VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
-    }
-    int32_t* {
-      set offset [int32VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
-    }
-    unit32_t* {
-      set offset [uint32VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
-    }
-  }
-  if {$offset > 0} {
-    dict set fieldInfo value $value
-  }
-  return $offset
-}
-
-# ============================= stmsg_encodeMsg ========================
-
-proc stmsg_encodeMsg {handle} {
-puts stderr "stmsg_encodeMsg!"
-  set structmsg [structmsg_get_structmsg_ptr $handle]
-#  checkHandleOK(structmsg)
-  dict set structmsg encoded [list]
-  set msgPtr [dict get structmsg encoded]
-  set offset 0
-  set offset [uint16Encode msgPtr $offset [dict get $structmsg hdr hdrInfo hdrKeys src]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode msgPtr $offset [dict get $structmsg hdr hdrInfo hdrKeys dst]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode msgPtr $offset [dict get $structmsg hdr hdrInfo hdrKeys totalLgth]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode msgPtr $offset [dict get $structmsg hdr hdrInfo hdrKeys cmdKey]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode msgPtr $offset [dict get $structmsg hdr hdrInfo hdrKeys cmdLgth]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set numEntries [dict get $structmsg msg numFieldInfos]
-  set offset [uint8Encode msgPtr $offset,numEntries)
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set idx 0
-  while {$idx < $numEntries} {
-    set fieldInfo [lindex [dict get $structmsg msg fieldInfos] $idx]
-    if {[string range [dict get $fieldInfo fieldName] 0 0] eq "@"} {
-      set result [structmsg_getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set specFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
-      switch $specFieldName { 
-      @src -
-      @dst -
-      @targetCmd -
-      @totalLgth -
-      @cmdKey -
-      @cmdLgth {
-puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldName]]
-      }
-      @randomNum {
-        set offset [randomNumEncode msgPtr $offset randomNum]
-        if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-        set result [stmsg_setFieldValue $handle "@randomNum" $randomNum ""]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      }
-      @sequenceNum {
-        set offset [sequenceNumEncode msgPtr $offset $structmsg $sequenceNum]
-        if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-        set result [stmsg_setFieldValue $handle "@sequenceNum" $sequenceNum ""]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      }
-      @filler {
-        set offset [fillerEncode $msgPtr $offset [dict get $fieldInfo fieldLgth] [dict get $fieldInfo value ubyteVector]]
-        if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-        set result [stmsg_setFieldValue $handle "@filler" 0 [dict get $fieldInfo valuer .ubyteVector]]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      }
-      @crc {
-        set offset [crcEncode structmsg->encoded $offset [dict get $structmsg hdr hdrInfo hdrKeys totalLgth] crc [dict get $structmsg hdr headerLgth]]
-        if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-        set result [stmsg_setFieldValue $handle "@crc" $crc ""]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      }
-      @id {
-        return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD
-      }
-      @tablerows {
-      }
-      @tablerowfields {
-        if {[dict get $structmsg msg numTableRows] > 0} {
-          set row 0
-          set col 0
-          set cell 0
-          while (row < [dict get $structmsg msg numTableRows) {
-            while {$col < [dict get $structmsg msg numRowFields]} {
-               set cell [expr {$col + $row * [dict get $structmsg msg numRowFields]}]
-               set fieldInfo [lindex [dict get $structmsg msg tableFieldInfos] $cell]
-               set offset [encodeField msgPtr $fieldInfo $offset]
-               if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-               incr col
-            }
-            incr row
-            set col 0
+      # and now the names
+      set offset [uint16Encode data $offset $size]
+      set idx 0
+      set nameIdx 1
+      while {$idx < [dict get $definition numFields]} {
+        set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
+        if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} { 
+          set result [getFieldIdName [dict get $fieldInfo fieldId] fieldName]
+          if {$result != $::STRUCT_MSG_ERR_OK} { return -1 }
+          set offset [uint8VectorEncode data $offset $fieldName [string length $fieldName]]
+          if {$nameIdx < $numEntries} {
+            set offset [uint8Encode data $offset 0]
+          } else {
+            set offset [uint8Encode data $offset 0]
           }
+          incr nameIdx
         }
+        incr idx
       }
-      }
-    } else {
-      set offset [encodeField msgPtr $fieldInfo $offset]
+      return $offset
+    }
+    
+    # ============================= normalFieldNamesDecode ========================
+    
+    proc normalFieldNamesDecode {data offset} {
+      return offset
+    }
+    
+    # ============================= definitionEncode ========================
+    
+    proc definitionEncode {dataVar offset definition normNamesOffsets} {
+      upvar $dataVar data
+    
+      set idx 0
+      set offset [uint8Encode data $offset [dict get $definition numFields]]
       if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-    }
-    incr idx
-  }
-  dict lappend structmsg flags STRUCT_MSG_ENCODED
-puts stderr "ENCODING DONE offset: $offset!"
-  return $::STRUCT_MSG_ERR_OK
-}
-
-# ============================= stmsg_getEncoded ========================
-
-proc stmsg_getEncoded {handle encodedVar lgthVar} {
-  upvar $encodedVar encoded
-  upvar $lgthVar lgth
-
-  set structmsg [structmsg_get_structmsg_ptr $handle]
-#  checkHandleOK(structmsg)
-  if {[dict get $structmsg encoded] eq ""} {
-    return $::STRUCT_MSG_ERR_NOT_ENCODED
-  }
-  set encoded [dict get $structmsg encoded]
-  set lgth [dict get $structmsg hdr hdrInfo hdrKeys totalLgth]
-  return $::STRUCT_MSG_ERR_OK
-}
-
-# ============================= stmsg_decodeMsg ========================
-
-proc stmsg_decodeMsg {handle data} {
-  set structmsg [structmsg_get_structmsg_ptr $handle]
-#  checkHandleOK(structmsg)
-  set structmsg todecode [string range $data 0 [dict get $structmsg hdr hdrInfo hdrKeys totalLgth]]
-  set msgPtr [dict get structmsg todecode]
-  set offset 0
-  set offset [uint16Decode $msgPtr $offset structmsg->hdr.hdrInfo.hdrKeys.src]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint16Decode $msgPtr $offset structmsg->hdr.hdrInfo.hdrKeys.dst]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint16Decode $msgPtr $offset structmsg->hdr.hdrInfo.hdrKeys.totalLgth]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint16Decode $msgPtr $offset structmsg->hdr.hdrInfo.hdrKeys.cmdKey]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint16Decode $msgPtr $offset structmsg->hdr.hdrInfo.hdrKeys.cmdLgth]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set result [structmsg_fillHdrInfo $handle $structmsg]
-  if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-  set offset [uint8Decode $msgPtr $offset numEntries]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set idx 0
-  while {$idx < $numEntries} {
-    set fieldInfo [lindex [dict get $structmsg msg fieldInfos] $idx]
-    if {[string range [dict get $fieldInfo fieldName] 0 0] eq "@"} {
-      set result [structmsg_getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set specFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
-      switch $specFieldName { 
-      @src -
-      @dst -
-      @targetCmd -
-      @totalLgth -
-      @cmdKey -
-      @cmdLgth {
-puts stderr [format "funny should decode: %s" [dict get $fieldInfo fieldName]]
-      }
-      @randomNum {
-        set offset [randomNumDecode $msgPtr $offset fieldInfo->value.uval]
-        if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      }
-      @sequenceNum {
-        set offset [sequenceNumDecode $msgPtr $offset fieldInfo->value.uval]
-        if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      }
-      @filler {
-        set offset [fillerDecode $msgPtr $offset [dict get $fieldInfo fieldLgth] fieldInfo->value.ubyteVector]
-        if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      }
-      @crc {
-        set offset [crcDecode $msgPtr $offset [dict get $structmsg hdr hdrInfo hdrKeys cmdLgth] fieldInfo->value.ushortVal [dict get $structmsg hdr headerLgth]]
-        if {$offset < 0} {
-          return $::STRUCT_MSG_ERR_BAD_CRC_VALUE
-        }
-      }
-      @id {
-        return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD
-      }
-      @tablerows {
-      }
-      @tablerowfields {
-        if {[dict get $structmsg msg numTableRows] > 0} {
-          set row 0
-          set col 0
-          set cell 0
-          while {$row < [dict get $structmsg msg numTableRows]} {
-            while {$col < [dict get $structmsg msg numRowFields]} {
-               set cell [expr {$col + $row * [dict get $structmsg msg numRowFields]}]
-               set fieldInfo [lindex [dict get $structmsg msg tableFieldInfos] $cell]
-               set offset [decodeField $msgPtr $fieldInfo $offset)
-               if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-               incr col
+      while {$idx < [dict get $definition numFields]} {
+        set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
+        if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
+          set idIdx 0
+          set found 0
+          while {$idIdx < [dict get $definition numFields]} {
+            if {[dict get [lindex $normNamesOffsets $idIdx] id] == 0} {
+              # id 0 is not used to be able to stop here!!
+              break
             }
-            incr row
-            set col 0
+            if {[dict get $fieldInfo fieldId] == [dict get [lindex $normNamesOffsets $idIdx] id]} {
+              set nameOffset [dict get [lindex $normNamesOffsets $idIdx] offset]
+              set found 1
+              break
+            }
+            incr idIdx
           }
+          if {!$found} {
+            return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
+          }
+          set offset [uint16Encode data $offset $nameOffset]
+        } else {
+          set offset [uint16Encode data $offset [dict get $fieldInfo fieldId]]
         }
+        set offset [uint8Encode data $offset [dict get $fieldInfo fieldType]]
+        set offset [uint16Encode data $offset [dict get $fieldInfo fieldLgth]]
+        incr idx
       }
-      }
-      dict lappend fieldInfo flags STRUCT_MSG_FIELD_IS_SET
-    } else {
-      set offset [decodeField $msgPtr $fieldInfo $offset]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      dict lappend fieldInfo flags STRUCT_MSG_FIELD_IS_SET
+      return $offset
     }
-    incr idx
-  }
-  dict lappend structmsg flags STRUCT_MSG_DECODED
-  return $::STRUCT_MSG_ERR_OK
-}
-
-
-# ============================= structmsg_getDefinitionDict ========================
-
-proc structmsg_getDefinitionDict {name stmsgDefinitionVar} {
-  upvar $stmsgDefinitionVar stmsgDefinition
-
-  set idx 0
-  foreach definition [dict get $::structmsg(structmsgDefinitions) definitions] {
-    if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
-      set stmsgDefinition $definition
+    
+    # ============================= definitionDecode ========================
+    
+    proc definitionDecode {data offset} {
+      # first the keys
+      set offset [::structmsg encdec uint8Decode $data $offset numNameEntries]
+      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
+      set idsStart $offset
+      incr offset [expr {$numNameEntries * [sizeof uint16_t]}]
+      set idsEnd $offset
+      # and now the names
+      set offset [::structmsg encdec uint16Decode $data $offset namesSize]
+      if {$offset < 0} { return $offset }
+      set namesStart $offset
+      incr offset $namesSize
+      set definitionStart [expr {$namesStart + $namesSize}]
+      set offset [uint16Decode $data $offset definitionLgth]
+      if {$offset < 0} { return $offset }
+      set offset [uint8Decode $data $offset nameLgth]
+      if {$offset < 0} { return $offset }
+      set name [string range $data $offset [expr {$offset + $nameLgth - 2}]]
+      incr offset $nameLgth
+      set offset [uint8Decode $data $offset numFields]
+      if {$offset < 0} { return $offset }
+      set result [::structmsg def createDefinition $name $numFields]
+    #  checkOffsetErrOK(result)
+      set definitionIdx 0
+      set namesIdx 0
+      while {$definitionIdx < $numFields} { 
+        set offset [uint16Decode $data $offset fieldId]
+        if {$offset < 0} { return $offset }
+        if {$fieldId > $::STRUCT_MSG_SPEC_FIELD_LOW} {
+          set result [::structmsg def getIdFieldNameStr $fieldId fieldName]
+    #      checkOffsetErrOK(result)
+        } else {
+          set fieldId [expr {$namesIdx + 1}]
+          set myOffset [expr {$idsStart + ($namesIdx * [sizeof uint16_t])}]
+          set myOffset [::structmsg encdec uint16Decode $data $myOffset nameOffset]
+          set myStartIdx [expr {$namesStart + $nameOffset}]
+          set myEndIdx $myStartIdx
+          while {true} {
+            set myEndIdx [uint8Decode $data $myEndIdx ch]
+            if {$ch == 0} {
+              incr myEndIdx -2 ; # the 0 char and the offset has been moved after the 0 char
+              break
+            }
+          }
+          set fieldName [string range $data $myStartIdx $myEndIdx]
+          incr namesIdx
+        }
+        set offset [uint8Decode $data $offset fieldTypeId]
+        if {$offset < 0} { return $offset }
+        set result [::structmsg def getFieldTypeStr $fieldTypeId fieldType]
+        if {$result < 0} { return -1 }
+        set offset [::structmsg encdec uint16Decode $data $offset fieldLgth]
+        if {$offset < 0} { return $offset }
+    #puts stderr [format "add field: %s fieldId: %d fieldType: %d  %s fieldLgth: %d offset: %d" $fieldName $fieldId $fieldTypeId $fieldType $fieldLgth $offset]
+        set result [::structmsg def addFieldDefinition  $name $fieldName $fieldType $fieldLgth]
+        if {$result < 0} { return -1 }
+        incr definitionIdx
+      }
+      return $offset
+    }
+    
+    # ============================= fillHdrInfo ========================
+    
+    proc fillHdrInfo {handle} {
+      # fill the hdrInfo
+      set hdrInfo [dict get $::structmsg($handle) hdr hdrInfo]
+      set hdrKeys [dict get $hdrInfo hdrKeys]
+      set hdrId ""
+      set offset 0
+      set offset [uint16Encode hdrId $offset [dict get $hdrKeys src]]
+      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
+      set offset [uint16Encode hdrId $offset [dict get $hdrKeys dst]]
+      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
+      set offset [uint16Encode hdrId $offset [dict get $hdrKeys totalLgth]]
+      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
+      set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdKey]]
+      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
+      set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdLgth]]
+      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
+      dict set ::::structmsg($handle) hdr hdrInfo hdrId $hdrId
       return $::STRUCT_MSG_ERR_OK
     }
-  }
-  return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
-}
-# ============================= getSpecFieldSizes ========================
-
-proc getSpecFieldSizes {numFieldsVar namesSizeVar} {
-  upvar $numFieldVars numFields
-  upvar $namesSizeVar namesSize
-
-  set numFields 0
-  set namesSize 0
-  foreach entry $::structmsg(structmsgSpecialFieldNames) {
-    if {[dict get $entry fieldName] ne ""} {
-      incr numFields
-      set namesSize [expr {$namesSize + [string length [dict get $entry fieldName]] + 1}] ;  # +1 for "\0" as separator
-#puts [format "%s: %d %d" [expr {[dict get $entry fieldName] * $numFields}] * $namesSize]
-    }
-  }
-  return $::STRUCT_MSG_ERR_OK
-}
-
-# ============================= structmsg_encodeDefinition ========================
-
-proc structmsg_encodeDefinition {name dataVar lgthVar} {
-  upvar $dataVar data
-  upvar $lgthVar lgth
-
-  set src 123
-  set dst 987
-  set cmdKey $::STRUCT_MSG_DEFINITION_CMD_KEY
-
-  set idx 0
-  while {$idx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
-    set definition [lindex [dict get $::structmsg(structmsgDefinitions) definitions] $idx]
-    if {$name  eq [dict get $definition name]} {
-      set found 1
-      break
-    }
-    incr idx
-  }
-  if {!$found} {
-    return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND
-  }
-  set numNormFields 0
-  set normNamesSize 0
-  set idx 0
-  while {$idx < [dict get $definition numFields]} {
-    set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
-    if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
-      set result [getFieldIdName [dict get $fieldInfo fieldId] fieldName]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-#puts stderr [format "fieldName: %s" $fieldName]
-      incr numNormFields
-      set normNamesSize [expr {$normNamesSize + [string length $fieldName] + 1}]
-    }
-    incr idx
-  }
-  set normNamesOffsets [list]
-  # nameLgth + name of Definition
-  set definitionPayloadSize [expr {[sizeof uint8_t] + [string length $name] + 1}]
-  # fieldId uint16_t, fieldType uint8_t, fieldLgth uint16_t
-  set definitionPayloadSize [expr {$definitionPayloadSize + [dict get $definition numFields] * ([sizeof uint16_t] + [sizeof uint8_t] + [sizeof uint16_t])}]
-  set payloadSize $::STRUCT_MSG_CMD_HEADER_LENGTH ; # cmdKey + cmdLgth
-  # numEntries uint8_t randomNum
-  set payloadSize [expr {$payloadSize + [sizeof uint8_t] + [sizeof uint32_t]}]
-  # len ids + ids (numNormFields * (uint16_t)) + len Names + names size
-  set payloadSize [expr {$payloadSize + [sizeof uint8_t] + $numNormFields * [sizeof uint16_t] + [sizeof uint16_t] + $normNamesSize}]
-  # size definitionPayload + definitionPayload
-  set payloadSize [expr {$payloadSize + [sizeof uint16_t] + $definitionPayloadSize}]
-  set fillerSize 0
-  set myLgth [expr {$payloadSize + [sizeof uint16_t]}] ; # sizeof(uint16_t) for CRC
-  while {($myLgth % 16) != 0} {
-    incr myLgth
-    incr fillerSize
-  }
-  set cmdLgth [expr {$payloadSize + $fillerSize + [sizeof uint16_t]}]
-  set totalLgth [expr {$::STRUCT_MSG_HEADER_LENGTH + $cmdLgth}]
-puts stderr [format "cmdLgth: %d totalLgth: %d" $cmdLgth $totalLgth]
-  dict set definition encoded [list]
-  set encoded ""
-  set offset 0
-  set offset [uint16Encode encoded $offset $src]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode encoded $offset $dst]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode encoded $offset $totalLgth]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode encoded $offset $cmdKey]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode encoded $offset $cmdLgth]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [randomNumEncode encoded $offset randomNum]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [normalFieldNamesEncode encoded $offset $definition normNamesOffsets $numNormFields $normNamesSize]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint16Encode encoded $offset $definitionPayloadSize]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint8Encode encoded $offset [expr {[string length $name] + 1}]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint8VectorEncode encoded $offset $name [string length $name ]]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [uint8Encode encoded $offset 0]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [definitionEncode encoded $offset $definition $normNamesOffsets]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [fillerEncode encoded $offset $fillerSize dummy]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-  set offset [crcEncode encoded $offset $totalLgth crc $::STRUCT_MSG_HEADER_LENGTH]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-puts stderr [format "after crc offset: %d totalLgth :%d crc: 0x%04x" $offset $totalLgth $crc]
-  set data $encoded
-  set lgth $totalLgth
-  return $::STRUCT_MSG_ERR_OK
-}
-
-# ============================= structmsg_decodeDefinition ========================
-
-proc structmsg_decodeDefinition {data} {
-  set offset 0
-  set offset [uint16Decode $data $offset src]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint16Decode $data $offset dst]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint16Decode $data $offset totalLgth]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint16Decode $data $offset cmdKey]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  if {$cmdKey != $::STRUCT_MSG_DEFINITION_CMD_KEY} {
-    return $::STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY
-  }
-  set offset [uint16Decode $data $offset cmdLgth]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set offset [uint32Decode $data $offset randomNum]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  # now check the crc
-  set crcOffset [expr {$totalLgth - [sizeof uint16_t]}]
-  set crcOffset [crcDecode $data $crcOffset $cmdLgth crc $::STRUCT_MSG_HEADER_LENGTH]
-puts stderr "crcOffset: $crcOffset!offset: $offset!"
-  set offset [definitionDecode $data $offset]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  set myLgth [expr {$offset - $::STRUCT_MSG_HEADER_LENGTH + [sizeof uint16_t]}]
-  set fillerSize 0
-  while {($myLgth % 16) != 0} {
-    incr myLgth
-    incr fillerSize
-  }
-  set offset [fillerDecode $data $offset $fillerSize filler]
-  if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-  return $::STRUCT_MSG_ERR_OK
-}
-
-# ============================= structmsg_deleteDefinition ========================
-
-proc structmsg_deleteDefinition {name} {
-  set definitionsIdx 0
-  set found 0
-  set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
-  while {$definitionsIdx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
-    set definition [lindex $definitions $definitionsIdx]
-    if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
-      set found 1
-      break
-    }
-    incr definitionsIdx
-  }
-  if {!$found} {
-    return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND
-  }
-  set definitionIdx 0
-  while {$definitionIdx < [dict get $definition numFields]} {
-    set fieldInfo [lindex [dict get $definition fieldInfos] $definitionIdx]
-    set nameIdx 0
-    set nameFound 0
-    if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
-      while {$nameIdx < [dict get $::structmsg(fieldNameDefinitions) numDefinitions]} {
-        set nameEntry [lindex [dict get $::structmsg(fieldNameDefinitions) definitions] $nameIdx]
-        if {[dict get $fieldInfo fieldId] == [dict get $nameEntry id]} {
-          set result [structmsg_getFieldNameId [dict get $nameEntry fieldName] fieldId $::STRUCT_MSG_DECR]
-          if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-          set nameFound 1
-          break
+    
+    # ============================= encodeField ========================
+    
+    proc encodeField {encodedVar fieldInfo offset} {
+      upvar $encodedVar encoded
+    
+      switch [dict get $fieldInfo fieldType] {
+        int8_t {
+          set offset [int8Encode encoded $offset [dict get $fieldInfo value]]
         }
-        incr nameIdx
+        uint8_t {
+          set offset [uint8Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        int16_t {
+          set offset [int16Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        uint16_t {
+          set offset [uint16Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        int32_t {
+          set offset [int32Encode encoded $$offset [dict get $fieldInfo value]]
+        }
+        uint32_t {
+          set offset [uint32Encode encoded $offset [dict get $fieldInfo value]]
+        }
+        int8_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int8Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint8_t* {
+          append encoded [dict get $fieldInfo value]
+          set offset [expr {$offset + [dict get $fieldInfo fieldLgth]}]
+        }
+        int16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint16_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint16Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        int32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [int32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
+        uint32_t* {
+          set fieldIdx 0
+          while {$fieldIdx < [dict get $fieldInfo fieldLgth]} {
+            set offset [uint32Encode encoded $offset [lindex [dict get $fieldInfo value] $fieldIdx]]
+            incr fieldIdx
+          }
+        }
       }
-      if {!$nameFound} {
-        return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
+      return $offset
+    }
+    
+    # ============================= decodeField ========================
+    
+    proc decodeField {todecode fieldInfoVar offset} {
+      upvar $fieldInfoVar fieldInfo
+    
+      set fieldTypeName [dict get $fieldInfo fieldType]
+      switch $fieldTypeName {
+        int8_t {
+          set offset [int8Decode $todecode $offset value]
+        }
+        unit8_t {
+          set offset [uint8Decode $todecode $offset value]
+        }
+        int16_t {
+          set offset [int16Decode $todecode $offset value]
+        }
+        unit16_t {
+          set offset [uint16Decode $todecode $offset value]
+        }
+        int32_t {
+          set offset [int32Decode $todecode $offset value]
+        }
+        uint32_tT {
+          set offset [uint32Decode $todecode $offset value]
+        }
+        int8_t* {
+          set offset [int8VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
+        }
+        uint8_t* {
+          set offset [uint8VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
+        }
+        int16_t* {
+          set offset [int16VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
+        }
+        uint16_t* {
+          set offset [uint16VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
+        }
+        int32_t* {
+          set offset [int32VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
+        }
+        unit32_t* {
+          set offset [uint32VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
+        }
       }
+      if {$offset > 0} {
+        dict set fieldInfo value $value
+      }
+      return $offset
     }
-    incr definitionIdx
-  }
-  # nameDefinitions deleted
-
-  dict set definition numFields 0
-  dict set definition maxFields 0
-  dict set definition name ""
-  if {[dict exists $definition encoded]} {
-    dict set definition encoded ""
-  }
-  dict set definition fieldInfos ""
-  set definitions [lreplace $definitions $definitionsIdx $definitionsIdx $definition]
-  dict set ::structmsg(structmsgDefinitions) definitions $definitions
-  # definition deleted
-
-  return $::STRUCT_MSG_ERR_OK
-}
-
-# ============================= structmsg_deleteDefinitions ========================
-
-proc structmsg_deleteDefinitions {} {
-  # delete the whole structmsgDefinitions info, including fieldNameDefinitions info
-
-  set idx 0
-  while {$idx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
-    set definition [dict get $::structmsg(structmsgDefinitions) definitions] $idx]
-    if {[dict get $definition name] ne ""} {
-      structmsg_deleteDefinition [dict get $definition name]
+    
+    # ============================= stmsg_getEncoded ========================
+    
+    proc stmsg_getEncoded {handle encodedVar lgthVar} {
+      upvar $encodedVar encoded
+      upvar $lgthVar lgth
+    
+      set structmsg [structmsg_get_structmsg_ptr $handle]
+    #  checkHandleOK(structmsg)
+      if {[dict get $structmsg encoded] eq ""} {
+        return $::STRUCT_MSG_ERR_NOT_ENCODED
+      }
+      set encoded [dict get $structmsg encoded]
+      set lgth [dict get $structmsg hdr hdrInfo hdrKeys totalLgth]
+      return $::STRUCT_MSG_ERR_OK
     }
-    incr idx
-  }
-  dict set ::structmsg(structmsgDefinitions) numDefinitions 0
-  dict set ::structmsg(structmsgDefinitions) maxDefinitions 0
-  dict set ::structmsg(structmsgDefinitions) definitions [list]
-
-  dict set ::structmsg(fieldNameDefinitions) numDefinitions 0
-  dict set ::structmsg(fieldNameDefinitions) maxDefinitions 0
-  dict set ::structmsg(fieldNameDefinitions) definitions [list]
-
-  # all deleted/reset
-  return $::STRUCT_MSG_ERR_OK
-}
-
+    
+  } ; # namespace encdec
+} ; # namespace structmsg

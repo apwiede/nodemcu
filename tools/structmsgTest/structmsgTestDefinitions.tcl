@@ -37,59 +37,99 @@ source pdict.tcl
 source structmsgCmd.tcl
 source structmsgEncodeDecode.tcl
 source structmsgDefinitions.tcl
+source structmsgApi.tcl
 
-structmsg_initFieldTypeDefines
-structmsg_initSpecialFieldNames
+structmsg def initFieldTypeDefines
+structmsg def initSpecialFieldNames
+
+proc checkErrOK {result} {
+  puts stderr "result: $result!"
+}
 
 source structmsgTest2.tcl
 
 if {0} {
 set def "pwd1"
-structmsg_createStructmsgDefinition $def 15
-structmsg_addFieldDefinition $def "@src" "uint16_t" 2
-structmsg_addFieldDefinition $def "@dst" "uint16_t" 2
-structmsg_addFieldDefinition $def "@totalLgth" "uint16_t" 2
-structmsg_addFieldDefinition $def "@cmdKey" "uint16_t" 2
-structmsg_addFieldDefinition $def "@cmdLgth" "uint16_t" 2
-structmsg_addFieldDefinition $def "@randomNum" "uint32_t" 4
-structmsg_addFieldDefinition $def "@sequenceNum" "uint32_t" 4
-structmsg_addFieldDefinition $def "pwd1" "uint8_t*" 16
-structmsg_addFieldDefinition $def "@tablerows" "uint8_t" 1
-structmsg_addFieldDefinition $def "@tablerowfields" "uint8_t" 1
-structmsg_addFieldDefinition $def "ssid1" "uint8_t*" 16
-structmsg_addFieldDefinition $def "rssid1" "uint8_t*" 6
-structmsg_addFieldDefinition $def "channel1" "uint8_t*" 6
-structmsg_addFieldDefinition $def "@filler" "uint8_t*" 1
-structmsg_addFieldDefinition $def "@crc" "uint16_t" 2
+set result [structmsg create_definition $def 15]
+set result [structmsg add_fieldDefinition $def "@src" "uint16_t" 2
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@dst" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@totalLgth" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@cmdKey" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@cmdLgth" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@randomNum" "uint32_t" 4]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@sequenceNum" "uint32_t" 4]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "pwd1" "uint8_t*" 16]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@tablerows" "uint8_t" 1]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@tablerowfields" "uint8_t" 1]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "ssid1" "uint8_t*" 16]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "rssid1" "uint8_t*" 6]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "channel1" "uint8_t*" 6]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@filler" "uint8_t*" 1]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@crc" "uint16_t" 2]
+checkErrOK $result
 }
 if {1} {
 set def "pwd2"
-structmsg_createStructmsgDefinition "pwd2" 15
-structmsg_addFieldDefinition $def "@src" "uint16_t" 2
-structmsg_addFieldDefinition $def "@dst" "uint16_t" 2
-structmsg_addFieldDefinition $def "@totalLgth" "uint16_t" 2
-structmsg_addFieldDefinition $def "@cmdKey" "uint16_t" 2
-structmsg_addFieldDefinition $def "@cmdLgth" "uint16_t" 2
-structmsg_addFieldDefinition $def "@randomNum" "uint32_t" 4
-structmsg_addFieldDefinition $def "@sequenceNum" "uint32_t" 4
-structmsg_addFieldDefinition $def "pwd2" "uint8_t*" 16
-structmsg_addFieldDefinition $def "@tablerows" "uint8_t" 1
-structmsg_addFieldDefinition $def "@tablerowfields" "uint8_t" 1
-structmsg_addFieldDefinition $def "ssid1" "uint8_t*" 16
-structmsg_addFieldDefinition $def "rssid1" "uint8_t*" 6
-structmsg_addFieldDefinition $def "channel1" "uint8_t*" 6
-structmsg_addFieldDefinition $def "@filler" "uint8_t*" 1
-structmsg_addFieldDefinition $def "@crc" "uint16_t" 2
-structmsg_dumpFieldDefinition $def
-structmsg_encodeFieldDefinitionMessage $def data lgth
+set result [structmsg create_definition "pwd2" 15]
+set result [structmsg add_fieldDefinition $def "@src" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@dst" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@totalLgth" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@cmdKey" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@cmdLgth" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@randomNum" "uint32_t" 4]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@sequenceNum" "uint32_t" 4]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "pwd2" "uint8_t*" 16]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@tablerows" "uint8_t" 1]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@tablerowfields" "uint8_t" 1]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "ssid1" "uint8_t*" 16]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "rssid1" "uint8_t*" 6]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "channel1" "uint8_t*" 6]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@filler" "uint8_t*" 1]
+checkErrOK $result
+set result [structmsg add_fieldDefinition $def "@crc" "uint16_t" 2]
+checkErrOK $result
+set result [structmsg dump_fieldDefinition $def]
+checkErrOK $result
+set encoded [structmsg encode_fieldDefinition $def]
 set def pwd1
-structmsg_deleteDefinition $def
+set result [structmsg delete_fieldDefinition $def]
+checkErrOK $result
 set def pwd2
-structmsg_deleteDefinition $def
-structmsg_decodeFieldDefinitionMessage $data
-structmsg_dumpFieldDefinition $def
+set result [structmsg delete_fieldDefinition $def]
+checkErrOK $result
+set decoded [structmsg decode_fieldDefinition $def $encoded]
+set result [structmsg dump_fieldDefinition $def]
+checkErrOK $result
 }
 
-structmsg_createMsgFromDefinition $def
+set result [structmsg create_msgFromDefinition $def]
+checkErrOK $result
 puts stderr "msgfromdef done"
-structmsg_decode $handle $encoded
+set decoded [structmsg decode $handle $encoded]
