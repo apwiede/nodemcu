@@ -88,7 +88,7 @@ checkOK(result,"@crc")
 --result=structmsg.dumpdef(def)
 --print(tostring(result))
 end
-if (false) then
+if (true) then
 encoded2=structmsg.encodedef(def)
 --print("encoded2 len: "..tostring(string.len(encoded2)))
 encrypted2=structmsg.encryptdef(def,cryptkey)

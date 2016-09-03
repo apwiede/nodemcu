@@ -227,7 +227,7 @@ typedef struct hdrKeys
   uint16_t cmdLgth;
 } hdrKeys_t;
 
-typedef union hdrInfo {
+typedef struct hdrInfo {
   hdrKeys_t hdrKeys;
   uint8_t hdrId[sizeof(hdrKeys_t)];
 } hdrInfo_t;
@@ -276,7 +276,7 @@ int structmsg_dumpFieldDefinition (const uint8_t *name);
 int structmsg_deleteStructmsgDefinition(const uint8_t *name);
 int structmsg_deleteStructmsgDefinitions();
 int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
-int structmsg_getDefinitionPtr(const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, stmsgDefinition_t **stmsgDefinition);
+int structmsg_getDefinitionPtr(const uint8_t *name, stmsgDefinition_t **stmsgDefinition, uint8_t *definitionsIdx);
 int stmsg_getDefinitionName(uint8_t *decrypted, uint8_t **name);
 int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
 int structmsg_encdecDefinition(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
@@ -298,13 +298,19 @@ int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int num
 int stmsg_setTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
 int stmsg_getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
 int stmsg_getTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
-int structmsg_encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
+int structmsg_encryptdecrypt(const uint8_t *handle, const uint8_t *msg, size_t mlgth, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
 int stmsg_setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
 int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle);
 int structmsg_encodeFieldDefinitionMessage (const uint8_t *name, uint8_t **data, int *lgth);
 int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *data);
 int structmsg_fillHdrInfo(const uint8_t *handle, structmsg_t *structmsg);
 int structmsg_createMsgFromDefinition(const uint8_t *name);
+int structmsg_getDefinitionNormalFieldNames(const uint8_t *name, uint8_t ***normalFieldNames);
+int structmsg_getDefinitionTableFieldNames(const uint8_t *name, uint8_t ***tableFieldNames);
+int structmsg_getDefinitionNumTableRows(const uint8_t *name, uint8_t *numTableRows);
+int structmsg_getDefinitionNumTableRowFields(const uint8_t *name, uint8_t *numTableRowFields);
+int structmsg_getDefinitionFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo);
+int structmsg_getDefinitionTableFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo);
 
 #ifdef	__cplusplus
 }

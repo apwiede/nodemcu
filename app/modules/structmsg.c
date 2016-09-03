@@ -160,7 +160,8 @@ static int structmsg_encdec (lua_State *L, bool enc) {
   handle = luaL_checkstring( L, 1 );
   key = luaL_checklstring (L, 2, &klen);
   iv = luaL_optlstring (L, 3, "", &ivlen);
-  result = stmsg_encdec(handle, key, klen, iv, ivlen, enc, &buf, &lgth);
+  result = structmsg_encryptdecrypt(handle, NULL, 0, key, klen, iv, ivlen,enc, &buf, &lgth);
+//  result = stmsg_encdec(handle, key, klen, iv, ivlen, enc, &buf, &lgth);
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushlstring (L, buf, lgth);
   } else {
@@ -503,7 +504,6 @@ static int structmsg_dump_fieldDefinition( lua_State* L ) {
   return 1;
 }
 
-
 // ============================= structmsg_encode_fieldDefinitionMessage =================
 
 static int structmsg_encode_fieldDefinitionMessage( lua_State* L ) {
@@ -625,37 +625,124 @@ static int structmsg_create_msgFromDefinition( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_get_definitionNormalFieldNames ==================
+
+static int structmsg_get_definitionNormalFieldNames( lua_State* L ) {
+  const uint8_t *name;
+  uint8_t **normalFieldNames;
+  int result;
+
+  name = luaL_checkstring (L, 1);
+  result = structmsg_getDefinitionNormalFieldNames(name, &normalFieldNames);
+  checkOKOrErr(L, result, "getdefnormfnames", "");
+  return 1;
+}
+
+// ============================= structmsg_get_definitionTableFieldNames ==================
+
+static int structmsg_get_definitionTableFieldNames( lua_State* L ) {
+  const uint8_t *name;
+  uint8_t **tableFieldNames;
+  int result;
+
+  name = luaL_checkstring (L, 1);
+  result = structmsg_getDefinitionTableFieldNames(name, &tableFieldNames);
+  checkOKOrErr(L, result, "getdeftablefnames", "");
+  return 1;
+}
+
+// ============================= structmsg_get_definitionNumTableRows ====================
+
+static int structmsg_get_definitionNumTableRows( lua_State* L ) {
+  const uint8_t *name;
+  uint8_t numTableRows;
+  int result;
+
+  name = luaL_checkstring (L, 1);
+  result = structmsg_getDefinitionNumTableRows(name, &numTableRows);
+  checkOKOrErr(L, result, "getdefntablerows", "");
+  return 1;
+}
+
+// ============================= structmsg_get_definitionNumTableRowFields ===============
+
+static int structmsg_get_definitionNumTableRowFields( lua_State* L ) {
+  const uint8_t *name;
+  uint8_t numTableRowFields;
+  int result;
+
+  name = luaL_checkstring (L, 1);
+  result = structmsg_getDefinitionNumTableRowFields(name, &numTableRowFields);
+  checkOKOrErr(L, result, "getdefntablerowfields", "");
+  return 1;
+}
+
+// ============================= structmsg_get_definitionFieldInfo ======================
+
+static int structmsg_get_definitionFieldInfo( lua_State* L ) {
+  const uint8_t *name;
+  const uint8_t *fieldName;
+  fieldInfoDefinition_t *fieldInfo;
+  int result;
+
+  name = luaL_checkstring (L, 1);
+  fieldName = luaL_checkstring (L, 2);
+  result = structmsg_getDefinitionFieldInfo(name, fieldName, &fieldInfo);
+  checkOKOrErr(L, result, "getdeffieldinfo", "");
+  return 1;
+}
+
+// ============================= structmsg_get_definitionTableFieldInfo ==================
+
+static int structmsg_get_definitionTableFieldInfo( lua_State* L ) {
+  const uint8_t *name;
+  const uint8_t *fieldName;
+  fieldInfoDefinition_t *fieldInfo;
+  int result;
+
+  name = luaL_checkstring (L, 1);
+  result = structmsg_getDefinitionTableFieldInfo(name, fieldName, &fieldInfo);
+  checkOKOrErr(L, result, "getdeftablefieldinfo", "");
+  return 1;
+}
+
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
-  { LSTRKEY( "create" ),             LFUNCVAL( structmsg_create ) },
-  { LSTRKEY( "delete" ),             LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "__gc" ),               LFUNCVAL( structmsg_delete ) },
-  { LSTRKEY( "encode" ),             LFUNCVAL( structmsg_encode ) },
-  { LSTRKEY( "getencoded" ),         LFUNCVAL( structmsg_get_encoded ) },
-  { LSTRKEY( "decode" ),             LFUNCVAL( structmsg_decode ) },
-  { LSTRKEY( "dump" ),               LFUNCVAL( structmsg_dump ) },
-  { LSTRKEY( "encrypt" ),            LFUNCVAL( structmsg_encrypt ) },
-  { LSTRKEY( "decrypt" ),            LFUNCVAL( structmsg_decrypt ) },
-  { LSTRKEY( "addField" ),           LFUNCVAL( structmsg_add_field ) },
-  { LSTRKEY( "setFillerAndCrc" ),    LFUNCVAL( structmsg_set_fillerAndCrc ) },
-  { LSTRKEY( "setFieldValue" ),      LFUNCVAL( structmsg_set_fieldValue ) },
-  { LSTRKEY( "setTableFieldValue" ), LFUNCVAL( structmsg_set_tableFieldValue ) },
-  { LSTRKEY( "getFieldValue" ),      LFUNCVAL( structmsg_get_fieldValue ) },
-  { LSTRKEY( "getTableFieldValue" ), LFUNCVAL( structmsg_get_tableFieldValue ) },
-  { LSTRKEY( "setcrypted" ),         LFUNCVAL( structmsg_set_crypted ) },
-  { LSTRKEY( "decryptgethandle" ),   LFUNCVAL( structmsg_decrypt_getHandle ) },
-  { LSTRKEY( "createdef" ),          LFUNCVAL( structmsg_create_msgDefinition ) },
-  { LSTRKEY( "adddeffield" ),        LFUNCVAL( structmsg_add_fieldDefinition ) },
-  { LSTRKEY( "dumpdef" ),            LFUNCVAL( structmsg_dump_fieldDefinition ) },
-  { LSTRKEY( "encodedef" ),          LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
-  { LSTRKEY( "decodedef" ),          LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
-  { LSTRKEY( "encryptdef" ),         LFUNCVAL( structmsg_encrypt_msgDefinition ) },
-  { LSTRKEY( "decryptdef" ),         LFUNCVAL( structmsg_decrypt_msgDefinition ) },
-  { LSTRKEY( "setcrypteddef" ),      LFUNCVAL( structmsg_set_crypted_msgDefinition ) },
-  { LSTRKEY( "decryptdefgetname" ),  LFUNCVAL( structmsg_decrypt_getDefinitionName ) },
-  { LSTRKEY( "deletedef" ),          LFUNCVAL( structmsg_delete_msgDefinition ) },
-  { LSTRKEY( "deletedefinitions" ),  LFUNCVAL( structmsg_delete_msgDefinitions ) },
-  { LSTRKEY( "createmsgfromdef" ),   LFUNCVAL( structmsg_create_msgFromDefinition ) },
+  { LSTRKEY( "create" ),                LFUNCVAL( structmsg_create ) },
+  { LSTRKEY( "delete" ),                LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "__gc" ),                  LFUNCVAL( structmsg_delete ) },
+  { LSTRKEY( "encode" ),                LFUNCVAL( structmsg_encode ) },
+  { LSTRKEY( "getencoded" ),            LFUNCVAL( structmsg_get_encoded ) },
+  { LSTRKEY( "decode" ),                LFUNCVAL( structmsg_decode ) },
+  { LSTRKEY( "dump" ),                  LFUNCVAL( structmsg_dump ) },
+  { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },
+  { LSTRKEY( "decrypt" ),               LFUNCVAL( structmsg_decrypt ) },
+  { LSTRKEY( "addField" ),              LFUNCVAL( structmsg_add_field ) },
+  { LSTRKEY( "setFillerAndCrc" ),       LFUNCVAL( structmsg_set_fillerAndCrc ) },
+  { LSTRKEY( "setFieldValue" ),         LFUNCVAL( structmsg_set_fieldValue ) },
+  { LSTRKEY( "setTableFieldValue" ),    LFUNCVAL( structmsg_set_tableFieldValue ) },
+  { LSTRKEY( "getFieldValue" ),         LFUNCVAL( structmsg_get_fieldValue ) },
+  { LSTRKEY( "getTableFieldValue" ),    LFUNCVAL( structmsg_get_tableFieldValue ) },
+  { LSTRKEY( "setcrypted" ),            LFUNCVAL( structmsg_set_crypted ) },
+  { LSTRKEY( "decryptgethandle" ),      LFUNCVAL( structmsg_decrypt_getHandle ) },
+  { LSTRKEY( "createdef" ),             LFUNCVAL( structmsg_create_msgDefinition ) },
+  { LSTRKEY( "adddeffield" ),           LFUNCVAL( structmsg_add_fieldDefinition ) },
+  { LSTRKEY( "dumpdef" ),               LFUNCVAL( structmsg_dump_fieldDefinition ) },
+  { LSTRKEY( "encodedef" ),             LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
+  { LSTRKEY( "decodedef" ),             LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
+  { LSTRKEY( "encryptdef" ),            LFUNCVAL( structmsg_encrypt_msgDefinition ) },
+  { LSTRKEY( "decryptdef" ),            LFUNCVAL( structmsg_decrypt_msgDefinition ) },
+  { LSTRKEY( "setcrypteddef" ),         LFUNCVAL( structmsg_set_crypted_msgDefinition ) },
+  { LSTRKEY( "decryptdefgetname" ),     LFUNCVAL( structmsg_decrypt_getDefinitionName ) },
+  { LSTRKEY( "deletedef" ),             LFUNCVAL( structmsg_delete_msgDefinition ) },
+  { LSTRKEY( "deletedefinitions" ),     LFUNCVAL( structmsg_delete_msgDefinitions ) },
+  { LSTRKEY( "createmsgfromdef" ),      LFUNCVAL( structmsg_create_msgFromDefinition ) },
+  { LSTRKEY( "getdefnormfnames" ),      LFUNCVAL( structmsg_get_definitionNormalFieldNames ) },
+  { LSTRKEY( "getdeftablefnames" ),     LFUNCVAL( structmsg_get_definitionTableFieldNames ) },
+  { LSTRKEY( "getdefntablerows" ),      LFUNCVAL( structmsg_get_definitionNumTableRows ) },
+  { LSTRKEY( "getdefntablerowfields" ), LFUNCVAL( structmsg_get_definitionNumTableRowFields ) },
+  { LSTRKEY( "getdeffieldinfo" ),       LFUNCVAL( structmsg_get_definitionFieldInfo ) },
+  { LSTRKEY( "getdeftablefieldinfo" ),  LFUNCVAL( structmsg_get_definitionTableFieldInfo ) },
   { LNILKEY, LNILVAL }
 };
 

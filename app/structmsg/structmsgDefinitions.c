@@ -290,31 +290,35 @@ int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields) 
   return STRUCT_MSG_ERR_NO_SLOT_FOUND;
 }
 
+// ============================= structmsg_getDefinitionPtr ========================
+
+int structmsg_getDefinitionPtr (const uint8_t *name, stmsgDefinition_t **definition, uint8_t *definitionsIdx) {
+  *definitionsIdx = 0;
+  while (*definitionsIdx < structmsgDefinitions.numDefinitions) {
+    *definition = &structmsgDefinitions.definitions[*definitionsIdx];
+    if (((*definition)->name != NULL) && (c_strcmp(name, (*definition)->name) == 0)) {
+      return STRUCT_MSG_ERR_OK;
+    }
+    (*definitionsIdx)++;
+  }
+  return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
+}
+
 // ============================= structmsg_addFieldDefinition ========================
 
 int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName, const uint8_t *fieldTypeStr, size_t fieldLgth) {
   stmsgDefinition_t *definition;
+  uint8_t definitionsIdx;
+  int result;
   fieldInfoDefinition_t *fieldInfo;
   int fieldId;
   int fieldType;
   int idx;
   int found = 0;
-  int result;
 
 //ets_printf("addFieldDefinition: %s %s %s %d\n", name, fieldName, fieldTypeStr, fieldLgth);
-  idx = 0;
-  while (idx < structmsgDefinitions.numDefinitions) {
-    definition = &structmsgDefinitions.definitions[idx];
-    if ((definition->name != NULL) && (c_strcmp(name, definition->name) == 0)) {
-      found = 1;
-      break;
-    }
-    definition++;
-    idx++;
-  }
-  if (!found) {
-    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
-  }
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
   if (definition->numFields >= definition->maxFields) {
     return STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS;
   }
@@ -338,23 +342,14 @@ int structmsg_dumpFieldDefinition (const uint8_t *name) {
   fieldInfoDefinition_t *fieldInfo;
   uint8_t *fieldIdStr;
   uint8_t *fieldTypeStr;
+  uint8_t definitionsIdx;
   int fieldType;
   int idx = 0;
   int found = 0;
   int result;
 
-  while (idx < structmsgDefinitions.numDefinitions) {
-    definition = &structmsgDefinitions.definitions[idx];
-    if (c_strcmp(name, definition->name) == 0) {
-      found = 1;
-      break;
-    }
-    definition++;
-    idx++;
-  }
-  if (!found) {
-    return STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
-  }
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
   ets_printf("definition: %s numFields: %d\n", name, definition->numFields);
   idx = 0;
   while (idx < definition->numFields) {
@@ -394,24 +389,25 @@ int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *
 
 int structmsg_encdecDefinition(const uint8_t *name, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
   stmsgDefinition_t *definition;
+  uint8_t definitionsIdx;
   int result;
 
   *buf = NULL;
   *lgth = 0;
-  result = structmsg_getDefinitionPtr(name, &structmsgDefinitions, &definition);
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
   checkErrOK(result);
 
   if (enc) {
     if (definition->encoded == NULL) {
       return STRUCT_MSG_ERR_NOT_ENCODED;
     }
-    result = structmsg_encryptdecrypt(definition->encoded, definition->totalLgth, key, klen, iv, ivlen, enc, &definition->encrypted, lgth);
+    result = structmsg_encryptdecrypt(NULL, definition->encoded, definition->totalLgth, key, klen, iv, ivlen, enc, &definition->encrypted, lgth);
     *buf = definition->encrypted;
   } else {
     if (definition->encrypted == NULL) {
       return STRUCT_MSG_ERR_NOT_ENCRYPTED;
     }
-    result = structmsg_encryptdecrypt(definition->encrypted, definition->totalLgth, key, klen, iv, ivlen, enc, &definition->todecode, lgth);
+    result = structmsg_encryptdecrypt(NULL, definition->encrypted, definition->totalLgth, key, klen, iv, ivlen, enc, &definition->todecode, lgth);
     *buf = definition->todecode;
   }
   return result;
@@ -421,9 +417,10 @@ int structmsg_encdecDefinition(const uint8_t *name, const uint8_t *key, size_t k
 
 int stmsg_setCryptedDefinition(const uint8_t *name, const uint8_t *crypted, int cryptedLgth) {
   stmsgDefinition_t *definition;
+  uint8_t definitionsIdx;
   int result;
 
-  result = structmsg_getDefinitionPtr(name, &structmsgDefinitions, &definition);
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
   checkErrOK(result);
   if (definition->encrypted != NULL) {
     os_free(definition->encrypted);
@@ -443,12 +440,116 @@ int stmsg_decryptGetDefinitionName(const uint8_t *encryptedMsg, size_t mlen, con
 
    decrypted = NULL;
    lgth = 0; 
-   result = structmsg_encryptdecrypt(encryptedMsg, mlen, key, klen, iv, ivlen, false, &decrypted, &lgth);
+   result = structmsg_encryptdecrypt(NULL, encryptedMsg, mlen, key, klen, iv, ivlen, false, &decrypted, &lgth);
    if (result != STRUCT_MSG_ERR_OK) {
      return result;
    }
    result = stmsg_getDefinitionName(decrypted, name);
    return result;
+}
+
+// ============================= structmsg_deleteDefinition ========================
+
+int structmsg_deleteDefinition(const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  name2id_t *nameEntry;
+  uint8_t definitionsIdx;
+  int idx;
+  int nameIdx;
+  int nameFound;
+  int result;
+  int fieldId;
+
+  result =  structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  idx = 0;
+  while (idx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[idx];
+    nameIdx = 0;
+    nameFound = 0;
+    if (fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW) {
+      while (nameIdx < fieldNameDefinitions->numDefinitions) {
+        nameEntry = &fieldNameDefinitions->definitions[nameIdx];
+        if (fieldInfo->fieldId == nameEntry->id) {
+          result = structmsg_getFieldNameId(nameEntry->str, &fieldId, STRUCT_MSG_DECR);
+          checkErrOK(result);
+          nameFound = 1;
+          break;
+        }
+        nameIdx++;
+      }
+      if (!nameFound) {
+        return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+      }
+    }
+    idx++;
+  }
+  // nameDefinitions deleted
+
+  definition->numFields = 0;
+  definition->maxFields = 0;
+  os_free(definition->name);
+  definition->name = NULL;
+  if (definition->encoded != NULL) {
+    os_free(definition->encoded);
+    definition->encoded = NULL;
+  }
+  os_free(definition->fieldInfos);
+  definition->fieldInfos = NULL;
+  if (definition->encoded != NULL) {
+    os_free(definition->encoded);
+    definition->encoded = NULL;
+  }
+  if (definition->encrypted != NULL) {
+    os_free(definition->encrypted);
+    definition->encrypted = NULL;
+  }
+  if (definition->todecode != NULL) {
+    os_free(definition->todecode);
+    definition->todecode = NULL;
+  }
+  definition->totalLgth = 0;
+  // definition deleted
+
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= structmsg_deleteDefinitions ========================
+
+int structmsg_deleteDefinitions(stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
+  // delete the whole structmsgDefinitions info, including fieldNameDefinitions info
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  name2id_t *nameEntry;
+  uint8_t *name;
+  int idx;
+  int nameIdx;
+  int found;
+  int nameFound;
+  int result;
+  int fieldId;
+
+  idx = 0;
+  while (idx < structmsgDefinitions->numDefinitions) {
+    definition = &structmsgDefinitions->definitions[idx];
+    if (definition->name != NULL) {
+      structmsg_deleteDefinition(definition->name, structmsgDefinitions, fieldNameDefinitions);
+    }
+    idx++;
+  }
+  structmsgDefinitions->numDefinitions = 0;
+  structmsgDefinitions->maxDefinitions = 0;
+  os_free(structmsgDefinitions->definitions);
+  structmsgDefinitions->definitions = NULL;
+
+  fieldNameDefinitions->numDefinitions = 0;
+  fieldNameDefinitions->maxDefinitions = 0;
+  os_free(fieldNameDefinitions->definitions);
+  fieldNameDefinitions->definitions = NULL;
+
+  // all deleted/reset
+  return STRUCT_MSG_ERR_OK;
 }
 
 // ============================= structmsg_deleteStructmsgDefinition ========================
@@ -472,10 +573,11 @@ int structmsg_createMsgFromDefinition(const uint8_t *name) {
   uint8_t *fieldName;
   uint8_t *fieldType;
   uint8_t *handle;
+  uint8_t definitionsIdx;
   int fieldIdx;
   int result;
 
-  result = structmsg_getDefinitionPtr(name, &structmsgDefinitions, &definition);
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
   checkErrOK(result);
   result = stmsg_createMsg(definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS, &handle);
 //ets_printf("create: handle: %s numFields: %d\n", handle, definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS);
@@ -503,5 +605,125 @@ int structmsg_createMsgFromDefinition(const uint8_t *name) {
     fieldIdx++;
   }
   return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= structmsg_getDefinitionNormalFieldNames ========================
+
+int structmsg_getDefinitionNormalFieldNames(const uint8_t *name, uint8_t ***normalFieldNames) {
+  stmsgDefinition_t *definition;
+  uint8_t definitionsIdx;
+  int result;
+
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= structmsg_getDefinitionTableFieldNames ========================
+
+int structmsg_getDefinitionTableFieldNames(const uint8_t *name, uint8_t ***tableFieldNames) {
+  stmsgDefinition_t *definition;
+  uint8_t definitionsIdx;
+  int result;
+
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= structmsg_getDefinitionNumTableRows ========================
+
+int structmsg_getDefinitionNumTableRows(const uint8_t *name, uint8_t *numTableRows) {
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  uint8_t definitionsIdx;
+  int idx;
+  int result;
+  uint8_t *fieldName;
+
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  idx = 0;
+  while(idx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[idx];
+    result  = structmsg_getIdFieldNameStr (fieldInfo->fieldId, &fieldName);
+    checkErrOK(result);
+    if (c_strcmp(fieldName, "@tablerows") == 0) {
+      *numTableRows = fieldInfo->fieldLgth;
+      return STRUCT_MSG_ERR_OK;
+    }
+  }
+  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ============================= structmsg_getDefinitionNumTableRowFields ========================
+
+int structmsg_getDefinitionNumTableRowFields(const uint8_t *name, uint8_t *numTableRowFields) {
+  stmsgDefinition_t *definition;
+  fieldInfoDefinition_t *fieldInfo;
+  uint8_t definitionsIdx;
+  int idx;
+  int result;
+  uint8_t *fieldName;
+
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  idx = 0;
+  while(idx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[idx];
+    result  = structmsg_getIdFieldNameStr (fieldInfo->fieldId, &fieldName);
+    checkErrOK(result);
+    if (c_strcmp(fieldName, "@tablerowfields") == 0) {
+      *numTableRowFields = fieldInfo->fieldLgth;
+      return STRUCT_MSG_ERR_OK;
+    }
+  }
+  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ============================= structmsg_getDefinitionFieldInfo ========================
+
+int structmsg_getDefinitionFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo) {
+  stmsgDefinition_t *definition;
+  uint8_t definitionsIdx;
+  int idx;
+  int result;
+  uint8_t *lookupFieldName;
+
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  idx = 0;
+  while(idx < definition->numFields) {
+    *fieldInfo = &definition->fieldInfos[idx];
+    result  = structmsg_getIdFieldNameStr ((*fieldInfo)->fieldId, &lookupFieldName);
+    checkErrOK(result);
+    if (c_strcmp(lookupFieldName, fieldName) == 0) {
+      return STRUCT_MSG_ERR_OK;
+    }
+  }
+  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ============================= structmsg_getDefinitionTableFieldInfo ========================
+
+int structmsg_getDefinitionTableFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo) {
+  stmsgDefinition_t *definition;
+  uint8_t definitionsIdx;
+  int idx;
+  int result;
+  uint8_t *lookupFieldName;
+
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  idx = 0;
+  while(idx < definition->numFields) {
+    *fieldInfo = &definition->fieldInfos[idx];
+    result  = structmsg_getIdFieldNameStr ((*fieldInfo)->fieldId, &lookupFieldName);
+    checkErrOK(result);
+    if (c_strcmp(lookupFieldName, fieldName) == 0) {
+      return STRUCT_MSG_ERR_OK;
+    }
+  }
+  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
 

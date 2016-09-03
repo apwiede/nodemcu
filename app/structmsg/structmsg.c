@@ -259,7 +259,10 @@ static int setHandleField(const uint8_t *handle, int fieldId, int fieldValue) {
 
 // ============================= structmsg_encryptdecrypt ========================
 
-int structmsg_encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
+int structmsg_encryptdecrypt(const uint8_t *handle, const uint8_t *msg, size_t mlgth, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
+  structmsg_t *structmsg;
+  const uint8_t *message;
+  size_t mlen;
   const crypto_mech_t *mech;
   const char *data;
   size_t dlen;
@@ -267,6 +270,31 @@ int structmsg_encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t 
   size_t clen;
   const uint8_t *what;
   uint8_t *crypted;
+
+  *buf = NULL;
+  *lgth = 0;
+  if (handle != NULL) {
+    structmsg = structmsg_get_structmsg_ptr(handle);
+    checkHandleOK(structmsg);
+
+    mlen = structmsg->hdr.hdrInfo.hdrKeys.totalLgth;
+    if (enc) {
+      if (structmsg->encoded == NULL) {
+        return STRUCT_MSG_ERR_NOT_ENCODED;
+      }
+      message = structmsg->encoded;
+//    result = structmsg_encryptdecrypt(structmsg->encoded, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->encrypted, lgth);
+    } else {
+      if (structmsg->encrypted == NULL) {
+        return STRUCT_MSG_ERR_NOT_ENCRYPTED;
+      }
+      message = structmsg->encrypted;
+//    result = structmsg_encryptdecrypt(structmsg->encrypted, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->todecode, lgth);
+    }
+  } else {
+    message = msg;
+    mlen = mlgth;
+  }
 
   mech = crypto_encryption_mech ("AES-CBC");
   if (mech == NULL) {
@@ -299,6 +327,15 @@ int structmsg_encryptdecrypt(const uint8_t *message, size_t mlen, const uint8_t 
     os_free (*buf);
     return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
   } else { 
+    if (enc) {
+      if (handle != NULL) {
+        structmsg->encrypted = *buf;
+      }
+    } else {
+      if (handle != NULL) {
+        structmsg->todecode = *buf;
+      }
+    }
     return STRUCT_MSG_ERR_OK;
   }
 }
@@ -935,33 +972,6 @@ int stmsg_dumpMsg(const uint8_t *handle) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= stmsg_encdec ========================
-
-int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
-  structmsg_t *structmsg;
-  int result;
-
-  *buf = NULL;
-  *lgth = 0;
-  structmsg = structmsg_get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
-
-  if (enc) {
-    if (structmsg->encoded == NULL) {
-      return STRUCT_MSG_ERR_NOT_ENCODED;
-    }
-    result = structmsg_encryptdecrypt(structmsg->encoded, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->encrypted, lgth);
-    *buf = structmsg->encrypted;
-  } else {
-    if (structmsg->encrypted == NULL) {
-      return STRUCT_MSG_ERR_NOT_ENCRYPTED;
-    }
-    result = structmsg_encryptdecrypt(structmsg->encrypted, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->todecode, lgth);
-    *buf = structmsg->todecode;
-  }
-  return result;
-} 
-
 // ============================= stmsg_addField ========================
 
 int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth) {
@@ -1227,7 +1237,7 @@ int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8
 
    decrypted = NULL;
    lgth = 0; 
-   result = structmsg_encryptdecrypt(encryptedMsg, mlen, key, klen, iv, ivlen, false, &decrypted, &lgth);
+   result = structmsg_encryptdecrypt(NULL, encryptedMsg, mlen, key, klen, iv, ivlen, false, &decrypted, &lgth);
    if (result != STRUCT_MSG_ERR_OK) {
      return result;
    }
