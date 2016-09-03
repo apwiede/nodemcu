@@ -91,7 +91,7 @@
 #  encoded
 #  todecode
 #  encrypted
-#  hasBeenEncoded
+#  hasBeenEncoded                   <-- flag for checking if @filler and @crc have been set!!
 # 
 # ::structmsg(hdrId2Handles) [list
 #  hdrId
@@ -245,334 +245,387 @@ namespace eval structmsg {
   namespace export dump_fieldDefinition encode_fieldDefinition decode_fieldDefinition
   namespace export set_crypted_definition decrypt_getDefinitionName encrypt_fieldDefinition
   namespace export decrypt_fieldDefinition delete_fieldDefinition delete_fieldDefinitions
-  namespace export create_msgFromDefinition
+  namespace export create_msgFromDefinition et_definitionNormalFieldNames
+  namespace export get_definitionTableFieldNames get_definitionNormalFieldNames get_definitionNumTableRows
+  namespace export get_definitionNumTableRowFields get_definitionFieldInfo get_definitionTableFieldInfo
 
 
-# ============================= checkOKOrErr ========================
-
-proc checkOKOrErr {result {where ""} {fieldName ""}}  {
-  if  {$result eq $::STRUCT_MSG_ERR_OK}  {
-    return "OK"
+  # ============================= checkOKOrErr ========================
+  
+  proc checkOKOrErr {result {where ""} {fieldName ""}}  {
+    if  {$result eq $::STRUCT_MSG_ERR_OK}  {
+      return "OK"
+    }
+  #puts stderr [format  "error result: %d"  result]
+    set errStr "ERROR"
+    switch  [dict get $::structmsg(structmsgErrId2Str) $result]  {
+      ERR_VALUE_NOT_SET {
+        return [format "%s: %s: value for field: %s not set"  $errStr  $where  $fieldName]
+      }
+      ERR_VALUE_OUT_OF_RANGE {
+        return [format "%s: %s: field: '%s' value out of range"  $errStr  $where  $fieldName]
+      }
+      ERR_BAD_VALUE {
+        return [format "%s: %s: field: '%s' bad value"  $errStr  $where  $fieldName]
+      }
+      ERR_BAD_FIELD_TYPE {
+        return [format "%s: %s: field: '%s' bad field type"  $errStr  $where  $fieldName]
+      }
+      ERR_FIELD_NOT_FOUND {
+        return [format "%s: %s: field: '%s' not found"  $errStr  $where  $fieldName]
+      }
+      ERR_BAD_HANDLE {
+        return [format "%s: bad handle"  $errStr]
+      }
+      ERR_OUT_OF_MEMORY {
+        error [format "out of memory"]
+      }
+      ERR_HANDLE_NOT_FOUND {
+        return [format "%s: handle not found"  $errStr]
+      }
+      ERR_NOT_ENCODED {
+        return [format "%s: not encoded"  $errStr]
+      }
+      ERR_DECODE_ERROR {
+        return [format "%s: decode error"  $errStr]
+      }
+      ERR_BAD_CRC_VALUE {
+        return [format "%s: bad crc val"  $errStr]
+      }
+      ERR_CRYPTO_INIT_FAILED {
+        return [format "%s: crypto init failed"  $errStr]
+      }
+      ERR_CRYPTO_OP_FAILED {
+        return [format "%s: crypto op failed"  $errStr]
+      }
+      ERR_CRYPTO_BAD_MECHANISM {
+        return [format "%s: crypto bad mechanism"  $errStr]
+      }
+      ERR_NOT_ENCRYPTED {
+        return [format "%s: not encrypted"  $errStr]
+      }
+      ERR_DEFINITION_NOT_FOUND {
+        return [format "%s: definiton not found"  $errStr]
+      }
+      ERR_BAD_SPECIAL_FIELD {
+        return [format "%s: bad special field"  $errStr]
+      }
+      ERR_DEFINITION_TOO_MANY_FIELDS {
+        return [format "%s: definition too many fields"  $errStr]
+      }
+      ERR_BAD_TABLE_ROW {
+        return [format "%s: bad table row"  $errStr]
+      }
+      ERR_TOO_MANY_FIELDS {
+        return [format "%s: too many fields"  $errStr]
+      }
+      ERR_BAD_DEFINTION_CMD_KEY {
+        return [format "%s: bad definition cmd key"  $errStr]
+      }
+      ERR_NO_SLOT_FOUND {
+        return [format "%s: no slot found"  $errStr]
+      }
+      ERR_DUPLICATE_FIELD {
+        return [format "%s: duplicate field"  $errStr]
+      }
+      default {
+        return [format "%s: funny result error code"  $errStr]
+      }
+    }
   }
-#puts stderr [format  "error result: %d"  result]
-  set errStr "ERROR"
-  switch  [dict get $::structmsg(structmsgErrId2Str) $result]  {
-    ERR_VALUE_NOT_SET {
-      return [format "%s: %s: value for field: %s not set"  $errStr  $where  $fieldName]
-    }
-    ERR_VALUE_OUT_OF_RANGE {
-      return [format "%s: %s: field: '%s' value out of range"  $errStr  $where  $fieldName]
-    }
-    ERR_BAD_VALUE {
-      return [format "%s: %s: field: '%s' bad value"  $errStr  $where  $fieldName]
-    }
-    ERR_BAD_FIELD_TYPE {
-      return [format "%s: %s: field: '%s' bad field type"  $errStr  $where  $fieldName]
-    }
-    ERR_FIELD_NOT_FOUND {
-      return [format "%s: %s: field: '%s' not found"  $errStr  $where  $fieldName]
-    }
-    ERR_BAD_HANDLE {
-      return [format "%s: bad handle"  $errStr]
-    }
-    ERR_OUT_OF_MEMORY {
-      error [format "out of memory"]
-    }
-    ERR_HANDLE_NOT_FOUND {
-      return [format "%s: handle not found"  $errStr]
-    }
-    ERR_NOT_ENCODED {
-      return [format "%s: not encoded"  $errStr]
-    }
-    ERR_DECODE_ERROR {
-      return [format "%s: decode error"  $errStr]
-    }
-    ERR_BAD_CRC_VALUE {
-      return [format "%s: bad crc val"  $errStr]
-    }
-    ERR_CRYPTO_INIT_FAILED {
-      return [format "%s: crypto init failed"  $errStr]
-    }
-    ERR_CRYPTO_OP_FAILED {
-      return [format "%s: crypto op failed"  $errStr]
-    }
-    ERR_CRYPTO_BAD_MECHANISM {
-      return [format "%s: crypto bad mechanism"  $errStr]
-    }
-    ERR_NOT_ENCRYPTED {
-      return [format "%s: not encrypted"  $errStr]
-    }
-    ERR_DEFINITION_NOT_FOUND {
-      return [format "%s: definiton not found"  $errStr]
-    }
-    ERR_BAD_SPECIAL_FIELD {
-      return [format "%s: bad special field"  $errStr]
-    }
-    ERR_DEFINITION_TOO_MANY_FIELDS {
-      return [format "%s: definition too many fields"  $errStr]
-    }
-    ERR_BAD_TABLE_ROW {
-      return [format "%s: bad table row"  $errStr]
-    }
-    ERR_TOO_MANY_FIELDS {
-      return [format "%s: too many fields"  $errStr]
-    }
-    ERR_BAD_DEFINTION_CMD_KEY {
-      return [format "%s: bad definition cmd key"  $errStr]
-    }
-    ERR_NO_SLOT_FOUND {
-      return [format "%s: no slot found"  $errStr]
-    }
-    ERR_DUPLICATE_FIELD {
-      return [format "%s: duplicate field"  $errStr]
-    }
-    default {
-      return [format "%s: funny result error code"  $errStr]
-    }
+  
+  # ============================= encdec_msgDefinition ========================
+  
+  proc encdec_msgDefinition  {handle key enc iv bufVar lgthVar}  {
+    upvar $bufVar buf
+    upvar $lgthVar lgth
+  
+    set result [encdecDefinition $handle $key $enc $iv buf  lgth]
+    return $result
   }
-}
-
-# ============================= encdec_msgDefinition ========================
-
-proc encdec_msgDefinition  {handle key enc iv bufVar lgthVar}  {
-  upvar $bufVar buf
-  upvar $lgthVar lgth
-
-  set result [encdecDefinition $handle $key $enc $iv buf  lgth]
-  return $result
-}
-
-# ============================= create ========================
-
-proc create {numFields} {
-  set result [cmd create  $numFields handle]
-  if {$result eq $::STRUCT_MSG_ERR_OK}  {
-    return $handle
+  
+  # ============================= create ========================
+  
+  proc create {numFields} {
+    set result [cmd create  $numFields handle]
+    if {$result eq $::STRUCT_MSG_ERR_OK}  {
+      return $handle
+    }
+    return [checkOKOrErr $result "create" ""]
   }
-  return [checkOKOrErr $result "create" ""]
-}
-
-# ============================= delete ========================
-
-proc delete {handle} {
-  set result [stmsg_deleteMsg $handle
-  return [checkOKOrErr $result "delete" "" ]
-}
-
-# ============================= encode ========================
-
-proc encode {handle}  {
-  set result [cmd encode $handle]
-  return [checkOKOrErr $result "encode" "" ]
-}
-
-# ============================= get_encoded ========================
-
-proc get_encoded {handle} {
-  set result [cmd get_encoded $handle  encoded lgth]
-  if {$result eq $::STRUCT_MSG_ERR_OK}  {
-    return $encoded
+  
+  # ============================= delete ========================
+  
+  proc delete {handle} {
+    set result [stmsg_deleteMsg $handle
+    return [checkOKOrErr $result "delete" "" ]
   }
-  return [checkOKOrErr $result "get_encoded" ""]
-}
-
-# ============================= decode ========================
-
-proc decode {handle data} {
-puts stderr "decode:"
-  set result [cmd decode $handle $data]
-puts stderr "result: $result!"
-  return [checkOKOrErr $result "decode" ""]
-}
-
-# ============================= dump ========================
-
-proc dump {handle} {
-  set result [cmd dump $handle]
-  return [checkOKOrErr $result "dump" ""]
-}
-
-# ============================= encrypt ========================
-
-proc encrypt {handle key {iv ""}} {
-  set result [cmd encrypt $handle [list] 0 $key $iv buf lgth]
-  if {$result eq $::STRUCT_MSG_ERR_OK}  {
-    return $buf
+  
+  # ============================= encode ========================
+  
+  proc encode {handle}  {
+    set result [cmd encode $handle]
+    return [checkOKOrErr $result "encode" "" ]
   }
-  return [checkOKOrErr $result "encrypt" ""]
-}
-
-# ============================= decrypt ========================
-
-proc decrypt {handle key iv crypted} {
-  set result [cmd decrypt $handle [list] 0 $key $iv $crypted buf lgth]
-  if {$result eq $::STRUCT_MSG_ERR_OK}  {
-    return $buf
+  
+  # ============================= get_encoded ========================
+  
+  proc get_encoded {handle} {
+    set result [cmd get_encoded $handle  encoded lgth]
+    if {$result eq $::STRUCT_MSG_ERR_OK}  {
+      return $encoded
+    }
+    return [checkOKOrErr $result "get_encoded" ""]
   }
-  return [checkOKOrErr $result "decrypt" ""]
-}
-
-# ============================= add_field ========================
-
-proc add_field {handle fieldStr fieldType fieldLgth} {
-  set result [cmd add_field $handle $fieldStr $fieldType $fieldLgth]
-  return [checkOKOrErr $result "add_field" ""]
-}
-
-# ============================= set_fillerAndCrc ========================
-
-proc set_fillerAndCrc {handle} {
-  set result [stmsg_setFillerAndCrc $handle]
-  return [checkOKOrErr $result "set_fillerAndCrc" ""]
-}
-
-# ============================= set_fieldValue ========================
-
-proc set_fieldValue {handle fieldName value} {
-  set result [cmd set_fieldValue $handle $fieldName $value]
-  return [checkOKOrErr $result "set_fieldValue" $fieldName]
-}
-
-# ============================= set_tableFieldValue ========================
-
-proc set_tableFieldValue {handle fieldName row value} {
-  set result [cmd set_tableFieldValue $handle $fieldName $row  $value]
-  return [checkOKOrErr $result "set_tableFieldValue" $fieldName]
-}
-
-# ============================= get_fieldValue ========================
-
-proc get_fieldValue {handle fieldName} {
-  set result [cmd get_fieldValue $handle $fieldName value]
-  if {$result eq $::STRUCT_MSG_ERR_OK} {
-    return $value
+  
+  # ============================= decode ========================
+  
+  proc decode {handle data} {
+  puts stderr "decode:"
+    set result [cmd decode $handle $data]
+  puts stderr "result: $result!"
+    return [checkOKOrErr $result "decode" ""]
   }
-  return [checkOKOrErr $result "get_fieldValue" $fieldName]
-}
-
-# ============================= get_tableFieldValue ========================
-
-proc get_tableFieldValue {handle fieldName row} {
-  set result [cmd get_tableFieldValue $handle $fieldName $row value]
-  if {$result eq $::STRUCT_MSG_ERR_OK} {
-    return $value
+  
+  # ============================= dump ========================
+  
+  proc dump {handle} {
+    set result [cmd dump $handle]
+    return [checkOKOrErr $result "dump" ""]
   }
-  return [checkOKOrErr $result "get_tableFieldValue" $fieldName]
-}
-
-# ============================= set_crypted ========================
-
-proc set_crypted {handle crypted} {
-  set result [cmd set_crypted $handle $crypted]
-  return [checkOKOrErr $result "set_crypted" ""]
-}
-
-# ============================= decrypt_getHandle ========================
-
-proc decrypt_getHandle {encrypted key iv handleVar} {
-  upvar $handleVar handle
-
-  set result [cmd decrypt_getHandle $encrypted $key $iv handle]
-  return [checkOKOrErr $result "decrypt_getHandle" ""]
-}
-
-# ============================= create_definition ========================
-
-proc create_definition {name numFields} {
-  set result [::structmsg def createDefinition $name $numFields]
-  return [checkOKOrErr $result "create_Definition" ""]
-}
-
-# ============================= add_fieldDefinition ========================
-
-proc add_fieldDefinition {name fieldName fieldType fieldLgth} {
-  set result [::structmsg def addFieldDefinition $name $fieldName $fieldType $fieldLgth]
-  return [checkOKOrErr $result "add_fieldDefinition" ""]
-}
-
-# ============================= dump_fieldDefinition ========================
-
-proc dump_fieldDefinition {name} {
-  set result [::structmsg def dumpFieldDefinition $name]
-  return [checkOKOrErr $result "dump_fieldDefinition" ""]
-}
-
-# ============================= encode_fieldDefinition =================
-
-proc encode_fieldDefinition {name} {
-  set result [structmsg def encodeFieldDefinition $name data lgth]
-  if  {$result == $::STRUCT_MSG_ERR_OK}  {
-    return $data
+  
+  # ============================= encrypt ========================
+  
+  proc encrypt {handle key {iv ""}} {
+    set result [cmd encrypt $handle [list] 0 $key $iv buf lgth]
+    if {$result eq $::STRUCT_MSG_ERR_OK}  {
+      return $buf
+    }
+    return [checkOKOrErr $result "encrypt" ""]
   }
-  return [checkOKOrErr $result "encode_fieldDefinition" ""]
-}
-
-# ============================= decode_fieldDefinition =================
-
-proc decode_fieldDefinition {name encoded} {
-  set result [structmsg def decodeFieldDefinition $name $encoded]
-  return [checkOKOrErr $result "decode_fieldDefinition" ""]
-}
-
-# ============================= set_crypted_definition ========================
-
-proc set_crypted_definition {name crypted} {
-  set result [stmsg def setCryptedDefinition $handle $crypted]
-  return [checkOKOrErr $result "set_crypted_definition" ""]
-}
-
-# ============================= decrypt_getDefinitionName ========================
-
-proc decrypt_getDefinitionName {encrypted key {iv ""}} {
-  set result [stmsg def decryptGetDefinitionName $encrypted $key $iv handle]
-  if  {$result == $::STRUCT_MSG_ERR_OK} {
-    return $handle
+  
+  # ============================= decrypt ========================
+  
+  proc decrypt {handle key iv crypted} {
+    set result [cmd decrypt $handle [list] 0 $key $iv $crypted buf lgth]
+    if {$result eq $::STRUCT_MSG_ERR_OK}  {
+      return $buf
+    }
+    return [checkOKOrErr $result "decrypt" ""]
   }
-  return [checkOKOrErr $result "decrypt_getDefinitionName" ""]
-}
-
-# ============================= encrypt_definition ========================
-
-proc encrypt_definition {name key {iv}} {
-  set result [structmsg def enccryptDefinition $name $key $iv true buf lgth]
-  if  {$result == $::STRUCT_MSG_ERR_OK} {
-    return $buf
+  
+  # ============================= add_field ========================
+  
+  proc add_field {handle fieldStr fieldType fieldLgth} {
+    set result [cmd add_field $handle $fieldStr $fieldType $fieldLgth]
+    return [checkOKOrErr $result "add_field" ""]
   }
-  return [checkOKOrErr $result "encrypt_definition" ""]
-}
-
-# ============================= decrypt_definition ========================
-
-proc decrypt_definition {name key {iv ""}} {
-  set result [structmsg def decryptDefinition $name $key $iv false buf lgth]
-  if  {$result == $::STRUCT_MSG_ERR_OK} {
-    return $buf
+  
+  # ============================= set_fillerAndCrc ========================
+  
+  proc set_fillerAndCrc {handle} {
+    set result [stmsg_setFillerAndCrc $handle]
+    return [checkOKOrErr $result "set_fillerAndCrc" ""]
   }
-  return [checkOKOrErr $result "decrypt_definition" ""]
-}
+  
+  # ============================= set_fieldValue ========================
+  
+  proc set_fieldValue {handle fieldName value} {
+    set result [cmd set_fieldValue $handle $fieldName $value]
+    return [checkOKOrErr $result "set_fieldValue" $fieldName]
+  }
+  
+  # ============================= set_tableFieldValue ========================
+  
+  proc set_tableFieldValue {handle fieldName row value} {
+    set result [cmd set_tableFieldValue $handle $fieldName $row  $value]
+    return [checkOKOrErr $result "set_tableFieldValue" $fieldName]
+  }
+  
+  # ============================= get_fieldValue ========================
+  
+  proc get_fieldValue {handle fieldName valueVar} {
+    upvar $valueVar value
 
-# ============================= delete_fieldDefinition ========================
+    set result [cmd get_fieldValue $handle $fieldName value]
+    return [checkOKOrErr $result "get_fieldValue" $fieldName]
+  }
+  
+  # ============================= get_tableFieldValue ========================
+  
+  proc get_tableFieldValue {handle fieldName row valueVar} {
+    upvar $valueVar value
 
-proc delete_fieldDefinition {name} {
-  set result [structmsg def deleteFieldDefinition $name]
-  return [checkOKOrErr $result "delete_fieldDefinition" ""]
-}
+    set result [cmd get_tableFieldValue $handle $fieldName $row value]
+    return [checkOKOrErr $result "get_tableFieldValue" $fieldName]
+  }
+  
+  # ============================= set_crypted ========================
+  
+  proc set_crypted {handle crypted} {
+    set result [cmd set_crypted $handle $crypted]
+    return [checkOKOrErr $result "set_crypted" ""]
+  }
+  
+  # ============================= decrypt_getHandle ========================
+  
+  proc decrypt_getHandle {encrypted key iv handleVar} {
+    upvar $handleVar handle
+  
+    set result [cmd decrypt_getHandle $encrypted $key $iv handle]
+    return [checkOKOrErr $result "decrypt_getHandle" ""]
+  }
+  
+  # ============================= create_definition ========================
+  
+  proc create_definition {name numFields} {
+    set result [::structmsg def createDefinition $name $numFields]
+    return [checkOKOrErr $result "create_Definition" ""]
+  }
+  
+  # ============================= add_fieldDefinition ========================
+  
+  proc add_fieldDefinition {name fieldName fieldType fieldLgth} {
+    set result [::structmsg def addFieldDefinition $name $fieldName $fieldType $fieldLgth]
+    return [checkOKOrErr $result "add_fieldDefinition" ""]
+  }
+  
+  # ============================= dump_fieldDefinition ========================
+  
+  proc dump_fieldDefinition {name} {
+    set result [::structmsg def dumpFieldDefinition $name]
+    return [checkOKOrErr $result "dump_fieldDefinition" ""]
+  }
+  
+  # ============================= encode_fieldDefinition =================
+  
+  proc encode_fieldDefinition {name} {
+    set result [structmsg def encodeFieldDefinition $name data lgth]
+    if  {$result == $::STRUCT_MSG_ERR_OK}  {
+      return $data
+    }
+    return [checkOKOrErr $result "encode_fieldDefinition" ""]
+  }
+  
+  # ============================= decode_fieldDefinition =================
+  
+  proc decode_fieldDefinition {name encoded} {
+    set result [structmsg def decodeFieldDefinition $name $encoded]
+    return [checkOKOrErr $result "decode_fieldDefinition" ""]
+  }
+  
+  # ============================= set_crypted_definition ========================
+  
+  proc set_crypted_definition {name crypted} {
+    set result [stmsg def setCryptedDefinition $handle $crypted]
+    return [checkOKOrErr $result "set_crypted_definition" ""]
+  }
+  
+  # ============================= decrypt_getDefinitionName ========================
+  
+  proc decrypt_getDefinitionName {encrypted key {iv ""}} {
+    set result [stmsg def decryptGetDefinitionName $encrypted $key $iv handle]
+    if  {$result == $::STRUCT_MSG_ERR_OK} {
+      return $handle
+    }
+    return [checkOKOrErr $result "decrypt_getDefinitionName" ""]
+  }
+  
+  # ============================= encrypt_definition ========================
+  
+  proc encrypt_definition {name key {iv}} {
+    set result [structmsg def enccryptDefinition $name $key $iv true buf lgth]
+    if  {$result == $::STRUCT_MSG_ERR_OK} {
+      return $buf
+    }
+    return [checkOKOrErr $result "encrypt_definition" ""]
+  }
+  
+  # ============================= decrypt_definition ========================
+  
+  proc decrypt_definition {name key {iv ""}} {
+    set result [structmsg def decryptDefinition $name $key $iv false buf lgth]
+    if  {$result == $::STRUCT_MSG_ERR_OK} {
+      return $buf
+    }
+    return [checkOKOrErr $result "decrypt_definition" ""]
+  }
+  
+  # ============================= delete_fieldDefinition ========================
+  
+  proc delete_fieldDefinition {name} {
+    set result [structmsg def deleteFieldDefinition $name]
+    return [checkOKOrErr $result "delete_fieldDefinition" ""]
+  }
+  
+  # ============================= delete_fieldDefinitions ========================
+  
+  proc delete_fieldDefinitions {} {
+    set result [structmsg def deleteFieldDefinitions]
+    return [checkOKOrErr $result "delete_fieldDefinitions" ""]
+  }
+  
+  # ============================= create_msgFromDefinition ========================
+  
+  proc create_msgFromDefinition {name handleVar}  {
+    upvar $handleVar handle
+  
+    set result [structmsg def createMsgFromDefinition $name handle]
+    return [checkOKOrErr $result "create_msgFromDefinition" ""]
+  }
 
-# ============================= delete_fieldDefinitions ========================
+  # ============================= get_definitionNormalFieldNames ========================
+  
+  proc get_definitionNormalFieldNames {name normalFieldNamesVar}  {
+    upvar $normalFieldNamesVar normalFieldNames
+  
+    set result [structmsg def getDefinitionNormalFieldNames $name normalFieldNames]
+    return [checkOKOrErr $result "get_definitionNormalFieldNames" ""]
+  }
 
-proc delete_fieldDefinitions {} {
-  set result [structmsg def deleteFieldDefinitions]
-  return [checkOKOrErr $result "delete_fieldDefinitions" ""]
-}
+  # ============================= get_definitionTableFieldNames ========================
+  
+  proc get_definitionTableFieldNames {name tableFieldNamesVar}  {
+    upvar $tableFieldNamesVar tableFieldNames
+  
+    set result [structmsg def getDefinitionTableFieldNames $name tableFieldNames]
+    return [checkOKOrErr $result "get_definitionTableFieldNames" ""]
+  }
 
+  # ============================= get_definitionNumTableRows ========================
+  
+  proc get_definitionNumTableRows {name numTableRowsVar}  {
+    upvar $numTableRowsVar numTableRows
+  
+    set result [structmsg def getDefinitionNumTableRows $name numTableRows]
+    return [checkOKOrErr $result "get_definitionNumTableRows" ""]
+  }
 
-# ============================= create_msgFromDefinition ========================
+  # ============================= get_definitionNumTableRowFields ========================
+  
+  proc get_definitionNumTableRowFields {name numTableRowFieldsVar}  {
+    upvar $numTableRowFieldsVar numTableRowFields
+  
+    set result [structmsg def getDefinitionNumTableRowFields $name numTableRowFields]
+    return [checkOKOrErr $result "get_definitionNumTableRowFields" ""]
+  }
 
-proc create_msgFromDefinition {name handleVar}  {
-  upvar $handleVar handle
+  # ============================= get_definitionFieldInfo ========================
+  
+  proc get_definitionFieldInfo {name fieldName fieldInfoVar}  {
+    upvar $fieldInfoVar fieldInfo
+  
+    set result [structmsg def getDefinitionFieldInfo $name $fieldName fieldInfo]
+    return [checkOKOrErr $result "get_definitionFieldInfo" ""]
+  }
 
-  set result [structmsg def createMsgFromDefinition $name handle]
-  return [checkOKOrErr $result "create_msgFromDefinition" ""]
-}
+  # ============================= get_definitionTableFieldInfo ========================
+  
+  proc get_definitionTableFieldInfo {name fieldName row fieldInfoVar}  {
+    upvar $fieldInfoVar fieldInfo
+  
+    set result [structmsg def getDefinitionTableFieldInfo $name $fieldName $row fieldInfo]
+    return [checkOKOrErr $result "get_definitionTableFieldInfo" ""]
+  }
 
 } ; # namespace structmsg

@@ -140,8 +140,32 @@ checkErrOK $result
 puts stderr "msgfromdef done"
 puts stderr "HANDLE: $handle2!"
 structmsg dump $handle2
-puts stderr "encoded: $pwd1_encoded!"
+puts stderr ">>encoded: $pwd1_encoded!"
 set decoded [structmsg decode $handle2 $pwd1_encoded]
 puts stderr "FILLED:"
 structmsg dump $handle2
 puts stderr "DEFINITIONS TEST DONE SUCCESSFULLY!!!"
+set result [::structmsg get_definitionNormalFieldNames $def normalFieldNames]
+checkErrOK $result
+puts stderr "normalFieldNames: [join $normalFieldNames \n]!"
+set result [::structmsg get_definitionTableFieldNames $def tableFieldNames]
+checkErrOK $result
+puts stderr "tableFieldNames: [join $tableFieldNames \n]!"
+set result [::structmsg get_definitionNumTableRows $def numTableRows]
+checkErrOK $result
+puts stderr "numTableRows: $numTableRows!"
+set result [::structmsg get_definitionNumTableRowFields $def numTableRowFields]
+checkErrOK $result
+puts stderr "numTableRowFields: $numTableRowFields!"
+set result [::structmsg get_definitionFieldInfo $def pwd2 fieldInfo]
+checkErrOK $result
+puts stderr "fieldInfo: pwd2: $fieldInfo!"
+set result [::structmsg get_definitionFieldInfo $def @totalLgth fieldInfo]
+checkErrOK $result
+puts stderr "fieldInfo: @totalLgth: $fieldInfo!"
+set result [::structmsg get_fieldValue $handle2 @totalLgth value]
+checkErrOK $result
+puts stderr "@totalLgth: value $value!"
+set result [::structmsg get_tableFieldValue $handle2 rssid1 1 value]
+checkErrOK $result
+puts stderr "rssid1 row 1: value $value!"

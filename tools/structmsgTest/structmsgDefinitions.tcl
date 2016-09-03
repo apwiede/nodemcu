@@ -53,7 +53,9 @@ namespace eval structmsg {
     namespace export getFieldTypeId createDefinition addFieldDefinition deleteFieldDefinition
     namespace export deleteFieldDefinitions dumpFieldDefinition encryptDefinition decryptDefinition
     namespace export encodeFieldDefinition decodeFieldDefinition getIdFieldNameStr getFieldTypeStr
-    namespace export createMsgFromDefinition
+    namespace export createMsgFromDefinition getDefinitionNormalFieldNames getDefinitionTableFieldNames
+    namespace expor getDefinitionNumTableRows
+    namespace export getDefinitionNumTableRowFields getDefinitionFieldInfo getDefinitionTableFieldInfo
 
     # ============================= initFieldTypeDefines ========================
     
@@ -262,6 +264,26 @@ namespace eval structmsg {
       return $::STRUCT_MSG_ERR_OK
     }
     
+    # ============================= checkDefinitionExists ========================
+    
+    proc checkDefinitionExists {name} {
+      set definitionsIdx 0
+      set found 0
+      set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
+      while {$definitionsIdx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
+        set definition [lindex $definitions $definitionsIdx]
+        if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
+          set found 1
+          break
+        }
+        incr definitionsIdx
+      }
+      if {!$found} {
+        return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND
+      }
+      return $::STRUCT_MSG_ERR_OK
+    }
+    
     # ============================= createDefinition ========================
     
     proc createDefinition {name numFields} {
@@ -302,6 +324,9 @@ namespace eval structmsg {
     # ============================= addFieldDefinition ========================
     
     proc addFieldDefinition {name fieldName fieldType fieldLgth} {
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      # FIXME a similar code to checkDefinitionExists!!
       set fieldDefinitionDict [dict create]
       set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
       set definitionIdx 0
@@ -339,28 +364,18 @@ namespace eval structmsg {
     # ============================= dumpFieldDefinition ========================
     
     proc dumpFieldDefinition {name} {
-      set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
-      set definitionIdx 0
-      set found 0
-      foreach definition $definitions {
-        if {[dict get $definition name] eq $name} {
-          set found 1
-          break
-        }
-        incr definitionIdx
-      } 
-      if {!$found} {
-        error "structmsg definition for $name does not exist"
-#        return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
-      }
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
       puts [format "definition: %s numFields: %d" $name [dict get $definition numFields]]
       set idx 0
       while {$idx < [dict get $definition numFields]} {
         set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
         set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldIdStr]
-#        checkErrOK $result
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
         set result [getFieldTypeStr [dict get $fieldInfo fieldType] fieldTypeStr]
-#        checkErrOK(result);
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
         puts [format "  idx: %d id: %d %s type: %d %s lgth: %d" $idx [dict get $fieldInfo fieldId] $fieldIdStr [dict get $fieldInfo fieldType] $fieldTypeStr [dict get $fieldInfo fieldLgth]]
         incr idx
       }
@@ -372,12 +387,12 @@ namespace eval structmsg {
     proc createMsgFromDefinition {name handleVar} {
       upvar $handleVar handle
 
-      set result [getDefinitionDict $name definition]
-#      checkErrOK(result);
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
 puts stderr "DEF2: $definition!"
       set result [::structmsg cmd create [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}] handle]
 puts stderr [format "create: handle: %s numFields: %d" $handle [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}]]
-#      checkErrOK(result);
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
       set fieldIdx 0
 puts stderr "CMFD1: numField: [dict get $definition numFields]!"
       while {$fieldIdx < [dict get $definition numFields]} {
@@ -420,15 +435,16 @@ puts stderr "createMsgFromDefinition END"
     
     # ============================= getDefinitionDict ========================
     
-    proc getDefinitionDict {name stmsgDefinitionVar} {
-      upvar $stmsgDefinitionVar stmsgDefinition
+    proc getDefinitionDict {name definitionVar definitionsIdxVar} {
+      upvar $definitionVar definition
+      upvar $definitionsIdxVar definitionsIdx
     
-      set idx 0
+      set definitionsIdx 0
       foreach definition [dict get $::structmsg(structmsgDefinitions) definitions] {
         if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
-          set stmsgDefinition $definition
           return $::STRUCT_MSG_ERR_OK
         }
+        incr definitionsIdx
       }
       return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
     }
@@ -443,18 +459,10 @@ puts stderr "createMsgFromDefinition END"
       set dst 987
       set cmdKey $::STRUCT_MSG_DEFINITION_CMD_KEY
     
-      set idx 0
-      while {$idx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
-        set definition [lindex [dict get $::structmsg(structmsgDefinitions) definitions] $idx]
-        if {$name  eq [dict get $definition name]} {
-          set found 1
-          break
-        }
-        incr idx
-      }
-      if {!$found} {
-        return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND
-      }
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
       set numNormFields 0
       set normNamesSize 0
       set idx 0
@@ -489,7 +497,7 @@ puts stderr "createMsgFromDefinition END"
       }
       set cmdLgth [expr {$payloadSize + $fillerSize + [sizeof uint16_t]}]
       set totalLgth [expr {$::STRUCT_MSG_HEADER_LENGTH + $cmdLgth}]
-    puts stderr [format "cmdLgth: %d totalLgth: %d" $cmdLgth $totalLgth]
+puts stderr [format "cmdLgth: %d totalLgth: %d" $cmdLgth $totalLgth]
       dict set definition encoded [list]
       set encoded ""
       set offset 0
@@ -521,7 +529,7 @@ puts stderr "createMsgFromDefinition END"
       if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
       set offset [::structmsg encdec crcEncode encoded $offset $totalLgth crc $::STRUCT_MSG_HEADER_LENGTH]
       if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-    puts stderr [format "after crc offset: %d totalLgth :%d crc: 0x%04x" $offset $totalLgth $crc]
+puts stderr [format "after crc offset: %d totalLgth :%d crc: 0x%04x" $offset $totalLgth $crc]
       set data $encoded
       set lgth $totalLgth
       return $::STRUCT_MSG_ERR_OK
@@ -549,7 +557,7 @@ puts stderr "createMsgFromDefinition END"
       # now check the crc
       set crcOffset [expr {$totalLgth - [sizeof uint16_t]}]
       set crcOffset [::structmsg encdec crcDecode $data $crcOffset $cmdLgth crc $::STRUCT_MSG_HEADER_LENGTH]
-    puts stderr "crcOffset: $crcOffset!offset: $offset!"
+puts stderr "crcOffset: $crcOffset!offset: $offset!"
       set offset [::structmsg encdec definitionDecode $data $offset]
       if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
       set myLgth [expr {$offset - $::STRUCT_MSG_HEADER_LENGTH + [sizeof uint16_t]}]
@@ -562,24 +570,15 @@ puts stderr "createMsgFromDefinition END"
       if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
       return $::STRUCT_MSG_ERR_OK
     }
-    
+
     # ============================= deleteFieldDefinition ========================
     
     proc deleteFieldDefinition {name} {
-      set definitionsIdx 0
-      set found 0
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
       set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
-      while {$definitionsIdx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
-        set definition [lindex $definitions $definitionsIdx]
-        if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
-          set found 1
-          break
-        }
-        incr definitionsIdx
-      }
-      if {!$found} {
-        return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND
-      }
       set definitionIdx 0
       while {$definitionIdx < [dict get $definition numFields]} {
         set fieldInfo [lindex [dict get $definition fieldInfos] $definitionIdx]
@@ -641,6 +640,159 @@ puts stderr "createMsgFromDefinition END"
     
       # all deleted/reset
       return $::STRUCT_MSG_ERR_OK
+    }
+
+    # ============================= getDefinitionNormalFieldNames ========================
+    
+    proc getDefinitionNormalFieldNames {name normalFieldNamesVar} {
+      upvar $normalFieldNamesVar normalFieldNames
+  
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set normalFieldNames [list]
+      set inTableRows false
+      foreach fieldInfo [dict get $definition fieldInfos] {
+        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+        if {[string range $fieldName 0 0] ne "@"} {
+          if {$inTableRows} {
+            incr tableRowFields
+            if {$tableRowFields >= $numTableRowFields} {
+              set inTableRows false
+            }
+          } else {
+            lappend normalFieldNames $fieldName
+          }
+        } else {
+          if {$fieldName eq "@tablerowfields"} {
+            set inTableRows true
+            set tableRowFields 0
+            set numTableRowFields [dict get $fieldInfo fieldLgth]
+          }
+        }
+      }
+      return $::STRUCT_MSG_ERR_OK
+    }
+
+    # ============================= getDefinitionTableFieldNames ========================
+    
+    proc getDefinitionTableFieldNames {name tableFieldNamesVar} {
+      upvar $tableFieldNamesVar tableFieldNames
+  
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set tableFieldNames [list]
+      set inTableRows false
+      foreach fieldInfo [dict get $definition fieldInfos] {
+        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+        if {[string range $fieldName 0 0] ne "@"} {
+          if {$inTableRows} {
+            incr tableRowFields
+            lappend tableFieldNames $fieldName
+            if {$tableRowFields >= $numTableRowFields} {
+              set inTableRows false
+            }
+          }
+        } else {
+          if {$fieldName eq "@tablerowfields"} {
+            set inTableRows true
+            set tableRowFields 0
+            set numTableRowFields [dict get $fieldInfo fieldLgth]
+          }
+        }
+      }
+      return $::STRUCT_MSG_ERR_OK
+    }
+
+    # ============================= getDefinitionNumTableRows ========================
+    
+    proc getDefinitionNumTableRows {name numTableRowsVar} {
+      upvar $numTableRowsVar numTableRows
+  
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      foreach fieldInfo [dict get $definition fieldInfos] {
+        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+        if {$fieldName eq "@tablerows"} {
+          set numTableRows [dict get $fieldInfo fieldLgth]
+          return $::STRUCT_MSG_ERR_OK
+        }
+      }
+      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
+    }
+
+    # ============================= getDefinitionNumTableRowFields ========================
+    
+    proc getDefinitionNumTableRowFields {name numTableRowFieldsVar} {
+      upvar $numTableRowFieldsVar numTableRowFields
+  
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      foreach fieldInfo [dict get $definition fieldInfos] {
+        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+        if {$fieldName eq "@tablerowfields"} {
+          set numTableRowFields [dict get $fieldInfo fieldLgth]
+          return $::STRUCT_MSG_ERR_OK
+        }
+      }
+      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
+    }
+
+    # ============================= getDefinitionFieldInfo ========================
+    
+    proc getDefinitionFieldInfo {name lookupFieldName fieldInfoVar} {
+      upvar $fieldInfoVar fieldInfo
+  
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      foreach lookupFieldInfo [dict get $definition fieldInfos] {
+        set result [getIdFieldNameStr [dict get $lookupFieldInfo fieldId] fieldName]
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+        if {$fieldName eq $lookupFieldName} {
+            set result [getFieldTypeStr [dict get $lookupFieldInfo fieldType] fieldType]
+            if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+              set fieldInfo [dict create]
+              dict set fieldInfo fieldName $fieldName
+              dict set fieldInfo fieldType $fieldType
+              dict set fieldInfo fieldLgth [dict get $lookupFieldInfo fieldLgth]
+          return $::STRUCT_MSG_ERR_OK
+        }
+      }
+      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
+    }
+
+    # ============================= getDefinitionTableFieldInfo ========================
+    
+    proc getDefinitionTableFieldInfo {name lookupFieldName row fieldInfoVar} {
+      upvar $fieldInfoVar fieldInfo
+  
+      set result [checkDefinitionExists $name]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      foreach fieldInfo [dict get $definition fieldInfos] {
+        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+        if {$fieldName eq $lookupFieldName} {
+          set result [getFieldTypeStr [dict get $fieldInfo fieldType] fieldType]
+          if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+          return $::STRUCT_MSG_ERR_OK
+        }
+      }
+      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
     }
 
   } ; # namespace def

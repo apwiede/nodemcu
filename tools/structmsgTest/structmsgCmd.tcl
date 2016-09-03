@@ -494,38 +494,35 @@ puts stderr "tabelrowfields: offset: $offset!"
                 set row 0
                 set col 0
                 set cell 0
+                set tableFieldIdx 0
                 while {$row < [dict get $myDict msg numTableRows]} {
                   while {$col < [dict get $myDict msg numTableRowFields]} {
+                     set myDict $::structmsg($handle)
                      set cell [expr {$col + $row * [dict get $myDict msg numTableRowFields]}]
                      set tableFieldInfos [dict get $myDict msg tableFieldInfos]
-puts stderr "LLTAB: [llength $tableFieldInfos]!"
                      set tableFieldInfo [lindex $tableFieldInfos $cell]
                      set offset [::structmsg encdec decodeField $todecode tableFieldInfo $offset]
-puts stderr "  offset: $offset!fieldName: [dict get $tableFieldInfo fieldName]!value: [dict get $tableFieldInfo value]!"
                      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
+                     set tableFieldInfos [lreplace $tableFieldInfos $tableFieldIdx $tableFieldIdx $tableFieldInfo]
+                     dict set myDict msg tableFieldInfos $tableFieldInfos
+                     set ::structmsg($handle) $myDict
                      incr col
+                     incr tableFieldIdx
                   }
                   incr row
                   set col 0
-                  set tableFieldInfos [lreplace $tableFieldInfos $idx $idx $tableFieldInfo]
-                  dict set myDict msg tableFieldInfos $tableFieldInfos
                 }
               }
             }
           }
-puts stderr "fieldInfo1: $fieldInfo!offset: $offset!"
         } else {
-puts stderr "fieldInfo2a: $fieldInfo!offset: $offset!"
           set offset [::structmsg encdec decodeField $todecode fieldInfo $offset]
-puts stderr "fieldInfo2b: [dict get $fieldInfo value]!offset: $offset!"
           if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
           set myDict $::structmsg($handle)
           set fieldInfos [dict get $myDict msg fieldInfos]
-puts stderr "FINFOS: $fieldInfos!"
           set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
           dict set myDict msg fieldInfos $fieldInfos
         }
-puts stderr "fieldInfo3: $fieldInfo!offset: $offset!"
         if {[lsearch [dict get $fieldInfo flags] "FIELD_IS_SET"] < 0} {
           dict lappend fieldInfo flags FIELD_IS_SET
         }
@@ -1088,23 +1085,23 @@ puts stderr "set_tableFieldValue: $handle $fieldName $value!"
       switch $fieldName {
         @src {
           set value [ dict get $myDict hdr src]
-          return
+          return $::STRUCT_MSG_ERR_OK
         }
         @dst {
           set value [dict get $myDict hdr dst]
-          return
+          return $::STRUCT_MSG_ERR_OK
         }
         @totalLgth {
           set value [dict get $myDict hdr totalLgth]
-          return
+          return $::STRUCT_MSG_ERR_OK
         }
         @cmdKey {
           set value [dict get $myDict hdr hdrInfo hdrKeys cmdKey]
-          return
+          return $::STRUCT_MSG_ERR_OK
         }
         @cmdLgth {
           set value [dict get $myDict hdr hdrInfo hdrKeys  cmdLgth]
-          return
+          return $::STRUCT_MSG_ERR_OK
         }
       }
       set numEntries [dict get $myDict msg numFieldInfos]
@@ -1117,11 +1114,11 @@ puts stderr "set_tableFieldValue: $handle $fieldName $value!"
             error "field: $fieldName is not set!"
           }
           set value [dict get $fieldInfo value]
-          return
+          return $::STRUCT_MSG_ERR_OK
         }
         incr idx
       }
-      error "field $fieldName not found"
+      return $__STRUCT_MSG_ERR_FIELD_NOT_FOUND
     }
     
     # ============================= get_tableFieldValue ========================
@@ -1137,10 +1134,10 @@ puts stderr "set_tableFieldValue: $handle $fieldName $value!"
         return $::STRUCT_MSG_ERR_BAD_TABLE_ROW
       }
       set idx 0
-      set cell = [expr {0 + $row * [dict get $myDict msg numRowFields]}]
+      set cell [expr {0 + $row * [dict get $myDict msg numTableRowFields]}]
       set tableFieldInfos [dict get $myDict msg tableFieldInfos]
       while {$idx < [dict get $myDict msg numRowFields]} {
-        set fieldInfo [lindex $tableFieldInfos cell]
+        set fieldInfo [lindex $tableFieldInfos $cell]
         if {$fieldName eq [dict get $fieldInfo fieldName]} {
           set value [dict get $fieldInfo value]
           return $::STRUCT_MSG_ERR_OK
