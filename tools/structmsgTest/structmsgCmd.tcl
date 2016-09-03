@@ -300,6 +300,7 @@ puts stderr "numEntries: $numEntries!"
 puts stderr "numEntries2: [dict get $myDict msg numFieldInfos]!"
         set fieldInfos [dict get $myDict msg fieldInfos]
         set fieldInfo [lindex $fieldInfos $idx]
+puts stderr "hanling: [dict get $fieldInfo fieldName]!"
         if {[string range [dict get $fieldInfo fieldName] 0 0] eq "@"} {
           set result [::structmsg def getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
           if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
@@ -410,6 +411,18 @@ puts stderr "decode exi: $handle![info exists ::structmsg($handle]!"
       if {![info exists ::structmsg($handle)]} {
         error "no such structmsg: $handle"
       }
+      set myDict $::structmsg($handle)
+puts stderr "HBE: [dict get $myDict hasBeenEncoded]!"
+      if {![dict get $myDict hasBeenEncoded]} {
+        set result [set_fillerAndCrc $handle]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
+        # Attention: set_fillerAndCrc changes myDict!!
+        set myDict $::structmsg($handle)
+      }
+puts stderr "after set_fillerAndCrc!"
+dump $handle
 puts stderr "DECODE: lgth: [string length $todecode]!$handle!"
 dump_binary $todecode "TODECODE"
       set myDict $::structmsg($handle)
@@ -434,7 +447,7 @@ puts stderr "offset0: $offset!numEntries: $numEntries!"
         set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
         set fieldInfos [dict get $myDict msg fieldInfos]
         set fieldInfo [lindex $fieldInfos $idx]
-puts stderr "ENTRY: $fieldInfo!"
+puts stderr "idx: $idx!numEntries: $numEntries: fieldInfo: $fieldInfo!"
         if {[string range [dict get $fieldInfo fieldName] 0 0] == "@"} {
           set result [::structmsg def getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
           set specialFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
@@ -477,7 +490,7 @@ puts stderr "after crc offset: $offset!cmdLgth: [dict get $myDict hdr hdrInfo hd
             }
             @tablerowfields {
               if {[dict get $myDict msg numTableRows] > 0} {
-    puts stderr "tabelrowfields: offset: $offset!"
+puts stderr "tabelrowfields: offset: $offset!"
                 set row 0
                 set col 0
                 set cell 0
@@ -488,7 +501,7 @@ puts stderr "after crc offset: $offset!cmdLgth: [dict get $myDict hdr hdrInfo hd
 puts stderr "LLTAB: [llength $tableFieldInfos]!"
                      set tableFieldInfo [lindex $tableFieldInfos $cell]
                      set offset [::structmsg encdec decodeField $todecode tableFieldInfo $offset]
-    puts stderr "  offset: $offset!fieldName: [dict get $tableFieldInfo fieldName]!value: [dict get $tableFieldInfo value]!"
+puts stderr "  offset: $offset!fieldName: [dict get $tableFieldInfo fieldName]!value: [dict get $tableFieldInfo value]!"
                      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
                      incr col
                   }
@@ -500,11 +513,11 @@ puts stderr "LLTAB: [llength $tableFieldInfos]!"
               }
             }
           }
-    puts stderr "fieldInfo1: $fieldInfo!offset: $offset!"
+puts stderr "fieldInfo1: $fieldInfo!offset: $offset!"
         } else {
-    puts stderr "fieldInfo2a: $fieldInfo!offset: $offset!"
+puts stderr "fieldInfo2a: $fieldInfo!offset: $offset!"
           set offset [::structmsg encdec decodeField $todecode fieldInfo $offset]
-    puts stderr "fieldInfo2b: [dict get $fieldInfo value]!offset: $offset!"
+puts stderr "fieldInfo2b: [dict get $fieldInfo value]!offset: $offset!"
           if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
           set myDict $::structmsg($handle)
           set fieldInfos [dict get $myDict msg fieldInfos]
@@ -512,7 +525,7 @@ puts stderr "FINFOS: $fieldInfos!"
           set fieldInfos [lreplace $fieldInfos $idx $idx $fieldInfo]
           dict set myDict msg fieldInfos $fieldInfos
         }
-    puts stderr "fieldInfo3: $fieldInfo!offset: $offset!"
+puts stderr "fieldInfo3: $fieldInfo!offset: $offset!"
         if {[lsearch [dict get $fieldInfo flags] "FIELD_IS_SET"] < 0} {
           dict lappend fieldInfo flags FIELD_IS_SET
         }
@@ -523,6 +536,7 @@ puts stderr "FINFOS: $fieldInfos!"
         dict lappend myDict flags DECODED
       }
       set ::structmsg($handle) $myDict
+puts stderr "DECODE DONE!"
       return $::STRUCT_MSG_ERR_OK;
     }
     

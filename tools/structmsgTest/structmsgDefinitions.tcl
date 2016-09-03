@@ -369,23 +369,26 @@ namespace eval structmsg {
     
     # ============================= createMsgFromDefinition ========================
     
-    proc createMsgFromDefinition {name} {
+    proc createMsgFromDefinition {name handleVar} {
+      upvar $handleVar handle
+
       set result [getDefinitionDict $name definition]
-    #  checkErrOK(result);
-    puts stderr "DEF2: $definition!"
+#      checkErrOK(result);
+puts stderr "DEF2: $definition!"
       set result [::structmsg cmd create [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}] handle]
-    puts stderr [format "create: handle: %s numFields: %d" $handle [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}]]
-    #  checkErrOK(result);
+puts stderr [format "create: handle: %s numFields: %d" $handle [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}]]
+#      checkErrOK(result);
       set fieldIdx 0
+puts stderr "CMFD1: numField: [dict get $definition numFields]!"
       while {$fieldIdx < [dict get $definition numFields]} {
         set fieldInfos [dict get $definition fieldInfos]
         set fieldInfo [lindex $fieldInfos $fieldIdx]
-    puts stderr "fieldInfo: $fieldInfo!$fieldIdx!"
+puts stderr "MCFD2: fieldInfo: $fieldInfo!$fieldIdx!"
         set fieldId [dict get $fieldInfo fieldId]
         set fieldName "??"
         if {[dict exists $::structmsg(specialFieldIds) $fieldId]} {
           set fieldName [dict get $::structmsg(specialFieldIds) $fieldId]
-puts stderr "fieldName: $fieldName!"
+puts stderr "CMFD3: fieldName: $fieldName!"
         }
         switch $fieldName { 
           @src -
@@ -402,7 +405,10 @@ puts stderr "fieldName: $fieldName!"
             set result [getFieldTypeStr [dict get $fieldInfo fieldType] fieldType]
 #      checkErrOK(result);
 #puts stderr [format {addfield: %s %s %d} $fieldName $fieldType [dict get $fieldInfo fieldLgth]]
-            set result [::structmsg cmd add_field $handle $fieldName [dict get $fieldInfo fieldType] [dict get $fieldInfo fieldLgth]]
+            # @filler and @crc are handled in encode!!
+            if {!(($fieldName eq "@filler") || ($fieldName eq "@crc"))} {
+              set result [::structmsg cmd add_field $handle $fieldName $fieldType [dict get $fieldInfo fieldLgth]]
+            }
           }
         } 
         incr fieldIdx

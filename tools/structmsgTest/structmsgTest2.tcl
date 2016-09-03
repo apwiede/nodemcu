@@ -111,7 +111,7 @@ set result [structmsg decode $handle $encoded]
 checkErrOK $result
 
 structmsg encode $handle
-set encoded [structmsg get_encoded $handle]
+set pwd1_encoded [structmsg get_encoded $handle]
 structmsg decode $handle $encoded
 set encryptedMsg [structmsg encrypt $handle "a1b2c3d4e5f6g7h8" ""]
 set decryptedMsg [structmsg decrypt $handle "a1b2c3d4e5f6g7h8" "" $encryptedMsg]

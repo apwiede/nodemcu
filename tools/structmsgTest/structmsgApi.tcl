@@ -568,8 +568,10 @@ proc delete_fieldDefinitions {} {
 
 # ============================= create_msgFromDefinition ========================
 
-proc create_msgFromDefinition {name}  {
-  set result [structmsg def createMsgFromDefinition $name]
+proc create_msgFromDefinition {name handleVar}  {
+  upvar $handleVar handle
+
+  set result [structmsg def createMsgFromDefinition $name handle]
   return [checkOKOrErr $result "create_msgFromDefinition" ""]
 }
 

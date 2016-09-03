@@ -69,9 +69,9 @@ set result [structmsg add_fieldDefinition $def "@sequenceNum" "uint32_t" 4]
 checkErrOK $result
 set result [structmsg add_fieldDefinition $def "pwd1" "uint8_t*" 16]
 checkErrOK $result
-set result [structmsg add_fieldDefinition $def "@tablerows" "uint8_t" 1]
+set result [structmsg add_fieldDefinition $def "@tablerows" "uint8_t" 2]
 checkErrOK $result
-set result [structmsg add_fieldDefinition $def "@tablerowfields" "uint8_t" 1]
+set result [structmsg add_fieldDefinition $def "@tablerowfields" "uint8_t" 3]
 checkErrOK $result
 set result [structmsg add_fieldDefinition $def "ssid1" "uint8_t*" 16]
 checkErrOK $result
@@ -104,9 +104,9 @@ set result [structmsg add_fieldDefinition $def "@sequenceNum" "uint32_t" 4]
 checkErrOK $result
 set result [structmsg add_fieldDefinition $def "pwd2" "uint8_t*" 16]
 checkErrOK $result
-set result [structmsg add_fieldDefinition $def "@tablerows" "uint8_t" 1]
+set result [structmsg add_fieldDefinition $def "@tablerows" "uint8_t" 2]
 checkErrOK $result
-set result [structmsg add_fieldDefinition $def "@tablerowfields" "uint8_t" 1]
+set result [structmsg add_fieldDefinition $def "@tablerowfields" "uint8_t" 3]
 checkErrOK $result
 set result [structmsg add_fieldDefinition $def "ssid1" "uint8_t*" 16]
 checkErrOK $result
@@ -120,6 +120,7 @@ set result [structmsg add_fieldDefinition $def "@crc" "uint16_t" 2]
 checkErrOK $result
 set result [structmsg dump_fieldDefinition $def]
 checkErrOK $result
+puts stderr "++ $def ENCODE FIELD DEFINITION"
 set encoded [structmsg encode_fieldDefinition $def]
 puts stderr "++ $def ENCODED"
 set def pwd1
@@ -134,7 +135,13 @@ checkErrOK $result
 }
 
 puts stderr "==createMsgFromDefinition"
-set result [structmsg create_msgFromDefinition $def]
+set result [structmsg create_msgFromDefinition $def handle2]
 checkErrOK $result
 puts stderr "msgfromdef done"
-set decoded [structmsg decode $handle $encoded]
+puts stderr "HANDLE: $handle2!"
+structmsg dump $handle2
+puts stderr "encoded: $pwd1_encoded!"
+set decoded [structmsg decode $handle2 $pwd1_encoded]
+puts stderr "FILLED:"
+structmsg dump $handle2
+puts stderr "DEFINITIONS TEST DONE SUCCESSFULLY!!!"
