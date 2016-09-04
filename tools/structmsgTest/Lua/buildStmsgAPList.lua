@@ -4,40 +4,29 @@ function checkOK(result, fieldName)
   end
 end
 
+msgInfos={}
+msgInfos["1"]="@randomNum,uint32_t,4,0"
+msgInfos["2"]="@sequenceNum,uint32_t,4,0"
+msgInfos["3"]="@tablerows,uint8_t,@numRows,0"
+msgInfos["4"]="@tablerowfields,uint8_t,5,2"
+msgInfos["5"]="@tablerowfields,uint8_t,3,1"
+msgInfos["6"]="ssid,uint8_t*,32,0"
+msgInfos["7"]="bssid,uint8_t*, 17,2"
+msgInfos["8"]="rssi,int8_t,1,0"
+msgInfos["9"]="authmode,uint8_t,1,2"
+msgInfos["10"]="channel,uint8_t,1,0"
+
 function createAPListMsg(useBig,numRows)
-  handle=nil
-  handle=structmsg.create(8)
-  result=structmsg.addField(handle, "@randomNum", "uint32_t")
-  checkOK(result,"@randomNum")
-  result=structmsg.addField(handle, "@sequenceNum", "uint32_t")
-  checkOK(result,"@sequenceNum")
-  result=structmsg.addField(handle, "@tablerows", "uint8_t", numRows)
-  checkOK(result,"@tablerows")
-  if (useBig) then
-    result=structmsg.addField(handle, "@tablerowfields", "uint8_t", 5)
-  else
-    result=structmsg.addField(handle, "@tablerowfields", "uint8_t", 3)
+  numEntries=0
+  for x,v in pairs(msgInfos) do
+    numEntries=numEntries+1
   end
-  checkOK(result,"@tabelrowfields")
-  result=structmsg.addField(handle, "ssid", "uint8_t*", 32)
-  checkOK(result,"ssid")
-  if (useBig) then
-    result=structmsg.adddeffield(def, "bssid", "uint8_t*", 17)
-    checkOK(result,"bssid")
-  end
-  result=structmsg.addField(handle, "rssi", "int8_t", 1)
-  checkOK(result,"rssi")
-  if (useBig) then
-    result=structmsg.adddeffield(def, "authmode", "uint8_t", 1)
-    checkOK(result,"authmode")
-  end
-  result=structmsg.addField(handle, "channel", "uint8_t", 1)
-  checkOK(result,"channel")
+  handle=structmsg.createmsgfromlist(numEntries,msgInfos,numRows,0);
+print("handlemsg: "..tostring(handle))
   return handle
 end
 
 function fillWithSpaces(str,lgth)
-print("str: "..tostring(str).." "..tostring(lgth))
   while (string.len(str) < lgth) do
     str=str.." "
   end
@@ -45,6 +34,12 @@ print("str: "..tostring(str).." "..tostring(lgth))
 end
 
 function setFieldValues(t,handle,useBig,numRows)
+  result=structmsg.setFieldValue(handle, "@src",123)
+  checkOK(result,"@src")
+  result=structmsg.setFieldValue(handle, "@dst",456)
+  checkOK(result,"@dst")
+  result=structmsg.setFieldValue(handle, "@cmdKey",789)
+  checkOK(result,"@cmdKey")
   row=0
   for ssid,v in pairs(t) do
     local authmode, rssi, bssid, channel = string.match(v, "([^,]+),([^,]+),([^,]+),([^,]+)")
@@ -81,14 +76,8 @@ end
 
 function buildStmsgAPList(t,useBig,numRows)
   handle=createAPListMsg(useBig,numRows)
-  result=structmsg.setFieldValue(handle, "@src",123)
-  checkOK(result,"@src")
-  result=structmsg.setFieldValue(handle, "@dst",456)
-  checkOK(result,"@dst")
-  result=structmsg.setFieldValue(handle, "@cmdKey",789)
-  checkOK(result,"@cmdKey")
   setFieldValues(t,handle,useBig,numRows)
-structmsg.dump(handle)
+--structmsg.dump(handle)
 
   result=structmsg.encode(handle)
   checkOK(result,"encode")
@@ -96,4 +85,3 @@ print("encoded")
   encoded_pwd1=structmsg.getencoded(handle)
 print("GETencoded len: "..tostring(string.len(encoded_pwd1)))
 end
-

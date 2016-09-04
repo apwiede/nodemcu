@@ -73,17 +73,18 @@ str2key_t structmsgSpecialFieldNames[] = {
   {NULL, -1},
 };
 
-// ============================= structmsg_getFieldTypeKey ========================
+// ============================= structmsg_getFieldTypeId ========================
 
-int structmsg_getFieldTypeKey(const uint8_t *str) {
+int structmsg_getFieldTypeId(const uint8_t *str, uint8_t *fieldType) {
   str2key_t *entry = &structmsgFieldTypes[0];
   while (entry->str != NULL) {
     if (c_strcmp(entry->str, str) == 0) {
-      return entry->key;
+      *fieldType = entry->key;
+      return STRUCT_MSG_ERR_OK;
     }
     entry++;
   }
-  return -1;
+  return STRUCT_MSG_ERR_BAD_FIELD_TYPE;
 }
 
 // ============================= structmsg_getFieldTypeStr ========================
@@ -231,7 +232,7 @@ int structmsg_getFieldNameId (const uint8_t *fieldName, int *id, int incrRefCnt)
 
 // ============================= structmsg_getFieldTypeId ========================
 
-static int structmsg_getFieldTypeId (const uint8_t *fieldTypeStr, int *key) {
+static int structmsg_getFieldTypeIdXX (const uint8_t *fieldTypeStr, int *key) {
   // find field type
   str2key_t *entry = &structmsgFieldTypes[0];
 
@@ -312,7 +313,7 @@ int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName,
   int result;
   fieldInfoDefinition_t *fieldInfo;
   int fieldId;
-  int fieldType;
+  uint8_t fieldType;
   int idx;
   int found = 0;
 
@@ -599,8 +600,11 @@ int structmsg_createMsgFromDefinition(const uint8_t *name) {
       result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
       checkErrOK(result);
 //ets_printf("addfield: %s %s %d\n", fieldName, fieldType, fieldInfo->fieldLgth);
-      result = stmsg_addField(handle, fieldName, fieldInfo->fieldType, fieldInfo->fieldLgth);
-       break;
+      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+      checkErrOK(result);
+      result = stmsg_addField(handle, fieldName, fieldType, fieldInfo->fieldLgth);
+      checkErrOK(result);
+      break;
     } 
     fieldIdx++;
   }

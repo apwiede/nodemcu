@@ -266,7 +266,7 @@ extern str2key_t structmsgFieldTypes[];
 
 structmsg_t *structmsg_get_structmsg_ptr( const uint8_t *handle );
 void structmsg_dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where);
-int structmsg_getFieldTypeKey(const uint8_t *str);
+int structmsg_getFieldTypeId(const uint8_t *str, uint8_t *fieldType);
 int structmsg_getIdFieldNameStr (int id, uint8_t **fieldName);
 int structmsg_getFieldNameId (const uint8_t *fieldName, int *id, int incrRefCnt);
 int structmsg_getFieldTypeStr(uint8_t key, uint8_t **fieldType);
@@ -292,7 +292,7 @@ int stmsg_getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth);
 int stmsg_decodeMsg(const uint8_t *handle, const uint8_t *data);
 int stmsg_dumpMsg(const uint8_t *handle);
 int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
-int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth);
+int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, const uint8_t *fieldType, int fieldLgth);
 int stmsg_setFillerAndCrc(const uint8_t *handle);
 int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 int stmsg_setTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
@@ -311,6 +311,7 @@ int structmsg_getDefinitionNumTableRows(const uint8_t *name, uint8_t *numTableRo
 int structmsg_getDefinitionNumTableRowFields(const uint8_t *name, uint8_t *numTableRowFields);
 int structmsg_getDefinitionFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo);
 int structmsg_getDefinitionTableFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo);
+int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
 
 #ifdef	__cplusplus
 }

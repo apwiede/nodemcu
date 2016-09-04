@@ -23,6 +23,7 @@ end
 function getNumRows(t)
   local numRows=0
   for ssid,v in pairs(t) do
+print("t: "..tostring(ssid).." "..tostring(v))
     numRows=numRows+1
   end 
 print("numRows: "..tostring(numRows))

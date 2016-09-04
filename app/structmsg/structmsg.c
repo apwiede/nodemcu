@@ -974,21 +974,25 @@ int stmsg_dumpMsg(const uint8_t *handle) {
 
 // ============================= stmsg_addField ========================
 
-int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t fieldType, int fieldLgth) {
+int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, const uint8_t *fieldTypeStr, int fieldLgth) {
   uint8_t numTableFields;
   uint8_t numTableRowFields;
   uint8_t numTableRows;
+  uint8_t fieldType;
   int row;
   int cellIdx;
   int result;
   structmsg_t *structmsg;
   fieldInfo_t *fieldInfo;
 
+  result = structmsg_getFieldTypeId(fieldTypeStr, &fieldType);
+  checkErrOK(result);
   structmsg = structmsg_get_structmsg_ptr(handle);
 //ets_printf("addfield: %s totalLgth: %d\n", fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkHandleOK(structmsg);
   if (c_strcmp(fieldStr, "@tablerows") == 0) {
     structmsg->msg.numTableRows = fieldLgth;
+//ets_printf("tablerows1: lgth: %d\n",  fieldLgth);
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
 //ets_printf("tablerows1: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
@@ -1001,6 +1005,7 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, uint8_t field
     structmsg->msg.numTableRowFields = fieldLgth;
     numTableFields = structmsg->msg.numTableRows * structmsg->msg.numTableRowFields;
     fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
+//ets_printf("tablerowFields1: %d lgth: %d\n", numTableFields, fieldLgth);
 //ets_printf("tablerowfields1: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
     fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, 0, 0);
@@ -1060,9 +1065,9 @@ int stmsg_setFillerAndCrc(const uint8_t *handle) {
     myLgth++;
     fillerLgth++;
   }
-  result = stmsg_addField(handle, "@filler", STRUCT_MSG_FIELD_UINT8_VECTOR, fillerLgth);
+  result = stmsg_addField(handle, "@filler", "uint8_t*", fillerLgth);
   checkErrOK(result);
-  result = stmsg_addField(handle, "@crc", STRUCT_MSG_FIELD_UINT16_T, 2);
+  result = stmsg_addField(handle, "@crc", "uint16_t", 2);
   checkErrOK(result);
   return STRUCT_MSG_ERR_OK;
 }
@@ -1142,7 +1147,6 @@ int stmsg_setTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, in
   int idx;
   int cell;
 
-//ets_printf("setTableFieldValue: handle: %s fieldName: %s row: %d numericValue: %d stringValue: %p\n", handle, fieldName, row, numericValue, stringValue);
   structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   if (row >= structmsg->msg.numTableRows) {
@@ -1244,4 +1248,78 @@ int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8
    }
    result = getHandle(decrypted, handle);
    return result;
+}
+
+// ============================= structmsg_createMsgFromListInfo ========================
+
+int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle) {
+  *handle = "DUMMY";
+  const uint8_t *listEntry;
+  int idx;
+  int result;
+  uint8_t*cp;
+  uint8_t *handle2;
+  uint8_t *fieldName;
+  uint8_t *fieldType;
+  uint8_t *fieldLgthStr;
+  char *endPtr;
+  uint8_t fieldLgth;
+  uint8_t *flagStr;
+  uint8_t flag;
+  unsigned long lgth;
+  unsigned long uflag;
+
+  result = stmsg_createMsg(numEntries, &handle2);
+  checkErrOK(result);
+  *handle=handle2;
+  listEntry = listVector[0];
+  idx = 0;
+  while(idx < numEntries) {
+    listEntry = listVector[idx];
+    uint8_t buffer[c_strlen(listEntry) + 1];
+    fieldName = buffer;
+    c_memcpy(fieldName, listEntry, c_strlen(listEntry));
+    fieldName[c_strlen(listEntry)] = '\0';
+    cp = fieldName;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    fieldType = cp;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    fieldLgthStr = cp;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    flagStr = cp;
+    if (c_strcmp(fieldLgthStr,"@numRows") == 0) {
+      fieldLgth = numRows;
+    } else {
+      lgth = c_strtoul(fieldLgthStr, &endPtr, 10);
+      fieldLgth = (uint8_t)lgth;
+    }
+    uflag = c_strtoul(flagStr, &endPtr, 10);
+    flag = (uint8_t)uflag;
+    if (flag == 0) {
+      result = stmsg_addField(*handle, fieldName, fieldType, fieldLgth);
+      checkErrOK(result);
+    } else {
+      if ((flags != 0) && (flag == 2)) {
+        result = stmsg_addField(*handle, fieldName, fieldType, fieldLgth);
+        checkErrOK(result);
+      } else {
+        if ((flags == 0) && (flag == 1)) {
+          result = stmsg_addField(*handle, fieldName, fieldType, fieldLgth);
+          checkErrOK(result);
+        }
+      }
+    }
+    idx++;
+  }
+  
+  return STRUCT_MSG_ERR_OK;
 }
