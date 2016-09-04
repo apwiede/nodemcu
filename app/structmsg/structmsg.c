@@ -759,7 +759,7 @@ static int dumpTableRowFields(structmsg_t *structmsg) {
     if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
       switch (fieldInfo->fieldType) {
       case STRUCT_MSG_FIELD_INT8_T:
-        ets_printf("        value: 0x%02x\n", (int8_t)fieldInfo->value.byteVal);
+        ets_printf("        value: %d 0x%02x\n", (int8_t)fieldInfo->value.byteVal, ((int8_t)fieldInfo->value.byteVal) & 0xFF);
         break;
       case STRUCT_MSG_FIELD_UINT8_T:
         ets_printf("        value: 0x%02x\n", (uint8_t)fieldInfo->value.ubyteVal);
@@ -1142,6 +1142,7 @@ int stmsg_setTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, in
   int idx;
   int cell;
 
+//ets_printf("setTableFieldValue: handle: %s fieldName: %s row: %d numericValue: %d stringValue: %p\n", handle, fieldName, row, numericValue, stringValue);
   structmsg = structmsg_get_structmsg_ptr(handle);
   checkHandleOK(structmsg);
   if (row >= structmsg->msg.numTableRows) {
