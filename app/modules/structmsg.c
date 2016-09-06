@@ -751,8 +751,43 @@ ets_printf("no table!!\n");
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushstring (L, handle);
   } else {
-    checkOKOrErr(L, result, "getdeftablefieldinfo", "");
+    checkOKOrErr(L, result, "createmsgfromlist", "");
   }
+  return 1;
+}
+
+// ============================= structmsg_create_msgDefinitionFromListInfo ==================
+
+// Lua: createmsgdeffromlist(list,numentries,name,numRows,flags)
+static int structmsg_create_msDefinitiongFromListInfo( lua_State* L ) {
+  const uint8_t *list;
+  const uint8_t *name;
+  uint8_t numRows;
+  uint8_t numEntries;
+  uint16_t flags;
+  const uint8_t **listVector;
+  int idx;
+  int result;
+  char buf[10];
+  const uint8_t *str;
+
+  numEntries = luaL_checkinteger (L, 1);
+  if (!lua_istable(L, 2)) {
+ets_printf("no table!!\n");
+    return 1;
+  }
+  idx = 0;
+  listVector = os_zalloc(numEntries * sizeof(uint8_t *) + 1);
+  while (idx < numEntries) {
+    os_sprintf(buf, "%d", idx+1);
+    listVector[idx] = parse_key(L, 2, buf);
+    idx++;
+  }
+  name = luaL_checkstring (L, 3);
+  numRows = luaL_checkinteger (L, 4);
+  flags = luaL_checkinteger (L, 5);
+  result = structmsg_createMsgDefinitionFromListInfo(name, listVector, numEntries, numRows, flags);
+  checkOKOrErr(L, result, "createmsgdeffromlist", "");
   return 1;
 }
 
@@ -794,6 +829,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "getdeffieldinfo" ),       LFUNCVAL( structmsg_get_definitionFieldInfo ) },
   { LSTRKEY( "getdeftablefieldinfo" ),  LFUNCVAL( structmsg_get_definitionTableFieldInfo ) },
   { LSTRKEY( "createmsgfromlist" ),     LFUNCVAL( structmsg_create_msgFromListInfo ) },
+  { LSTRKEY( "createmsgdeffromlist" ),  LFUNCVAL( structmsg_create_msDefinitiongFromListInfo ) },
   { LNILKEY, LNILVAL }
 };
 

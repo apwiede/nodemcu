@@ -731,3 +731,72 @@ int structmsg_getDefinitionTableFieldInfo(const uint8_t *name, const uint8_t *fi
   return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
 
+// ============================= structmsg_createMsgDefinitionFromListInfo ========================
+
+int structmsg_createMsgDefinitionFromListInfo(const uint8_t *name, const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags) {
+  const uint8_t *listEntry;
+  int idx;
+  int result;
+  uint8_t*cp;
+  uint8_t *fieldName;
+  uint8_t *fieldType;
+  uint8_t *fieldLgthStr;
+  char *endPtr;
+  uint8_t fieldLgth;
+  uint8_t *flagStr;
+  uint8_t flag;
+  unsigned long lgth;
+  unsigned long uflag;
+
+  result = structmsg_createStructmsgDefinition(name, numEntries);
+  checkErrOK(result);
+  listEntry = listVector[0];
+  idx = 0;
+  while(idx < numEntries) {
+    listEntry = listVector[idx];
+    uint8_t buffer[c_strlen(listEntry) + 1];
+    fieldName = buffer;
+    c_memcpy(fieldName, listEntry, c_strlen(listEntry));
+    fieldName[c_strlen(listEntry)] = '\0';
+    cp = fieldName;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    fieldType = cp;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    fieldLgthStr = cp;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    flagStr = cp;
+    if (c_strcmp(fieldLgthStr,"@numRows") == 0) {
+      fieldLgth = numRows;
+    } else {
+      lgth = c_strtoul(fieldLgthStr, &endPtr, 10);
+      fieldLgth = (uint8_t)lgth;
+    }
+    uflag = c_strtoul(flagStr, &endPtr, 10);
+    flag = (uint8_t)uflag;
+    if (flag == 0) {
+      result = structmsg_addFieldDefinition(name, fieldName, fieldType, fieldLgth);
+      checkErrOK(result);
+    } else {
+      if ((flags != 0) && (flag == 2)) {
+        result = structmsg_addFieldDefinition(name, fieldName, fieldType, fieldLgth);
+        checkErrOK(result);
+      } else {
+        if ((flags == 0) && (flag == 1)) {
+          result = structmsg_addFieldDefinition(name, fieldName, fieldType, fieldLgth);
+          checkErrOK(result);
+        }
+      }
+    }
+    idx++;
+  }
+  return STRUCT_MSG_ERR_OK;
+}

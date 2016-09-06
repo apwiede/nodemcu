@@ -773,6 +773,11 @@ int stmsg_encodeMsg(const uint8_t *handle) {
   if (structmsg->encoded != NULL) {
     os_free(structmsg->encoded);
   }
+  if ((structmsg->flags & STRUCT_MSG_HAS_CRC) == 0) {
+    result = stmsg_setFillerAndCrc(handle);
+    checkErrOK(result);
+    structmsg->flags |= STRUCT_MSG_HAS_CRC;
+  }
   structmsg->encoded = (uint8_t *)os_zalloc(structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   msgPtr = structmsg->encoded;
   offset = 0;

@@ -1253,7 +1253,6 @@ int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8
 // ============================= structmsg_createMsgFromListInfo ========================
 
 int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle) {
-  *handle = "DUMMY";
   const uint8_t *listEntry;
   int idx;
   int result;
@@ -1320,6 +1319,5 @@ int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntri
     }
     idx++;
   }
-  
   return STRUCT_MSG_ERR_OK;
 }
