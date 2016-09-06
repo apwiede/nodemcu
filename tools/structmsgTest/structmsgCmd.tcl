@@ -97,42 +97,17 @@ namespace eval structmsg {
       puts stderr ""
     }
     
-    # ===================== setHandleFieldXX =============================
-    
-    proc setHandleFieldXX {handle fieldName value} {
-      if {![info exists ::structmsg($handle)]} {
-        error "no such structmsg: $handle"
-      }
-      set myHandles $::structmsg(handles)
-puts stderr "myHandles: $myHandles![dict keys $::structmsg($handle) ]!"
-      set idx 0
-      foreach handle2Hdr $myHandles {
-        if {[dict get $handle2Hdr handle] eq $handle} {
-          # have to set ::structmsg($handle) here too!!
-          set hdrInfo [dict get $handle2Hdr hdrInfo]
-          dict set hdrInfo hdrKeys $fieldName $value
-          dict set handle2Hdr hdrInfo $hdrInfo
-          set myHandles [lreplace $myHandles $idx $idx $handle2Hdr]
-          set ::structmsg(handles) $myHandles
-          break
-        }
-        incr idx
-      }
-    }
-    
     # ============================= fixHeaderInfo ========================
     
     proc fixHeaderInfo {myDictVar fieldInfoVar fieldName fieldType fieldLgth numTableRows} {
       upvar $myDictVar myDict
       upvar $fieldInfoVar fieldInfo
     
-puts stderr "fixHeaderInfo $fieldName $fieldType $fieldLgth!"
       dict set fieldInfo fieldName $fieldName
       dict set fieldInfo fieldType $fieldType
       dict set fieldInfo value [list]
       dict set fieldInfo flags [list]
       set hdrKeysDict [dict get $myDict hdr hdrInfo hdrKeys]
-puts stderr "->hdrKeysDict1: $hdrKeysDict!"
       set totalLgth [dict get $hdrKeysDict totalLgth]
       set cmdLgth [dict get $hdrKeysDict cmdLgth]
       set value [list]
@@ -189,9 +164,6 @@ puts stderr "->hdrKeysDict1: $hdrKeysDict!"
         }
       }
       dict set myDict hdr hdrInfo hdrKeys $hdrKeysDict
-puts stderr "->hdrKeysDict2: $hdrKeysDict!"
-#      setHandleField [dict get $myDict handle] $::STRUCT_MSG_FIELD_CMD_LGTH [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]
-#      setHandleField [dict get $myDict handle] $::STRUCT_MSG_FIELD_TOTAL_LGTH [dict get $myDict hdr hdrInfo hdrKeys totalLgth]
       dict set fieldInfo fieldLgth $fieldLgth
       return $::STRUCT_MSG_ERR_OK
     }
@@ -246,7 +218,6 @@ puts stderr " ==> found handle from hdrId: $handle"
       dict set myDict todecode [list]
       dict set myDict encrypted [list]
       dict set myDict handleHdrInfoPtr [list]
-      dict set myDict hasBeenEncoded 0
       set handle $::structmsg(prefix)ffef[format "%04d" $::structmsg(numHandles)]
       set ::structmsg(numHandles) [expr {$::structmsg(numHandles) + 1}]
       dict set myDict handle $handle
@@ -267,13 +238,11 @@ puts stderr " ==> found handle from hdrId: $handle"
     # ============================= encode ========================
     
     proc encode {handle} {
-puts stderr "ENCODE $handle!"
       if {![info exists ::structmsg($handle)]} {
         error "no such structmsg: $handle"
       }
       set myDict $::structmsg($handle)
-puts stderr "HBE: [dict get $myDict hasBeenEncoded]!"
-      if {![dict get $myDict hasBeenEncoded]} {
+      if {[lsearch [dict get $myDict flags] "HAS_CRC"] < 0} {
         set result [set_fillerAndCrc $handle]
         if {$result != $::STRUCT_MSG_ERR_OK} {
           return $result
@@ -281,7 +250,6 @@ puts stderr "HBE: [dict get $myDict hasBeenEncoded]!"
         # set_fillerAndCrc changes myDict!!
         set myDict $::structmsg($handle)
       }
-puts stderr "-->numEntries 8: [dict get $myDict msg numFieldInfos]!"
       dict set myDict encoded [list]
       set encoded [list]
       set offset 0
@@ -290,21 +258,16 @@ puts stderr "-->numEntries 8: [dict get $myDict msg numFieldInfos]!"
       set offset [::structmsg encdec uint16Encode encoded $offset [dict get $myDict hdr hdrInfo hdrKeys totalLgth]]
       set offset [::structmsg encdec uint16Encode encoded $offset [dict get $myDict hdr hdrInfo hdrKeys cmdKey]]
       set offset [::structmsg encdec uint16Encode encoded $offset [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
-#    puts stderr "CMD_LGTH: [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]!"
       set numEntries [dict get $myDict msg numFieldInfos]
       set offset [::structmsg encdec uint8Encode encoded $offset $numEntries]
     
       set idx 0
-puts stderr "numEntries: $numEntries!"
       while {$idx < $numEntries} {
-puts stderr "numEntries2: [dict get $myDict msg numFieldInfos]!"
         set fieldInfos [dict get $myDict msg fieldInfos]
         set fieldInfo [lindex $fieldInfos $idx]
-puts stderr "hanling: [dict get $fieldInfo fieldName]!"
         if {[string range [dict get $fieldInfo fieldName] 0 0] eq "@"} {
           set result [::structmsg def getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
           if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-puts stderr "offset0: $offset![dict get $fieldInfo fieldName]!"
           set specFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
           switch $specFieldName { 
             @src -
@@ -355,7 +318,6 @@ puts stderr [format "funny should encode: %s" [dict get $fieldInfo fieldName]]
                      set fieldInfos [dict get $myDict msg tableFieldInfos]
                      set fieldInfo [lindex $fieldInfos $cell]
                      set offset [::structmsg encdec encodeField encoded $fieldInfo $offset]
-puts stderr "offset1: $offset![dict get $fieldInfo fieldName]!"
                      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
                      incr col
                   }
@@ -372,16 +334,12 @@ puts stderr "fieldId: $fieldId ($specFieldName) not in switch!"
           set offset [::structmsg encdec encodeField encoded $fieldInfo $offset]
           if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
         }
-puts stderr "offset2: $offset![dict get $fieldInfo fieldName]!"
         incr idx
       }
       if {[lsearch [dict get $myDict flags] "ENCODED"] < 0} {
         dict lappend myDict flags ENCODED
       }
       dict set myDict encoded $encoded
-      dict set myDict hasBeenEncoded 1
-puts stderr "ENCODING END: offset: $offset lgth: [string length $encoded]!"
-dump_binary $encoded "ENCODED"
       set ::structmsg($handle) $myDict
       return $::STRUCT_MSG_ERR_OK
     }
@@ -407,13 +365,11 @@ dump_binary $encoded "ENCODED"
     # ============================= decode ========================
     
     proc decode {handle todecode} {
-puts stderr "decode exi: $handle![info exists ::structmsg($handle]!"
       if {![info exists ::structmsg($handle)]} {
-        error "no such structmsg: $handle"
+        return $::STRUCT_MSG_ERR_HANDLE_NOT_FOUND
       }
       set myDict $::structmsg($handle)
-puts stderr "HBE: [dict get $myDict hasBeenEncoded]!"
-      if {![dict get $myDict hasBeenEncoded]} {
+      if {[lsearch [dict get $myDict flags] "HAS_CRC"] < 0} {
         set result [set_fillerAndCrc $handle]
         if {$result != $::STRUCT_MSG_ERR_OK} {
           return $result
@@ -421,10 +377,6 @@ puts stderr "HBE: [dict get $myDict hasBeenEncoded]!"
         # Attention: set_fillerAndCrc changes myDict!!
         set myDict $::structmsg($handle)
       }
-puts stderr "after set_fillerAndCrc!"
-dump $handle
-puts stderr "DECODE: lgth: [string length $todecode]!$handle!"
-dump_binary $todecode "TODECODE"
       set myDict $::structmsg($handle)
       dict set myDict todecode $todecode
       set offset 0
@@ -441,18 +393,15 @@ dump_binary $todecode "TODECODE"
       set ::structmsg($handle) $myDict
       ::structmsg encdec fillHdrId $handle
       set offset [::structmsg encdec uint8Decode $todecode $offset numEntries]
-puts stderr "offset0: $offset!numEntries: $numEntries!"
       set idx 0
       while {$idx < $numEntries} {
         set myDict $::structmsg($handle) ; # needed because set_fieldValue changes the dict!!
         set fieldInfos [dict get $myDict msg fieldInfos]
         set fieldInfo [lindex $fieldInfos $idx]
-puts stderr "idx: $idx!numEntries: $numEntries: fieldInfo: $fieldInfo!"
         if {[string range [dict get $fieldInfo fieldName] 0 0] == "@"} {
           set result [::structmsg def getFieldNameId [dict get $fieldInfo fieldName] fieldId $::STRUCT_MSG_NO_INCR]
           set specialFieldName [dict get $::structmsg(specialFieldIds) $fieldId]
           if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-puts stderr "specialFieldName: $specialFieldName!fieldId: $fieldId!"
           switch $specialFieldName {
             @src -
             @dst -
@@ -463,12 +412,10 @@ puts stderr [format "funny should decode: %s" [dict get $fieldInfo fieldName]]
             }
             @randomNum {
               set offset [::structmsg encdec randomNumDecode $todecode $offset value]
-puts stderr "after randomNum: offset: $offset!value: [format 0x%08x $value]"
               if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
             }
             @sequenceNum {
               set offset [::structmsg encdec sequenceNumDecode $todecode $offset value]
-puts stderr "after sequenceNum: offset: $offset!value: [format 0x%08x $value]"
               if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
             }
             @filler {
@@ -476,9 +423,7 @@ puts stderr "after sequenceNum: offset: $offset!value: [format 0x%08x $value]"
               if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
             }
             @crc {
-puts stderr "before crc"
               set offset [::structmsg encdec crcDecode $todecode $offset [dict get $myDict hdr hdrInfo hdrKeys cmdLgth] crc [dict get $myDict hdr headerLgth]]
-puts stderr "after crc offset: $offset!cmdLgth: [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]!$cmdLgth!crc: $crc]!"
               if {$offset < 0} {
                 return $::STRUCT_MSG_ERR_BAD_CRC_VALUE;
               }
@@ -490,7 +435,6 @@ puts stderr "after crc offset: $offset!cmdLgth: [dict get $myDict hdr hdrInfo hd
             }
             @tablerowfields {
               if {[dict get $myDict msg numTableRows] > 0} {
-puts stderr "tabelrowfields: offset: $offset!"
                 set row 0
                 set col 0
                 set cell 0
@@ -533,7 +477,6 @@ puts stderr "tabelrowfields: offset: $offset!"
         dict lappend myDict flags DECODED
       }
       set ::structmsg($handle) $myDict
-puts stderr "DECODE DONE!"
       return $::STRUCT_MSG_ERR_OK;
     }
     
@@ -668,24 +611,41 @@ puts stderr "DECODE DONE!"
       upvar $bufVar buf
       upvar lgthVar lgth
 
-      if {![info exists ::structmsg($handle)]} {
-        error "no such structmsg: $handle"
+      if {$handle ne ""} {
+        if {![info exists ::structmsg($handle)]} {
+          error "no such structmsg: $handle"
+        }
+        set myDict $::structmsg($handle)
+        if {[lsearch [dict get $myDict flags] "HAS_CRC"] < 0} {
+          set result [set_fillerAndCrc $handle]
+          if {$result != $::STRUCT_MSG_ERR_OK} {
+            return $result
+          }
+        }
+        # Attention: set_fillerAndCrc changes myDict!!
+        set myDict $::structmsg($handle)
+        set headerLgth [dict get $myDict hdr headerLgth]
+        set lgth [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]
+        set offset $headerLgth
+        set todecrypt [string range $crypted $offset [expr {$offset + $lgth - 1}]]
+      } else {
+        set idx1 $::STRUCT_MSG_HEADER_LENGTH
+        set todecrypt [string range $todecrypt $idx1 end]
       }
-      set myDict $::structmsg($handle)
-      set headerLgth [dict get $myDict hdr headerLgth]
-      set lgth [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]
-      set offset $headerLgth
-      set todecrypt [string range $crypted $offset [expr {$offset + $lgth - 1}]]
       set decryptedData [aes::aes -dir decrypt -key $cryptKey $todecrypt]
-      set len [string length $decryptedData]
-      dict set myDict decrypted $decryptedData
-      dict set myDict decryptedMsg [string range $crypted 0 [expr {$headerLgth - 1}]]
-      dict append myDict decryptedMsg $decryptedData
-      if {[lsearch [dict get $myDict flags] "DECRYPTED"] < 0} {
-        dict lappend myDict flags DECRYPTED
+      if {$handle ne ""} {
+        set len [string length $decryptedData]
+        dict set myDict decrypted $decryptedData
+        dict set myDict decryptedMsg [string range $crypted 0 [expr {$headerLgth - 1}]]
+        dict append myDict decryptedMsg $decryptedData
+        if {[lsearch [dict get $myDict flags] "DECRYPTED"] < 0} {
+          dict lappend myDict flags DECRYPTED
+        }
+        set ::structmsg($handle) $myDict
+        set buf [dict get $myDict decryptedMsg]
+      } else {
+        set buf $decryptedData
       }
-      set ::structmsg($handle) $myDict
-      set buf [dict get $myDict decryptedMsg]
       set lgth [string length $buf]
       return $::STRUCT_MSG_ERR_OK
     }
@@ -706,6 +666,7 @@ puts stderr "DECODE DONE!"
     #puts stderr [format "tablerows1: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
         # we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
         fixHeaderInfo myDict fieldInfo $name $fieldType 0 0
+        dict set fieldInfo fieldLgth $fieldLgth
         lappend fieldInfos $fieldInfo
         dict set myDict msg fieldInfos $fieldInfos
     #puts stderr [format "tablerows2: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
@@ -722,6 +683,7 @@ puts stderr "DECODE DONE!"
     #puts stderr [format "tablerowfields1: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $myDict hdr hdrInfo hdrKeys cmdLgth]]
         # we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
         fixHeaderInfo myDict fieldInfo $name $fieldType 0 0
+        dict set fieldInfo fieldLgth $fieldLgth
         lappend fieldInfos $fieldInfo
         dict set myDict msg fieldInfos $fieldInfos
     #puts stderr [format "tablerowfields2: totalLgth: %d cmdLgth: %d" [dict get $myDict hdr hdrInfo hdrKeys totalLgth] [dict get $mmyDict hdr hdrInfo hdrKeys cmdLgth]]
@@ -755,9 +717,7 @@ puts stderr "DECODE DONE!"
 puts stderr "==> DUPLICATE: $name!"
             if {($fieldName eq "@filler") || ($fieldName eq "@crc")} { 
               # these are internal fields and may be we have to fix values!
-puts stderr "==> fieldInfo: $fieldInfo![dict get $myDict hdr]"
               fixHeaderInfo myDict fieldInfo $name $fieldType $fieldLgth $numTableRows
-puts stderr "==> fieldInfo2: $fieldInfo![dict get $myDict hdr]"
               set fieldInfos [lreplace $fieldInfos $fieldInfoIdx $fieldInfoIdx $fieldInfo]
               dict set myDict msg fieldInfos $fieldInfos
               set ::structmsg($handle) $myDict
@@ -842,9 +802,11 @@ puts stderr "==> fieldInfo2: $fieldInfo![dict get $myDict hdr]"
         error "no such structmsg: $handle"
       }
       set myDict $::structmsg($handle)
+      if {[lsearch [dict get $myDict flags] "HAS_CRC"] >= 0} {
+        return $::STRUCT_MSG_ERR_DUPLICATE_FIELD
+      }
       set hdrDict [dict get $myDict hdr]
       # for the internal numEntries field
-puts stderr "set_fillerAndCrc: cmdLgth: [dict get $hdrDict hdrInfo hdrKeys cmdLgth]!"
       dict set hdrDict hdrInfo hdrKeys cmdLgth [expr {[dict get $hdrDict hdrInfo hdrKeys cmdLgth] + 1}]
       dict set hdrDict hdrInfo hdrKeys totalLgth [expr {[dict get $hdrDict hdrInfo hdrKeys totalLgth] + 1}]
       # end for the internal numEntries field
@@ -855,19 +817,15 @@ puts stderr "set_fillerAndCrc: cmdLgth: [dict get $hdrDict hdrInfo hdrKeys cmdLg
         incr fillerLgth
       }
       dict set myDict hdr $hdrDict
+      if {[lsearch [dict get $myDict flags] "HAS_CRC"] < 0} {
+        dict lappend myDict flags HAS_CRC
+      }
       set ::structmsg($handle) $myDict
-puts stderr "numEntries21: [dict get $::structmsg($handle) msg numFieldInfos]!"
-puts stderr "fillerLgth: $fillerLgth!"
       set result [add_field $handle "@filler" uint8_t* $fillerLgth]
-puts stderr "numEntries22: [dict get $::structmsg($handle) msg numFieldInfos]!"
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
-puts stderr "numEntries23: [dict get $::structmsg($handle) msg numFieldInfos]!"
       set result [add_field $handle "@crc" uint16_t 1]
-puts stderr "numEntries24: [dict get $::structmsg($handle) msg numFieldInfos]!"
-puts stderr "srt_fillerAndCrc End"
-dump $handle
       return $result
     }
     
@@ -999,7 +957,6 @@ dump $handle
     # ===================== set_fieldValue =============================
     
     proc set_fieldValue {handle fieldName value} {
-puts stderr "set_fieldValue: $handle $fieldName $value!"
       if {![info exists ::structmsg($handle)]} {
         error "no such structmsg: $handle"
       }
@@ -1175,7 +1132,6 @@ puts stderr "set_tableFieldValue: $handle $fieldName $value!"
       append hdr $decryptedData
       set len [string length $hdr]
       set result [getHandle $hdr handle]
-puts stderr "RES: $result!"
       return $result
     }
 

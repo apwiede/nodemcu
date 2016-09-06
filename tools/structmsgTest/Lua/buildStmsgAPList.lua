@@ -4,24 +4,28 @@ function checkOK(result, fieldName)
   end
 end
 
-msgInfos={}
-msgInfos["1"]="@randomNum,uint32_t,4,0"
-msgInfos["2"]="@sequenceNum,uint32_t,4,0"
-msgInfos["3"]="@tablerows,uint8_t,@numRows,0"
-msgInfos["4"]="@tablerowfields,uint8_t,5,2"
-msgInfos["5"]="@tablerowfields,uint8_t,3,1"
-msgInfos["6"]="ssid,uint8_t*,32,0"
-msgInfos["7"]="bssid,uint8_t*, 17,2"
-msgInfos["8"]="rssi,int8_t,1,0"
-msgInfos["9"]="authmode,uint8_t,1,2"
-msgInfos["10"]="channel,uint8_t,1,0"
-
 function createAPListMsg(useBig,numRows)
+  local msgInfos={}
+  msgInfos["1"]="@randomNum,uint32_t,4,0"
+  msgInfos["2"]="@tablerows,uint8_t,@numRows,0"
+  msgInfos["3"]="@tablerowfields,uint8_t,5,2"
+  msgInfos["4"]="@tablerowfields,uint8_t,3,1"
+  msgInfos["5"]="ssid,uint8_t*,32,0"
+  msgInfos["6"]="bssid,uint8_t*, 17,2"
+  msgInfos["7"]="rssi,int8_t,1,0"
+  msgInfos["8"]="authmode,uint8_t,1,2"
+  msgInfos["9"]="channel,uint8_t,1,0"
+
   numEntries=0
   for x,v in pairs(msgInfos) do
     numEntries=numEntries+1
   end
-  handle=structmsg.createmsgfromlist(numEntries,msgInfos,numRows,0);
+  if (useBig) then
+    flags= 1
+  else
+    flags=0
+  end
+  handle=structmsg.createmsgfromlist(numEntries,msgInfos,numRows,flags);
 print("handlemsg: "..tostring(handle))
   return handle
 end
@@ -82,6 +86,11 @@ function buildStmsgAPList(t,useBig,numRows)
   result=structmsg.encode(handle)
   checkOK(result,"encode")
 print("encoded")
-  encoded_pwd1=structmsg.getencoded(handle)
-print("GETencoded len: "..tostring(string.len(encoded_pwd1)))
+--  encoded_pwd1=structmsg.getencoded(handle)
+--print("GETencoded len: "..tostring(string.len(encoded_pwd1)))
+  encrypted=structmsg.encrypt(handle,cryptkey)
+print("encrypted len: "..tostring(string.len(encrypted)))
+    srv_sck:send(encrypted,srv_close)
+
+  return encrypted
 end

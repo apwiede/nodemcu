@@ -58,6 +58,8 @@
 #      name
 #      numFields
 #      maxFields
+#      encoded
+#      encrypted
 #      fieldInfos [list
 #        fieldId
 #        fieldType
@@ -85,13 +87,12 @@
 #    ]
 #    tableFieldInfos [list
 #    ]
-#    flags [list
+#    flags [list          ; # HAS_CRC, ENCODED, DECODED, ENCRYPTED, DECRYPTED
 #    ]
 #  sequenceNum
 #  encoded
 #  todecode
 #  encrypted
-#  hasBeenEncoded                   <-- flag for checking if @filler and @crc have been set!!
 # 
 # ::structmsg(hdrId2Handles) [list
 #  hdrId
@@ -243,8 +244,8 @@ namespace eval structmsg {
   namespace export set_tableFieldValue get_fieldValue get_tableFieldValue set_crypted
   namespace export decrypt_getHandle create_definition add_fieldDefinition
   namespace export dump_fieldDefinition encode_fieldDefinition decode_fieldDefinition
-  namespace export set_crypted_definition decrypt_getDefinitionName encrypt_fieldDefinition
-  namespace export decrypt_fieldDefinition delete_fieldDefinition delete_fieldDefinitions
+  namespace export set_crypted_definition decrypt_getDefinitionName encrypt_definition
+  namespace export decrypt_definition delete_fieldDefinition delete_fieldDefinitions
   namespace export create_msgFromDefinition et_definitionNormalFieldNames
   namespace export get_definitionTableFieldNames get_definitionNormalFieldNames get_definitionNumTableRows
   namespace export get_definitionNumTableRowFields get_definitionFieldInfo get_definitionTableFieldInfo
@@ -357,7 +358,7 @@ namespace eval structmsg {
   # ============================= delete ========================
   
   proc delete {handle} {
-    set result [stmsg_deleteMsg $handle
+    set result [cmd delete $handle
     return [checkOKOrErr $result "delete" "" ]
   }
   
@@ -381,9 +382,7 @@ namespace eval structmsg {
   # ============================= decode ========================
   
   proc decode {handle data} {
-  puts stderr "decode:"
     set result [cmd decode $handle $data]
-  puts stderr "result: $result!"
     return [checkOKOrErr $result "decode" ""]
   }
   
@@ -424,7 +423,7 @@ namespace eval structmsg {
   # ============================= set_fillerAndCrc ========================
   
   proc set_fillerAndCrc {handle} {
-    set result [stmsg_setFillerAndCrc $handle]
+    set result [structmsg_setFillerAndCrc $handle]
     return [checkOKOrErr $result "set_fillerAndCrc" ""]
   }
   
@@ -517,16 +516,16 @@ namespace eval structmsg {
   # ============================= set_crypted_definition ========================
   
   proc set_crypted_definition {name crypted} {
-    set result [stmsg def setCryptedDefinition $handle $crypted]
+    set result [structmsg def setCryptedDefinition $name $crypted]
     return [checkOKOrErr $result "set_crypted_definition" ""]
   }
   
   # ============================= decrypt_getDefinitionName ========================
   
   proc decrypt_getDefinitionName {encrypted key {iv ""}} {
-    set result [stmsg def decryptGetDefinitionName $encrypted $key $iv handle]
+    set result [structmsg def decryptGetDefinitionName $encrypted $key $iv name]
     if  {$result == $::STRUCT_MSG_ERR_OK} {
-      return $handle
+      return $name
     }
     return [checkOKOrErr $result "decrypt_getDefinitionName" ""]
   }
@@ -534,7 +533,7 @@ namespace eval structmsg {
   # ============================= encrypt_definition ========================
   
   proc encrypt_definition {name key {iv}} {
-    set result [structmsg def enccryptDefinition $name $key $iv true buf lgth]
+    set result [structmsg def encryptDefinition $name $key $iv buf lgth]
     if  {$result == $::STRUCT_MSG_ERR_OK} {
       return $buf
     }
@@ -543,8 +542,8 @@ namespace eval structmsg {
   
   # ============================= decrypt_definition ========================
   
-  proc decrypt_definition {name key {iv ""}} {
-    set result [structmsg def decryptDefinition $name $key $iv false buf lgth]
+  proc decrypt_definition {name key {iv ""} {encrypted {}}} {
+    set result [structmsg def decryptDefinition $name $key $iv $encrypted buf lgth]
     if  {$result == $::STRUCT_MSG_ERR_OK} {
       return $buf
     }

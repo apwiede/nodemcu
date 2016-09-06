@@ -1,7 +1,9 @@
 accessPointData=""
 useBig=false
 
+dofile("myConfig.lua")
 dofile("buildStmsgAPList.lua")
+dofile("buildStmsgAPListDefinition.lua")
 
 function dbgPrint(s)
   print(s)
@@ -30,11 +32,41 @@ print("numRows: "..tostring(numRows))
   return numRows
 end
 
--- (SSID : Authmode, RSSI, BSSID, Channel)
+--srv_sck=nil
+
+function srv_listen(sck)
+print("srv_listen")
+  sck:on("receive",function(sck,payload)
+    print("receive: ".."!"..tostring(payload).."!")
+    srv_sck=sck
+    if (payload == "getaplist\r\n") then
+      wifi.sta.getap(buildAPList)
+      return
+    end
+    if (tostring(payload) == "getapdeflist\r\n") then
+      numRows=2
+      encryptedDef=buildStmsgAPDefList(t,useBig,numRows)
+print("encryptedDef: "..tostring(string.len(encryptedDef)))
+      srv_sck:send(encryptedDef,srv_close)
+      return
+    end
+    srv_sck:send("bad request",srv_close)
+  end)
+end
+
+function srv_connected(sck)
+print("srv_connected")
+  sck:listen(port,srv_listen)
+end
+
+function srv_close(sck)
+  sck:close()
+end
+
 function buildAPList(t)
   numRows=getNumRows(t)
-  handle=buildStmsgAPList(t,useBig,numRows)
---  sendAPList(useBig,numRows)
+  encrypted=buildStmsgAPList(t,useBig,numRows)
+  srv_sck:send(encrypted,srv_close)
 end
 
 function chkRouterConnected(sck)
@@ -45,6 +77,10 @@ end
 function ProvisioningServerStart(big)
   useBig=big
 
+  if srv ~= nil then
+    srv:close()
+    srv=nil
+  end
   wifi.sta.disconnect()
   wifi.setmode(wifi.STATIONAP)
   wifi.ap.config({ssid="SPIRIT21_Connect",auth=wifi.AUTH_OPEN})
@@ -57,7 +93,7 @@ dbgPrint('Provisioning: wifi mode: '..tostring(wifi.getmode()))
 dbgPrint("Provisioning: AP IP: "..tostring(wifi.ap.getip()))
 dbgPrint("Provisioning: STA IP: "..tostring(wifi.sta.getip()))
 --       wifi.sta.getap(listap)
-       wifi.sta.getap(buildAPList)
+       srv=net.createServer(net.TCP,30,srv_connected)
      else
 dbgPrint("IP: "..tostring(ip))
      end

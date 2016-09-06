@@ -54,7 +54,7 @@ namespace eval structmsg {
     namespace export deleteFieldDefinitions dumpFieldDefinition encryptDefinition decryptDefinition
     namespace export encodeFieldDefinition decodeFieldDefinition getIdFieldNameStr getFieldTypeStr
     namespace export createMsgFromDefinition getDefinitionNormalFieldNames getDefinitionTableFieldNames
-    namespace expor getDefinitionNumTableRows
+    namespace expor getDefinitionNumTableRows decryptGetDefinitionName setCryptedDefinition
     namespace export getDefinitionNumTableRowFields getDefinitionFieldInfo getDefinitionTableFieldInfo
 
     # ============================= initFieldTypeDefines ========================
@@ -352,21 +352,16 @@ namespace eval structmsg {
 
       set result [getDefinitionDict $name definition definitionsIdx]
       if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-puts stderr "DEF2: $definition!"
       set result [::structmsg cmd create [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}] handle]
-puts stderr [format "create: handle: %s numFields: %d" $handle [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}]]
       if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
       set fieldIdx 0
-puts stderr "CMFD1: numField: [dict get $definition numFields]!"
       while {$fieldIdx < [dict get $definition numFields]} {
         set fieldInfos [dict get $definition fieldInfos]
         set fieldInfo [lindex $fieldInfos $fieldIdx]
-puts stderr "MCFD2: fieldInfo: $fieldInfo!$fieldIdx!"
         set fieldId [dict get $fieldInfo fieldId]
         set fieldName "??"
         if {[dict exists $::structmsg(specialFieldIds) $fieldId]} {
           set fieldName [dict get $::structmsg(specialFieldIds) $fieldId]
-puts stderr "CMFD3: fieldName: $fieldName!"
         }
         switch $fieldName { 
           @src -
@@ -382,7 +377,6 @@ puts stderr "CMFD3: fieldName: $fieldName!"
 #      checkErrOK(result);
             set result [getFieldTypeStr [dict get $fieldInfo fieldType] fieldType]
 #      checkErrOK(result);
-#puts stderr [format {addfield: %s %s %d} $fieldName $fieldType [dict get $fieldInfo fieldLgth]]
             # @filler and @crc are handled in encode!!
             if {!(($fieldName eq "@filler") || ($fieldName eq "@crc"))} {
               set result [::structmsg cmd add_field $handle $fieldName $fieldType [dict get $fieldInfo fieldLgth]]
@@ -391,8 +385,6 @@ puts stderr "CMFD3: fieldName: $fieldName!"
         } 
         incr fieldIdx
       }
-puts stderr "createMsgFromDefinition END"
-::structmsg cmd dump $handle
       return $::STRUCT_MSG_ERR_OK
     }
     
@@ -518,7 +510,9 @@ puts stderr [format "after crc offset: %d totalLgth :%d crc: 0x%04x" $offset $to
       # now check the crc
       set crcOffset [expr {$totalLgth - [sizeof uint16_t]}]
       set crcOffset [::structmsg encdec crcDecode $data $crcOffset $cmdLgth crc $::STRUCT_MSG_HEADER_LENGTH]
-puts stderr "crcOffset: $crcOffset!offset: $offset!"
+if {$::crcDebug} {
+  puts stderr "crcOffset: $crcOffset!offset: $offset!"
+}
       set offset [::structmsg encdec definitionDecode $data $offset]
       if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
       set myLgth [expr {$offset - $::STRUCT_MSG_HEADER_LENGTH + [sizeof uint16_t]}]
@@ -529,6 +523,60 @@ puts stderr "crcOffset: $crcOffset!offset: $offset!"
       }
       set offset [::structmsg encdec fillerDecode $data $offset $fillerSize filler]
       if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
+      return $::STRUCT_MSG_ERR_OK
+    }
+
+    # ============================= setCryptedDefinition ========================
+    
+    proc setCryptedDefinition {name crypted} {
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      dict set definition encrypted $crypted
+      set definitions [dict get $::strucmsg(structmsgDefinitions) definitions]
+      set defintions [lreplace $definitions $definitionsIdx $definitionsIdx $definition]
+      set ::strucmsg(structmsgDefinitions) $definitions
+      return $::STRUCT_MSG_ERR_OK
+    }
+
+    # ============================= decryptGetDefinitionName ========================
+    
+    proc decryptGetDefinitionName {encrypted key iv nameVar} {
+      upvar $nameVar name
+
+      set decrypted [list]
+      set lgth 0
+      set result [::structmsg cmd decrypt "" $encrypted [string length $encrypted] $key $iv $encrypted decrypted lgth]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [::structmsg encdec getDefinitionName $decrypted name]
+      return $result
+    }
+
+    # ============================= encryptDefinition ========================
+    
+    proc encryptDefinition {name key iv bufVar lgthVar} {
+      upvar $bufVar buf
+      upvar $lgthVar lgth
+
+      set result [getDefinitionDict $name definition definitionsIdx]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      set result [::structmsg cmd encrypt $tocrypt [string length $tocrypt] $key $iv buf lgth]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+      return $::STRUCT_MSG_ERR_OK
+    }
+
+    # ============================= decryptDefinition ========================
+    
+    proc decryptDefinition {name key iv encrypted bufVar lgthVar} {
+      upvar $bufVar buf
+      upvar $lgthVar lgth
+
+      if {$encrypted eq [list]} {
+        set result [getDefinitionDict $name definition definitionsIdx]
+        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
+        set encrypted [dict get $definition encrypted]
+      }
+      set result [::structmsg cmd decrypt "" $encrypted [string length $encrypted] $key $iv "" buf lgth]
+      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
       return $::STRUCT_MSG_ERR_OK
     }
 

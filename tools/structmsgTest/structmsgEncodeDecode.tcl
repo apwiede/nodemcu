@@ -48,7 +48,7 @@ namespace eval structmsg {
     namespace export randomNumEncode randomNumDecode sequenceNumEncode sequenceNumDecode
     namespace export fillerEncode fillerDecode crcEncode crcDecode fillHdrId
     namespace export encodeField decodeField getFieldIdName normalFieldNamesEncode
-    namespace export definitionEncode definitionDecode
+    namespace export definitionEncode definitionDecode getDefinitionName
 
     # ============================= uint8Encode ========================
     
@@ -219,7 +219,11 @@ namespace eval structmsg {
       if {![string is integer $ch]} {
         binary scan $ch c pch
       }
-      set value [expr {$pch & 0xFF}]
+      if {[string is integer $pch]} {
+        set value [expr {$pch & 0xFF}]
+      } else {
+        set value $pch
+      }
       incr offset
       return $offset
     }
@@ -229,7 +233,12 @@ namespace eval structmsg {
     proc int8Decode {data offset val} {
       upvar $val value
     
-      set value [expr {[string range $data $offset $offset] & 0xFF}]
+      set ch [string range $data $offset $offset]
+      set pch $ch
+      if {![string is integer $ch]} {
+        binary scan $ch c pch
+      }
+      set value $pch
       incr offset
       return $offset
     }
@@ -418,7 +427,6 @@ namespace eval structmsg {
       upvar $val value
     
       set myVal [getRandom]
-puts stderr "randomnumEncode: myVal: [format 0x%08x $myVal]!"
       set value $myVal
       return [uint32Encode data $offset $myVal]
     }
@@ -522,7 +530,9 @@ puts stderr "crc1: $crc![format 0x%04x $crc]!"
 }
       set crc [expr {~$crc & 0xFFFF}]
       set offset [uint16Encode data $offset $crc]
+if {$::crcDebug} {
 puts stderr "crc: $crc![format 0x%04x $crc]!offset: $offset!"
+}
       set value $crc
       return $offset
     }
@@ -553,7 +563,9 @@ puts stderr "crcVal end: $crcVal!"
 }
       set crcVal [expr {~$crcVal & 0xFFFF}]
       set offset [uint16Decode $data $offset crc]
+if {$::crcDebug} {
 puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
+}
       if {$crcVal != $crc} {
         return -1
       }
@@ -766,28 +778,6 @@ puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x
     }
     
     
-    # ============================= fillHdrInfoXX ========================
-    
-    proc fillHdrInfoXX {handle} {
-      # fill the hdrInfo
-      set hdrInfo [dict get $::structmsg($handle) hdr hdrInfo]
-      set hdrKeys [dict get $hdrInfo hdrKeys]
-      set hdrId ""
-      set offset 0
-      set offset [uint16Encode hdrId $offset [dict get $hdrKeys src]]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [uint16Encode hdrId $offset [dict get $hdrKeys dst]]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [uint16Encode hdrId $offset [dict get $hdrKeys totalLgth]]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdKey]]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [uint16Encode hdrId $offset [dict get $hdrKeys cmdLgth]]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      dict set ::::structmsg($handle) hdr hdrInfo hdrId $hdrId
-      return $::STRUCT_MSG_ERR_OK
-    }
-    
     # ============================= encodeField ========================
     
     proc encodeField {encodedVar fieldInfo offset} {
@@ -865,7 +855,7 @@ puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x
         int8_t {
           set offset [int8Decode $todecode $offset value]
         }
-        unit8_t {
+        uint8_t {
           set offset [uint8Decode $todecode $offset value]
         }
         int16_t {
@@ -898,6 +888,9 @@ puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x
         unit32_t* {
           set offset [uint32VectorDecode $todecode $offset value [dict get $fieldInfo fieldLgth]]
         }
+        default {
+puts stderr "funny fieldType: $fieldTypeName!"
+        }
       }
       if {$offset > 0} {
         dict set fieldInfo value $value
@@ -921,5 +914,32 @@ puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x
       return $::STRUCT_MSG_ERR_OK
     }
     
+    # ============================= getDefinitionName ========================
+    
+    proc getDefinitionName {decrypted nameVar} {
+      upvar $nameVar name
+  
+      set name ""
+#      set nameOffset $::STRUCT_MSG_HEADER_LENGTH ; # src + dst + totalLgth
+      set nameOffset 0
+      set nameOffset [expr {$nameOffset + $::STRUCT_MSG_CMD_HEADER_LENGTH}] ; # cmdKey + cmdLgth
+      # randomNum
+      set nameOffset [expr {$nameOffset + [sizeof uint32_t]}]
+      # len ids 
+      set nameOffset [uint8Decode $decrypted $nameOffset numNormFields]
+      # ids vector
+      set nameOffset [expr {$nameOffset + $numNormFields * [sizeof uint16_t]}]
+      # size of name strings (normnamesSize)
+      set nameOffset [uint16Decode $decrypted $nameOffset normNamesSize]
+      # names vector
+      set nameOffset [expr {$nameOffset + $normNamesSize}]
+      # definitionSize + nameLgth
+      set nameOffset [expr {$nameOffset + [sizeof uint16_t]}]
+      set nameOffset [uint8Decode $decrypted $nameOffset nameLgth]
+      # here the name starts
+      set name [string range $decrypted $nameOffset [expr {$nameOffset + $nameLgth - 1 - 1}]] ; # second -1 for stripping off `\0' char
+      return $::STRUCT_MSG_ERR_OK
+    }
+
   } ; # namespace encdec
 } ; # namespace structmsg
