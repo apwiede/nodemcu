@@ -1,0 +1,221 @@
+/*====================================================
+ * A structured Message Support implementation in Javascript named Esp
+ *
+ * Structmsg objectInherit for Esp (objectInherit.js)
+ *
+ * utility has* functions for Object inheritance 
+ * This code is mostly taken from:
+ * http://yuilibrary.com/ YUI 3.3 version
+ *
+ * Released under BSD/MIT license.
+ * (BSD license found at <http://www.tcl.tk/software/tcltk/license.html>)
+ *
+ * Arnulf P. Wiedemann arnulf@wiedemann-pri.de (C)2016
+ *
+ */
+
+/* this are additional Object utility functions */
+
+EM.addModule("Esp-objectInherit", function(T, name) {
+    var CACHED_DELIMITER = '__';
+    var hasOwn   = Object.prototype.hasOwnProperty;
+    var isObject = T.Util.isObject;
+
+
+    /* =============================== T.cached ================================== */
+
+    /**
+    Returns a wrapper for a function which caches the return value of that function,
+    keyed off of the combined string representation of the argument values provided
+    when the wrapper is called.
+    
+    Calling this function again with the same arguments will return the cached value
+    rather than executing the wrapped function.
+    
+    Note that since the cache is keyed off of the string representation of arguments
+    passed to the wrapper function, arguments that aren't strings and don't provide
+    a meaningful `toString()` method may result in unexpected caching behavior. For
+    example, the objects `{}` and `{foo: 'bar'}` would both be converted to the
+    string `[object Object]` when used as a cache key.
+    
+    @method cached
+    @param {Function} source The function to memoize.
+    @param {Object} [cache={}] Object in which to store cached values. You may seed
+      this object with pre-existing cached values if desired.
+    @param {any} [refetch] If supplied, this value is compared with the cached value
+      using a `==` comparison. If the values are equal, the wrapped function is
+      executed again even though a cached value exists.
+    @return {Function} Wrapped function.
+    @for AT
+    **/
+
+    T.cached = function (source, cache, refetch) {
+        cache || (cache = {});
+
+        return function (arg) {
+            var key = arguments.length > 1 ?  Array.prototype.join.call(arguments, CACHED_DELIMITER) :
+                  arg.toString();
+            if (!(key in cache) || (refetch && cache[key] == refetch)) {
+                cache[key] = source.apply(source, arguments);
+            }
+            return cache[key];
+        };
+    };
+
+    /* =============================== T.merge ================================== */
+
+    /**
+    Returns a new object containing all of the properties of all the supplied
+    objects. The properties from later objects will overwrite those in earlier
+    objects.
+
+    Passing in a single object will create a shallow copy of it. For a deep copy,
+    use `clone()`.
+
+    @method merge
+    @param {Object} objects* One or more objects to merge.
+    @return {Object} A new merged object.
+    **/
+
+    T.merge = function () {
+      var args   = arguments;
+      var i      = 0;
+      var len    = args.length;
+      var result = {};
+
+      for (; i < len; ++i) {
+          T.mix(result, args[i], true);
+      }
+      return result;
+    };
+
+    /* =============================== T.mix ================================== */
+
+    /**
+    Mixes _supplier_'s properties into _receiver_. Properties will not be
+    overwritten or merged unless the _overwrite_ or _merge_ parameters are `true`,
+    respectively.
+
+    In the default mode (0), only properties the supplier owns are copied (prototype
+    properties are not copied). The following copying modes are available:
+
+      * `0`: _Default_. Object to object.
+      * `1`: Prototype to prototype.
+      * `2`: Prototype to prototype and object to object.
+      * `3`: Prototype to object.
+      * `4`: Object to prototype.
+
+    @method mix
+    @param {Function|Object} receiver The object or function to receive the mixed
+      properties.
+    @param {Function|Object} supplier The object or function supplying the
+      properties to be mixed.
+    @param {Boolean} [overwrite=false] If `true`, properties that already exist
+      on the receiver will be overwritten with properties from the supplier.
+    @param {String[]} [whitelist] An array of property names to copy. If
+      specified, only the whitelisted properties will be copied, and all others
+      will be ignored.
+    @param {Int} [mode=0] Mix mode to use. See above for available modes.
+    @param {Boolean} [merge=false] If `true`, objects and arrays that already
+      exist on the receiver will have the corresponding object/array from the
+      supplier merged into them, rather than being skipped or overwritten. When
+      both _overwrite_ and _merge_ are `true`, _merge_ takes precedence.
+    @return {Function|Object|RAPL} The receiver, or the YUI instance if the
+      specified receiver is falsy.
+    **/
+
+    T.mix = function(receiver, supplier, overwrite, whitelist, mode, merge) {
+        var alwaysOverwrite, exists, from, i, key, len, to;
+    
+        // If no supplier is given, we return the receiver. If no receiver is given,
+        // we return Y. Returning Y doesn't make much sense to me, but it's
+        // grandfathered in for backcompat reasons.
+        if (!receiver || !supplier) {
+            return receiver || R;
+        }
+        if (mode) {
+            // In mode 2 (prototype to prototype and object to object), we recurse
+            // once to do the proto to proto mix. The object to object mix will be
+            // handled later on.
+            if (mode === 2) {
+                T.mix(receiver.prototype, supplier.prototype, overwrite, whitelist, 0, merge);
+            }
+            // Depending on which mode is specified, we may be copying from or to
+            // the prototypes of the supplier and receiver.
+            from = mode === 1 || mode === 3 ? supplier.prototype : supplier;
+            to   = mode === 1 || mode === 4 ? receiver.prototype : receiver;
+            // If either the supplier or receiver doesn't actually have a
+            // prototype property, then we could end up with an undefined `from`
+            // or `to`. If that happens, we abort and return the receiver.
+            if (!from || !to) {
+                return receiver;
+            }
+        } else {
+            from = supplier;
+            to   = receiver;
+        }
+        // If `overwrite` is truthy and `merge` is falsy, then we can skip a call
+        // to `hasOwnProperty` on each iteration and save some time.
+        alwaysOverwrite = overwrite && !merge;
+        if (whitelist) {
+            for (i = 0, len = whitelist.length; i < len; ++i) {
+                key = whitelist[i];
+                // We call `Object.prototype.hasOwnProperty` instead of calling
+                // `hasOwnProperty` on the object itself, since the object's
+                // `hasOwnProperty` method may have been overridden or removed.
+                // Also, some native objects don't implement a `hasOwnProperty`
+                // method.
+                if (!hasOwn.call(from, key)) {
+                    continue;
+                }
+                exists = alwaysOverwrite ? false : hasOwn.call(to, key);
+                if (merge && exists && isObject(to[key], true) && isObject(from[key], true)) {
+                    // If we're in merge mode, and the key is present on both
+                    // objects, and the value on both objects is either an object or
+                    // an array (but not a function), then we recurse to merge the
+                    // `from` value into the `to` value instead of overwriting it.
+                    //
+                    // Note: It's intentional that the whitelist isn't passed to the
+                    // recursive call here. This is legacy behavior that lots of
+                    // code still depends on.
+                    T.mix(to[key], from[key], overwrite, null, 0, merge);
+                } else {
+                    if (overwrite || !exists) {
+                        // We're not in merge mode, so we'll only copy the `from` value
+                        // to the `to` value if we're in overwrite mode or if the
+                        // current key doesn't exist on the `to` object.
+                        to[key] = from[key];
+                    }
+                }
+            }
+        } else {
+            for (key in from) {
+              // The code duplication here is for runtime performance reasons.
+              // Combining whitelist and non-whitelist operations into a single
+              // loop or breaking the shared logic out into a function both result
+              // in worse performance, and Y.mix is critical enough that the byte
+              // tradeoff is worth it.
+              if (!hasOwn.call(from, key)) {
+                  continue;
+              }
+              exists = alwaysOverwrite ? false : hasOwn.call(to, key);
+              if (merge && exists && isObject(to[key], true) && isObject(from[key], true)) {
+                  T.mix(to[key], from[key], overwrite, null, 0, merge);
+              } else {
+                  if (overwrite || !exists) {
+                      to[key] = from[key];
+                  }
+              }
+          }
+          // If this is an IE browser with the JScript enumeration bug, force
+          // enumeration of the buggy properties by making a recursive call with
+          // the buggy properties as the whitelist.
+          if (T.Object._hasEnumBug) {
+              T.mix(to, from, overwrite, T.Object._forceEnum, mode, merge);
+          }
+        }
+        return receiver;
+    };
+
+    T.log("module: "+name+" initialised!", "info", "objectInherit.js");
+}, '0.0.1', {});
