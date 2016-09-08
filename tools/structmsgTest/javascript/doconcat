@@ -1,5 +1,9 @@
 cat \
  espBase.js \
+ util.js \
+ object.js \
+ objectInherit.js \
+ inheritUtil.js \
  structmsgDefines.js \
  espLog.js \
  StructmsgDefinition.js \
@@ -12,10 +16,10 @@ cat \
  StructmsgInfo.js \
  structmsgApi.js \
  structmsgDefs.js \
+ structmsgCmd.js \
  structmsgEncDec.js \
  espMain.js \
  espStart.js > esp_concatenated.js
 
- # structmsgCmd.js \
 
 

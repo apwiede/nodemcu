@@ -19,6 +19,10 @@
 //print("Z!"+z+"!");
 //}
 EM.Env.mod_names = new Array();
+EM.Env.mod_names.push("util");
+EM.Env.mod_names.push("object");
+EM.Env.mod_names.push("objectInherit");
+EM.Env.mod_names.push("inheritUtil");
 EM.Env.mod_names.push("structmsgDefines");
 EM.Env.mod_names.push("log");
 EM.Env.mod_names.push("StructmsgDefinition");
@@ -30,9 +34,9 @@ EM.Env.mod_names.push("HeaderInfo");
 EM.Env.mod_names.push("MsgInfo");
 EM.Env.mod_names.push("StructmsgInfo");
 EM.Env.mod_names.push("structmsgApi");
-//EM.Env.mod_names.push("structmsgCmd");
 EM.Env.mod_names.push("structmsgDefs");
 EM.Env.mod_names.push("structmsgEncDec");
+EM.Env.mod_names.push("structmsgCmd");
 for (var i = 0; i < EM.Env.mod_names.length; i++) {
    var mod_name_part = EM.Env.mod_names[i];
 print("MD!"+mod_name_part+"!");
