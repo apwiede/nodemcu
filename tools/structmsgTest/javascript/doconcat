@@ -2,10 +2,20 @@ cat \
  espBase.js \
  structmsgDefines.js \
  espLog.js \
+ StructmsgDefinition.js \
+ StructmsgDefinitions.js \
+ FieldInfoDefinition.js \
+ FieldNameDefinitions.js \
+ FieldInfo.js \
+ HeaderInfo.js \
+ MsgInfo.js \
+ StructmsgInfo.js \
  structmsgApi.js \
- structmsgCmd.js \
  structmsgDefs.js \
  structmsgEncDec.js \
  espMain.js \
  espStart.js > esp_concatenated.js
+
+ # structmsgCmd.js \
+
 
