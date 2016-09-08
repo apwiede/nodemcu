@@ -21,6 +21,7 @@
 EM.Env.mod_names = new Array();
 EM.Env.mod_names.push("structmsgDefines");
 EM.Env.mod_names.push("log");
+EM.Env.mod_names.push("structmsgApi");
 for (var i = 0; i < EM.Env.mod_names.length; i++) {
    var mod_name_part = EM.Env.mod_names[i];
 print("MD!"+mod_name_part+"!");

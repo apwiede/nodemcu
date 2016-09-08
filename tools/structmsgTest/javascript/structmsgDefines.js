@@ -87,13 +87,13 @@
 EM.addModule("Esp-structmsgDefines", function(T, name) {
 
     function Defines() {
-        T.log('constructor called', 'info', 'defines', true);
+        T.log('constructor called', 'info', 'structmsgDefines', true);
 
         var defines = this;
         defines.name = defines.constructor.NAME;
         defines.init.apply(defines, arguments);
 
-        T.log('constructor end', 'info', 'defines', true);
+        T.log('constructor end', 'info', 'structmsgDefines', true);
     }
 
     Defines.structmsg = null;
@@ -300,11 +300,11 @@ print("getErrIdStr: ", val);
   
         /* ==================== showProps ============================== */
         showProps: function(val) {
-            AT.log("props!", "info", "defines.js");
+            AT.log("props!", "info", "structmsgDefines.js");
             for (var z in val) {
-                AT.log("Z!"+z+"!"+val[z]+"!", "info", "defines.js");
+                AT.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgDefines.js");
             }
-            AT.log("props END!", "info", "defines.js");
+            AT.log("props END!", "info", "structmsgDefines.js");
         },
   
         /* ==================== mySelf ===================================== */
@@ -317,5 +317,5 @@ print("getErrIdStr: ", val);
     Defines.prototype.constructor = Defines;
     T.Defines = Defines;
 
-    T.log("module: "+name+" initialised!", "info", "defines.js");
+    T.log("module: "+name+" initialised!", "info", "structmsgDefines.js");
 }, "0.0.1", {});
