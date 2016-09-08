@@ -43,7 +43,8 @@ print("after dump")
 print("defencoded")
 --  encoded_def=structmsg.getencoded(def)
 --print("GETencoded len: "..tostring(string.len(encoded_def)))
-  encryptedDef=structmsg.encryptdef(def,cryptkey)
+  iv=cryptkey
+  encryptedDef=structmsg.encryptdef(def,cryptkey,iv)
 print("encryptedDef len: "..tostring(string.len(encryptedDef)))
   return encryptedDef
 end
