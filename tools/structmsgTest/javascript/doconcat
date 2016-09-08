@@ -3,6 +3,9 @@ cat \
  structmsgDefines.js \
  espLog.js \
  structmsgApi.js \
+ structmsgCmd.js \
+ structmsgDefs.js \
+ structmsgEncDec.js \
  espMain.js \
  espStart.js > esp_concatenated.js
 

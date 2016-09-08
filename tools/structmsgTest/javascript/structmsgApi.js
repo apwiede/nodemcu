@@ -408,11 +408,11 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
-      AT.log("props!", "info", "structmsgApi.js");
+      EM.log("props!", "info", "structmsgApi.js");
       for (var z in val) {
-        AT.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgApi.js");
+        EM.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgApi.js");
       }
-      AT.log("props END!", "info", "structmsgApi.js");
+      EM.log("props END!", "info", "structmsgApi.js");
     },
   
     /* ==================== mySelf ===================================== */

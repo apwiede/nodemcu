@@ -48,20 +48,20 @@ EM.addModule("Esp-log", function(T, name) {
      * If the 'debug' config is true, a 'at:log' event will be
      * dispatched, which the Console widget and anything else
      * can consume.  If the 'useBrowserConsole' config is true, it will
-     * write to the browser console if available.  AT-specific log
+     * write to the browser console if available.  EM-specific log
      * messages will only be present in the -debug versions of the
      * JS files.  The build system is supposed to remove log statements
      * from the raw and minified versions of the files.
      *
      * @method log
-     * @for AT
+     * @for EM
      * @param  {String}  msg  The message to log.
      * @param  {String}  cat  The log category for the message.  Default
      *                        categories are "info", "warn", "error", time".
      *                        Custom categories can be used as well. (opt).
      * @param  {String}  src  The source of the the message (opt).
      * @param  {boolean} silent If true, the log event won't fire.
-     * @return {AT}      AT instance.
+     * @return {EM}      EM instance.
      */
 
     INSTANCE.log = function(msg, cat, src, silent) {
@@ -75,7 +75,7 @@ EM.addModule("Esp-log", function(T, name) {
         if (typeof T.config != "undefined") {
             c = T.config ;
         }
-//        var publisher = (T.fire) ? T : AT.Env.globalEvents;
+//        var publisher = (T.fire) ? T : EM.Env.globalEvents;
         var publisher = null;
         // suppress log message if the config is off or the event stack
         // or the event call stack contains a consumer of the tui:log event
@@ -168,16 +168,16 @@ EM.addModule("Esp-log", function(T, name) {
 
     /**
      * Write a system message.  This message will be preserved in the
-     * minified and raw versions of the AT files, unlike log statements.
+     * minified and raw versions of the EM files, unlike log statements.
      * @method message
-     * @for AT
+     * @for EM
      * @param  {String}  msg  The message to log.
      * @param  {String}  cat  The log category for the message.  Default
      *                        categories are "info", "warn", "error", time".
      *                        Custom categories can be used as well. (opt).
      * @param  {String}  src  The source of the the message (opt).
      * @param  {boolean} silent If true, the log event won't fire.
-     * @return {AT}      AT instance.
+     * @return {EM}      EM instance.
      */
 
     INSTANCE.message = function() {

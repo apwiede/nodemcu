@@ -300,11 +300,11 @@ print("getErrIdStr: ", val);
   
         /* ==================== showProps ============================== */
         showProps: function(val) {
-            AT.log("props!", "info", "structmsgDefines.js");
+            EM.log("props!", "info", "structmsgDefines.js");
             for (var z in val) {
-                AT.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgDefines.js");
+                EM.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgDefines.js");
             }
-            AT.log("props END!", "info", "structmsgDefines.js");
+            EM.log("props END!", "info", "structmsgDefines.js");
         },
   
         /* ==================== mySelf ===================================== */
