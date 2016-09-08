@@ -20,25 +20,37 @@ EM.addModule("Esp-FieldInfo", function(T, name) {
   function FieldInfo() {
     T.log('constructor called', 'info', 'FieldInfo', true);
 
-    var FieldInfo = this;
-    FieldInfo.name = FieldInfo.constructor.NAME;
-    FieldInfo.init.apply(FieldInfo, arguments);
+    var fieldInfo = this;
+    var constructor = fieldInfo.constructor;
+    FieldInfo.superclass.constructor.apply(fieldInfo, arguments);
 
-    FieldInfo.fieldStr = null;
-    FieldInfo.fieldType = 0;
-    FieldInfo.fieldLgth = 0;
-    FieldInfo.value = null;
-    FieldInfo.flags = 0;
+    fieldInfo.fieldStr = null;
+    fieldInfo.fieldType = 0;
+    fieldInfo.fieldLgth = 0;
+    fieldInfo.value = null;
+    fieldInfo.flags = 0;
 
     T.log('constructor end', 'info', 'FieldInfo', true);
   }
 
+  T.extend(FieldInfo, T.Defines, {
+     my_name: "FieldInfo",
+     type_name: "field_info",
+     flags: 0,
 
-  FieldInfo.my_name = "Esp-FieldInfo";
-  FieldInfo.NAME = "FieldInfo";
+    /* ==================== toString ===================================== */
 
-  FieldInfo.prototype = {
+    toString: function () {
+      var fInfo = this;
+      return fInfo.mySelf()+"!"+fInfo.fieldType+"!";
+    },
 
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var fInfo = this;
+      var str = fInfo.mySelf()+"\n";
+      return str;
+    },
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
@@ -49,12 +61,7 @@ EM.addModule("Esp-FieldInfo", function(T, name) {
       EM.log("props END!", "info", "FieldInfo.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
   FieldInfo.prototype.constructor = FieldInfo;
   T.FieldInfo = FieldInfo;

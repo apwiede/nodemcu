@@ -20,23 +20,35 @@ EM.addModule("Esp-FieldNameDefinitions", function(T, name) {
   function FieldNameDefinitions() {
     T.log('constructor called', 'info', 'FieldNameDefinitions', true);
 
-    var FieldNameDefinitions = this;
-    FieldNameDefinitions.name = FieldNameDefinitions.constructor.NAME;
-    FieldNameDefinitions.init.apply(FieldNameDefinitions, arguments);
+    var fieldNameDefinitions = this;
+    var constructor = fieldNameDefinitions.constructor;
+    FieldNameDefinitions.superclass.constructor.apply(fieldNameDefinitions, arguments);
 
-    FieldNameDefinitions.numDefinitions = 0;
-    FieldNameDefinitions.maxDefinitions = 0;
-    FieldNameDefinitions.definitions = null;
+    fieldNameDefinitions.numDefinitions = 0;
+    fieldNameDefinitions.maxDefinitions = 0;
+    fieldNameDefinitions.definitions = null;
 
     T.log('constructor end', 'info', 'FieldNameDefinitions', true);
   }
 
+  T.extend(FieldNameDefinitions, T.Defines, {
+     my_name: "FieldNameDefinitions",
+     type_name: "fieldName_definitions",
+     flags: 0,
 
-  FieldNameDefinitions.my_name = "Esp-FieldNameDefinitions";
-  FieldNameDefinitions.NAME = "FieldNameDefinitions";
+    /* ==================== toString ===================================== */
 
-  FieldNameDefinitions.prototype = {
+    toString: function () {
+      var fndef = this;
+      return fndef.mySelf()+"!"+fndef.numDefinitions+"!";
+    },
 
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var fndef = this;
+      var str = fndef.mySelf()+"\n";
+      return str;
+    },
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
@@ -47,14 +59,8 @@ EM.addModule("Esp-FieldNameDefinitions", function(T, name) {
       EM.log("props END!", "info", "FieldNameDefinitions.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  FieldNameDefinitions.prototype.constructor = FieldNameDefinitions;
   T.FieldNameDefinitions = FieldNameDefinitions;
 
   T.log("module: "+name+" initialised!", "info", "FieldNameDefinitions.js");

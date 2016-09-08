@@ -20,27 +20,39 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
   function MsgInfo() {
     T.log('constructor called', 'info', 'MsgInfo', true);
 
-    var MsgInfo = this;
-    MsgInfo.name = MsgInfo.constructor.NAME;
-    MsgInfo.init.apply(MsgInfo, arguments);
+    var msgInfo = this;
+    var constructor = msgInfo.constructor;
+    MsgInfo.superclass.constructor.apply(msgInfo, arguments);
 
-    MsgInfo.fieldInfos = null;
-    MsgInfo.tableFieldInfos = null;
-    MsgInfo.numFieldInfos = 0;
-    MsgInfo.maxFieldInfos = 0;
-    MsgInfo.numTableRows = 0;         // number of list rows
-    MsgInfo.numTableRowFields = 0;    // number of fields within a table row
-    MsgInfo.numRowFields = 0;         // for checking how many tableRowFields have been processed
+    msgInfo.fieldInfos = null;
+    msgInfo.tableFieldInfos = null;
+    msgInfo.numFieldInfos = 0;
+    msgInfo.maxFieldInfos = 0;
+    msgInfo.numTableRows = 0;         // number of list rows
+    msgInfo.numTableRowFields = 0;    // number of fields within a table row
+    msgInfo.numRowFields = 0;         // for checking how many tableRowFields have been processed
 
     T.log('constructor end', 'info', 'MsgInfo', true);
   }
 
+  T.extend(MsgInfo, T.Defines, {
+     my_name: "MsgInfo",
+     type_name: "msg_info",
+     flags: 0,
 
-  MsgInfo.my_name = "Esp-MsgInfo";
-  MsgInfo.NAME = "MsgInfo";
+    /* ==================== toString ===================================== */
 
-  MsgInfo.prototype = {
+    toString: function () {
+      var msgInfo = this;
+      return msgInfo.mySelf()+"!"+msgInfo.numFieldInfos+"!";
+    },
 
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var msgInfo = this;
+      var str = msgInfo.mySelf()+"\n";
+      return str;
+    },
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
@@ -51,14 +63,8 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
       EM.log("props END!", "info", "MsgInfo.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  MsgInfo.prototype.constructor = MsgInfo;
   T.MsgInfo = MsgInfo;
 
   T.log("module: "+name+" initialised!", "info", "MsgInfo.js");

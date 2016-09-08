@@ -20,26 +20,38 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
   function HeaderInfo() {
     T.log('constructor called', 'info', 'HeaderInfo', true);
 
-    var HeaderInfo = this;
-    HeaderInfo.name = HeaderInfo.constructor.NAME;
-    HeaderInfo.init.apply(HeaderInfo, arguments);
+    var hdrInfo = this;
+    var constructor = hdrInfo.constructor;
+    HeaderInfo.superclass.constructor.apply(hdrInfo, arguments);
 
-    HeaderInfo.src = 0;
-    HeaderInfo.dst = 0;
-    HeaderInfo.totalLgth = 0;
-    HeaderInfo.cmdKey = 0;
-    HeaderInfo.cmdLgth = 0;
-    HeaderInfo.hdrId = null;
+    hdrInfo.src = 0;
+    hdrInfo.dst = 0;
+    hdrInfo.totalLgth = 0;
+    hdrInfo.cmdKey = 0;
+    hdrInfo.cmdLgth = 0;
+    hdrInfo.hdrId = null;
 
     T.log('constructor end', 'info', 'HeaderInfo', true);
   }
 
+  T.extend(HeaderInfo, T.Defines, {
+     my_name: "HeaderInfo",
+     type_name: "header_info",
+     flags: 0,
 
-  HeaderInfo.my_name = "Esp-HeaderInfo";
-  HeaderInfo.NAME = "HeaderInfo";
+    /* ==================== toString ===================================== */
 
-  HeaderInfo.prototype = {
+    toString: function () {
+      var hdrInfo = this;
+      return hdrInfo.mySelf()+"!"+hdrInfo.src+"!";
+    },
 
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var hdrInfo = this;
+      var str = hdrInfo.mySelf()+"\n";
+      return str;
+    },
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
@@ -50,14 +62,8 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
       EM.log("props END!", "info", "HeaderInfo.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  HeaderInfo.prototype.constructor = HeaderInfo;
   T.HeaderInfo = HeaderInfo;
 
   T.log("module: "+name+" initialised!", "info", "HeaderInfo.js");

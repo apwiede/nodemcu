@@ -20,20 +20,31 @@ EM.addModule("Esp-structmsgDefs", function(T, name) {
   function Defs() {
     T.log('constructor called', 'info', 'structmsgDefs', true);
 
-    var Defs = this;
-    Defs.name = Defs.constructor.NAME;
-    Defs.init.apply(Defs, arguments);
+    var defs = this;
+    var constructor = defs.constructor;
+    Defs.superclass.constructor.apply(defs, arguments);
 
     T.log('constructor end', 'info', 'structmsgDefs', true);
   }
 
-  Defs.structmsg = null;
+  T.extend(Defs, T.Defines, {
+     my_name: "Defs",
+     type_name: "defs",
+     flags: 0,
 
-  Defs.my_name = "Esp-StructmsgDefs";
-  Defs.NAME = "structmsgDefs";
+    /* ==================== toString ===================================== */
 
-  Defs.prototype = {
+    toString: function () {
+      var defs = this;
+      return defs.mySelf()+"!";
+    },
 
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var defs = this;
+      var str = defs.mySelf()+"\n";
+      return str;
+    },
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
@@ -44,14 +55,8 @@ EM.addModule("Esp-structmsgDefs", function(T, name) {
       EM.log("props END!", "info", "structmsgDefs.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  Defs.prototype.constructor = Defs;
   T.Defs = Defs;
 
   T.log("module: "+name+" initialised!", "info", "structmsgDefs.js");

@@ -25,10 +25,6 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
     var constructor = StmsgInfo.constructor;
     StructmsgInfo.superclass.constructor.apply(StmsgInfo, arguments);
 
-//    StructmsgInfo.name = StructmsgInfo.constructor.NAME;
-//    StructmsgInfo.init.apply(StructmsgInfo, arguments);
-
-
     StmsgInfo.hdr = null;
     StmsgInfo.msg = null;
     StmsgInfo.handle = "unknown";
@@ -43,15 +39,10 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
   }
 
 
-//  StructmsgInfo.my_name = "Esp-StructmsgInfo";
-//  StructmsgInfo.NAME = "StructmsgInfo";
-
-//  StructmsgInfo.prototype = {
   T.extend(StructmsgInfo, T.Defines, {
      my_name: "StructmsgInfo",
      type_name: "structmsg_info",
      flags: 0,
-
 
     /* ==================== toString ===================================== */
 
@@ -67,7 +58,6 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       return str;
     },
 
-
     /* ==================== showProps ============================== */
     showProps: function(val) {
       EM.log("props!", "info", "StructmsgInfo.js");
@@ -79,7 +69,6 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
   
   });
 
-//  StructmsgInfo.prototype.constructor = StructmsgInfo;
   T.StructmsgInfo = StructmsgInfo;
 
   T.log("module: "+name+" initialised!", "info", "StructmsgInfo.js");

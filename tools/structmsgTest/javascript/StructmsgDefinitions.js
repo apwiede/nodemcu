@@ -20,23 +20,35 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
   function StructmsgDefinitions() {
     T.log('constructor called', 'info', 'StructmsgDefinitions', true);
 
-    var StructmsgDefinitions = this;
-    StructmsgDefinitions.name = StructmsgDefinitions.constructor.NAME;
-    StructmsgDefinitions.init.apply(StructmsgDefinitions, arguments);
+    var StmsgDefinitions = this;
+    var constructor = StmsgDefinitions.constructor;
+    StructmsgDefinitions.superclass.constructor.apply(StmsgDefinitions, arguments);
 
-    StructmsgDefinitions.numDefinitions = 0;
-    StructmsgDefinitions.maxDefinitions = 0;
-    StructmsgDefinitions.definitions = null;
+    StmsgDefinitions.numDefinitions = 0;
+    StmsgDefinitions.maxDefinitions = 0;
+    StmsgDefinitions.definitions = null;
 
     T.log('constructor end', 'info', 'StructmsgDefinitions', true);
   }
 
+  T.extend(StructmsgDefinitions, T.Defines, {
+     my_name: "StructmsgDefinitions",
+     type_name: "structmsg_definitions",
+     flags: 0,
 
-  StructmsgDefinitions.my_name = "Esp-StructmsgStructmsgDefinitions";
-  StructmsgDefinitions.NAME = "StructmsgDefinitions";
+    /* ==================== toString ===================================== */
 
-  StructmsgDefinitions.prototype = {
+    toString: function () {
+      var stmsgDefs = this;
+      return stmsgDefs.mySelf()+"!"+stmsgDefs.numDefinitions+"!";
+    },
 
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var stmsgDefs = this;
+      var str = stmsgDefs.mySelf()+"\n";
+      return str;
+    },
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
@@ -47,14 +59,8 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
       EM.log("props END!", "info", "StructmsgDefinitions.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  StructmsgDefinitions.prototype.constructor = StructmsgDefinitions;
   T.StructmsgDefinitions = StructmsgDefinitions;
 
   T.log("module: "+name+" initialised!", "info", "StructmsgDefinitions.js");

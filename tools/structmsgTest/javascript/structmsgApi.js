@@ -20,17 +20,31 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
   function Api() {
     T.log('constructor called', 'info', 'structmsgApi', true);
 
-    var Api = this;
-    Api.name = Api.constructor.NAME;
-    Api.init.apply(Api, arguments);
+    var api = this;
+    var constructor = api.constructor;
+    Api.superclass.constructor.apply(api, arguments);
 
     T.log('constructor end', 'info', 'structmsgApi', true);
   }
 
-  Api.my_name = "Esp-StructmsgApi";
-  Api.NAME = "structmsgApi";
+  T.extend(Api, T.Defines, {
+     my_name: "Api",
+     type_name: "api",
+     flags: 0,
 
-  Api.prototype = {
+    /* ==================== toString ===================================== */
+
+    toString: function () {
+      var api = this;
+      return api.mySelf()+"!";
+    },
+
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var api = this;
+      var str = api.mySelf()+"\n";
+      return str;
+    },
 
     // ============================= checkOKOrErr ========================
     
@@ -415,14 +429,8 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
       EM.log("props END!", "info", "structmsgApi.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  Api.prototype.constructor = Api;
   T.Api = Api;
 
   T.log("module: "+name+" initialised!", "info", "structmsgApi.js");

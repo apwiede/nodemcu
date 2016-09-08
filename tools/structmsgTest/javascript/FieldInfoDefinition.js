@@ -20,23 +20,35 @@ EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
   function FieldInfoDefinition() {
     T.log('constructor called', 'info', 'FieldInfoDefinition', true);
 
-    var FieldInfoDefinition = this;
-    FieldInfoDefinition.name = FieldInfoDefinition.constructor.NAME;
-    FieldInfoDefinition.init.apply(FieldInfoDefinition, arguments);
+    var fldInfoDef = this;
+    var constructor = fldInfoDef.constructor;
+    FieldInfoDefinition.superclass.constructor.apply(fldInfoDef, arguments);
 
-    FieldInfoDefinition.fieldId = 0;
-    FieldInfoDefinition.fieldType = 0;
-    FieldInfoDefinition.fieldLgth = 0;
+    fldInfoDef.fieldId = 0;
+    fldInfoDef.fieldType = 0;
+    fldInfoDef.fieldLgth = 0;
 
     T.log('constructor end', 'info', 'FieldInfoDefinition', true);
   }
 
+  T.extend(FieldInfoDefinition, T.Defines, {
+     my_name: "FieldInfoDefinition",
+     type_name: "fieldInfo_definition",
+     flags: 0,
 
-  FieldInfoDefinition.my_name = "Esp-FieldInfoDefinition";
-  FieldInfoDefinition.NAME = "FieldInfoDefinition";
+    /* ==================== toString ===================================== */
 
-  FieldInfoDefinition.prototype = {
+    toString: function () {
+      var fldInfoDef = this;
+      return fldInfoDef.mySelf()+"!"+fldInfoDef.fieldType+"!";
+    },
 
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var fldInfoDef = this;
+      var str = fldInfoDef.mySelf()+"\n";
+      return str;
+    },
 
     /* ==================== showProps ============================== */
     showProps: function(val) {
@@ -47,14 +59,8 @@ EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
       EM.log("props END!", "info", "FieldInfoDefinition.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  FieldInfoDefinition.prototype.constructor = FieldInfoDefinition;
   T.FieldInfoDefinition = FieldInfoDefinition;
 
   T.log("module: "+name+" initialised!", "info", "FieldInfoDefinition.js");

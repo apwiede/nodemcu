@@ -20,19 +20,31 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
   function Cmd() {
     T.log('constructor called', 'info', 'structmsgCmd', true);
 
-    var Cmd = this;
-    Cmd.name = Cmd.constructor.NAME;
-    Cmd.init.apply(Cmd, arguments);
+    var cmd = this;
+    var constructor = cmd.constructor;
+    Cmd.superclass.constructor.apply(cmd, arguments);
 
     T.log('constructor end', 'info', 'structmsgCmd', true);
   }
 
-  Cmd.structmsg = null;
+  T.extend(Cmd, T.Defines, {
+     my_name: "Cmd",
+     type_name: "cmd",
+     flags: 0,
 
-  Cmd.my_name = "Esp-StructmsgCmd";
-  Cmd.NAME = "structmsgCmd";
+    /* ==================== toString ===================================== */
 
-  Cmd.prototype = {
+    toString: function () {
+      var cmd = this;
+      return cmd.mySelf()+"!";
+    },
+
+    /* ==================== toDebugString ===================================== */
+    toDebugString: function () {
+      var cmd = this;
+      var str = cmd.mySelf()+"\n";
+      return str;
+    },
 
     // ============================= checkHandle ========================
     
@@ -1312,19 +1324,6 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
       return STRUCT_MSG_ERR_OK;
     },
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     /* ==================== showProps ============================== */
     showProps: function(val) {
       EM.log("props!", "info", "structmsgCmd.js");
@@ -1334,14 +1333,8 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
       EM.log("props END!", "info", "structmsgCmd.js");
     },
   
-    /* ==================== mySelf ===================================== */
-    mySelf: function () {
-      return this.my_name+"!"+this.oid;
-    },
-  
-  };
+  });
 
-  Cmd.prototype.constructor = Cmd;
   T.Cmd = Cmd;
 
   T.log("module: "+name+" initialised!", "info", "structmsgCmd.js");
