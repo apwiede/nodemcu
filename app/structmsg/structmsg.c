@@ -283,13 +283,11 @@ int structmsg_encryptdecrypt(const uint8_t *handle, const uint8_t *msg, size_t m
         return STRUCT_MSG_ERR_NOT_ENCODED;
       }
       message = structmsg->encoded;
-//    result = structmsg_encryptdecrypt(structmsg->encoded, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->encrypted, lgth);
     } else {
       if (structmsg->encrypted == NULL) {
         return STRUCT_MSG_ERR_NOT_ENCRYPTED;
       }
       message = structmsg->encrypted;
-//    result = structmsg_encryptdecrypt(structmsg->encrypted, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, key, klen, iv, ivlen, enc, &structmsg->todecode, lgth);
     }
   } else {
     message = msg;
