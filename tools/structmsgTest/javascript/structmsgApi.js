@@ -15,6 +15,8 @@
 
 EM.addModule("Esp-structmsgApi", function(T, name) {
 
+  /* ==================== Api constructor ======================= */
+
   function Api() {
     T.log('constructor called', 'info', 'structmsgApi', true);
 
@@ -24,8 +26,6 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
 
     T.log('constructor end', 'info', 'structmsgApi', true);
   }
-
-  Api.structmsg = null;
 
   Api.my_name = "Esp-StructmsgApi";
   Api.NAME = "structmsgApi";

@@ -15,6 +15,8 @@
 
 EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
 
+  /* ==================== FieldInfoDefinition constructor ======================= */
+
   function FieldInfoDefinition() {
     T.log('constructor called', 'info', 'FieldInfoDefinition', true);
 

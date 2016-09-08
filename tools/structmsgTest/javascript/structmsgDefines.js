@@ -86,6 +86,8 @@
 
 EM.addModule("Esp-structmsgDefines", function(T, name) {
 
+  /* ==================== Defines constructor ======================= */
+
     function Defines() {
         T.log('constructor called', 'info', 'structmsgDefines', true);
 
@@ -309,7 +311,7 @@ print("getErrIdStr: ", val);
   
         /* ==================== mySelf ===================================== */
         mySelf: function () {
-            return this.my_name+"!"+this.oid;
+            return this.my_name+"!";
         },
   
     };

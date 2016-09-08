@@ -15,6 +15,8 @@
 
 EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
 
+  /* ==================== StructmsgDefinitions constructor ======================= */
+
   function StructmsgDefinitions() {
     T.log('constructor called', 'info', 'StructmsgDefinitions', true);
 

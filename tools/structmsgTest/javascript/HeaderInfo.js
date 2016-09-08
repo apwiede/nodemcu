@@ -15,6 +15,8 @@
 
 EM.addModule("Esp-HeaderInfo", function(T, name) {
 
+  /* ==================== HeaderInfo constructor ======================= */
+
   function HeaderInfo() {
     T.log('constructor called', 'info', 'HeaderInfo', true);
 

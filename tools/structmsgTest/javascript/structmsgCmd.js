@@ -15,6 +15,8 @@
 
 EM.addModule("Esp-structmsgCmd", function(T, name) {
 
+  /* ==================== Cmd constructor ======================= */
+
   function Cmd() {
     T.log('constructor called', 'info', 'structmsgCmd', true);
 

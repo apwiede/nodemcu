@@ -15,6 +15,8 @@
 
 EM.addModule("Esp-MsgInfo", function(T, name) {
 
+  /* ==================== MsgInfo constructor ======================= */
+
   function MsgInfo() {
     T.log('constructor called', 'info', 'MsgInfo', true);
 

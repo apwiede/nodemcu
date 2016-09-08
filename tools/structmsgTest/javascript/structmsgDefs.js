@@ -15,6 +15,8 @@
 
 EM.addModule("Esp-structmsgDefs", function(T, name) {
 
+  /* ==================== Defs constructor ======================= */
+
   function Defs() {
     T.log('constructor called', 'info', 'structmsgDefs', true);
 
