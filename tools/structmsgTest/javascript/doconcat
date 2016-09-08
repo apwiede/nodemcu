@@ -1,0 +1,7 @@
+cat \
+ espBase.js \
+ structmsgDefines.js \
+ espLog.js \
+ espMain.js \
+ espStart.js > esp_concatenated.js
+
