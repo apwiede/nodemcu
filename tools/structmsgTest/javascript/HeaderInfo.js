@@ -29,12 +29,13 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
     hdrInfo.totalLgth = 0;
     hdrInfo.cmdKey = 0;
     hdrInfo.cmdLgth = 0;
-    hdrInfo.hdrId = null;
+    //FIXME !!
+    hdrInfo.hdrId = new ArrayBuffer(10);
 
     T.log('constructor end', 'info', 'HeaderInfo', true);
   }
 
-  T.extend(HeaderInfo, T.Defines, {
+  T.extend(HeaderInfo, T.structmsgEncDec, {
      my_name: "HeaderInfo",
      type_name: "header_info",
      flags: 0,
@@ -47,10 +48,39 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
     },
 
     /* ==================== toDebugString ===================================== */
+
     toDebugString: function () {
       var hdrInfo = this;
       var str = hdrInfo.mySelf()+"\n";
+      str += "    src:          0x"+hdrInfo.src.toString(16)+"\n";
+      str += "    dst:          0x"+hdrInfo.dst.toString(16)+"\n";
+      str += "    totalLgth:    "+hdrInfo.totalLgth+"\n";
+      str += "    cmdKey:       0x"+hdrInfo.cmdKey.toString(16)+"\n";
+      str += "    cmdLgth:      "+hdrInfo.cmdLgth+"\n";
+      str += "    hdrId (lgth): "+(hdrInfo.hdrId == null ? "null" : hdrInfo.hdrId.byteLength)+"\n";
+      if (hdrInfo.hdrId != null) {
+        str += "      values: "+hdrInfo.dumpHex(hdrInfo.hdrId)+"\n";
+      }
       return str;
+    },
+
+    /* ==================== fillHdrInfo ===================================== */
+
+    fillHdrInfo: function () {
+      var hdrInfo = this;
+      var offset = 0;
+
+      offset = hdrInfo.uint16Encode(hdrInfo.hdrId, offset, hdrInfo.src);
+//  checkEncodeOffset(offset);
+      offset = hdrInfo.uint16Encode(hdrInfo.hdrId, offset, hdrInfo.dst);
+//  checkEncodeOffset(offset);
+      offset = hdrInfo.uint16Encode(hdrInfo.hdrId, offset, hdrInfo.totalLgth);
+//  checkEncodeOffset(offset);
+      offset = hdrInfo.uint16Encode(hdrInfo.hdrId, offset, hdrInfo.cmdKey);
+//  checkEncodeOffset(offset);
+      offset = hdrInfo.uint16Encode(hdrInfo.hdrId, offset, hdrInfo.cmdLgth);
+//  checkEncodeOffset(offset);
+      return hdrInfo.STRUCT_MSG_ERR_OK;
     },
 
   });

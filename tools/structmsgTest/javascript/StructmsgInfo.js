@@ -127,14 +127,21 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       structmsgInfo.msg.numRowFields = 0;
 //      structmsg.msg.fieldInfos = newFieldInfos(numFieldInfos);
       structmsgInfo.msg.fieldInfos = new Array();
-      structmsgInfo.msg.tableFieldInfos = null;
+      structmsgInfo.msg.tableFieldInfos = new Array();
       structmsgInfo.flags = 0;
       structmsgInfo.sequenceNum = 0;
       structmsgInfo.encoded = null;
       structmsgInfo.todecode = null;
       structmsgInfo.encrypted = null;
       structmsgInfo.handleHdrInfoPtr = null;
-      structmsgInfo.handle = structmsgInfo.HANDLE_PREFIX+"structmsg";
+      T.Defines.numHandles++;
+      var s = "0000" + T.Defines.numHandles;
+      s = s.substr(s.length-4);
+      structmsgInfo.handle = structmsgInfo.HANDLE_PREFIX+'efff'+s;
+//      result = addHandle(structmsg->handle, &structmsg->handleHdrInfoPtr);
+//  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+//  setHandleField(structmsg->handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+      structmsgInfo.hdr.fillHdrInfo();
       return structmsgInfo;
     },
 

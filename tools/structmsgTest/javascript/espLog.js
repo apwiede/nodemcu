@@ -141,7 +141,7 @@ EM.addModule("Esp-log", function(T, name) {
 	                            }
                                     if (show_it) {
                                         T.logPrint(m, cat, "Esp-log");
-//                                        print(cat+": "+m);
+                                        print(cat+": "+m);
 		                    }
 	                        }
                             }

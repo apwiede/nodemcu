@@ -51,17 +51,27 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
     /* ==================== toDebugString ===================================== */
     toDebugString: function () {
       var stmsgInfos = this;
+      var idx = 0;
       var str = stmsgInfos.mySelf()+"\n";
       str += "  numHandles:     "+stmsgInfos.numHandles+"\n";
       str += "  numHeaders:     "+stmsgInfos.numHeaders+"\n";
+      str += "  handles:\n";
+      while (idx < stmsgInfos.handles.length) {
+        str += "    "+idx+": "+stmsgInfos.handles[idx].handle+'\n';
+        idx++;
+      }
       return str;
     },
 
     /* ==================== create ===================================== */
     create: function (numFields) {
+      var stmsgInfos = this;
+
       stmsgInfo = new T.StructmsgInfo();
       structmsgInfo=stmsgInfo.create(numFields);
-print("stmsgInfo: ",structmsgInfo.toDebugString());
+      stmsgInfos.numHandles++;
+T.log(structmsgInfo.toDebugString(), 'info', 'stmsgInfo', true);
+      stmsgInfos.handles.push({handle: stmsgInfo.handle, structmsg: stmsgInfo});
     },
 
   });

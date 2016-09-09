@@ -27,7 +27,7 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     T.log('constructor end', 'info', 'structmsgEncDec', true);
   }
 
-  T.extend(structmsgEncDec, T.StructmsgInfos, {
+  T.extend(structmsgEncDec, T.Defines, {
     my_name: "structmsgEncDec",
     type_name: "encDec",
     flags: 0,
@@ -63,9 +63,10 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= uint16Encode ========================
     
     uint16Encode: function(data, offset, value) {
-      data[offset++] = (value >> 8) & 0xFF;
-      data[offset++] = value & 0xFF;
-    return offset;
+      var dv = new DataView(data);
+
+      dv.setUint16(offset, value);
+      return offset+2;
     },
     
     // ============================= int16Encode ========================
