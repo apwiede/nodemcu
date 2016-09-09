@@ -621,9 +621,9 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
       return STRUCT_MSG_ERR_VALUE_NOT_SET;
     },
     
-    // ============================= stmsg_createMsg ========================
+    // ============================= createMsg ========================
     
-    stmsg_createMsg: function(numFieldInfos, handle) {
+    createMsg: function(numFieldInfos, handle) {
       var ptr;
       var hdrInfo;
       var result;

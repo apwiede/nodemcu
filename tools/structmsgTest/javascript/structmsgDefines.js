@@ -149,6 +149,37 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
     STRUCT_MSG_FIELD_UINT32_VECTOR:        11,
     STRUCT_MSG_FIELD_INT32_VECTOR:         12,
 
+    structmsgFieldTypes2Id: {
+      "uint8_t":   1,
+      "int8_t":    2,
+      "uint16_t":  3,
+      "int16_t":   4,
+      "uint32_t":  5,
+      "int32_t":   6,
+      "uint8_t*":  7,
+      "int8_t*":   8,
+      "uint16_t*": 9,
+      "int16_t*":  10,
+      "uint32_t*": 11,
+      "int32_t*":  12,
+      null:        -1,
+    },
+
+    sstructmsgFieldTypes2Str: {
+      "1":  "uint8_t",
+      "2":  "int8_t",
+      "3":  "uint16_t",
+      "4":  "int16_t",
+      "5":  "uint32_t",
+      "6":  "int32_t",
+      "7":  "uint8_t*",
+      "8":  "uint16_t*",
+      "9":  "int8_t*",
+      "10": "int16_t*",
+      "11": "uint32_t*",
+      "12": "int32_t*",
+    },
+
     STRUCT_MSG_SPEC_FIELD_SRC:              255,
     STRUCT_MSG_SPEC_FIELD_DST:              254,
     STRUCT_MSG_SPEC_FIELD_TARGET_CMD:       253,
@@ -160,10 +191,25 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
     STRUCT_MSG_SPEC_FIELD_FILLER:           247,
     STRUCT_MSG_SPEC_FIELD_CRC:              246,
     STRUCT_MSG_SPEC_FIELD_ID:               245,
-    STRUCT_MSG_SPEC_FIELD_ID:               245,
     STRUCT_MSG_SPEC_FIELD_TABLE_ROWS:       244,
     STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS: 243,
     STRUCT_MSG_SPEC_FIELD_LOW:              242,  // this must be the last entry!!
+
+    structmsgSpecialFieldNames2Id: {
+      "@src":            255,
+      "@dst":            254,
+      "@targetCmd":      253,
+      "@totalLgth":      252,
+      "@cmdKey":         251,
+      "@cmdLgth":        250,
+      "@randomNum":      249,
+      "@sequenceNum":    248,
+      "@filler":         247,
+      "@crc":            246,
+      "@id":             245,
+      "@tablerows":      244,
+      "@tablerowfields": 243,
+    },
 
     STRUCT_MSG_ERR_OK:                      0,
     STRUCT_MSG_ERR_VALUE_NOT_SET:           255,
@@ -191,33 +237,6 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
     STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY:   233,
     STRUCT_MSG_ERR_NO_SLOT_FOUND:           232,
     STRUCT_MSG_ERR_DUPLICATE_FIELD:         231,
-
-    STRUCT_MSG_FIELD_SRC:                   1,
-    STRUCT_MSG_FIELD_DST:                   2,
-    STRUCT_MSG_FIELD_TOTAL_LGTH:            3,
-    STRUCT_MSG_FIELD_CMD_KEY:               4,
-    STRUCT_MSG_FIELD_CMD_LGTH:              5,
-
-    uint16_t_size:                          2,
-    // header length: uint16_t src + uint16_t dst + uint16_t totalLgth
-// FIXME!!
-//        STRUCT_MSG_HEADER_LENGTH: (uint16_t_size * 3),
-    STRUCT_MSG_HEADER_LENGTH: (2 * 3),
-    // cmd header length uint16_t cmdKey + unit16_t cmdLgth
-//        STRUCT_MSG_CMD_HEADER_LENGTH: (uint16_t_size * 2),
-    STRUCT_MSG_CMD_HEADER_LENGTH: (2 * 2),
-//        STRUCT_MSG_TOTAL_HEADER_LENGTH: (Defines.prototype.STRUCT_MSG_HEADER_LENGTH + Defines.prototype.STRUCT_MSG_CMD_HEADER_LENGTH),
-    STRUCT_MSG_TOTAL_HEADER_LENGTH: (5 * 2),
-    STRUCT_MSG_NUM_HEADER_FIELDS: 3,
-    STRUCT_MSG_NUM_CMD_HEADER_FIELDS: 2,
-    STRUCT_MSG_DEFINITION_CMD_KEY: 0xFFFF,
-    STRUCT_MSG_FREE_FIELD_ID: 0xFF,
-
-    STRUCT_MSG_NO_INCR:                     0,
-    STRUCT_MSG_INCR:                        1,
-    STRUCT_MSG_DECR:                        -1,
-
-    HANDLE_PREFIX:                          "stmsg_",
 
     structmsgErrId2Str: {
       0:   "ERR_OK",
@@ -248,54 +267,32 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
       231: "ERR_DUPLICATE_FIELD",
     },
 
-    structmsgFieldTypes2Id: {
-      "uint8_t":   Defines.STRUCT_MSG_FIELD_UINT8_T,
-      "int8_t":    Defines.STRUCT_MSG_FIELD_INT8_T,
-      "uint16_t":  Defines.STRUCT_MSG_FIELD_UINT16_T,
-      "int16_t":   Defines.STRUCT_MSG_FIELD_INT16_T,
-      "uint32_t":  Defines.STRUCT_MSG_FIELD_UINT32_T,
-      "int32_t":   Defines.STRUCT_MSG_FIELD_INT32_T,
-      "uint8_t*":  Defines.STRUCT_MSG_FIELD_UINT8_VECTOR,
-      "int8_t*":   Defines.STRUCT_MSG_FIELD_INT8_VECTOR,
-      "uint16_t*": Defines.STRUCT_MSG_FIELD_UINT16_VECTOR,
-      "int16_t*":  Defines.STRUCT_MSG_FIELD_INT16_VECTOR,
-      "uint32_t*": Defines.STRUCT_MSG_FIELD_UINT32_VECTOR,
-      "int32_t*":  Defines.STRUCT_MSG_FIELD_INT32_VECTOR,
-      null:        -1,
-    },
+    STRUCT_MSG_FIELD_SRC:                   1,
+    STRUCT_MSG_FIELD_DST:                   2,
+    STRUCT_MSG_FIELD_TOTAL_LGTH:            3,
+    STRUCT_MSG_FIELD_CMD_KEY:               4,
+    STRUCT_MSG_FIELD_CMD_LGTH:              5,
 
-    structmsgFieldTypes2Str: {
-      STRUCT_MSG_FIELD_UINT8_T:       "uint8_t",
-      STRUCT_MSG_FIELD_INT8_T:        "int8_t",
-      STRUCT_MSG_FIELD_UINT16_T:      "uint16_t",
-      STRUCT_MSG_FIELD_INT16_T:       "int16_t",
-      STRUCT_MSG_FIELD_UINT32_T:      "uint32_t",
-      STRUCT_MSG_FIELD_INT32_T:       "int32_t",
-      STRUCT_MSG_FIELD_UINT8_VECTOR:  "uint8_t*",
-      STRUCT_MSG_FIELD_INT8_VECTOR:   "uint16_t*",
-      STRUCT_MSG_FIELD_UINT16_VECTOR: "int8_t*",
-      STRUCT_MSG_FIELD_INT16_VECTOR:  "int16_t*",
-      STRUCT_MSG_FIELD_UINT32_VECTOR: "uint32_t*",
-      STRUCT_MSG_FIELD_INT32_VECTOR:  "int32_t*",
-      0:                              null,
-    },
+    uint16_t_size:                          2,
+    // header length: uint16_t src + uint16_t dst + uint16_t totalLgth
+// FIXME!!
+//        STRUCT_MSG_HEADER_LENGTH: (uint16_t_size * 3),
+    STRUCT_MSG_HEADER_LENGTH: (2 * 3),
+    // cmd header length uint16_t cmdKey + uint16_t cmdLgth
+//        STRUCT_MSG_CMD_HEADER_LENGTH: (uint16_t_size * 2),
+    STRUCT_MSG_CMD_HEADER_LENGTH: (2 * 2),
+//        STRUCT_MSG_TOTAL_HEADER_LENGTH: (Defines.prototype.STRUCT_MSG_HEADER_LENGTH + Defines.prototype.STRUCT_MSG_CMD_HEADER_LENGTH),
+    STRUCT_MSG_TOTAL_HEADER_LENGTH: (5 * 2),
+    STRUCT_MSG_NUM_HEADER_FIELDS: 3,
+    STRUCT_MSG_NUM_CMD_HEADER_FIELDS: 2,
+    STRUCT_MSG_DEFINITION_CMD_KEY: 0xFFFF,
+    STRUCT_MSG_FREE_FIELD_ID: 0xFF,
 
-    structmsgSpecialFieldNames2Id: {
-      "@src":            Defines.STRUCT_MSG_SPEC_FIELD_SRC,
-      "@dst":            Defines.STRUCT_MSG_SPEC_FIELD_DST,
-      "@targetCmd":      Defines.STRUCT_MSG_SPEC_FIELD_TARGET_CMD,
-      "@totalLgth":      Defines.STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH,
-      "@cmdKey":         Defines.STRUCT_MSG_SPEC_FIELD_CMD_KEY,
-      "@cmdLgth":        Defines.STRUCT_MSG_SPEC_FIELD_CMD_LGTH,
-      "@randomNum":      Defines.STRUCT_MSG_SPEC_FIELD_RANDOM_NUM,
-      "@sequenceNum":    Defines.STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM,
-      "@filler":         Defines.STRUCT_MSG_SPEC_FIELD_FILLER,
-      "@crc":            Defines.STRUCT_MSG_SPEC_FIELD_CRC,
-      "@id":             Defines.STRUCT_MSG_SPEC_FIELD_ID,
-      "@tablerows":      Defines.STRUCT_MSG_SPEC_FIELD_TABLE_ROWS,
-      "@tablerowfields": Defines.STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS,
-      null:              -1,
-    },
+    STRUCT_MSG_NO_INCR:                     0,
+    STRUCT_MSG_INCR:                        1,
+    STRUCT_MSG_DECR:                        -1,
+
+    HANDLE_PREFIX:                          "stmsg_",
 
 
     /* =========================== init ================================== */
@@ -354,28 +351,27 @@ T.log("getGenericTypeVal!"+val+"!", "error", "defines.js");
       return defines.getGenericTypeString(defines.structmsgErrId2Str, msg, val);
     },
 
+    // ============================= getFieldTypeId ========================
 
-    // ============================= structmsg_getFieldTypeId ========================
-
-    structmsg_getFieldTypeId: function(str) {
+    getFieldTypeId: function(str) {
       var msg = "funny FieldTypeStr: ";
       var defines = this;
 
-      return defines.getGenericTypeString(defines.structmsgFieldTypes2Id, msg, val);
+      return defines.getGenericTypeString(defines.structmsgFieldTypes2Id, msg, str);
     },
 
-    // ============================= structmsg_getFieldTypeStr ========================
+    // ============================= getFieldTypeStr ========================
 
-    structmsg_getFieldTypeStr: function(key) {
+    getFieldTypeStr: function(key) {
       var msg = "funny FieldTypeId: ";
       var defines = this;
 
-      return defines.getGenericTypeString(defines.structmsgFieldTypes2str, msg, val);
+      return defines.getGenericTypeString(defines.structmsgFieldTypes2str, msg, key);
     },
 
-    // ============================= structmsg_getIdFieldNameStr ========================
+    // ============================= getIdFieldNameStr ========================
 
-    structmsg_getIdFieldNameStr: function(id, fieldName) {
+    getIdFieldNameStr: function(id, fieldName) {
       var entry;
       var nameEntry;
     
@@ -561,7 +557,6 @@ T.log("getGenericTypeVal!"+val+"!", "error", "defines.js");
 
     /* ==================== dumpHex ===================================== */
     dumpHex: function(data) {
-print("dump: ",typeof data);
       var dv = new DataView(data);
       var hex = ''
       var idx;

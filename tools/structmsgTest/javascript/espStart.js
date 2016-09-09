@@ -51,10 +51,11 @@ EM.log(val13, 'info', 'val13', true);
     fldinfo.fieldStr="Hello World"
 EM.log(fldinfo.fieldType+"!"+fldinfo.fieldStr, 'info', 'fldinfo', true);
 }
-    var def = new EM.StructmsgInfos();
-    def.create(5);
-    var dbgval = def.toDebugString();
-EM.log(dbgval, 'info', 'dbgval', true);
+    var stmsgApi = new EM.Api();
+    handle = stmsgApi.create(5);
+print("handle: ",handle);
+    var result = stmsgApi.add_field(handle, "@randomNum", "uint32_t", 4);
+print("result: ",result);
 
 
     function confirm(str) {

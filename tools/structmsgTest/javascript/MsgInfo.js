@@ -63,28 +63,20 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
 
     // ============================= addField ========================
     
-    addField: function(handle, fieldStr, fieldTypeStr, fieldLgth) {
-      var numTableFields;
+    addField: function(fieldStr, fieldTypeStr, fieldLgth) {
+      var msgInfo = this;
       var numTableRowFields;
       var numTableRows;
-      var fieldType;
-      var row;
-      var cellIdx;
-      var result;
-      var structmsg;
-      var fieldInfo;
-
-      var msgInfo = this;
-      if (msgInfo.numFieldInfos >= msgInfos.maxFieldInfos) {
+      var numTableFields;
+print("MsgInfo: addField", msgInfo.toDebugString());
+      if (msgInfo.numFieldInfos >= msgInfo.maxFieldInfos) {
       }
       
     
       fieldType = msgInfo.getFieldTypeId(fieldTypeStr);
 //      checkErrOK(result);
-      structmsg = structmsg_get_structmsg_ptr(handle);
-    //ets_printf("addfield: %s totalLgth: %d\n", fieldStr, structmsg.hdr.hdrInfo.hdrKeys.totalLgth);
-      checkHandleOK(structmsg);
-      if (c_strcmp(fieldStr, "@tablerows") == 0) {
+print("fieldType: ",fieldType);
+      if (fieldStr == "@tablerows") {
         structmsg.msg.numTableRows = fieldLgth;
     //ets_printf("tablerows1: lgth: %d\n",  fieldLgth);
         fieldInfo = structmsg.msg.fieldInfos[structmsg.msg.numFieldInfos];
@@ -95,7 +87,7 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
         structmsg.msg.numFieldInfos++;
         return STRUCT_MSG_ERR_OK;
       }
-      if (c_strcmp(fieldStr, "@tablerowfields") == 0) {
+      if (fieldStr == "@tablerowfields") {
         structmsg.msg.numTableRowFields = fieldLgth;
         numTableFields = structmsg.msg.numTableRows * structmsg.msg.numTableRowFields;
         fieldInfo = structmsg.msg.fieldInfos[structmsg.msg.numFieldInfos];
@@ -110,17 +102,31 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
         structmsg.msg.numFieldInfos++;
         return STRUCT_MSG_ERR_OK;
       }
-      numTableRowFields = structmsg.msg.numTableRowFields;
-      numTableRows = structmsg.msg.numTableRows;
+      numTableRowFields = msgInfo.numTableRowFields;
+      numTableRows = msgInfo.numTableRows;
       numTableFields = numTableRows * numTableRowFields;
-      if (!((numTableFields > 0) && (structmsg.msg.numRowFields < numTableRowFields))) {
-        if (structmsg.msg.numFieldInfos >= structmsg.msg.maxFieldInfos) {
-          return STRUCT_MSG_ERR_TOO_MANY_FIELDS;
+      if (!((numTableFields > 0) && (msgInfo.numRowFields < numTableRowFields))) {
+        if (msgInfo.numFieldInfos >= msgInfo.maxFieldInfos) {
+          return msgInfo.STRUCT_MSG_ERR_TOO_MANY_FIELDS;
         }
-        fieldInfo = structmsg.msg.fieldInfos[structmsg.msg.numFieldInfos];
+ print ("numFieldInfos:", msgInfo.numFieldInfos," ",msgInfo.maxFieldInfos);
+        if (msgInfo.numFieldInfos <= msgInfo.fieldInfos.length) {
+          fieldInfo = new T.FieldInfo();
+          msgInfo.fieldInfos.push(fieldInfo);
+        }
+        fieldInfo = msgInfo.fieldInfos[msgInfo.numFieldInfos]
+        fieldInfo.fieldStr = fieldStr;
+        fieldInfo.fieldType = fieldType;
+        fieldInfo.fieldLgth = fieldLgth;
+        fieldInfo.fieldValue = null;
+        fieldInfo.flags = 0;
+        msgInfo.fieldInfos[msgInfo.numFieldInfos] = fieldInfo;
+        msgInfo.numFieldInfos++;
         numTableFields = 0;
         numTableRows = 1;
         numTableRowFields = 0;
+print("fi: ",fieldInfo.toDebugString());
+return msgInfo.STRUCT_MSG_ERR_OK;
         fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, fieldLgth, numTableRows);
     //ets_printf("field2: %s totalLgth: %d cmdLgth: %d\n", fieldInfo.fieldStr, structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
         result = structmsg_fillHdrInfo(handle, structmsg);
@@ -137,6 +143,7 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
         }
         structmsg.msg.numRowFields++;  
       } 
+return msgInfo.STRUCT_MSG_ERR_OK;
       return result;
     },
   });

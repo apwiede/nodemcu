@@ -145,6 +145,13 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       return structmsgInfo;
     },
 
+    /* ==================== addField ===================================== */
+    addField: function (fieldStr, fieldType, fieldLgth) {
+      var structmsgInfo = this;
+print("StructmsgInfo addField: ");
+      return structmsgInfo.msg.addField(fieldStr, fieldType, fieldLgth);
+    },
+
   });
 
   T.StructmsgInfo = StructmsgInfo;

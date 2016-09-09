@@ -63,6 +63,20 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return str;
     },
 
+    /* ==================== geStructmsgInfo ===================================== */
+    getStructmsgInfo: function(handle) {
+      var stmsgInfos = this;
+      var idx = 0;
+      while (idx < stmsgInfos.handles.length) {
+        if (stmsgInfos.handles[idx].handle == handle) {
+          return stmsgInfos.handles[idx].structmsg;
+        }
+        idx++;
+      }
+      stmsgInfos.result = stmsgInfos.STRUCT_MSG_HANDLE_NOT_FOUND;
+      return null;
+    },
+
     /* ==================== create ===================================== */
     create: function (numFields) {
       var stmsgInfos = this;
@@ -70,8 +84,20 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       stmsgInfo = new T.StructmsgInfo();
       structmsgInfo=stmsgInfo.create(numFields);
       stmsgInfos.numHandles++;
-T.log(structmsgInfo.toDebugString(), 'info', 'stmsgInfo', true);
-      stmsgInfos.handles.push({handle: stmsgInfo.handle, structmsg: stmsgInfo});
+//T.log(structmsgInfo.toDebugString(), 'info', 'stmsgInfo', true);
+      stmsgInfos.handles.push({handle: structmsgInfo.handle, structmsg: stmsgInfo});
+      stmsgInfos.result= stmsgInfos.STRUCT_MSG_ERR_OK;
+      return structmsgInfo.handle;
+    },
+
+    /* ==================== addField ===================================== */
+    addField: function(handle, fieldStr, fieldType, fieldLgth) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.addField(fieldStr, fieldType, fieldLgth);
     },
 
   });

@@ -4,8 +4,8 @@ cat \
  object.js \
  objectInherit.js \
  inheritUtil.js \
- structmsgDefines.js \
  espLog.js \
+ structmsgDefines.js \
  StructmsgDefinition.js \
  StructmsgDefinitions.js \
  FieldInfoDefinition.js \

@@ -49,6 +49,11 @@ EM.addModule("Esp-FieldInfo", function(T, name) {
     toDebugString: function () {
       var fInfo = this;
       var str = fInfo.mySelf()+"\n";
+      str += "    fieldStr:   "+(fInfo.fieldStr == null ? "null" : fInfo.fieldStr)+"\n";
+      str += "    fieldType:   "+fInfo.fieldType+"\n";
+      str += "    fieldLgth:   "+fInfo.fieldLgth+"\n";
+      str += "    value:       "+(fInfo.value == null ? "null" : fInfo.value)+"\n";
+      str += "    flags:       "+fInfo.flags+"\n";
       return str;
     },
 
