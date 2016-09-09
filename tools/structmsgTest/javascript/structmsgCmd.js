@@ -27,7 +27,7 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
     T.log('constructor end', 'info', 'structmsgCmd', true);
   }
 
-  T.extend(Cmd, T.Defines, {
+  T.extend(Cmd, T.StructmsgInfos, {
      my_name: "Cmd",
      type_name: "cmd",
      flags: 0,
@@ -105,10 +105,11 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
     structmsg_dumpBinary: function(data, lgth, where) {
       var idx;
     
-      printf(where);
+// FIXME use T.log
+//      print(where);
       idx = 0;
       while (idx < lgth) {
-         print('idx: ',idx,' ch: ', (data[idx] & 0xFF).toString(16));
+//         print('idx: ',idx,' ch: ', (data[idx] & 0xFF).toString(16));
         idx++;
       }
     },
@@ -1324,15 +1325,6 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
       return STRUCT_MSG_ERR_OK;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "structmsgCmd.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgCmd.js");
-      }
-      EM.log("props END!", "info", "structmsgCmd.js");
-    },
-  
   });
 
   T.Cmd = Cmd;

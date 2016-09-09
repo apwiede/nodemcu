@@ -58,15 +58,6 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       return str;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "StructmsgInfo.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "StructmsgInfo.js");
-      }
-      EM.log("props END!", "info", "StructmsgInfo.js");
-    },
-  
   });
 
   T.StructmsgInfo = StructmsgInfo;

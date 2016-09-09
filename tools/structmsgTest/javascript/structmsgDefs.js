@@ -27,7 +27,7 @@ EM.addModule("Esp-structmsgDefs", function(T, name) {
     T.log('constructor end', 'info', 'structmsgDefs', true);
   }
 
-  T.extend(Defs, T.Defines, {
+  T.extend(Defs, T.StructmsgInfos, {
      my_name: "Defs",
      type_name: "defs",
      flags: 0,
@@ -46,15 +46,6 @@ EM.addModule("Esp-structmsgDefs", function(T, name) {
       return str;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "structmsgDefs.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgDefs.js");
-      }
-      EM.log("props END!", "info", "structmsgDefs.js");
-    },
-  
   });
 
   T.Defs = Defs;

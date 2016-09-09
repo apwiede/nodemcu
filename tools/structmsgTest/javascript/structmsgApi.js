@@ -27,7 +27,7 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
     T.log('constructor end', 'info', 'structmsgApi', true);
   }
 
-  T.extend(Api, T.Defines, {
+  T.extend(Api, T.StructmsgInfos, {
      my_name: "Api",
      type_name: "api",
      flags: 0,
@@ -420,15 +420,6 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
       return checkOKOrErr(result, "get_definitionTableFieldInfo", "");
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "structmsgApi.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgApi.js");
-      }
-      EM.log("props END!", "info", "structmsgApi.js");
-    },
-  
   });
 
   T.Api = Api;

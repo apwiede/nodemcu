@@ -55,15 +55,6 @@ EM.addModule("Esp-StructmsgDefinition", function(T, name) {
       return str;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "StructmsgDefinition.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "StructmsgDefinition.js");
-      }
-      EM.log("props END!", "info", "StructmsgDefinition.js");
-    },
-  
   });
 
   T.StructmsgDefinition = StructmsgDefinition;

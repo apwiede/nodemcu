@@ -96,7 +96,7 @@ EM.addModule("Esp-log", function(T, name) {
                     show_it = true;
                 }
             } else {
-                T.logPrint("funny F!"+f+"!", "ERROR", "ApwTcl-log");
+                T.logPrint("funny F!"+f+"!", "ERROR", "Esp-log");
             }
             // apply source filters
             if (show_it && src) {
@@ -137,10 +137,11 @@ EM.addModule("Esp-log", function(T, name) {
 	                                    show_it = true;
 		                        }
 	                            } else {
-                                        T.logPrint("funny F 2!"+f+"!", "error", "ApwTcl-log");
+                                        T.logPrint("funny F 2!"+f+"!", "error", "Esp-log");
 	                            }
                                     if (show_it) {
-                                        print(cat+": "+m);
+                                        T.logPrint(m, cat, "Esp-log");
+//                                        print(cat+": "+m);
 		                    }
 	                        }
                             }

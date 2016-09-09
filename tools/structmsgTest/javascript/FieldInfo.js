@@ -52,15 +52,6 @@ EM.addModule("Esp-FieldInfo", function(T, name) {
       return str;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "FieldInfo.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "FieldInfo.js");
-      }
-      EM.log("props END!", "info", "FieldInfo.js");
-    },
-  
   });
 
   FieldInfo.prototype.constructor = FieldInfo;

@@ -222,14 +222,12 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
         /* ==================== getGenericTypeString ============================== */
         getGenericTypeString: function(type_obj, msg, val) {
             var defines = this;
-print("getGenericTypeStr: ", type_obj, val);
   if (typeof type_obj == "undefined") {
   T.log("getGenericTypeString!"+msg+"!"+val+"!", "error", "defines.js");
   }
             if (val == null) {
                 return null;
             }
-print("tval: ",typeof type_obj[val]);
             if (typeof type_obj[val] == "undefined") {
                 throw msg+val+"!";
             }
@@ -255,7 +253,6 @@ print("tval: ",typeof type_obj[val]);
         getErrIdString: function(val) {
             var msg = "funny ErrId: ";
             var defines = this;
-print("getErrIdStr: ", val);
             return defines.getGenericTypeString(defines.structmsgErrId2Str, msg, val);
         },
   
@@ -301,12 +298,12 @@ print("getErrIdStr: ", val);
   
   
         /* ==================== showProps ============================== */
-        showProps: function(val) {
-            EM.log("props!", "info", "structmsgDefines.js");
+        showProps: function(val,obj) {
+            EM.log("props!", "info", obj.my_name);
             for (var z in val) {
-                EM.log("Z!"+z+"!"+val[z]+"!", "info", "structmsgDefines.js");
+                EM.log("Z!"+z+"!"+val[z]+"!", "info", obj.my_name);
             }
-            EM.log("props END!", "info", "structmsgDefines.js");
+            EM.log("props END!", "info", obj.my_name);
         },
   
         /* ==================== mySelf ===================================== */

@@ -39,11 +39,11 @@ EM.Env.mod_names.push("structmsgEncDec");
 EM.Env.mod_names.push("structmsgCmd");
 for (var i = 0; i < EM.Env.mod_names.length; i++) {
    var mod_name_part = EM.Env.mod_names[i];
-print("MD!"+mod_name_part+"!");
-  print("RE0!"+mod_name_part+"!"+typeof EM.Env.mods["Esp-"+mod_name_part].fn+"!");
+EM.log(mod_name_part, 'info', 'MD', true);
+EM.log(mod_name_part+"!"+typeof EM.Env.mods["Esp-"+mod_name_part].fn, 'info', 'RE0', true);
    try {
      EM.Env.mods["Esp-"+mod_name_part].fn(EM, "Esp-"+mod_name_part);
    } catch(e) {
-print("ERROR!"+e+"!"+mod_name_part+"!");
+EM.log(e, 'error', mod_name_part, true);
    }
 }

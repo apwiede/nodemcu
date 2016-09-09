@@ -54,15 +54,6 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
       return str;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "MsgInfo.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "MsgInfo.js");
-      }
-      EM.log("props END!", "info", "MsgInfo.js");
-    },
-  
   });
 
   T.MsgInfo = MsgInfo;

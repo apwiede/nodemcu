@@ -7,53 +7,59 @@
  * Arnulf P. Wiedemann arnulf@wiedemann-pri.de (C)2016
  */
 
+if (0) {
     var esp = new EM.Defines();
     var val1 = esp.getErrIdString(255);
-print("val1: ",val1);
+EM.log(val1, 'info', 'val1', true);
     var sm2 = new EM.StructmsgInfo();
     var val2 = sm2.toString();
-print("val2: ",val2);
+EM.log(val2, 'info', 'val2', true);
     var sm3 = new EM.FieldInfo();
     var val3 = sm3.toString();
-print("val3: ",val3);
+EM.log(val3, 'info', 'val3', true);
     var sm4 = new EM.FieldNameDefinitions();
     var val4 = sm4.toString();
-print("val4: ",val4);
+EM.log(val4, 'info', 'val4', true);
     var sm5 = new EM.FieldInfoDefinition();
     var val5 = sm5.toString();
-print("val5: ",val5);
+EM.log(val5, 'info', 'val5', true);
     var sm6 = new EM.HeaderInfo();
     var val6 = sm6.toString();
-print("val6: ",val6);
+EM.log(val6, 'info', 'val6', true);
     var sm7 = new EM.MsgInfo();
     var val7 = sm7.toString();
-print("val7: ",val7);
+EM.log(val7, 'info', 'val7', true);
     var sm8 = new EM.StructmsgDefinition();
     var val8 = sm8.toString();
-print("val8: ",val8);
+EM.log(val8, 'info', 'val8', true);
     var sm9 = new EM.StructmsgDefinitions();
     var val9 = sm9.toString();
-print("val9: ",val9);
+EM.log(val9, 'info', 'val9', true);
     var sm10 = new EM.Defs();
     var val10 = sm10.toString();
-print("val10: ",val10);
+EM.log(val10, 'info', 'val10', true);
     var sm11 = new EM.Api();
     var val11 = sm11.toString();
-print("val11: ",val11);
+EM.log(val11, 'info', 'val11', true);
     var sm12 = new EM.Cmd();
     var val12 = sm12.toString();
-print("val12: ",val12);
+EM.log(val12, 'info', 'val12', true);
     var sm13 = new EM.structmsgEncDec();
     var val13 = sm13.toString();
-print("val13: ",val13);
+EM.log(val13, 'info', 'val13', true);
+    var fldinfo = new EM.FieldInfo();
+    fldinfo.fieldStr="Hello World"
+EM.log(fldinfo.fieldType+"!"+fldinfo.fieldStr, 'info', 'fldinfo', true);
+}
+    var def = new EM.Defines();
+print("before props")
+    def.showProps(def,def);
+print("after props")
 
-    function evalTopLevel(script) {
-      eval(script);
-    }
 
     function confirm(str) {
-      print("confirm!"+str+"!");
+      EM.log(str, 'info', "confirm", true);
     }
 
 
-print("END");
+EM.log('END', 'info', "End", true);

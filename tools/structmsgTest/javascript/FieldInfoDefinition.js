@@ -50,15 +50,6 @@ EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
       return str;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "FieldInfoDefinition.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "FieldInfoDefinition.js");
-      }
-      EM.log("props END!", "info", "FieldInfoDefinition.js");
-    },
-  
   });
 
   T.FieldInfoDefinition = FieldInfoDefinition;

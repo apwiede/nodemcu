@@ -53,15 +53,6 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
       return str;
     },
 
-    /* ==================== showProps ============================== */
-    showProps: function(val) {
-      EM.log("props!", "info", "HeaderInfo.js");
-      for (var z in val) {
-        EM.log("Z!"+z+"!"+val[z]+"!", "info", "HeaderInfo.js");
-      }
-      EM.log("props END!", "info", "HeaderInfo.js");
-    },
-  
   });
 
   T.HeaderInfo = HeaderInfo;
