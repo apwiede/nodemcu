@@ -51,10 +51,10 @@ EM.log(val13, 'info', 'val13', true);
     fldinfo.fieldStr="Hello World"
 EM.log(fldinfo.fieldType+"!"+fldinfo.fieldStr, 'info', 'fldinfo', true);
 }
-    var def = new EM.Defines();
-print("before props")
-    def.showProps(def,def);
-print("after props")
+    var def = new EM.StructmsgInfos();
+    def.create(5);
+    var dbgval = def.toDebugString();
+EM.log(dbgval, 'info', 'dbgval', true);
 
 
     function confirm(str) {

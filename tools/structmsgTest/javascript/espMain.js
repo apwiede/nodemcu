@@ -24,6 +24,7 @@ EM.Env.mod_names.push("object");
 EM.Env.mod_names.push("objectInherit");
 EM.Env.mod_names.push("inheritUtil");
 EM.Env.mod_names.push("structmsgDefines");
+EM.Env.mod_names.push("StructmsgInfos");
 EM.Env.mod_names.push("log");
 EM.Env.mod_names.push("StructmsgDefinition");
 EM.Env.mod_names.push("StructmsgDefinitions");
@@ -39,6 +40,7 @@ EM.Env.mod_names.push("structmsgEncDec");
 EM.Env.mod_names.push("structmsgCmd");
 for (var i = 0; i < EM.Env.mod_names.length; i++) {
    var mod_name_part = EM.Env.mod_names[i];
+print("MNP: ",mod_name_part);
 EM.log(mod_name_part, 'info', 'MD', true);
 EM.log(mod_name_part+"!"+typeof EM.Env.mods["Esp-"+mod_name_part].fn, 'info', 'RE0', true);
    try {

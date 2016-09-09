@@ -25,8 +25,12 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
     var constructor = StmsgInfos.constructor;
     StructmsgInfos.superclass.constructor.apply(StmsgInfos, arguments);
 
-    StmsgInfos.handles = null;
-    StmsgInfos.headers = null;
+    T.Defines.StructmsgInfosOid++;
+    StmsgInfos.oid = T.Defines.StructmsgInfosOid;
+    StmsgInfos.numHandles = 0;
+    StmsgInfos.numHeaders = 0;
+    StmsgInfos.handles = new Array();
+    StmsgInfos.headers = new Array();
 
     T.log('constructor end', 'info', 'StructmsgInfos', true);
   }
@@ -41,14 +45,23 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
 
     toString: function () {
       var stmsgInfos = this;
-      return stmsgInfos.mySelf()+"!"+stmsgInfos.handles+"!";
+      return stmsgInfos.mySelf()+"!"+stmsgInfos.oid+"!";
     },
 
     /* ==================== toDebugString ===================================== */
     toDebugString: function () {
       var stmsgInfos = this;
       var str = stmsgInfos.mySelf()+"\n";
+      str += "  numHandles:     "+stmsgInfos.numHandles+"\n";
+      str += "  numHeaders:     "+stmsgInfos.numHeaders+"\n";
       return str;
+    },
+
+    /* ==================== create ===================================== */
+    create: function (numFields) {
+      stmsgInfo = new T.StructmsgInfo();
+      structmsgInfo=stmsgInfo.create(numFields);
+print("stmsgInfo: ",structmsgInfo.toDebugString());
     },
 
   });

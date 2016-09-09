@@ -86,7 +86,7 @@
 
 EM.addModule("Esp-structmsgDefines", function(T, name) {
 
-  /* ==================== Defines constructor ======================= */
+    /* ==================== Defines constructor ======================= */
 
     function Defines() {
         T.log('constructor called', 'info', 'structmsgDefines', true);
@@ -94,11 +94,41 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
         var defines = this;
         defines.name = defines.constructor.NAME;
         defines.init.apply(defines, arguments);
+        defines.uint16_t_size = sizeof("uint16_t");
 
         T.log('constructor end', 'info', 'structmsgDefines', true);
-    }
+    };
 
-    Defines.structmsg = null;
+    /* ==================== sizeof ======================= */
+
+    function sizeof(type) {
+      switch (type) {
+      case 'int8_t':
+      case 'uint8_t':
+        return 1;
+        break;
+      case 'int16_t':
+      case 'uint16_t':
+        return 2;
+        break
+      case 'int32_t':
+      case 'uint32_t':
+        return 4;
+        break
+      }
+      T.log("bad type in sizeof: "+type, 'error', 'structmsgDefines', true);
+    };
+
+
+    Defines.FieldInfoDefinitionOid = 0;
+    Defines.FieldInfoOid = 0;
+    Defines.FieldNameDefinitionsOid = 0;
+    Defines.HeaderInfoOid = 0;
+    Defines.MsgInfoOid = 0;
+    Defines.StructmsgDefinitionOid = 0;
+    Defines.StructmsgDefinitionsOid = 0;
+    Defines.StructmsgInfoOid = 0;
+    Defines.StructmsgInfosOid = 0;
 
     Defines.my_name = "Esp-StructmsgDefines";
     Defines.NAME = "structmsgDefines";
@@ -166,10 +196,26 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
         STRUCT_MSG_FIELD_CMD_KEY:               4,
         STRUCT_MSG_FIELD_CMD_LGTH:              5,
 
+        uint16_t_size:                          2,
+        // header length: uint16_t src + uint16_t dst + uint16_t totalLgth
+// FIXME!!
+//        STRUCT_MSG_HEADER_LENGTH: (uint16_t_size * 3),
+        STRUCT_MSG_HEADER_LENGTH: (2 * 3),
+        // cmd header length uint16_t cmdKey + unit16_t cmdLgth
+//        STRUCT_MSG_CMD_HEADER_LENGTH: (uint16_t_size * 2),
+        STRUCT_MSG_CMD_HEADER_LENGTH: (2 * 2),
+//        STRUCT_MSG_TOTAL_HEADER_LENGTH: (Defines.prototype.STRUCT_MSG_HEADER_LENGTH + Defines.prototype.STRUCT_MSG_CMD_HEADER_LENGTH),
+        STRUCT_MSG_TOTAL_HEADER_LENGTH: (5 * 2),
+        STRUCT_MSG_NUM_HEADER_FIELDS: 3,
+        STRUCT_MSG_NUM_CMD_HEADER_FIELDS: 2,
+        STRUCT_MSG_DEFINITION_CMD_KEY: 0xFFFF,
+        STRUCT_MSG_FREE_FIELD_ID: 0xFF,
+
         STRUCT_MSG_NO_INCR:                     0,
         STRUCT_MSG_INCR:                        1,
         STRUCT_MSG_DECR:                        -1,
 
+        HANDLE_PREFIX:                          "stmsg_",
 
         structmsgErrId2Str: {
             0:   "ERR_OK",

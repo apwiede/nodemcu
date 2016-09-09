@@ -14,6 +14,7 @@ cat \
  HeaderInfo.js \
  MsgInfo.js \
  StructmsgInfo.js \
+ StructmsgInfos.js \
  structmsgApi.js \
  structmsgDefs.js \
  structmsgCmd.js \
