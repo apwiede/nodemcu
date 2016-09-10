@@ -146,6 +146,162 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
 print("MsgInfo:\naddField", msgInfo.toDebugString());
       return msgInfo.STRUCT_MSG_ERR_OK;
     },
+
+    // ============================= check_setFieldValue ========================
+    
+    check_setFieldValue: function(fieldInfo, fieldName, value) {
+      var msgInfo = this;
+print("fieldtype: ",fieldInfo.fieldType," ",fieldName," ",value);
+      switch (fieldInfo.fieldType) {
+        case msgInfo.STRUCT_MSG_FIELD_INT8_T:
+          if ((value > -128) && (value < 128)) {
+            fieldInfo.value = value;
+          } else {
+            return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+          }
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_UINT8_T:
+          if ((value >= 0) && (value <= 256)) {
+            fieldInfo.value = value;
+          }
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_INT16_T:
+          if ((value > -32767) && (value < 32767)) {
+            fieldInfo.value = value;
+          } else {
+            return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+          }
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_UINT16_T:
+          if ((value >= 0) && (value <= 65535)) {
+            fieldInfo.value = value;
+          } else {
+            return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+          }
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_INT32_T:
+          if ((value > -0x7FFFFFFF) && (value <= 0x7FFFFFFF)) {
+            fieldInfo.value = value;
+          } else {
+            return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+          }
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_UINT32_T:
+          val = Number(value);
+//FIXME!!
+//          if ((val > 0) && (val <= 0xFFFFFFFF)) {
+            fieldInfo.value = value;
+//          } else {
+//            return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+//          }
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_INT8_VECTOR:
+          // check for length needed!!
+          fieldInfo.value = value
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_UINT8_VECTOR:
+          // check for length needed!!
+          fieldInfo.value = value;
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_INT16_VECTOR:
+          // check for length needed!!
+          fieldInfo.value = value;
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_UINT16_VECTOR:
+          // check for length needed!!
+          fieldInfo.value = value;
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_INT32_VECTOR:
+          // check for length needed!!
+          fieldInfo.value = value;
+          break;
+        case msgInfo.STRUCT_MSG_FIELD_UINT32_VECTOR:
+          // check for length needed!!
+          fieldInfo.value = value;
+          break;
+        default:
+          return msgInfo.STRUCT_MSG_ERR_BAD_FIELD_TYPE;
+          break;
+      }
+      fieldInfo.flags |= msgInfo.STRUCT_MSG_FIELD_IS_SET;
+      return msgInfo.STRUCT_MSG_ERR_OK;
+    },
+    
+    // ============================= setFieldValue ========================
+    
+    setFieldValue: function(structmsgInfo, fieldName, value) {
+      var msgInfo = this;
+      var fieldInfo;
+      var idx;
+      var result;
+      var numEntries;
+    
+      if (fieldName == "@src") {
+        if ((value >= 0) && (value <= 65535)) {
+          structmsgInfo.hdr.src = value;
+//          setHandleField(handle, STRUCT_MSG_FIELD_SRC, structmsg.hdr.hdrInfo.hdrKeys.src);
+          result = structmsgInfo.hdr.fillHdrInfo();
+          return result;
+        } else {
+          return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+        }
+      } else {
+        if (fieldName == "@dst") {
+          if ((value >= 0) && (value <= 65535)) {
+            structmsgInfo.hdr.dst = value;
+//            setHandleField(handle, STRUCT_MSG_FIELD_DST, structmsg.hdr.hdrInfo.hdrKeys.dst);
+            result = structmsgInfo.hdr.fillHdrInfo();
+            return result;
+          } else {
+            return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+          }
+        } else {
+          if (fieldName == "@cmdKey") {
+            if ((value >= 0) && (value <= 65535)) {
+              structmsgInfo.hdr.cmdKey = value;
+//              setHandleField(handle, STRUCT_MSG_FIELD_CMD_KEY, structmsg.hdr.hdrInfo.hdrKeys.cmdKey);
+              result = structmsgInfo.hdr.fillHdrInfo();
+              return result;
+            } else {
+              return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
+            }
+          }
+        }
+      }
+      idx = 0;
+      numEntries = msgInfo.numFieldInfos;
+      while (idx < numEntries) {
+        fieldInfo = msgInfo.fieldInfos[idx];
+//print("entry: ",idx, " ",fieldInfo.toDebugString());
+        if (fieldName == fieldInfo.fieldStr) {
+          return msgInfo.check_setFieldValue(fieldInfo, fieldName, value);
+        }
+        idx++;
+      }
+      return msgInfo.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    },
+    
+    // ============================= setTableFieldValue ========================
+    
+    setTableFieldValue: function(structmsgInfo, fieldName, row, value) {
+      var msgInfo = this;
+      var fieldInfo;
+      var idx;
+      var cell;
+    
+      idx = 0;
+      cell = 0 + row * msgInfo.numRowFields;
+      while (idx < msgInfo.numRowFields) {
+        fieldInfo = msgInfo.tableFieldInfos[cell];
+        if (fieldName == fieldInfo.fieldStr) {
+          return msgInfo.check_setFieldValue(fieldInfo, fieldName, value);
+        }
+        idx++;
+        cell++;
+      }
+      return msgInfo.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    },
+    
   });
 
   T.MsgInfo = MsgInfo;

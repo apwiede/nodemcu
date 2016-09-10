@@ -60,76 +60,77 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
       if (typeof fieldName === 'undefined') {
         fieldName = "";
       }
-//print([format  "error result: %d"  result])
+print("error result: ", result," ",api.structmsgErrId2Str[result]);
+      var str = api.structmsgErrId2Str[result];
       var errStr = "ERROR";
-      switch (esp.getErrIdString(result)) {
-        case STRUCT_MSG_ERR_VALUE_NOT_SET:
+      switch (result) {
+        case api.STRUCT_MSG_ERR_VALUE_NOT_SET:
           return errStr+where+': value for field:'+fieldName+' not set';
           break;
-        case STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE:
+        case api.STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE:
           return errStr+where+': field: '+fieldName+' value out of range';
           break;
-        case STRUCT_MSG_ERR_BAD_VALUE:
+        case api.STRUCT_MSG_ERR_BAD_VALUE:
           return errStr+where+': field: '+fieldName+' bad value';
           break;
-        case STRUCT_MSG_ERR_BAD_FIELD_TYPE:
+        case api.STRUCT_MSG_ERR_BAD_FIELD_TYPE:
           return errStr+where+': field: '+fieldName+' bad field type';
           break;
-        case STRUCT_MSG_ERR_FIELD_NOT_FOUND:
+        case api.STRUCT_MSG_ERR_FIELD_NOT_FOUND:
           return errStr+where+': field: '+fieldName+' not found';
           break;
-        case STRUCT_MSG_ERR_BAD_HANDLE:
+        case api.STRUCT_MSG_ERR_BAD_HANDLE:
           return errStr+where+': bad handle';
           break;
-        case STRUCT_MSG_ERR_OUT_OF_MEMORY:
+        case api.STRUCT_MSG_ERR_OUT_OF_MEMORY:
           return errStr+' out of memory';
           break;
-        case STRUCT_MSG_ERR_HANDLE_NOT_FOUND:
+        case api.STRUCT_MSG_ERR_HANDLE_NOT_FOUND:
           return errStr+': handle not found';
           break;
-        case STRUCT_MSG_ERR_NOT_ENCODED:
+        case api.STRUCT_MSG_ERR_NOT_ENCODED:
           return errStr+': not encoded';
           break;
-        case STRUCT_MSG_ERR_DECODE_ERROR:
+        case api.STRUCT_MSG_ERR_DECODE_ERROR:
           return errStr+': decode error';
           break;
-        case STRUCT_MSG_ERR_BAD_CRC_VALUE:
+        case api.STRUCT_MSG_ERR_BAD_CRC_VALUE:
           return errStr+': bad crc val';
           break;
-        case STRUCT_MSG_ERR_CRYPTO_INIT_FAILED:
+        case api.STRUCT_MSG_ERR_CRYPTO_INIT_FAILED:
           return errStr+': crypto init failed';
           break;
-        case STRUCT_MSG_ERR_CRYPTO_OP_FAILED:
+        case api.STRUCT_MSG_ERR_CRYPTO_OP_FAILED:
           return errStr+': crypto op failed';
           break;
-        case STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM:
+        case api.STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM:
           return errStr+': crypto bad mechanism';
           break;
-        case STRUCT_MSG_ERR_NOT_ENCRYPTED:
+        case api.STRUCT_MSG_ERR_NOT_ENCRYPTED:
           return errStr+': not encrypted';
           break;
-        case STRUCT_MSG_ERR_DEFINITION_NOT_FOUND:
+        case api.STRUCT_MSG_ERR_DEFINITION_NOT_FOUND:
           return errStr+': definiton not found';
           break;
-        case STRUCT_MSG_ERR_BAD_SPECIAL_FIELD:
+        case api.STRUCT_MSG_ERR_BAD_SPECIAL_FIELD:
           return errStr+': bad special field';
           break;
-        case STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS:
+        case api.STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS:
           return errStr+': definition too many fields';
           break;
-        case STRUCT_MSG_ERR_BAD_TABLE_ROW:
+        case api.STRUCT_MSG_ERR_BAD_TABLE_ROW:
           return errStr+': bad table row';
           break;
-        case STRUCT_MSG_ERR_TOO_MANY_FIELDS:
+        case api.STRUCT_MSG_ERR_TOO_MANY_FIELDS:
           return errStr+': too many fields';
           break;
-        case STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY:
+        case api.STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY:
           return errStr+': bad definition cmd key';
           break;
-        case STRUCT_MSG_ERR_NO_SLOT_FOUND:
+        case api.STRUCT_MSG_ERR_NO_SLOT_FOUND:
           return errStr+': no slot found';
           break;
-        case STRUCT_MSG_ERR_DUPLICATE_FIELD:
+        case api.STRUCT_MSG_ERR_DUPLICATE_FIELD:
           return errStr+': duplicate field';
           break;
         default:
@@ -245,7 +246,7 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
     
     set_fieldValue: function(handle, fieldName, value) {
       var stmsgApi = this;
-      var result  = cmd.set_fieldValue(handle, fieldName, value);
+      var result = stmsgApi.structmsg.setFieldValue(handle, fieldName, value);
       return stmsgApi.checkOKOrErr(result,"set_fieldValue", fieldName);
     },
     
@@ -253,7 +254,7 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
     
     set_tableFieldValue: function(handle, fieldName, row, value) {
       var stmsgApi = this;
-      var result = cmd.set_tableFieldValue(handle, fieldName, row, value);
+      var result = stmsgApi.structmsg.setTableFieldValue(handle, fieldName, row, value);
       return stmsgApi.checkOKOrErr(result, "set_tableFieldValue", fieldName);
     },
     

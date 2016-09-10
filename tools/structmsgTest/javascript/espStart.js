@@ -26,7 +26,28 @@ print("result: ",result);
     result = stmsgApi.add_field(handle, "channel", "uint8_t", 1);
 print("result: ",result);
 print("Api2: ",stmsgApi.structmsg.handles[0].structmsg.toDebugString());
+
+    result = stmsgApi.set_fieldValue(handle, "@src",123);
+print("result: ",result);
+    result = stmsgApi.set_fieldValue(handle, "@dst",456);
+print("result: ",result);
+    result = stmsgApi.set_fieldValue(handle, "@cmdKey",789);
+print("result: ",result);
+    result = stmsgApi.set_tableFieldValue(handle, "ssid",0,"Wiede70123456789");
+print("result: ",result);
+    result = stmsgApi.set_tableFieldValue(handle, "rssid",0,42);
+print("result: ",result);
+    result = stmsgApi.set_tableFieldValue(handle, "channel",0,5);
+print("result: ",result);
+    result = stmsgApi.set_tableFieldValue(handle, "ssid",1,"1und170123456789");
+print("result: ",result);
+    result = stmsgApi.set_tableFieldValue(handle, "rssid",1,-76);
+print("result: ",result);
+    result = stmsgApi.set_tableFieldValue(handle, "channel",1,7);
+print("result: ",result);
+
     result = stmsgApi.encode(handle);
+print("result: ",result);
 
 
     function confirm(str) {

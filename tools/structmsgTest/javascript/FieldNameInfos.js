@@ -1,7 +1,7 @@
 /*====================================================
  * A structured Message Support implementation in Javascript named Esp
  *
- * Structmsg FieldNameDefinitions for Esp (FieldNameDefinitions.js)
+ * Structmsg FieldNameInfos for Esp (FieldNameInfos.js)
  *
  * Part of this code is taken from:
  * http://yuilibrary.com/ YUI 3.3 version
@@ -14,53 +14,56 @@
  */
 
 /*====================================================
- * layout of a StructmsgInfo:
+ * layout of a FieldNamenfos:
  *
  *  definition (FieldNameInfo)
  *    fieldName
  *    fieldId
  *    fieldOffset
+ *    refCnt
  *====================================================
  */
 
-  /* ==================== FieldNameDefinitions constructor ======================= */
+EM.addModule("Esp-FieldNameInfos", function(T, name) {
 
-  function FieldNameDefinitions() {
-    T.log('constructor called', 'info', 'FieldNameDefinitions', true);
+  /* ==================== FieldNameInfos constructor ======================= */
 
-    var fieldNameDefinitions = this;
-    var constructor = fieldNameDefinitions.constructor;
-    FieldNameDefinitions.superclass.constructor.apply(fieldNameDefinitions, arguments);
+  function FieldNameInfos() {
+    T.log('constructor called', 'info', 'FieldNameInfos', true);
 
-    fieldNameDefinitions.numDefinitions = 0;
-    fieldNameDefinitions.maxDefinitions = 0;
-    fieldNameDefinitions.definitions = null;
+    var fieldNameInfos = this;
+    var constructor = fieldNameInfos.constructor;
+    FieldNameInfos.superclass.constructor.apply(fieldNameInfos, arguments);
 
-    T.log('constructor end', 'info', 'FieldNameDefinitions', true);
+    fieldNameInfos.numInfos = 0;
+    fieldNameInfos.maxInfos = 0;
+    fieldNameInfos.definitions = null;
+
+    T.log('constructor end', 'info', 'FieldNameInfos', true);
   }
 
-  T.extend(FieldNameDefinitions, T.Defines, {
-     my_name: "FieldNameDefinitions",
-     type_name: "fieldName_definitions",
+  T.extend(FieldNameInfos, T.Defines, {
+     my_name: "FieldNameInfos",
+     type_name: "fieldName_infos",
      flags: 0,
 
     /* ==================== toString ===================================== */
 
     toString: function () {
       var fndef = this;
-      return fndef.mySelf()+"!"+fndef.numDefinitions+"!";
+      return fndef.mySelf()+"!"+fndef.numInfos+"!";
     },
 
     /* ==================== toDebugString ===================================== */
     toDebugString: function () {
-      var fndef = this;
-      var str = fndef.mySelf()+"\n";
-      str += "    numDefinitions:   "+fndef.numDefinitions+"\n";
-      str += "    maxDefinitions:   "+fndef.maxDefinitions+"\n";
-      str += "    definitions:      "+"\n";
+      var fnInfos = this;
+      var str = fnInfos.mySelf()+"\n";
+      str += "    numInfos:     "+fnInfos.numInfos+"\n";
+      str += "    maxInfos:     "+fnInfos.maxInfos+"\n";
+      str += "    definitions:  "+"\n";
       idx = 0;
-      while (idx < fndef.numDefinitions) {
-        str += fndef.definitions[idx].toDebugString();
+      while (idx < fnInfos.numInfos) {
+        str += fnInfos.definitions[idx].toDebugString();
         idx++;
       }
       return str;
@@ -69,24 +72,113 @@
     // ============================= getFieldIdName ========================
     
     getFieldIdName: function (id, fieldName) {
-      var fndef = this;
+      var fnInfos = this;
       // find field name
       var idx = 0;
-      while (idx < fieldNameDefinitions.numDefinitions) {
-        var entry = fieldNameDefinitions.definitions[idx];
-        if (entry.id == id) {
-          fieldName = entry.str;
-          return STRUCT_MSG_ERR_OK;
+      while (idx < fieldNameInfos.numInfos) {
+        var entry = fieldNameInfos.Infos[idx];
+        if (entry.fieldId == id) {
+          fieldName = entry.fieldName;
+          return fnInfos.STRUCT_MSG_ERR_OK;
         }
-        entry++;
         idx++;
       }
-      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+      return fnInfos.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
     },
     
+    // ============================= getFieldNameId ========================
+
+    getFieldNameId: function(fieldName, result, incrRefCnt) {
+      var fnInfos = this;
+      var nameIdx = 0;
+      var firstFreeEntryId;
+      var firstFreeEntry;
+      var idx;
+      var id;
+ 
+      if (fieldName[0] == '@') {
+        // find special field name
+        if (typeof fnInfos.structmsgSpecialFieldNames2Id[fieldName] != 'undefined') {
+          result.fieldId = fnInfos.structmsgSpecialFieldNames2Id[fieldName];
+          return fnInfos.STRUCT_MSG_ERR_OK;
+        }
+        return fnInfos.STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
+      } else {
+        if ((incrRefCnt == fnInfos.STRUCT_MSG_INCR) & (fnInfos.numDefinitions >= fnInfos.maxDefinitions)) {
+          if (fnInfos.maxDefinitions == 0) {
+            fnInfos.maxDefinitions = 4;
+            fnInfos.definitions = new Array(fnInfos.maxDefinitions);
+            idx = 0;
+            while (idx < fnInfos.maxDefinitions) {
+              fnInfos.definitions[idx] = new FieldNameInfo();
+              idx++;
+            }
+          } else {
+            fnInfos.maxDefinitions += 2;
+            fnInfos.definitions.psuh(new FieldNameInfo());
+            fnInfos.definitions.psuh(new FieldNameInfo());
+          }
+        }
+        firstFreeEntry = null;
+        firstFreeEntryId = 0;
+        if (fnInfos.numDefinitions > 0) {
+          // find field name
+          nameIdx = 0;
+          while (nameIdx < fnInfos.numDefinitions) {
+            nameEntry = fnInfos.definitions[nameIdx];
+            if ((nameEntry.str != null) && (nameEntry.str == fieldName)) {
+              if (incrRefCnt < 0) {
+                if (nameEntry.refCnt > 0) {
+                  nameEntry.refCnt--;
+                }
+                if (nameEntry.refCnt == 0) {
+                  nameEntry.id = fnInfos.STRUCT_MSG_FREE_FIELD_ID;
+                  nameEntry.str = NULL;
+                }
+              } else {
+                if (incrRefCnt > 0) {
+                  nameEntry.refCnt++;
+                } else {
+                  // just get the entry, do not modify
+                }
+              }
+              result.fieldId = nameEntry.id;
+              return fnInfos.STRUCT_MSG_ERR_OK;
+            }
+            if ((incrRefCnt == fnInfos.STRUCT_MSG_INCR) && (nameEntry.id == fnInfos.STRUCT_MSG_FREE_FIELD_ID) && (firstFreeEntry == null)) {
+              firstFreeEntry = nameEntry;
+              firstFreeEntry.id = nameIdx + 1;
+            }
+            nameIdx++;
+          }
+        }
+        if (incrRefCnt < 0) {
+          return fnInfos.STRUCT_MSG_ERR_OK; // just ignore silently
+        } else {
+          if (incrRefCnt == 0) {
+            return fnInfos.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+          } else {
+            if (firstFreeEntry != null) {
+              result.fieldid = firstFreeEntry.id;
+              firstFreeEntry.refCnt = 1;
+              firstFreeEntry.str = fieldName;
+            } else {
+              newDefinition = fnInfos.definitions[fnInfos.numDefinitions];
+              newDefinition.refCnt = 1;
+              newDefinition.id = fnInfos.numDefinitions + 1;
+              newDefinition.str = fieldName;
+              fnInfos.numDefinitions++;
+              result.fieldId = newDefinition.id;
+            }
+          }
+        }
+      }
+      return fnInfos.STRUCT_MSG_ERR_OK;
+    },
+
   });
 
-  T.FieldNameDefinitions = FieldNameDefinitions;
+  T.FieldNameInfos = FieldNameInfos;
 
-  T.log("module: "+name+" initialised!", "info", "FieldNameDefinitions.js");
+  T.log("module: "+name+" initialised!", "info", "FieldNameInfos.js");
 }, "0.0.1", {});

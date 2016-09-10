@@ -10,7 +10,8 @@ cat \
  StructmsgDefinition.js \
  StructmsgDefinitions.js \
  FieldInfoDefinition.js \
- FieldNameDefinitions.js \
+ FieldNameInfos.js \
+ FieldNameInfo.js \
  FieldInfo.js \
  HeaderInfo.js \
  MsgInfo.js \

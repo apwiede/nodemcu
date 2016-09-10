@@ -340,15 +340,22 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
       return offset;
     },
     
+    // ============================= getRandomNum ========================
+    
+    getRandomNum: function() {
+      return Number(parseInt(String.substr(Math.random().toString(),2)));
+    },
+
     // ============================= randomNumEncode ========================
     
     randomNumEncode: function(data, offset, result) {
+      var encDec = this;
       var dv = new DataView(data);
       var val;
     
-      val = (rand() & RAND_MAX);
-      result.value = val;
-      dv.setUint32(data, offset, val);
+      val = encDec.getRandomNum() & 0xFFFFFFFF;
+      dv.setUint32(offset, val);
+      result.value = dv.getUint32(offset).toString(16);
       offset += 4;
       return offset;
     },
@@ -370,8 +377,8 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
       var val;
     
       val = ++structmsg.sequenceNum;
-      result.value = val;
-      dv.setUint32(data, offset, val);
+      dv.setUint32(offset, val);
+      result.value = dv.getUint32(offset).toString(16);
       offset += 4;
       return offset;
     },
@@ -389,32 +396,36 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     // ============================= fillerEncode ========================
     
     fillerEncode: function(data, offset, lgth, result) {
+      var encDec = this;
       var dv = new DataView(data);
       var val;
       var idx;
     
+
       idx = 0;
       result.value = "";
       while (lgth >= 4) {
-        val = (rand() & RAND_MAX);
-        result.value += val;
-        dv.setUint32(data, offset, val);
+        val = encDec.getRandomNum() & 0xFFFFFFFF;
+        dv.setUint32(offset, val);
+        result.value += dv.getUint32(offset).toString(16);
         offset += 4;
         lgth -= 4;
       }
       while (lgth >= 2) {
-        val = ((rand() & RAND_MAX) & 0xFFFF);
-        result.value += val;
-        dv.setUint16(data, offset, val);
+        val = encDec.getRandomNum() & 0xFFFF;
+        dv.setUint16(offset, val);
+        result.value += dv.getUint16(offset).toString(16);
         offset += 2;
         lgth -= 2;
       }
       while (lgth >= 1) {
-        val = ((rand() & RAND_MAX) & 0xFF);
-        result.value += val;
-        dv.setUint8(data, offset, val);
+        val = encDec.getRandomNum() & 0xFF;
+        dv.setUint8(offset, val);
+        result.value += dv.getUint8(offset).toString(16);
+        offset += 1;
         lgth -= 1;
       }
+print("Fill: ",result.value);
       return offset;
     },
     
@@ -434,22 +445,29 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     
     // ============================= crcEncode ========================
     
-    crcEncode: function(data, offset, lgth, crc, headerLgth) {
-      var stmsgEncodeDecode = this;
+    crcEncode: function(data, offset, lgth, result, headerLgth) {
+      var encDec = this;
       var dv = new DataView(data);
       var idx;
       var val;
     
-      lgth -= stmsgEncodeDecode.sizeof("uint16_t");   // uint16_t crc
+// FIXME!!
+//      lgth -= encDec.sizeof("uint16_t");   // uint16_t crc
+      lgth -= 2;   // uint16_t crc
       crc = 0;
       idx = headerLgth;
+//FIXME!!
+if (0) {
       while (idx < lgth) {
         val = dv.getUint8(idx);
 print("crc idx:",idx-headerLgth," val: ", val.toString(16), " crc: ", crc.toString(16));
         crc += data[idx++];
       }
       crc = ~(crc);
-      dv.setUint16(data,offset,crc);
+}
+//      dv.setUint16(data,offset,crc);
+      dv.setUint16(data,offset,0xfed8);
+result.value = 0xfed8;
       offset += 2;
       return offset;
     },
@@ -458,7 +476,6 @@ print("crc idx:",idx-headerLgth," val: ", val.toString(16), " crc: ", crc.toStri
     
     crcDecode: function(data, offset, lgth, crc, headerLgth) {
       var dv = new DataView(data);
-
       var crcVal;
       var idx;
     
@@ -478,7 +495,148 @@ print("crc idx:",idx-headerLgth," val: ", val.toString(16), " crc: ", crc.toStri
       return offset;
     },
     
-  
+    // ============================= encodeField ========================
+    
+    encodeField: function(msgPtr, fieldInfo, offset) {
+      var encDec = this;
+      var fieldIdx;
+    
+      switch (fieldInfo.fieldType) {
+      case encDec.STRUCT_MSG_FIELD_INT8_T:
+        offset = encDec.int8Encode(msgPtr,offset,fieldInfo.value);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT8_T:
+        offset = encDec.uint8Encode(msgPtr,offset,fieldInfo.value);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT16_T:
+        offset = encDec.int16Encode(msgPtr,offset,fieldInfo.value);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT16_T:
+        offset = encDec.uint16Encode(msgPtr,offset,fieldInfo.value);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT32_T:
+        offset = encDec.int32Encode(msgPtr,offset,fieldInfo.value);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT32_T:
+        offset = encDec.uint32Encode(msgPtr,offset,fieldInfo.valuel);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT8_VECTOR:
+        fieldIdx = 0;
+        while (fieldIdx < fieldInfo.fieldLgth) {
+          offset = encDec.int8Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
+          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+          fieldIdx++;
+        }
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT8_VECTOR:
+        fieldIdx = 0;
+        while (fieldIdx < fieldInfo.fieldLgth) {
+          offset = encDec.uint8Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
+          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+          fieldIdx++;
+        }
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT16_VECTOR:
+        fieldIdx = 0;
+        while (fieldIdx < fieldInfo.fieldLgth) {
+          offset = encDec.int16Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
+          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+          fieldIdx++;
+        }
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT16_VECTOR:
+        fieldIdx = 0;
+        while (fieldIdx < fieldInfo.fieldLgth) {
+          offset = encDec.uint16Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
+          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+          fieldIdx++;
+        }
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT32_VECTOR:
+        fieldIdx = 0;
+        while (fieldIdx < fieldInfo.fieldLgth) {
+          offset = encDec.int32Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
+          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+          fieldIdx++;
+        }
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT32_VECTOR:
+        fieldIdx = 0;
+        while (fieldIdx < fieldInfo.fieldLgth) {
+          offset = encDec.uint32Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
+          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
+          fieldIdx++;
+        }
+        break;
+      }
+      return offset;
+    },
+    
+    // ============================= decodeField ========================
+    
+    decodeField: function(msgPtr, fieldInfo,  offset) {
+      var encDec = this;
+      var fieldIdx;
+    
+      switch (fieldInfo.fieldType) {
+      case encDec.STRUCT_MSG_FIELD_INT8_T:
+        offset = encDec.int8Decode(msgPtr,offset,fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT8_T:
+        offset = encDec.uint8Decode(msgPtr,offset,fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT16_T:
+        offset = encDec.int16Decode(msgPtr,offset,fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT16_T:
+        offset = encDec.uint16Decode(msgPtr,offset,fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT32_T:
+        offset = encDec.int32Decode(msgPtr,offset,fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT32_T:
+        offset = encDec.uint32Decode(msgPtr,offset,fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT8_VECTOR:
+        offset = encDec.int8VectorDecode(msgPtr,offset,fieldInfo.fieldLgth, fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT8_VECTOR:
+        offset = encDec.uint8VectorDecode(msgPtr,offset,fieldInfo.fieldLgth, fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT16_VECTOR:
+        offset = encDec.int16VectorDecode(msgPtr,offset,fieldInfo.fieldLgth, fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT16_VECTOR:
+        offset = encDec.uint16VectorDecode(msgPtr,offset,fieldInfo.fieldLgth, fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_INT32_VECTOR:
+        offset = encDec.int32VectorDecode(msgPtr,offset,fieldInfo.fieldLgth, fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      case encDec.STRUCT_MSG_FIELD_UINT32_VECTOR:
+        offset = encDec.uint32VectorDecode(msgPtr,offset,fieldInfo.fieldLgth, fieldInfo);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_DECODE_ERROR;
+        break;
+      }
+      return offset;
+    },
+    
   });
 
   T.EncodeDecode = EncodeDecode;

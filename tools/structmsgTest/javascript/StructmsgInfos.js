@@ -100,6 +100,26 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return structmsgInfo.addField(fieldStr, fieldType, fieldLgth);
     },
 
+    /* ==================== setFieldValue ===================================== */
+    setFieldValue: function(handle, fieldName, value) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.setFieldValue(fieldName, value);
+    },
+
+    /* ==================== setTableFieldValue ===================================== */
+    setTableFieldValue: function(handle, fieldName, row, value) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.setTableFieldValue(fieldName, row, value);
+    },
+
     /* ==================== encode ===================================== */
     encode: function(handle) {
       var stmsgInfos = this;

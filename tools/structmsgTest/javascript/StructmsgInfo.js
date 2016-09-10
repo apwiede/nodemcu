@@ -77,6 +77,7 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
     StmsgInfo.encrypted = null;
     StmsgInfo.sequenceNum = 0;
     StmsgInfo.handleHdrInfoPtr = null;
+    StmsgInfo.fieldNameInfos = new T.FieldNameInfos();
 
     T.log('constructor end', 'info', 'StructmsgInfo', true);
   }
@@ -152,6 +153,18 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       return structmsgInfo.msg.addField(structmsgInfo, fieldStr, fieldType, fieldLgth);
     },
 
+    /* ==================== setFieldValue ===================================== */
+    setFieldValue: function (fieldName, value) {
+      var structmsgInfo = this;
+      return structmsgInfo.msg.setFieldValue(structmsgInfo, fieldName, value);
+    },
+
+    /* ==================== setTableFieldValue ===================================== */
+    setTableFieldValue: function (fieldName, row, value) {
+      var structmsgInfo = this;
+      return structmsgInfo.msg.setTableFieldValue(structmsgInfo, fieldName, row, value);
+    },
+
     // ============================= setFillerAndCrc ========================
     
     setFillerAndCrc: function() {
@@ -197,12 +210,13 @@ print("StructmsgInfo.js encode");
         structmsgInfo.flags |= structmsgInfo.STRUCT_MSG_HAS_CRC;
       }
       //      structmsg.encoded = os_zalloc(structmsg.hdr.hdrInfo.hdrKeys.totalLgth);
-      msgPtr = new Object();
+//      msgPtr = new Object();
       structmsgInfo.encoded = new ArrayBuffer(structmsgInfo.hdr.totalLgth);
 print("enc: ",typeof structmsgInfo.encoded,"!",structmsgInfo.encoded.byteLength);
       msgPtr = structmsgInfo.encoded;
 print("msgptr: ",typeof msgPtr,"!");
       offset = 0;
+print("msgptr0: ",msgPtr.byteLength,"!");
       offset = structmsgInfo.uint16Encode(msgPtr,offset,structmsgInfo.hdr.src);
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
       offset = structmsgInfo.uint16Encode(msgPtr,offset,structmsgInfo.hdr.dst);
@@ -214,63 +228,78 @@ print("msgptr: ",typeof msgPtr,"!");
       offset = structmsgInfo.uint16Encode(msgPtr,offset,structmsgInfo.hdr.cmdLgth);
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
       numEntries = structmsgInfo.msg.numFieldInfos;
+print("msgptr1: ",msgPtr.byteLength,"!");
+var i = 0;
+var d1 = new DataView(msgPtr);
+while(i < 10) {
+print("i: ",i," 0x",d1.getUint8(i).toString(16));
+  i++;
+}
       offset = structmsgInfo.uint8Encode(msgPtr,offset,numEntries);
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
       idx = 0;
       while (idx < numEntries) {
         fieldInfo = structmsgInfo.msg.fieldInfos[idx];
-print("encode field:",idx,"!",fieldInfo.fieldStr);
         if (fieldInfo.fieldStr[0] == '@') {
-          result = structmsg_getFieldNameId(fieldInfo.fieldStr, fieldId, STRUCT_MSG_NO_INCR);
+          var obj = new Object();
+          obj.fieldId = -1;
+          result = structmsgInfo.fieldNameInfos.getFieldNameId(fieldInfo.fieldStr, obj, structmsgInfo.STRUCT_MSG_NO_INCR);
           if(result != structmsgInfo.STRUCT_MSG_ERR_OK) return result;
-          switch (fieldId) {
-          case STRUCT_MSG_SPEC_FIELD_SRC:
-          case STRUCT_MSG_SPEC_FIELD_DST:
-          case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
-          case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-          case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
-          case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-    ets_printf("funny should encode: %s\n", fieldInfo.fieldStr);
+          switch (obj.fieldId) {
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_SRC:
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_DST:
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
+    print("funny should encode:", fieldInfo.fieldStr);
             break;
-          case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
-            offset = randomNumEncode(msgPtr, offset, randomNum);
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
+print("encode field:",idx,"!",fieldInfo.fieldStr);
+            obj.value = 0;
+            offset = structmsgInfo.randomNumEncode(msgPtr, offset, obj);
+print("rn: ",obj.value);
             if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
-            result = stmsg_setFieldValue(handle, "@randomNum", randomNum, NULL);
+            result = structmsgInfo.msg.setFieldValue(handle, "@randomNum", obj.value, null);
             if(result != structmsgInfo.STRUCT_MSG_ERR_OK) return result;
             break;
-          case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
-            offset = sequenceNumEncode(msgPtr, offset, structmsg, sequenceNum);
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
+            obj.value = 0;
+            offset = structmsgInfo.sequenceNumEncode(msgPtr, offset, structmsgInfo,obj);
             if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
-            result = stmsg_setFieldValue(handle, "@sequenceNum", sequenceNum, NULL);
+            result = structmsgInfo.msg.setFieldValue(handle, "@sequenceNum", obj.value, null);
             if(result != structmsgInfo.STRUCT_MSG_ERR_OK) return result;
             break;
-          case STRUCT_MSG_SPEC_FIELD_FILLER:
-            offset = fillerEncode(msgPtr, offset, fieldInfo.fieldLgth, fieldInfo.value.ubyteVector);
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_FILLER:
+            offset = structmsgInfo.fillerEncode(msgPtr, offset, fieldInfo.fieldLgth, obj);
             if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
-            result = stmsg_setFieldValue(handle, "@filler", 0, fieldInfo.value.ubyteVector);
+            fieldInfo.value = obj.value;
+            result = structmsgInfo.msg.setFieldValue(handle, "@filler", 0, fieldInfo.value);
             if(result != structmsgInfo.STRUCT_MSG_ERR_OK) return result;
             break;
-          case STRUCT_MSG_SPEC_FIELD_CRC:
-            offset = crcEncode(structmsg.encoded, offset, structmsg.hdr.hdrInfo.hdrKeys.totalLgth, crc, structmsg.hdr.headerLgth);
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_CRC:
+            obj.value = 0;
+            offset = structmsgInfo.crcEncode(msgPtr, offset, structmsgInfo.hdr.totalLgth, obj, structmsgInfo.hdr.headerLgth);
             if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
-            result = stmsg_setFieldValue(handle, "@crc", crc, NULL);
+            crc = obj.value;
+            result = structmsgInfo.msg.setFieldValue(handle, "@crc", crc, null);
             if(result != structmsgInfo.STRUCT_MSG_ERR_OK) return result;
             break;
-          case STRUCT_MSG_SPEC_FIELD_ID:
-            return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_ID:
+            return structmsgInfo.STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
             break;
-          case STRUCT_MSG_SPEC_FIELD_TABLE_ROWS:
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_TABLE_ROWS:
             break;
-          case STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
-            if (structmsg.msg.numTableRows > 0) {
+          case structmsgInfo.STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
+            if (structmsgInfo.msg.numTableRows > 0) {
               var row = 0;
               var col = 0;
               var cell = 0;
-              while (row < structmsg.msg.numTableRows) {
-    	        while (col < structmsg.msg.numRowFields) {
-    	           cell = col + row * structmsg.msg.numRowFields;
-    	           fieldInfo = structmsg.msg.tableFieldInfos[cell];
-    	           offset = encodeField(msgPtr, fieldInfo, offset);
+              while (row < structmsgInfo.msg.numTableRows) {
+    	        while (col < structmsgInfo.msg.numRowFields) {
+    	           cell = col + row * structmsgInfo.msg.numRowFields;
+    	           fieldInfo = structmsgInfo.msg.tableFieldInfos[cell];
+    	           offset = structmsgInfo.encodeField(msgPtr, fieldInfo, offset);
                    if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
     	           col++;
     	        }
@@ -281,13 +310,21 @@ print("encode field:",idx,"!",fieldInfo.fieldStr);
             break;
           }
         } else {
-          offset = encodeField(msgPtr, fieldInfo, offset);
+          offset = structmsgInfo.encodeField(msgPtr, fieldInfo, offset);
           if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
         }
         idx++;
       }
-      structmsg.flags |= STRUCT_MSG_ENCODED;
-      return STRUCT_MSG_ERR_OK;
+print("ENCODED");
+var i = 0;
+var d1 = new DataView(msgPtr,1);
+while(i < msgPtr.byteLength) {
+print("i: ",i," 0x",d1.getUint8(i).toString(16));
+  i++;
+}
+//structmsgInfo.dumpHex(msgPtr);
+      structmsgInfo.flags |= structmsgInfo.STRUCT_MSG_ENCODED;
+      return structmsgInfo.STRUCT_MSG_ERR_OK;
     },
     
   });
