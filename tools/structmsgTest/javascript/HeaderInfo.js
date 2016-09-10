@@ -35,7 +35,7 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
     T.log('constructor end', 'info', 'HeaderInfo', true);
   }
 
-  T.extend(HeaderInfo, T.structmsgEncDec, {
+  T.extend(HeaderInfo, T.EncodeDecode, {
      my_name: "HeaderInfo",
      type_name: "header_info",
      flags: 0,

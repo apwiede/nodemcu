@@ -82,7 +82,7 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
   }
 
 
-  T.extend(StructmsgInfo, T.structmsgEncDec, {
+  T.extend(StructmsgInfo, T.EncodeDecode, {
      my_name: "StructmsgInfo",
      type_name: "structmsg_info",
      flags: 0,

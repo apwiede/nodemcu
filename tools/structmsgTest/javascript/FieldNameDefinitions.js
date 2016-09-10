@@ -13,9 +13,17 @@
  *
  */
 
-EM.addModule("Esp-FieldNameDefinitions", function(T, name) {
+/*====================================================
+ * layout of a StructmsgInfo:
+ *
+ *  definition (FieldNameInfo)
+ *    fieldName
+ *    fieldId
+ *    fieldOffset
+ *====================================================
+ */
 
-  /* ==================== FieldNameDefinition constructor ======================= */
+  /* ==================== FieldNameDefinitions constructor ======================= */
 
   function FieldNameDefinitions() {
     T.log('constructor called', 'info', 'FieldNameDefinitions', true);
@@ -47,9 +55,35 @@ EM.addModule("Esp-FieldNameDefinitions", function(T, name) {
     toDebugString: function () {
       var fndef = this;
       var str = fndef.mySelf()+"\n";
+      str += "    numDefinitions:   "+fndef.numDefinitions+"\n";
+      str += "    maxDefinitions:   "+fndef.maxDefinitions+"\n";
+      str += "    definitions:      "+"\n";
+      idx = 0;
+      while (idx < fndef.numDefinitions) {
+        str += fndef.definitions[idx].toDebugString();
+        idx++;
+      }
       return str;
     },
 
+    // ============================= getFieldIdName ========================
+    
+    getFieldIdName: function (id, fieldName) {
+      var fndef = this;
+      // find field name
+      var idx = 0;
+      while (idx < fieldNameDefinitions.numDefinitions) {
+        var entry = fieldNameDefinitions.definitions[idx];
+        if (entry.id == id) {
+          fieldName = entry.str;
+          return STRUCT_MSG_ERR_OK;
+        }
+        entry++;
+        idx++;
+      }
+      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    },
+    
   });
 
   T.FieldNameDefinitions = FieldNameDefinitions;

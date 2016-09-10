@@ -6,6 +6,7 @@ cat \
  inheritUtil.js \
  espLog.js \
  structmsgDefines.js \
+ EncodeDecode.js \
  StructmsgDefinition.js \
  StructmsgDefinitions.js \
  FieldInfoDefinition.js \
