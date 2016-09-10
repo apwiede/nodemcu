@@ -31,6 +31,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
     StmsgInfos.numHeaders = 0;
     StmsgInfos.handles = new Array();
     StmsgInfos.headers = new Array();
+    StmsgInfos.fieldNameInfos = null;
 
     T.log('constructor end', 'info', 'StructmsgInfos', true);
   }
@@ -82,6 +83,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       var stmsgInfos = this;
 
       stmsgInfo = new T.StructmsgInfo();
+      stmsgInfo.fieldNameInfos = stmsgInfos.fieldNameInfos;
       structmsgInfo=stmsgInfo.create(numFields);
       stmsgInfos.numHandles++;
 //T.log(structmsgInfo.toDebugString(), 'info', 'stmsgInfo', true);
@@ -129,6 +131,17 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       }
 print("StructmsgInfos.js encode");
       return structmsgInfo.encode();
+    },
+
+    /* ==================== decode ===================================== */
+    decode: function(handle, result) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+print("StructmsgInfos.js decode");
+      return structmsgInfo.decode(result);
     },
 
   });

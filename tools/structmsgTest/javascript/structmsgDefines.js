@@ -314,7 +314,7 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
     },
 
     /* ==================== getGenericTypeString ============================== */
-    getGenericTypeString: function(type_obj, msg, val) {
+    getGenericTypeString: function(type_obj, msg, val, result) {
       var defines = this;
 if (typeof type_obj == "undefined") {
 T.log("getGenericTypeString!"+msg+"!"+val+"!", "error", "defines.js");
@@ -323,9 +323,10 @@ T.log("getGenericTypeString!"+msg+"!"+val+"!", "error", "defines.js");
         return null;
       }
       if (typeof type_obj[val] == "undefined") {
-        throw msg+val+"!";
+        return defines.STRUCT_MSG_ERR_FIELD_VALUE_NOT_FOUND;
       }
-      return type_obj[val];
+      result.value = type_obj[val];
+      return defines.STRUCT_MSG_ERR_OK;
     },
 
     /* ==================== getGenericTypeVal ============================== */
@@ -344,29 +345,30 @@ T.log("getGenericTypeVal!"+val+"!", "error", "defines.js");
     },
 
     /* ==================== getErrIdString ============================== */
-    getErrIdString: function(val) {
+    getErrIdString: function(val, result) {
       var msg = "funny ErrId: ";
       var defines = this;
+      var res;
 
-      return defines.getGenericTypeString(defines.structmsgErrId2Str, msg, val);
+      return defines.getGenericTypeString(defines.structmsgErrId2Str, msg, val, result);
     },
 
     // ============================= getFieldTypeId ========================
 
-    getFieldTypeId: function(str) {
+    getFieldTypeId: function(str, result) {
       var msg = "funny FieldTypeStr: ";
       var defines = this;
 
-      return defines.getGenericTypeString(defines.structmsgFieldTypes2Id, msg, str);
+      return defines.getGenericTypeString(defines.structmsgFieldTypes2Id, msg, str, result);
     },
 
     // ============================= getFieldTypeStr ========================
 
-    getFieldTypeStr: function(key) {
+    getFieldTypeStr: function(key, result) {
       var msg = "funny FieldTypeId: ";
       var defines = this;
 
-      return defines.getGenericTypeString(defines.structmsgFieldTypes2str, msg, key);
+      return defines.getGenericTypeString(defines.structmsgFieldTypes2str, msg, key, result);
     },
 
     // ============================= getIdFieldNameStr ========================

@@ -40,13 +40,16 @@ EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
 
     toString: function () {
       var fldInfoDef = this;
-      return fldInfoDef.mySelf()+"!"+fldInfoDef.fieldType+"!";
+      return fldInfoDef.mySelf()+"!";
     },
 
     /* ==================== toDebugString ===================================== */
     toDebugString: function () {
       var fldInfoDef = this;
       var str = fldInfoDef.mySelf()+"\n";
+      str += "      fieldId:   "+fldInfoDef.fieldId+"\n";
+      str += "      fieldType: "+fldInfoDef.fieldType+"\n";
+      str += "      fieldLgth: "+fldInfoDef.fieldLgth+"\n";
       return str;
     },
 

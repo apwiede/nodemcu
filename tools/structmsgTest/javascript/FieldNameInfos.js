@@ -37,7 +37,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
 
     fieldNameInfos.numInfos = 0;
     fieldNameInfos.maxInfos = 0;
-    fieldNameInfos.definitions = null;
+    fieldNameInfos.infos = null;
 
     T.log('constructor end', 'info', 'FieldNameInfos', true);
   }
@@ -51,19 +51,19 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
 
     toString: function () {
       var fndef = this;
-      return fndef.mySelf()+"!"+fndef.numInfos+"!";
+      return fndef.mySelf()+"!";
     },
 
     /* ==================== toDebugString ===================================== */
     toDebugString: function () {
       var fnInfos = this;
       var str = fnInfos.mySelf()+"\n";
-      str += "    numInfos:     "+fnInfos.numInfos+"\n";
-      str += "    maxInfos:     "+fnInfos.maxInfos+"\n";
-      str += "    definitions:  "+"\n";
+      str += "    numInfos: "+fnInfos.numInfos+"\n";
+      str += "    maxInfos: "+fnInfos.maxInfos+"\n";
+      str += "    infos:    "+"\n";
       idx = 0;
       while (idx < fnInfos.numInfos) {
-        str += fnInfos.definitions[idx].toDebugString();
+        str += fnInfos.infos[idx].toDebugString();
         idx++;
       }
       return str;
@@ -76,7 +76,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
       // find field name
       var idx = 0;
       while (idx < fieldNameInfos.numInfos) {
-        var entry = fieldNameInfos.Infos[idx];
+        var entry = fieldNameInfos.infos[idx];
         if (entry.fieldId == id) {
           fieldName = entry.fieldName;
           return fnInfos.STRUCT_MSG_ERR_OK;
@@ -93,6 +93,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
       var nameIdx = 0;
       var firstFreeEntryId;
       var firstFreeEntry;
+      var newDefinition;
       var idx;
       var id;
  
@@ -104,28 +105,29 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
         }
         return fnInfos.STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
       } else {
-        if ((incrRefCnt == fnInfos.STRUCT_MSG_INCR) & (fnInfos.numDefinitions >= fnInfos.maxDefinitions)) {
-          if (fnInfos.maxDefinitions == 0) {
-            fnInfos.maxDefinitions = 4;
-            fnInfos.definitions = new Array(fnInfos.maxDefinitions);
+print("new fieldName: ", fieldName);
+        if ((incrRefCnt == fnInfos.STRUCT_MSG_INCR) & (fnInfos.numInfos >= fnInfos.maxInfos)) {
+          if (fnInfos.maxInfos == 0) {
+            fnInfos.maxInfos = 4;
+            fnInfos.infos = new Array(fnInfos.maxInfos);
             idx = 0;
-            while (idx < fnInfos.maxDefinitions) {
-              fnInfos.definitions[idx] = new FieldNameInfo();
+            while (idx < fnInfos.maxInfos) {
+              fnInfos.infos[idx] = new T.FieldNameInfo();
               idx++;
             }
           } else {
-            fnInfos.maxDefinitions += 2;
-            fnInfos.definitions.psuh(new FieldNameInfo());
-            fnInfos.definitions.psuh(new FieldNameInfo());
+            fnInfos.maxInfos += 2;
+            fnInfos.infos.push(new T.FieldNameInfo());
+            fnInfos.infos.push(new T.FieldNameInfo());
           }
         }
         firstFreeEntry = null;
         firstFreeEntryId = 0;
-        if (fnInfos.numDefinitions > 0) {
+        if (fnInfos.numInfos > 0) {
           // find field name
           nameIdx = 0;
-          while (nameIdx < fnInfos.numDefinitions) {
-            nameEntry = fnInfos.definitions[nameIdx];
+          while (nameIdx < fnInfos.numInfos) {
+            nameEntry = fnInfos.infos[nameIdx];
             if ((nameEntry.str != null) && (nameEntry.str == fieldName)) {
               if (incrRefCnt < 0) {
                 if (nameEntry.refCnt > 0) {
@@ -163,11 +165,11 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
               firstFreeEntry.refCnt = 1;
               firstFreeEntry.str = fieldName;
             } else {
-              newDefinition = fnInfos.definitions[fnInfos.numDefinitions];
+              newDefinition = fnInfos.infos[fnInfos.numInfos];
               newDefinition.refCnt = 1;
-              newDefinition.id = fnInfos.numDefinitions + 1;
+              newDefinition.id = fnInfos.numInfos + 1;
               newDefinition.str = fieldName;
-              fnInfos.numDefinitions++;
+              fnInfos.numInfos++;
               result.fieldId = newDefinition.id;
             }
           }

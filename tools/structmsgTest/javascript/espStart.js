@@ -46,7 +46,57 @@ print("result: ",result);
     result = stmsgApi.set_tableFieldValue(handle, "channel",1,7);
 print("result: ",result);
 
+if (0) {
     result = stmsgApi.encode(handle);
+print("result: ",result);
+
+print("DECODE");
+    result = stmsgApi.decode(handle);
+print("result: ",result);
+}
+
+print("create def");
+    result = stmsgApi.create_definition("aplist", 15);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "@src","uint16_t",2);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "@dst","uint16_t",2);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "@totalLgth","uint16_t",2);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "@cmdKey","uint16_t",2);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "@cmdLgth","uint16_t",2);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "@tablerows","uint8_t",2);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "@tablerowfields","uint8_t",3);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "ssid","uint8_t*",32);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "rssid","uint8_t",1);
+print("result: ",result);
+
+print("addField def");
+    result = stmsgApi.add_fieldDefinition("aplist", "channel","uint8_t",1);
 print("result: ",result);
 
 

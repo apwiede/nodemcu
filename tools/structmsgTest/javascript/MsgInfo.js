@@ -90,9 +90,13 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
       var numTableRowFields;
       var numTableRows;
       var numTableFields;
+      var obj = new Object();
+      var result;
     
-      fieldType = msgInfo.getFieldTypeId(fieldTypeStr);
-//      checkErrOK(result);
+      obj.value = null;
+      result = msgInfo.getFieldTypeId(fieldTypeStr, obj);
+      if(result != msgInfo.STRUCT_MSG_ERR_OK) return result;
+      fieldType = obj.value;
       if (fieldStr == "@tablerows") {
         msgInfo.numTableRows = fieldLgth;
         msgInfo.initFieldInfo(msgInfo.fieldInfos[msgInfo.numFieldInfos], fieldStr, fieldType, fieldLgth);
