@@ -132,7 +132,6 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
 //  checkEncodeOffset(offset);
       offset = hdrInfo.uint16Encode(hdrInfo.hdrId, offset, hdrInfo.cmdLgth);
 //  checkEncodeOffset(offset);
-print("hdr: ",hdrInfo.toDebugString());
       return hdrInfo.STRUCT_MSG_ERR_OK;
     },
 

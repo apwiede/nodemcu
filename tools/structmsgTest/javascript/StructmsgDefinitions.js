@@ -73,7 +73,7 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
       str += "  maxDefinitions:     "+stmsgDefs.maxDefinitions+"\n";
       str += "  definitions:\n";
       while (idx < stmsgDefs.definitions.length) {
-        str += "    "+idx+": "+stmsgDefs.definitions[idx].name+'\n';
+        str += "    "+idx+": "+stmsgDefs.definitions[idx].defName+'\n';
         idx++;
       }
       return str;
@@ -82,12 +82,12 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
 
     // ============================= getDefinition ========================
 
-    getDefinition: function (name, result) {
+    getDefinition: function (defName, result) {
       var stmsgDefs = this;
       var definitionsIdx = 0
       while (definitionsIdx < stmsgDefs.numDefinitions) {
         definition = stmsgDefs.definitions[definitionsIdx];
-        if ((definition.name != null) && (name == definition.name)) {
+        if ((definition.defName != null) && (defName == definition.defName)) {
           result.idx = definitionsIdx;
           return stmsgDefs.STRUCT_MSG_ERR_OK;
         }
@@ -97,7 +97,7 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
     },
 
     /* ==================== create ===================================== */
-    create: function (name, numFields) {
+    create: function (defName, numFields) {
       var stmsgDefs = this;
       var definitionIdx;
       var definition;
@@ -128,7 +128,7 @@ print(">>fieldNameInfos: ",stmsgDefs.fieldNameInfos.toDebugString(),"!",typeof s
       definitionIdx = 0;
       while (definitionIdx < stmsgDefs.maxDefinitions) {
         definition = stmsgDefs.definitions[definitionIdx];
-        if (definition.name == null) {
+        if (definition.defName == null) {
           definition.encoded = null;
           definition.todecode = null;
           definition.encrypted = null;
@@ -144,7 +144,7 @@ print(">>fieldNameInfos: ",stmsgDefs.fieldNameInfos.toDebugString(),"!",typeof s
           if (definitionIdx >= stmsgDefs.numDefinitions) {
             stmsgDefs.numDefinitions++;
           }
-          definition.name = name;
+          definition.defName = defName;
 print("create def: ",definition.toDebugString());
           return stmsgDefs.STRUCT_MSG_ERR_OK;
         }
@@ -155,18 +155,48 @@ print("create def: ",definition.toDebugString());
     },
 
     /* ==================== addFieldDefinition ===================================== */
-    addFieldDefinition: function (name, fieldName, fieldType, fieldLgth) {
+    addFieldDefinition: function (defName, fieldName, fieldType, fieldLgth) {
       var stmsgDefs = this;
       var result;
       var definition;
       var obj = new Object();
 
       obj.idx = -1;
-      result = stmsgDefs.getDefinition(name, obj);
+      result = stmsgDefs.getDefinition(defName, obj);
 print("addFieldDefinition: ",result," ",obj.idx);
       if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
       definition = stmsgDefs.definitions[obj.idx];
       return definition.addFieldDefinition(fieldName, fieldType, fieldLgth);
+    },
+
+    /* ==================== addFieldDefinition ===================================== */
+    encodeFieldDefinition: function (defName, data) {
+      var stmsgDefs = this;
+      var data;
+      var definition;
+      var obj = new Object();
+
+      obj.idx = -1;
+      result = stmsgDefs.getDefinition(defName, obj);
+print("encodeFieldDefinition: ",result," ",obj.idx);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      definition = stmsgDefs.definitions[obj.idx];
+      return definition.encodeFieldDefinition(data);
+    },
+
+    /* ==================== decodeFieldDefinition ===================================== */
+    decodeFieldDefinition: function (defName, encoded) {
+      var stmsgDefs = this;
+      var result;
+      var definition;
+      var obj = new Object();
+
+      obj.idx = -1;
+      result = stmsgDefs.getDefinition(defName, obj);
+print("decodeFieldDefinition: ",result," ",obj.idx);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      definition = stmsgDefs.definitions[obj.idx];
+      return definition.decodeFieldDefinition(encoded);
     },
 
   });

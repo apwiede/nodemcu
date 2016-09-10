@@ -129,7 +129,6 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       if (structmsgInfo == null) {
         return stmsgInfos.result;
       }
-print("StructmsgInfos.js encode");
       return structmsgInfo.encode();
     },
 
@@ -140,7 +139,6 @@ print("StructmsgInfos.js encode");
       if (structmsgInfo == null) {
         return stmsgInfos.result;
       }
-print("StructmsgInfos.js decode");
       return structmsgInfo.decode(result);
     },
 

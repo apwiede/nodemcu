@@ -25,7 +25,6 @@ print("result: ",result);
 print("result: ",result);
     result = stmsgApi.add_field(handle, "channel", "uint8_t", 1);
 print("result: ",result);
-print("Api2: ",stmsgApi.structmsg.handles[0].structmsg.toDebugString());
 
     result = stmsgApi.set_fieldValue(handle, "@src",123);
 print("result: ",result);
@@ -97,6 +96,12 @@ print("result: ",result);
 
 print("addField def");
     result = stmsgApi.add_fieldDefinition("aplist", "channel","uint8_t",1);
+print("result: ",result);
+
+print("encodeField def");
+    var data = new Object();
+    data.data = null;
+    result = stmsgApi.encode_fieldDefinition("aplist", data);
 print("result: ",result);
 
 

@@ -147,7 +147,6 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
         }
         msgInfo.numRowFields++;  
       } 
-print("MsgInfo:\naddField", msgInfo.toDebugString());
       return msgInfo.STRUCT_MSG_ERR_OK;
     },
 
@@ -155,7 +154,6 @@ print("MsgInfo:\naddField", msgInfo.toDebugString());
     
     check_setFieldValue: function(fieldInfo, fieldName, value) {
       var msgInfo = this;
-print("fieldtype: ",fieldInfo.fieldType," ",fieldName," ",value);
       switch (fieldInfo.fieldType) {
         case msgInfo.STRUCT_MSG_FIELD_INT8_T:
           if ((value > -128) && (value < 128)) {

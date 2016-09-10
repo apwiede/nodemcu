@@ -211,11 +211,8 @@ print("StructmsgInfo.js encode");
       }
       //      structmsg.encoded = os_zalloc(structmsg.hdr.hdrInfo.hdrKeys.totalLgth);
       structmsgInfo.encoded = new ArrayBuffer(structmsgInfo.hdr.totalLgth);
-print("enc: ",typeof structmsgInfo.encoded,"!",structmsgInfo.encoded.byteLength);
       msgPtr = structmsgInfo.encoded;
-print("msgptr: ",typeof msgPtr,"!");
       offset = 0;
-print("msgptr0: ",msgPtr.byteLength,"!");
       offset = structmsgInfo.uint16Encode(msgPtr,offset,structmsgInfo.hdr.src);
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
       offset = structmsgInfo.uint16Encode(msgPtr,offset,structmsgInfo.hdr.dst);
@@ -227,13 +224,13 @@ print("msgptr0: ",msgPtr.byteLength,"!");
       offset = structmsgInfo.uint16Encode(msgPtr,offset,structmsgInfo.hdr.cmdLgth);
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
       numEntries = structmsgInfo.msg.numFieldInfos;
-print("msgptr1: ",msgPtr.byteLength,"!");
-var i = 0;
-var d1 = new DataView(msgPtr);
-while(i < 10) {
-print("i: ",i," 0x",d1.getUint8(i).toString(16));
-  i++;
-}
+//print("msgptr1: ",msgPtr.byteLength,"!");
+//var i = 0;
+//var d1 = new DataView(msgPtr);
+//while(i < 10) {
+//print("i: ",i," 0x",d1.getUint8(i).toString(16));
+//  i++;
+//}
       offset = structmsgInfo.uint8Encode(msgPtr,offset,numEntries);
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
       idx = 0;
@@ -254,10 +251,8 @@ print("i: ",i," 0x",d1.getUint8(i).toString(16));
     print("funny should encode:", fieldInfo.fieldStr);
             break;
           case structmsgInfo.STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
-print("encode field:",idx,"!",fieldInfo.fieldStr);
             obj.value = 0;
             offset = structmsgInfo.randomNumEncode(msgPtr, offset, obj);
-print("rn: ",obj.value);
             if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_ENCODE_ERROR;
             result = structmsgInfo.msg.setFieldValue(handle, "@randomNum", obj.value, null);
             if(result != structmsgInfo.STRUCT_MSG_ERR_OK) return result;

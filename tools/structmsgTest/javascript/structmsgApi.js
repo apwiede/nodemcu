@@ -23,7 +23,11 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
     var api = this;
     var constructor = api.constructor;
     Api.superclass.constructor.apply(api, arguments);
+    api.fieldNameInfos = new T.FieldNameInfos();
     api.structmsg = new T.StructmsgInfos();
+    api.structmsg.fieldNameInfos = api.fieldNameInfos;
+    api.definitions = new T.StructmsgDefinitions();
+    api.definitions.fieldNameInfos = api.fieldNameInfos;
 
     T.log('constructor end', 'info', 'structmsgApi', true);
   }
@@ -65,22 +69,22 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
       var errStr = "ERROR";
       switch (result) {
         case api.STRUCT_MSG_ERR_VALUE_NOT_SET:
-          return errStr+where+': value for field:'+fieldName+' not set';
+          return errStr+" "+where+': value for field:'+fieldName+' not set';
           break;
         case api.STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE:
-          return errStr+where+': field: '+fieldName+' value out of range';
+          return errStr+" "+where+': field: '+fieldName+' value out of range';
           break;
         case api.STRUCT_MSG_ERR_BAD_VALUE:
-          return errStr+where+': field: '+fieldName+' bad value';
+          return errStr+" "+where+': field: '+fieldName+' bad value';
           break;
         case api.STRUCT_MSG_ERR_BAD_FIELD_TYPE:
-          return errStr+where+': field: '+fieldName+' bad field type';
+          return errStr+" "+where+': field: '+fieldName+' bad field type';
           break;
         case api.STRUCT_MSG_ERR_FIELD_NOT_FOUND:
-          return errStr+where+': field: '+fieldName+' not found';
+          return errStr+" "+where+': field: '+fieldName+' not found';
           break;
         case api.STRUCT_MSG_ERR_BAD_HANDLE:
-          return errStr+where+': bad handle';
+          return errStr+" "+where+': bad handle';
           break;
         case api.STRUCT_MSG_ERR_OUT_OF_MEMORY:
           return errStr+' out of memory';
@@ -162,6 +166,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     delete: function(handle) {
       var stmsgApi = this;
+print("delete not yet implemented");
       var result = cmd.delete(handle);
       return stmsgApi.checkOKOrErr(result, "delete", "");
     },
@@ -178,6 +183,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     get_encoded: function(handle) {
       var stmsgApi = this;
+print("get_encoded not yet implemented");
       var result = cmd.get_encoded(handle, encoded, lgth);
       if (result == STRUCT_MSG_ERR_OK) {
         return encoded;
@@ -187,9 +193,9 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     // ============================= decode ========================
     
-    decode: function(handle, data) {
+    decode: function(handle, result) {
       var stmsgApi = this;
-      var result = cmd.decode(handle, data);
+      var result = stmsgApi.structmsg.decode(handle,result);
       return stmsgApi.checkOKOrErr(result, "decode", "");
     },
     
@@ -197,6 +203,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     dump: function(handle) {
       var stmsgApi = this;
+print("dump not yet implemented");
       var result = cmd.dump(handle);
       return stmsgApi.checkOKOrErr(result, "dump", "");
     },
@@ -205,6 +212,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     encrypt: function(handle, key, iv) {
       var stmsgApi = this;
+print("encrypt not yet implemented");
       if (typeof iv === 'undefined') {
         iv = "";
       }
@@ -219,6 +227,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     decrypt: function(handle, key, iv, crypted) {
       var stmsgApi = this;
+print("encrypt not yet implemented");
       var result = cmd.decrypt(handle, null, 0, key, iv, crypted, buf, lgth);
       if (result == STRUCT_MSG_ERR_OK) {
         return buf;
@@ -238,6 +247,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     set_fillerAndCrc: function(handle) {
       var stmsgApi = this;
+print("encrypt not yet implemented");
       var result = structmsg_setFillerAndCrc(handle);
       return stmsgApi.checkOKOrErr(result, "set_fillerAndCrc", "");
     },
@@ -262,6 +272,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     get_fieldValue: function(handle, fieldName, valueVar) {
       var stmsgApi = this;
+print("get_fieldValue not yet implemented");
       var result = cmd.get_fieldValue(handle, fieldName, valueC);
       return stmsgApi.checkOKOrErr(result, "get_fieldValue", fieldName);
     },
@@ -270,6 +281,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     get_tableFieldValue: function(handle, fieldName, row, valueVar) {
       var stmsgApi = this;
+print("get_tableFieldValue not yet implemented");
       var result = cmd.get_tableFieldValue(handle, fieldName, row, value);
       return stmsgApi.checkOKOrErr(result, "get_tableFieldValue", fieldName);
     },
@@ -278,6 +290,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     set_crypted: function(handle, crypted) {
       var stmsgApi = this;
+print("set_encrpyted not yet implemented");
       var result = cmd.set_crypted(handle, crypted);
       return stmsgApi.checkOKOrErr(result, "set_crypted", "");
     },
@@ -286,6 +299,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     decrypt_getHandle: function(encrypted, key, iv, handleVar) {
       var stmsgApi = this;
+print("decrypt_getHandle not yet implemented");
       var result = cmd.decrypt_getHandle(encrypted, key, iv, handle);
       return stmsgApi.checkOKOrErr(result, "decrypt_getHandle", "");
     },
@@ -294,7 +308,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     create_definition: function(name, numFields) {
       var stmsgApi = this;
-      var result = structmsg.def.createDefinition(name, numFields);
+      var result = stmsgApi.definitions.create(name, numFields);
       return stmsgApi.checkOKOrErr(result, "create_Definition", "");
     },
     
@@ -302,7 +316,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     add_fieldDefinition: function(name, fieldName, fieldType, fieldLgth) {
       var stmsgApi = this;
-      var result = structmsg.def.addFieldDefinition(name, fieldName, fieldType, fieldLgth);
+      var result = stmsgApi.definitions.addFieldDefinition(name, fieldName, fieldType, fieldLgth);
       return stmsgApi.checkOKOrErr(result, "add_fieldDefinition", "");
     },
     
@@ -310,18 +324,16 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     dump_fieldDefinition: function(name) {
       var stmsgApi = this;
+print("dump_fieldDefinition not yet implemented");
       var result = structmsg.def.dumpFieldDefinition(name);
       return stmsgApi.checkOKOrErr(result, "dump_fieldDefinition", "");
     },
     
     // ============================= encode_fieldDefinition =================
     
-    encode_fieldDefinition: function(name) {
+    encode_fieldDefinition: function(name, data) {
       var stmsgApi = this;
-      var result = structmsg.def.encodeFieldDefinition(name, data, lgth);
-      if  (result == STRUCT_MSG_ERR_OK) {
-        return data;
-      }
+      var result = stmsgApi.definitions.encodeFieldDefinition(name, data);
       return stmsgApi.checkOKOrErr(result, "encode_fieldDefinition","");
     },
     
@@ -329,7 +341,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     decode_fieldDefinition: function(name, encoded) {
       var stmsgApi = this;
-      var result = structmsg.def.decodeFieldDefinition(name, encoded);
+      var result = stmsgApi.definitions.decodeFieldDefinition(name, encoded);
       return stmsgApi.checkOKOrErr(result, "decode_fieldDefinition", "");
     },
     
@@ -337,6 +349,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     set_crypted_definition: function(name, crypted) {
       var stmsgApi = this;
+print("set_crypted_definition not yet implemented");
       var result = structmsg.def.setCryptedDefinition(name, crypted);
       return stmsgApi.checkOKOrErr(result, "set_crypted_definition", "");
     },
@@ -345,6 +358,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     decrypt_getDefinitionName: function(encrypted, key, iv) {
       var stmsgApi = this;
+print("decrypt_getDefinitionName not yet implemented");
       if (typeof iv === 'undefined') {
         iv = "";
       }
@@ -358,6 +372,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= encrypt_definition ========================
     
     encrypt_definition: function(name, key, iv) {
+print("encrypt_definition not yet implemented");
       var stmsgApi = this;
       if (typeof iv === 'undefined') {
         iv = "";
@@ -372,6 +387,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= decrypt_definition ========================
     
     decrypt_definition: function(name, key, iv, encrypted) {
+print("decrypt_definition not yet implemented");
       var stmsgApi = this;
       if (typeof iv === 'undefined') {
         iv = "";
@@ -389,6 +405,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= delete_fieldDefinition ========================
     
     delete_fieldDefinition: function(name) {
+print("delete_fieldDefinition not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.deleteFieldDefinition(name);
       return stmsgApi.checkOKOrErr(result, "delete_fieldDefinition", "");
@@ -397,6 +414,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= delete_fieldDefinitions ========================
     
     delete_fieldDefinitions: function() {
+print("delete_fieldDefinitions not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.deleteFieldDefinitions();
       return stmsgApi.checkOKOrErr(result, "delete_fieldDefinitions", "");
@@ -405,6 +423,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= create_msgFromDefinition ========================
     
     create_msgFromDefinition: function(name, handleVar)  {
+print("create_msgFromDefinition not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.createMsgFromDefinition(name, handle);
       return stmsgApi.checkOKOrErr(result, "create_msgFromDefinition", "");
@@ -413,6 +432,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= get_definitionNormalFieldNames ========================
     
     get_definitionNormalFieldNames: function(name, normalFieldNamesVar)  {
+print("gete_definitionNormalFieldNames not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.getDefinitionNormalFieldNames(name, normalFieldNames);
       return stmsgApi.checkOKOrErr(result, "get_definitionNormalFieldNames", "");
@@ -421,6 +441,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= get_definitionTableFieldNames ========================
     
     get_definitionTableFieldNames: function(name, tableFieldNamesVar)  {
+print("gete_definitionTableFieldNames not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.getDefinitionTableFieldNames(name, tableFieldNames);
       return stmsgApi.checkOKOrErr(result, "get_definitionTableFieldNames", "");
@@ -429,6 +450,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= get_definitionNumTableRows ========================
     
     get_definitionNumTableRows: function(name, numTableRowsVar)  {
+print("gete_definitionNumTableRows not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.getDefinitionNumTableRows(name, numTableRows);
       return stmsgApi.checkOKOrErr(result, "get_definitionNumTableRows", "");
@@ -437,6 +459,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= get_definitionNumTableRowFields ========================
     
     get_definitionNumTableRowFields: function(name, numTableRowFieldsVar)  {
+print("gete_definitionNumTableRowFields not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.getDefinitionNumTableRowFields(name, numTableRowFields);
       return stmsgApi.checkOKOrErr(result, "get_definitionNumTableRowFields", "");
@@ -445,6 +468,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= get_definitionFieldInfo ========================
     
     get_definitionFieldInfo: function(name, fieldName, fieldInfoVar)  {
+print("gete_definitionFieldInfo not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.getDefinitionFieldInfo(name, fieldName, fieldInfo);
       return stmsgApi.checkOKOrErr(result, "get_definitionFieldInfo", "");
@@ -453,6 +477,7 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     // ============================= get_definitionTableFieldInfo ========================
     
     get_definitionTableFieldInfo: function(name, fieldName, row, fieldInfoVar)  {
+print("gete_definitionTableFieldInfo not yet implemented");
       var stmsgApi = this;
       var result = structmsg.def.getDefinitionTableFieldInfo(name, fieldName, row, fieldInfo);
       return stmsgApi.checkOKOrErr(result, "get_definitionTableFieldInfo", "");
