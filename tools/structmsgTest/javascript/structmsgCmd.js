@@ -343,73 +343,6 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
       }
     },
     
-    // ============================= fixHeaderInfo ========================
-    
-    fixHeaderInfo: function(structmsg, fieldInfo, fieldStr, fieldType, fieldLgth, numTableRows) {
-//      fieldInfo.fieldStr = os_malloc(os_strlen(fieldStr) + 1);
-//      fieldInfo.fieldStr[os_strlen(fieldStr)] = '\0';
-      os_memcpy(fieldInfo.fieldStr, fieldStr, os_strlen(fieldStr));
-      fieldInfo.fieldType = fieldType;
-      fieldInfo.value.byteVector = null;
-      fieldInfo.flags = 0;
-      switch (fieldType) {
-        case STRUCT_MSG_FIELD_UINT8_T:
-        case STRUCT_MSG_FIELD_INT8_T:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += 1 * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += 1 * numTableRows;
-          fieldLgth = 1;
-          break;
-        case STRUCT_MSG_FIELD_UINT16_T:
-        case STRUCT_MSG_FIELD_INT16_T:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += 2 * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += 2 * numTableRows;
-          fieldLgth = 2;
-          break;
-        case STRUCT_MSG_FIELD_UINT32_T:
-        case STRUCT_MSG_FIELD_INT32_T:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += 4 * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += 4 * numTableRows;
-          fieldLgth = 4;
-          break;
-        case STRUCT_MSG_FIELD_UINT8_VECTOR:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
-//          fieldInfo.value.ubyteVector = (uint8_t *)os_malloc(fieldLgth + 1);
-          fieldInfo.value.ubyteVector[fieldLgth] = '\0';
-          break;
-        case STRUCT_MSG_FIELD_INT8_VECTOR:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
-//          fieldInfo.value.byteVector = (int8_t *)os_malloc(fieldLgth + 1);
-          fieldInfo.value.ubyteVector[fieldLgth] = '\0';
-          break;
-        case STRUCT_MSG_FIELD_UINT16_VECTOR:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
-//          fieldInfo.value.ushortVector = (uint16_t *)os_malloc(fieldLgth*sizeof(uint16_t));
-          break;
-        case STRUCT_MSG_FIELD_INT16_VECTOR:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
-//          fieldInfo.value.shortVector = (int16_t *)os_malloc(fieldLgth*sizeof(int16_t));
-          break;
-        case STRUCT_MSG_FIELD_UINT32_VECTOR:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
-//          fieldInfo.value.uint32Vector = (uint32_t *)os_malloc(fieldLgth*sizeof(uint32_t));
-          break;
-        case STRUCT_MSG_FIELD_INT32_VECTOR:
-          structmsg.hdr.hdrInfo.hdrKeys.totalLgth += fieldLgth * numTableRows;
-          structmsg.hdr.hdrInfo.hdrKeys.cmdLgth += fieldLgth * numTableRows;
-//          fieldInfo.value.int32Vector = (int32_t *)os_malloc(fieldLgth*sizeof(int32_t));
-          break;
-      }
-      setHandleField(structmsg.handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
-      setHandleField(structmsg.handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg.hdr.hdrInfo.hdrKeys.totalLgth);
-      fieldInfo.fieldLgth = fieldLgth;
-      return STRUCT_MSG_ERR_OK;
-    },
-    
     // ============================= setFieldValue ========================
     
     setFieldValue: function(structmsg, fieldInfo, fieldName, numericValue, stringValue) {
@@ -975,32 +908,6 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
       return STRUCT_MSG_ERR_OK;
     },
     
-    
-    // ============================= stmsg_setFillerAndCrc ========================
-    
-    stmsg_setFillerAndCrc: function(handle) {
-      var structmsg;
-      var fillerLgth = 0;
-      var myLgth = 0;
-      var result;
-    
-      structmsg = structmsg_get_structmsg_ptr(handle);
-      checkHandleOK(structmsg);
-      // space for the numEntries field!!
-      structmsg.hdr.hdrInfo.hdrKeys.cmdLgth++;
-      structmsg.hdr.hdrInfo.hdrKeys.totalLgth++;
-      // end space for the numEntries field!!
-      myLgth = structmsg.hdr.hdrInfo.hdrKeys.cmdLgth + 2;
-      while ((myLgth % 16) != 0) {
-        myLgth++;
-        fillerLgth++;
-      }
-      result = stmsg_addField(handle, "@filler", "uint8_t*", fillerLgth);
-      checkErrOK(result);
-      result = stmsg_addField(handle, "@crc", "uint16_t", 2);
-      checkErrOK(result);
-      return STRUCT_MSG_ERR_OK;
-    },
     
     // ============================= stmsg_setFieldValue ========================
     

@@ -50,57 +50,73 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
     /* ==================== toDebugString ===================================== */
     toDebugString: function () {
       var msgInfo = this;
+      var idx;
       var str = msgInfo.mySelf()+"\n";
-      str += "    fieldInfos (lgth):      "+(msgInfo.fieldInfos == null ? "null" : msgInfo.fieldInfos.length)+"\n";
-      str += "    tableFieldInfos (lgth): "+(msgInfo.tableFieldInfos == null ? "null" : msgInfo.tableFieldInfos.length)+"\n";
       str += "    numFieldInfos:          "+msgInfo.numFieldInfos+"\n";
       str += "    maxFieldInfos:          "+msgInfo.maxFieldInfos+"\n";
+      str += "    fieldInfos:      "+(msgInfo.fieldInfos == null ? "null" : "")+"\n";
+      idx = 0;
+      while (idx < msgInfo.numFieldInfos) {
+        str += msgInfo.fieldInfos[idx].toDebugString();
+        idx++;
+      }
       str += "    numTableRows:           "+msgInfo.numTableRows+"\n";
       str += "    numTableRowFields:      "+msgInfo.numTableRowFields+"\n";
-      str += "    numwRoFields:           "+msgInfo.numRowFields+"\n";
+      str += "    numwRowFields:          "+msgInfo.numRowFields+"\n";
+      str += "    tableFieldInfos: "+(msgInfo.tableFieldInfos == null ? "null" : "")+"\n";
+      idx = 0;
+      while (idx < msgInfo.numTableRows * msgInfo.numRowFields) {
+        str += msgInfo.tableFieldInfos[idx].toDebugString();
+        idx++;
+      }
       return str;
+    },
+
+    // ============================= initFieldInfo ========================
+    
+    initFieldInfo: function(fieldInfo, fieldStr, fieldTypeStr, fieldLgth) {
+      var msgInfo = this;
+      fieldInfo.fieldStr = fieldStr;
+      fieldInfo.fieldType = fieldType;
+      fieldInfo.fieldLgth = fieldLgth;
+      fieldInfo.fieldValue = null;
+      fieldInfo.flags = 0;
     },
 
     // ============================= addField ========================
     
-    addField: function(fieldStr, fieldTypeStr, fieldLgth) {
+    addField: function(structmsgInfo, fieldStr, fieldTypeStr, fieldLgth) {
       var msgInfo = this;
       var numTableRowFields;
       var numTableRows;
       var numTableFields;
-print("MsgInfo: addField", msgInfo.toDebugString());
-      if (msgInfo.numFieldInfos >= msgInfo.maxFieldInfos) {
-      }
-      
     
       fieldType = msgInfo.getFieldTypeId(fieldTypeStr);
 //      checkErrOK(result);
-print("fieldType: ",fieldType);
       if (fieldStr == "@tablerows") {
-        structmsg.msg.numTableRows = fieldLgth;
-    //ets_printf("tablerows1: lgth: %d\n",  fieldLgth);
-        fieldInfo = structmsg.msg.fieldInfos[structmsg.msg.numFieldInfos];
-    //ets_printf("tablerows1: totalLgth: %d cmdLgth: %d\n", structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
+        msgInfo.numTableRows = fieldLgth;
+        msgInfo.initFieldInfo(msgInfo.fieldInfos[msgInfo.numFieldInfos], fieldStr, fieldType, fieldLgth);
         // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
-        fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, 0, 0);
-    //ets_printf("tablerows2: totalLgth: %d cmdLgth: %d\n", structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
-        structmsg.msg.numFieldInfos++;
-        return STRUCT_MSG_ERR_OK;
+        structmsgInfo.hdr.fixHeaderInfo(msgInfo.fieldInfos[msgInfo.numFieldInfos], fieldType, 0, 0);
+        msgInfo.numFieldInfos++;
+        return msgInfo.STRUCT_MSG_ERR_OK;
       }
       if (fieldStr == "@tablerowfields") {
-        structmsg.msg.numTableRowFields = fieldLgth;
-        numTableFields = structmsg.msg.numTableRows * structmsg.msg.numTableRowFields;
-        fieldInfo = structmsg.msg.fieldInfos[structmsg.msg.numFieldInfos];
-    //ets_printf("tablerowFields1: %d lgth: %d\n", numTableFields, fieldLgth);
-    //ets_printf("tablerowfields1: totalLgth: %d cmdLgth: %d\n", structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
+        msgInfo.numTableRowFields = fieldLgth;
+        numTableFields = msgInfo.numTableRows * msgInfo.numTableRowFields;
+        msgInfo.initFieldInfo(msgInfo.fieldInfos[msgInfo.numFieldInfos], fieldStr, fieldType, fieldLgth);
         // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
-        fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, 0, 0);
-    //ets_printf("tablerowfields2: totalLgth: %d cmdLgth: %d\n", structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
-        if ((structmsg.msg.tableFieldInfos == null) && (numTableFields != 0)) {
-          structmsg.msg.tableFieldInfos = newFieldInfos(numTableFields);
+        structmsgInfo.hdr.fixHeaderInfo(msgInfo.fieldInfos[msgInfo.numFieldInfos], fieldType, 0, 0);
+        if ((msgInfo.tableFieldInfos == null) && (numTableFields != 0)) {
+          msgInfo.tableFieldInfos = new Array(numTableFields);
+          var idx = 0;
+          while (idx < numTableFields) {
+            msgInfo.tableFieldInfos[idx]= new T.FieldInfo();
+            idx++;
+          }
         }
-        structmsg.msg.numFieldInfos++;
-        return STRUCT_MSG_ERR_OK;
+        msgInfo.numFieldInfos++;
+        return msgInfo.STRUCT_MSG_ERR_OK;
       }
       numTableRowFields = msgInfo.numTableRowFields;
       numTableRows = msgInfo.numTableRows;
@@ -109,42 +125,26 @@ print("fieldType: ",fieldType);
         if (msgInfo.numFieldInfos >= msgInfo.maxFieldInfos) {
           return msgInfo.STRUCT_MSG_ERR_TOO_MANY_FIELDS;
         }
- print ("numFieldInfos:", msgInfo.numFieldInfos," ",msgInfo.maxFieldInfos);
-        if (msgInfo.numFieldInfos <= msgInfo.fieldInfos.length) {
-          fieldInfo = new T.FieldInfo();
-          msgInfo.fieldInfos.push(fieldInfo);
-        }
-        fieldInfo = msgInfo.fieldInfos[msgInfo.numFieldInfos]
-        fieldInfo.fieldStr = fieldStr;
-        fieldInfo.fieldType = fieldType;
-        fieldInfo.fieldLgth = fieldLgth;
-        fieldInfo.fieldValue = null;
-        fieldInfo.flags = 0;
-        msgInfo.fieldInfos[msgInfo.numFieldInfos] = fieldInfo;
-        msgInfo.numFieldInfos++;
+        msgInfo.initFieldInfo(msgInfo.fieldInfos[msgInfo.numFieldInfos], fieldStr, fieldType, fieldLgth);
         numTableFields = 0;
         numTableRows = 1;
         numTableRowFields = 0;
-print("fi: ",fieldInfo.toDebugString());
-return msgInfo.STRUCT_MSG_ERR_OK;
-        fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, fieldLgth, numTableRows);
-    //ets_printf("field2: %s totalLgth: %d cmdLgth: %d\n", fieldInfo.fieldStr, structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
-        result = structmsg_fillHdrInfo(handle, structmsg);
-        structmsg.msg.numFieldInfos++;
+        structmsgInfo.hdr.fixHeaderInfo(msgInfo.fieldInfos[msgInfo.numFieldInfos], fieldType, fieldLgth, numTableRows);
+        result = structmsgInfo.hdr.fillHdrInfo();
+        msgInfo.numFieldInfos++;
       } else {
+        var cellIdx;
         row = 0;
         while (row < numTableRows) {
-          cellIdx = structmsg.msg.numRowFields + row * numTableRowFields;;
-          fieldInfo = structmsg.msg.tableFieldInfos[cellIdx];
-    //ets_printf("table field1: %s totalLgth: %d cmdLgth: %d\n", fieldInfo.fieldStr, structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
-          fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, fieldLgth, 1);
-    //ets_printf("table field2: %s totalLgth: %d cmdLgth: %d\n", fieldInfo.fieldStr, structmsg.hdr.hdrInfo.hdrKeys.totalLgth, structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
+          cellIdx = msgInfo.numRowFields + row * numTableRowFields;;
+          msgInfo.initFieldInfo(msgInfo.tableFieldInfos[cellIdx], fieldStr, fieldType, fieldLgth);
+          structmsgInfo.hdr.fixHeaderInfo(msgInfo.tableFieldInfos[cellIdx], fieldType, fieldLgth, 1);
           row++;
         }
-        structmsg.msg.numRowFields++;  
+        msgInfo.numRowFields++;  
       } 
-return msgInfo.STRUCT_MSG_ERR_OK;
-      return result;
+print("MsgInfo:\naddField", msgInfo.toDebugString());
+      return msgInfo.STRUCT_MSG_ERR_OK;
     },
   });
 

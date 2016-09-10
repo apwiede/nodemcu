@@ -100,6 +100,17 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return structmsgInfo.addField(fieldStr, fieldType, fieldLgth);
     },
 
+    /* ==================== encode ===================================== */
+    encode: function(handle) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+print("StructmsgInfos.js encode");
+      return structmsgInfo.encode();
+    },
+
   });
 
   T.StructmsgInfos = StructmsgInfos;

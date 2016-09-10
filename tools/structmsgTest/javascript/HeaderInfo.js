@@ -64,6 +64,58 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
       return str;
     },
 
+    // ============================= fixHeaderInfo ========================
+    
+    fixHeaderInfo: function(fieldInfo, fieldType, fieldLgth, numTableRows) {
+      var hdrInfo = this;
+      switch (fieldType) {
+        case hdrInfo.STRUCT_MSG_FIELD_UINT8_T:
+        case hdrInfo.STRUCT_MSG_FIELD_INT8_T:
+          hdrInfo.totalLgth += 1 * numTableRows;
+          hdrInfo.cmdLgth += 1 * numTableRows;
+          fieldLgth = 1;
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_UINT16_T:
+        case hdrInfo.STRUCT_MSG_FIELD_INT16_T:
+          hdrInfo.totalLgth += 2 * numTableRows;
+          hdrInfo.cmdLgth += 2 * numTableRows;
+          fieldLgth = 2;
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_UINT32_T:
+        case hdrInfo.STRUCT_MSG_FIELD_INT32_T:
+          hdrInfo.totalLgth += 4 * numTableRows;
+          hdrInfo.cmdLgth += 4 * numTableRows;
+          fieldLgth = 4;
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_UINT8_VECTOR:
+          hdrInfo.totalLgth += fieldLgth * numTableRows;
+          hdrInfo.cmdLgth += fieldLgth * numTableRows;
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_INT8_VECTOR:
+          hdrInfo.totalLgth += fieldLgth * numTableRows;
+          hdrInfo.cmdLgth += fieldLgth * numTableRows;
+          fieldInfo.value.ubyteVector[fieldLgth] = '\0';
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_UINT16_VECTOR:
+          hdrInfo.totalLgth += fieldLgth * numTableRows;
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_INT16_VECTOR:
+          hdrInfo.totalLgth += fieldLgth * numTableRows;
+          hdrInfo.cmdLgth += fieldLgth * numTableRows;
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_UINT32_VECTOR:
+          hdrInfo.totalLgth += fieldLgth * numTableRows;
+          hdrInfo.cmdLgth += fieldLgth * numTableRows;
+          break;
+        case hdrInfo.STRUCT_MSG_FIELD_INT32_VECTOR:
+          hdrInfo.totalLgth += fieldLgth * numTableRows;
+          hdrInfo.cmdLgth += fieldLgth * numTableRows;
+          break;
+      }
+      fieldInfo.fieldLgth = fieldLgth;
+      return hdrInfo.STRUCT_MSG_ERR_OK;
+    },
+    
     /* ==================== fillHdrInfo ===================================== */
 
     fillHdrInfo: function () {
@@ -80,6 +132,7 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
 //  checkEncodeOffset(offset);
       offset = hdrInfo.uint16Encode(hdrInfo.hdrId, offset, hdrInfo.cmdLgth);
 //  checkEncodeOffset(offset);
+print("hdr: ",hdrInfo.toDebugString());
       return hdrInfo.STRUCT_MSG_ERR_OK;
     },
 

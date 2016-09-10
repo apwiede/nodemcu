@@ -49,15 +49,19 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= uint8Encode ========================
     
     uint8Encode: function(data, offset, value) {
-      data[offset++] = value & 0xFF;
-      return offset;
+      var dv = new DataView(data);
+
+      dv.setUint8(offset, value);
+      return offset + 1;
     },
     
     // ============================= int8Encode ========================
     
     int8Encode: function(data, offset, value) {
-      data[offset++] = value & 0xFF;
-      return offset;
+      var dv = new DataView(data);
+
+      dv.setInt8(offset, value);
+      return offset + 1;
     },
     
     // ============================= uint16Encode ========================
@@ -72,56 +76,70 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= int16Encode ========================
     
     int16Encode: function(data, offset, value) {
-      data[offset++] = (value >> 8) & 0xFF;
-      data[offset++] = value & 0xFF;
-      return offset;
+      var dv = new DataView(data);
+
+      dv.setInt16(offset, value);
+      return offset + 2;
     },
     
     // ============================= uint32Encode ========================
     
     uint32Encode: function(data, offset, value) {
-      data[offset++] = (value >> 24) & 0xFF;
-      data[offset++] = (value >> 16) & 0xFF;
-      data[offset++] = (value >> 8) & 0xFF;
-      data[offset++] = value & 0xFF;
-      return offset;
+      var dv = new DataView(data);
+
+      dv.setUint32(offset, value);
+      return offset + 4;
     },
     
     // ============================= int32Encode ========================
     
     int32Encode: function(data, offset, value) {
-      data[offset++] = (value >> 24) & 0xFF;
-      data[offset++] = (value >> 16) & 0xFF;
-      data[offset++] = (value >> 8) & 0xFF;
-      data[offset++] = value & 0xFF;
-      return offset;
+      var dv = new DataView(data);
+
+      dv.setInt32(offset, value);
+      return offset + 4;
     },
     
     // ============================= uint8VectorEncode ========================
     
     uint8VectorEncode: function(data, offset, value, lgth) {
-      c_memcpy(data+offset,value,lgth);
-      offset += lgth;
+      var dv = new DataView(data);
+      var idx;
+
+      idx = 0;
+      while (idx < lgth) {
+        dv.setUint8(offset, value[idx]);
+        idx++;
+        offset++;
+      }
       return offset;
     },
     
     // ============================= int8VectorEncode ========================
     
     int8VectorEncode: function(data, offset, value, lgth) {
-      c_memcpy(data+offset,value,lgth);
-      offset += lgth;
+      var dv = new DataView(data);
+
+      idx = 0;
+      while (idx < lgth) {
+        dv.setInt8(offset, value[idx]);
+        idx++;
+        offset++;
+      }
       return offset;
     },
     
     // ============================= uint16VectorEncode ========================
     
     uint16VectorEncode: function(data, offset, value, lgth) {
+      var dv = new DataView(data);
       var idx;
     
       idx = 0;
       while (idx < lgth) {
-        offset = uint16Encode(data, offset, value[idx]);
+        dv.setUint16(offset, value[idx]);
         idx++;
+        offset += 2;
       }
       return offset;
     },
@@ -129,12 +147,14 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= int16VectorEncode ========================
     
     int16VectorEncode: function(data, offset, value, lgth) {
+      var dv = new DataView(data);
       var idx;
     
       idx = 0;
       while (idx < lgth) {
-        offset = int16Encode(data, offset, value[idx]);
+        dv.setInt16(offset, value[idx]);
         idx++;
+        offset += 2;
       }
       return offset;
     },
@@ -142,12 +162,14 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= uint32VectorEncode ========================
     
     uint32VectorEncode: function(data, offset, value, lgth) {
+      var dv = new DataView(data);
       var idx;
     
       idx = 0;
       while (idx < lgth) {
-        offset = uint32Encode(data, offset, value[idx]);
+        dv.setUint32(offset, value[idx]);
         idx++;
+        offset += 4;
       }
       return offset;
     },
@@ -155,89 +177,114 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= int32VectorEncode ========================
     
     int32VectorEncode: function(data, offset, value, lgth) {
+      var dv = new DataView(data);
       var idx;
     
       idx = 0;
       while (idx < lgth) {
-        offset = int32Encode(data, offset, value[idx]);
+        dv.setInt32(offset, value[idx]);
         idx++;
+        offset += 4;
       }
       return offset;
     },
     
     // ============================= uint8Decode ========================
     
-    uint8Decode: function(data, offset, value) {
-      value = data[offset++] & 0xFF;
+    uint8Decode: function(data, offset, result) {
+      var dv = new DataView(data);
+
+      result.value = dv.getUint8(offset);
+      offset++;
       return offset;
     },
     
     // ============================= int8Decode ========================
     
-    int8Decode: function(data, offset, value) {
-      value = data[offset++] & 0xFF;
+    int8Decode: function(data, offset, result) {
+      var dv = new DataView(data);
+
+      result.value = dv.getInt8(offset);
+      offset++;
       return offset;
     },
     
     // ============================= uint16Decode ========================
     
-    uint16Decode: function(data, offset, value) {
-      value = 0;
-      value += (data[offset++] & 0xFF) << 8;
-      value += (data[offset++] & 0xFF) << 0;
+    uint16Decode: function(data, offset, result) {
+      var dv = new DataView(data);
+
+      result.value = dv.getUint16(offset);
+      offset += 2;
       return offset;
     },
     
     // ============================= int16Decode ========================
     
-    int16Decode: function(data, offset, value) {
-      value = 0;
-      value += (data[offset++] & 0xFF) << 8;
-      value += (data[offset++] & 0xFF) << 0;
+    int16Decode: function(data, offset, result) {
+      var dv = new DataView(data);
+
+      result.value = dv.getInt16(offset);
+      offset += 2;
       return offset;
     },
     
     // ============================= uint32Decode ========================
     
-    uint32Decode: function(data, offset, value) {
-      value = 0;
-      value += (data[offset++] & 0xFF) << 24;
-      value += (data[offset++] & 0xFF) << 16;
-      value += (data[offset++] & 0xFF) << 8;
-      value += (data[offset++] & 0xFF) << 0;
+    uint32Decode: function(data, offset, result) {
+      var dv = new DataView(data);
+
+      result.value = dv.getUint32(offset);
+      offset += 4;
       return offset;
     },
     
     // ============================= int32Decode ========================
     
-    int32Decode: function(data, offset, value) {
-      value = 0;
-      value += (data[offset++] & 0xFF) << 24;
-      value += (data[offset++] & 0xFF) << 16;
-      value += (data[offset++] & 0xFF) << 8;
-      value += (data[offset++] & 0xFF) << 0;
+    int32Decode: function(data, offset, result) {
+      var dv = new DataView(data);
+
+      result.value = dv.getInt32(offset);
+      offset += 4;
       return offset;
     },
     
     // ============================= uint8VectorDecode ========================
     
-    uint8VectorDecode: function(data, offset, lgth, value) {
-      c_memcpy(value,data+offset,lgth);
-      offset += lgth;
+    uint8VectorDecode: function(data, offset, lgth, result) {
+      var dv = new DataView(data);
+      var idx;
+    
+      idx = 0;
+      result.value = ""
+      while (idx < lgth) {
+        result.value += dv.getUint8(offset);
+        idx++;
+        offset++;
+      }
       return offset;
     },
     
     // ============================= int8VectorDecode ========================
     
     int8VectorDecode: function(data, offset, lgth, value) {
-      c_memcpy(value,data+offset,lgth);
-      offset += lgth;
-      return offset;
+      var dv = new DataView(data);
+      var idx;
+    
+      idx = 0;
+      result.value = ""
+      while (idx < lgth) {
+        result.value += dv.getInt8(offset);
+        idx++;
+        offset++;
+      }
     },
     
     // ============================= uint16VectorDecode ========================
     
     uint16VectorDecode: function(data, offset, lgth, value) {
+      var dv = new DataView(data);
+
       var idx;
     
       idx = 0;
@@ -251,6 +298,8 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= int16VectorDecode ========================
     
     int16VectorDecode: function(data, offset, lgth, value) {
+      var dv = new DataView(data);
+
       var idx;
     
       idx = 0;
@@ -264,6 +313,8 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= uint32VectorDecode ========================
     
     uint32VectorDecode: function(data, offset, lgth, value) {
+      var dv = new DataView(data);
+
       var idx;
     
       idx = 0;
@@ -277,6 +328,8 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     // ============================= int32VectorDecode ========================
     
     int32VectorDecode: function(data, offset, lgth, value) {
+      var dv = new DataView(data);
+
       var idx;
     
       idx = 0;
@@ -289,69 +342,77 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     
     // ============================= randomNumEncode ========================
     
-    randomNumEncode: function(data, offset, value) {
+    randomNumEncode: function(data, offset, result) {
+      var dv = new DataView(data);
       var val;
     
       val = (rand() & RAND_MAX);
-      value = val;
-      return uint32Encode(data, offset, val);
+      result.value = val;
+      dv.setUint32(data, offset, val);
+      offset += 4;
+      return offset;
     },
     
     // ============================= randomNumDecode ========================
     
-    randomNumDecode: function(data, offset, value) {
-      var result;
+    randomNumDecode: function(data, offset, result) {
+      var dv = new DataView(data);
     
-      offset = uint32Decode(data, offset, value);
+      result.value = dv.getUint32(data, offset);
+      offset += 4;
       return offset;
     },
     
     // ============================= sequenceNumEncode ========================
     
-    sequenceNumEncode: function(data, offset, structmsg,  value) {
+    sequenceNumEncode: function(data, offset, structmsg, result) {
+      var dv = new DataView(data);
       var val;
     
       val = ++structmsg.sequenceNum;
-      value = val;
-      return uint32Encode(data, offset, val);
+      result.value = val;
+      dv.setUint32(data, offset, val);
+      offset += 4;
+      return offset;
     },
     
     // ============================= sequenceNumDecode ========================
     
-    sequenceNumDecode: function(data, offset, value) {
-      var result;
+    sequenceNumDecode: function(data, offset, result) {
+      var dv = new DataView(data);
     
-      offset = uint32Decode(data, offset, value);
+      result.value = dv.getUint32(data, offset);
+      offset += 4;
       return offset;
     },
     
     // ============================= fillerEncode ========================
     
-    fillerEncode: function(data, offset, lgth, value) {
+    fillerEncode: function(data, offset, lgth, result) {
+      var dv = new DataView(data);
       var val;
       var idx;
     
       idx = 0;
+      result.value = "";
       while (lgth >= 4) {
         val = (rand() & RAND_MAX);
-        value[idx++] = (val >> 24) & 0xFF;
-        value[idx++] = (val >> 16) & 0xFF;
-        value[idx++] = (val >> 8) & 0xFF;
-        value[idx++] = (val >> 0) & 0xFF;
-        offset = uint32Encode(data, offset, val);
+        result.value += val;
+        dv.setUint32(data, offset, val);
+        offset += 4;
         lgth -= 4;
       }
       while (lgth >= 2) {
         val = ((rand() & RAND_MAX) & 0xFFFF);
-        value[idx++] = (val >> 8) & 0xFF;
-        value[idx++] = (val >> 0) & 0xFF;
-        offset = uint16Encode(data, offset, val);
+        result.value += val;
+        dv.setUint16(data, offset, val);
+        offset += 2;
         lgth -= 2;
       }
       while (lgth >= 1) {
         val = ((rand() & RAND_MAX) & 0xFF);
-        offset = uint8Encode(data, offset, val);
-        value[idx++] = (val >> 0) & 0xFF;
+        result.value += val;
+        dv.setUint8(data, offset, val);
         lgth -= 1;
       }
       return offset;
@@ -359,34 +420,45 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
     
     // ============================= fillerDecode ========================
     
-    fillerDecode: function(data, offset, lgth, value) {
+    fillerDecode: function(data, offset, lgth, result) {
+      var dv = new DataView(data);
       var idx;
     
-      c_memcpy(value,data+offset,lgth);
-      offset += lgth;
+      result.value = ""
+      while (idx < lgth) {
+        result.value += dv.getUint8(data,offset);
+        offset++;
+      }
       return offset;
     },
     
     // ============================= crcEncode ========================
     
     crcEncode: function(data, offset, lgth, crc, headerLgth) {
+      var stmsgEncDec = this;
+      var dv = new DataView(data);
       var idx;
+      var val;
     
-      lgth -= sizeof(uint16_t);   // uint16_t crc
+      lgth -= stmsgEncDec.sizeof("uint16_t");   // uint16_t crc
       crc = 0;
       idx = headerLgth;
       while (idx < lgth) {
-        //ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-headerLgth, data[idx], crc);
+        val = dv.getUint8(idx);
+print("crc idx:",idx-headerLgth," val: ", val.toString(16), " crc: ", crc.toString(16));
         crc += data[idx++];
       }
       crc = ~(crc);
-      offset = uint16Encode(data,offset,crc);
+      dv.setUint16(data,offset,crc);
+      offset += 2;
       return offset;
     },
     
     // ============================= crcDecode ========================
     
     crcDecode: function(data, offset, lgth, crc, headerLgth) {
+      var dv = new DataView(data);
+
       var crcVal;
       var idx;
     
@@ -752,125 +824,6 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
         break;
       }
       return offset;
-    },
-    
-    // ============================= stmsg_encodeMsg ========================
-    
-    stmsg_encodeMsg: function(handle) {
-      var structmsg;
-      var msgPtr;
-      var ushortPtr;
-      var shortPtr;
-      var uintPtr;
-      var intPtr;
-      var randomNum;
-      var sequenceNum;
-      var crc;
-      var offset;
-      var idx;
-      var fieldIdx;
-      var numEntries;
-      var result;
-      var fieldId = 0;
-      var fieldInfo;
-    
-      structmsg = structmsg_get_structmsg_ptr(handle);
-      checkHandleOK(structmsg);
-      if (structmsg.encoded != NULL) {
-        os_free(structmsg.encoded);
-      }
-      if ((structmsg.flags & STRUCT_MSG_HAS_CRC) == 0) {
-        result = stmsg_setFillerAndCrc(handle);
-        checkErrOK(result);
-        structmsg.flags |= STRUCT_MSG_HAS_CRC;
-      }
-      //      structmsg.encoded = os_zalloc(structmsg.hdr.hdrInfo.hdrKeys.totalLgth);
-      msgPtr = structmsg.encoded;
-      offset = 0;
-      offset = uint16Encode(msgPtr,offset,structmsg.hdr.hdrInfo.hdrKeys.src);
-      checkEncodeOffset(offset);
-      offset = uint16Encode(msgPtr,offset,structmsg.hdr.hdrInfo.hdrKeys.dst);
-      checkEncodeOffset(offset);
-      offset = uint16Encode(msgPtr,offset,structmsg.hdr.hdrInfo.hdrKeys.totalLgth);
-      checkEncodeOffset(offset);
-      offset = uint16Encode(msgPtr,offset,structmsg.hdr.hdrInfo.hdrKeys.cmdKey);
-      checkEncodeOffset(offset);
-      offset = uint16Encode(msgPtr,offset,structmsg.hdr.hdrInfo.hdrKeys.cmdLgth);
-      checkEncodeOffset(offset);
-      numEntries = structmsg.msg.numFieldInfos;
-      offset = uint8Encode(msgPtr,offset,numEntries);
-      checkEncodeOffset(offset);
-      idx = 0;
-      while (idx < numEntries) {
-        fieldInfo = structmsg.msg.fieldInfos[idx];
-        if (fieldInfo.fieldStr[0] == '@') {
-          result = structmsg_getFieldNameId(fieldInfo.fieldStr, fieldId, STRUCT_MSG_NO_INCR);
-          checkErrOK(result);
-          switch (fieldId) {
-          case STRUCT_MSG_SPEC_FIELD_SRC:
-          case STRUCT_MSG_SPEC_FIELD_DST:
-          case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
-          case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-          case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
-          case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-    ets_printf("funny should encode: %s\n", fieldInfo.fieldStr);
-            break;
-          case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
-            offset = randomNumEncode(msgPtr, offset, randomNum);
-            checkEncodeOffset(offset);
-            result = stmsg_setFieldValue(handle, "@randomNum", randomNum, NULL);
-            checkErrOK(result);
-            break;
-          case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
-            offset = sequenceNumEncode(msgPtr, offset, structmsg, sequenceNum);
-            checkEncodeOffset(offset);
-            result = stmsg_setFieldValue(handle, "@sequenceNum", sequenceNum, NULL);
-            checkErrOK(result);
-            break;
-          case STRUCT_MSG_SPEC_FIELD_FILLER:
-            offset = fillerEncode(msgPtr, offset, fieldInfo.fieldLgth, fieldInfo.value.ubyteVector);
-            checkEncodeOffset(offset);
-            result = stmsg_setFieldValue(handle, "@filler", 0, fieldInfo.value.ubyteVector);
-            checkErrOK(result);
-            break;
-          case STRUCT_MSG_SPEC_FIELD_CRC:
-            offset = crcEncode(structmsg.encoded, offset, structmsg.hdr.hdrInfo.hdrKeys.totalLgth, crc, structmsg.hdr.headerLgth);
-            checkEncodeOffset(offset);
-            result = stmsg_setFieldValue(handle, "@crc", crc, NULL);
-            checkErrOK(result);
-            break;
-          case STRUCT_MSG_SPEC_FIELD_ID:
-            return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
-            break;
-          case STRUCT_MSG_SPEC_FIELD_TABLE_ROWS:
-            break;
-          case STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
-            if (structmsg.msg.numTableRows > 0) {
-              var row = 0;
-              var col = 0;
-              var cell = 0;
-              while (row < structmsg.msg.numTableRows) {
-    	        while (col < structmsg.msg.numRowFields) {
-    	           cell = col + row * structmsg.msg.numRowFields;
-    	           fieldInfo = structmsg.msg.tableFieldInfos[cell];
-    	           offset = encodeField(msgPtr, fieldInfo, offset);
-    	           checkEncodeOffset(offset);
-    	           col++;
-    	        }
-    	        row++;
-    	        col = 0;
-              }
-            }
-            break;
-          }
-        } else {
-          offset = encodeField(msgPtr, fieldInfo, offset);
-          checkEncodeOffset(offset);
-        }
-        idx++;
-      }
-      structmsg.flags |= STRUCT_MSG_ENCODED;
-      return STRUCT_MSG_ERR_OK;
     },
     
     // ============================= stmsg_getEncoded ========================

@@ -169,7 +169,7 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
     
     encode: function(handle)  {
       var stmsgApi = this;
-      var result = cmd.encode(handle);
+      var result = stmsgApi.structmsg.encode(handle);
       return stmsgApi.checkOKOrErr(result, "encode", "");
     },
     
