@@ -94,29 +94,9 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
       var defines = this;
       defines.name = defines.constructor.NAME;
       defines.init.apply(defines, arguments);
-      defines.uint16_t_size = sizeof("uint16_t");
+//      defines.uint16_t_size = sizeof("uint16_t");
 
       T.log('constructor end', '2.info', 'structmsgDefines', true);
-  };
-
-  /* ==================== sizeof ======================= */
-
-  function sizeof(type) {
-    switch (type) {
-    case 'int8_t':
-    case 'uint8_t':
-      return 1;
-      break;
-    case 'int16_t':
-    case 'uint16_t':
-      return 2;
-      break
-    case 'int32_t':
-    case 'uint32_t':
-      return 4;
-      break
-    }
-    T.log("bad type in sizeof: "+type, 'error', 'structmsgDefines', true);
   };
 
 
@@ -136,6 +116,26 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
   Defines.NAME = "structmsgDefines";
 
   Defines.prototype = {
+  /* ==================== sizeof ======================= */
+
+  sizeof: function(type) {
+    switch (type) {
+    case 'int8_t':
+    case 'uint8_t':
+      return 1;
+      break;
+    case 'int16_t':
+    case 'uint16_t':
+      return 2;
+      break
+    case 'int32_t':
+    case 'uint32_t':
+      return 4;
+      break
+    }
+    T.log("bad type in sizeof: "+type, 'error', 'structmsgDefines', true);
+  },
+
     STRUCT_MSG_FIELD_UINT8_T:              1,
     STRUCT_MSG_FIELD_INT8_T:               2,
     STRUCT_MSG_FIELD_UINT16_T:             3,
@@ -165,19 +165,19 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
       null:        -1,
     },
 
-    sstructmsgFieldTypes2Str: {
-      "1":  "uint8_t",
-      "2":  "int8_t",
-      "3":  "uint16_t",
-      "4":  "int16_t",
-      "5":  "uint32_t",
-      "6":  "int32_t",
-      "7":  "uint8_t*",
-      "8":  "uint16_t*",
-      "9":  "int8_t*",
-      "10": "int16_t*",
-      "11": "uint32_t*",
-      "12": "int32_t*",
+    structmsgFieldTypes2Str: {
+      1:  "uint8_t",
+      2:  "int8_t",
+      3:  "uint16_t",
+      4:  "int16_t",
+      5:  "uint32_t",
+      6:  "int32_t",
+      7:  "uint8_t*",
+      8:  "uint16_t*",
+      9:  "int8_t*",
+      10: "int16_t*",
+      11: "uint32_t*",
+      12: "int32_t*",
     },
 
     STRUCT_MSG_SPEC_FIELD_SRC:              255,
@@ -209,6 +209,22 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
       "@id":             245,
       "@tablerows":      244,
       "@tablerowfields": 243,
+    },
+
+    structmsgSpecialFieldNamesId2Str: {
+      255: "@src",
+      254: "@dst",
+      253: "@targetCmd",
+      252: "@totalLgth",
+      251: "@cmdKey",
+      250: "@cmdLgth",
+      249: "@randomNum",
+      248: "@sequenceNum",
+      247: "@filler",
+      246: "@crc",
+      245: "@id",
+      244: "@tablerows",
+      243: "@tablerowfields",
     },
 
     STRUCT_MSG_ERR_OK:                      0,
@@ -364,42 +380,44 @@ T.log("getGenericTypeVal!"+val+"!", "error", "defines.js");
 
     // ============================= getFieldTypeStr ========================
 
-    getFieldTypeStr: function(key, result) {
+    getFieldTypeStr: function(key, resultData) {
       var msg = "funny FieldTypeId: ";
       var defines = this;
 
-      return defines.getGenericTypeString(defines.structmsgFieldTypes2str, msg, key, result);
+      if (typeof defines.structmsgFieldTypes2Str[key] != 'undefined') {
+        resultData.fieldType = defines.structmsgFieldTypes2Str[key];
+        return defines.STRUCT_MSG_ERR_OK;
+      }
+      return defines.STRUCT_MSG_ERR_BAD_FIELD_TYPE;
+//      return defines.getGenericTypeString(defines.structmsgFieldTypes2str, msg, key, result);
     },
 
     // ============================= getIdFieldNameStr ========================
 
-    getIdFieldNameStr: function(id, fieldName) {
+    getIdFieldNameStr: function(id, resultData) {
+      var defines = this;
       var entry;
       var nameEntry;
     
       fieldName = null;
       // first try to find special field name
-      entry = structmsgSpecialFieldNames[0];
-      while (entry.str != NULL) {
-        if (entry.key == id) {
-          fieldName = entry.str;
-          return STRUCT_MSG_ERR_OK;
-        }
-        entry++;
+      if (typeof defines.structmsgSpecialFieldNamesId2Str[id] != 'undefined') {
+        resultData.fieldName = defines.structmsgSpecialFieldNamesId2Str[id];
+        return defines.STRUCT_MSG_ERR_OK;
       }
       // find field name
       var idx = 0;
     
-      while (idx < fieldNameDefinitions.numDefinitions) {
-        nameEntry = fieldNameDefinitions.definitions[idx];
+      while (idx < defines.fieldNameDefinitions.numDefinitions) {
+        nameEntry = defines.fieldNameDefinitions.definitions[idx];
         if (nameEntry.id == id) {
-          fieldName = nameEntry.str;
-          return STRUCT_MSG_ERR_OK;
+          resultData.fieldName = nameEntry.str;
+          return defines.STRUCT_MSG_ERR_OK;
         }
         nameEntry++;
         idx++;
       }
-      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+      return defines.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
     },
 
 

@@ -391,15 +391,7 @@ EM.addModule("Esp-StructmsgDefinition", function(T, name) {
       offset = stmsgDef.crcEncode(encoded, offset, totalLgth, obj, stmsgDef.STRUCT_MSG_HEADER_LENGTH);
       crc = obj.value;
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString(16), 'info', "StructmsgDefinition.js", true);
-var hex = '';
-var dv = new DataView(encoded);
-idx = 0;
-while (idx < totalLgth) {
-  hex += ' 0x'+dv.getUint8(idx).toString(16);
-  idx++;
-}
-T.log('encoded: '+hex, 'info', "StructmsgDefinition.js", true);
+T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString(16), '1.info', "StructmsgDefinition.js", true);
       data.data = encoded;
       return stmsgDef.STRUCT_MSG_ERR_OK;
     },
@@ -461,7 +453,55 @@ T.log('encoded: '+hex, 'info', "StructmsgDefinition.js", true);
       }
       offset = fillerDecode(data, offset, fillerSize, filler);
       checkDecodeOffset(offset);
+      return stmsgDef.STRUCT_MSG_ERR_OK;
+    },
 
+    createMsgFromDefinition: function(resultData) {
+      var stmsgDef = this;
+
+      var definition;
+      var fieldInfo;
+      var fieldName;
+      var fieldType;
+      var handle;
+      var definitionsIdx;
+      var fieldIdx;
+      var result;
+      var obj = new Object();
+    
+      result = stmsgDef.structmsg.create(stmsgDef.numFields - stmsgDef.STRUCT_MSG_NUM_HEADER_FIELDS - stmsgDef.STRUCT_MSG_NUM_CMD_HEADER_FIELDS, resultData);
+      if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+print("numFields: ",stmsgDef.numFields);
+      fieldIdx = 0;
+      while (fieldIdx < stmsgDef.numFields) {
+        fieldInfo = stmsgDef.fieldInfos[fieldIdx];
+print("fieldInfo: ",fieldInfo.toDebugString());
+        switch (fieldInfo.fieldId) {
+        case stmsgDef.STRUCT_MSG_SPEC_FIELD_SRC:
+        case stmsgDef.STRUCT_MSG_SPEC_FIELD_DST:
+        case stmsgDef.STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
+        case stmsgDef.STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
+        case stmsgDef.STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+        case stmsgDef.STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
+          // nothing to do!
+          break;
+        default:
+          obj.fieldName = null;
+          result = stmsgDef.getIdFieldNameStr(fieldInfo.fieldId, obj);
+          if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+          fieldName = obj.fieldName;
+          obj.fieldType = null;
+          result = stmsgDef.getFieldTypeStr(fieldInfo.fieldType, obj);
+          if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+          fieldType = obj.fieldType;
+print('addfield: ',fieldName,' fieldType: ',fieldType,' fieldLgth: ',fieldInfo.fieldLgth);
+          result = stmsgDef.structmsg.addField(handle, fieldName, fieldType, fieldInfo.fieldLgth);
+          if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+          break;
+        } 
+        fieldIdx++;
+      }
+      return stmsgDef.STRUCT_MSG_ERR_OK;
     },
 
   });

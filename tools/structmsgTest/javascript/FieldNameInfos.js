@@ -88,7 +88,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
     
     // ============================= getFieldNameId ========================
 
-    getFieldNameId: function(fieldName, result, incrRefCnt) {
+    getFieldNameId: function(fieldName, resultData, incrRefCnt) {
       var fnInfos = this;
       var nameIdx = 0;
       var firstFreeEntryId;
@@ -100,7 +100,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
       if (fieldName[0] == '@') {
         // find special field name
         if (typeof fnInfos.structmsgSpecialFieldNames2Id[fieldName] != 'undefined') {
-          result.fieldId = fnInfos.structmsgSpecialFieldNames2Id[fieldName];
+          resultData.fieldId = fnInfos.structmsgSpecialFieldNames2Id[fieldName];
           return fnInfos.STRUCT_MSG_ERR_OK;
         }
         return fnInfos.STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
@@ -143,7 +143,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
                   // just get the entry, do not modify
                 }
               }
-              result.fieldId = nameEntry.id;
+              resultData.fieldId = nameEntry.id;
               return fnInfos.STRUCT_MSG_ERR_OK;
             }
             if ((incrRefCnt == fnInfos.STRUCT_MSG_INCR) && (nameEntry.id == fnInfos.STRUCT_MSG_FREE_FIELD_ID) && (firstFreeEntry == null)) {
@@ -160,7 +160,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
             return fnInfos.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
           } else {
             if (firstFreeEntry != null) {
-              result.fieldid = firstFreeEntry.id;
+              resultData.fieldid = firstFreeEntry.id;
               firstFreeEntry.refCnt = 1;
               firstFreeEntry.fieldName = fieldName;
             } else {
@@ -170,7 +170,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
               newDefinition.fieldName = fieldName;
               fnInfos.infos[fnInfos.numInfos] = newDefinition;
               fnInfos.numInfos++;
-              result.fieldId = newDefinition.fieldId;
+              resultData.fieldId = newDefinition.fieldId;
             }
           }
         }

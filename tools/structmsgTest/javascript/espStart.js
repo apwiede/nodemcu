@@ -8,6 +8,7 @@
  */
 
     var result;
+    var result_data = new Object();
     var stmsgApi = new EM.Api();
     function checkResult(result) {
       if (result != "OK") {
@@ -15,9 +16,13 @@
       }
     }
 
-EM.log('Start', 'info', "espStart.js", true);
-    handle = stmsgApi.create(10);
-EM.log('handle:'+handle, 'info', "espStart.js", true);
+EM.log('Start', '1.info', "espStart.js", true);
+    result_data.handle = null;
+    result = stmsgApi.create(10, result_data);
+    checkResult(result);
+    handle=result_data.handle;
+
+EM.log('handle:'+result_data.handle, '1.info', "espStart.js", true);
     result = stmsgApi.add_field(handle, "@randomNum", "uint32_t", 4);
     checkResult(result);
     result = stmsgApi.add_field(handle, "@sequenceNum", "uint32_t", 4);
@@ -51,14 +56,29 @@ EM.log('handle:'+handle, 'info', "espStart.js", true);
     result = stmsgApi.set_tableFieldValue(handle, "channel",1,7);
     checkResult(result);
 
-if (0) {
-    result = stmsgApi.encode(handle);
+    result_data.data = null
+    result = stmsgApi.encode(handle, result_data);
     checkResult(result);
+EM.log('encoded'+stmsgApi.dumpHex(result_data.data), '1.info', "espStart.js", true);
 
-EM.log('Decode', 'info', "espStart.js", true);
+    result_data.data = null
+    result = stmsgApi.get_encoded(handle, result_data);
+    checkResult(result);
+EM.log('encoded2'+stmsgApi.dumpHex(result_data.data), '1.info', "espStart.js", true);
+
+    result_data.value = null;
+    result = stmsgApi.get_fieldValue(handle, "@randomNum", result_data);
+    checkResult(result);
+EM.log('>> FIELD: @randomNum: '+result_data.value, '1.info', "espStart.js", true);
+
+    result_data.value = null
+    result = stmsgApi.get_tableFieldValue(handle, "ssid", 0, result_data);
+    checkResult(result);
+EM.log('>> TableField: ssid: '+result_data.value, '1.info', "espStart.js", true);
+
+EM.log('Decode', '1.info', "espStart.js", true);
     result = stmsgApi.decode(handle);
     checkResult(result);
-}
 
     result = stmsgApi.create_definition("aplist", 15);
     checkResult(result);
@@ -93,11 +113,21 @@ EM.log('Decode', 'info', "espStart.js", true);
     result = stmsgApi.add_fieldDefinition("aplist", "channel","uint8_t",1);
     checkResult(result);
 
-EM.log('encodeFieldDefinition', 'info', "espStart.js", true);
+EM.log('encodeFieldDefinition', '1.info', "espStart.js", true);
     var data = new Object();
     data.data = null;
     result = stmsgApi.encode_fieldDefinition("aplist", data);
     checkResult(result);
+EM.log('encoded definition'+stmsgApi.dumpHex(data.data), '1.info', "espStart.js", true);
+
+    data.data = null;
+    result = stmsgApi.create_msgFromDefinition("aplist", data);
+    checkResult(result);
+print("data.handle: ",data.handle);
+EM.log('create from Definition done', '1.info', "espStart.js", true);
+    stmsgApi.dump(data.handle);
+
+
 
 
     function confirm(str) {
@@ -105,4 +135,4 @@ EM.log('encodeFieldDefinition', 'info', "espStart.js", true);
     }
 
 
-EM.log('END', 'info', "EspStart.js", true);
+EM.log('END', '1.info', "EspStart.js", true);

@@ -28,7 +28,7 @@ EM.addModule("Esp-log", function(T, name) {
   };
   var START_LEVELS = {
     debug: 1,
-    info:  1,
+    info:  2,
     warn:  1,
     error: 1,
     log:   1
@@ -91,11 +91,12 @@ EM.addModule("Esp-log", function(T, name) {
       var start_level = 99;
       if (f in START_LEVELS) {
         start_level = START_LEVELS[f];
-//print("start_level: ",start_level," cat_level: ",cat_level);
+//print("start_level: ",start_level," cat_level: ",cat_level,"cat: ",cat," f: ",f);
         var my_level = LEVELS[f];
-        if (start_level >= cat_level) {
+        if ((start_level >= cat_level)) {
           show_it = true;
         }
+//print("show_it: ",show_it);
       } else {
         T.logPrint("funny F!"+f+"!", "ERROR", "Esp-log");
       }

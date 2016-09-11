@@ -283,6 +283,28 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
       return msgInfo.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
     },
     
+    // ============================= getFieldValue ========================
+    
+    getFieldValue: function(structmsgInfo, fieldName, resultData) {
+      var msgInfo = this;
+      var fieldInfo;
+      var idx;
+      var result;
+      var numEntries;
+    
+      idx = 0;
+      numEntries = msgInfo.numFieldInfos;
+      while (idx < numEntries) {
+        fieldInfo = msgInfo.fieldInfos[idx];
+        if (fieldName == fieldInfo.fieldStr) {
+          resultData.value = fieldInfo.value;
+          return msgInfo.STRUCT_MSG_ERR_OK;
+        }
+        idx++;
+      }
+      return msgInfo.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    },
+    
     // ============================= setTableFieldValue ========================
     
     setTableFieldValue: function(structmsgInfo, fieldName, row, value) {
@@ -297,6 +319,28 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
         fieldInfo = msgInfo.tableFieldInfos[cell];
         if (fieldName == fieldInfo.fieldStr) {
           return msgInfo.check_setFieldValue(fieldInfo, fieldName, value);
+        }
+        idx++;
+        cell++;
+      }
+      return msgInfo.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    },
+    
+    // ============================= getTableFieldValue ========================
+    
+    getTableFieldValue: function(structmsgInfo, fieldName, row, resultData) {
+      var msgInfo = this;
+      var fieldInfo;
+      var idx;
+      var cell;
+    
+      idx = 0;
+      cell = 0 + row * msgInfo.numRowFields;
+      while (idx < msgInfo.numRowFields) {
+        fieldInfo = msgInfo.tableFieldInfos[cell];
+        if (fieldName == fieldInfo.fieldStr) {
+          resultData.value = fieldInfo.value;
+          return msgInfo.STRUCT_MSG_ERR_OK;
         }
         idx++;
         cell++;

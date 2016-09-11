@@ -48,6 +48,7 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
     StmsgDefinitions.maxDefinitions = 0;
     StmsgDefinitions.definitions = null;
     StmsgDefinitions.fieldNameInfos = null;
+    StmsgDefinitions.structmsg = null;
 
     T.log('constructor end', '2.info', 'StructmsgDefinitions', true);
   }
@@ -110,6 +111,7 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
           while(idx < stmsgDefs.maxDefinitions) {
             stmsgDefs.definitions[idx] = new T.StructmsgDefinition();
             stmsgDefs.definitions[idx].fieldNameInfos = stmsgDefs.fieldNameInfos;
+            stmsgDefs.definitions[idx].structmsg = stmsgDefs.structmsg;
             idx++;
           }
         } else {
@@ -192,6 +194,21 @@ print("decodeFieldDefinition: ",result," ",obj.idx);
       if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
       definition = stmsgDefs.definitions[obj.idx];
       return definition.decodeFieldDefinition(encoded);
+    },
+
+    /* ==================== createMsgFromDefinition ===================================== */
+    createMsgFromDefinition: function (defName, resultData) {
+      var stmsgDefs = this;
+      var result;
+      var definition;
+      var obj = new Object();
+
+      obj.idx = -1;
+      result = stmsgDefs.getDefinition(defName, obj);
+print("createMsgFromDefinition: ",result," ",obj.idx);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      definition = stmsgDefs.definitions[obj.idx];
+      return definition.createMsgFromDefinition(resultData);
     },
 
   });

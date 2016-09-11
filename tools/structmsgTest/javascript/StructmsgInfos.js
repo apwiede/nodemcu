@@ -32,6 +32,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
     StmsgInfos.handles = new Array();
     StmsgInfos.headers = new Array();
     StmsgInfos.fieldNameInfos = null;
+    StmsgInfos.structmsg = null;
 
     T.log('constructor end', '2.info', 'StructmsgInfos', true);
   }
@@ -79,17 +80,22 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
     },
 
     /* ==================== create ===================================== */
-    create: function (numFields) {
+    create: function (numFields, resultData) {
       var stmsgInfos = this;
+      var result;
 
       stmsgInfo = new T.StructmsgInfo();
       stmsgInfo.fieldNameInfos = stmsgInfos.fieldNameInfos;
-      structmsgInfo=stmsgInfo.create(numFields);
+      stmsgInfo.structmsg = stmsgInfos.structmsg;
+      result=stmsgInfo.create(numFields, resultData);
+      if(result != stmsgInfo.STRUCT_MSG_ERR_OK) return result;
+      structmsgInfo = resultData.data;
+      resultData.handle = resultData.data.handle;
       stmsgInfos.numHandles++;
 //T.log(structmsgInfo.toDebugString(), 'info', 'stmsgInfo', true);
       stmsgInfos.handles.push({handle: structmsgInfo.handle, structmsg: stmsgInfo});
       stmsgInfos.result= stmsgInfos.STRUCT_MSG_ERR_OK;
-      return structmsgInfo.handle;
+      return stmsgInfos.STRUCT_MSG_ERR_OK;
     },
 
     /* ==================== addField ===================================== */
@@ -112,6 +118,16 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return structmsgInfo.setFieldValue(fieldName, value);
     },
 
+    /* ==================== getFieldValue ===================================== */
+    getFieldValue: function(handle, fieldName, resultData) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.getFieldValue(fieldName, resultData);
+    },
+
     /* ==================== setTableFieldValue ===================================== */
     setTableFieldValue: function(handle, fieldName, row, value) {
       var stmsgInfos = this;
@@ -122,24 +138,54 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return structmsgInfo.setTableFieldValue(fieldName, row, value);
     },
 
-    /* ==================== encode ===================================== */
-    encode: function(handle) {
+    /* ==================== getTableFieldValue ===================================== */
+    getTableFieldValue: function(handle, fieldName, row, resultData) {
       var stmsgInfos = this;
       var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
       if (structmsgInfo == null) {
         return stmsgInfos.result;
       }
-      return structmsgInfo.encode();
+      return structmsgInfo.getTableFieldValue(fieldName, row, resultData);
+    },
+
+    /* ==================== encode ===================================== */
+    encode: function(handle, result_data) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.encode(result_data);
+    },
+
+    /* ==================== getEncoded ===================================== */
+    getEncoded: function(handle, result_data) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.getEncoded(result_data);
     },
 
     /* ==================== decode ===================================== */
-    decode: function(handle, result) {
+    decode: function(handle) {
       var stmsgInfos = this;
       var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
       if (structmsgInfo == null) {
         return stmsgInfos.result;
       }
-      return structmsgInfo.decode(result);
+      return structmsgInfo.decode();
+    },
+
+    /* ==================== dump ===================================== */
+    dump: function(handle) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.dump();
     },
 
   });

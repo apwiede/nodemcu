@@ -211,10 +211,10 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     
     // ============================= uint16Decode ========================
     
-    uint16Decode: function(data, offset, result) {
+    uint16Decode: function(data, offset, resultData) {
       var dv = new DataView(data);
 
-      result.value = dv.getUint16(offset);
+      resultData.value = dv.getUint16(offset);
       offset += 2;
       return offset;
     },
@@ -378,7 +378,7 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     
       val = ++structmsg.sequenceNum;
       dv.setUint32(offset, val);
-      result.value = dv.setUint32(offset).toString(16);
+      result.value = dv.getUint32(offset).toString(16);
       offset += 4;
       return offset;
     },
@@ -395,7 +395,7 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     
     // ============================= fillerEncode ========================
     
-    fillerEncode: function(data, offset, lgth, result) {
+    fillerEncode: function(data, offset, lgth, resultData) {
       var encDec = this;
       var dv = new DataView(data);
       var val;
@@ -403,43 +403,46 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     
 
       idx = 0;
-      result.value = "";
+      resultData.value = "";
       while (lgth >= 4) {
         val = encDec.getRandomNum() & 0xFFFFFFFF;
         dv.setUint32(offset, val);
-        result.value += dv.getUint32(offset).toString(16);
+        resultData.value += dv.getUint32(offset).toString(16);
         offset += 4;
         lgth -= 4;
       }
       while (lgth >= 2) {
         val = encDec.getRandomNum() & 0xFFFF;
         dv.setUint16(offset, val);
-        result.value += dv.getUint16(offset).toString(16);
+        resultData.value += dv.getUint16(offset).toString(16);
         offset += 2;
         lgth -= 2;
       }
       while (lgth >= 1) {
         val = encDec.getRandomNum() & 0xFF;
         dv.setUint8(offset, val);
-        result.value += dv.getUint8(offset).toString(16);
+        resultData.value += dv.getUint8(offset).toString(16);
         offset += 1;
         lgth -= 1;
       }
-T.log('Filler: '+result.value, 'info', "EncodeDecode.js", true);
+T.log('FillerEncode: '+resultData.value, '1.info', "EncodeDecode.js", true);
       return offset;
     },
     
     // ============================= fillerDecode ========================
     
-    fillerDecode: function(data, offset, lgth, result) {
+    fillerDecode: function(data, offset, lgth, resultData) {
       var dv = new DataView(data);
       var idx;
     
-      result.value = ""
+      idx = 0;
+      resultData.value = ""
       while (idx < lgth) {
-        result.value += dv.getUint8(data,offset);
+        resultData.value += dv.getUint8(data,offset);
         offset++;
+        idx++;
       }
+T.log('FillerDecode: '+resultData.value, '1.info', "EncodeDecode.js", true);
       return offset;
     },
     
@@ -464,7 +467,7 @@ T.log('Filler: '+result.value, 'info', "EncodeDecode.js", true);
         idx++;
       }
       crc = (~(crc) & 0xFFFF);
-T.log('crc end: 0x'+crc.toString(16)+' offset: '+offset, 'info', "EncodeDecode.js", true);
+T.log('crc encode end: 0x'+crc.toString(16)+' offset: '+offset, '1.info', "EncodeDecode.js", true);
       dv.setUint16(offset,crc);
       result.value = crc;
       offset += 2;
@@ -474,20 +477,26 @@ T.log('crc end: 0x'+crc.toString(16)+' offset: '+offset, 'info', "EncodeDecode.j
     // ============================= crcDecode ========================
     
     crcDecode: function(data, offset, lgth, crc, headerLgth) {
+      var encdec = this;
       var dv = new DataView(data);
       var crcVal;
       var idx;
+      var obj = new Object();
     
-      lgth -= sizeof(uint16_t);   // uint16_t crc
+      lgth -= encdec.sizeof('uint16_t');   // uint16_t crc
       crcVal = 0;
       idx = headerLgth;
       while (idx < lgth + headerLgth) {
-    //ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-headerLgth, data[idx], crcVal);
-        crcVal += data[idx++];
+        val = dv.getUint8(idx);
+//print('crc idx: ',idx-headerLgth,' ch: ',val,' crc: ',crcVal);
+        crcVal += val;
+        idx++;
       }
-      crcVal = ~crcVal;
-      offset = uint16Decode(offset, crc);
-      ets_printf("crcVal: 0x%04x crc: 0x%04x\n", crcVal, crc);
+      crcVal = ~(crcVal) & 0xFFFF;
+      obj.value = null,
+      offset = encdec.uint16Decode(data, offset, obj);
+      crc = obj.value;
+T.log('crc decode end: crcval 0x'+crcVal.toString(16)+' crc: '+crc.toString(16)+' offset: '+offset, '1.info', "EncodeDecode.js", true);
       if (crcVal != crc) {
         return -1;
       }

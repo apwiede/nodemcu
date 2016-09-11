@@ -28,6 +28,7 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
     api.structmsg.fieldNameInfos = api.fieldNameInfos;
     api.definitions = new T.StructmsgDefinitions();
     api.definitions.fieldNameInfos = api.fieldNameInfos;
+    api.definitions.structmsg = api.structmsg;
 
     T.log('constructor end', '2.info', 'structmsgApi', true);
   }
@@ -153,13 +154,10 @@ print("error result: ", result," ",api.structmsgErrId2Str[result]);
     
     // ============================= create ========================
     
-    create: function(numFields) {
+    create: function(numFields, resultData) {
       var stmsgApi = this;
-      var handle = stmsgApi.structmsg.create(numFields);
-      if (handle != null)  {
-        return handle;
-      }
-      return stmsgApi.checkOKOrErr(stmsgApi.structmsg.result, "create", "");
+      var result = stmsgApi.structmsg.create(numFields, resultData);
+      return stmsgApi.checkOKOrErr(result, "create", "");
     },
     
     // ============================= delete ========================
@@ -173,29 +171,25 @@ print("delete not yet implemented");
     
     // ============================= encode ========================
     
-    encode: function(handle)  {
+    encode: function(handle, result_data)  {
       var stmsgApi = this;
-      var result = stmsgApi.structmsg.encode(handle);
+      var result = stmsgApi.structmsg.encode(handle, result_data);
       return stmsgApi.checkOKOrErr(result, "encode", "");
     },
     
     // ============================= get_encoded ========================
     
-    get_encoded: function(handle) {
+    get_encoded: function(handle, result_data) {
       var stmsgApi = this;
-print("get_encoded not yet implemented");
-      var result = cmd.get_encoded(handle, encoded, lgth);
-      if (result == STRUCT_MSG_ERR_OK) {
-        return encoded;
-      }
+      var result = stmsgApi.structmsg.getEncoded(handle, result_data);
       return stmsgApi.checkOKOrErr(result, "get_encoded", "");
     },
     
     // ============================= decode ========================
     
-    decode: function(handle, result) {
+    decode: function(handle) {
       var stmsgApi = this;
-      var result = stmsgApi.structmsg.decode(handle,result);
+      var result = stmsgApi.structmsg.decode(handle);
       return stmsgApi.checkOKOrErr(result, "decode", "");
     },
     
@@ -203,8 +197,7 @@ print("get_encoded not yet implemented");
     
     dump: function(handle) {
       var stmsgApi = this;
-print("dump not yet implemented");
-      var result = cmd.dump(handle);
+      var result = stmsgApi.structmsg.dump(handle);
       return stmsgApi.checkOKOrErr(result, "dump", "");
     },
     
@@ -243,15 +236,6 @@ print("encrypt not yet implemented");
       return stmsgApi.checkOKOrErr(result, "add_field", "");
     },
     
-    // ============================= set_fillerAndCrc ========================
-    
-    set_fillerAndCrc: function(handle) {
-      var stmsgApi = this;
-print("encrypt not yet implemented");
-      var result = structmsg_setFillerAndCrc(handle);
-      return stmsgApi.checkOKOrErr(result, "set_fillerAndCrc", "");
-    },
-    
     // ============================= set_fieldValue ========================
     
     set_fieldValue: function(handle, fieldName, value) {
@@ -270,19 +254,17 @@ print("encrypt not yet implemented");
     
     // ============================= get_fieldValue ========================
     
-    get_fieldValue: function(handle, fieldName, valueVar) {
+    get_fieldValue: function(handle, fieldName, resultData) {
       var stmsgApi = this;
-print("get_fieldValue not yet implemented");
-      var result = cmd.get_fieldValue(handle, fieldName, valueC);
+      var result = stmsgApi.structmsg.getFieldValue(handle, fieldName, resultData);
       return stmsgApi.checkOKOrErr(result, "get_fieldValue", fieldName);
     },
     
     // ============================= get_tableFieldValue ========================
     
-    get_tableFieldValue: function(handle, fieldName, row, valueVar) {
+    get_tableFieldValue: function(handle, fieldName, row, resultData) {
       var stmsgApi = this;
-print("get_tableFieldValue not yet implemented");
-      var result = cmd.get_tableFieldValue(handle, fieldName, row, value);
+      var result = stmsgApi.structmsg.getTableFieldValue(handle, fieldName, row, resultData);
       return stmsgApi.checkOKOrErr(result, "get_tableFieldValue", fieldName);
     },
     
@@ -422,10 +404,9 @@ print("delete_fieldDefinitions not yet implemented");
     
     // ============================= create_msgFromDefinition ========================
     
-    create_msgFromDefinition: function(name, handleVar)  {
-print("create_msgFromDefinition not yet implemented");
+    create_msgFromDefinition: function(name, resultData)  {
       var stmsgApi = this;
-      var result = structmsg.def.createMsgFromDefinition(name, handle);
+      var result = stmsgApi.definitions.createMsgFromDefinition(name, resultData);
       return stmsgApi.checkOKOrErr(result, "create_msgFromDefinition", "");
     },
   
