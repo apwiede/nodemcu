@@ -89,14 +89,14 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
   /* ==================== Defines constructor ======================= */
 
   function Defines() {
-      T.log('constructor called', 'info', 'structmsgDefines', true);
+      T.log('constructor called', '2.info', 'structmsgDefines', true);
 
       var defines = this;
       defines.name = defines.constructor.NAME;
       defines.init.apply(defines, arguments);
       defines.uint16_t_size = sizeof("uint16_t");
 
-      T.log('constructor end', 'info', 'structmsgDefines', true);
+      T.log('constructor end', '2.info', 'structmsgDefines', true);
   };
 
   /* ==================== sizeof ======================= */
@@ -308,8 +308,8 @@ EM.addModule("Esp-structmsgDefines", function(T, name) {
      * @return {Defines} A reference to this object
      */
     init: function(config) {
-      T.log('init called', 'info', 'base', true);
-      T.log('init end', 'info', 'base', true);
+      T.log('init called', '2.info', 'base', true);
+      T.log('init end', '2.info', 'base', true);
       return this;
     },
 
@@ -478,5 +478,5 @@ T.log("getGenericTypeVal!"+val+"!", "error", "defines.js");
   Defines.prototype.constructor = Defines;
   T.Defines = Defines;
 
-  T.log("module: "+name+" initialised!", "info", "structmsgDefines.js");
+  T.log("module: "+name+" initialised!", "2.info", "structmsgDefines.js");
 }, "0.0.1", {});

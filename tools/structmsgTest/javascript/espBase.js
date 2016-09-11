@@ -181,5 +181,3 @@ var Esp = function() {
 
 var EM = Esp();
 
-// next lines for testing only!!
-EM.logPrint("start", "info", "espMsg");

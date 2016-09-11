@@ -18,7 +18,7 @@ EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
   /* ==================== FieldInfoDefinition constructor ======================= */
 
   function FieldInfoDefinition() {
-    T.log('constructor called', 'info', 'FieldInfoDefinition', true);
+    T.log('constructor called', '2.info', 'FieldInfoDefinition', true);
 
     var fldInfoDef = this;
     var constructor = fldInfoDef.constructor;
@@ -28,7 +28,7 @@ EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
     fldInfoDef.fieldType = 0;
     fldInfoDef.fieldLgth = 0;
 
-    T.log('constructor end', 'info', 'FieldInfoDefinition', true);
+    T.log('constructor end', '2.info', 'FieldInfoDefinition', true);
   }
 
   T.extend(FieldInfoDefinition, T.Defines, {
@@ -57,5 +57,5 @@ EM.addModule("Esp-FieldInfoDefinition", function(T, name) {
 
   T.FieldInfoDefinition = FieldInfoDefinition;
 
-  T.log("module: "+name+" initialised!", "info", "FieldInfoDefinition.js");
+  T.log("module: "+name+" initialised!", "2.info", "FieldInfoDefinition.js");
 }, "0.0.1", {});

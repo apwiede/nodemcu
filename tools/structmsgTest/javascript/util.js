@@ -341,5 +341,5 @@ EM.addModule("Esp-util", function(T, name) {
         return new Date().getTime();
     };
 
-    T.log("module: "+name+" initialised!", "info", "util.js");
+    T.log("module: "+name+" initialised!", "2.info", "util.js");
 }, '0.0.1', {});

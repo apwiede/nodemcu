@@ -217,5 +217,5 @@ EM.addModule("Esp-objectInherit", function(T, name) {
         return receiver;
     };
 
-    T.log("module: "+name+" initialised!", "info", "objectInherit.js");
+    T.log("module: "+name+" initialised!", "2.info", "objectInherit.js");
 }, '0.0.1', {});

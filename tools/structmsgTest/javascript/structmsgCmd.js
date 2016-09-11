@@ -18,13 +18,13 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
   /* ==================== Cmd constructor ======================= */
 
   function Cmd() {
-    T.log('constructor called', 'info', 'structmsgCmd', true);
+    T.log('constructor called', '2.info', 'structmsgCmd', true);
 
     var cmd = this;
     var constructor = cmd.constructor;
     Cmd.superclass.constructor.apply(cmd, arguments);
 
-    T.log('constructor end', 'info', 'structmsgCmd', true);
+    T.log('constructor end', '2.info', 'structmsgCmd', true);
   }
 
   T.extend(Cmd, T.StructmsgInfos, {
@@ -944,5 +944,5 @@ EM.addModule("Esp-structmsgCmd", function(T, name) {
 
   T.Cmd = Cmd;
 
-  T.log("module: "+name+" initialised!", "info", "structmsgCmd.js");
+  T.log("module: "+name+" initialised!", "2.info", "structmsgCmd.js");
 }, "0.0.1", {});

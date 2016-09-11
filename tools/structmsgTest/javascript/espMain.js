@@ -42,9 +42,8 @@ EM.Env.mod_names.push("structmsgDefs");
 EM.Env.mod_names.push("structmsgCmd");
 for (var i = 0; i < EM.Env.mod_names.length; i++) {
    var mod_name_part = EM.Env.mod_names[i];
-print("MNP: ",mod_name_part);
-EM.log(mod_name_part, 'info', 'MD', true);
-EM.log(mod_name_part+"!"+typeof EM.Env.mods["Esp-"+mod_name_part].fn, 'info', 'RE0', true);
+EM.log(mod_name_part, '2.info', 'MD', true);
+EM.log(mod_name_part+"!"+typeof EM.Env.mods["Esp-"+mod_name_part].fn, '2.info', 'RE0', true);
    try {
      EM.Env.mods["Esp-"+mod_name_part].fn(EM, "Esp-"+mod_name_part);
    } catch(e) {

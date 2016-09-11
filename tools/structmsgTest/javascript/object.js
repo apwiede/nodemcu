@@ -405,6 +405,6 @@ EM.addModule("Esp-object", function(T, name) {
         return !O.keys(obj).length;
     };
 
-    T.log("module: "+name+" initialised!", "info", "object.js");
+    T.log("module: "+name+" initialised!", "2.info", "object.js");
 }, '0.0.1', {});
 

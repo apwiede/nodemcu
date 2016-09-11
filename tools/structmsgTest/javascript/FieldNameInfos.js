@@ -29,7 +29,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
   /* ==================== FieldNameInfos constructor ======================= */
 
   function FieldNameInfos() {
-    T.log('constructor called', 'info', 'FieldNameInfos', true);
+    T.log('constructor called', '2.info', 'FieldNameInfos', true);
 
     var fieldNameInfos = this;
     var constructor = fieldNameInfos.constructor;
@@ -39,7 +39,7 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
     fieldNameInfos.maxInfos = 0;
     fieldNameInfos.infos = null;
 
-    T.log('constructor end', 'info', 'FieldNameInfos', true);
+    T.log('constructor end', '2.info', 'FieldNameInfos', true);
   }
 
   T.extend(FieldNameInfos, T.Defines, {
@@ -182,5 +182,5 @@ EM.addModule("Esp-FieldNameInfos", function(T, name) {
 
   T.FieldNameInfos = FieldNameInfos;
 
-  T.log("module: "+name+" initialised!", "info", "FieldNameInfos.js");
+  T.log("module: "+name+" initialised!", "2.info", "FieldNameInfos.js");
 }, "0.0.1", {});

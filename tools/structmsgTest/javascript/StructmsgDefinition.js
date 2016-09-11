@@ -18,7 +18,7 @@ EM.addModule("Esp-StructmsgDefinition", function(T, name) {
   /* ==================== StructmsgDefinition constructor ======================= */
 
   function StructmsgDefinition() {
-    T.log('constructor called', 'info', 'StructmsgDefinition', true);
+    T.log('constructor called', '2.info', 'StructmsgDefinition', true);
 
     var StmsgDefinition = this;
     var constructor = StmsgDefinition.constructor;
@@ -34,7 +34,7 @@ EM.addModule("Esp-StructmsgDefinition", function(T, name) {
     StmsgDefinition.fieldInfos = null;
     StmsgDefinition.fieldNameInfos = null;
 
-    T.log('constructor end', 'info', 'StructmsgDefinition', true);
+    T.log('constructor end', '2.info', 'StructmsgDefinition', true);
   }
 
   T.extend(StructmsgDefinition, T.EncodeDecode, {
@@ -84,16 +84,13 @@ EM.addModule("Esp-StructmsgDefinition", function(T, name) {
       var normNamesOffset;
       var obj = new Object();
     
-print("> namesEncode offset: ",offset,"!",numEntries,"!",size,"!",res);
       // first the keys
       offset = stmsgDef.uint8Encode(data, offset, numEntries);
       idx = 0;
       normNamesOffsets = new Array();
-print("rno0: ", normNamesOffsets.length);
       while (idx < stmsgDef.numFields) {
         fieldInfo = stmsgDef.fieldInfos[idx];
         if (fieldInfo.fieldId < stmsgDef.STRUCT_MSG_SPEC_FIELD_LOW) { 
-print("rno1: ", normNamesOffsets.length);
           result = stmsgDef.fieldNameInfos.getFieldIdName(fieldInfo.fieldId, obj);
           if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
           fieldName = obj.fieldName;
@@ -102,16 +99,12 @@ print("rno1: ", normNamesOffsets.length);
           normNameOffset.id = fieldInfo.fieldId;
           normNameOffset.offset = namesOffset;
           normNamesOffsets.push(normNameOffset);
-print("rno2: ", normNamesOffsets.length);
           normNameOffset++;
           namesOffset += fieldName.length + 1;
         }
         idx++;
       }
-print("rno3: ", normNamesOffsets.length);
       res.normNamesOffsets = normNamesOffsets;
-print("rno4: ", normNamesOffsets.length);
-print("rno: ",res.normNamesOffsets.length);
       // and now the names
       offset = stmsgDef.uint16Encode(data, offset, size);
       idx = 0;
@@ -148,24 +141,15 @@ print("rno: ",res.normNamesOffsets.length);
       var fieldType;
       var fieldLgth;
     
-print("nno2: ",normNamesOffsets);
       idx= 0;
-for (z in normNamesOffsets) {
-print("z2: ",z);
-}
-print("nno3: ",typeof normNamesOffsets);
-print("nno4: ",typeof normNamesOffsets);
       offset = stmsgDef.uint8Encode(data, offset, stmsgDef.numFields); 
-print("denc2: ", data.byteLength," offset ",offset);
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-print("numFields: ",stmsgDef.numFields);
       while (idx < stmsgDef.numFields) {
         fieldInfo = stmsgDef.fieldInfos[idx];
         if (fieldInfo.fieldId < stmsgDef.STRUCT_MSG_SPEC_FIELD_LOW) {
           idIdx = 0;
           found = 0;
           while (idIdx < stmsgDef.numFields) {
-print("idIdx: ",idIdx);
             if (normNamesOffsets[idIdx].id == 0) {
               // id 0 is not used to be able to stop here!!
               break;
@@ -181,17 +165,13 @@ print("idIdx: ",idIdx);
             return stmsgDef.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
           }
           offset = stmsgDef.uint16Encode(data, offset, nameOffset);
-print("offset1: ", offset);
         } else {
           offset = stmsgDef.uint16Encode(data, offset, fieldInfo.fieldId);
-print("offset2: ", offset);
         }
-print("denc3 idx: ",idx,"!", data.byteLength," offset ",offset);
         offset = stmsgDef.uint8Encode(data, offset, fieldInfo.fieldType);
         offset = stmsgDef.uint16Encode(data, offset, fieldInfo.fieldLgth);
         idx++;
       }
-print("definitionEncode done");
       return offset;
     },
     
@@ -338,12 +318,9 @@ print("definitionEncode done");
       while (idx < stmsgDef.numFields) {
         fieldInfo = stmsgDef.fieldInfos[idx];
         if (fieldInfo.fieldId < stmsgDef.STRUCT_MSG_SPEC_FIELD_LOW) {
-print("1: ", fieldInfo.toDebugString());
           result = stmsgDef.fieldNameInfos.getFieldIdName(fieldInfo.fieldId, obj);
-print("2");
           if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
           fieldName = obj.fieldName;
-print("fieldName: ", fieldName, " l: ",stmsgDef.defName.length+1);
           numNormFields++;
           normNamesSize += fieldName.length + 1;
         }
@@ -358,17 +335,14 @@ print("fieldName: ", fieldName, " l: ",stmsgDef.defName.length+1);
       // len ids + ids (numNormFields * (uint16_t)) + len Names + names size
 //      payloadSize += sizeof(uint8_t) + (numNormFields * sizeof(uint16_t)) + sizeof(uint16_t) + normNamesSize;
       payloadSize += 1 + (numNormFields * 2) + 2 + normNamesSize;
-print("normNamesSize: ",normNamesSize);
       // definitionPayloadSize
     
       // definitionLgth + nameLgth + name of Definition
 //      definitionPayloadSize = sizeof(uint16_t) + sizeof(uint8_t) + (c_strlen(name) + 1);
-      definitionPayloadSize = 2 + 1 + name.length + 1;
+      definitionPayloadSize = 2 + 1 +stmsgDef.defName.length + 1;
       // numFields (uint8_t) + numFields * (fieldId uint16_t, fieldType uint8_t, fieldLgth uint16_t)
 //      definitionPayloadSize += sizeof(uint8_t) + definition.numFields * (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
-      definitionPayloadSize += 1 + definition.numFields * 2 + 1 + 2;
-print("defpaysize: ",definitionPayloadSize," ",definition.numFields);
-print("paysize: ",payloadSize);
+      definitionPayloadSize += 1 + definition.numFields * (2 + 1 + 2);
     
       payloadSize += definitionPayloadSize;
       fillerSize = 0;
@@ -381,7 +355,6 @@ print("paysize: ",payloadSize);
 //      cmdLgth = payloadSize + fillerSize + sizeof(uint16_t);
       cmdLgth = payloadSize + fillerSize + 2;
       totalLgth = stmsgDef.STRUCT_MSG_HEADER_LENGTH + cmdLgth;
-print("cmdLgth: ",cmdLgth," total: ",totalLgth);
       stmsgDef.totalLgth = totalLgth;
       stmsgDef.encoded = new ArrayBuffer(totalLgth);
       encoded = stmsgDef.encoded;
@@ -398,43 +371,35 @@ print("cmdLgth: ",cmdLgth," total: ",totalLgth);
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
       offset = stmsgDef.randomNumEncode(encoded, offset, obj); 
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-print("encode1 random: offset: ", offset);
       var obj2 = new Object();
       obj2.normNamesOffsets = null;
       offset = stmsgDef.normalFieldNamesEncode(encoded, offset, obj2, numNormFields, normNamesSize);
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-for (z in obj2) {
-print("z: ",z);
-}
       normNamesOffsets = obj2.normNamesOffsets;
-print("nnx: ",obj2.normNamesOffsets);
-for (z in normNamesOffsets) {
-print("za: ",z);
-}
- offset = stmsgDef.uint16Encode(encoded, offset, definitionPayloadSize); 
-print("offset2: ", offset);
+      offset = stmsgDef.uint16Encode(encoded, offset, definitionPayloadSize); 
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
       offset = stmsgDef.uint8Encode(encoded, offset, stmsgDef.defName.length+1); 
-print("offset3: ", offset);
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
       offset = stmsgDef.uint8VectorEncode(encoded, offset, stmsgDef.defName, stmsgDef.defName.length); 
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-print("offset4: ", offset);
       offset = stmsgDef.uint8Encode(encoded, offset, 0); 
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-print("encode1 defName: offset: ", offset," nno: ",typeof normNamesOffsets);
-for (z in normNamesOffsets) {
-print("z1: ",z);
-}
       offset = stmsgDef.definitionEncode(encoded, offset, normNamesOffsets);
-print("after definitionEncode");
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
       offset = stmsgDef.fillerEncode(encoded, offset, fillerSize, obj);
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
       offset = stmsgDef.crcEncode(encoded, offset, totalLgth, obj, stmsgDef.STRUCT_MSG_HEADER_LENGTH);
       crc = obj.value;
       if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-print("after crc offset: ",offset," totalLgth: ",totalLgth," crc: ",crc.toString(16));
+T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString(16), 'info', "StructmsgDefinition.js", true);
+var hex = '';
+var dv = new DataView(encoded);
+idx = 0;
+while (idx < totalLgth) {
+  hex += ' 0x'+dv.getUint8(idx).toString(16);
+  idx++;
+}
+T.log('encoded: '+hex, 'info', "StructmsgDefinition.js", true);
       data.data = encoded;
       return stmsgDef.STRUCT_MSG_ERR_OK;
     },
@@ -503,5 +468,5 @@ print("after crc offset: ",offset," totalLgth: ",totalLgth," crc: ",crc.toString
 
   T.StructmsgDefinition = StructmsgDefinition;
 
-  T.log("module: "+name+" initialised!", "info", "StructmsgDefinition.js");
+  T.log("module: "+name+" initialised!", "2.info", "StructmsgDefinition.js");
 }, "0.0.1", {});

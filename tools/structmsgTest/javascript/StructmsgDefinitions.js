@@ -38,7 +38,7 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
   /* ==================== StructmsgDefinitions constructor ======================= */
 
   function StructmsgDefinitions() {
-    T.log('constructor called', 'info', 'StructmsgDefinitions', true);
+    T.log('constructor called', '2.info', 'StructmsgDefinitions', true);
 
     var StmsgDefinitions = this;
     var constructor = StmsgDefinitions.constructor;
@@ -49,7 +49,7 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
     StmsgDefinitions.definitions = null;
     StmsgDefinitions.fieldNameInfos = null;
 
-    T.log('constructor end', 'info', 'StructmsgDefinitions', true);
+    T.log('constructor end', '2.info', 'StructmsgDefinitions', true);
   }
 
   T.extend(StructmsgDefinitions, T.Defines, {
@@ -76,7 +76,6 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
         str += "    "+idx+": "+stmsgDefs.definitions[idx].defName+'\n';
         idx++;
       }
-      return str;
       return str;
     },
 
@@ -124,7 +123,6 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
         }
       }
       // check for unused slot!
-print(">>fieldNameInfos: ",stmsgDefs.fieldNameInfos.toDebugString(),"!",typeof stmsgDefs.fieldNameInfos.getFieldNameId);
       definitionIdx = 0;
       while (definitionIdx < stmsgDefs.maxDefinitions) {
         definition = stmsgDefs.definitions[definitionIdx];
@@ -145,7 +143,6 @@ print(">>fieldNameInfos: ",stmsgDefs.fieldNameInfos.toDebugString(),"!",typeof s
             stmsgDefs.numDefinitions++;
           }
           definition.defName = defName;
-print("create def: ",definition.toDebugString());
           return stmsgDefs.STRUCT_MSG_ERR_OK;
         }
         definitionIdx++;
@@ -163,7 +160,6 @@ print("create def: ",definition.toDebugString());
 
       obj.idx = -1;
       result = stmsgDefs.getDefinition(defName, obj);
-print("addFieldDefinition: ",result," ",obj.idx);
       if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
       definition = stmsgDefs.definitions[obj.idx];
       return definition.addFieldDefinition(fieldName, fieldType, fieldLgth);
@@ -178,7 +174,6 @@ print("addFieldDefinition: ",result," ",obj.idx);
 
       obj.idx = -1;
       result = stmsgDefs.getDefinition(defName, obj);
-print("encodeFieldDefinition: ",result," ",obj.idx);
       if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
       definition = stmsgDefs.definitions[obj.idx];
       return definition.encodeFieldDefinition(data);
@@ -203,5 +198,5 @@ print("decodeFieldDefinition: ",result," ",obj.idx);
 
   T.StructmsgDefinitions = StructmsgDefinitions;
 
-  T.log("module: "+name+" initialised!", "info", "StructmsgDefinitions.js");
+  T.log("module: "+name+" initialised!", "2.info", "StructmsgDefinitions.js");
 }, "0.0.1", {});

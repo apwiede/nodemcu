@@ -18,13 +18,13 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
   /* ==================== structmsgEncDec constructor ======================= */
 
   function structmsgEncDec() {
-    T.log('constructor called', 'info', 'structmsgEncDec', true);
+    T.log('constructor called', '2.info', 'structmsgEncDec', true);
 
     var encDec = this;
     var constructor = encDec.constructor;
     structmsgEncDec.superclass.constructor.apply(encDec, arguments);
 
-    T.log('constructor end', 'info', 'structmsgEncDec', true);
+    T.log('constructor end', '2.info', 'structmsgEncDec', true);
   }
 
   T.extend(structmsgEncDec, T.Defines, {
@@ -311,5 +311,5 @@ EM.addModule("Esp-structmsgEncDec", function(T, name) {
 
   T.structmsgEncDec = structmsgEncDec;
 
-  T.log("module: "+name+" initialised!", "info", "structmsgEncDec.js");
+  T.log("module: "+name+" initialised!", "2.info", "structmsgEncDec.js");
 }, "0.0.1", {});

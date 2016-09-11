@@ -18,7 +18,7 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
   /* ==================== HeaderInfo constructor ======================= */
 
   function HeaderInfo() {
-    T.log('constructor called', 'info', 'HeaderInfo', true);
+    T.log('constructor called', '2.info', 'HeaderInfo', true);
 
     var hdrInfo = this;
     var constructor = hdrInfo.constructor;
@@ -32,7 +32,7 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
     //FIXME !!
     hdrInfo.hdrId = new ArrayBuffer(10);
 
-    T.log('constructor end', 'info', 'HeaderInfo', true);
+    T.log('constructor end', '2.info', 'HeaderInfo', true);
   }
 
   T.extend(HeaderInfo, T.EncodeDecode, {
@@ -139,5 +139,5 @@ EM.addModule("Esp-HeaderInfo", function(T, name) {
 
   T.HeaderInfo = HeaderInfo;
 
-  T.log("module: "+name+" initialised!", "info", "HeaderInfo.js");
+  T.log("module: "+name+" initialised!", "2.info", "HeaderInfo.js");
 }, "0.0.1", {});

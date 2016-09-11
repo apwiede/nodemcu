@@ -18,7 +18,7 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
   /* ==================== MsgInfo constructor ======================= */
 
   function MsgInfo() {
-    T.log('constructor called', 'info', 'MsgInfo', true);
+    T.log('constructor called', '2.info', 'MsgInfo', true);
 
     var msgInfo = this;
     var constructor = msgInfo.constructor;
@@ -32,7 +32,7 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
     msgInfo.numTableRowFields = 0;    // number of fields within a table row
     msgInfo.numRowFields = 0;         // for checking how many tableRowFields have been processed
 
-    T.log('constructor end', 'info', 'MsgInfo', true);
+    T.log('constructor end', '2.info', 'MsgInfo', true);
   }
 
   T.extend(MsgInfo, T.Defines, {
@@ -308,5 +308,5 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
 
   T.MsgInfo = MsgInfo;
 
-  T.log("module: "+name+" initialised!", "info", "MsgInfo.js");
+  T.log("module: "+name+" initialised!", "2.info", "MsgInfo.js");
 }, "0.0.1", {});

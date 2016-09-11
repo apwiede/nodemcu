@@ -18,7 +18,7 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
   /* ==================== Api constructor ======================= */
 
   function Api() {
-    T.log('constructor called', 'info', 'structmsgApi', true);
+    T.log('constructor called', '2.info', 'structmsgApi', true);
 
     var api = this;
     var constructor = api.constructor;
@@ -29,7 +29,7 @@ EM.addModule("Esp-structmsgApi", function(T, name) {
     api.definitions = new T.StructmsgDefinitions();
     api.definitions.fieldNameInfos = api.fieldNameInfos;
 
-    T.log('constructor end', 'info', 'structmsgApi', true);
+    T.log('constructor end', '2.info', 'structmsgApi', true);
   }
 
   T.extend(Api, T.StructmsgInfos, {
@@ -487,5 +487,5 @@ print("gete_definitionTableFieldInfo not yet implemented");
 
   T.Api = Api;
 
-  T.log("module: "+name+" initialised!", "info", "structmsgApi.js");
+  T.log("module: "+name+" initialised!", "2.info", "structmsgApi.js");
 }, "0.0.1", {});

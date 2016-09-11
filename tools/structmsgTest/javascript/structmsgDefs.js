@@ -18,13 +18,13 @@ EM.addModule("Esp-structmsgDefs", function(T, name) {
   /* ==================== Defs constructor ======================= */
 
   function Defs() {
-    T.log('constructor called', 'info', 'structmsgDefs', true);
+    T.log('constructor called', '2.info', 'structmsgDefs', true);
 
     var defs = this;
     var constructor = defs.constructor;
     Defs.superclass.constructor.apply(defs, arguments);
 
-    T.log('constructor end', 'info', 'structmsgDefs', true);
+    T.log('constructor end', '2.info', 'structmsgDefs', true);
   }
 
   T.extend(Defs, T.StructmsgInfos, {
@@ -50,5 +50,5 @@ EM.addModule("Esp-structmsgDefs", function(T, name) {
 
   T.Defs = Defs;
 
-  T.log("module: "+name+" initialised!", "info", "structmsgDefs.js");
+  T.log("module: "+name+" initialised!", "2.info", "structmsgDefs.js");
 }, "0.0.1", {});

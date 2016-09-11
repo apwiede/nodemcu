@@ -237,5 +237,5 @@ EM.addModule("Esp-inheritUtil", function(T, name) {
         return dispatch(o, f, c, proto, 'some');
     };
 
-    T.log("module: "+name+" initialised!", "info", "inheritUtil.js");
+    T.log("module: "+name+" initialised!", "2.info", "inheritUtil.js");
 }, "0.0.1", {});

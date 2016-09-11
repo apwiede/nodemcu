@@ -18,7 +18,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
   /* ==================== StructmsgInfos constructor ======================= */
 
   function StructmsgInfos() {
-    T.log('constructor called', 'info', 'StructmsgInfos', true);
+    T.log('constructor called', '2.info', 'StructmsgInfos', true);
 
     var StmsgInfos = this;
 
@@ -33,7 +33,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
     StmsgInfos.headers = new Array();
     StmsgInfos.fieldNameInfos = null;
 
-    T.log('constructor end', 'info', 'StructmsgInfos', true);
+    T.log('constructor end', '2.info', 'StructmsgInfos', true);
   }
 
 
@@ -146,5 +146,5 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
 
   T.StructmsgInfos = StructmsgInfos;
 
-  T.log("module: "+name+" initialised!", "info", "StructmsgInfos.js");
+  T.log("module: "+name+" initialised!", "2.info", "StructmsgInfos.js");
 }, "0.0.1", {});

@@ -59,7 +59,7 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
   /* ==================== StructmsgInfo constructor ======================= */
 
   function StructmsgInfo() {
-    T.log('constructor called', 'info', 'StructmsgInfo', true);
+    T.log('constructor called', '2.info', 'StructmsgInfo', true);
 
     var StmsgInfo = this;
 
@@ -79,7 +79,7 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
     StmsgInfo.handleHdrInfoPtr = null;
     StmsgInfo.fieldNameInfos = null;
 
-    T.log('constructor end', 'info', 'StructmsgInfo', true);
+    T.log('constructor end', '2.info', 'StructmsgInfo', true);
   }
 
 
@@ -440,5 +440,5 @@ print("funny should decode: ", fieldInfo.fieldStr);
 
   T.StructmsgInfo = StructmsgInfo;
 
-  T.log("module: "+name+" initialised!", "info", "StructmsgInfo.js");
+  T.log("module: "+name+" initialised!", "2.info", "StructmsgInfo.js");
 }, "0.0.1", {});
