@@ -215,6 +215,7 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       var fieldInfo;
       var msgPtr;
     
+print("======== StructmsgInfo ENCODE");
       structmsgInfo.encoded = null;
       if ((structmsgInfo.flags & structmsgInfo.STRUCT_MSG_HAS_CRC) == 0) {
         result = structmsgInfo.setFillerAndCrc();
@@ -319,6 +320,15 @@ EM.log('encode: funny should encode: '+fieldInfo.fieldStr, 'error', "StructmsgIn
       return structmsgInfo.STRUCT_MSG_ERR_OK;
     },
     
+    // ============================= setEncoded ========================
+    
+    setEncoded: function(data) {
+      var structmsgInfo = this;
+
+      structmsgInfo.encoded = data;
+      return structmsgInfo.STRUCT_MSG_ERR_OK;
+    },
+
     // ============================= getEncoded ========================
     
     getEncoded: function(resultData) {
@@ -376,6 +386,7 @@ EM.log('encode: funny should encode: '+fieldInfo.fieldStr, 'error', "StructmsgIn
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_DECODE_ERROR;
       numEntries = obj.value;
       idx = 0;
+//print("msg: ",structmsgInfo.msg.toDebugString());
       while (idx < numEntries) {
         fieldInfo = structmsgInfo.msg.fieldInfos[idx];
         if (fieldInfo.fieldStr[0] == '@') {

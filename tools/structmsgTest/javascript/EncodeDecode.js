@@ -103,12 +103,15 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     // ============================= uint8VectorEncode ========================
     
     uint8VectorEncode: function(data, offset, value, lgth) {
+      var encdec = this;
       var dv = new DataView(data);
       var idx;
+      var ch;
 
       idx = 0;
       while (idx < lgth) {
-        dv.setUint8(offset, value.charCodeAt(idx));
+        ch = value.charCodeAt(idx);
+        dv.setUint8(offset, ch);
         idx++;
         offset++;
       }
@@ -254,11 +257,13 @@ EM.addModule("Esp-EncodeDecode", function(T, name) {
     uint8VectorDecode: function(data, offset, lgth, result) {
       var dv = new DataView(data);
       var idx;
+      var ch;
     
       idx = 0;
       result.value = ""
       while (idx < lgth) {
-        result.value += dv.getUint8(offset);
+        ch = dv.getUint8(offset);
+        result.value += String.fromCharCode(ch);
         idx++;
         offset++;
       }
@@ -432,13 +437,16 @@ T.log('FillerEncode: '+resultData.value, '1.info', "EncodeDecode.js", true);
     // ============================= fillerDecode ========================
     
     fillerDecode: function(data, offset, lgth, resultData) {
+      var encDec = this;
       var dv = new DataView(data);
       var idx;
+      var ch;
     
       idx = 0;
       resultData.value = ""
       while (idx < lgth) {
-        resultData.value += dv.getUint8(data,offset);
+        ch = dv.getUint8(data,offset);
+        resultData.value += ch;
         offset++;
         idx++;
       }
@@ -536,19 +544,12 @@ T.log('crc decode end: crcval 0x'+crcVal.toString(16)+' crc: '+crc.toString(16)+
         break;
       case encDec.STRUCT_MSG_FIELD_INT8_VECTOR:
         fieldIdx = 0;
-        while (fieldIdx < fieldInfo.fieldLgth) {
-          offset = encDec.int8Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
-          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-          fieldIdx++;
-        }
+        offset = encDec.int8VectorEncode(msgPtr,offset,fieldInfo.value,fieldInfo.fieldLgth);
+        if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
         break;
       case encDec.STRUCT_MSG_FIELD_UINT8_VECTOR:
         fieldIdx = 0;
-        while (fieldIdx < fieldInfo.fieldLgth) {
-          offset = encDec.uint8Encode(msgPtr,offset,fieldInfo.value[fieldIdx]);
-          if (offset < 0) return encDec.STRUCT_MSG_ERR_ENCODE_ERROR;
-          fieldIdx++;
-        }
+        offset = encDec.uint8VectorEncode(msgPtr,offset,fieldInfo.value,fieldInfo.fieldLgth);
         break;
       case encDec.STRUCT_MSG_FIELD_INT16_VECTOR:
         fieldIdx = 0;

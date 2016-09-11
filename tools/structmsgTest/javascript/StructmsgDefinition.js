@@ -71,6 +71,34 @@ EM.addModule("Esp-StructmsgDefinition", function(T, name) {
       return str;
     },
 
+    // ============================= getFieldNameFromId ========================
+
+    getFieldNameFromId: function(id, resultData) {
+      var stmsgDef = this;
+      var entry;
+      var nameEntry;
+    
+      fieldName = null;
+      // first try to find special field name
+      if (typeof stmsgDef.structmsgSpecialFieldNamesId2Str[id] != 'undefined') {
+        resultData.fieldName = stmsgDef.structmsgSpecialFieldNamesId2Str[id];
+        return stmsgDef.STRUCT_MSG_ERR_OK;
+      }
+      // find field name
+      var idx = 0;
+    
+      while (idx < stmsgDef.fieldNameInfos.numInfos) {
+        nameEntry = stmsgDef.fieldNameInfos.infos[idx];
+        if (nameEntry.fieldId == id) {
+          resultData.fieldName = nameEntry.fieldName;
+          return stmsgDef.STRUCT_MSG_ERR_OK;
+        }
+        nameEntry++;
+        idx++;
+      }
+      return stmsgDef.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    },
+
     // ============================= normalFieldNamesEncode ========================
     
     normalFieldNamesEncode: function(data, offset, res, numEntries, size) {
@@ -232,7 +260,7 @@ EM.addModule("Esp-StructmsgDefinition", function(T, name) {
         offset = uint16Decode(data, offset, fieldId);
         checkBadOffset(offset);
         if (fieldId > STRUCT_MSG_SPEC_FIELD_LOW) {
-          result = structmsg_getIdFieldNameStr(fieldId, fieldName);
+          result = stmsgDef.getFieldNameFromId(fieldId, fieldName);
           checkOffsetErrOK(result);
         } else {
           fieldId = namesIdx + 1;
@@ -456,6 +484,7 @@ T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString
       return stmsgDef.STRUCT_MSG_ERR_OK;
     },
 
+    /* ==================== createMsgFromDefinition ===================================== */
     createMsgFromDefinition: function(resultData) {
       var stmsgDef = this;
 
@@ -471,11 +500,10 @@ T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString
     
       result = stmsgDef.structmsg.create(stmsgDef.numFields - stmsgDef.STRUCT_MSG_NUM_HEADER_FIELDS - stmsgDef.STRUCT_MSG_NUM_CMD_HEADER_FIELDS, resultData);
       if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
-print("numFields: ",stmsgDef.numFields);
+      handle = resultData.handle;
       fieldIdx = 0;
       while (fieldIdx < stmsgDef.numFields) {
         fieldInfo = stmsgDef.fieldInfos[fieldIdx];
-print("fieldInfo: ",fieldInfo.toDebugString());
         switch (fieldInfo.fieldId) {
         case stmsgDef.STRUCT_MSG_SPEC_FIELD_SRC:
         case stmsgDef.STRUCT_MSG_SPEC_FIELD_DST:
@@ -487,15 +515,15 @@ print("fieldInfo: ",fieldInfo.toDebugString());
           break;
         default:
           obj.fieldName = null;
-          result = stmsgDef.getIdFieldNameStr(fieldInfo.fieldId, obj);
+          result = stmsgDef.getFieldNameFromId(fieldInfo.fieldId, obj);
           if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
           fieldName = obj.fieldName;
           obj.fieldType = null;
           result = stmsgDef.getFieldTypeStr(fieldInfo.fieldType, obj);
           if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
           fieldType = obj.fieldType;
-print('addfield: ',fieldName,' fieldType: ',fieldType,' fieldLgth: ',fieldInfo.fieldLgth);
-          result = stmsgDef.structmsg.addField(handle, fieldName, fieldType, fieldInfo.fieldLgth);
+          var structmsgInfo = stmsgDef.structmsg.getStructmsgInfo(handle);
+          result = structmsgInfo.addField(fieldName, fieldType, fieldInfo.fieldLgth);
           if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
           break;
         } 

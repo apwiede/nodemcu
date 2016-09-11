@@ -177,6 +177,14 @@ print("delete not yet implemented");
       return stmsgApi.checkOKOrErr(result, "encode", "");
     },
     
+    // ============================= set_encoded ========================
+    
+    set_encoded: function(handle, data) {
+      var stmsgApi = this;
+      var result = stmsgApi.structmsg.setEncoded(handle, data);
+      return stmsgApi.checkOKOrErr(result, "set_encoded", "");
+    },
+    
     // ============================= get_encoded ========================
     
     get_encoded: function(handle, result_data) {

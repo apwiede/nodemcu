@@ -420,9 +420,6 @@ T.log("getGenericTypeVal!"+val+"!", "error", "defines.js");
       return defines.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
     },
 
-
-
-
     /* ==================== escape_key ============================== */
     escape_key: function(key) {
       if (key == null) {

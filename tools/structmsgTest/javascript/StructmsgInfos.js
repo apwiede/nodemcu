@@ -65,7 +65,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return str;
     },
 
-    /* ==================== geStructmsgInfo ===================================== */
+    /* ==================== getStructmsgInfo ===================================== */
     getStructmsgInfo: function(handle) {
       var stmsgInfos = this;
       var idx = 0;
@@ -156,6 +156,16 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
         return stmsgInfos.result;
       }
       return structmsgInfo.encode(result_data);
+    },
+
+    /* ==================== setEncoded ===================================== */
+    setEncoded: function(handle, data) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.setEncoded(data);
     },
 
     /* ==================== getEncoded ===================================== */
