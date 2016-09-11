@@ -22,6 +22,7 @@ cat \
  structmsgCmd.js \
  structmsgEncDec.js \
  espMain.js \
+ aes.js \
  espStart.js > esp_concatenated.js
 
 

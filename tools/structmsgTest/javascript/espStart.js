@@ -7,6 +7,8 @@
  * Arnulf P. Wiedemann arnulf@wiedemann-pri.de (C)2016
  */
 
+    var cryptkey = 'a1b2c3d4e5f6g7h8';
+    var iv = cryptkey;
     var result;
     var result_data = new Object();
     var stmsgApi = new EM.Api();
@@ -56,12 +58,37 @@ EM.log('handle:'+result_data.handle, '1.info', "espStart.js", true);
     result = stmsgApi.set_tableFieldValue(handle, "channel",1,7);
     checkResult(result);
 
-print(" E N C O D E I N G");
     result_data.data = null
     result = stmsgApi.encode(handle, result_data);
     checkResult(result);
 //    stmsgApi.dump(handle);
-EM.log('encoded'+stmsgApi.dumpHex(result_data.data), '1.info', "espStart.js", true);
+    encoded = result_data.data;
+EM.log('encoded'+stmsgApi.dumpHex(encoded), '1.info', "espStart.js", true);
+
+    // we build an ArrayBuffer, as the websocket inteface also delivers an ArrayBuffer!
+    encodedBytes = new ArrayBuffer(encoded);
+    result_data.encryptedBytes = null
+print("cryptkey: ",cryptkey.length," ",iv.length);
+    result = stmsgApi.encrypt(handle, cryptkey, iv, encoded, result_data);
+    checkResult(result);
+    encryptedBytes = result_data.encryptedBytes;
+//EM.log('encrypted'+stmsgApi.dumpHex(encryptedBytes), '1.info', "espStart.js", true);
+print("encrypt done");
+
+    result_data.decryptedBytes = null
+    result = stmsgApi.decrypt(handle, cryptkey, iv, new ArrayBuffer(encryptedBytes), result_data);
+    checkResult(result);
+    decryptedBytes = result_data.decryptedBytes;
+//EM.log('decryptedBytes'+stmsgApi.dumpHex(new ArrayBuffer(decryptedBytes)), '1.info', "espStart.js", true);
+print("decrypt done");
+
+
+
+
+
+
+
+if (0) {
 
 EM.log('decode1', '1.info', "espStart.js", true);
     result = stmsgApi.decode(handle);
@@ -158,6 +185,37 @@ EM.log('decode', '1.info', "espStart.js", true);
     result = stmsgApi.decode(handle);
     checkResult(result);
     stmsgApi.dump(handle);
+
+EM.log('normalFieldNames', '1.info', "espStart.js", true);
+    data.data = null;
+    result = stmsgApi.get_definitionNormalFieldNames("aplist",data);
+    checkResult(result);
+    normalFieldNames=data.fieldNames;
+print("norm: ",normalFieldNames.toString());
+
+EM.log('tableFieldNames', '1.info', "espStart.js", true);
+    data.data = null;
+    result = stmsgApi.get_definitionTableFieldNames("aplist",data);
+    checkResult(result);
+    tableFieldNames=data.fieldNames;
+print("table: ",tableFieldNames.toString());
+
+EM.log('numTableRows', '1.info', "espStart.js", true);
+    data.data = null;
+    result = stmsgApi.get_definitionNumTableRows("aplist",data);
+    checkResult(result);
+    numTableRows=data.numTableRows;
+print("numTableRows: ",numTableRows);
+
+EM.log('numTableRowFields', '1.info', "espStart.js", true);
+    data.data = null;
+    result = stmsgApi.get_definitionNumTableRowFields("aplist",data);
+    checkResult(result);
+    numTableRowFields=data.numTableRowFields;
+print("numTableRowFields: ",numTableRowFields);
+}
+
+
 
 
     function confirm(str) {

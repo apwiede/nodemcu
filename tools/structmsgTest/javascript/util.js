@@ -18,6 +18,7 @@
 
 EM.addModule("Esp-util", function(T, name) {
     var U = T.Util || (T.Util = {});
+print("U: ",U);
     var STRING_PROTO = String.prototype;
     var TOSTRING     = Object.prototype.toString;
     var TYPES = {
@@ -57,6 +58,7 @@ EM.addModule("Esp-util", function(T, name) {
      */
 
     U.isArray = (!unsafeNatives && Array.isArray) || function (o) {
+print("U.isArray");
         return U.type(o) === 'array';
     };
 
@@ -341,5 +343,6 @@ EM.addModule("Esp-util", function(T, name) {
         return new Date().getTime();
     };
 
+    T.util = U;
     T.log("module: "+name+" initialised!", "2.info", "util.js");
 }, '0.0.1', {});

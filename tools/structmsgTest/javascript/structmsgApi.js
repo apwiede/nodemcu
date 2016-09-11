@@ -211,25 +211,20 @@ print("delete not yet implemented");
     
     // ============================= encrypt ========================
     
-    encrypt: function(handle, key, iv) {
+    encrypt: function(handle, key, iv, encoded, resultData) {
       var stmsgApi = this;
-print("encrypt not yet implemented");
-      if (typeof iv === 'undefined') {
-        iv = "";
-      }
-      var result  = cmd.encrypt(handle, null, 0, key, iv, buf, lgth);
-      if (result == STRUCT_MSG_ERR_OK) {
-        return buf;
-      }
+//      var result  = cmd.encrypt(handle, null, 0, key, iv, buf, lgth);
+      var result = stmsgApi.structmsg.encrypt(handle, key, iv, encoded, resultData);
       return stmsgApi.checkOKOrErr(result, "encrypt", "");
     },
     
     // ============================= decrypt ========================
     
-    decrypt: function(handle, key, iv, crypted) {
+    decrypt: function(handle, key, iv, crypted, resultData) {
+      // crypted must be a ArrayBuffer !!
       var stmsgApi = this;
-print("encrypt not yet implemented");
-      var result = cmd.decrypt(handle, null, 0, key, iv, crypted, buf, lgth);
+//      var result = cmd.decrypt(handle, null, 0, key, iv, crypted, buf, lgth);
+      var result = stmsgApi.structmsg.decrypt(handle, key, iv, crypted, resultData);
       if (result == STRUCT_MSG_ERR_OK) {
         return buf;
       }
@@ -412,63 +407,59 @@ print("delete_fieldDefinitions not yet implemented");
     
     // ============================= create_msgFromDefinition ========================
     
-    create_msgFromDefinition: function(name, resultData)  {
+    create_msgFromDefinition: function(defName, resultData)  {
       var stmsgApi = this;
-      var result = stmsgApi.definitions.createMsgFromDefinition(name, resultData);
+      var result = stmsgApi.definitions.createMsgFromDefinition(defName, resultData);
       return stmsgApi.checkOKOrErr(result, "create_msgFromDefinition", "");
     },
   
     // ============================= get_definitionNormalFieldNames ========================
     
-    get_definitionNormalFieldNames: function(name, normalFieldNamesVar)  {
-print("gete_definitionNormalFieldNames not yet implemented");
+    get_definitionNormalFieldNames: function(defName, resultData)  {
       var stmsgApi = this;
-      var result = structmsg.def.getDefinitionNormalFieldNames(name, normalFieldNames);
+      var result = stmsgApi.definitions.getDefinitionNormalFieldNames(defName, resultData);
       return stmsgApi.checkOKOrErr(result, "get_definitionNormalFieldNames", "");
     },
   
     // ============================= get_definitionTableFieldNames ========================
     
-    get_definitionTableFieldNames: function(name, tableFieldNamesVar)  {
-print("gete_definitionTableFieldNames not yet implemented");
+    get_definitionTableFieldNames: function(defName, resultData)  {
       var stmsgApi = this;
-      var result = structmsg.def.getDefinitionTableFieldNames(name, tableFieldNames);
+      var result = stmsgApi.definitions.getDefinitionTableFieldNames(defName, resultData);
       return stmsgApi.checkOKOrErr(result, "get_definitionTableFieldNames", "");
     },
   
     // ============================= get_definitionNumTableRows ========================
     
-    get_definitionNumTableRows: function(name, numTableRowsVar)  {
-print("gete_definitionNumTableRows not yet implemented");
+    get_definitionNumTableRows: function(defName, resultData)  {
       var stmsgApi = this;
-      var result = structmsg.def.getDefinitionNumTableRows(name, numTableRows);
+      var result = stmsgApi.definitions.getDefinitionNumTableRows(defName, resultData);
       return stmsgApi.checkOKOrErr(result, "get_definitionNumTableRows", "");
     },
   
     // ============================= get_definitionNumTableRowFields ========================
     
-    get_definitionNumTableRowFields: function(name, numTableRowFieldsVar)  {
-print("gete_definitionNumTableRowFields not yet implemented");
+    get_definitionNumTableRowFields: function(defName, resultData)  {
       var stmsgApi = this;
-      var result = structmsg.def.getDefinitionNumTableRowFields(name, numTableRowFields);
+      var result = stmsgApi.definitions.getDefinitionNumTableRowFields(defName, resultData);
       return stmsgApi.checkOKOrErr(result, "get_definitionNumTableRowFields", "");
     },
   
     // ============================= get_definitionFieldInfo ========================
     
-    get_definitionFieldInfo: function(name, fieldName, fieldInfoVar)  {
+    get_definitionFieldInfo: function(defName, fieldName, resultData)  {
 print("gete_definitionFieldInfo not yet implemented");
       var stmsgApi = this;
-      var result = structmsg.def.getDefinitionFieldInfo(name, fieldName, fieldInfo);
+      var result = structmsg.def.getDefinitionFieldInfo(defName, fieldName, fieldInfo);
       return stmsgApi.checkOKOrErr(result, "get_definitionFieldInfo", "");
     },
   
     // ============================= get_definitionTableFieldInfo ========================
     
-    get_definitionTableFieldInfo: function(name, fieldName, row, fieldInfoVar)  {
+    get_definitionTableFieldInfo: function(defName, fieldName, row, resultData)  {
 print("gete_definitionTableFieldInfo not yet implemented");
       var stmsgApi = this;
-      var result = structmsg.def.getDefinitionTableFieldInfo(name, fieldName, row, fieldInfo);
+      var result = structmsg.def.getDefinitionTableFieldInfo(defName, fieldName, row, fieldInfo);
       return stmsgApi.checkOKOrErr(result, "get_definitionTableFieldInfo", "");
     },
 

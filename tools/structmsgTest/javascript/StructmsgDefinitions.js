@@ -205,10 +205,65 @@ print("decodeFieldDefinition: ",result," ",obj.idx);
 
       obj.idx = -1;
       result = stmsgDefs.getDefinition(defName, obj);
-print("createMsgFromDefinition: ",result," ",obj.idx);
       if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
       definition = stmsgDefs.definitions[obj.idx];
       return definition.createMsgFromDefinition(resultData);
+    },
+
+    /* ==================== getDefinitionNormalFieldNames ===================================== */
+    getDefinitionNormalFieldNames: function (defName, resultData) {
+      var stmsgDefs = this;
+      var result;
+      var definition;
+      var obj = new Object();
+
+      obj.idx = -1;
+      result = stmsgDefs.getDefinition(defName, obj);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      definition = stmsgDefs.definitions[obj.idx];
+      return definition.getDefinitionNormalFieldNames(resultData);
+    },
+
+    /* ==================== getDefinitionTableFieldNames ===================================== */
+    getDefinitionTableFieldNames: function (defName, resultData) {
+      var stmsgDefs = this;
+      var result;
+      var definition;
+      var obj = new Object();
+
+      obj.idx = -1;
+      result = stmsgDefs.getDefinition(defName, obj);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      definition = stmsgDefs.definitions[obj.idx];
+      return definition.getDefinitionTableFieldNames(resultData);
+    },
+
+    /* ==================== getDefinitionNumTableRows ===================================== */
+    getDefinitionNumTableRows: function (defName, resultData) {
+      var stmsgDefs = this;
+      var result;
+      var definition;
+      var obj = new Object();
+
+      obj.idx = -1;
+      result = stmsgDefs.getDefinition(defName, obj);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      definition = stmsgDefs.definitions[obj.idx];
+      return definition.getDefinitionNumTableRows(resultData);
+    },
+
+    /* ==================== getDefinitionNumTableRowFields ===================================== */
+    getDefinitionNumTableRowFields: function (defName, resultData) {
+      var stmsgDefs = this;
+      var result;
+      var definition;
+      var obj = new Object();
+
+      obj.idx = -1;
+      result = stmsgDefs.getDefinition(defName, obj);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      definition = stmsgDefs.definitions[obj.idx];
+      return definition.getDefinitionNumTableRowFields(resultData);
     },
 
   });

@@ -488,12 +488,10 @@ T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString
     createMsgFromDefinition: function(resultData) {
       var stmsgDef = this;
 
-      var definition;
       var fieldInfo;
       var fieldName;
       var fieldType;
       var handle;
-      var definitionsIdx;
       var fieldIdx;
       var result;
       var obj = new Object();
@@ -530,6 +528,142 @@ T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString
         fieldIdx++;
       }
       return stmsgDef.STRUCT_MSG_ERR_OK;
+    },
+
+    /* ==================== getDefinitionNormalFieldNames ===================================== */
+    getDefinitionNormalFieldNames: function(resultData) {
+      var stmsgDef = this;
+      var idx = 0;
+      var fieldInfo;
+      var fieldName;
+      var tableRowFields = 0;
+      var numTableRowFields = 0;
+      var normalFieldNames;
+      var obj = new Object();
+
+      normalFieldNames = new Array();
+      inTableRows = false;
+      while (idx < stmsgDef.numFields) {
+        fieldInfo  = stmsgDef.fieldInfos[idx];
+        obj.fieldName = null;
+        result = stmsgDef.getFieldNameFromId(fieldInfo.fieldId, obj);
+        if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+        fieldName = obj.fieldName;
+        if (fieldName[0] != "@") {
+          if (inTableRows) {
+            tableRowFields++;
+            if (tableRowFields >= numTableRowFields) {
+              inTableRows = false;
+            }
+          }
+          normalFieldNames.push(fieldName);
+        } else {
+          if (fieldName == "@tablerowfields") {
+            inTableRows = true
+            tableRowFields = 0
+            numTableRowFields = fieldInfo.fieldLgth;
+          }
+        }
+        idx++;
+      }
+      resultData.fieldNames = normalFieldNames;
+      return stmsgDef.STRUCT_MSG_ERR_OK;
+    },
+
+    /* ==================== getDefinitionTableFieldNames ===================================== */
+    getDefinitionTableFieldNames: function(resultData) {
+      var stmsgDef = this;
+      var idx = 0;
+      var fieldInfo;
+      var fieldName;
+      var tableRowFields = 0;
+      var numTableRowFields = 0;
+      var tableFieldNames;
+      var obj = new Object();
+
+      tableFieldNames = new Array();
+      inTableRows = false;
+      while (idx < stmsgDef.numFields) {
+        fieldInfo  = stmsgDef.fieldInfos[idx];
+        obj.fieldName = null;
+        result = stmsgDef.getFieldNameFromId(fieldInfo.fieldId, obj);
+        if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+        fieldName = obj.fieldName;
+        if (fieldName[0] == "@") {
+          if (inTableRows) {
+            tableRowFields++;
+            if (tableRowFields >= numTableRowFields) {
+              inTableRows = false;
+            }
+          }
+          tableFieldNames.push(fieldName);
+        } else {
+          if (fieldName == "@tablerowfields") {
+            inTableRows = true
+            tableRowFields = 0
+            numTableRowFields = fieldInfo.fieldLgth;
+          }
+        }
+        idx++;
+      }
+      resultData.fieldNames = tableFieldNames;
+      return stmsgDef.STRUCT_MSG_ERR_OK;
+    },
+
+    /* ==================== getDefinitionNumTableRows ===================================== */
+    getDefinitionNumTableRows: function(resultData) {
+      var stmsgDef = this;
+      var idx = 0;
+      var fieldInfo;
+      var fieldName;
+      var tableRowFields = 0;
+      var numTableRowFields = 0;
+      var tableFieldNames;
+      var obj = new Object();
+
+      tableFieldNames = new Array();
+      inTableRows = false;
+      while (idx < stmsgDef.numFields) {
+        fieldInfo  = stmsgDef.fieldInfos[idx];
+        obj.fieldName = null;
+        result = stmsgDef.getFieldNameFromId(fieldInfo.fieldId, obj);
+        if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+        fieldName = obj.fieldName;
+        if (fieldName == "@tablerows") {
+          resultData.numTableRows = fieldInfo.fieldLgth;
+          return stmsgDef.STRUCT_MSG_ERR_OK;
+        }
+        idx++;
+      }
+      return stmsgDef.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    },
+
+    /* ==================== getDefinitionNumTableRowFields ===================================== */
+    getDefinitionNumTableRowFields: function(resultData) {
+      var stmsgDef = this;
+      var idx = 0;
+      var fieldInfo;
+      var fieldName;
+      var tableRowFields = 0;
+      var numTableRowFields = 0;
+      var tableFieldNames;
+      var obj = new Object();
+
+      tableFieldNames = new Array();
+      inTableRows = false;
+      while (idx < stmsgDef.numFields) {
+        fieldInfo  = stmsgDef.fieldInfos[idx];
+        obj.fieldName = null;
+        result = stmsgDef.getFieldNameFromId(fieldInfo.fieldId, obj);
+        if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
+        fieldName = obj.fieldName;
+        if (fieldName == "@tablerowfields") {
+          resultData.numTableRowFields = fieldInfo.fieldLgth;
+          return stmsgDef.STRUCT_MSG_ERR_OK;
+        }
+        idx++;
+      }
+      return stmsgDef.STRUCT_MSG_ERR_FIELD_NOT_FOUND;
     },
 
   });

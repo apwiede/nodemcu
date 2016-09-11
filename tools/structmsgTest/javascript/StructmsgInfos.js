@@ -198,6 +198,26 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return structmsgInfo.dump();
     },
 
+    /* ==================== encrypt ===================================== */
+    encrypt: function(handle, cryptkey, ivvec, data, resultData) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.encrypt(cryptkey, ivvec, data, resultData);
+    },
+
+    /* ==================== decrypt ===================================== */
+    decrypt: function(handle, cryptkey, ivvec, crypted, resultData) {
+      var stmsgInfos = this;
+      var structmsgInfo = stmsgInfos.getStructmsgInfo(handle);
+      if (structmsgInfo == null) {
+        return stmsgInfos.result;
+      }
+      return structmsgInfo.decrypt(cryptkey, ivvec, crypted, resultData);
+    },
+
   });
 
   T.StructmsgInfos = StructmsgInfos;
