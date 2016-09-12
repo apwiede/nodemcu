@@ -18,9 +18,7 @@ cat \
  StructmsgInfo.js \
  StructmsgInfos.js \
  structmsgApi.js \
- structmsgDefs.js \
  structmsgCmd.js \
- structmsgEncDec.js \
  espMain.js \
  aes.js \
  espStart.js > esp_concatenated.js

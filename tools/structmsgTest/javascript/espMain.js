@@ -37,8 +37,6 @@ EM.Env.mod_names.push("HeaderInfo");
 EM.Env.mod_names.push("MsgInfo");
 EM.Env.mod_names.push("StructmsgInfo");
 EM.Env.mod_names.push("structmsgApi");
-EM.Env.mod_names.push("structmsgEncDec");
-EM.Env.mod_names.push("structmsgDefs");
 EM.Env.mod_names.push("structmsgCmd");
 for (var i = 0; i < EM.Env.mod_names.length; i++) {
    var mod_name_part = EM.Env.mod_names[i];

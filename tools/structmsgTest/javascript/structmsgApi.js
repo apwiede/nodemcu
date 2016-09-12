@@ -267,21 +267,11 @@ print("delete not yet implemented");
       return stmsgApi.checkOKOrErr(result, "get_tableFieldValue", fieldName);
     },
     
-    // ============================= set_crypted ========================
-    
-    set_crypted: function(handle, crypted) {
-      var stmsgApi = this;
-print("set_encrpyted not yet implemented");
-      var result = cmd.set_crypted(handle, crypted);
-      return stmsgApi.checkOKOrErr(result, "set_crypted", "");
-    },
-    
     // ============================= decrypt_getHandle ========================
     
-    decrypt_getHandle: function(encrypted, key, iv, handleVar) {
+    decrypt_getHandle: function(key, iv, crypted, resultData) {
       var stmsgApi = this;
-print("decrypt_getHandle not yet implemented");
-      var result = cmd.decrypt_getHandle(encrypted, key, iv, handle);
+      var result = stmsgApi.structmsg.decryptGetHandle(key, iv, crypted, resultData);
       return stmsgApi.checkOKOrErr(result, "decrypt_getHandle", "");
     },
     
@@ -326,27 +316,11 @@ print("dump_fieldDefinition not yet implemented");
       return stmsgApi.checkOKOrErr(result, "decode_fieldDefinition", "");
     },
     
-    // ============================= set_crypted_definition ========================
-    
-    set_crypted_definition: function(name, crypted) {
-      var stmsgApi = this;
-print("set_crypted_definition not yet implemented");
-      var result = structmsg.def.setCryptedDefinition(name, crypted);
-      return stmsgApi.checkOKOrErr(result, "set_crypted_definition", "");
-    },
-    
     // ============================= decrypt_getDefinitionName ========================
     
-    decrypt_getDefinitionName: function(encrypted, key, iv) {
+    decrypt_getDefinitionName: function(key, iv, crypted, resultData) {
       var stmsgApi = this;
-print("decrypt_getDefinitionName not yet implemented");
-      if (typeof iv === 'undefined') {
-        iv = "";
-      }
-      var result = structmsg.def.decryptGetDefinitionName(encrypted, key, iv, name);
-      if (result == STRUCT_MSG_ERR_OK) {
-        return name;
-      }
+      var result = stmsgApi.definitions.decryptGetDefinitionName(key, iv, crypted, resultData);
       return stmsgApi.checkOKOrErr(result, "decrypt_getDefinitionName", "");
     },
     

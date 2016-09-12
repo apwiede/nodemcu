@@ -79,6 +79,34 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       return null;
     },
 
+    /* ==================== updateHeaders ===================================== */
+    updateHeaders: function(structmsgInfo) {
+      var stmsgInfos = this;
+      var result;
+      var headers;
+      var idx;
+      var hdrId;
+
+      headers = stmsgInfos.headers;
+      idx = 0;
+      while (idx < stmsgInfos.numHeaders) {
+        var entry = stmsgInfos.handles[idx];
+        if (entry.handle == structmsgInfo.handle) {
+          entry.hdrId = structmsgInfo.hdrId;
+          stmsgInfos.handles[idx] = entry;
+//print(">>updateHeaders1: ",structmsgInfo.toDebugString());
+          return stmsgInfos.STRUCT_MSG_ERR_OK;
+        }
+        idx++;
+      }
+      hdrId = structmsgInfo.hdr.hdrId
+      var myEntry = {handle: structmsgInfo.handle, header: hdrId};
+      stmsgInfos.headers.push(myEntry);
+      stmsgInfos.numHeaders++;
+      var entry2 = stmsgInfos.headers[idx];
+      return stmsgInfos.STRUCT_MSG_ERR_OK;
+    },
+
     /* ==================== create ===================================== */
     create: function (numFields, resultData) {
       var stmsgInfos = this;
@@ -87,6 +115,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       stmsgInfo = new T.StructmsgInfo();
       stmsgInfo.fieldNameInfos = stmsgInfos.fieldNameInfos;
       stmsgInfo.structmsg = stmsgInfos.structmsg;
+      stmsgInfo.structmsgInfos = stmsgInfos;
       result=stmsgInfo.create(numFields, resultData);
       if(result != stmsgInfo.STRUCT_MSG_ERR_OK) return result;
       structmsgInfo = resultData.data;
@@ -95,6 +124,7 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
 //T.log(structmsgInfo.toDebugString(), 'info', 'stmsgInfo', true);
       stmsgInfos.handles.push({handle: structmsgInfo.handle, structmsg: stmsgInfo});
       stmsgInfos.result= stmsgInfos.STRUCT_MSG_ERR_OK;
+      stmsgInfos.updateHeaders(structmsgInfo);
       return stmsgInfos.STRUCT_MSG_ERR_OK;
     },
 
@@ -268,6 +298,48 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
       decryptedBytes = aesCbcDec.decrypt(myMsg);
       resultData.decryptedBytes = header.concat(decryptedBytes);
       return structmsgInfos.STRUCT_MSG_ERR_OK;
+    },
+
+    /* ==================== decryptGetHandle ===================================== */
+    decryptGetHandle: function(cryptkey, ivvec, crypted, resultData) {
+      var structmsgInfos = this;
+      var result;
+      var idx;
+      var idx2;
+      var haederIdBuf;
+      var headers;
+      var dv1;
+      var dv2;
+      var found;
+
+      result = structmsgInfos.decrypt(cryptkey, ivvec, crypted, resultData);
+      if(result != structmsgInfos.STRUCT_MSG_ERR_OK) return result;
+      var arr2 = Uint8Array.from(resultData.decryptedBytes);
+      var decryptedBytesBuf = arr2.buffer;
+      headerIdBuf = decryptedBytesBuf;
+      headers = structmsgInfos.headers;
+      idx = 0;
+      found = false;
+      while (idx < structmsgInfos.numHeaders) {
+        var entry = structmsgInfos.headers[idx];
+        idx2 = 0;
+        dv1 = new DataView(headerIdBuf);
+        dv2 = new DataView(entry.header);
+        found = true;
+        while (idx2 < entry.header.byteLength) {
+          if (dv1.getUint8(idx2) != dv2.getUint8(idx2)) {
+            found = false;
+            break;
+          }
+          idx2++;
+        }
+        if (found) {
+          resultData.handle = entry.handle;
+          return structmsgInfos.STRUCT_MSG_ERR_OK;
+        }
+        idx++;
+      }
+      return structmsgInfos.STRUCT_MSG_ERR_HANDLE_NOT_FOUND;
     },
 
   });

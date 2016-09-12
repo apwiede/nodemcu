@@ -78,6 +78,8 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
     StmsgInfo.sequenceNum = 0;
     StmsgInfo.handleHdrInfoPtr = null;
     StmsgInfo.fieldNameInfos = null;
+    StmsgInfo.structmsg = null;
+    StmsgInfo.structmsgInfos = null;
 
     T.log('constructor end', '2.info', 'StructmsgInfo', true);
   }
@@ -385,6 +387,7 @@ EM.log('encode: funny should encode: '+fieldInfo.fieldStr, 'error', "StructmsgIn
       offset = structmsgInfo.uint8Decode(msgPtr,offset,obj);
       if (offset < 0) return structmsgInfo.STRUCT_MSG_ERR_DECODE_ERROR;
       numEntries = obj.value;
+      structmsgInfo.structmsgInfos.updateHeaders(structmsgInfo);
       idx = 0;
 //print("msg: ",structmsgInfo.msg.toDebugString());
       while (idx < numEntries) {

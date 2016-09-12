@@ -60,7 +60,7 @@ EM.log('handle:'+result_data.handle, '1.info', "espStart.js", true);
 
 
 
-if (0) {
+if (1) {
 
     result_data.data = null
     result = stmsgApi.encode(handle, result_data);
@@ -77,9 +77,17 @@ EM.log('encoded'+stmsgApi.dumpHex(encoded), '1.info', "espStart.js", true);
     encryptedBytes = result_data.encryptedBytes;
 //EM.log('encrypted'+stmsgApi.dumpHex(encryptedBytes), '1.info', "espStart.js", true);
 
+    result_data.handle = null
+
     result_data.decryptedBytes = null
     var arr = Uint8Array.from(encryptedBytes);
     var encryptedBytesBuf = arr.buffer;
+
+    result = stmsgApi.decrypt_getHandle(cryptkey, iv, encryptedBytesBuf, result_data);
+    checkResult(result);
+    var handle2 = result_data.handle;
+EM.log('decrypt getHandle: '+handle2, '1.info', "espStart.js", true);
+
 
     result = stmsgApi.decrypt(cryptkey, iv, encryptedBytesBuf, result_data);
     checkResult(result);
@@ -94,7 +102,7 @@ EM.log('decrypt done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.j
 
 
 
-if (0) {
+if (1) {
 
 EM.log('decode1', '1.info', "espStart.js", true);
     result = stmsgApi.decode(handle);
@@ -196,13 +204,17 @@ EM.log('encoded definition'+stmsgApi.dumpHex(encodedDefinition), '1.info', "espS
     var decryptedBytesBuf = arr2.buffer;
 EM.log('decrypt definition done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.js", true);
 
+    result = stmsgApi.decrypt_getDefinitionName(cryptkey, iv, encryptedBytesBuf, result_data);
+    checkResult(result);
+    var defName = result_data.defName;
+EM.log('decrypt getDefinitionName done '+defName, '1.info', "espStart.js", true);
 
 
 
 
 
 
-if (0) {
+if (1) {
 
 EM.log('create_msgFromDefinition', '1.info', "espStart.js", true);
     data.data = null;

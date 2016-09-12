@@ -243,6 +243,7 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
           structmsgInfo.hdr.src = value;
 //          setHandleField(handle, STRUCT_MSG_FIELD_SRC, structmsg.hdr.hdrInfo.hdrKeys.src);
           result = structmsgInfo.hdr.fillHdrInfo();
+          structmsgInfo.structmsgInfos.updateHeaders(structmsgInfo);
           return result;
         } else {
           return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -253,6 +254,7 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
             structmsgInfo.hdr.dst = value;
 //            setHandleField(handle, STRUCT_MSG_FIELD_DST, structmsg.hdr.hdrInfo.hdrKeys.dst);
             result = structmsgInfo.hdr.fillHdrInfo();
+            structmsgInfo.structmsgInfos.updateHeaders(structmsgInfo);
             return result;
           } else {
             return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;
@@ -263,6 +265,7 @@ EM.addModule("Esp-MsgInfo", function(T, name) {
               structmsgInfo.hdr.cmdKey = value;
 //              setHandleField(handle, STRUCT_MSG_FIELD_CMD_KEY, structmsg.hdr.hdrInfo.hdrKeys.cmdKey);
               result = structmsgInfo.hdr.fillHdrInfo();
+              structmsgInfo.structmsgInfos.updateHeaders(structmsgInfo);
               return result;
             } else {
               return msgInfo.STRUCT_MSG_ERR_VALUE_TOO_BIG;

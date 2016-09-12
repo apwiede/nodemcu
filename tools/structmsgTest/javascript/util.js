@@ -18,7 +18,6 @@
 
 EM.addModule("Esp-util", function(T, name) {
     var U = T.Util || (T.Util = {});
-print("U: ",U);
     var STRING_PROTO = String.prototype;
     var TOSTRING     = Object.prototype.toString;
     var TYPES = {

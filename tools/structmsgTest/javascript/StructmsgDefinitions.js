@@ -53,7 +53,7 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
     T.log('constructor end', '2.info', 'StructmsgDefinitions', true);
   }
 
-  T.extend(StructmsgDefinitions, T.Defines, {
+  T.extend(StructmsgDefinitions, T.EncodeDecode, {
      my_name: "StructmsgDefinitions",
      type_name: "structmsg_definitions",
      flags: 0,
@@ -150,7 +150,6 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
         definitionIdx++;
       }
       return stmsgDefs.STRUCT_MSG_ERR_NO_SLOT_FOUND;
-
     },
 
     /* ==================== addFieldDefinition ===================================== */
@@ -271,7 +270,7 @@ print("decodeFieldDefinition: ",result," ",obj.idx);
       var stmsgDefs = this;
       var result;
 
-      result = stmsgDefs.structmsg.encrypt(key, iv, encoded, resultData);
+      return stmsgDefs.structmsg.encrypt(key, iv, encoded, resultData);
     },
 
     /* ==================== decryptDefinition ===================================== */
@@ -279,7 +278,54 @@ print("decodeFieldDefinition: ",result," ",obj.idx);
       var stmsgDefs = this;
       var result;
 
-      result = stmsgDefs.structmsg.decrypt(key, iv, crypted, resultData);
+      return stmsgDefs.structmsg.decrypt(key, iv, crypted, resultData);
+    },
+
+    /* ==================== decryptGeDefinitionName ===================================== */
+    decryptGetDefinitionName: function(cryptkey, ivvec, crypted, resultData) {
+      var stmsgDefs = this;
+      var result;
+      var defName;
+      var nameOffset;
+      var numNormFields;
+      var normNamesSize;
+      var obj = new Object();
+      var decryptedBytes;
+      var decrypted;
+
+      result = stmsgDefs.structmsg.decrypt(cryptkey, ivvec, crypted, resultData);
+      if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
+      decryptedBytes = resultData.decryptedBytes;
+      var arr2 = Uint8Array.from(decryptedBytes);
+      var decrypted = arr2.buffer;
+      defName = ""
+      nameOffset = stmsgDefs.STRUCT_MSG_HEADER_LENGTH;
+      nameOffset += stmsgDefs.STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+      // randomNum
+      nameOffset += stmsgDefs.sizeof('uint32_t');
+      // len ids 
+      obj.value = null;
+      nameOffset = stmsgDefs.uint8Decode(decrypted, nameOffset, obj);
+      numNormFields = obj.value;
+      // ids vector
+      nameOffset += numNormFields * stmsgDefs.sizeof('uint16_t');
+      // size of name strings (normnamesSize)
+      obj.value = null;
+      nameOffset = stmsgDefs.uint16Decode(decrypted, nameOffset, obj);
+      normNamesSize = obj.value;
+      // names vector
+      nameOffset += normNamesSize;
+      // definitionSize + nameLgth
+      nameOffset += stmsgDefs.sizeof('uint16_t');
+      obj.value = null;
+      nameOffset = stmsgDefs.uint8Decode(decrypted, nameOffset, obj);
+      nameLgth = obj.value;
+      // here the name starts
+      obj.value = null;
+      nameOffset = stmsgDefs.uint8VectorDecode(decrypted, nameOffset, nameLgth, obj) ; // second -1 for stripping off `\0' char
+      defName = obj.value;
+      resultData.defName = obj.value;
+      return stmsgDefs.STRUCT_MSG_ERR_OK;
     },
 
   });
