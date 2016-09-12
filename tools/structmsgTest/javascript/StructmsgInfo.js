@@ -463,8 +463,83 @@ EM.log('decode: funny should decode: '+fieldInfo.fieldStr, 'error', "StructmsgIn
     dump: function() {
       var structmsgInfo = this;
 
-print("dump");
       T.log("dump msg: "+structmsgInfo.toDebugString(), "0.info", "StructmsgInfo.js");
+      return structmsgInfo.STRUCT_MSG_ERR_OK;
+    },
+
+    // ============================= encrypt ========================
+    
+    encrypt: function(cryptkey, ivvec, data, resultData) {
+      var structmsgInfo = this;
+      var key;
+      var iv;
+      var aesCbc;
+      var aesCbc2;
+      var headerLgth;
+      var dv;
+      var myMsg;
+      var idx;
+      var encryptedBytes;
+      var header;
+
+      headerLgth = structmsgInfo.STRUCT_MSG_HEADER_LENGTH;
+      key = aesjs.util.convertStringToBytes(cryptkey);
+      // The initialization vector, which must be 16 bytes
+      iv  = aesjs.util.convertStringToBytes(ivvec);
+      aesCbc = new aesjs.ModeOfOperation.cbc(key, iv);
+      dv = new DataView(data);
+      myMsg = new Array(data.byteLength-headerLgth);
+      header = new Array();
+      for (i = 0; i < headerLgth; i++) {
+        header[i] = dv.getUint8(i).toString(10);  
+      }
+      idx = headerLgth;
+      var h1 = "";
+      for (i = 0; i < data.byteLength-headerLgth; i++) {
+        var ch = dv.getUint8(idx).toString(10);
+        myMsg[i]= dv.getUint8(idx).toString(10);
+        idx++;
+      }
+      encryptedBytes = aesCbc.encrypt(myMsg);
+      resultData.encryptedBytes = header.concat(encryptedBytes);
+      return structmsgInfo.STRUCT_MSG_ERR_OK;
+    },
+
+    // ============================= decrypt ========================
+    
+    decrypt: function(cryptkey, ivvec, crypted, resultData) {
+      var structmsgInfo = this;
+      var key;
+      var iv;
+      var aesCbcDec;
+      var headerLgth;
+      var dv;
+      var myMsg;
+      var idx;
+      var decryptedBytes;
+      var header;
+
+      headerLgth = structmsgInfo.STRUCT_MSG_HEADER_LENGTH;
+      key = aesjs.util.convertStringToBytes(cryptkey);
+      // The initialization vector, which must be 16 bytes
+      iv  = aesjs.util.convertStringToBytes(ivvec);
+      aesCbcDec = new aesjs.ModeOfOperation.cbc(key, iv);
+      dv = new DataView(crypted);
+      myMsg = new Array(crypted.byteLength-headerLgth);
+      header = new Array();
+      for (i = 0; i < headerLgth; i++) {
+        header[i] = dv.getUint8(i);  
+      }
+      idx = headerLgth;
+      var h1 = "";
+      for (i = 0; i < crypted.byteLength-headerLgth; i++) {
+        var ch = dv.getUint8(idx).toString(10);
+        myMsg[i]= dv.getUint8(idx).toString(10);
+        idx++;
+      }
+
+      decryptedBytes = aesCbcDec.decrypt(myMsg);
+      resultData.decryptedBytes = header.concat(decryptedBytes);
       return structmsgInfo.STRUCT_MSG_ERR_OK;
     },
 

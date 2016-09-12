@@ -482,6 +482,7 @@ T.log("getGenericTypeVal!"+val+"!", "error", "defines.js");
 
       idx = 0;
       while (idx < data.byteLength) {
+        if ((idx % 10) == 0) hex += '\n i: '+idx;
         hex += ' 0x'+dv.getUint8(idx).toString(16);
         idx++;
       }

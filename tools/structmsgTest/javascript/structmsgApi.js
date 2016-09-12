@@ -225,9 +225,6 @@ print("delete not yet implemented");
       var stmsgApi = this;
 //      var result = cmd.decrypt(handle, null, 0, key, iv, crypted, buf, lgth);
       var result = stmsgApi.structmsg.decrypt(handle, key, iv, crypted, resultData);
-      if (result == STRUCT_MSG_ERR_OK) {
-        return buf;
-      }
       return stmsgApi.checkOKOrErr(result, "decrypt", "");
     },
     

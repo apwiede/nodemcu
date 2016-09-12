@@ -65,22 +65,24 @@ EM.log('handle:'+result_data.handle, '1.info', "espStart.js", true);
     encoded = result_data.data;
 EM.log('encoded'+stmsgApi.dumpHex(encoded), '1.info', "espStart.js", true);
 
-    // we build an ArrayBuffer, as the websocket inteface also delivers an ArrayBuffer!
+    // we build an ArrayBuffer, as the websocket interface also delivers an ArrayBuffer!
     encodedBytes = new ArrayBuffer(encoded);
     result_data.encryptedBytes = null
-print("cryptkey: ",cryptkey.length," ",iv.length);
     result = stmsgApi.encrypt(handle, cryptkey, iv, encoded, result_data);
     checkResult(result);
     encryptedBytes = result_data.encryptedBytes;
 //EM.log('encrypted'+stmsgApi.dumpHex(encryptedBytes), '1.info', "espStart.js", true);
-print("encrypt done");
 
     result_data.decryptedBytes = null
-    result = stmsgApi.decrypt(handle, cryptkey, iv, new ArrayBuffer(encryptedBytes), result_data);
+    var arr = Uint8Array.from(encryptedBytes);
+    var encryptedBytesBuf = arr.buffer;
+
+    result = stmsgApi.decrypt(handle, cryptkey, iv, encryptedBytesBuf, result_data);
     checkResult(result);
     decryptedBytes = result_data.decryptedBytes;
-//EM.log('decryptedBytes'+stmsgApi.dumpHex(new ArrayBuffer(decryptedBytes)), '1.info', "espStart.js", true);
-print("decrypt done");
+    var arr2 = Uint8Array.from(decryptedBytes);
+    var decryptedBytesBuf = arr2.buffer;
+EM.log('decrypt done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.js", true);
 
 
 
