@@ -211,20 +211,19 @@ print("delete not yet implemented");
     
     // ============================= encrypt ========================
     
-    encrypt: function(handle, key, iv, encoded, resultData) {
+    encrypt: function(key, iv, encoded, resultData) {
+      // encoded must be a ArrayBuffer !!
       var stmsgApi = this;
-//      var result  = cmd.encrypt(handle, null, 0, key, iv, buf, lgth);
-      var result = stmsgApi.structmsg.encrypt(handle, key, iv, encoded, resultData);
+      var result = stmsgApi.structmsg.encrypt(key, iv, encoded, resultData);
       return stmsgApi.checkOKOrErr(result, "encrypt", "");
     },
     
     // ============================= decrypt ========================
     
-    decrypt: function(handle, key, iv, crypted, resultData) {
+    decrypt: function(key, iv, crypted, resultData) {
       // crypted must be a ArrayBuffer !!
       var stmsgApi = this;
-//      var result = cmd.decrypt(handle, null, 0, key, iv, crypted, buf, lgth);
-      var result = stmsgApi.structmsg.decrypt(handle, key, iv, crypted, resultData);
+      var result = stmsgApi.structmsg.decrypt(key, iv, crypted, resultData);
       return stmsgApi.checkOKOrErr(result, "decrypt", "");
     },
     
@@ -353,34 +352,17 @@ print("decrypt_getDefinitionName not yet implemented");
     
     // ============================= encrypt_definition ========================
     
-    encrypt_definition: function(name, key, iv) {
-print("encrypt_definition not yet implemented");
+    encrypt_definition: function(key, iv, encoded, resultData) {
       var stmsgApi = this;
-      if (typeof iv === 'undefined') {
-        iv = "";
-      }
-      var result = structmsg.def.encryptDefinition(name, key, iv, buf, lgth);
-      if  (result == STRUCT_MSG_ERR_OK) {
-        return buf;
-      }
+      var result = stmsgApi.definitions.encryptDefinition(key, iv, encoded, resultData);
       return stmsgApi.checkOKOrErr(result, "encrypt_definition", "");
     },
     
     // ============================= decrypt_definition ========================
     
-    decrypt_definition: function(name, key, iv, encrypted) {
-print("decrypt_definition not yet implemented");
+    decrypt_definition: function(key, iv, crypted, resultData) {
       var stmsgApi = this;
-      if (typeof iv === 'undefined') {
-        iv = "";
-      }
-      if (typeof encrypted === 'undefined') {
-        encrypted = "";
-      }
-      var result = structmsg.def.decryptDefinition(name, key, iv, encrypted, buf, lgth);
-      if  (result == STRUCT_MSG_ERR_OK) {
-        return buf
-      }
+      var result = stmsgApi.definitions.decryptDefinition(key, iv, crypted, resultData);
       return stmsgApi.checkOKOrErr(result, "decrypt_definition", "");
     },
     

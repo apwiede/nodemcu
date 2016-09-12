@@ -266,6 +266,22 @@ print("decodeFieldDefinition: ",result," ",obj.idx);
       return definition.getDefinitionNumTableRowFields(resultData);
     },
 
+    /* ==================== encrypDefinition ===================================== */
+    encryptDefinition: function (key, iv, encoded, resultData) {
+      var stmsgDefs = this;
+      var result;
+
+      result = stmsgDefs.structmsg.encrypt(key, iv, encoded, resultData);
+    },
+
+    /* ==================== decryptDefinition ===================================== */
+    decryptDefinition: function (key, iv, crypted, resultData) {
+      var stmsgDefs = this;
+      var result;
+
+      result = stmsgDefs.structmsg.decrypt(key, iv, crypted, resultData);
+    },
+
   });
 
   T.StructmsgDefinitions = StructmsgDefinitions;

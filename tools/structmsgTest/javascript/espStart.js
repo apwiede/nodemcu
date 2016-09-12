@@ -58,6 +58,10 @@ EM.log('handle:'+result_data.handle, '1.info', "espStart.js", true);
     result = stmsgApi.set_tableFieldValue(handle, "channel",1,7);
     checkResult(result);
 
+
+
+if (0) {
+
     result_data.data = null
     result = stmsgApi.encode(handle, result_data);
     checkResult(result);
@@ -68,7 +72,7 @@ EM.log('encoded'+stmsgApi.dumpHex(encoded), '1.info', "espStart.js", true);
     // we build an ArrayBuffer, as the websocket interface also delivers an ArrayBuffer!
     encodedBytes = new ArrayBuffer(encoded);
     result_data.encryptedBytes = null
-    result = stmsgApi.encrypt(handle, cryptkey, iv, encoded, result_data);
+    result = stmsgApi.encrypt(cryptkey, iv, encoded, result_data);
     checkResult(result);
     encryptedBytes = result_data.encryptedBytes;
 //EM.log('encrypted'+stmsgApi.dumpHex(encryptedBytes), '1.info', "espStart.js", true);
@@ -77,14 +81,14 @@ EM.log('encoded'+stmsgApi.dumpHex(encoded), '1.info', "espStart.js", true);
     var arr = Uint8Array.from(encryptedBytes);
     var encryptedBytesBuf = arr.buffer;
 
-    result = stmsgApi.decrypt(handle, cryptkey, iv, encryptedBytesBuf, result_data);
+    result = stmsgApi.decrypt(cryptkey, iv, encryptedBytesBuf, result_data);
     checkResult(result);
     decryptedBytes = result_data.decryptedBytes;
     var arr2 = Uint8Array.from(decryptedBytes);
     var decryptedBytesBuf = arr2.buffer;
 EM.log('decrypt done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.js", true);
 
-
+}
 
 
 
@@ -117,58 +121,88 @@ EM.log('>> TableField: ssid: '+result_data.value, '1.info', "espStart.js", true)
 EM.log('Decode', '1.info', "espStart.js", true);
     result = stmsgApi.decode(handle);
     checkResult(result);
+}
 
-    result = stmsgApi.create_definition("aplist", 15);
+    var defName = 'aplist';
+    result = stmsgApi.create_definition(defName, 15);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@src","uint16_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@src","uint16_t",2);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@dst","uint16_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@dst","uint16_t",2);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@totalLgth","uint16_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@totalLgth","uint16_t",2);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@cmdKey","uint16_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@cmdKey","uint16_t",2);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@cmdLgth","uint16_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@cmdLgth","uint16_t",2);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@randomNum","uint32_t",4);
+    result = stmsgApi.add_fieldDefinition(defName, "@randomNum","uint32_t",4);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@sequenceNum","uint32_t",4);
+    result = stmsgApi.add_fieldDefinition(defName, "@sequenceNum","uint32_t",4);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@tablerows","uint8_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@tablerows","uint8_t",2);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@tablerowfields","uint8_t",3);
+    result = stmsgApi.add_fieldDefinition(defName, "@tablerowfields","uint8_t",3);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "ssid","uint8_t*",32);
+    result = stmsgApi.add_fieldDefinition(defName, "ssid","uint8_t*",32);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "rssid","uint8_t",1);
+    result = stmsgApi.add_fieldDefinition(defName, "rssid","uint8_t",1);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "channel","uint8_t",1);
+    result = stmsgApi.add_fieldDefinition(defName, "channel","uint8_t",1);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@filler","uint16_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@filler","uint16_t",2);
     checkResult(result);
 
-    result = stmsgApi.add_fieldDefinition("aplist", "@crc","uint16_t",2);
+    result = stmsgApi.add_fieldDefinition(defName, "@crc","uint16_t",2);
     checkResult(result);
 
 EM.log('encodeFieldDefinition', '1.info', "espStart.js", true);
     var data = new Object();
     data.data = null;
-    result = stmsgApi.encode_fieldDefinition("aplist", data);
+    result = stmsgApi.encode_fieldDefinition(defName, data);
+    encodedDefinition = data.data;
     checkResult(result);
-EM.log('encoded definition'+stmsgApi.dumpHex(data.data), '1.info', "espStart.js", true);
+EM.log('encoded definition'+stmsgApi.dumpHex(encodedDefinition), '1.info', "espStart.js", true);
+
+    // we build an ArrayBuffer, as the websocket interface also delivers an ArrayBuffer!
+    var encodedBytes = new ArrayBuffer(encodedDefinition);
+    result_data.encryptedBytes = null
+    result = stmsgApi.encrypt_definition(cryptkey, iv, encodedDefinition, result_data);
+    checkResult(result);
+    var encryptedBytes = result_data.encryptedBytes;
+//EM.log('encrypted'+stmsgApi.dumpHex(encryptedBytes), '1.info', "espStart.js", true);
+
+    result_data.decryptedBytes = null
+    var arr = Uint8Array.from(encryptedBytes);
+    var encryptedBytesBuf = arr.buffer;
+
+    result = stmsgApi.decrypt_definition(cryptkey, iv, encryptedBytesBuf, result_data);
+    checkResult(result);
+    decryptedBytes = result_data.decryptedBytes;
+    var arr2 = Uint8Array.from(decryptedBytes);
+    var decryptedBytesBuf = arr2.buffer;
+EM.log('decrypt definition done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.js", true);
+
+
+
+
+
+
+
+if (0) {
 
 EM.log('create_msgFromDefinition', '1.info', "espStart.js", true);
     data.data = null;
@@ -215,6 +249,7 @@ EM.log('numTableRowFields', '1.info', "espStart.js", true);
     checkResult(result);
     numTableRowFields=data.numTableRowFields;
 print("numTableRowFields: ",numTableRowFields);
+
 }
 
 
