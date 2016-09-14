@@ -147,6 +147,7 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       structmsgInfo.handle = structmsgInfo.HANDLE_PREFIX+'efff'+s;
       structmsgInfo.hdr.fillHdrInfo();
       resultData.data = structmsgInfo;
+      resultData.handle = structmsgInfo.handle;
       return stmsgInfo.STRUCT_MSG_ERR_OK;
     },
 
@@ -217,7 +218,6 @@ EM.addModule("Esp-StructmsgInfo", function(T, name) {
       var fieldInfo;
       var msgPtr;
     
-print("======== StructmsgInfo ENCODE");
       structmsgInfo.encoded = null;
       if ((structmsgInfo.flags & structmsgInfo.STRUCT_MSG_HAS_CRC) == 0) {
         result = structmsgInfo.setFillerAndCrc();
@@ -403,7 +403,7 @@ EM.log('encode: funny should encode: '+fieldInfo.fieldStr, 'error', "StructmsgIn
           case structmsgInfo.STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
           case structmsgInfo.STRUCT_MSG_SPEC_FIELD_CMD_KEY:
           case structmsgInfo.STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-EM.log('decode: funny should decode: '+fieldInfo.fieldStr, 'error', "StructmsgInfo.js", true);
+T.log('decode: funny should decode: '+fieldInfo.fieldStr, 'error', "StructmsgInfo.js", true);
             return structmsgInfo.STRUCT_MSG_ERR_DECODE_ERROR;
             break;
           case structmsgInfo.STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:

@@ -189,7 +189,6 @@ EM.addModule("Esp-StructmsgDefinitions", function(T, name) {
 
       obj.idx = -1;
       result = stmsgDefs.getDefinition(defName, obj);
-print("decodeFieldDefinition: ",result," ",obj.idx);
       if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;
       definition = stmsgDefs.definitions[obj.idx];
       return definition.decodeFieldDefinition(encoded);
@@ -202,6 +201,8 @@ print("decodeFieldDefinition: ",result," ",obj.idx);
       var definition;
       var obj = new Object();
 
+T.log('create_msgFromDefinition3: '+typeof resultData, '1.info', "espStart.js", true);
+      resultData.handle = 'unknown2';
       obj.idx = -1;
       result = stmsgDefs.getDefinition(defName, obj);
       if(result != stmsgDefs.STRUCT_MSG_ERR_OK) return result;

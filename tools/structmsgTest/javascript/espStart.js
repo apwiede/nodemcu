@@ -17,7 +17,10 @@
         print("ERROR: ",result);
       }
     }
+    var localFull = true;
+    var localPartial = true;
 
+if (localPartial) {
 EM.log('Start', '1.info', "espStart.js", true);
     result_data.handle = null;
     result = stmsgApi.create(10, result_data);
@@ -57,10 +60,10 @@ EM.log('handle:'+result_data.handle, '1.info', "espStart.js", true);
     result = stmsgApi.set_tableFieldValue(handle, "rssid",1,-76);
     result = stmsgApi.set_tableFieldValue(handle, "channel",1,7);
     checkResult(result);
+}
 
 
-
-if (1) {
+if (localPartial) {
 
     result_data.data = null
     result = stmsgApi.encode(handle, result_data);
@@ -102,7 +105,7 @@ EM.log('decrypt done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.j
 
 
 
-if (1) {
+if (localFull) {
 
 EM.log('decode1', '1.info', "espStart.js", true);
     result = stmsgApi.decode(handle);
@@ -132,6 +135,8 @@ EM.log('Decode', '1.info', "espStart.js", true);
 }
 
     var defName = 'aplist';
+
+if (localPartial) {
     result = stmsgApi.create_definition(defName, 15);
     checkResult(result);
 
@@ -195,34 +200,71 @@ EM.log('encoded definition'+stmsgApi.dumpHex(encodedDefinition), '1.info', "espS
 
     result_data.decryptedBytes = null
     var arr = Uint8Array.from(encryptedBytes);
-    var encryptedBytesBuf = arr.buffer;
+    var decryptedBytesBuf = arr.buffer;
+}
 
-    result = stmsgApi.decrypt_definition(cryptkey, iv, encryptedBytesBuf, result_data);
+// here starts the part for decodeing a received message from the Wifi!!!
+
+function decryptDefinition(encryptedBuf) {
+EM.log('>>> decrypt definition START: '+encryptedBuf.byteLength, '1.info', "espStart.js", true);
+    result = stmsgApi.decrypt_definition(cryptkey, iv, encryptedBuf, result_data);
     checkResult(result);
     decryptedBytes = result_data.decryptedBytes;
     var arr2 = Uint8Array.from(decryptedBytes);
     var decryptedBytesBuf = arr2.buffer;
 EM.log('decrypt definition done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.js", true);
 
-    result = stmsgApi.decrypt_getDefinitionName(cryptkey, iv, encryptedBytesBuf, result_data);
+    result = stmsgApi.decrypt_getDefinitionName(cryptkey, iv, encryptedBuf, result_data);
     checkResult(result);
     var defName = result_data.defName;
 EM.log('decrypt getDefinitionName done '+defName, '1.info', "espStart.js", true);
+}
+
+function decryptMsg(encryptedBuf) {
+EM.log('>>> decrypt Msg START: '+encryptedBuf.byteLength, '1.info', "espStart.js", true);
+    result = stmsgApi.decrypt(cryptkey, iv, encryptedBuf, result_data);
+    checkResult(result);
+    decryptedBytes = result_data.decryptedBytes;
+    var arr2 = Uint8Array.from(decryptedBytes);
+    var decryptedBytesBuf = arr2.buffer;
+EM.log('decrypt Msg done'+stmsgApi.dumpHex(decryptedBytesBuf), '1.info', "espStart.js", true);
+
+//    result = stmsgApi.decrypt_getHandle(cryptkey, iv, encryptedBuf, result_data);
+//    checkResult(result);
+//    var handle3 = result_data.handle;
+//EM.log('decrypt getHandleName done '+handle3, '1.info', "espStart.js", true);
+
+EM.log('create_msgFromDefinition', '1.info', "espStart.js", true);
+    var resultData = "";
+//    resultData.handle = null;
+    result = stmsgApi.create_msgFromDefinition(defName, resultData);
+    checkResult(result);
+    handle = resultData.handle
+EM.log('create from Definition done: handle: '+handle, '1.info', "espStart.js", true);
+}
+
+
+
+
+// here ends the part for decodeing a received message from the Wifi!!!
 
 
 
 
 
+if (localPartial) {
+decryptDefinition(encryptedBytesBuf)
+}
 
-if (1) {
+
+if (localPartial) {
 
 EM.log('create_msgFromDefinition', '1.info', "espStart.js", true);
     data.data = null;
-    result = stmsgApi.create_msgFromDefinition("aplist", data);
+    result = stmsgApi.create_msgFromDefinition(defName, data);
     checkResult(result);
     handle = data.handle
-print("handle: ",handle);
-EM.log('create from Definition done', '1.info', "espStart.js", true);
+EM.log('create from Definition done: handle: '+handle, '1.info', "espStart.js", true);
 //    stmsgApi.dump(handle);
 
 EM.log('set_encoded', '1.info', "espStart.js", true);
@@ -236,28 +278,28 @@ EM.log('decode', '1.info', "espStart.js", true);
 
 EM.log('normalFieldNames', '1.info', "espStart.js", true);
     data.data = null;
-    result = stmsgApi.get_definitionNormalFieldNames("aplist",data);
+    result = stmsgApi.get_definitionNormalFieldNames(defName,data);
     checkResult(result);
     normalFieldNames=data.fieldNames;
 print("norm: ",normalFieldNames.toString());
 
 EM.log('tableFieldNames', '1.info', "espStart.js", true);
     data.data = null;
-    result = stmsgApi.get_definitionTableFieldNames("aplist",data);
+    result = stmsgApi.get_definitionTableFieldNames(defName,data);
     checkResult(result);
     tableFieldNames=data.fieldNames;
 print("table: ",tableFieldNames.toString());
 
 EM.log('numTableRows', '1.info', "espStart.js", true);
     data.data = null;
-    result = stmsgApi.get_definitionNumTableRows("aplist",data);
+    result = stmsgApi.get_definitionNumTableRows(defName,data);
     checkResult(result);
     numTableRows=data.numTableRows;
 print("numTableRows: ",numTableRows);
 
 EM.log('numTableRowFields', '1.info', "espStart.js", true);
     data.data = null;
-    result = stmsgApi.get_definitionNumTableRowFields("aplist",data);
+    result = stmsgApi.get_definitionNumTableRowFields(defName,data);
     checkResult(result);
     numTableRowFields=data.numTableRowFields;
 print("numTableRowFields: ",numTableRowFields);

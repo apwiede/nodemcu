@@ -28,7 +28,7 @@ EM.addModule("Esp-log", function(T, name) {
   };
   var START_LEVELS = {
     debug: 1,
-    info:  2,
+    info:  1,
     warn:  1,
     error: 1,
     log:   1

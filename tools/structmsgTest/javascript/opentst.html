@@ -1,6 +1,6 @@
 <html>
 <body>
-  <script src="./aes.js"></script>
+  <script src="./esp_concatenated.js"></script>
   <script type="text/javascript">
     // Host we are connecting to
     var host = '192.168.4.1'; 
@@ -10,124 +10,119 @@
     var fullMsg = "";
     var lastIdx=0;
     var numReceived=0;
+    var cryptkey = 'a1b2c3d4e5f6g7h8';
+    var iv = cryptkey;
+    var result;
+    var result_data = new Object();
+    var stmsgApi = new EM.Api();
+    var numMsg = 0;
 
-    var ws = new WebSocket('ws://192.168.4.1:8080/getapdeflist');
-    ws.binaryType = 'arraybuffer';
-
-    // onopen
-    ws.onopen = function() {
-      console.log('ws connected');
-      ws.send('getapdeflist\r\n');
+    function callnext() {
+      callWebsocket('getapdeflist');
     };
 
-    // onerror
-    ws.onerror = function() {
-      console.log('ws error');
-    };
+console.log('>>> Start WevSocket <<<');
+    function callWebsocket(listType) {
+console.log('websocket called: listType: '+listType);
+      var ws = new WebSocket('ws://192.168.4.1:8080/'+listType);
+      ws.binaryType = 'arraybuffer';
+      stmsg="";
+      fullMsg = "";
+      lastIdx=0;
+      numReceived=0;
 
-    // onclose
-    ws.onclose = function() {
-      console.log('ws closed');
-      var cryptkey="a1b2c3d4e5f6g7h8"; 
-      var ivvec = cryptkey;
-      var key = aesjs.util.convertStringToBytes(cryptkey);
-// The initialization vector, which must be 16 bytes
-      var iv = aesjs.util.convertStringToBytes(ivvec);
+      // onopen
+      ws.onopen = function() {
+        console.log('ws connected');
+        ws.send('getapdeflist\r\n');
+      };
 
-      var aesCbc = new aesjs.ModeOfOperation.cbc(key, iv);
-      console.log('stmsg byteLength: ',stmsg.byteLength);
-      d1 = new DataView(stmsg);
-      hex='';
-      for (i = 0; i < stmsg.byteLength; i++) {
-        hex += ' 0x'+d1.getUint8(i).toString(16);
-      }
-      console.log('stmsg:: \n',hex);
-      var myMsg=new Array(stmsg.byteLength-6);
-      var idx = 6;
-      for (i = 0; i < stmsg.byteLength-6; i++) {
-        myMsg[i]= d1.getUint8(idx).toString(10);
-        idx++;
-      }
-       
-      console.log("myMsg: ",myMsg.length);
-      var decryptedBytes = aesCbc.decrypt(myMsg);
-      console.log("decrypted: ",myMsg.length);
+      // onerror
+      ws.onerror = function() {
+        console.log('ws error');
+      };
 
-      // Convert our bytes back into text
-      hex='';
-      for (i = 0; i < decryptedBytes.length; i++) {
-        hex += ' 0x'+decryptedBytes[i].toString(16);
-      }
+      // onclose
+      ws.onclose = function() {
+        if (numMsg < 1) {
+          console.log('ws closed');
+          if (numMsg == 0) {
+            decryptDefinition(stmsg);
+            console.log('decryptDefinition done!!!');
+          } else {
+            console.log('+++decryp MSG!!!');
+            decryptMsg(stmsg);
+            console.log('decryptMsg done!!!');
+          }
+        
+//          setTimeout(callnext,4000) 
+          numMsg++;
+        }
+      };
 
-      console.log("DEC: \n",hex);
-
-if (0) {
-      var decryptedText = aesjs.util.convertBytesToString(decryptedBytes);
-      console.log(decryptedText);
-      hex='';
-      for (i = 0; i < decryptedText.length; i++) {
-        var ch = decryptedText[i];
-        hex += i.toString()+' 0x'+ch.toString(16)+" "+decryptedText[i]+"\n";
-//        hex += i.toString()+' 0x'+ch.toString(10)+" "+"\n";
-      }
-
-      console.log("DEC: \n",hex);
-}
-
-    };
-
-    // onmessage
-    ws.onmessage = function(msgevent) {
-      console.log('ws message');
-      console.log('in :', msgevent.data);
-      if (numReceived == 0) {
-        numReceived++;
-        return;
-      }
-      console.log('size: ',msgevent.data.length);
-      if (numReceived == 1) {
+      // onmessage
+      ws.onmessage = function(msgevent) {
+        console.log('ws message');
+        console.log('in :', msgevent.data);
+        if (numReceived == 0) {
+          numReceived++;
+          return;
+        }
+        console.log('size: ',msgevent.data.length);
+        if (numReceived == 1) {
+          d1 = new DataView(msgevent.data);
+          src=d1.getUint16(0);
+          console.log("src: ",src);
+          dst=d1.getUint16(2);
+          console.log("dst: ",dst);
+          totalLgth=d1.getUint16(4);
+          console.log("totalLgth: ",totalLgth);
+          stmsg=new ArrayBuffer(totalLgth);
+          d2 = new DataView(stmsg);
+          for (i=0; i < msgevent.data.byteLength;i++) {
+            d2.setUint8(lastIdx,d1.getUint8(i));
+            lastIdx++;
+          }
+          console.log('u8 length: ',stmsg.byteLength);
+	  var hex = '';
+          console.log("length: ",stmsg.byteLength);
+	  for(var i=0;i<msgevent.data.byteLength-1;i++) {
+		  hex += ' 0x'+d2.getUint8(i).toString(16);
+	  }
+          console.log('stmsg: ',hex);
+          numReceived++;
+          return;
+        }
         d1 = new DataView(msgevent.data);
-        src=d1.getUint16(0);
-        console.log("src: ",src);
-        dst=d1.getUint16(2);
-        console.log("dst: ",dst);
-        totalLgth=d1.getUint16(4);
-        console.log("totalLgth: ",totalLgth);
-        stmsg=new ArrayBuffer(totalLgth);
-        d2 = new DataView(stmsg);
+        d3 = new DataView(stmsg);
+        console.log('stmsg length: ',stmsg.byteLength);
         for (i=0; i < msgevent.data.byteLength;i++) {
-          d2.setUint8(lastIdx,d1.getUint8(i));
+          d3.setUint8(lastIdx,d1.getUint8(i));
           lastIdx++;
         }
         console.log('u8 length: ',stmsg.byteLength);
-	var hex = '';
-        console.log("length: ",stmsg.byteLength);
-	for(var i=0;i<msgevent.data.byteLength-1;i++) {
-		hex += ' 0x'+d2.getUint8(i).toString(16);
-	}
-        console.log('stmsg: ',hex);
         numReceived++;
-        return;
-      }
-      d1 = new DataView(msgevent.data);
-      d3 = new DataView(stmsg);
-      console.log('stmsg length: ',stmsg.byteLength);
-      for (i=0; i < msgevent.data.byteLength;i++) {
-        d3.setUint8(lastIdx,d1.getUint8(i));
-        lastIdx++;
-      }
-      console.log('u8 length: ',stmsg.byteLength);
-      numReceived++;
-      console.log('str length: ',msgevent.data.byteLength);
-        d1 = new DataView(stmsg);
-	var hex = '';
-      console.log("length: ",stmsg.byteLength);
-	for(var i=0;i<stmsg.byteLength-1;i++) {
-		hex += ' 0x'+d1.getUint8(i).toString(16);
-	}
-      console.log('stmsg end: ',stmsg.byteLength," ",hex);
-        // message received, do something
-    };
+        console.log('str length: ',msgevent.data.byteLength);
+          d1 = new DataView(stmsg);
+	  var hex = '';
+        console.log("length: ",stmsg.byteLength);
+	  for(var i=0;i<stmsg.byteLength-1;i++) {
+		  hex += ' 0x'+d1.getUint8(i).toString(16);
+	  }
+        console.log('stmsg end: ',stmsg.byteLength," ",hex);
+        if (stmsg.byteLength >= 120) {
+          if (numMsg > 0) {
+            console.log('+++decryp MSG!!!');
+            decryptMsg(stmsg);
+            console.log('decryptMsg done!!!');
+          }
+        }
+          // message received, do something
+      };
+    }
+console.log('callWebsocket1');
+  callWebsocket('getapdeflist');
+  
   </script>
 </body>
 </html>

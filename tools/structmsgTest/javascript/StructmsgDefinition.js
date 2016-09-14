@@ -495,10 +495,16 @@ T.log('after crc offset: '+offset+' totalLgth: '+totalLgth+' crc: '+crc.toString
       var fieldIdx;
       var result;
       var obj = new Object();
+      var resultData2;
     
-      result = stmsgDef.structmsg.create(stmsgDef.numFields - stmsgDef.STRUCT_MSG_NUM_HEADER_FIELDS - stmsgDef.STRUCT_MSG_NUM_CMD_HEADER_FIELDS, resultData);
+T.log('create_msgFromDefinition4: '+typeof resultData, '1.info', "StructmsgDefinition.js", true);
+      resultData.handle = 'unknowwn';
+      resultData2 = "";
+      result = stmsgDef.structmsg.create(stmsgDef.numFields - stmsgDef.STRUCT_MSG_NUM_HEADER_FIELDS - stmsgDef.STRUCT_MSG_NUM_CMD_HEADER_FIELDS, resultData2);
       if(result != stmsgDef.STRUCT_MSG_ERR_OK) return result;
-      handle = resultData.handle;
+      handle = resultData2.handle;
+T.log('<<<create_msgFromDefinition handle: '+handle, '1.info', "espStart.js", true);
+      resultData.handle = handle;
       fieldIdx = 0;
       while (fieldIdx < stmsgDef.numFields) {
         fieldInfo = stmsgDef.fieldInfos[fieldIdx];

@@ -361,6 +361,7 @@ print("delete_fieldDefinitions not yet implemented");
     // ============================= create_msgFromDefinition ========================
     
     create_msgFromDefinition: function(defName, resultData)  {
+EM.log('create_msgFromDefinition2: '+typeof resultData, '1.info', "espStart.js", true);
       var stmsgApi = this;
       var result = stmsgApi.definitions.createMsgFromDefinition(defName, resultData);
       return stmsgApi.checkOKOrErr(result, "create_msgFromDefinition", "");

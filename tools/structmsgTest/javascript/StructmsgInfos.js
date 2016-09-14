@@ -111,18 +111,20 @@ EM.addModule("Esp-StructmsgInfos", function(T, name) {
     create: function (numFields, resultData) {
       var stmsgInfos = this;
       var result;
+      var resultData2 = new Object();
 
       stmsgInfo = new T.StructmsgInfo();
       stmsgInfo.fieldNameInfos = stmsgInfos.fieldNameInfos;
       stmsgInfo.structmsg = stmsgInfos.structmsg;
       stmsgInfo.structmsgInfos = stmsgInfos;
-      result=stmsgInfo.create(numFields, resultData);
+      resultData2.handle = "";
+      result=stmsgInfo.create(numFields, resultData2);
       if(result != stmsgInfo.STRUCT_MSG_ERR_OK) return result;
-      structmsgInfo = resultData.data;
-      resultData.handle = resultData.data.handle;
+      structmsgInfo = resultData2.data;
+      resultData.handle = resultData2.handle;
       stmsgInfos.numHandles++;
 //T.log(structmsgInfo.toDebugString(), 'info', 'stmsgInfo', true);
-      stmsgInfos.handles.push({handle: structmsgInfo.handle, structmsg: stmsgInfo});
+      stmsgInfos.handles.push({handle: resultData.handle, structmsg: stmsgInfo});
       stmsgInfos.result= stmsgInfos.STRUCT_MSG_ERR_OK;
       stmsgInfos.updateHeaders(structmsgInfo);
       return stmsgInfos.STRUCT_MSG_ERR_OK;
