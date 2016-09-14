@@ -68,6 +68,7 @@ print("offset: "..tostring(offset).." endOffset: "..tostring(endOffset))
   cnt=cnt+1
 end
 
+numMsg=0
 function srv_listen(sck)
 print("srv_listen")
   srv_sck=sck
@@ -75,14 +76,21 @@ print("srv_listen")
     print("receive: ".."!"..tostring(payload).."!")
     srv_sck=sck
     if (payload == "getaplist\r\n") then
+print("++getaplist")
       wifi.sta.getap(buildAPList)
       return
     end
     if (tostring(payload) == "getapdeflist\r\n") then
 --      srv_sck:send("Hello World",1)
 --      return
-      numRows=2
-      encryptedDef=buildStmsgAPDefList(t,useBig,numRows)
+      if (numMsg == 0) then
+        numRows=2
+        encryptedDef=buildStmsgAPDefList(t,useBig,numRows)
+        numMsg = numMsg+1
+      else
+print("++getaplist")
+        wifi.sta.getap(buildAPList)
+      end
 print("encryptedDef: "..tostring(string.len(encryptedDef)))
 --      encryptedDef=crypto.encrypt("AES-CBC", cryptkey, "Hello world 1234",cryptkey)
 --      srv_sck:send("HELLO: "..encryptedDef,1)
@@ -128,7 +136,7 @@ function ProvisioningServerStart(big)
   end
   wifi.sta.disconnect()
   wifi.setmode(wifi.STATIONAP)
-  wifi.ap.config({ssid="SPIRIT21_Connect",auth=wifi.AUTH_OPEN})
+  wifi.ap.config({ssid="testDevice_connect",auth=wifi.AUTH_OPEN})
 
   if (not tmr.alarm(1,1000,tmr.ALARM_AUTO,function()
      ip=wifi.ap.getip()
