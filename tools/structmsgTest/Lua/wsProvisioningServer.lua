@@ -35,7 +35,7 @@ end
 --srv_sck=nil
 
 
-junk=100
+junk=5116
 offset=0
 cnt=1
 
@@ -84,14 +84,15 @@ print("++getaplist")
 --      srv_sck:send("Hello World",1)
 --      return
       if (numMsg == 0) then
+print("++getapdeflist")
         numRows=2
         encryptedDef=buildStmsgAPDefList(t,useBig,numRows)
         numMsg = numMsg+1
+print("encryptedDef: "..tostring(string.len(encryptedDef)))
       else
 print("++getaplist")
         wifi.sta.getap(buildAPList)
       end
-print("encryptedDef: "..tostring(string.len(encryptedDef)))
 --      encryptedDef=crypto.encrypt("AES-CBC", cryptkey, "Hello world 1234",cryptkey)
 --      srv_sck:send("HELLO: "..encryptedDef,1)
       offset=1
