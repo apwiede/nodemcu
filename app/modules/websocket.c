@@ -59,6 +59,8 @@
 
 #define TCP ESPCONN_TCP
 
+#define SSL_BUFFER_SIZE 5120
+
 static ip_addr_t host_ip; // for dns
 
 enum websocket_opcode {
@@ -196,8 +198,6 @@ int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resDa
   uint8_t FIN = byte & 0x80;
   uint8_t opcode = byte & 0x0F;
 
-//ets_printf("frame opcode: %02X FIN: %02X len: %d\r\n", opcode, FIN, dataLenb);
-
   if ((opcode > 0x03 && opcode < 0x08) || opcode > 0x0B) {
     ets_sprintf(err_opcode, "%d", opcode);
     checkErrOK(gL, WEBSOCKET_ERR_INVALID_FRAME_OPCODE, err_opcode);
@@ -262,7 +262,6 @@ int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resDa
     *resData = DATA;
     *len = SIZE;
     DATA[SIZE] = 0;
-//    ets_printf("SIZE: %d  len: %d, \r\n", SIZE, dataLenb);
 
     if (SIZE > 0) {
       if(wud->cb_receive_ref != LUA_NOREF && wud->self_ref != LUA_NOREF) {
@@ -362,7 +361,6 @@ int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url,lwebsocket_userdata 
     os_free(key);
     checkErrOK(gL, result, "espconn_sent");
   } else if (wud->isWebsocket == 1) {
-//    ets_printf("WEBSOCKET MESSAGE \r\n");
     websocket_parse(string, os_strlen(string), data, lgth, wud);
   }
   return WEBSOCKET_ERR_OK;
@@ -372,7 +370,6 @@ int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url,lwebsocket_userdata 
 
 static void websocket_server_disconnected(void *arg)    // for tcp server only
 {
-ets_printf("websocket_server_disconnected is called.\n");
   NODE_DBG("websocket_server_disconnected is called.\n");
   struct espconn *pesp_conn = arg;
   if(gL == NULL) {
@@ -423,7 +420,6 @@ ets_printf("websocket_server_disconnected is called.\n");
 
 static void websocket_socket_disconnected(void *arg)    // tcp only
 {
-ets_printf("websocket_socket_disconnected is called.\n");
   NODE_DBG("websocket_socket_disconnected is called.\n");
   struct espconn *pesp_conn = arg;
   if(pesp_conn == NULL) {
@@ -513,7 +509,6 @@ static void websocket_socket_received(void *arg, char *pdata, unsigned short len
 // End Websocket
 // Websocket
   } else {
-//ets_printf("NORMAL MESSAGE \r\n");
 // End Websocket
     if ((strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
       wud->isWebsocket = 1;
@@ -567,7 +562,7 @@ static void socket_connect(struct espconn *pesp_conn)
 
 #ifdef CLIENT_SSL_ENABLE
   if(wud->secure){
-    espconn_secure_set_size(ESPCONN_CLIENT, 5120); /* set SSL buffer size */
+    espconn_secure_set_size(ESPCONN_CLIENT, SSL_BUFFER_SIZE); /* set SSL buffer size */
     espconn_secure_connect(pesp_conn);
   }
   else
@@ -1042,7 +1037,6 @@ static int websocket_start( lua_State* L, const char *mt )
 // client disconnect and unref itself
 static int websocket_close( lua_State* L, const char *mt )
 {
-ets_printf("websocket_close is called\r\n");
   NODE_DBG("websocket_close is called.\n");
   bool isserver = false;
   int i = 0;
@@ -1289,27 +1283,37 @@ static int websocket_on( lua_State* L, const char *mt )
 
 static int websocket_writeData( const char *payload, int size, lwebsocket_userdata *wud, int opcode )
 {
-  uint8_t byte;
-  int fsize = size + 2;
-  char * buff = os_malloc(fsize);
-  int SIZE;
+  uint8_t hdrBytes[4]; // we have either 2 or 4 bytes depending on length of message
+  int hdrLgth;
+  int fsize;
+  uint8_t*buff;
+  int i;
 
+  hdrLgth = 2;
+  hdrBytes[0] = 0x80; //set first bit
+  hdrBytes[0] |= opcode; //frame->opcode; //set op code
+  if (size < 126) {
+    hdrBytes[1] = size;
+  } else {
+    if (size < SSL_BUFFER_SIZE - sizeof(hdrBytes)) {
+      hdrLgth += 2;
+      hdrBytes[1] = 126;
+      hdrBytes[2] = (size >> 8) & 0xFF;
+      hdrBytes[3] = size & 0xFF;
+    } else {
+      return WEBSOCKET_ERR_TOO_MUCH_DATA;
+    }
+  }
+  fsize = size + hdrLgth;
+  buff = os_malloc(fsize);
   if (buff == NULL) {
     return WEBSOCKET_ERR_OUT_OF_MEMORY;
   }
-  byte = 0x80; //set first bit
-  byte |= opcode; //frame->opcode; //set op code
-  buff[0] = byte;
-  byte = 0;
-  SIZE = size;
-  if (SIZE < 126) {
-    byte = size;
-    buff[1] = byte;
-  } else {
-    return WEBSOCKET_ERR_TOO_MUCH_DATA;
+  for (i = 0; i < hdrLgth; i++) {
+    buff[i] = hdrBytes[i];
   }
 
-  os_memcpy(&buff[2], payload, byte);
+  os_memcpy(&buff[hdrLgth], (uint8_t *)payload, size);
   espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
   os_free(buff);
   return WEBSOCKET_ERR_OK;
