@@ -99,12 +99,15 @@ typedef struct lwebsocket_userdata
   uint8_t secure;
 #endif
   uint8_t isWebsocket;
-  char *url;
+  uint8_t num_urls;
+  uint8_t max_urls;
+  char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
+  char *curr_url; // that is url which has been provided in the received data
 }lwebsocket_userdata;
 
 // Websocket
 
-int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url, lwebsocket_userdata *wud, char **resData, int *len);
+int ICACHE_FLASH_ATTR websocket_recv(char * string, lwebsocket_userdata *wud, char **resData, int *len);
 int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len, lwebsocket_userdata *wud);
 static int websocket_writeData( const char *payload, int size, lwebsocket_userdata *wud, int opcode );
 
@@ -221,30 +224,30 @@ int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resDa
   }
   byte = data[1];
 
-  char * DATA;
-  int MASKED = byte & 0x80;
-  int SIZE = byte & 0x7F;
+  char * recv_data;
+  int masked = byte & 0x80;
+  int size = byte & 0x7F;
   int offset = 2;
 
-  if (SIZE == 126) {
-    SIZE = 0;
-    SIZE = data[3];                  //LSB
-    SIZE |= (uint64_t) data[2] << 8; //MSB
+  if (size == 126) {
+    size = 0;
+    size = data[3];                  //LSB
+    size |= (uint64_t) data[2] << 8; //MSB
     offset = 4;
-  } else if (SIZE == 127) {
-    SIZE = 0;
-    SIZE |= (uint64_t) data[2] << 56;
-    SIZE |= (uint64_t) data[3] << 48;
-    SIZE |= (uint64_t) data[4] << 40;
-    SIZE |= (uint64_t) data[5] << 32;
-    SIZE |= (uint64_t) data[6] << 24;
-    SIZE |= (uint64_t) data[7] << 16;
-    SIZE |= (uint64_t) data[8] << 8;
-    SIZE |= (uint64_t) data[9];
+  } else if (size == 127) {
+    size = 0;
+    size |= (uint64_t) data[2] << 56;
+    size |= (uint64_t) data[3] << 48;
+    size |= (uint64_t) data[4] << 40;
+    size |= (uint64_t) data[5] << 32;
+    size |= (uint64_t) data[6] << 24;
+    size |= (uint64_t) data[7] << 16;
+    size |= (uint64_t) data[8] << 8;
+    size |= (uint64_t) data[9];
     offset = 10;
   }
 
-  if (MASKED) {
+  if (masked) {
     //read mask key
     char mask[4];
     uint64_t i;
@@ -254,26 +257,27 @@ int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resDa
     mask[2] = data[offset + 2];
     mask[3] = data[offset + 3];
     offset += 4;
-    for (i = 0; i < SIZE; i++) {
+    for (i = 0; i < size; i++) {
       data[i + offset] ^= mask[i % 4];
     }
   }
-    DATA = &data[offset];
-    *resData = DATA;
-    *len = SIZE;
-    DATA[SIZE] = 0;
+    recv_data = &data[offset];
+    *resData = recv_data;
+    *len = size;
+    recv_data[size] = 0;
 
-    if (SIZE > 0) {
+    if (size > 0) {
       if(wud->cb_receive_ref != LUA_NOREF && wud->self_ref != LUA_NOREF) {
         lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->cb_receive_ref);
         lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->self_ref);  // pass the userdata(server) to callback func in lua
-        lua_pushlstring(gL, DATA, SIZE);
-        lua_call(gL, 2, 0);
+        lua_pushlstring(gL, recv_data, size);
+        lua_pushlstring(gL, wud->curr_url, c_strlen(wud->curr_url));
+        lua_call(gL, 3, 0);
       }
     }
 
-    if (SIZE + offset < dataLenb) {
-      websocket_parse(&data[SIZE + offset], dataLenb - (SIZE + offset), resData, len, wud);
+    if (size + offset < dataLenb) {
+      websocket_parse(&data[size + offset], dataLenb - (size + offset), resData, len, wud);
     }
   return WEBSOCKET_ERR_OK;
 }
@@ -317,20 +321,27 @@ static uint8 *toBase64 ( const uint8 *msg, size_t *len){
 
 // ============================ websocket_recv =========================================
 
-int ICACHE_FLASH_ATTR websocket_recv(char * string,char*url,lwebsocket_userdata *wud, char **data, int *lgth) {
-  if (strstr(string, wud->url) != 0) {
-    char * key;
-    if (strstr(string, header_key) != 0) {
-      char * begin = strstr(string, header_key) + os_strlen(header_key);
-      char * end = strstr(begin, "\r");
+int ICACHE_FLASH_ATTR websocket_recv(char * string, lwebsocket_userdata *wud, char **data, int *lgth) {
+  char * key;
+  int idx;
+  int found;
+
+  idx = 0;
+  if ((wud->curr_url != NULL) && (strstr(string, wud->curr_url) != NULL)) {
+    if (strstr(string, header_key) != NULL) {
+      char *begin = strstr(string, header_key) + os_strlen(header_key);
+      char *end = strstr(begin, "\r");
       key = os_malloc((end - begin) + 1);
       checkAllocgLOK(key);
       os_memcpy(key, begin, end - begin);
       key[end - begin] = 0;
     }
-    const char *trailer = "\r\n\r\n";
-    int trailerLen = os_strlen(trailer);
-    size_t digestLen = 20; //sha1 is always 20 byte long
+    const char *trailer;
+    trailer = "\r\n\r\n";
+    int trailerLen;
+    trailerLen = os_strlen(trailer);
+    size_t digestLen;
+    digestLen = 20; //sha1 is always 20 byte long
     uint8_t digest[digestLen];
     int payloadLen;
     char *payload;
@@ -474,6 +485,9 @@ static void websocket_socket_received(void *arg, char *pdata, unsigned short len
 {
   NODE_DBG("websocket_socket_received is called.\n");
   struct espconn *pesp_conn = arg;
+  char url[50] = { 0 };
+  int idx;
+
   if(pesp_conn == NULL) {
     checkErrOK(gL, WEBSOCKET_ERR_PESP_CONN_IS_NIL, "websocket_socket_received");
     return;
@@ -488,7 +502,6 @@ static void websocket_socket_received(void *arg, char *pdata, unsigned short len
   if(wud->self_ref == LUA_NOREF)
     return;
 // Websocket
-  char url[50] = { 0 };
   if (strstr(pdata, "GET /") != 0) {
     char *begin = strstr(pdata, "GET /") + 4;
     char *end = strstr(begin, " ");
@@ -496,7 +509,16 @@ static void websocket_socket_received(void *arg, char *pdata, unsigned short len
     url[end - begin] = 0;
   }
   if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
-    wud->isWebsocket = 1;
+    idx = 0;
+    wud->curr_url = NULL;
+    while (idx < wud->num_urls) {
+      if (c_strcmp(url, wud->urls[idx]) == 0) {
+        wud->curr_url = wud->urls[idx];
+        wud->isWebsocket = 1;
+        break;
+      }
+      idx++;
+    }
   }
 
   if(wud->isWebsocket == 1) {
@@ -504,7 +526,7 @@ static void websocket_socket_received(void *arg, char *pdata, unsigned short len
     int lgth = 0;
     int result;
 
-    result = websocket_recv(pdata,url,wud, &data, &lgth);
+    result = websocket_recv(pdata, wud, &data, &lgth);
     checkErrOK(gL,result,"websocket_recv");
 // End Websocket
 // Websocket
@@ -515,6 +537,7 @@ static void websocket_socket_received(void *arg, char *pdata, unsigned short len
     }
     lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->cb_receive_ref);
     lua_rawgeti(gL, LUA_REGISTRYINDEX, wud->self_ref);  // pass the userdata(server) to callback func in lua
+    lua_pushstring(gL, wud->curr_url);
     lua_pushlstring(gL, pdata, len);
     lua_call(gL, 2, 0);
 // Websocket
@@ -709,7 +732,10 @@ static void websocket_server_connected(void *arg) // for tcp only
   skt->secure = 0;    // as a server SSL is not supported.
 #endif
   skt->isWebsocket = wud->isWebsocket;
-  skt->url = wud->url;
+  skt->num_urls = wud->num_urls;
+  skt->max_urls = wud->max_urls;
+  skt->curr_url = wud->curr_url;
+  skt->urls = wud->urls;
 
   skt->pesp_conn = pesp_conn;   // point to the espconn made by low level sdk
   pesp_conn->reverse = skt;   // let espcon carray the info of this userdata(net.socket)
@@ -823,7 +849,12 @@ static int websocket_create( lua_State* L, const char *mt )
   wud->secure = secure;
 #endif
   wud->isWebsocket = 0;
-  wud->url = NULL;
+  wud->num_urls = 0;
+  wud->max_urls = 4;
+  wud->urls = (char **)c_zalloc(sizeof(char *) * wud->max_urls);
+  checkAllocgLOK(wud->urls);
+  wud->urls[0] = NULL;
+  wud->curr_url = NULL;
 
   // set its metatable
   luaL_getmetatable(L, mt);
@@ -860,6 +891,7 @@ static int websocket_create( lua_State* L, const char *mt )
     pTcpServer = pesp_conn;
   }
 
+#ifdef NOTDEF
   if ( lua_isstring(L, stack) )
   {
     // we have an url for the path otherwise use "/echo"
@@ -872,6 +904,7 @@ static int websocket_create( lua_State* L, const char *mt )
   } else {
     wud->url = "/echo"; // default to /echo
   }
+#endif
 
   gL = L;   // global L for net module.
 
@@ -1213,6 +1246,50 @@ static int websocket_delete( lua_State* L, const char *mt )
   return 0;  
 }
 
+// ============================ webserver_set_recv_url =======================
+
+static int webserver_set_recv_url( lua_State* L, const char *mt )
+{
+  NODE_DBG("webserver_set_recv_url is called.\n");
+  bool isserver = false;
+  lwebsocket_userdata *wud;
+  size_t sl;
+  int idx;
+  const char *url;
+  char *cp;
+  
+  wud = (lwebsocket_userdata *)luaL_checkudata(L, 1, mt);
+  luaL_argcheck(L, wud, 1, "Server/Socket expected");
+  if(wud==NULL){
+    NODE_DBG("userdata is nil.\n");
+    return 0;
+  }
+
+  if (mt!=NULL && c_strcmp(mt, "websocket.server")==0)
+    isserver = true;
+  else if (mt!=NULL && c_strcmp(mt, "websocket.socket")==0)
+    isserver = false;
+  else
+  {
+    NODE_DBG("wrong metatable for websocket_on.\n");
+    return 0;
+  }
+
+  url = luaL_checklstring( L, 2, &sl );
+  if (wud->num_urls >= wud->max_urls) {
+    wud->max_urls += 4;
+    wud->urls = c_realloc(wud->urls, sizeof(char *) * wud->max_urls);
+    checkAllocgLOK(wud->urls);
+  }
+  wud->urls[wud->num_urls] = (char *)c_zalloc(c_strlen(url) + 1);
+  cp = wud->urls[wud->num_urls];
+  checkAllocgLOK(cp);
+  cp[c_strlen(url)] = 0;
+  c_memcpy(cp, url, c_strlen(url));
+  wud->num_urls++;
+  return 0;
+}
+
 // ============================ websocket_on =======================
 
 // Lua: socket/udpserver:on( "method", function(s) )
@@ -1450,6 +1527,15 @@ static int websocket_server_close( lua_State* L )
 }
 
 
+// ============================ websocket_server_set_recv_url =======================
+
+// Lua: server:seturl( url )
+static int websocket_server_set_recv_url( lua_State* L )
+{
+  const char *mt = "websocket.server";
+  return webserver_set_recv_url(L, mt);
+}
+
 // ============================ websocket_createConnection =======================
 
 // Lua: s = websocket.createConnection(function(conn))
@@ -1519,6 +1605,7 @@ static const LUA_REG_TYPE websocket_socket_map[] =  {
 static const LUA_REG_TYPE websocket_server_map[] =  {
   { LSTRKEY( "listen" ),   LFUNCVAL( websocket_server_listen ) },
   { LSTRKEY( "close" ),    LFUNCVAL( websocket_server_close ) },
+  { LSTRKEY( "seturl" ),   LFUNCVAL( websocket_server_set_recv_url ) },
 //  { LSTRKEY( "delete" ), LFUNCVAL( websocket_server_delete ) },
   { LSTRKEY( "__gc" ),     LFUNCVAL( websocket_server_delete ) },
   { LSTRKEY( "__index" ),  LROVAL( websocket_server_map ) },
