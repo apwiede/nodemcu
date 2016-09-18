@@ -1,5 +1,8 @@
 #!/usr/bin/env tclsh8.6
 
+set newlinePattern {(?n)\A[\r\n\f]}
+set identifier {\A\w+}
+
 set tokenPatterns [list \
   [list {\A[@].}            DOC_TOKEN] \
   [list {\A/[*][*]}         DOC_COMMENT] \
@@ -9,16 +12,14 @@ set tokenPatterns [list \
   [list {\A[/][/]}          LINE_COMMENT] \
   [list {\A\d+}             NUMBER] \
   [list {\A0x[[:xdigit:]]+} HEX_NUMBER] \
-  [list {\A\w+}             IDENTIFIER] \
+  [list $identifier         IDENTIFIER] \
   [list {\A\s+}             WHITESPACE] \
   [list {.}                 CHAR] \
   [list {\A[.]}             DOT] \
   [list {\A[']}             SINGLE_QUOTE] \
   [list {\A[\"]}            DOUBLE_QUOTE] \
-  [list {\A[\r\n\f]}        EOL] \
+  [list $newlinePattern     EOL] \
 ]
-
-set newlinePattern {\A[\r\n\f\]}
 
 set ::inText false
 set ::inComment false
@@ -248,18 +249,19 @@ proc nextNoneWsToken {offset tokenTypeVar tokenVar} {
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
 
+puts stderr "nextNoneWsToken1:!"
   set tokenType ""
   set offset [nextToken $offset tokenType token]
   if {$::isEof} {
     return -1
   }
-puts stderr "netxNoneWsToken: tokenType: $tokenType!$token!"
   while {$tokenType eq "WHITESPACE"} {
     set offset [nextToken $offset tokenType token]
     if {$::isEof} {
       return -1
     }
   }
+puts stderr "nextNoneWsToken2: tokenType: $tokenType!$token!"
 #puts stderr "nnwt: $tokenType!$token!$::lineNo!"
   return $offset
 }
@@ -267,7 +269,7 @@ puts stderr "netxNoneWsToken: tokenType: $tokenType!$token!"
 # ================================= nextTokenIsLineEnd =============================
 
 proc nextTokenIsLineEnd {offset} {
-  if {[regexp -start $offset $::currLine $::newlinePattern]} {
+  if {[regexp -start $offset $::newlinePattern $::currLine]} {
     return true
   }
   return false
@@ -306,7 +308,7 @@ proc parseString {offset tokenTypeVar tokenVar} {
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
 
-puts stderr "parseString1"
+puts stderr "PARSE_STRING"
   set token $::stringType
   set tokenType ""
 puts stderr "parseString2"
@@ -484,7 +486,7 @@ proc parseCode {offset tokenTypeVar tokenVar} {
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
 
-puts stderr "parseCode!offset: $offset"
+puts stderr "parseCode0!offset: $offset"
     if {[llength $::parserStack] > 0} {
       set entry [lindex $::parserStack 0]
       set ::parserStack [lrange $::parserStack 1 end]
@@ -493,7 +495,7 @@ puts stderr "parserStack2: [llength $::parserStack]!"
     } else {
       set offset [nextNoneWsToken $offset tokenType token]
     }
-puts stderr "parseCode: $tokenType $token!"
+puts stderr "parseCode1: $tokenType $token!$::scanMode!"
     if {$::scanMode eq "SCAN_DOC_COMMENT"} {
       error "Unexpected documentation comment."
     }
@@ -504,6 +506,18 @@ puts stderr "parseCode: $tokenType!$token!offset: $offset"
   return $offset
 }
 
+# ================================= nextTokenIsIdentifier =============================
+
+proc nextTokenIsIdentifier {offset} {
+puts stderr "RR: [string range $::currLine $offset end]!"
+  if {[regexp -start $offset $::identifier $::currLine]} {
+puts stderr "isIdentifier"
+    return true
+  }
+puts stderr "not isIdentifier"
+  return false
+}
+
 # ================================= nextParserToken =============================
 
 proc nextParserToken {offset tokenTypeVar tokenVar} {
@@ -512,6 +526,7 @@ proc nextParserToken {offset tokenTypeVar tokenVar} {
   
   set tokenLst [list]
   while {true} {
+puts stderr "nextParserToken1: #stack: [llength $::parserStack]!stack: $::parserStack!"
     if {[llength $::parserStack] > 0} {
       set entry [lindex $::parserStack 0]
       set ::parserStack [lreplace $::parserStack 0 0]
@@ -522,34 +537,42 @@ proc nextParserToken {offset tokenTypeVar tokenVar} {
         return -1
       }
     }
-puts stderr "nextParserToken: $tokenType!$token!$::scanMode"
+puts stderr "nextParserToken2: $tokenType!$token!$::scanMode"
     if {($::scanMode eq "SCAN_COMMENT") || ($::scanMode eq "SCAN_LINE_COMMENT")} {
       set offset [parseComment $offset myTokenType myToken]
       continue
     }
     if {$::scanMode eq "SCAN_CODE"} {
-puts stderr "next_parser_token SCAN_CODE"
-      if {$tokenType eq "IDENTIFIER"} {
+puts stderr "next_parser_token3: token: $token scanMode: SCAN_CODE"
+puts stderr "next_parser_token3a: [string range $::currLine $offset end]!"
+      if {[regexp -start 0 ${::identifier}\$ $token]} {
+puts stderr "IS IDENTIFIER!"
+puts stderr "next_parser_token4: $token"
         lappend tokenLst [list $tokenType $token]
+puts stderr "next_parser_token4c: tokenLst: $tokenLst!"
         while {true} {
           set offset [parseCode $offset myTokenType myToken]
-puts stderr "next_parser_token 2: parseCode: $myTokenType!$myToken!"
+puts stderr "next_parser_token401: parseCode: $myTokenType!$myToken!"
           if {$myTokenType ne "DOT"} {
             break
           }
+          lappend tokenLst [list $myTokenType $myToken]
+puts stderr "next_parser_token402: tokenLst: $tokenLst!"
           set offset [parseCode $offset myTokenType myToken]
+puts stderr "next_parser_token403: tokentype: $myTokenType token: $myToken!"
           if {$myTokenType eq "IDENTIFIER"} {
 puts stderr "ident: $myToken!"
             lappend tokenLst [list $myTokenType $myToken]
+puts stderr "next_parser_token404: tokenLst: $tokenLst!"
           } else {
-
+puts stderr "MISSING CODE1!!"
           }
         }
 puts stderr "tokenLst: $tokenLst!"        
         lappend ::parserStack [list $myTokenType $myToken]
         foreach {tokenType token} [lindex $tokenLst 0] break
-        break
       }
+      break
     } else {
 puts stderr "nextParserToken2: $tokenType!$token!$::scanMode"
       if {$::scanMode eq "SCAN_STRING"} {
@@ -574,8 +597,39 @@ proc parseVariable {offset level contextVar tokenTypeVar tokenVar} {
   upvar $contextVar context
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
-puts stderr "parseVariable"
 
+puts stderr "PARSE_VARIABLE"
+puts stderr "DEB_DETECTOR ($::lineNo); Find Variable in '[dict get $context name]'."
+  set offset [parseCode $offset tokenType token]
+
+puts stderr "PARSE_VARIABLE1 token: $token"
+  if {[dict get $context objType] eq "OBJ_T_FILE"} {
+puts stderr "PARSE_VARIABLE2"
+    if {$tokenType ne "IDENTIFIER"} {
+      error "Variable name expected, found '$token'."
+    }
+    dict set context objs $token name $token
+    dict set context objs $token objType OBJ_T_VARIABLE
+    dict set context objs $token scope context
+    set varContext [dict get $context objs $token]
+puts stderr "DEB_DATABASE ($::lineNo): Variable '$token'"
+    if {$::lastDoc ne [list]} {
+      if {[dict get $::lastDoc objType] eq "OBJ_T_UNKNOWN"} {
+        if {[dict exists $varContext doc]} {
+          puts stderr "warning Comment for '$token' already exists, ignoring new."
+        } else {
+          dict set varContext doc $::lastDoc
+puts stderr "DEB_PARSER ($::lineNo): Comment for variable '$token'." 
+        }
+      }
+    }
+  }
+puts stderr "DEB_DETECTOR ($::lineNo): Found Variable in '[dict get $context name]'."
+puts stderr "context: $context!"
+  set ::lastDoc undef
+puts stderr "PARSE_VARIABLE3"
+  set tokenType "CHAR"
+  set token ";"
   return $offset
 }
 
@@ -585,8 +639,36 @@ proc parseThis {offset level contextVar tokenTypeVar tokenVar} {
   upvar $contextVar context
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
-puts stderr "parseThis"
+puts stderr "PARSE_THIS"
+puts stderr "DEB_DETECTOR ($::lineNo): Find member variable in ' [dict get $context name]' with token '$token'." 
 
+  if {$token =~ s/^this\.($identifier)$/\1/ } {
+    set offset [parseCode $offset tokenType, token]
+    if {$token ne "="} {
+puts stderr "DEB_DETECTOR ($::lineNo): Not found member variable in '[dict get $context name]' with token '$token'." 
+      return
+    }
+        
+    if {![dict exists $context members $token]} {
+      dict set context members $token name $token
+      dict set context members $token name objType OBJ_T_MEMBERVAR 
+      dict set context members $token name scope context 
+            
+puts stderr "DEB_DATABASE ($::lineNo): Added member variable '$token' to class '[dict get $context name]'." 
+    }
+    if {[$::lastdoc me [list]} {
+      if {[dict exists $context members $token doc]} {
+        puts stderr "warning Comment for '$token' already exists, ignoring new."
+      } else {
+        dict set context members $token doc $::lastDoc
+puts stderr "DEB_DATABASE ($::lineNo): Comment for member variable '$token'."
+      }
+    }
+    set ::lastDoc undef
+  }
+
+puts stderr "DEB_DETECTOR ($::lineNo): Found Member variable in '[dict get $context name]'."
+puts stderr "PARSE_THIS END"
   return $offset
 }
 
@@ -596,8 +678,8 @@ proc parseFunction {offset level contextVar tokenTypeVar tokenVar} {
   upvar $contextVar context
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
-puts stderr "parseFunction LEVEL: $level Find Function Definition in: "
-puts stderr "context: $context!"
+puts stderr "PARSE_FUNCTION"
+puts stderr "parseFunction LEVEL: $level Find Function Definition in: [dict get $context name]"
   
   set offset [parseCode $offset tokenType token]
 puts stderr "parseFunction1: $tokenType $token!"
@@ -716,7 +798,7 @@ proc parsePrototype {offset level contextVar tokenTypeVar tokenVar} {
   upvar $contextVar context
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
-puts stderr "parsePrototype"
+puts stderr "PARSE_PROTOTYPE"
 
   return $offset
 }
@@ -727,7 +809,7 @@ proc parseInterface {offset level contextVar tokenTypeVar tokenVar} {
   upvar $contextVar context
   upvar $tokenTypeVar tokenType
   upvar $tokenVar token
-puts stderr "parseInterface"
+puts stderr "PARSE_INTERFACE"
 
   return $offset
 }
@@ -740,10 +822,11 @@ proc parse {contextVar offset levelVar tokenType token} {
 
 puts stderr "LEVEL: $level contextName: [dict get $context name]!"
 puts stderr "Parser1 ($::lineNo) token: $token!"
+puts stderr ">>>scanMode1:!"
 #  set offset [nextToken $offset tokenType token]
 #puts stderr "START: $tokenType!$token!scanMode: $::scanMode!"
   while {![eof $::fd]} {
-puts stderr "Parser2 ($::lineNo)"
+puts stderr "Parser BEGIN LOOP ($::lineNo)"
     set offset [nextParserToken $offset tokenType token]
     if {$::isEof} {
       return -1
@@ -759,7 +842,7 @@ puts stderr "docComment:!"
 puts stderr "docComment: $tokenType!$token!scanMode: $::scanMode!"
       }
       SCAN_CODE {
-puts stderr "parse: $::scanMode! tokenType: $tokenType!"
+puts stderr "parse: >>>scanMode2: $::scanMode! tokenType: $tokenType!"
         switch $tokenType {
           CHAR {
 puts stderr "scanCode CHAR $token!"
@@ -770,7 +853,7 @@ puts stderr "scanCode CHAR $token!"
               "\}" {
                 incr ::level -1
                 if {$level < 0} {
-                  break ; # error!!
+                  break
                 }
               }
               default {
@@ -783,6 +866,7 @@ puts stderr "Parser ($::lineNo) scanCode IDENTIFIER $token!"
             switch $token {
               var {
                 set offset [parseVariable $offset $level context tokenType token]
+puts stderr ">>> variable"
               }
               this {
                 set offset [parseThis $offset $level context tokenType token]
@@ -833,6 +917,7 @@ if {0} {
 puts stderr "default $::scanMode!"
       }
     }
+puts stderr "END LOOP"
   }
 }
 
