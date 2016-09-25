@@ -179,6 +179,9 @@ ets_printf("createMsg: numFields: %d self: %p, *handle: %p, fields size: %d fiel
   self->numTableRowFields = 0;
   self->numRowFields = 0;
   self->fieldOffset = 0;
+  self->totalLgth = 0;
+  self->cmdLgth = 0;
+  self->headerLgth = 0;
   self->header = NULL;
 //  self->handleHdrInfoPtr = NULL;
   os_sprintf(self->handle, "%s%p", HANDLE_PREFIX, self);
@@ -287,6 +290,292 @@ static uint8_t addField(structmsgData_t *self, const uint8_t *fieldName, const u
   return STRUCT_MSG_ERR_OK;
 }
 
+// ================================= getFieldValue ====================================
+
+static uint8_t getFieldValue(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
+  return DATA_VIEW_ERR_OK;
+}
+
+// ================================= setFieldValue ====================================
+
+static uint8_t setFieldValue(structmsgData_t *self, const uint8_t *fieldName, int numericValue, uint8_t *stringValue) {
+  structmsgField_t *fieldInfo;
+  uint8_t fieldNameId;
+  int idx;
+  int numEntries;
+  int result;
+
+  if ((self->flags & STRUCT_MSG_IS_INITTED) == 0) {
+    return STRUCT_MSG_ERR_NOT_YET_INITTED;
+  }
+  result = self->structmsgDataView->getFieldNameIdFromStr(self->structmsgDataView, fieldName, &fieldNameId, STRUCT_MSG_NO_INCR);
+  checkErrOK(result);
+  switch (fieldNameId) {
+    case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
+    case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
+    case STRUCT_MSG_SPEC_FIELD_FILLER:
+    case STRUCT_MSG_SPEC_FIELD_CRC:
+    case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
+    case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
+      return STRUCT_MSG_ERR_FIELD_CANNOT_BE_SET;
+  }
+  idx = 0;
+  numEntries = self->numFields;
+  while (idx < numEntries) {
+    fieldInfo = &self->fields[idx];
+    if (fieldNameId == fieldInfo->fieldNameId) {
+      result = self->structmsgDataView->dvSetFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue);
+      checkErrOK(result);
+      fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+      break;
+    }
+    idx++;
+  }
+  return DATA_VIEW_ERR_OK;
+}
+
+
+// ================================= getTableFieldValue ====================================
+
+static uint8_t getTableFieldValue(structmsgData_t *self, int row, const uint8_t *fieldName, int numericValue, uint8_t **stringValue) {
+  return DATA_VIEW_ERR_OK;
+}
+
+// ================================= setTableFieldValue ====================================
+
+static uint8_t setTableFieldValue(structmsgData_t *self, int row, const uint8_t *fieldName, int numericValue, uint8_t **stringValue) {
+  return DATA_VIEW_ERR_OK;
+}
+
+// ================================= initMsg ====================================
+
+static uint8_t initMsg(structmsgData_t *self) {
+  int numEntries;
+  int idx;
+  size_t myLgth;
+  size_t fillerLgth;
+  size_t crcLgth;
+  structmsgField_t *fieldInfo;
+  structmsgField_t *fieldInfo2;
+
+  if ((self->flags & STRUCT_MSG_IS_INITTED) != 0) {
+    return STRUCT_MSG_ERR_ALREADY_INITTED;
+  }
+  self->fieldOffset = 0;
+  numEntries = self->numFields;
+  idx = 0;
+  self->headerLgth = 0;
+  while (idx < numEntries) {
+    fieldInfo = &self->fields[idx];
+    fieldInfo->fieldOffset = self->fieldOffset;
+    switch (fieldInfo->fieldNameId) {
+      case STRUCT_MSG_SPEC_FIELD_SRC:
+      case STRUCT_MSG_SPEC_FIELD_DST:
+      case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
+      case STRUCT_MSG_SPEC_FIELD_GUID:
+        self->headerLgth += fieldInfo->fieldLgth;
+        break;
+      case STRUCT_MSG_SPEC_FIELD_FILLER:
+        fillerLgth = 0;
+        crcLgth = 0;
+        if (self->flags & STRUCT_MSG_HAS_CRC) {
+          if (self->flags & STRUCT_MSG_UINT8_CRC) {
+            crcLgth = 1;
+          } else {
+            crcLgth = 2;
+          }
+        }
+        myLgth = self->fieldOffset + crcLgth - self->headerLgth;
+        while ((myLgth % 16) != 0) {
+          myLgth++;
+          fillerLgth++;
+        }
+        fieldInfo->fieldLgth = fillerLgth;
+        self->totalLgth = self->fieldOffset + fillerLgth + crcLgth;
+        self->cmdLgth = self->totalLgth - self->headerLgth;
+        break;
+    }
+    self->fieldOffset += fieldInfo->fieldLgth;
+    idx++;
+  }
+  if (self->structmsgDataView->dataView->data != NULL) {
+    os_free(self->structmsgDataView->dataView->data);
+  }
+  self->structmsgDataView->dataView->data = os_zalloc(self->totalLgth);
+  self->structmsgDataView->dataView->lgth = self->totalLgth;
+  self->flags |= STRUCT_MSG_IS_INITTED;
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ================================= dumpMsg ====================================
+
+static uint8_t dumpMsg(structmsgData_t *self) {
+  int numEntries;
+  int idx;
+  int valueIdx;
+  int result;
+  uint8_t uch;
+  int8_t ch;
+  uint16_t ush;
+  int16_t sh;
+  uint32_t uval;
+  int32_t val;
+  uint8_t *fieldTypeStr;
+  uint8_t *fieldNameStr;
+  structmsgField_t *fieldInfo;
+
+  ets_printf("handle: %s\r\n", self->handle);
+  numEntries = self->numFields;
+  ets_printf("  numFields: %d maxFields: %d\r\n", numEntries, (int)self->maxFields);
+  ets_printf("  headerLgth: %d cmdLgth: %d totalLgth: %d\r\n", self->headerLgth, self->cmdLgth, self->totalLgth);
+  ets_printf("  flags:");
+  if ((self->flags & STRUCT_MSG_ENCODED) != 0) {
+    ets_printf(" STRUCT_MSG_ENCODED");
+  }
+  if ((self->flags &  STRUCT_MSG_DECODED) != 0) {
+    ets_printf(" STRUCT_MSG_DECODED");
+  }
+  if ((self->flags & STRUCT_MSG_FIELD_IS_SET) != 0) {
+    ets_printf(" STRUCT_MSG_FIELD_IS_SET");
+  }
+  if ((self->flags & STRUCT_MSG_HAS_CRC) != 0) {
+    ets_printf(" STRUCT_MSG_HAS_CRC");
+  }
+  if ((self->flags & STRUCT_MSG_UINT8_CRC) != 0) {
+    ets_printf(" STRUCT_MSG_UNIT8_CRC");
+  }
+  if ((self->flags & STRUCT_MSG_HAS_FILLER) != 0) {
+    ets_printf(" STRUCT_MSG_HAS_FILLER");
+  }
+  if ((self->flags & STRUCT_MSG_SHORT_CMD_KEY) != 0) {
+    ets_printf(" STRUCT_MSG_SHORT_CMD_KEY");
+  }
+  if ((self->flags & STRUCT_MSG_HAS_TABLE_ROWS) != 0) {
+    ets_printf(" STRUCT_MSG_HAS_TABLE_ROWS");
+  }
+  if ((self->flags & STRUCT_MSG_IS_INITTED) != 0) {
+    ets_printf(" STRUCT_MSG_IS_INITTED");
+  }
+  ets_printf("\r\n");
+  idx = 0;
+  while (idx < numEntries) {
+    fieldInfo = &self->fields[idx];
+    result = self->structmsgDataView->dataView->getFieldTypeStrFromId(self->structmsgDataView->dataView, fieldInfo->fieldTypeId, &fieldTypeStr);
+    checkErrOK(result);
+    result = self->structmsgDataView->getFieldNameStrFromId(self->structmsgDataView, fieldInfo->fieldNameId, &fieldNameStr);
+    checkErrOK(result);
+    if (c_strcmp(fieldNameStr, "@tablerows") == 0) {
+      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, self->numTableRows);
+      idx++;
+      continue;
+    }
+    if (c_strcmp(fieldNameStr, "@tablerowfields") == 0) {
+      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, self->numRowFields);
+//      dumpTableRowFields(structmsg);
+      idx++;
+      continue;
+    }
+    ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth);
+#ifdef NOTDEF
+    if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
+      switch (fieldInfo->fieldType) {
+      case STRUCT_MSG_FIELD_INT8_T:
+        ets_printf("      value: 0x%02x\n", (int8_t)fieldInfo->value.byteVal);
+        break;
+      case STRUCT_MSG_FIELD_UINT8_T:
+        ets_printf("      value: 0x%02x\n", (uint8_t)fieldInfo->value.ubyteVal);
+        break;
+      case STRUCT_MSG_FIELD_INT16_T:
+        ets_printf("      value: 0x%04x\n", (int16_t)fieldInfo->value.shortVal);
+        break;
+      case STRUCT_MSG_FIELD_UINT16_T:
+        ets_printf("      value: 0x%04x\n", (uint16_t)fieldInfo->value.ushortVal);
+        break;
+      case STRUCT_MSG_FIELD_INT32_T:
+        ets_printf("      value: 0x%08x\n", (int32_t)fieldInfo->value.val);
+        break;
+      case STRUCT_MSG_FIELD_UINT32_T:
+        ets_printf("      value: 0x%08x\n", (uint32_t)fieldInfo->value.uval);
+        break;
+      case STRUCT_MSG_FIELD_INT8_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          ch = fieldInfo->value.byteVector[valueIdx];
+          ets_printf("        idx: %d value: %c 0x%02x\n", valueIdx, (char)ch, (uint8_t)(ch & 0xFF));
+          valueIdx++;
+        }
+        ets_printf("\n");
+        break;
+      case STRUCT_MSG_FIELD_UINT8_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:\n");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          uch = fieldInfo->value.ubyteVector[valueIdx];
+          ets_printf("        idx: %d value: %c 0x%02x\n", valueIdx, (char)uch, (uint8_t)(uch & 0xFF));
+          valueIdx++;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT16_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          sh = fieldInfo->value.shortVector[valueIdx];
+          ets_printf("        idx: %d value: 0x%04x\n", valueIdx, (int16_t)(sh & 0xFFFF));
+          valueIdx++;
+        }
+        ets_printf("\n");
+        break;
+      case STRUCT_MSG_FIELD_UINT16_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:\n");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          ush = fieldInfo->value.ushortVector[valueIdx];
+          ets_printf("        idx: %d value: 0x%04x\n", valueIdx, (uint16_t)(ush & 0xFFFF));
+          valueIdx++;
+        }
+        break;
+      case STRUCT_MSG_FIELD_INT32_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          val = fieldInfo->value.int32Vector[valueIdx];
+          ets_printf("        idx: %d value: 0x%08x\n", valueIdx, (int32_t)(val & 0xFFFFFFFF));
+          valueIdx++;
+        }
+        ets_printf("\n");
+        break;
+      case STRUCT_MSG_FIELD_UINT32_VECTOR:
+        valueIdx = 0;
+        ets_printf("      values:\n");
+        while (valueIdx < fieldInfo->fieldLgth) {
+          uval = fieldInfo->value.uint32Vector[valueIdx];
+          ets_printf("        idx: %d value: 0x%08x\n", valueIdx, (uint32_t)(uval & 0xFFFFFFFF));
+          valueIdx++;
+        }
+        break;
+      }
+    }
+#endif
+    idx++;
+  }
+ets_printf("dumpMsg done\n");
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= dumpBinary ========================
+
+static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
+  int idx;
+
+  ets_printf("%s\n", where);
+  idx = 0;
+  while (idx < lgth) {
+     ets_printf("idx: %d ch: 0x%02x\n", idx, data[idx] & 0xFF);
+    idx++;
+  }
+}
+
 // ================================= newStructmsgData ====================================
 
 structmsgData_t *newStructmsgData(void) {
@@ -309,10 +598,20 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->numTableRowFields = 0;
   structmsgData->numRowFields = 0;
   structmsgData->fieldOffset = 0;
+  structmsgData->totalLgth = 0;
+  structmsgData->cmdLgth = 0;
+  structmsgData->headerLgth = 0;
   structmsgData->header = NULL;
 
   structmsgData->createMsg = &createMsg;
   structmsgData->addField = &addField;
+  structmsgData->getFieldValue = &getFieldValue;
+  structmsgData->setFieldValue = &setFieldValue;
+  structmsgData->getTableFieldValue = &getTableFieldValue;
+  structmsgData->setTableFieldValue = &setTableFieldValue;
+  structmsgData->dumpMsg = &dumpMsg;
+  structmsgData->dumpBinary = &dumpBinary;
+  structmsgData->initMsg = &initMsg;
 
 ets_printf("structmsgData: %p size: %d\n", structmsgData, sizeof(structmsgData_t));
   return structmsgData;
@@ -328,19 +627,6 @@ void freeStructmsgData(structmsgData_t *structmsgdata) {
 
 
 #ifdef NOTDEF
-
-// ============================= structmsg_dumpBinary ========================
-
-void structmsg_dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
-  int idx;
-
-  ets_printf("%s\n", where);
-  idx = 0;
-  while (idx < lgth) {
-     ets_printf("idx: %d ch: 0x%02x\n", idx, data[idx] & 0xFF);
-    idx++;
-  }
-}
 
 // ============================= getHandle ========================
 
@@ -943,127 +1229,6 @@ static int dumpTableRowFields(structmsg_t *structmsg) {
 // ============================= stmsg_dumpMsg ========================
 
 int stmsg_dumpMsg(const uint8_t *handle) {
-  int numEntries;
-  int idx;
-  int valueIdx;
-  int result;
-  uint8_t uch;
-  int8_t ch;
-  uint16_t ush;
-  int16_t sh;
-  uint32_t uval;
-  int32_t val;
-  uint8_t *fieldType;
-  structmsg_t *structmsg;
-
-  structmsg = structmsg_get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
-  ets_printf("handle: %s src: %d dst: %d totalLgth: %d\r\n", structmsg->handle, (int)structmsg->hdr.hdrInfo.hdrKeys.src, (int)structmsg->hdr.hdrInfo.hdrKeys.dst, (int)structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
-  ets_printf("  cmdKey: %d cmdLgth: %d\r\n", (int)structmsg->hdr.hdrInfo.hdrKeys.cmdKey, (int)structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
-  numEntries = structmsg->msg.numFieldInfos;
-  ets_printf("  numFieldInfos: %d max: %d\r\n", numEntries, (int)structmsg->msg.maxFieldInfos);
-  idx = 0;
-  while (idx < numEntries) {
-    fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[idx];
-    if (c_strcmp(fieldInfo->fieldStr, "@tablerows") == 0) {
-      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
-      checkErrOK(result);
-      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldType, structmsg->msg.numTableRows);
-      idx++;
-      continue;
-    }
-    if (c_strcmp(fieldInfo->fieldStr, "@tablerowfields") == 0) {
-      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
-      checkErrOK(result);
-      ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldType, structmsg->msg.numRowFields);
-      dumpTableRowFields(structmsg);
-      idx++;
-      continue;
-    }
-    result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
-    checkErrOK(result);
-    ets_printf("    idx %d: key: %-20s type: %-8s lgth: %.5d\r\n", idx, fieldInfo->fieldStr, fieldType, fieldInfo->fieldLgth);
-    if (fieldInfo->flags & STRUCT_MSG_FIELD_IS_SET) {
-      switch (fieldInfo->fieldType) {
-      case STRUCT_MSG_FIELD_INT8_T:
-        ets_printf("      value: 0x%02x\n", (int8_t)fieldInfo->value.byteVal);
-        break;
-      case STRUCT_MSG_FIELD_UINT8_T:
-        ets_printf("      value: 0x%02x\n", (uint8_t)fieldInfo->value.ubyteVal);
-        break;
-      case STRUCT_MSG_FIELD_INT16_T:
-        ets_printf("      value: 0x%04x\n", (int16_t)fieldInfo->value.shortVal);
-        break;
-      case STRUCT_MSG_FIELD_UINT16_T:
-        ets_printf("      value: 0x%04x\n", (uint16_t)fieldInfo->value.ushortVal);
-        break;
-      case STRUCT_MSG_FIELD_INT32_T:
-        ets_printf("      value: 0x%08x\n", (int32_t)fieldInfo->value.val);
-        break;
-      case STRUCT_MSG_FIELD_UINT32_T:
-        ets_printf("      value: 0x%08x\n", (uint32_t)fieldInfo->value.uval);
-        break;
-      case STRUCT_MSG_FIELD_INT8_VECTOR:
-        valueIdx = 0;
-        ets_printf("      values:");
-        while (valueIdx < fieldInfo->fieldLgth) {
-          ch = fieldInfo->value.byteVector[valueIdx];
-          ets_printf("        idx: %d value: %c 0x%02x\n", valueIdx, (char)ch, (uint8_t)(ch & 0xFF));
-          valueIdx++;
-        }
-        ets_printf("\n");
-        break;
-      case STRUCT_MSG_FIELD_UINT8_VECTOR:
-        valueIdx = 0;
-        ets_printf("      values:\n");
-        while (valueIdx < fieldInfo->fieldLgth) {
-          uch = fieldInfo->value.ubyteVector[valueIdx];
-          ets_printf("        idx: %d value: %c 0x%02x\n", valueIdx, (char)uch, (uint8_t)(uch & 0xFF));
-          valueIdx++;
-        }
-        break;
-      case STRUCT_MSG_FIELD_INT16_VECTOR:
-        valueIdx = 0;
-        ets_printf("      values:");
-        while (valueIdx < fieldInfo->fieldLgth) {
-          sh = fieldInfo->value.shortVector[valueIdx];
-          ets_printf("        idx: %d value: 0x%04x\n", valueIdx, (int16_t)(sh & 0xFFFF));
-          valueIdx++;
-        }
-        ets_printf("\n");
-        break;
-      case STRUCT_MSG_FIELD_UINT16_VECTOR:
-        valueIdx = 0;
-        ets_printf("      values:\n");
-        while (valueIdx < fieldInfo->fieldLgth) {
-          ush = fieldInfo->value.ushortVector[valueIdx];
-          ets_printf("        idx: %d value: 0x%04x\n", valueIdx, (uint16_t)(ush & 0xFFFF));
-          valueIdx++;
-        }
-        break;
-      case STRUCT_MSG_FIELD_INT32_VECTOR:
-        valueIdx = 0;
-        ets_printf("      values:");
-        while (valueIdx < fieldInfo->fieldLgth) {
-          val = fieldInfo->value.int32Vector[valueIdx];
-          ets_printf("        idx: %d value: 0x%08x\n", valueIdx, (int32_t)(val & 0xFFFFFFFF));
-          valueIdx++;
-        }
-        ets_printf("\n");
-        break;
-      case STRUCT_MSG_FIELD_UINT32_VECTOR:
-        valueIdx = 0;
-        ets_printf("      values:\n");
-        while (valueIdx < fieldInfo->fieldLgth) {
-          uval = fieldInfo->value.uint32Vector[valueIdx];
-          ets_printf("        idx: %d value: 0x%08x\n", valueIdx, (uint32_t)(uval & 0xFFFFFFFF));
-          valueIdx++;
-        }
-        break;
-      }
-    }
-    idx++;
-  }
   return STRUCT_MSG_ERR_OK;
 }
 
