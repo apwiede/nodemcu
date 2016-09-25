@@ -120,7 +120,7 @@ EM.addModule("Esp-objectInherit", function(T, name) {
       exist on the receiver will have the corresponding object/array from the
       supplier merged into them, rather than being skipped or overwritten. When
       both _overwrite_ and _merge_ are `true`, _merge_ takes precedence.
-    @return {Function|Object|RAPL} The receiver, or the YUI instance if the
+    @return {Function|Object|EM} The receiver, or the YUI instance if the
       specified receiver is falsy.
     **/
 

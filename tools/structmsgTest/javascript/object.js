@@ -17,7 +17,7 @@
 
 EM.addModule("Esp-object", function(T, name) {
     /**
-     * Adds utilities to the RAPL instance for working with objects.
+     * Adds utilities to the EM instance for working with objects.
      *
      * @class Object
      */

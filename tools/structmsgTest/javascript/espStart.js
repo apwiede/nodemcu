@@ -17,8 +17,8 @@
         print("ERROR: ",result);
       }
     }
-    var localFull = true;
-    var localPartial = true;
+    var localFull = false;
+    var localPartial = false;
 
 if (localPartial) {
 EM.log('Start', '1.info', "espStart.js", true);
