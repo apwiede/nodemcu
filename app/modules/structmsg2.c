@@ -139,6 +139,15 @@ ets_printf("error result: %d\n", result);
   case STRUCT_MSG_ERR_BAD_NUM_FIELDS:
     lua_pushfstring(L, "%s: bad num fields", errStr);
     break;
+  case STRUCT_MSG_ERR_ALREADY_INITTED:
+    lua_pushfstring(L, "%s: already initted", errStr);
+    break;
+  case STRUCT_MSG_ERR_NOT_YET_INITTED:
+    lua_pushfstring(L, "%s: not yet initted", errStr);
+    break;
+  case STRUCT_MSG_ERR_FIELD_CANNOT_BE_SET:
+    lua_pushfstring(L, "%s: field cannot be set", errStr);
+    break;
   default:
     lua_pushfstring(L, "%s: funny result error code", errStr);
 ets_printf("funny result: %d\n", result);
@@ -279,19 +288,43 @@ static int structmsg_decode( lua_State* L ) {
   return 1;
 }
 
+#endif
+
 // ============================= structmsg_dump ========================
 
 static int structmsg_dump( lua_State* L )
 {
   const char *handle;
+  structmsgData_t *structmsgData;
   int result;
 
   handle = luaL_checkstring( L, 1 );
-  result = stmsg_dumpMsg(handle);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "dump", "");
+  result = structmsgData->dumpMsg(structmsgData);
   checkOKOrErr(L, result, "dump", "");
   return 1;
 }
 
+// ============================= structmsg_init ========================
+
+static int structmsg_init( lua_State* L )
+{
+  const char *handle;
+  structmsgData_t *structmsgData = NULL;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+ets_printf("structmsg_init: handle: %s\n", handle);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "init", "");
+ets_printf("structmsg_init2: structmsgData: %p\n", structmsgData);
+  result = structmsgData->initMsg(structmsgData);
+  checkOKOrErr(L, result, "init", "");
+  return 1;
+}
+
+#ifdef NOTDEF
 // ============================= structmsg_encrypt ========================
 
 static int structmsg_encrypt( lua_State* L ) {
@@ -829,7 +862,10 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "encode" ),                LFUNCVAL( structmsg_encode ) },
   { LSTRKEY( "getencoded" ),            LFUNCVAL( structmsg_get_encoded ) },
   { LSTRKEY( "decode" ),                LFUNCVAL( structmsg_decode ) },
+#endif
   { LSTRKEY( "dump" ),                  LFUNCVAL( structmsg_dump ) },
+  { LSTRKEY( "init" ),                  LFUNCVAL( structmsg_init ) },
+#ifdef NOtDEF
   { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },
   { LSTRKEY( "decrypt" ),               LFUNCVAL( structmsg_decrypt ) },
 #endif
