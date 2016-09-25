@@ -73,7 +73,11 @@ enum DataViewErrorCode
   DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND  = 251,
   DATA_VIEW_ERR_VALUE_TOO_BIG         = 250,
   DATA_VIEW_ERR_OUT_OF_MEMORY         = 249,
+  DATA_VIEW_ERR_OUT_OF_RANGE          = 248,
 };
+
+#define checkAllocOK(addr) if(addr == NULL) return DATA_VIEW_ERR_OUT_OF_MEMORY
+#define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) return result
 
 typedef struct str2id {
   uint8_t *str;

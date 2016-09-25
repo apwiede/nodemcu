@@ -97,24 +97,40 @@ static uint8_t getFieldTypeStrFromId(dataView_t *self, uint8_t fieldTypeId, uint
 // ================================= getUint8 ====================================
 
 static uint8_t getUint8(dataView_t *self, int offset, uint8_t *value) {
+  if (offset > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  *value = self->data[offset];
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= getInt8 ====================================
 
 static uint8_t getInt8(dataView_t *self, int offset, int8_t *value) {
+  if (offset > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  *value = self->data[offset] & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setUint8 ====================================
 
 static uint8_t setUint8(dataView_t *self, int offset, uint8_t value) {
+  if (offset > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  self->data[offset] = value;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setInt8 ====================================
 
 static uint8_t setInt8(dataView_t *self, int offset, int8_t value) {
+  if (offset > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -122,24 +138,46 @@ static uint8_t setInt8(dataView_t *self, int offset, int8_t value) {
 // ================================= getUint16 ====================================
 
 static uint8_t getUint16(dataView_t *self, int offset, uint16_t *value) {
+  if (offset + 1 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  *value = 0;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= getInt16 ====================================
 
 static uint8_t getInt16(dataView_t *self, int offset, int16_t *value) {
+  if (offset + 1 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  *value = 0;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setUint16 ====================================
 
 static uint8_t setUint16(dataView_t *self, int offset, uint16_t value) {
+  if (offset + 1 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setInt16 ====================================
 
 static uint8_t setInt16(dataView_t *self, int offset, int16_t value) {
+  if (offset + 1 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -147,24 +185,54 @@ static uint8_t setInt16(dataView_t *self, int offset, int16_t value) {
 // ================================= getUint32 ====================================
 
 static uint8_t getUint32(dataView_t *self, int offset, uint32_t *value) {
+  if (offset + 3 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  *value = 0;
+  *value += (self->data[offset++] & 0xFF) << 24;
+  *value += (self->data[offset++] & 0xFF) << 16;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= getInt32 ====================================
 
 static uint8_t getInt32(dataView_t *self, int offset, int32_t *value) {
+  if (offset + 3 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  *value = 0;
+  *value += (self->data[offset++] & 0xFF) << 24;
+  *value += (self->data[offset++] & 0xFF) << 16;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setUint32 ====================================
 
 static uint8_t setUint32(dataView_t *self, int offset, uint32_t value) {
+  if (offset + 3 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  self->data[offset++] = (value >> 24) & 0xFF;
+  self->data[offset++] = (value >> 16) & 0xFF;
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setInt32 ====================================
 
 static uint8_t setInt32(dataView_t *self, int offset, int32_t value) {
+  if (offset + 3 > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  self->data[offset++] = (value >> 24) & 0xFF;
+  self->data[offset++] = (value >> 16) & 0xFF;
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -172,24 +240,40 @@ static uint8_t setInt32(dataView_t *self, int offset, int32_t value) {
 // ================================= getUint8Vector ====================================
 
 static uint8_t getUint8Vector(dataView_t *self, int offset, uint8_t **value, size_t lgth) {
+  if (offset + lgth > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  c_memcpy(*value,self->data+offset,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= getInt8Vector ====================================
 
 static uint8_t getInt8Vector(dataView_t *self, int offset, int8_t **value, size_t lgth) {
+  if (offset + lgth > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  c_memcpy(*value,self->data+offset,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setUint8Vector ====================================
 
 static uint8_t setUint8Vector(dataView_t *self, int offset, uint8_t *value, size_t lgth) {
+  if (offset + lgth > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  c_memcpy(self->data+offset,value,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setInt8Vector ====================================
 
 static uint8_t setInt8Vector(dataView_t *self, int offset, int8_t *value, size_t lgth) {
+  if (offset + lgth > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  c_memcpy(self->data+offset,value,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -197,55 +281,145 @@ static uint8_t setInt8Vector(dataView_t *self, int offset, int8_t *value, size_t
 // ================================= getUint16Vector ====================================
 
 static uint8_t getUint16Vector(dataView_t *self, int offset, uint16_t **value, size_t lgth) {
+  int idx;
+  int result;
+
+  if (offset + lgth * sizeof(uint16_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = getUint16(self, offset, &((*value)[idx]));
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= getInt16Vector ====================================
 
 static uint8_t getInt16Vector(dataView_t *self, int offset, int16_t **value, size_t lgth) {
+  int idx;
+  int result;
+
+  if (offset + lgth * sizeof(uint16_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = getInt16(self, offset, &((*value)[idx]));
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setUint16Vector ====================================
 
 static uint8_t setUint16Vector(dataView_t *self, int offset, uint16_t *value, size_t lgth) {
+  int idx;
+  int result;
+
+  if (offset + lgth * sizeof(uint16_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = setUint16(self, offset, value[idx]);
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setInt16Vector ====================================
 
 static uint8_t setInt16Vector(dataView_t *self, int offset, int16_t *value, size_t lgth) {
+  int idx;
+  int result;
+
+  if (offset + lgth * sizeof(uint16_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = setInt16(self, offset, value[idx]);
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
 
-// ================================= getUint32 ====================================
+// ================================= getUint32Vector ====================================
 
 static uint8_t getUint32Vector(dataView_t *self, int offset, uint32_t **value, size_t lgth) {
+  int idx;
+  int result;
+
+  if (offset + lgth * sizeof(uint32_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = getUint32(self, offset, &((*value)[idx]));
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
-// ================================= getInt32 ====================================
+// ================================= getInt32Vector ====================================
 
 static uint8_t getInt32Vector(dataView_t *self, int offset, int32_t **value, size_t lgth) {
+  int idx;
+  int result;
+
+  if (offset + lgth * sizeof(uint32_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = getInt32(self, offset, &((*value)[idx]));
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
-// ================================= setUint32 ====================================
+// ================================= setUint32Vector ====================================
 
 static uint8_t setUint32Vector(dataView_t *self, int offset, uint32_t *value, size_t lgth) {
+  int idx;
+  int result;
+
+  if (offset + lgth * sizeof(uint32_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = setUint32(self, offset, value[idx]);
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
-// ================================= setInt32 ====================================
+// ================================= setInt32Vector ====================================
 
 static uint8_t setInt32Vector(dataView_t *self, int offset, int32_t *value, size_t lgth) {
-  return DATA_VIEW_ERR_OK;
-}
+  int idx;
+  int result;
 
-// ================================= setData ====================================
-
-static uint8_t setData(dataView_t *self, uint8_t *data, size_t lgth) {
+  if (offset + lgth * sizeof(uint32_t) > self->lgth) {
+    return DATA_VIEW_ERR_OUT_OF_RANGE;
+  }
+  idx = 0;
+  while (idx < lgth) {
+    result = setInt32(self, offset, value[idx]);
+    checkErrOK(result);
+    idx++;
+  }
   return DATA_VIEW_ERR_OK;
 }
 
