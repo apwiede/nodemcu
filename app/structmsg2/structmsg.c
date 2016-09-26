@@ -309,7 +309,7 @@ static uint8_t getFieldValue(structmsgData_t *self, const uint8_t *fieldName, in
   while (idx < numEntries) {
     fieldInfo = &self->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-      result = self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue);
+      result = self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       break;
     }
@@ -346,7 +346,7 @@ static uint8_t setFieldValue(structmsgData_t *self, const uint8_t *fieldName, in
   while (idx < numEntries) {
     fieldInfo = &self->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-      result = self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue);
+      result = self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
       break;
@@ -383,7 +383,7 @@ static uint8_t getTableFieldValue(structmsgData_t *self, const uint8_t *fieldNam
   while (idx < self->numRowFields) {
     fieldInfo = &self->tableFields[cellIdx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-      return self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue);
+      return self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue, 0);
     }
     cellIdx++;
     idx++;
@@ -418,7 +418,7 @@ static uint8_t setTableFieldValue(structmsgData_t *self, const uint8_t *fieldNam
     fieldInfo = &self->tableFields[cellIdx];
     if (fieldNameId == fieldInfo->fieldNameId) {
       fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
-      return self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue);
+      return self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue, 0);
     }
     cellIdx++;
     idx++;
@@ -560,12 +560,12 @@ static uint8_t initMsg(structmsgData_t *self) {
     fieldInfo = &self->fields[idx];
     switch (fieldInfo->fieldNameId) {
       case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-        result = self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, (int)self->totalLgth, NULL);
+        result = self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, (int)self->totalLgth, NULL, 0);
         checkErrOK(result);
         fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
         break;
       case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-        result = self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, (int)self->cmdLgth, NULL);
+        result = self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, (int)self->cmdLgth, NULL, 0);
         checkErrOK(result);
         fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
         break;
@@ -665,7 +665,7 @@ static uint8_t dumpFieldValue(structmsgData_t *self, structmsgField_t *fieldInfo
   uint8_t *stringValue;
   int numericValue = 0;
 
-  result = self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, &numericValue, &stringValue);
+  result = self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, &numericValue, &stringValue, 0);
   checkErrOK(result);
   switch (fieldInfo->fieldTypeId) {
   case DATA_VIEW_FIELD_INT8_T:
@@ -762,7 +762,7 @@ static int dumpTableRowFields(structmsgData_t *self) {
   structmsgField_t *fieldInfo;
 
   numEntries = self->numTableRows * self->numRowFields;
-  ets_printf("    numTableFieldInfos: %d\r\n", numEntries);
+  ets_printf("    numTableFields: %d\r\n", numEntries);
   idx = 0;
   row = 0;
   col = 0;
@@ -979,17 +979,19 @@ structmsgData_t *newStructmsgData(void) {
   if (structmsgData->structmsgDataView == NULL) {
     return NULL;
   }
-
-  // structmsgData->handle[16];
+  
   structmsgData->fields = NULL;
   structmsgData->tableFields = NULL;
+  structmsgData->defFields = NULL;
   structmsgData->flags = 0;
   structmsgData->numFields = 0;
   structmsgData->maxFields = 0;
   structmsgData->numTableRows = 0;
   structmsgData->numTableRowFields = 0;
   structmsgData->numRowFields = 0;
+  structmsgData->numDefFields = 0;
   structmsgData->fieldOffset = 0;
+  structmsgData->defFieldOffset = 0;
   structmsgData->totalLgth = 0;
   structmsgData->cmdLgth = 0;
   structmsgData->headerLgth = 0;
@@ -1009,7 +1011,13 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->getMsgData = &getMsgData;
   structmsgData->setMsgData = &setMsgData;
 
-ets_printf("structmsgData: %p size: %d\n", structmsgData, sizeof(structmsgData_t));
+  structmsgData->structmsgDefinitionDataView = NULL;
+  structmsgData->initDef = NULL;
+  structmsgData->prepareDef = NULL;
+  structmsgData->addDefField = NULL;
+  structmsgData->dumpDefFields = NULL;
+  structmsgData->setDefFieldValue = NULL;
+  structmsgData->getDefFieldValue = NULL;
   return structmsgData;
 }
 

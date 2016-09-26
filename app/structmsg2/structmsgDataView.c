@@ -61,19 +61,26 @@ typedef struct fieldNames
 static fieldNames_t fieldNames = {0, 0, NULL};
 
 static str2id_t specialFieldNames[] = {
-  {"@src",            STRUCT_MSG_SPEC_FIELD_SRC},
-  {"@dst",            STRUCT_MSG_SPEC_FIELD_DST},
-  {"@targetCmd",      STRUCT_MSG_SPEC_FIELD_TARGET_CMD},
-  {"@totalLgth",      STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH},
-  {"@cmdKey",         STRUCT_MSG_SPEC_FIELD_CMD_KEY},
-  {"@cmdLgth",        STRUCT_MSG_SPEC_FIELD_CMD_LGTH},
-  {"@randomNum",      STRUCT_MSG_SPEC_FIELD_RANDOM_NUM},
-  {"@sequenceNum",    STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM},
-  {"@filler",         STRUCT_MSG_SPEC_FIELD_FILLER},
-  {"@crc",            STRUCT_MSG_SPEC_FIELD_CRC},
-  {"@id",             STRUCT_MSG_SPEC_FIELD_ID},
-  {"@tablerows",      STRUCT_MSG_SPEC_FIELD_TABLE_ROWS},
-  {"@tablerowfields", STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS},
+  {"@src",              STRUCT_MSG_SPEC_FIELD_SRC},
+  {"@dst",              STRUCT_MSG_SPEC_FIELD_DST},
+  {"@targetCmd",        STRUCT_MSG_SPEC_FIELD_TARGET_CMD},
+  {"@totalLgth",        STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH},
+  {"@cmdKey",           STRUCT_MSG_SPEC_FIELD_CMD_KEY},
+  {"@cmdLgth",          STRUCT_MSG_SPEC_FIELD_CMD_LGTH},
+  {"@randomNum",        STRUCT_MSG_SPEC_FIELD_RANDOM_NUM},
+  {"@sequenceNum",      STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM},
+  {"@filler",           STRUCT_MSG_SPEC_FIELD_FILLER},
+  {"@crc",              STRUCT_MSG_SPEC_FIELD_CRC},
+  {"@id",               STRUCT_MSG_SPEC_FIELD_ID},
+  {"@tablerows",        STRUCT_MSG_SPEC_FIELD_TABLE_ROWS},
+  {"@tablerowfields",   STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS},
+  {"@GUID",             STRUCT_MSG_SPEC_FIELD_GUID},
+  {"@numNormFlds",      STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS},
+  {"@normFldIds",       STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS},
+  {"@normFldNamesSize", STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE},
+  {"@normFldNames",     STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES},
+  {"@definitionsSize",  STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE},
+  {"@definitions",      STRUCT_MSG_SPEC_FIELD_DEFINITIONS},
   {NULL, -1},
 };
 
@@ -349,7 +356,7 @@ ets_printf("crc: 0x%04x\n", crc);
 
 // ================================= getFieldValue ====================================
 
-static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue) {
+static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx) {
   int idx;
   int numEntries;
   int8_t i8;
@@ -398,23 +405,26 @@ static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
       (*stringValue)[fieldInfo->fieldLgth] = 0;
       os_memcpy(*stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
-#ifdef NOTDEF
     case DATA_VIEW_FIELD_INT16_VECTOR:
-      if (stringValue != NULL) {
+      if (*stringValue == NULL) {
         // check for length needed!!
-        os_memcpy((int8_t *)fieldInfo->value.shortVector, stringValue, fieldInfo->fieldLgth);
+        self->dataView->getInt16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(int16_t), &i16);
+        *numericValue = (int)i16;
       } else {
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
       break;
     case DATA_VIEW_FIELD_UINT16_VECTOR:
-      if (stringValue != NULL) {
+      if (*stringValue == NULL) {
         // check for length needed!!
-        os_memcpy((uint8_t *)fieldInfo->value.ushortVector, stringValue, fieldInfo->fieldLgth);
+        self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), &ui16);
+        *numericValue = (int)ui16;
+ets_printf("get u16: offset: %d %d val: %d %d\n", fieldInfo->fieldOffset, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), *numericValue, ui16);
       } else {
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
       break;
+#ifdef NOTDEF
     case DATA_VIEW_FIELD_INT32_VECTOR:
       if (stringValue != NULL) {
         // check for length needed!!
@@ -441,7 +451,7 @@ static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
 
 // ================================= setFieldValue ====================================
 
-static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue) {
+static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx) {
   int idx;
   int numEntries;
 
@@ -533,23 +543,24 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
       break;
-#ifdef NOTDEF
     case DATA_VIEW_FIELD_INT16_VECTOR:
-      if (stringValue != NULL) {
+      if (stringValue == NULL) {
         // check for length needed!!
-        os_memcpy((int8_t *)fieldInfo->value.shortVector, stringValue, fieldInfo->fieldLgth);
+        self->dataView->setInt16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(int16_t), (int16_t)numericValue);
       } else {
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
       break;
     case DATA_VIEW_FIELD_UINT16_VECTOR:
-      if (stringValue != NULL) {
+      if (stringValue == NULL) {
         // check for length needed!!
-        os_memcpy((uint8_t *)fieldInfo->value.ushortVector, stringValue, fieldInfo->fieldLgth);
+ets_printf("set u16: offset: %d %d val: %d\n", fieldInfo->fieldOffset, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), numericValue);
+        self->dataView->setUint16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), (uint16_t)numericValue);
       } else {
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
       break;
+#ifdef NOTDEF
     case DATA_VIEW_FIELD_INT32_VECTOR:
       if (stringValue != NULL) {
         // check for length needed!!

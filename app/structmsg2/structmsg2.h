@@ -55,11 +55,6 @@ extern "C" {
 #define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
 #define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
 
-typedef struct id2offset {
-  uint16_t id;
-  uint16_t offset;
-} id2offset_t;
-
 typedef struct str2key {
   uint8_t *str;
   uint8_t key;
@@ -119,10 +114,13 @@ typedef struct stmsgDefinitions
 #define STRUCT_MSG_HAS_TABLE_ROWS (1 << 4)
 #define STRUCT_MSG_IS_INITTED     (1 << 5)
 #define STRUCT_MSG_IS_PREPARED    (1 << 6)
+#define STRUCT_DEF_IS_INITTED     (1 << 7)
+#define STRUCT_DEF_IS_PREPARED    (1 << 8)
 
 #define STRUCT_MSG_FIELD_IS_SET   (1 << 0)
 
-#define STRUCT_MSG_DEFINITION_CMD_KEY 0xFFFF
+#define STRUCT_DEF_NUM_DEF_FIELDS 15
+#define STRUCT_DEF_CMD_KEY 0xFFFF
 
 #define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
 
@@ -143,22 +141,34 @@ typedef uint8_t (* prepareMsg_t)(structmsgData_t *self);
 typedef uint8_t (* getMsgData_t)(structmsgData_t *structmsgData, uint8_t **data, int *lgth);
 typedef uint8_t (* setMsgData_t)(structmsgData_t *structmsgData, const uint8_t *data);
 
+typedef uint8_t (* dumpDefFields_t)(structmsgData_t *self);
+typedef uint8_t (* initDef_t)(structmsgData_t *self);
+typedef uint8_t (* prepareDef_t)(structmsgData_t *self);
+typedef uint8_t (* addDefField_t)(structmsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
+typedef uint8_t (* getDefFieldValue_t)(structmsgData_t *self, const uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int idx);
+typedef uint8_t (* setDefFieldValue_t)(structmsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int idx);
+
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
+  structmsgDataView_t *structmsgDefinitionDataView;
   char handle[16];
   structmsgField_t *fields;
   structmsgField_t *tableFields;
+  structmsgField_t *defFields;
   uint16_t flags;
   size_t numFields;
   size_t maxFields;
   size_t numTableRows;         // number of list rows
   size_t numTableRowFields;    // number of fields within a table row
   size_t numRowFields;         // for checking how many tableRowFields have been processed
+  size_t numDefFields;         // for checking how many defFields have been processed
   size_t fieldOffset;
+  size_t defFieldOffset;
   size_t totalLgth;
   size_t cmdLgth;
   size_t headerLgth;
   uint8_t *header;
+
   createMsg_t createMsg;
   deleteMsg_t deleteMsg;
   addField_t addField;
@@ -172,12 +182,20 @@ typedef struct structmsgData {
   prepareMsg_t prepareMsg;
   getMsgData_t getMsgData;
   setMsgData_t setMsgData;
+
+  initDef_t initDef;
+  prepareDef_t prepareDef;
+  dumpDefFields_t dumpDefFields;
+  addDefField_t addDefField;
+  getDefFieldValue_t getDefFieldValue;
+  setDefFieldValue_t setDefFieldValue;
 } structmsgData_t;
 
 
 structmsgData_t *newStructmsgData(void);
 uint8_t structmsgGetPtrFromHandle(const char *handle, structmsgData_t **structmsgData);
 uint8_t newStructmsgDataFromList(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
+uint8_t newStructmsgDefinition(structmsgData_t *structmsgData);
  
 #ifdef	__cplusplus
 }

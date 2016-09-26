@@ -88,26 +88,36 @@ enum structmsgErrorCode
   STRUCT_MSG_ERR_NO_SUCH_FIELD         = 208,
   STRUCT_MSG_ERR_BAD_DATA_LGTH         = 207,
   STRUCT_MSG_ERR_NOT_YET_PREPARED      = 206,
+  STRUCT_DEF_ERR_ALREADY_INITTED       = 205,
+  STRUCT_DEF_ERR_NOT_YET_INITTED       = 204,
+  STRUCT_DEF_ERR_NOT_YET_PREPARED      = 203,
+  STRUCT_DEF_ERR_ALREADY_CREATED       = 202,
 };
 
 enum structmsgSpecialFieldNames
 {
-  STRUCT_MSG_SPEC_FIELD_SRC              = 255,
-  STRUCT_MSG_SPEC_FIELD_DST              = 254,
-  STRUCT_MSG_SPEC_FIELD_TARGET_CMD       = 253,
-  STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH       = 252,
-  STRUCT_MSG_SPEC_FIELD_CMD_KEY          = 251,
-  STRUCT_MSG_SPEC_FIELD_CMD_LGTH         = 250,
-  STRUCT_MSG_SPEC_FIELD_RANDOM_NUM       = 249,
-  STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM     = 248,
-  STRUCT_MSG_SPEC_FIELD_FILLER           = 247,
-  STRUCT_MSG_SPEC_FIELD_CRC              = 246,
-  STRUCT_MSG_SPEC_FIELD_ID               = 245,
-  STRUCT_MSG_SPEC_FIELD_TABLE_ROWS       = 244,
-  STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS = 243,
-  STRUCT_MSG_SPEC_FIELD_NUM_FIELDS       = 242,
-  STRUCT_MSG_SPEC_FIELD_GUID             = 241,
-  STRUCT_MSG_SPEC_FIELD_LOW              = 240,         // this must be the last entry!!
+  STRUCT_MSG_SPEC_FIELD_SRC                 = 255,
+  STRUCT_MSG_SPEC_FIELD_DST                 = 254,
+  STRUCT_MSG_SPEC_FIELD_TARGET_CMD          = 253,
+  STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH          = 252,
+  STRUCT_MSG_SPEC_FIELD_CMD_KEY             = 251,
+  STRUCT_MSG_SPEC_FIELD_CMD_LGTH            = 250,
+  STRUCT_MSG_SPEC_FIELD_RANDOM_NUM          = 249,
+  STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM        = 248,
+  STRUCT_MSG_SPEC_FIELD_FILLER              = 247,
+  STRUCT_MSG_SPEC_FIELD_CRC                 = 246,
+  STRUCT_MSG_SPEC_FIELD_ID                  = 245,
+  STRUCT_MSG_SPEC_FIELD_TABLE_ROWS          = 244,
+  STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS    = 243,
+  STRUCT_MSG_SPEC_FIELD_NUM_FIELDS          = 242,
+  STRUCT_MSG_SPEC_FIELD_GUID                = 241,
+  STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS       = 240,
+  STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS        = 239,
+  STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE = 238,
+  STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      = 237,
+  STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    = 236,
+  STRUCT_MSG_SPEC_FIELD_DEFINITIONS         = 235,
+  STRUCT_MSG_SPEC_FIELD_LOW                 = 234,         // this must be the last entry!!
 };
 
 #define STRUCT_MSG_NO_INCR 0
@@ -141,8 +151,8 @@ typedef uint8_t (* setFiller_t)(structmsgDataView_t *self, structmsgField_t *fie
 typedef uint8_t (* getCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, size_t startOffset, size_t lgth);
 typedef uint8_t (* setCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, size_t startOffset, size_t lgth);
 
-typedef uint8_t (* dvGetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue);
-typedef uint8_t (* dvSetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue);
+typedef uint8_t (* dvGetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx);
+typedef uint8_t (* dvSetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx);
 
 typedef struct structmsgDataView {
   dataView_t *dataView;

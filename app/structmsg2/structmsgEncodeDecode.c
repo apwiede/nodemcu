@@ -291,22 +291,6 @@ int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, 
 
   result =  structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
   checkErrOK(result);
-  numNormFields = 0;
-  normNamesSize = 0;
-  idx = 0;
-  while (idx < definition->numFields) {
-    fieldInfo = &definition->fieldInfos[idx];
-    if (fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW) {
-      result = getFieldIdName(fieldInfo->fieldId, fieldNameDefinitions, &fieldName);
-      checkErrOK(result);
-//ets_printf("fieldName: %s\n", fieldName);
-      numNormFields++;
-      normNamesSize += c_strlen(fieldName) + 1;
-    }
-    idx++;
-  }
-  normNamesOffsets = os_zalloc(numNormFields * sizeof(id2offset_t) + 1);
-  checkAllocOK(normNamesOffsets);
   if (definition->flags & STRUCT_MSG_SHORT_CMD_KEY) {
     payloadSize = STRUCT_MSG_SHORT_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
   } else {
