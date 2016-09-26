@@ -434,10 +434,10 @@ static uint8_t prepareMsg(structmsgData_t *self) {
   int result;
   structmsgField_t *fieldInfo;
 
-  // create the values which are different for each message!!
   if ((self->flags & STRUCT_MSG_IS_INITTED) == 0) {
     return STRUCT_MSG_ERR_NOT_YET_INITTED;
   }
+  // create the values which are different for each message!!
   numEntries = self->numFields;
   idx = 0;
   numEntries = self->numFields;
@@ -467,6 +467,7 @@ static uint8_t prepareMsg(structmsgData_t *self) {
     }
     idx++;
   }
+  self->flags |= STRUCT_MSG_IS_PREPARED;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -802,12 +803,6 @@ static uint8_t dumpMsg(structmsgData_t *self) {
   ets_printf("  numFields: %d maxFields: %d\r\n", numEntries, (int)self->maxFields);
   ets_printf("  headerLgth: %d cmdLgth: %d totalLgth: %d\r\n", self->headerLgth, self->cmdLgth, self->totalLgth);
   ets_printf("  flags:");
-  if ((self->flags & STRUCT_MSG_ENCODED) != 0) {
-    ets_printf(" STRUCT_MSG_ENCODED");
-  }
-  if ((self->flags &  STRUCT_MSG_DECODED) != 0) {
-    ets_printf(" STRUCT_MSG_DECODED");
-  }
   if ((self->flags & STRUCT_MSG_FIELD_IS_SET) != 0) {
     ets_printf(" STRUCT_MSG_FIELD_IS_SET");
   }
@@ -828,6 +823,9 @@ static uint8_t dumpMsg(structmsgData_t *self) {
   }
   if ((self->flags & STRUCT_MSG_IS_INITTED) != 0) {
     ets_printf(" STRUCT_MSG_IS_INITTED");
+  }
+  if ((self->flags & STRUCT_MSG_IS_PREPARED) != 0) {
+    ets_printf(" STRUCT_MSG_IS_PREPARED");
   }
   ets_printf("\r\n");
   idx = 0;
@@ -857,6 +855,74 @@ static uint8_t dumpMsg(structmsgData_t *self) {
     idx++;
   }
 ets_printf("dumpMsg done\n");
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= getMsgData ========================
+
+static uint8_t getMsgData(structmsgData_t *self, uint8_t **data, int *lgth) {
+  if ((self->flags & STRUCT_MSG_IS_INITTED) == 0) {
+    return STRUCT_MSG_ERR_NOT_YET_INITTED;
+  }
+  if ((self->flags & STRUCT_MSG_IS_PREPARED) == 0) {
+    return STRUCT_MSG_ERR_NOT_YET_PREPARED;
+  }
+  *data = self->structmsgDataView->dataView->data;
+  *lgth = self->totalLgth;
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= setMsgData ========================
+
+static uint8_t setMsgData(structmsgData_t *self, const uint8_t *data) {
+  int idx;
+  int found;
+  int result;
+  uint16_t lgth;
+  structmsgField_t *fieldInfo;
+
+  if ((self->flags & STRUCT_MSG_IS_INITTED) == 0) {
+    return STRUCT_MSG_ERR_NOT_YET_INITTED;
+  }
+  found = 0;
+  // check lgth
+  while (idx < self->numFields) {
+    fieldInfo = &self->fields[idx];
+    if (fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH) {
+      found = 1;
+      break;
+    }
+    idx++;
+  }
+  if (! found) {
+    return STRUCT_MSG_ERR_NO_SUCH_FIELD;
+  } 
+  if (self->structmsgDataView->dataView->data != NULL) {
+    // free no longer used
+    os_free(self->structmsgDataView->dataView->data);
+  }
+  // temporary replace data entry of dataView by our param data
+  // to be able to use the get* functions for gettting totalLgth entry value
+  self->structmsgDataView->dataView->data = (uint8_t *)data;
+  // get totalLgth value from data
+  result = self->structmsgDataView->dataView->getUint16(self->structmsgDataView->dataView, fieldInfo->fieldOffset, &lgth);
+  checkErrOK(result);
+  if (lgth != self->totalLgth) {
+    return STRUCT_MSG_ERR_BAD_DATA_LGTH;
+  }
+  // now make a copy of the data to be on the safe side
+  // for freeing the Lua space in Lua set the variable to nil!!
+  self->structmsgDataView->dataView->data = os_zalloc(self->totalLgth);
+  checkAllocOK(self->structmsgDataView->dataView->data);
+  c_memcpy(self->structmsgDataView->dataView->data, data, self->totalLgth);
+  // and now set the IS_SET flasg and other stuff
+  idx = 0;
+  while (idx < self->numFields) {
+    fieldInfo = &self->fields[idx];
+    fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+    idx++;
+  }
+  self->flags |= STRUCT_MSG_IS_PREPARED;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -940,6 +1006,8 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->dumpBinary = &dumpBinary;
   structmsgData->initMsg = &initMsg;
   structmsgData->prepareMsg = &prepareMsg;
+  structmsgData->getMsgData = &getMsgData;
+  structmsgData->setMsgData = &setMsgData;
 
 ets_printf("structmsgData: %p size: %d\n", structmsgData, sizeof(structmsgData_t));
   return structmsgData;

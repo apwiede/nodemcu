@@ -151,6 +151,12 @@ ets_printf("error result: %d\n", result);
   case STRUCT_MSG_ERR_NO_SUCH_FIELD:
     lua_pushfstring(L, "%s: no such field", errStr);
     break;
+  case STRUCT_MSG_ERR_BAD_DATA_LGTH:
+    lua_pushfstring(L, "%s: bad data length", errStr);
+    break;
+  case STRUCT_MSG_ERR_NOT_YET_PREPARED:
+    lua_pushfstring(L, "%s: not yet prepared", errStr);
+    break;
   default:
     lua_pushfstring(L, "%s: funny result error code", errStr);
 ets_printf("funny result: %d\n", result);
@@ -424,6 +430,45 @@ static int structmsg_getTableFieldValue( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_getMsgData ========================
+
+static int structmsg_getMsgData( lua_State* L ) {
+  const char *handle;
+  uint8_t *data;
+  structmsgData_t *structmsgData;
+  int lgth;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "getMsgData", "");
+  result = structmsgData->getMsgData(structmsgData, &data, &lgth);
+  if (checkOKOrErr(L, result, "getMsgData", "")) {
+    lua_pushlstring(L, data, lgth);
+  }
+  return 1;
+}
+
+// ============================= structmsg_setMsgData ========================
+
+static int structmsg_setMsgData( lua_State* L ) {
+  const char *handle;
+  const uint8_t *data;
+  structmsgData_t *structmsgData;
+  int lgth;
+  int result;
+
+  handle = luaL_checkstring( L, 1 );
+  data = luaL_checkstring( L, 2 );
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "setMsgData", "");
+  result = structmsgData->setMsgData(structmsgData, data);
+  if (checkOKOrErr(L, result, "setMsgData", "")) {
+    lua_pushlstring(L, data, lgth);
+  }
+  return 1;
+}
+
 // ============================= parseKey ==================
 
 static const uint8_t *parseKey(lua_State* L, int paramNum, const char * key){
@@ -477,22 +522,6 @@ ets_printf("no table!!\n");
 }
 
 #ifdef NOTDEF
-// ============================= structmsg_get_encoded ========================
-
-static int structmsg_get_encoded( lua_State* L ) {
-  const char *handle;
-  uint8_t *encoded;
-  int lgth;
-  int result;
-
-  handle = luaL_checkstring( L, 1 );
-  result = stmsg_getEncoded(handle, &encoded, &lgth);
-  if (checkOKOrErr(L, result, "getencoded", "")) {
-    lua_pushlstring(L, encoded, lgth);
-  }
-  return 1;
-}
-
 // ============================= structmsg_encrypt ========================
 
 static int structmsg_encrypt( lua_State* L ) {
@@ -843,9 +872,8 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "create" ),                LFUNCVAL( structmsg_createMsg ) },
   { LSTRKEY( "delete" ),                LFUNCVAL( structmsg_deleteMsg ) },
   { LSTRKEY( "__gc" ),                  LFUNCVAL( structmsg_deleteMsg ) },
-#ifdef NOTDEF
-  { LSTRKEY( "getmessage" ),            LFUNCVAL( structmsg_getMsg ) },
-#endif
+  { LSTRKEY( "getMsgData" ),            LFUNCVAL( structmsg_getMsgData ) },
+  { LSTRKEY( "setMsgData" ),            LFUNCVAL( structmsg_setMsgData ) },
   { LSTRKEY( "dump" ),                  LFUNCVAL( structmsg_dumpMsg ) },
   { LSTRKEY( "init" ),                  LFUNCVAL( structmsg_initMsg ) },
   { LSTRKEY( "prepare" ),               LFUNCVAL( structmsg_prepareMsg ) },

@@ -112,14 +112,13 @@ typedef struct stmsgDefinitions
 
 #define HANDLE_PREFIX "stmsg_"
 
-#define STRUCT_MSG_ENCODED        (1 << 0)
-#define STRUCT_MSG_DECODED        (1 << 1)
-#define STRUCT_MSG_HAS_CRC        (1 << 2)
-#define STRUCT_MSG_UINT8_CRC      (1 << 3)
-#define STRUCT_MSG_HAS_FILLER     (1 << 4)
-#define STRUCT_MSG_SHORT_CMD_KEY  (1 << 5)
-#define STRUCT_MSG_HAS_TABLE_ROWS (1 << 6)
-#define STRUCT_MSG_IS_INITTED     (1 << 7)
+#define STRUCT_MSG_HAS_CRC        (1 << 0)
+#define STRUCT_MSG_UINT8_CRC      (1 << 1)
+#define STRUCT_MSG_HAS_FILLER     (1 << 2)
+#define STRUCT_MSG_SHORT_CMD_KEY  (1 << 3)
+#define STRUCT_MSG_HAS_TABLE_ROWS (1 << 4)
+#define STRUCT_MSG_IS_INITTED     (1 << 5)
+#define STRUCT_MSG_IS_PREPARED    (1 << 6)
 
 #define STRUCT_MSG_FIELD_IS_SET   (1 << 0)
 
@@ -141,7 +140,8 @@ typedef uint8_t (* dumpMsg_t)(structmsgData_t *self);
 typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
 typedef uint8_t (* initMsg_t)(structmsgData_t *self);
 typedef uint8_t (* prepareMsg_t)(structmsgData_t *self);
-typedef uint8_t (* createMsgFromListInfo_t)(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
+typedef uint8_t (* getMsgData_t)(structmsgData_t *structmsgData, uint8_t **data, int *lgth);
+typedef uint8_t (* setMsgData_t)(structmsgData_t *structmsgData, const uint8_t *data);
 
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
@@ -170,6 +170,8 @@ typedef struct structmsgData {
   dumpBinary_t dumpBinary;
   initMsg_t initMsg;
   prepareMsg_t prepareMsg;
+  getMsgData_t getMsgData;
+  setMsgData_t setMsgData;
 } structmsgData_t;
 
 

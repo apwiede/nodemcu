@@ -86,6 +86,8 @@ enum structmsgErrorCode
   STRUCT_MSG_ERR_NOT_YET_INITTED       = 210,
   STRUCT_MSG_ERR_FIELD_CANNOT_BE_SET   = 209,
   STRUCT_MSG_ERR_NO_SUCH_FIELD         = 208,
+  STRUCT_MSG_ERR_BAD_DATA_LGTH         = 207,
+  STRUCT_MSG_ERR_NOT_YET_PREPARED      = 206,
 };
 
 enum structmsgSpecialFieldNames
