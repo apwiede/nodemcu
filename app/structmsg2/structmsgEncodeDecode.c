@@ -44,39 +44,6 @@ extern str2key_t structmsgSpecialFieldNames[];
 // ============================= crcDecode ========================
 
 static int crcDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth, uint8_t uint8_crc_flag) {
-  uint16_t crcVal;
-  uint8_t uint8_crc;
-  int idx;
-
-  if (uint8_crc_flag) {
-    lgth -= sizeof(uint8_t);   // uint8_t crc
-  } else {
-    lgth -= sizeof(uint16_t);  // uint16_t crc
-  }
-  crcVal = 0;
-  idx = headerLgth;
-  while (idx < lgth + headerLgth) {
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-headerLgth, data[idx], crcVal);
-    crcVal += data[idx++];
-  }
-  crcVal = ~crcVal;
-  crc = 0;
-  if (uint8_crc_flag) {
-    offset = uint8Decode(data, offset, &uint8_crc);
-    *crc = (uint16_t)(uint8_crc & 0xFF);
-  } else {
-    offset = uint16Decode(data, offset, crc);
-  }
-ets_printf("crcVal: 0x%04x crc: 0x%04x\n", crcVal, *crc);
-  if (uint8_crc_flag) {
-    if (crcVal & 0xFF != uint8_crc) {
-      return -1;
-    }
-  } else {
-    if (crcVal != *crc) {
-      return -1;
-    }
-  }
   return offset;
 }
 

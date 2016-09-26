@@ -130,16 +130,18 @@ typedef struct stmsgDefinitions
 typedef struct structmsgData structmsgData_t;
 
 typedef uint8_t (* createMsg_t)(structmsgData_t *self, int numFields, uint8_t **handle);
+typedef uint8_t (* deleteMsg_t)(structmsgData_t *self);
 typedef uint8_t (* addField_t)(structmsgData_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
-typedef uint8_t (* getFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t *stringValue);
+typedef uint8_t (* getFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 
-typedef uint8_t (* getTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t *stringValue);
+typedef uint8_t (* getTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
 typedef uint8_t (* dumpMsg_t)(structmsgData_t *self);
 typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
 typedef uint8_t (* initMsg_t)(structmsgData_t *self);
 typedef uint8_t (* prepareMsg_t)(structmsgData_t *self);
+typedef uint8_t (* createMsgFromListInfo_t)(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
 
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
@@ -158,6 +160,7 @@ typedef struct structmsgData {
   size_t headerLgth;
   uint8_t *header;
   createMsg_t createMsg;
+  deleteMsg_t deleteMsg;
   addField_t addField;
   getFieldValue_t getFieldValue;
   setFieldValue_t setFieldValue;
@@ -171,8 +174,8 @@ typedef struct structmsgData {
 
 
 structmsgData_t *newStructmsgData(void);
-void freeStructmsgData(structmsgData_t *structmsgdata);
 uint8_t structmsgGetPtrFromHandle(const char *handle, structmsgData_t **structmsgData);
+uint8_t newStructmsgDataFromList(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
  
 #ifdef	__cplusplus
 }

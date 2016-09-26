@@ -110,7 +110,7 @@ static uint8_t getInt8(dataView_t *self, int offset, int8_t *value) {
   if (offset > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  *value = self->data[offset] & 0xFF;
+  *value = (int8_t)self->data[offset];
   return DATA_VIEW_ERR_OK;
 }
 

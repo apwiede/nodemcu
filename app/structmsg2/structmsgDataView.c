@@ -290,13 +290,43 @@ static uint8_t setFiller(structmsgDataView_t *self, structmsgField_t *fieldInfo)
 
 // ================================= getCrc ====================================
 
-static uint8_t getCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, uint32_t *value) {
+static uint8_t getCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, size_t startOffset, size_t lgth) {
+  uint16_t crcVal;
+  uint16_t crc;
+  uint8_t uint8_crc;
+  int crcLgth;
+  int idx;
+  int result;
+
+  crcLgth = fieldInfo->fieldLgth;
+  crcVal = 0;
+  idx = startOffset;
+  while (idx < lgth) {
+//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crc);
+    crcVal += self->dataView->data[idx++];
+  }
+  crcVal = ~(crcVal);
+  if (crcLgth == 1) {
+    result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
+    checkErrOK(result);
+ets_printf("crcVal1: 0x%02x crc: 0x%02x\n", crcVal & 0xFF, uint8_crc);
+    if (crcVal & 0xFF != uint8_crc) {
+      return -1;
+    }
+  } else {
+    result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
+    checkErrOK(result);
+ets_printf("crcVal2: 0x%04x crc: 0x%04x\n", crcVal, crc);
+    if (crcVal != crc) {
+      return STRUCT_MSG_ERR_BAD_CRC_VALUE;
+    }
+  }
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setCrc ====================================
 
-static uint8_t setCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, int startOffset, size_t lgth) {
+static uint8_t setCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, size_t startOffset, size_t lgth) {
   int idx;
   uint16_t crc;
 
@@ -319,35 +349,54 @@ ets_printf("crc: 0x%04x\n", crc);
 
 // ================================= getFieldValue ====================================
 
-static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue) {
+static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue) {
   int idx;
   int numEntries;
+  int8_t i8;
+  uint8_t ui8;
+  int16_t i16;
+  uint16_t ui16;
+  int32_t i32;
+  uint32_t ui32;
 
+  *stringValue = NULL;
+  *numericValue = 0;
   switch (fieldInfo->fieldTypeId) {
     case DATA_VIEW_FIELD_INT8_T:
-      self->dataView->getInt8(self->dataView, fieldInfo->fieldOffset, (int8_t *)(numericValue));
+      self->dataView->getInt8(self->dataView, fieldInfo->fieldOffset, &i8);
+      *numericValue = (int)i8;
       break;
     case DATA_VIEW_FIELD_UINT8_T:
-      self->dataView->getInt8(self->dataView, fieldInfo->fieldOffset, (uint8_t *)(numericValue));
+      self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &ui8);
+      *numericValue = (int)ui8;
       break;
     case DATA_VIEW_FIELD_INT16_T:
-      self->dataView->getInt16(self->dataView, fieldInfo->fieldOffset, (int16_t *)(numericValue));
+      self->dataView->getInt16(self->dataView, fieldInfo->fieldOffset, &i16);
+      *numericValue = (int)i16;
       break;
     case DATA_VIEW_FIELD_UINT16_T:
-      self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, (uint16_t *)(numericValue));
+      self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &ui16);
+      *numericValue = (int)ui16;
       break;
     case DATA_VIEW_FIELD_INT32_T:
-      self->dataView->getInt32(self->dataView, fieldInfo->fieldOffset, (uint32_t *)(numericValue));
+      self->dataView->getInt32(self->dataView, fieldInfo->fieldOffset, &i32);
+      *numericValue = (int)i32;
       break;
     case DATA_VIEW_FIELD_UINT32_T:
-      self->dataView->getUint32(self->dataView, fieldInfo->fieldOffset, (uint32_t *)(numericValue));
+      self->dataView->getUint32(self->dataView, fieldInfo->fieldOffset, &ui32);
+      *numericValue = (int)ui32;
       break;
     case DATA_VIEW_FIELD_INT8_VECTOR:
-        os_memcpy(stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      *numericValue = fieldInfo->fieldLgth;
+      *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
+      (*stringValue)[fieldInfo->fieldLgth] = 0;
+      os_memcpy(*stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
     case DATA_VIEW_FIELD_UINT8_VECTOR:
-        os_memcpy(stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
-        stringValue[fieldInfo->fieldLgth] = 0;
+      *numericValue = fieldInfo->fieldLgth;
+      *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
+      (*stringValue)[fieldInfo->fieldLgth] = 0;
+      os_memcpy(*stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
 #ifdef NOTDEF
     case DATA_VIEW_FIELD_INT16_VECTOR:
@@ -439,11 +488,10 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
       break;
-#ifdef NOTDEF
     case DATA_VIEW_FIELD_INT32_T:
       if (stringValue == NULL) {
         if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
-          fieldInfo->value.val = (int32_t)numericValue;
+          self->dataView->setInt32(self->dataView, fieldInfo->fieldOffset, (int32_t)numericValue);
         } else {
           return STRUCT_MSG_ERR_VALUE_TOO_BIG;
         }
@@ -453,9 +501,9 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
       break;
     case DATA_VIEW_FIELD_UINT32_T:
       if (stringValue == NULL) {
-        // we have to do the signed check as numericValue is a sigend integer!!
+        // we have to do the signed check as numericValue is a signed integer!!
         if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
-          fieldInfo->value.uval = (uint32_t)numericValue;
+          self->dataView->setUint32(self->dataView, fieldInfo->fieldOffset, (uint32_t)numericValue);
         } else {
           return STRUCT_MSG_ERR_VALUE_TOO_BIG;
         }
@@ -466,7 +514,10 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
     case DATA_VIEW_FIELD_INT8_VECTOR:
       if (stringValue != NULL) {
         // check for length needed!!
-        os_memcpy(fieldInfo->value.ubyteVector, stringValue, fieldInfo->fieldLgth);
+        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
+          return STRUCT_MSG_ERR_VALUE_TOO_BIG;
+        }
+        os_memcpy(self->dataView->data+fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
       } else {
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
@@ -474,11 +525,15 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
     case DATA_VIEW_FIELD_UINT8_VECTOR:
       if (stringValue != NULL) {
         // check for length needed!!
-        os_memcpy(fieldInfo->value.byteVector, stringValue, fieldInfo->fieldLgth);
+        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
+          return STRUCT_MSG_ERR_VALUE_TOO_BIG;
+        }
+        os_memcpy(self->dataView->data+fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
       } else {
         return STRUCT_MSG_ERR_BAD_VALUE;
       }
       break;
+#ifdef NOTDEF
     case DATA_VIEW_FIELD_INT16_VECTOR:
       if (stringValue != NULL) {
         // check for length needed!!
@@ -513,24 +568,13 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
       break;
 #endif
     default:
+ets_printf("bad type in setFieldValue. %d\n", fieldInfo->fieldTypeId);
       return STRUCT_MSG_ERR_BAD_FIELD_TYPE;
       break;
   }
   return DATA_VIEW_ERR_OK;
 }
 
-
-// ================================= getTableFieldValue ====================================
-
-static uint8_t getTableFieldValue(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue) {
-  return DATA_VIEW_ERR_OK;
-}
-
-// ================================= setTableFieldValue ====================================
-
-static uint8_t setTableFieldValue(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue) {
-  return DATA_VIEW_ERR_OK;
-}
 
 // ================================= newStructmsgDataView ====================================
 
@@ -561,9 +605,6 @@ structmsgDataView_t *newStructmsgDataView(void) {
 
   structmsgDataView->getFieldValue = &getFieldValue;
   structmsgDataView->setFieldValue = &setFieldValue;
-
-  structmsgDataView->getTableFieldValue = &getTableFieldValue;
-  structmsgDataView->setTableFieldValue = &setTableFieldValue;
 
   return structmsgDataView;
 }

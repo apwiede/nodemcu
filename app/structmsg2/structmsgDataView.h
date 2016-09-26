@@ -61,6 +61,7 @@ enum structmsgErrorCode
   STRUCT_MSG_ERR_OUT_OF_RANGE          = 248,
   // be carefull the values up to here
   // must correspond to the values in dataView.h !!!
+  // with the names like DATA_VIEW_ERR_*
 
   STRUCT_MSG_ERR_FIELD_NOT_FOUND       = 230,
   STRUCT_MSG_ERR_BAD_SPECIAL_FIELD     = 229,
@@ -84,6 +85,7 @@ enum structmsgErrorCode
   STRUCT_MSG_ERR_ALREADY_INITTED       = 211,
   STRUCT_MSG_ERR_NOT_YET_INITTED       = 210,
   STRUCT_MSG_ERR_FIELD_CANNOT_BE_SET   = 209,
+  STRUCT_MSG_ERR_NO_SUCH_FIELD         = 208,
 };
 
 enum structmsgSpecialFieldNames
@@ -134,14 +136,11 @@ typedef uint8_t (* setSequenceNum_t)(structmsgDataView_t *self, structmsgField_t
 typedef uint8_t (* getFiller_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, uint8_t **value);
 typedef uint8_t (* setFiller_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo);
 
-typedef uint8_t (* getCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, uint32_t *value);
-typedef uint8_t (* setCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int startOffset, size_t lgth);
+typedef uint8_t (* getCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, size_t startOffset, size_t lgth);
+typedef uint8_t (* setCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, size_t startOffset, size_t lgth);
 
-typedef uint8_t (* dvGetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue);
+typedef uint8_t (* dvGetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* dvSetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue);
-
-typedef uint8_t (* dvGetTableFieldValue_t)(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue);
-typedef uint8_t (* dvSetTableFieldValue_t)(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue);
 
 typedef struct structmsgDataView {
   dataView_t *dataView;
@@ -164,8 +163,6 @@ typedef struct structmsgDataView {
   dvGetFieldValue_t getFieldValue;
   dvSetFieldValue_t setFieldValue;
 
-  dvGetTableFieldValue_t getTableFieldValue;
-  dvSetTableFieldValue_t setTableFieldValue;
 } structmsgDataView_t;
 
 structmsgDataView_t *newStructmsgDataView(void);
