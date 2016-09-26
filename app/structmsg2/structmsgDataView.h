@@ -137,10 +137,10 @@ typedef uint8_t (* setFiller_t)(structmsgDataView_t *self, structmsgField_t *fie
 typedef uint8_t (* getCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, uint32_t *value);
 typedef uint8_t (* setCrc_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int startOffset, size_t lgth);
 
-typedef uint8_t (* dvGetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* dvGetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue);
 typedef uint8_t (* dvSetFieldValue_t)(structmsgDataView_t *self, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue);
 
-typedef uint8_t (* dvGetTableFieldValue_t)(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* dvGetTableFieldValue_t)(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue);
 typedef uint8_t (* dvSetTableFieldValue_t)(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue);
 
 typedef struct structmsgDataView {

@@ -292,7 +292,7 @@ static uint8_t addField(structmsgData_t *self, const uint8_t *fieldName, const u
 
 // ================================= getFieldValue ====================================
 
-static uint8_t getFieldValue(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
+static uint8_t getFieldValue(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t *stringValue) {
   structmsgField_t *fieldInfo;
   uint8_t fieldNameId;
   int idx;
@@ -360,19 +360,19 @@ static uint8_t setFieldValue(structmsgData_t *self, const uint8_t *fieldName, in
 
 // ================================= getTableFieldValue ====================================
 
-static uint8_t getTableFieldValue(structmsgData_t *self, int row, const uint8_t *fieldName, int numericValue, uint8_t **stringValue) {
+static uint8_t getTableFieldValue(structmsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t *stringValue) {
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= setTableFieldValue ====================================
 
-static uint8_t setTableFieldValue(structmsgData_t *self, int row, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
+static uint8_t setTableFieldValue(structmsgData_t *self, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue) {
   return DATA_VIEW_ERR_OK;
 }
 
-// ================================= reInitMsg ====================================
+// ================================= prepareMsg ====================================
 
-static uint8_t reInitMsg(structmsgData_t *self) {
+static uint8_t prepareMsg(structmsgData_t *self) {
   int numEntries;
   int idx;
   int result;
@@ -585,26 +585,25 @@ static uint8_t dumpMsg(structmsgData_t *self) {
       uint8_t stringValue[255];
       uint8_t *stringValuePtr = stringValue;
       numericValue = 0;
-      result = self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, &numericValue, &stringValuePtr);
-ets_printf("field: %s numericValue: 0x%08x stringValue: %p\n", fieldNameStr, numericValue, stringValue);
+      result = self->structmsgDataView->getFieldValue(self->structmsgDataView, fieldInfo, &numericValue, stringValue);
       switch (fieldInfo->fieldTypeId) {
       case DATA_VIEW_FIELD_INT8_T:
-        ets_printf("      value: 0x%02x\n", numericValue & 0xFF);
+        ets_printf("      value: 0x%02x %d\n", numericValue & 0xFF, numericValue & 0xFF);
         break;
       case DATA_VIEW_FIELD_UINT8_T:
-        ets_printf("      value: 0x%02x\n", numericValue & 0xFF);
+        ets_printf("      value: 0x%02x %d\n", numericValue & 0xFF, numericValue & 0xFF);
         break;
       case DATA_VIEW_FIELD_INT16_T:
-        ets_printf("      value: 0x%04x\n", numericValue & 0xFFFF);
+        ets_printf("      value: 0x%04x %d\n", numericValue & 0xFFFF, numericValue & 0xFFFF);
         break;
       case DATA_VIEW_FIELD_UINT16_T:
-        ets_printf("      value: 0x%04x\n", numericValue & 0xFFFF);
+        ets_printf("      value: 0x%04x %d\n", numericValue & 0xFFFF, numericValue & 0xFFFF);
         break;
       case DATA_VIEW_FIELD_INT32_T:
-        ets_printf("      value: 0x%08x\n", numericValue & 0xFFFFFFFF);
+        ets_printf("      value: 0x%08x %d\n", numericValue & 0xFFFFFFFF, numericValue & 0xFFFFFFFF);
         break;
       case DATA_VIEW_FIELD_UINT32_T:
-        ets_printf("      value: 0x%08x\n", numericValue & 0xFFFFFFFF);
+        ets_printf("      value: 0x%08x %d\n", numericValue & 0xFFFFFFFF, numericValue & 0xFFFFFFFF);
         break;
       case DATA_VIEW_FIELD_INT8_VECTOR:
         valueIdx = 0;
@@ -617,9 +616,6 @@ ets_printf("field: %s numericValue: 0x%08x stringValue: %p\n", fieldNameStr, num
         ets_printf("\n");
         break;
       case DATA_VIEW_FIELD_UINT8_VECTOR:
-ets_printf("fillerOffset: %d\n", fieldInfo->fieldOffset);
-self->dumpBinary(self->structmsgDataView->dataView->data+fieldInfo->fieldOffset,fieldInfo->fieldLgth, "FILLER");
-self->dumpBinary(self->structmsgDataView->dataView->data,self->structmsgDataView->dataView->lgth, "ALL");
         valueIdx = 0;
         ets_printf("      values:\n");
         while (valueIdx < fieldInfo->fieldLgth) {
@@ -725,7 +721,7 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->dumpMsg = &dumpMsg;
   structmsgData->dumpBinary = &dumpBinary;
   structmsgData->initMsg = &initMsg;
-  structmsgData->reInitMsg = &reInitMsg;
+  structmsgData->prepareMsg = &prepareMsg;
 
 ets_printf("structmsgData: %p size: %d\n", structmsgData, sizeof(structmsgData_t));
   return structmsgData;
@@ -1337,12 +1333,6 @@ static int dumpTableRowFields(structmsg_t *structmsg) {
     }
     idx++;
   }
-  return STRUCT_MSG_ERR_OK;
-}
-
-// ============================= stmsg_dumpMsg ========================
-
-int stmsg_dumpMsg(const uint8_t *handle) {
   return STRUCT_MSG_ERR_OK;
 }
 

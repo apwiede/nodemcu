@@ -131,15 +131,15 @@ typedef struct structmsgData structmsgData_t;
 
 typedef uint8_t (* createMsg_t)(structmsgData_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* addField_t)(structmsgData_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
-typedef uint8_t (* getFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t *stringValue);
 typedef uint8_t (* setFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 
-typedef uint8_t (* getTableFieldValue_t)(structmsgData_t *self, int row, const uint8_t *fieldName, int numericValue, uint8_t **stringValue);
-typedef uint8_t (* setTableFieldValue_t)(structmsgData_t *self, int row, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
+typedef uint8_t (* getTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t *stringValue);
+typedef uint8_t (* setTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
 typedef uint8_t (* dumpMsg_t)(structmsgData_t *self);
 typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
 typedef uint8_t (* initMsg_t)(structmsgData_t *self);
-typedef uint8_t (* reInitMsg_t)(structmsgData_t *self);
+typedef uint8_t (* prepareMsg_t)(structmsgData_t *self);
 
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
@@ -166,7 +166,7 @@ typedef struct structmsgData {
   dumpMsg_t dumpMsg;
   dumpBinary_t dumpBinary;
   initMsg_t initMsg;
-  reInitMsg_t reInitMsg;
+  prepareMsg_t prepareMsg;
 } structmsgData_t;
 
 

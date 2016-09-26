@@ -262,7 +262,6 @@ static uint8_t setFiller(structmsgDataView_t *self, structmsgField_t *fieldInfo)
 
   lgth = fieldInfo->fieldLgth;
   offset = fieldInfo->fieldOffset;
-ets_printf("fillerEncode: offset: %d lgth: %d\n", offset, lgth);
   idx = 0;
   while (lgth >= 4) {
     val = (uint32_t)(rand() & RAND_MAX);
@@ -301,7 +300,6 @@ static uint8_t setCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, in
   int idx;
   uint16_t crc;
 
-ets_printf("crcEncode: offset: %d lgth: %d startOffset: %d\n", fieldInfo->fieldOffset, fieldInfo->fieldLgth, startOffset);
   crc = 0;
   idx = startOffset;
   while (idx < lgth) {
@@ -321,7 +319,7 @@ ets_printf("crc: 0x%04x\n", crc);
 
 // ================================= getFieldValue ====================================
 
-static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue) {
+static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue) {
   int idx;
   int numEntries;
 
@@ -524,7 +522,7 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
 
 // ================================= getTableFieldValue ====================================
 
-static uint8_t getTableFieldValue(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue) {
+static uint8_t getTableFieldValue(structmsgDataView_t *self, int row, structmsgField_t *fieldInfo, int *numericValue, uint8_t *stringValue) {
   return DATA_VIEW_ERR_OK;
 }
 
@@ -546,7 +544,6 @@ structmsgDataView_t *newStructmsgDataView(void) {
     return NULL;
   }
 
-ets_printf("newStructmsgDataVidew: structmsgDataView: %p dataView: %p\n", structmsgDataView, structmsgDataView->dataView);
   structmsgDataView->getFieldNameIdFromStr = &getFieldNameIdFromStr;
   structmsgDataView->getFieldNameStrFromId = &getFieldNameStrFromId;
 
