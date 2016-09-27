@@ -432,6 +432,8 @@ dataView_t *newDataView(void) {
   }
   dataView->data = NULL;
   dataView->lgth = 0;
+  dataViewId++;
+  dataView->id = dataViewId;
 
   dataView->getFieldTypeIdFromStr = &getFieldTypeIdFromStr;
   dataView->getFieldTypeStrFromId = &getFieldTypeStrFromId;

@@ -57,7 +57,7 @@ static uint8_t dumpDefFieldValue(structmsgData_t *self, structmsgField_t *fieldI
   uint8_t *stringValue;
   int numericValue = 0;
 
-  result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDataView, fieldInfo, &numericValue, &stringValue, fieldIdx);
+  result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDefinitionDataView, fieldInfo, &numericValue, &stringValue, fieldIdx);
   checkErrOK(result);
   switch (fieldInfo->fieldTypeId) {
   case DATA_VIEW_FIELD_INT8_T:
@@ -80,7 +80,7 @@ static uint8_t dumpDefFieldValue(structmsgData_t *self, structmsgField_t *fieldI
     break;
   case DATA_VIEW_FIELD_INT8_VECTOR:
     valueIdx = 0;
-    ets_printf("      %svalues:");
+    ets_printf("      %svalues:", indent2);
     while (valueIdx < fieldInfo->fieldLgth) {
       ch = stringValue[valueIdx];
       ets_printf("        %sidx: %d value: %c 0x%02x\n", indent2, valueIdx, (char)ch, (uint8_t)(ch & 0xFF));
@@ -90,7 +90,7 @@ static uint8_t dumpDefFieldValue(structmsgData_t *self, structmsgField_t *fieldI
     break;
   case DATA_VIEW_FIELD_UINT8_VECTOR:
     valueIdx = 0;
-    ets_printf("      values:\n");
+    ets_printf("      %svalues:\n", indent2);
     while (valueIdx < fieldInfo->fieldLgth) {
       uch = stringValue[valueIdx];
       ets_printf("        %sidx: %d value: %c 0x%02x\n", valueIdx, (char)uch, (uint8_t)(uch & 0xFF));
@@ -99,9 +99,9 @@ static uint8_t dumpDefFieldValue(structmsgData_t *self, structmsgField_t *fieldI
     break;
   case DATA_VIEW_FIELD_INT16_VECTOR:
     valueIdx = 0;
-    ets_printf("      values:");
-    while (valueIdx < fieldInfo->fieldLgth) {
-      result = self->structmsgDefinitionDataView->dataView->getInt16(self->structmsgDataView->dataView, fieldInfo->fieldOffset+valueIdx*sizeof(int16_t), &sh);
+    ets_printf("      %svalues:", indent2);
+    while (valueIdx < fieldInfo->fieldLgth/sizeof(int16_t)) {
+      result = self->structmsgDefinitionDataView->dataView->getInt16(self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset+valueIdx*sizeof(int16_t), &sh);
       checkErrOK(result);
       ets_printf("        %sidx: %d value: 0x%04x\n", indent2, valueIdx, sh);
       valueIdx++;
@@ -110,13 +110,9 @@ static uint8_t dumpDefFieldValue(structmsgData_t *self, structmsgField_t *fieldI
     break;
   case DATA_VIEW_FIELD_UINT16_VECTOR:
     valueIdx = 0;
-ets_printf("ui16v: %d\n", fieldInfo->fieldLgth);
-    ets_printf("      values:\n");
-    while (valueIdx < fieldInfo->fieldLgth) {
-ets_printf("ui16v: idx1: %d offset: %d %d\n", valueIdx, fieldInfo->fieldOffset, fieldInfo->fieldOffset+valueIdx*sizeof(uint16_t));
-  result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDataView, fieldInfo, &numericValue, &stringValue, valueIdx);
-//      result = self->structmsgDefinitionDataView->dataView->getUint16(self->structmsgDataView->dataView, fieldInfo->fieldOffset+valueIdx*sizeof(uint16_t), &ush);
-//ets_printf("ui16v: idx2: %d res: %d ush: %d\n", valueIdx, result, ush);
+    ets_printf("      %svalues:\n", indent2);
+    while (valueIdx < fieldInfo->fieldLgth/sizeof(uint16_t)) {
+      result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDefinitionDataView, fieldInfo, &numericValue, &stringValue, valueIdx);
       checkErrOK(result);
       ets_printf("        %sidx: %d value: 0x%04x\n", indent2, valueIdx, (uint16_t)(numericValue & 0xFFFF));
       valueIdx++;
@@ -125,7 +121,7 @@ ets_printf("ui16v: idx1: %d offset: %d %d\n", valueIdx, fieldInfo->fieldOffset, 
 #ifdef NOTDEF
   case DATA_VIEW_FIELD_INT32_VECTOR:
     valueIdx = 0;
-    ets_printf("      values:");
+    ets_printf("      %svalues:", indent2);
     while (valueIdx < fieldInfo->fieldLgth) {
       val = fieldInfo->value.int32Vector[valueIdx];
       ets_printf("        %sidx: %d value: 0x%08x\n", indent2, valueIdx, (int32_t)(val & 0xFFFFFFFF));
@@ -135,7 +131,7 @@ ets_printf("ui16v: idx1: %d offset: %d %d\n", valueIdx, fieldInfo->fieldOffset, 
     break;
   case DATA_VIEW_FIELD_UINT32_VECTOR:
     valueIdx = 0;
-    ets_printf("      values:\n");
+    ets_printf("      %svalues:\n", indent2);
     while (valueIdx < fieldInfo->fieldLgth) {
       uval = fieldInfo->value.uint32Vector[valueIdx];
       ets_printf("        %sidx: %d value: 0x%08x\n", indent2, valueIdx, (uint32_t)(uval & 0xFFFFFFFF));
@@ -221,7 +217,7 @@ static uint8_t setDefFieldValue(structmsgData_t *self, uint8_t fieldNameId, int 
   while (idx < numEntries) {
     fieldInfo = &self->defFields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-      result = self->structmsgDefinitionDataView->setFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue, fieldIdx);
+      result = self->structmsgDefinitionDataView->setFieldValue(self->structmsgDefinitionDataView, fieldInfo, numericValue, stringValue, fieldIdx);
       checkErrOK(result);
       fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
       break;
@@ -309,7 +305,7 @@ ets_printf("initDef: numNormFields: %d normNamesSize: %d\n", numNormFields, norm
   checkErrOK(result);
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS, DATA_VIEW_FIELD_UINT8_T, 1);
   checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, DATA_VIEW_FIELD_UINT16_VECTOR, numNormFields);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, DATA_VIEW_FIELD_UINT16_VECTOR, numNormFields*sizeof(uint16));
   checkErrOK(result);
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE, DATA_VIEW_FIELD_UINT16_T, 2);
   checkErrOK(result);
@@ -331,6 +327,10 @@ ets_printf("initDef: numNormFields: %d normNamesSize: %d\n", numNormFields, norm
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CRC, DATA_VIEW_FIELD_UINT16_T, 2);
   checkErrOK(result);
   self->flags |= STRUCT_DEF_IS_INITTED;
+  self->structmsgDefinitionDataView->dataView->data = os_zalloc(self->defFieldOffset);
+  checkAllocOK(self->structmsgDefinitionDataView->dataView->data);
+ets_printf("DEF_DATA: %p\n", self->structmsgDefinitionDataView->dataView->data);
+  self->structmsgDefinitionDataView->dataView->lgth = self->defFieldOffset;
 
 // FIXME arc and dst are dummy values for now!!
   result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_SRC, 123, NULL, 0);
@@ -347,7 +347,6 @@ ets_printf("initDef: numNormFields: %d normNamesSize: %d\n", numNormFields, norm
   checkErrOK(result);
   idx = 0;
   while (idx < numNormFields) {
-ets_printf("normId: idx: %d offset: %d\n", idx, normNamesOffsets[idx].offset);
     result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, normNamesOffsets[idx].offset, NULL, idx);
     checkErrOK(result);
     idx++;

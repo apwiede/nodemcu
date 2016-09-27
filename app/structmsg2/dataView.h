@@ -123,6 +123,7 @@ typedef uint8_t (* setData_t)(dataView_t *self, uint8_t *data, size_t lgth);
 
 typedef struct dataView {
   uint8_t *data;
+  uint8_t id;
   size_t lgth;
   
   getFieldTypeIdFromStr_t getFieldTypeIdFromStr;
@@ -161,6 +162,7 @@ typedef struct dataView {
   setData_t setData;
 } dataView_t;
 
+uint8_t dataViewId;
 dataView_t *newDataView();
 void FreeDataView(dataView_t *dataView);
 

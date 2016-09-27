@@ -156,6 +156,7 @@ typedef uint8_t (* dvSetFieldValue_t)(structmsgDataView_t *self, structmsgField_
 
 typedef struct structmsgDataView {
   dataView_t *dataView;
+  uint8_t id;
 
   getFieldNameIdFromStr_t getFieldNameIdFromStr;
   getFieldNameStrFromId_t getFieldNameStrFromId;
@@ -177,6 +178,7 @@ typedef struct structmsgDataView {
 
 } structmsgDataView_t;
 
+uint8_t structmsgDataViewId;
 structmsgDataView_t *newStructmsgDataView(void);
 void freeStructmsgDataView(structmsgDataView_t *dataView);
 
