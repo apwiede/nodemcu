@@ -993,6 +993,9 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->cmdLgth = 0;
   structmsgData->headerLgth = 0;
   structmsgData->header = NULL;
+  structmsgData->defNumNormFields = 0;
+  structmsgData->defNormNamesSize = 0;
+  structmsgData->defDefinitionsSize = 0;
 
   structmsgData->createMsg = &createMsg;
   structmsgData->deleteMsg = &deleteMsg;

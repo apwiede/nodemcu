@@ -174,6 +174,9 @@ typedef struct structmsgData {
   size_t defTotalLgth;
   size_t cmdLgth;
   size_t headerLgth;
+  size_t defNumNormFields;
+  size_t defNormNamesSize;
+  size_t defDefinitionsSize;
   uint8_t *header;
 
   createMsg_t createMsg;
