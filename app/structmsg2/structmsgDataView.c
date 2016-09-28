@@ -349,7 +349,7 @@ static uint8_t setCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, si
   } else {
     self->dataView->setUint16(self->dataView,fieldInfo->fieldOffset,crc);
   }
-ets_printf("crc: 0x%04x\n", crc);
+//ets_printf("crc: 0x%04x\n", crc);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -408,7 +408,6 @@ static uint8_t getFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
       os_memcpy(*stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
     case DATA_VIEW_FIELD_UINT8_VECTOR:
-      *numericValue = fieldInfo->fieldLgth;
       *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
       checkAllocOK(stringValue);
       (*stringValue)[fieldInfo->fieldLgth] = 0;

@@ -169,6 +169,9 @@ ets_printf("error result: %d\n", result);
   case STRUCT_DEF_ERR_ALREADY_CREATED:
     lua_pushfstring(L, "%s: def already created", errStr);
     break;
+  case STRUCT_MSG_ERR_OUT_OF_RANGE:
+    lua_pushfstring(L, "%s: out of range", errStr);
+    break;
   default:
     lua_pushfstring(L, "%s: funny result error code", errStr);
 ets_printf("funny result: %d\n", result);
@@ -652,19 +655,24 @@ static int structmsg_add_fieldDefinition( lua_State* L ) {
   checkOKOrErr(L, result, "addfielddef", "");
   return 1;
 }
+#endif
 
-// ============================= structmsg_dump_fieldDefinition ========================
+// ============================= structmsg_dumpDefFields ========================
 
-static int structmsg_dump_fieldDefinition( lua_State* L ) {
-  const uint8_t *name;
+static int structmsg_dumpDefFields( lua_State* L ) {
+  const uint8_t *handle;
   int result;
+  structmsgData_t *structmsgData;
 
-  name = luaL_checkstring( L, 1 );
-  result = structmsg_dumpFieldDefinition(name);
-  checkOKOrErr(L, result, "dumpfielddef", "");
+  handle = luaL_checkstring( L, 1 );
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "dumpDef", "");
+  result = structmsgData->dumpDefFields(structmsgData);
+  checkOKOrErr(L, result, "dumpDef", "");
   return 1;
 }
 
+#ifdef NOTDEF
 // ============================= structmsg_encode_fieldDefinitionMessage =================
 
 static int structmsg_encode_fieldDefinitionMessage( lua_State* L ) {
@@ -776,22 +784,63 @@ static int structmsg_delete_msgDefinitions( lua_State* L ) {
   checkOKOrErr(L, result, "deletemsgdefinitions", "");
   return 1;
 }
+#endif
 
 
-// ============================= structmsg_create_msgFromDefinition ========================
+// ============================= structmsg_setDef ========================
 
-static int structmsg_create_msgFromDefinition( lua_State* L ) {
-  const uint8_t *name;
-  uint8_t shortCmdKey;
+static int structmsg_setDef( lua_State* L ) {
+  const uint8_t *handle;
+  const uint8_t *data;
+  structmsgData_t *structmsgData;
   int result;
 
-  name = luaL_checkstring (L, 1);
-  shortCmdKey = luaL_optinteger (L, 2, 0);
-  result = structmsg_createMsgFromDefinition(name, shortCmdKey);
-  checkOKOrErr(L, result, "createmsgfromdef", "");
+  handle = luaL_checkstring (L, 1);
+  data = luaL_checkstring (L, 2);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "setDef", "");
+  result = structmsgData->setDef(structmsgData, data);
+  checkOKOrErr(L, result, "setDef", "");
   return 1;
 }
 
+// ============================= structmsg_getDef ========================
+
+static int structmsg_getDef( lua_State* L ) {
+  const uint8_t *handle;
+  uint8_t *data;
+  int lgth;
+  structmsgData_t *structmsgData;
+  int result;
+
+  handle = luaL_checkstring (L, 1);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "getDef", "");
+  result = structmsgData->getDef(structmsgData, &data, &lgth);
+  if (result == STRUCT_MSG_ERR_OK) {
+    lua_pushlstring (L, data, lgth);
+  } else {
+    checkOKOrErr(L, result, "getDef", "");
+  }
+  return 1;
+}
+
+// ============================= structmsg_createMsgFromDef ========================
+
+static int structmsg_createMsgFromDef( lua_State* L ) {
+  const uint8_t *handle;
+  structmsgData_t *structmsgData;
+  int result;
+
+  handle = luaL_checkstring (L, 1);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "createMsgFromDef", "");
+  result = structmsgData->createMsgFromDef(structmsgData);
+  checkOKOrErr(L, result, "createMsgFromDef", "");
+  return 1;
+}
+
+#ifdef NOTDEF
 // ============================= structmsg_get_definitionNormalFieldNames ==================
 
 static int structmsg_get_definitionNormalFieldNames( lua_State* L ) {
@@ -932,13 +981,16 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "createMsgDef" ),          LFUNCVAL( structmsg_createMsgDefinition ) },
   { LSTRKEY( "initDef" ),               LFUNCVAL( structmsg_initDef ) },
   { LSTRKEY( "prepareDef" ),            LFUNCVAL( structmsg_prepareDef ) },
+  { LSTRKEY( "dumpDefFields" ),         LFUNCVAL( structmsg_dumpDefFields ) },
+  { LSTRKEY( "setDef" ),                LFUNCVAL( structmsg_setDef ) },
+  { LSTRKEY( "getDef" ),                LFUNCVAL( structmsg_getDef ) },
+  { LSTRKEY( "createMsgFromDef" ),      LFUNCVAL( structmsg_createMsgFromDef ) },
 #ifdef NOtDEF
   { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },
   { LSTRKEY( "decrypt" ),               LFUNCVAL( structmsg_decrypt ) },
   { LSTRKEY( "setcrypted" ),            LFUNCVAL( structmsg_set_crypted ) },
   { LSTRKEY( "decryptgethandle" ),      LFUNCVAL( structmsg_decrypt_getHandle ) },
   { LSTRKEY( "adddeffield" ),           LFUNCVAL( structmsg_add_fieldDefinition ) },
-  { LSTRKEY( "dumpdef" ),               LFUNCVAL( structmsg_dump_fieldDefinition ) },
   { LSTRKEY( "encodedef" ),             LFUNCVAL( structmsg_encode_fieldDefinitionMessage ) },
   { LSTRKEY( "decodedef" ),             LFUNCVAL( structmsg_decode_fieldDefinitionMessage ) },
   { LSTRKEY( "encryptdef" ),            LFUNCVAL( structmsg_encrypt_msgDefinition ) },
@@ -947,7 +999,6 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "decryptdefgetname" ),     LFUNCVAL( structmsg_decrypt_getDefinitionName ) },
   { LSTRKEY( "deletedef" ),             LFUNCVAL( structmsg_delete_msgDefinition ) },
   { LSTRKEY( "deletedefinitions" ),     LFUNCVAL( structmsg_delete_msgDefinitions ) },
-  { LSTRKEY( "createmsgfromdef" ),      LFUNCVAL( structmsg_create_msgFromDefinition ) },
   { LSTRKEY( "getdefnormfnames" ),      LFUNCVAL( structmsg_get_definitionNormalFieldNames ) },
   { LSTRKEY( "getdeftablefnames" ),     LFUNCVAL( structmsg_get_definitionTableFieldNames ) },
   { LSTRKEY( "getdefntablerows" ),      LFUNCVAL( structmsg_get_definitionNumTableRows ) },

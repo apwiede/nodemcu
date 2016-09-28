@@ -122,6 +122,9 @@ typedef struct stmsgDefinitions
 #define STRUCT_DEF_NUM_DEF_FIELDS 15
 #define STRUCT_DEF_CMD_KEY 0xFFFF
 
+#define STRUCT_DEF_TO_DATA        (1 << 0)
+#define STRUCT_DEF_FROM_DATA      (1 << 1)
+
 #define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
 
 typedef struct structmsgData structmsgData_t;
@@ -147,6 +150,9 @@ typedef uint8_t (* prepareDef_t)(structmsgData_t *self);
 typedef uint8_t (* addDefField_t)(structmsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
 typedef uint8_t (* getDefFieldValue_t)(structmsgData_t *self, const uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int idx);
 typedef uint8_t (* setDefFieldValue_t)(structmsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int idx);
+typedef uint8_t (* setDef_t)(structmsgData_t *self, const uint8_t *data);
+typedef uint8_t (* getDef_t)(structmsgData_t *self, uint8_t **data, int *lgth);
+typedef uint8_t (* createMsgFromDef_t)(structmsgData_t *self);
 
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
@@ -165,6 +171,7 @@ typedef struct structmsgData {
   size_t fieldOffset;
   size_t defFieldOffset;
   size_t totalLgth;
+  size_t defTotalLgth;
   size_t cmdLgth;
   size_t headerLgth;
   uint8_t *header;
@@ -189,6 +196,9 @@ typedef struct structmsgData {
   addDefField_t addDefField;
   getDefFieldValue_t getDefFieldValue;
   setDefFieldValue_t setDefFieldValue;
+  setDef_t setDef;
+  getDef_t getDef;
+  createMsgFromDef_t createMsgFromDef;
 } structmsgData_t;
 
 

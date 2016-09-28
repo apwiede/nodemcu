@@ -43,6 +43,44 @@ typedef struct id2offset {
   uint8_t *name;
 } id2offset_t;
 
+// ================================= dumpDefDefinitions ====================================
+
+static uint8_t dumpDefDefinitions(structmsgData_t *self, structmsgField_t *fieldInfo, const uint8_t *indent2, int fieldIdx, uint8_t *names) {
+  int result;
+  int valueIdx;
+  int numFields;
+  uint8_t uch;
+  int8_t ch;
+  uint16_t ush;
+  int16_t sh;
+  uint32_t uval;
+  int32_t val;
+  uint8_t *stringValue;
+  int numericValue = 0;
+  int fieldNameId;
+  int fieldTypeId;
+  int fieldLgth;
+  uint8_t * fieldNameStr;
+  uint8_t * fieldTypeStr;
+
+  valueIdx = 0;
+  while (valueIdx < fieldInfo->fieldLgth / sizeof(uint16_t)) {
+    result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDefinitionDataView, fieldInfo, &fieldNameId, &stringValue, valueIdx++);
+    result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDefinitionDataView, fieldInfo, &fieldTypeId, &stringValue, valueIdx++);
+    result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDefinitionDataView, fieldInfo, &fieldLgth, &stringValue, valueIdx++);
+    result = self->structmsgDataView->dataView->getFieldTypeStrFromId(self->structmsgDataView->dataView, fieldTypeId, &fieldTypeStr);
+    checkErrOK(result);
+    if (fieldNameId > STRUCT_MSG_SPEC_FIELD_LOW) {
+      result = self->structmsgDataView->getFieldNameStrFromId(self->structmsgDataView, fieldNameId, &fieldNameStr);
+      checkErrOK(result);
+    } else {
+      fieldNameStr = names+fieldNameId;
+    }
+    ets_printf("        defIdx: %3d fieldName: %3d %-20s fieldType: %3d %-8s fieldLgth: %5d\r\n", valueIdx/3, fieldNameId, fieldNameStr, fieldTypeId, fieldTypeStr, fieldLgth);
+  }
+  return DATA_VIEW_ERR_OK;
+}
+
 // ================================= dumpDefFieldValue ====================================
 
 static uint8_t dumpDefFieldValue(structmsgData_t *self, structmsgField_t *fieldInfo, const uint8_t *indent2, int fieldIdx) {
@@ -93,7 +131,7 @@ static uint8_t dumpDefFieldValue(structmsgData_t *self, structmsgField_t *fieldI
     ets_printf("      %svalues:\n", indent2);
     while (valueIdx < fieldInfo->fieldLgth) {
       uch = stringValue[valueIdx];
-      ets_printf("        %sidx: %d value: %c 0x%02x\n", valueIdx, (char)uch, (uint8_t)(uch & 0xFF));
+      ets_printf("        %sidx: %d value: %c 0x%02x\n", indent2, valueIdx, (char)uch, (uint8_t)(uch & 0xFF));
       valueIdx++;
     }
     break;
@@ -154,8 +192,11 @@ static uint8_t dumpDefFields(structmsgData_t *self) {
   uint8_t *fieldTypeStr;
   uint8_t *fieldNameStr;
   structmsgField_t *fieldInfo;
+  uint8_t *stringValue;
+  int numericValue;
 
   numEntries = self->numDefFields;
+  ets_printf("  defHandle: %s\r\n", self->handle);
   ets_printf("    numDefFields: %d\r\n", numEntries);
   idx = 0;
   while (idx < numEntries) {
@@ -166,8 +207,16 @@ static uint8_t dumpDefFields(structmsgData_t *self) {
     checkErrOK(result);
     ets_printf("      idx: %d fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d \r\n", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
     if (fieldInfo->fieldFlags & STRUCT_MSG_FIELD_IS_SET) {
-      result = dumpDefFieldValue(self, fieldInfo, "  ", 0);
-      checkErrOK(result);
+      if (fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_DEFINITIONS) {
+        result = dumpDefDefinitions(self, fieldInfo, "  ", 0, stringValue);
+        checkErrOK(result);
+      } else {
+        result = dumpDefFieldValue(self, fieldInfo, "  ", 0);
+        checkErrOK(result);
+      }
+      if (fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES) {
+        result = self->structmsgDefinitionDataView->getFieldValue(self->structmsgDefinitionDataView, fieldInfo, &numericValue, &stringValue, 0);
+      }
     }
     idx++;
   }
@@ -227,6 +276,173 @@ static uint8_t setDefFieldValue(structmsgData_t *self, uint8_t fieldNameId, int 
   return STRUCT_MSG_ERR_OK;
 }
 
+// ============================= addDefFields ========================
+
+static uint8_t addDefFields(structmsgData_t *self, uint16_t numNormFields, uint16_t normNamesSize, uint16_t definitionsSize, int direction) {
+  int fieldIdx;
+  int namesIdx;
+  int result;
+  int idx;
+  uint8_t numNormEntries;
+  size_t crcLgth;
+  size_t myLgth;
+  uint16_t fillerLgth;
+  size_t headerLgth;
+  size_t namesOffset;
+
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_SRC, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DST, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  headerLgth = self->defFieldOffset;
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CMD_KEY, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CMD_LGTH, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_RANDOM_NUM, DATA_VIEW_FIELD_UINT32_T, 4);
+  checkErrOK(result);
+  if (direction == STRUCT_DEF_FROM_DATA) {
+    result = self->structmsgDefinitionDataView->dataView->getUint8(self->structmsgDefinitionDataView->dataView, self->defFieldOffset, &numNormEntries);
+    checkErrOK(result);
+    numNormFields = numNormEntries;
+  }
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS, DATA_VIEW_FIELD_UINT8_T, 1);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, DATA_VIEW_FIELD_UINT16_VECTOR, numNormFields*sizeof(uint16));
+  checkErrOK(result);
+  if (direction == STRUCT_DEF_FROM_DATA) {
+    result = self->structmsgDefinitionDataView->dataView->getUint16(self->structmsgDefinitionDataView->dataView, self->defFieldOffset, &normNamesSize);
+    checkErrOK(result);
+  }
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES, DATA_VIEW_FIELD_UINT8_VECTOR, normNamesSize);
+  checkErrOK(result);
+  if (direction == STRUCT_DEF_FROM_DATA) {
+    result = self->structmsgDefinitionDataView->dataView->getUint16(self->structmsgDefinitionDataView->dataView, self->defFieldOffset, &definitionsSize);
+    checkErrOK(result);
+  }
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, DATA_VIEW_FIELD_UINT16_VECTOR, definitionsSize);
+  checkErrOK(result);
+    fillerLgth = 0;
+    crcLgth = 2;
+    myLgth = self->defFieldOffset + crcLgth - headerLgth;
+    while ((myLgth % 16) != 0) {
+      myLgth++;
+      fillerLgth++;
+    }
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_FILLER, DATA_VIEW_FIELD_UINT8_VECTOR, fillerLgth);
+  checkErrOK(result);
+  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CRC, DATA_VIEW_FIELD_UINT16_T, 2);
+  checkErrOK(result);
+  self->flags |= STRUCT_DEF_IS_INITTED;
+  if (direction == STRUCT_DEF_TO_DATA) {
+    self->structmsgDefinitionDataView->dataView->data = os_zalloc(self->defFieldOffset);
+    checkAllocOK(self->structmsgDefinitionDataView->dataView->data);
+  }
+  self->structmsgDefinitionDataView->dataView->lgth = self->defFieldOffset;
+  self->defTotalLgth = self->defFieldOffset;
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= setStaticDefFields ========================
+
+static uint8_t setStaticDefFields(structmsgData_t *self, int numNormFields, int normNamesSize, id2offset_t *normNamesOffsets, int definitionsSize) {
+  int fieldIdx;
+  int namesIdx;
+  int tabIdx;
+  int result;
+  int idx;
+  size_t headerLgth;
+  size_t fieldLgth;
+  size_t namesOffset;
+  structmsgField_t *fieldInfo;
+  structmsgField_t *tabFieldInfo;
+
+// FIXME arc and dst are dummy values for now!!
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_SRC, 123, NULL, 0);
+  checkErrOK(result);
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DST, 456, NULL, 0);
+  checkErrOK(result);
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH, self->defFieldOffset, NULL, 0);
+  checkErrOK(result);
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_CMD_KEY, STRUCT_DEF_CMD_KEY, NULL, 0);
+  checkErrOK(result);
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_CMD_LGTH, self->defFieldOffset-headerLgth, NULL, 0);
+  checkErrOK(result);
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS, numNormFields, NULL, 0);
+  checkErrOK(result);
+  idx = 0;
+  while (idx < numNormFields) {
+    result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, normNamesOffsets[idx].offset, NULL, idx);
+    checkErrOK(result);
+    idx++;
+  }
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE, normNamesSize, NULL, 0);
+  checkErrOK(result);
+  uint8_t names[normNamesSize];
+  idx = 0;
+  namesOffset = 0;
+  while (idx < numNormFields) {
+    c_memcpy(names+namesOffset, normNamesOffsets[idx].name,c_strlen(normNamesOffsets[idx].name));
+    namesOffset += c_strlen(normNamesOffsets[idx].name);
+    names[namesOffset] = 0;
+    namesOffset++;
+    idx++;
+  }
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES, 0, names, 0);
+  checkErrOK(result);
+  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE, definitionsSize, NULL, 0);
+  checkErrOK(result);
+  fieldIdx = 0;
+  idx = 0;
+  namesIdx = 0;
+  while (idx < self->numFields) {
+    fieldInfo = &self->fields[idx];
+    if (fieldInfo->fieldNameId < STRUCT_MSG_SPEC_FIELD_LOW) {
+      result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, normNamesOffsets[namesIdx++].offset, NULL, fieldIdx++);
+      checkErrOK(result);
+      result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldTypeId, NULL, fieldIdx++);
+      checkErrOK(result);
+      result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldLgth, NULL, fieldIdx++);
+      checkErrOK(result);
+    } else {
+      result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldNameId, NULL, fieldIdx++);
+      checkErrOK(result);
+      result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldTypeId, NULL, fieldIdx++);
+      checkErrOK(result);
+      fieldLgth = fieldInfo->fieldLgth;
+      if (fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TABLE_ROWS) {
+        fieldLgth = self->numTableRows;
+      }
+      if (fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS) {
+        fieldLgth = self->numTableRowFields;
+      }
+      result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldLgth, NULL, fieldIdx++);
+      checkErrOK(result);
+      if (fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS) {
+        tabIdx = 0;
+        while (tabIdx < self->numTableRowFields) {
+          tabFieldInfo = &self->tableFields[tabIdx];
+          result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, normNamesOffsets[namesIdx++].offset, NULL, fieldIdx++);
+          checkErrOK(result);
+          result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, tabFieldInfo->fieldTypeId, NULL, fieldIdx++);
+          checkErrOK(result);
+          result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, tabFieldInfo->fieldLgth, NULL, fieldIdx++);
+          checkErrOK(result);
+          tabIdx++;
+        }
+      }
+    }
+    idx++;
+  }
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ============================= initDef ========================
 
 static uint8_t initDef(structmsgData_t *self) {
@@ -236,21 +452,18 @@ static uint8_t initDef(structmsgData_t *self) {
   int tabIdx;
   int result;
   int numFields;
-  size_t definitionSize;
+  size_t definitionsSize;
   structmsgField_t *fieldInfo;
   structmsgField_t *tabFieldInfo;
   uint8_t *fieldNameStr;
   size_t headerLgth;
-  size_t crcLgth;
-  size_t myLgth;
-  size_t fillerLgth;
   size_t namesOffset;
 
   if ((self->flags & STRUCT_DEF_IS_INITTED) != 0) {
     return STRUCT_DEF_ERR_ALREADY_INITTED;
   }
   numFields = self->numFields + self->numTableRowFields;
-  definitionSize = numFields * (sizeof(uint16_t) + sizeof(uint8_t) * sizeof(uint16_t));
+  definitionsSize = numFields * (sizeof(uint16_t) + sizeof(uint16_t) * sizeof(uint16_t));
   id2offset_t normNamesOffsets[numFields];
   numNormFields = 0;
   normNamesSize = 0;
@@ -286,86 +499,184 @@ static uint8_t initDef(structmsgData_t *self) {
     }
     idx++;
   }
-ets_printf("initDef: numNormFields: %d normNamesSize: %d\n", numNormFields, normNamesSize);
-//  normNamesOffsets = os_zalloc(numNormFields * sizeof(id2offset_t) + 1);
-  checkAllocOK(normNamesOffsets);
-
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_SRC, DATA_VIEW_FIELD_UINT16_T, 2);
+  result = addDefFields(self, numNormFields, normNamesSize, definitionsSize, STRUCT_DEF_TO_DATA);
   checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DST, DATA_VIEW_FIELD_UINT16_T, 2);
+  result = setStaticDefFields(self, numNormFields, normNamesSize, normNamesOffsets, definitionsSize);
   checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH, DATA_VIEW_FIELD_UINT16_T, 2);
-  checkErrOK(result);
-  headerLgth = self->defFieldOffset;
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CMD_KEY, DATA_VIEW_FIELD_UINT16_T, 2);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CMD_LGTH, DATA_VIEW_FIELD_UINT16_T, 2);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_RANDOM_NUM, DATA_VIEW_FIELD_UINT32_T, 4);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS, DATA_VIEW_FIELD_UINT8_T, 1);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, DATA_VIEW_FIELD_UINT16_VECTOR, numNormFields*sizeof(uint16));
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE, DATA_VIEW_FIELD_UINT16_T, 2);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES, DATA_VIEW_FIELD_UINT8_VECTOR, normNamesSize);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE, DATA_VIEW_FIELD_UINT16_T, 2);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, DATA_VIEW_FIELD_UINT8_VECTOR, definitionSize);
-  checkErrOK(result);
-  fillerLgth = 0;
-  crcLgth = 2;
-  myLgth = self->defFieldOffset + crcLgth - headerLgth;
-  while ((myLgth % 16) != 0) {
-    myLgth++;
-    fillerLgth++;
-  }
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_FILLER, DATA_VIEW_FIELD_UINT8_VECTOR, fillerLgth);
-  checkErrOK(result);
-  result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CRC, DATA_VIEW_FIELD_UINT16_T, 2);
-  checkErrOK(result);
-  self->flags |= STRUCT_DEF_IS_INITTED;
-  self->structmsgDefinitionDataView->dataView->data = os_zalloc(self->defFieldOffset);
-  checkAllocOK(self->structmsgDefinitionDataView->dataView->data);
-ets_printf("DEF_DATA: %p\n", self->structmsgDefinitionDataView->dataView->data);
-  self->structmsgDefinitionDataView->dataView->lgth = self->defFieldOffset;
-
-// FIXME arc and dst are dummy values for now!!
-  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_SRC, 123, NULL, 0);
-  checkErrOK(result);
-  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DST, 456, NULL, 0);
-  checkErrOK(result);
-  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH, self->defFieldOffset, NULL, 0);
-  checkErrOK(result);
-  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_CMD_KEY, STRUCT_DEF_CMD_KEY, NULL, 0);
-  checkErrOK(result);
-  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_CMD_LGTH, self->defFieldOffset-headerLgth, NULL, 0);
-  checkErrOK(result);
-  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS, numNormFields, NULL, 0);
-  checkErrOK(result);
-  idx = 0;
-  while (idx < numNormFields) {
-    result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, normNamesOffsets[idx].offset, NULL, idx);
-    checkErrOK(result);
-    idx++;
-  }
-  result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE, normNamesSize, NULL, 0);
-  checkErrOK(result);
-dumpDefFields(self);
   return STRUCT_MSG_ERR_OK;
 }
 
 // ============================= prepareDef ========================
 
 static uint8_t prepareDef(structmsgData_t *self) {
+  int numEntries;
+  int idx;
+  int result;
+  structmsgField_t *fieldInfo;
+
   if ((self->flags & STRUCT_DEF_IS_INITTED) == 0) {
     return STRUCT_DEF_ERR_NOT_YET_INITTED;
   }
+  // create the values which are different for each message!!
+  numEntries = self->numDefFields;
+  idx = 0;
+  while (idx < numEntries) {
+    fieldInfo = &self->defFields[idx];
+    switch (fieldInfo->fieldNameId) {
+      case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
+        result = self->structmsgDefinitionDataView->setRandomNum(self->structmsgDefinitionDataView, fieldInfo);
+        checkErrOK(result);
+        fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+        break;
+      case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
+        result = self->structmsgDefinitionDataView->setSequenceNum(self->structmsgDefinitionDataView, fieldInfo);
+        checkErrOK(result);
+        fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+        break;
+      case STRUCT_MSG_SPEC_FIELD_FILLER:
+        result = self->structmsgDefinitionDataView->setFiller(self->structmsgDefinitionDataView, fieldInfo);
+        checkErrOK(result);
+        fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+        break;
+      case STRUCT_MSG_SPEC_FIELD_CRC:
+        result = self->structmsgDefinitionDataView->setCrc(self->structmsgDefinitionDataView, fieldInfo, self->headerLgth+1, self->cmdLgth-fieldInfo->fieldLgth);
+        checkErrOK(result);
+        fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+        break;
+    }
+    idx++;
+  }
+  self->flags |= STRUCT_DEF_IS_PREPARED;
   return STRUCT_MSG_ERR_OK;
 }
 
+
+// ============================= setDef ========================
+
+static uint8_t setDef(structmsgData_t *self, const  uint8_t *data) {
+  int idx;
+  int result;
+  uint16_t lgth;
+  size_t numNormFields;
+  size_t normNamesSize;
+  size_t definitionsSize;
+  structmsgField_t *fieldInfo;
+
+  if (self->structmsgDefinitionDataView == NULL) {
+    result = newStructmsgDefinition(self);
+    checkErrOK(result);
+  } else {
+    if (self->structmsgDataView->dataView->data != NULL) {
+      // free no longer used we cannot reuse as the size can be different!
+      os_free(self->structmsgDataView->dataView->data);
+      self->structmsgDataView->dataView->data = NULL;
+      // we do net free self->defFields, we just reuse them it is always the same number of defFields
+      os_free(self->defFields);
+      self->defFields = NULL;
+      self->numDefFields = 0;
+      self->defFieldOffset = 0;
+    }
+  }
+  // temporary replace data entry of dataView by our param data
+  // to be able to use the get* functions for gettting totalLgth entry value
+  self->structmsgDefinitionDataView->dataView->data = (uint8_t *)data;
+  self->structmsgDefinitionDataView->dataView->lgth = 10;
+  // get totalLgth value from data
+  result = self->structmsgDefinitionDataView->dataView->getUint16(self->structmsgDefinitionDataView->dataView, 4, &lgth);
+  checkErrOK(result);
+  // now make a copy of the data to be on the safe side
+  // for freeing the Lua space in Lua set the variable to nil!!
+  self->structmsgDefinitionDataView->dataView->data = os_zalloc(lgth);
+  checkAllocOK(self->structmsgDefinitionDataView->dataView->data);
+  c_memcpy(self->structmsgDefinitionDataView->dataView->data, data, lgth);
+  self->structmsgDefinitionDataView->dataView->lgth = lgth;
+  self->defTotalLgth = lgth;
+
+  numNormFields = 0;
+  normNamesSize = 0;
+  definitionsSize = 0;
+  result = addDefFields(self, numNormFields, normNamesSize, definitionsSize, STRUCT_DEF_FROM_DATA);
+  checkErrOK(result);
+
+  // and now set the IS_SET flags and other stuff
+  self->flags |= STRUCT_DEF_IS_INITTED;
+  idx = 0;
+  while (idx < self->numDefFields) {
+    fieldInfo = &self->defFields[idx];
+    fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+    idx++;
+  }
+  self->flags |= STRUCT_DEF_IS_PREPARED;
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= getDef ========================
+
+static uint8_t getDef(structmsgData_t *self, uint8_t **data, int *lgth) {
+  if ((self->flags & STRUCT_DEF_IS_INITTED) == 0) {
+    return STRUCT_DEF_ERR_NOT_YET_INITTED;
+  }
+  if ((self->flags & STRUCT_DEF_IS_PREPARED) == 0) {
+    return STRUCT_DEF_ERR_NOT_YET_PREPARED;
+  }
+  *data = self->structmsgDefinitionDataView->dataView->data;
+  *lgth = self->defTotalLgth;
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ============================= createMsgFromDef ========================
+
+static uint8_t createMsgFromDef(structmsgData_t *self) {
+#ifdef NOTDEF
+  stmsgDefinition_t *definition;
+  structmsg_t *structmsg;
+  fieldInfoDefinition_t *fieldInfo;
+  uint8_t *fieldName;
+  uint8_t *fieldType;
+  uint8_t *handle;
+  uint8_t definitionsIdx;
+  int fieldIdx;
+  int result;
+
+ets_printf("structmsg_createMsgFromDefinition: shortCmdKey: %d\n", shortCmdKey);
+  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
+  checkErrOK(result);
+  result = stmsg_createMsg(definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS, &handle, shortCmdKey);
+//ets_printf("create: handle: %s numFields: %d\n", handle, definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS);
+  checkErrOK(result);
+  // set flags if necessary
+  structmsg = structmsg_get_structmsg_ptr(handle);
+//  if (definition->flags & STRUCT_MSG_SHORT_CMD_KEY) {
+//    structmsg->flags |= STRUCT_MSG_SHORT_CMD_KEY;
+//  }
+  while (fieldIdx < definition->numFields) {
+    fieldInfo = &definition->fieldInfos[fieldIdx];
+    switch (fieldInfo->fieldId) {
+    case STRUCT_MSG_SPEC_FIELD_SRC:
+    case STRUCT_MSG_SPEC_FIELD_DST:
+    case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
+    case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
+    case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+    case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
+      // nothing to do!
+      break;
+    default:
+      result = structmsg_getIdFieldNameStr(fieldInfo->fieldId, &fieldName);
+      checkErrOK(result);
+      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+      checkErrOK(result);
+//ets_printf("addfield: %s %s %d\n", fieldName, fieldType, fieldInfo->fieldLgth);
+      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
+      checkErrOK(result);
+      result = stmsg_addField(handle, fieldName, fieldType, fieldInfo->fieldLgth);
+      checkErrOK(result);
+      break;
+    } 
+    fieldIdx++;
+  }
+#endif
+  return STRUCT_MSG_ERR_OK;
+}
 
 // ============================= newStructmsgDefinition ========================
 
@@ -388,6 +699,9 @@ uint8_t newStructmsgDefinition(structmsgData_t *self) {
   self->dumpDefFields = &dumpDefFields;
   self->setDefFieldValue = &setDefFieldValue;
   self->getDefFieldValue = &getDefFieldValue;
+  self->setDef = &setDef;
+  self->getDef = &getDef;
+  self->createMsgFromDef = &createMsgFromDef;
 
   return STRUCT_MSG_ERR_OK;
 }
@@ -572,58 +886,6 @@ int structmsg_deleteStructmsgDefinition(const uint8_t *name) {
 int structmsg_deleteStructmsgDefinitions() {
   // delete the whole structmsgDefinitions info, including fieldNameDefinitions info
   return structmsg_deleteDefinitions(&structmsgDefinitions, &fieldNameDefinitions);
-}
-
-// ============================= structmsg_createMsgFromDefinition ========================
-
-int structmsg_createMsgFromDefinition(const uint8_t *name, uint8_t shortCmdKey) {
-  stmsgDefinition_t *definition;
-  structmsg_t *structmsg;
-  fieldInfoDefinition_t *fieldInfo;
-  uint8_t *fieldName;
-  uint8_t *fieldType;
-  uint8_t *handle;
-  uint8_t definitionsIdx;
-  int fieldIdx;
-  int result;
-
-ets_printf("structmsg_createMsgFromDefinition: shortCmdKey: %d\n", shortCmdKey);
-  result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
-  checkErrOK(result);
-  result = stmsg_createMsg(definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS, &handle, shortCmdKey);
-//ets_printf("create: handle: %s numFields: %d\n", handle, definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS);
-  checkErrOK(result);
-  // set flags if necessary
-  structmsg = structmsg_get_structmsg_ptr(handle);
-//  if (definition->flags & STRUCT_MSG_SHORT_CMD_KEY) {
-//    structmsg->flags |= STRUCT_MSG_SHORT_CMD_KEY;
-//  }
-  while (fieldIdx < definition->numFields) {
-    fieldInfo = &definition->fieldInfos[fieldIdx];
-    switch (fieldInfo->fieldId) {
-    case STRUCT_MSG_SPEC_FIELD_SRC:
-    case STRUCT_MSG_SPEC_FIELD_DST:
-    case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
-    case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-    case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
-    case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-      // nothing to do!
-      break;
-    default:
-      result = structmsg_getIdFieldNameStr(fieldInfo->fieldId, &fieldName);
-      checkErrOK(result);
-      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
-      checkErrOK(result);
-//ets_printf("addfield: %s %s %d\n", fieldName, fieldType, fieldInfo->fieldLgth);
-      result = structmsg_getFieldTypeStr(fieldInfo->fieldType, &fieldType);
-      checkErrOK(result);
-      result = stmsg_addField(handle, fieldName, fieldType, fieldInfo->fieldLgth);
-      checkErrOK(result);
-      break;
-    } 
-    fieldIdx++;
-  }
-  return STRUCT_MSG_ERR_OK;
 }
 
 // ============================= structmsg_getDefinitionNormalFieldNames ========================

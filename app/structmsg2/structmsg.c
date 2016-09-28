@@ -170,7 +170,6 @@ static uint8_t createMsg(structmsgData_t *self, int numFields, uint8_t **handle)
   if (self->fields == NULL) {
     return STRUCT_MSG_ERR_OUT_OF_MEMORY;
   }
-ets_printf("createMsg: numFields: %d self: %p, *handle: %p, fields size: %d fields: %p\n", numFields, self, *handle, sizeof(structmsgField_t) * numFields, self->fields);
   self->tableFields = NULL;
   self->flags = 0;
   self->numFields = 0;
@@ -183,7 +182,6 @@ ets_printf("createMsg: numFields: %d self: %p, *handle: %p, fields size: %d fiel
   self->cmdLgth = 0;
   self->headerLgth = 0;
   self->header = NULL;
-//  self->handleHdrInfoPtr = NULL;
   os_sprintf(self->handle, "%s%p", HANDLE_PREFIX, self);
   result = addHandle(self->handle, self, &self->header);
   if (result != STRUCT_MSG_ERR_OK) {
@@ -440,7 +438,6 @@ static uint8_t prepareMsg(structmsgData_t *self) {
   // create the values which are different for each message!!
   numEntries = self->numFields;
   idx = 0;
-  numEntries = self->numFields;
   while (idx < numEntries) {
     fieldInfo = &self->fields[idx];
     switch (fieldInfo->fieldNameId) {
@@ -460,7 +457,7 @@ static uint8_t prepareMsg(structmsgData_t *self) {
         fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
         break;
       case STRUCT_MSG_SPEC_FIELD_CRC:
-        result = self->structmsgDataView->setCrc(self->structmsgDataView, fieldInfo, self->headerLgth+1, self->cmdLgth-fieldInfo->fieldLgth);
+        result = self->structmsgDataView->setCrc(self->structmsgDataView, fieldInfo, self->headerLgth, self->cmdLgth-fieldInfo->fieldLgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
         break;
@@ -502,7 +499,7 @@ static uint8_t initMsg(structmsgData_t *self) {
       case STRUCT_MSG_SPEC_FIELD_SRC:
       case STRUCT_MSG_SPEC_FIELD_DST:
       case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-      case STRUCT_MSG_SPEC_FIELD_GUID:
+//      case STRUCT_MSG_SPEC_FIELD_GUID:
         self->headerLgth += fieldInfo->fieldLgth;
         break;
       case STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
@@ -854,7 +851,6 @@ static uint8_t dumpMsg(structmsgData_t *self) {
     }
     idx++;
   }
-ets_printf("dumpMsg done\n");
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -915,7 +911,7 @@ static uint8_t setMsgData(structmsgData_t *self, const uint8_t *data) {
   self->structmsgDataView->dataView->data = os_zalloc(self->totalLgth);
   checkAllocOK(self->structmsgDataView->dataView->data);
   c_memcpy(self->structmsgDataView->dataView->data, data, self->totalLgth);
-  // and now set the IS_SET flasg and other stuff
+  // and now set the IS_SET flags and other stuff
   idx = 0;
   while (idx < self->numFields) {
     fieldInfo = &self->fields[idx];
@@ -993,6 +989,7 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->fieldOffset = 0;
   structmsgData->defFieldOffset = 0;
   structmsgData->totalLgth = 0;
+  structmsgData->defTotalLgth = 0;
   structmsgData->cmdLgth = 0;
   structmsgData->headerLgth = 0;
   structmsgData->header = NULL;
