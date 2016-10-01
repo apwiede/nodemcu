@@ -119,7 +119,7 @@ typedef uint8_t (* getInt32Vector_t)(dataView_t *self, int offset, int32_t **val
 typedef uint8_t (* setUint32Vector_t)(dataView_t *self, int offset, uint32_t *value, size_t lgth);
 typedef uint8_t (* setInt32Vector_t)(dataView_t *self, int offset, int32_t *value, size_t lgth);
 
-typedef uint8_t (* setData_t)(dataView_t *self, uint8_t *data, size_t lgth);
+typedef uint8_t (* setData_t)(dataView_t *self, size_t lgth);
 
 typedef struct dataView {
   uint8_t *data;
@@ -164,7 +164,7 @@ typedef struct dataView {
 
 uint8_t dataViewId;
 dataView_t *newDataView();
-void FreeDataView(dataView_t *dataView);
+void freeDataView(dataView_t *dataView);
 
 #ifdef	__cplusplus
 }

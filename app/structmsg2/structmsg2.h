@@ -43,67 +43,11 @@
 
 #include "c_types.h"
 #include "structmsgDataView.h"
+#include "structmsgDataDescriptions.h"
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
-
-#ifdef NOTDEF
-
-#define checkOffsetErrOK(result) if (result != STRUCT_MSG_ERR_OK) return -result
-#define checkBadOffset(val) if (val < 0) return val
-#define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
-#define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
-
-typedef struct str2key {
-  uint8_t *str;
-  uint8_t key;
-} str2key_t;
-
-typedef struct name2id {
-  uint8_t *str;
-  uint8_t id;
-  uint8_t refCnt;
-} name2id_t;
-
-typedef struct fieldNameDefinitions
-{
-  size_t numDefinitions;
-  size_t maxDefinitions;
-  name2id_t *definitions;
-} fieldNameDefinitions_t;
-
-typedef struct fieldInfoDefinition
-{
-  uint16_t fieldId;
-  uint8_t fieldType;
-  uint16_t fieldLgth;
-} fieldInfoDefinition_t;
-
-typedef struct stmsgDefinition
-{
-  size_t numFields;
-  size_t maxFields;
-  uint8_t *name;
-  uint8_t *encoded;
-  uint8_t *encrypted;
-  uint8_t *todecode;
-  uint16_t totalLgth;
-  uint16_t flags;
-  fieldInfoDefinition_t *fieldInfos;
-} stmsgDefinition_t;
-
-typedef struct stmsgDefinitions
-{
-  size_t numDefinitions;
-  size_t maxDefinitions;
-  stmsgDefinition_t *definitions;
-} stmsgDefinitions_t;
-
-#endif
-
-
-
 
 #define HANDLE_PREFIX "stmsg_"
 
@@ -143,6 +87,7 @@ typedef uint8_t (* initMsg_t)(structmsgData_t *self);
 typedef uint8_t (* prepareMsg_t)(structmsgData_t *self);
 typedef uint8_t (* getMsgData_t)(structmsgData_t *structmsgData, uint8_t **data, int *lgth);
 typedef uint8_t (* setMsgData_t)(structmsgData_t *structmsgData, const uint8_t *data);
+typedef uint8_t (* setMsgFieldFromList_t)(structmsgData_t *selfconst, const uint8_t **listVector, uint8_t numEntries, uint16_t flags);
 
 typedef uint8_t (* dumpDefFields_t)(structmsgData_t *self);
 typedef uint8_t (* initDef_t)(structmsgData_t *self);
@@ -192,6 +137,7 @@ typedef struct structmsgData {
   prepareMsg_t prepareMsg;
   getMsgData_t getMsgData;
   setMsgData_t setMsgData;
+  setMsgFieldFromList_t setMsgFieldsFromList;
 
   initDef_t initDef;
   prepareDef_t prepareDef;

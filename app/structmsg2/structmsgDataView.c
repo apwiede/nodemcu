@@ -38,6 +38,7 @@
  * Created on September 24, 2016
  */
 
+#include "osapi.h"
 #include "c_types.h"
 #include "mem.h"
 #include "c_string.h"
@@ -174,7 +175,7 @@ static uint8_t getFieldNameIdFromStr(structmsgDataView_t *self, const uint8_t *f
           newFieldNameEntry = &fieldNames.names[fieldNames.numNames];
           newFieldNameEntry->refCnt = 1;
           newFieldNameEntry->fieldNameId = fieldNames.numNames + 1;
-          newFieldNameEntry->fieldName = os_malloc(c_strlen(fieldName) + 1);
+          newFieldNameEntry->fieldName = os_zalloc(c_strlen(fieldName) + 1);
           newFieldNameEntry->fieldName[c_strlen(fieldName)] = '\0';
           c_memcpy(newFieldNameEntry->fieldName, fieldName, c_strlen(fieldName));
           fieldNames.numNames++;
@@ -642,5 +643,10 @@ structmsgDataView_t *newStructmsgDataView(void) {
 // ================================= freeStructmsgDataView ====================================
 
 void freeStructmsgDataView(structmsgDataView_t *dataView) {
+  if (dataView->dataView != NULL) {
+    freeDataView(dataView->dataView);
+    dataView->dataView = NULL;
+    os_free(dataView);
+  }
 }
 

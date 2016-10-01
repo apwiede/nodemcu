@@ -38,11 +38,10 @@
  * Created on September 24, 2016
  */
 
+#include "osapi.h"
 #include "c_types.h"
 #include "mem.h"
-
 #include "c_string.h"
-#include "structmsg2.h"
 
 #include "dataView.h"
 
@@ -423,6 +422,22 @@ static uint8_t setInt32Vector(dataView_t *self, int offset, int32_t *value, size
   return DATA_VIEW_ERR_OK;
 }
 
+
+// ================================= setData ====================================
+
+static uint8_t setData(dataView_t *self, size_t lgth) {
+  if (self->data != NULL) {
+ets_printf("dataView freeing data in setData %p\n", self->data);
+    os_free(self->data);
+  }
+  self->data = os_zalloc(lgth);
+  if (self->data == NULL) {
+    return DATA_VIEW_ERR_OUT_OF_MEMORY;
+  }
+  self->lgth = lgth;
+  return DATA_VIEW_ERR_OK;
+}
+
 // ================================= newDataView ====================================
 
 dataView_t *newDataView(void) {
@@ -467,12 +482,19 @@ dataView_t *newDataView(void) {
   dataView->getInt32Vector = &getInt32Vector;
   dataView->setUint32Vector = &setUint32Vector;
   dataView->setInt32Vector = &setInt32Vector;
+
+  dataView->setData = &setData;
   return dataView;
 }
 
 // ================================= freeDataView ====================================
 
 void freeDataView(dataView_t *dataView) {
+  if (dataView->data != NULL) {
+    os_free(dataView->data);
+    dataView->data = NULL;
+    os_free(dataView);
+  }
 }
 
 
