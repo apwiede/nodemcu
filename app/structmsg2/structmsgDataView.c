@@ -59,6 +59,7 @@ typedef struct fieldNames
   fieldName2id_t *names;
 } fieldNames_t;
 
+static uint8_t structmsgDataViewId;
 static fieldNames_t fieldNames = {0, 0, NULL};
 
 static str2id_t specialFieldNames[] = {

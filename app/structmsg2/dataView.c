@@ -61,6 +61,8 @@ static str2id_t fieldType2Ids[] = {
   {NULL, -1},
 };
 
+static uint8_t dataViewId;
+
 // ================================= getFieldTypeIdFromStr ====================================
 
 static uint8_t getFieldTypeIdFromStr(dataView_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId) {

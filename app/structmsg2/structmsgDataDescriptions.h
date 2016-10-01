@@ -39,3 +39,51 @@
  */
 
 /* struct message data descriptions handling */
+
+enum structmsDatagErrorCode
+{
+  STRUCT_DATA_DESC_ERR_OK                    = 0,
+  STRUCT_DATA_DESC_ERR_VALUE_NOT_SET         = 255,
+  STRUCT_DATA_DESC_ERR_VALUE_OUT_OF_RANGE    = 254,
+  STRUCT_DATA_DESC_ERR_BAD_VALUE             = 253,
+  STRUCT_DATA_DESC_ERR_BAD_FIELD_TYPE        = 252,
+  STRUCT_DATA_DESC_ERR_FIELD_TYPE_NOT_FOUND  = 251,
+  STRUCT_DATA_DESC_ERR_VALUE_TOO_BIG         = 250,
+  STRUCT_DATA_DESC_ERR_OUT_OF_MEMORY         = 249,
+  STRUCT_DATA_DESC_ERR_OUT_OF_RANGE          = 248,
+  // be carefull the values up to here
+  // must correspond to the values in dataView.h !!!
+  // with the names like DATA_VIEW_ERR_*
+
+  STRUCT_DATA_DESC_ERR_OPEN_FILE             = 189,
+  STRUCT_DATA_DESC_FILE_NOT_OPENED           = 188,
+  STRUCT_DATA_DESC_ERR_FLUSH_FILE            = 187,
+  STRUCT_DATA_DESC_ERR_WRITE_FILE            = 186,
+};
+
+
+typedef struct structmsgDataDescription structmsgDataDescription_t;
+
+typedef uint8_t (* openFile_t)(structmsgDataDescription_t *self, const uint8_t *fileName, const uint8_t *fileMode);
+typedef uint8_t (* closeFile_t)(structmsgDataDescription_t *self);
+typedef uint8_t (* flushFile_t)(structmsgDataDescription_t *self);
+typedef uint8_t (* readLine_t)(structmsgDataDescription_t *self, uint8_t **buffer, uint8_t *lgth);
+typedef uint8_t (* writeLine_t)(structmsgDataDescription_t *self, const uint8_t *buffer, uint8_t lgth);
+
+
+typedef struct structmsgDataDescription {
+  uint8_t id;
+  uint8_t *FileName;
+  uint8_t fileId;
+  size_t fileSize;
+  
+  openFile_t openFile;
+  closeFile_t closeFile;
+  flushFile_t flushFile;
+  readLine_t readLine;
+  writeLine_t writeLine;
+
+} structmsgDataDescription_t;
+
+structmsgDataDescription_t *newStructmsgDataDescription();
+void freeStructmsgDataDescription(structmsgDataDescription_t *structmsgDataDescription);

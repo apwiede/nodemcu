@@ -179,7 +179,6 @@ typedef struct structmsgDataView {
 
 } structmsgDataView_t;
 
-uint8_t structmsgDataViewId;
 structmsgDataView_t *newStructmsgDataView(void);
 void freeStructmsgDataView(structmsgDataView_t *dataView);
 

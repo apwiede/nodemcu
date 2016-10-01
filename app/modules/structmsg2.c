@@ -961,6 +961,85 @@ ets_printf("no table!!\n");
 }
 #endif
 
+// ============================= structmsg_openFile ==================
+
+// Lua: openFile(handle, name,flags)
+static int structmsg_openFile( lua_State* L ) {
+  int result;
+  const uint8_t *handle;
+  const uint8_t *fileName;
+  const uint8_t *flags;
+  structmsgData_t *structmsgData;
+
+  handle = luaL_checkstring (L, 1);
+  fileName = luaL_checkstring (L, 2);
+  flags = luaL_checkstring (L, 3);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "openFile", "");
+  result = structmsgData->openFile(structmsgData, fileName, flags);
+  checkOKOrErr(L, result, "openFile", "");
+  return 1;
+}
+
+// ============================= structmsg_closeFile ==================
+
+// Lua: closeFile(handle)
+static int structmsg_closeFile( lua_State* L ) {
+  int result;
+  const uint8_t *handle;
+  structmsgData_t *structmsgData;
+
+  handle = luaL_checkstring (L, 1);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "closeFile", "");
+  result = structmsgData->closeFile(structmsgData);
+  checkOKOrErr(L, result, "closeFile", "");
+  return 1;
+}
+
+// ============================= structmsg_readLine ==================
+
+// Lua: readLine(handle)
+static int structmsg_readLine( lua_State* L ) {
+  int result;
+  const uint8_t *handle;
+  uint8_t buffer[255];
+  uint8_t *data = buffer;
+  uint8_t lgth;
+  structmsgData_t *structmsgData;
+
+  handle = luaL_checkstring (L, 1);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "readLine", "");
+  result = structmsgData->readLine(structmsgData, &data, &lgth);
+  if (result == STRUCT_MSG_ERR_OK) {
+    lua_pushlstring(L, data, lgth);
+  } else {
+    checkOKOrErr(L, result, "readLine", "");
+  }
+  return 1;
+}
+
+// ============================= structmsg_writeLine ==================
+
+// Lua: writeLine(name,flags)
+static int structmsg_writeLine( lua_State* L ) {
+  int result;
+  const uint8_t *handle;
+  const uint8_t *buffer;
+  uint8_t lgth;
+  structmsgData_t *structmsgData;
+
+  handle = luaL_checkstring (L, 1);
+  buffer = luaL_checkstring (L, 2);
+  lgth = c_strlen(buffer);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "writeLine", "");
+  result = structmsgData->writeLine(structmsgData, buffer, lgth);
+  checkOKOrErr(L, result, "writeLine", "");
+  return 1;
+}
+
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "create" ),                LFUNCVAL( structmsg_createMsg ) },
@@ -986,6 +1065,10 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "setDef" ),                LFUNCVAL( structmsg_setDef ) },
   { LSTRKEY( "getDef" ),                LFUNCVAL( structmsg_getDef ) },
   { LSTRKEY( "createMsgFromDef" ),      LFUNCVAL( structmsg_createMsgFromDef ) },
+  { LSTRKEY( "openFile" ),              LFUNCVAL( structmsg_openFile ) },
+  { LSTRKEY( "closeFile" ),             LFUNCVAL( structmsg_closeFile ) },
+  { LSTRKEY( "readLine" ),              LFUNCVAL( structmsg_readLine ) },
+  { LSTRKEY( "writeLine" ),             LFUNCVAL( structmsg_writeLine ) },
 #ifdef NOtDEF
   { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },
   { LSTRKEY( "decrypt" ),               LFUNCVAL( structmsg_decrypt ) },

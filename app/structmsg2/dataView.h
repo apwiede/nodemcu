@@ -162,7 +162,6 @@ typedef struct dataView {
   setData_t setData;
 } dataView_t;
 
-uint8_t dataViewId;
 dataView_t *newDataView();
 void freeDataView(dataView_t *dataView);
 
