@@ -48,30 +48,168 @@
 #include "structmsgDispatcher.h"
 
 
+#define DISP_HANDLE_PREFIX "stmsgdisp_"
+#define checkAllocOK(addr) if(addr == NULL) return STRUCT_DISP_ERR_OUT_OF_MEMORY
+#define checkErrOK(result) if(result != STRUCT_DISP_ERR_OK) return result
+
+typedef struct handle2Dispatcher
+{
+  uint8_t *handle;
+  structmsgDispatcher_t *structmsgDispatcher;
+} handle2Dispatcher_t;
+
+typedef struct structmsgDispatcherHandles
+{
+  handle2Dispatcher_t *handles;
+  int numHandles;
+} structmsgDispatcherHandles_t;
+
+// create an object
+static structmsgDispatcherHandles_t structmsgDispatcherHandles = { NULL, 0};
+
 static int structmsgDispatcherId = 0;
 
 // ================================= BMsg ====================================
 
 static uint8_t BMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DATA_DISP_ERR_OK;
+  return STRUCT_DISP_ERR_OK;
 }
 
 // ================================= IMsg ====================================
 
 static uint8_t IMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DATA_DISP_ERR_OK;
+  return STRUCT_DISP_ERR_OK;
 }
 
 // ================================= MMsg ====================================
 
 static uint8_t MMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DATA_DISP_ERR_OK;
+  return STRUCT_DISP_ERR_OK;
 }
 
 // ================================= defaultMsg ====================================
 
 static uint8_t defaultMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DATA_DISP_ERR_OK;
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= uartReceiveCb ====================================
+
+static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
+ets_printf("§: %d %s§\n", lgth, buffer);
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ============================= addHandle ========================
+
+static int addHandle(uint8_t *handle, structmsgDispatcher_t *structmsgDispatcher) {
+  int idx;
+
+  if (structmsgDispatcherHandles.handles == NULL) {
+    structmsgDispatcherHandles.handles = os_zalloc(sizeof(handle2Dispatcher_t));
+    if (structmsgDispatcherHandles.handles == NULL) {
+      return STRUCT_DISP_ERR_OUT_OF_MEMORY;
+    } else {
+      structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].handle = handle;
+      structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].structmsgDispatcher = structmsgDispatcher;
+     structmsgDispatcherHandles.numHandles++;
+      return STRUCT_DISP_ERR_OK;
+    }
+  } else {
+    // check for unused slot first
+    idx = 0;
+    while (idx < structmsgDispatcherHandles.numHandles) {
+      if (structmsgDispatcherHandles.handles[idx].handle == NULL) {
+        structmsgDispatcherHandles.handles[idx].handle = handle;
+        structmsgDispatcherHandles.handles[idx].structmsgDispatcher = structmsgDispatcher;
+        return STRUCT_DISP_ERR_OK;
+      }
+      idx++;
+    }
+    structmsgDispatcherHandles.handles = os_realloc(structmsgDispatcherHandles.handles, sizeof(handle2Dispatcher_t)*(structmsgDispatcherHandles.numHandles+1));
+    checkAllocOK(structmsgDispatcherHandles.handles);
+    structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].handle = handle;
+    structmsgDispatcherHandles.handles[idx].structmsgDispatcher = structmsgDispatcher;
+  }
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ============================= deleteHandle ========================
+
+static int deleteHandle(const uint8_t *handle) {
+  int idx;
+  int numUsed;
+  int found;
+
+  if (structmsgDispatcherHandles.handles == NULL) {
+    return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
+  }
+  found = 0;
+  idx = 0;
+  numUsed = 0;
+  while (idx < structmsgDispatcherHandles.numHandles) {
+    if ((structmsgDispatcherHandles.handles[idx].handle != NULL) && (c_strcmp(structmsgDispatcherHandles.handles[idx].handle, handle) == 0)) {
+      structmsgDispatcherHandles.handles[idx].handle = NULL;
+      found++;
+    } else {
+      if (structmsgDispatcherHandles.handles[idx].handle != NULL) {
+        numUsed++;
+      }
+    }
+    idx++;
+  }
+  if (numUsed == 0) {
+    os_free(structmsgDispatcherHandles.handles);
+    structmsgDispatcherHandles.handles = NULL;
+  }
+  if (found) {
+      return STRUCT_DISP_ERR_OK;
+  }
+  return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
+}
+
+// ============================= checkHandle ========================
+
+static int checkHandle(const char *handle, structmsgDispatcher_t **structmsgDispatcher) {
+  int idx;
+
+  if (structmsgDispatcherHandles.handles == NULL) {
+    return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
+  }
+  idx = 0;
+  while (idx < structmsgDispatcherHandles.numHandles) {
+    if ((structmsgDispatcherHandles.handles[idx].handle != NULL) && (c_strcmp(structmsgDispatcherHandles.handles[idx].handle, handle) == 0)) {
+      *structmsgDispatcher = structmsgDispatcherHandles.handles[idx].structmsgDispatcher;
+      return STRUCT_DISP_ERR_OK;
+    }
+    idx++;
+  }
+  return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
+}
+
+// ============================= structmsgDispatcherGetPtrFromHandle ========================
+
+uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatcher_t **structmsgDispatcher) {
+
+  if (checkHandle(handle, structmsgDispatcher) != STRUCT_DISP_ERR_OK) {
+    return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
+  }
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= createDispatcher ====================================
+
+static uint8_t createDispatcher(structmsgDispatcher_t *self, uint8_t **handle) {
+  uint8_t result;
+  os_sprintf(self->handle, "%s%p", DISP_HANDLE_PREFIX, self);
+  result = addHandle(self->handle, self);
+  if (result != STRUCT_DISP_ERR_OK) {
+    deleteHandle(self->handle);
+    os_free(self);
+    return result;
+  }
+  *handle = self->handle;
+  return STRUCT_DISP_ERR_OK;
 }
 
 // ================================= newStructmsgDispatcher ====================================
@@ -83,6 +221,9 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   }
   structmsgDispatcherId++;
   structmsgDispatcher->id = structmsgDispatcherId;
+
+  structmsgDispatcher->uartReceiveCb = &uartReceiveCb;
+  structmsgDispatcher->createDispatcher = &createDispatcher;
 
   structmsgDispatcher->BMsg = &BMsg;
   structmsgDispatcher->IMsg = &IMsg;

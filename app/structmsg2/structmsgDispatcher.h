@@ -42,27 +42,33 @@
 
 enum structmsDispatcherErrorCode
 {
-  STRUCT_DATA_DISP_ERR_OK                    = 0,
-  STRUCT_DATA_DISP_ERR_VALUE_NOT_SET         = 255,
-  STRUCT_DATA_DISP_ERR_VALUE_OUT_OF_RANGE    = 254,
-  STRUCT_DATA_DISP_ERR_BAD_VALUE             = 253,
-  STRUCT_DATA_DISP_ERR_BAD_FIELD_TYPE        = 252,
-  STRUCT_DATA_DISP_ERR_FIELD_TYPE_NOT_FOUND  = 251,
-  STRUCT_DATA_DISP_ERR_VALUE_TOO_BIG         = 250,
-  STRUCT_DATA_DISP_ERR_OUT_OF_MEMORY         = 249,
-  STRUCT_DATA_DISP_ERR_OUT_OF_RANGE          = 248,
+  STRUCT_DISP_ERR_OK                    = 0,
+  STRUCT_DISP_ERR_VALUE_NOT_SET         = 255,
+  STRUCT_DISP_ERR_VALUE_OUT_OF_RANGE    = 254,
+  STRUCT_DISP_ERR_BAD_VALUE             = 253,
+  STRUCT_DISP_ERR_BAD_FIELD_TYPE        = 252,
+  STRUCT_DISP_ERR_FIELD_TYPE_NOT_FOUND  = 251,
+  STRUCT_DISP_ERR_VALUE_TOO_BIG         = 250,
+  STRUCT_DISP_ERR_OUT_OF_MEMORY         = 249,
+  STRUCT_DISP_ERR_OUT_OF_RANGE          = 248,
   // be carefull the values up to here
   // must correspond to the values in dataView.h !!!
   // with the names like DATA_VIEW_ERR_*
 
-  STRUCT_DATA_DISP_ERR_OPEN_FILE             = 189,
-  STRUCT_DATA_DISP_FILE_NOT_OPENED           = 188,
-  STRUCT_DATA_DISP_ERR_FLUSH_FILE            = 187,
-  STRUCT_DATA_DISP_ERR_WRITE_FILE            = 186,
+  STRUCT_DISP_ERR_HANDLE_NOT_FOUND      = 227,
+
+  STRUCT_DISP_ERR_OPEN_FILE             = 189,
+  STRUCT_DISP_FILE_NOT_OPENED           = 188,
+  STRUCT_DISP_ERR_FLUSH_FILE            = 187,
+  STRUCT_DISP_ERR_WRITE_FILE            = 186,
 };
 
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
+
+typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
+
+typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
 
 typedef uint8_t (* IMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* BMsg_t)(structmsgDispatcher_t *self);
@@ -72,10 +78,14 @@ typedef uint8_t (* defaultMsg_t)(structmsgDispatcher_t *self);
 
 typedef struct structmsgDispatcher {
   uint8_t id;
+  char handle[20];
   uint8_t *FileName;
   uint8_t fileId;
   size_t fileSize;
   
+  uartReceiveCb_t uartReceiveCb;
+  createDispatcher_t createDispatcher;
+
   IMsg_t IMsg;
   BMsg_t BMsg;
   MMsg_t MMsg;
@@ -84,4 +94,5 @@ typedef struct structmsgDispatcher {
 } structmsgDispatcher_t;
 
 structmsgDispatcher_t *newStructmsgDispatcher();
+uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatcher_t **structmsgDispatcher);
 void freeStructmsgDispatcher(structmsgDispatcher_t *structmsgDispatcher);

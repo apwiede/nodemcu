@@ -39,6 +39,8 @@
 #include "structmsg2.h"
 #include "../crypto/mech.h"
 
+#define HANDLE_PREFIX "stmsg_"
+
 typedef struct handle2Header 
 {
   uint8_t *handle;
@@ -148,14 +150,6 @@ static int checkHandle(const char *handle, structmsgData_t **structmsgData) {
 // ============================= structmsgGetPtrFromHandle ========================
 
 uint8_t structmsgGetPtrFromHandle(const char *handle, structmsgData_t **structmsgData) {
-  int id;
-  const char hex[] = "0123456789abcdef\0";
-  int num;
-  int len;
-  int shift;
-  const char *cp;
-  int idx;
-
   if (checkHandle(handle, structmsgData) != STRUCT_MSG_ERR_OK) {
     return STRUCT_MSG_ERR_HANDLE_NOT_FOUND;
   }
@@ -1071,13 +1065,6 @@ static uint8_t writeLine(structmsgData_t *self, const uint8_t *buffer, uint8_t l
   return self->structmsgDataDescription->writeLine(self->structmsgDataDescription, buffer, lgth);
 }
 
-// ================================= uartReceiveCb ====================================
-
-static uint8_t uartReceiveCb(structmsgData_t *self, const uint8_t *buffer, uint8_t lgth) {
-ets_printf("§: %d %s§\n", lgth, buffer);
-  return STRUCT_MSG_ERR_OK;
-}
-
 // ================================= newStructmsgData ====================================
 
 structmsgData_t *newStructmsgData(void) {
@@ -1140,8 +1127,6 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->closeFile = &closeFile;
   structmsgData->readLine = &readLine;
   structmsgData->writeLine = &writeLine;
-
-  structmsgData->uartReceiveCb = &uartReceiveCb;
 
   return structmsgData;
 }

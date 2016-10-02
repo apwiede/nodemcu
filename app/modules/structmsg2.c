@@ -251,7 +251,7 @@ size_t numFieldInfos;
     checkOKOrErr(L, STRUCT_MSG_ERR_OUT_OF_MEMORY, "create", "");
   } else {
     result = structmsgData->createMsg(structmsgData, numFieldInfos, &handle);
-    if (checkOKOrErr(L, result, "create", "")) {
+    if (checkOKOrErr(L, result, "createMsg", "")) {
       lua_pushstring(L, handle);
     }
   }
@@ -1040,6 +1040,27 @@ static int structmsg_writeLine( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_createDispatcher ========================
+
+static int structmsg_createDispatcher(lua_State* L)
+{
+size_t numFieldInfos;
+  uint8_t *handle;
+  structmsgDispatcher_t *structmsgDispatcher;
+  int result;
+
+  structmsgDispatcher = newStructmsgDispatcher();
+  if (structmsgDispatcher == NULL) {
+    checkOKOrErr(L, STRUCT_MSG_ERR_OUT_OF_MEMORY, "createDispatcher", "");
+  } else {
+    result = structmsgDispatcher->createDispatcher(structmsgDispatcher, &handle);
+    if (checkOKOrErr(L, result, "createDispatcher", "")) {
+      lua_pushstring(L, handle);
+    }
+  }
+  return 1;
+}
+
 // ============================= structmsg_uartReceiveCb ==================
 
 // Lua: uartReceiveCb(name,flags)
@@ -1048,14 +1069,14 @@ static int structmsg_uartReceiveCb( lua_State* L ) {
   const uint8_t *handle;
   const uint8_t *buffer;
   uint8_t lgth;
-  structmsgData_t *structmsgData;
+  structmsgDispatcher_t *structmsgDispatcher;
 
   handle = luaL_checkstring (L, 1);
   buffer = luaL_checkstring (L, 2);
   lgth = c_strlen(buffer);
-  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  result = structmsgDispatcherGetPtrFromHandle(handle, &structmsgDispatcher);
   checkOKOrErr(L, result, "uartReceiveCb", "");
-  result = structmsgData->uartReceiveCb(structmsgData, buffer, lgth);
+  result = structmsgDispatcher->uartReceiveCb(structmsgDispatcher, buffer, lgth);
   checkOKOrErr(L, result, "uartReceiveCbwriteLine", "");
   return 1;
 }
@@ -1063,14 +1084,14 @@ static int structmsg_uartReceiveCb( lua_State* L ) {
 // Module function map
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
-  { LSTRKEY( "create" ),                LFUNCVAL( structmsg_createMsg ) },
-  { LSTRKEY( "delete" ),                LFUNCVAL( structmsg_deleteMsg ) },
+  { LSTRKEY( "createMsg" ),             LFUNCVAL( structmsg_createMsg ) },
+  { LSTRKEY( "deleteMsg" ),             LFUNCVAL( structmsg_deleteMsg ) },
   { LSTRKEY( "__gc" ),                  LFUNCVAL( structmsg_deleteMsg ) },
   { LSTRKEY( "getMsgData" ),            LFUNCVAL( structmsg_getMsgData ) },
   { LSTRKEY( "setMsgData" ),            LFUNCVAL( structmsg_setMsgData ) },
-  { LSTRKEY( "dump" ),                  LFUNCVAL( structmsg_dumpMsg ) },
-  { LSTRKEY( "init" ),                  LFUNCVAL( structmsg_initMsg ) },
-  { LSTRKEY( "prepare" ),               LFUNCVAL( structmsg_prepareMsg ) },
+  { LSTRKEY( "dumpMsg" ),               LFUNCVAL( structmsg_dumpMsg ) },
+  { LSTRKEY( "initMsg" ),               LFUNCVAL( structmsg_initMsg ) },
+  { LSTRKEY( "prepareMsg" ),            LFUNCVAL( structmsg_prepareMsg ) },
   { LSTRKEY( "addField" ),              LFUNCVAL( structmsg_addField ) },
   { LSTRKEY( "setFieldValue" ),         LFUNCVAL( structmsg_setFieldValue ) },
   { LSTRKEY( "setTableFieldValue" ),    LFUNCVAL( structmsg_setTableFieldValue ) },
@@ -1090,6 +1111,8 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "closeFile" ),             LFUNCVAL( structmsg_closeFile ) },
   { LSTRKEY( "readLine" ),              LFUNCVAL( structmsg_readLine ) },
   { LSTRKEY( "writeLine" ),             LFUNCVAL( structmsg_writeLine ) },
+
+  { LSTRKEY( "createDispatcher" ),      LFUNCVAL( structmsg_createDispatcher ) },
   { LSTRKEY( "uartReceiveCb" ),         LFUNCVAL( structmsg_uartReceiveCb ) },
 #ifdef NOtDEF
   { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },
