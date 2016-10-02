@@ -105,6 +105,8 @@ typedef uint8_t (* flushFileDesc_t)(structmsgData_t *self);
 typedef uint8_t (* readLineDesc_t)(structmsgData_t *self, uint8_t **buffer, uint8_t *lgth);
 typedef uint8_t (* writeLineDesc_t)(structmsgData_t *self, const uint8_t *buffer, uint8_t lgth);
 
+typedef uint8_t (* uartReceiveCb_t)(structmsgData_t *self, const uint8_t *buffer, uint8_t lgth);
+
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
   structmsgDataView_t *structmsgDefinitionDataView;
@@ -160,6 +162,8 @@ typedef struct structmsgData {
   closeFileDesc_t closeFile;
   writeLineDesc_t writeLine;
   readLineDesc_t readLine;
+
+  uartReceiveCb_t uartReceiveCb;
 } structmsgData_t;
 
 

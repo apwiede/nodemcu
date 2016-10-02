@@ -127,7 +127,7 @@ static uint8_t writeLine(structmsgDataDescription_t *self, const uint8_t *buffer
   return STRUCT_DATA_DESC_ERR_WRITE_FILE;
 }
 
-// ================================= newStructmsgDataDescrption ====================================
+// ================================= newStructmsgDataDescription ====================================
 
 structmsgDataDescription_t *newStructmsgDataDescription() {
   structmsgDataDescription_t *structmsgDataDescription = os_zalloc(sizeof(structmsgDataDescription_t));

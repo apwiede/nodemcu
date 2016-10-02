@@ -1040,6 +1040,27 @@ static int structmsg_writeLine( lua_State* L ) {
   return 1;
 }
 
+// ============================= structmsg_uartReceiveCb ==================
+
+// Lua: uartReceiveCb(name,flags)
+static int structmsg_uartReceiveCb( lua_State* L ) {
+  int result;
+  const uint8_t *handle;
+  const uint8_t *buffer;
+  uint8_t lgth;
+  structmsgData_t *structmsgData;
+
+  handle = luaL_checkstring (L, 1);
+  buffer = luaL_checkstring (L, 2);
+  lgth = c_strlen(buffer);
+  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  checkOKOrErr(L, result, "uartReceiveCb", "");
+  result = structmsgData->uartReceiveCb(structmsgData, buffer, lgth);
+  checkOKOrErr(L, result, "uartReceiveCbwriteLine", "");
+  return 1;
+}
+
+// Module function map
 // Module function map
 static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "create" ),                LFUNCVAL( structmsg_createMsg ) },
@@ -1069,6 +1090,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "closeFile" ),             LFUNCVAL( structmsg_closeFile ) },
   { LSTRKEY( "readLine" ),              LFUNCVAL( structmsg_readLine ) },
   { LSTRKEY( "writeLine" ),             LFUNCVAL( structmsg_writeLine ) },
+  { LSTRKEY( "uartReceiveCb" ),         LFUNCVAL( structmsg_uartReceiveCb ) },
 #ifdef NOtDEF
   { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },
   { LSTRKEY( "decrypt" ),               LFUNCVAL( structmsg_decrypt ) },

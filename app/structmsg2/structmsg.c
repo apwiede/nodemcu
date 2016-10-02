@@ -1071,6 +1071,13 @@ static uint8_t writeLine(structmsgData_t *self, const uint8_t *buffer, uint8_t l
   return self->structmsgDataDescription->writeLine(self->structmsgDataDescription, buffer, lgth);
 }
 
+// ================================= uartReceiveCb ====================================
+
+static uint8_t uartReceiveCb(structmsgData_t *self, const uint8_t *buffer, uint8_t lgth) {
+ets_printf("§: %d %s§\n", lgth, buffer);
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ================================= newStructmsgData ====================================
 
 structmsgData_t *newStructmsgData(void) {
@@ -1133,6 +1140,9 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->closeFile = &closeFile;
   structmsgData->readLine = &readLine;
   structmsgData->writeLine = &writeLine;
+
+  structmsgData->uartReceiveCb = &uartReceiveCb;
+
   return structmsgData;
 }
 
