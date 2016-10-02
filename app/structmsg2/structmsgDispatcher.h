@@ -40,6 +40,8 @@
 
 /* struct message data descriptions handling */
 
+#include "structmsgDataView.h"
+
 enum structmsDispatcherErrorCode
 {
   STRUCT_DISP_ERR_OK                    = 0,
@@ -61,8 +63,23 @@ enum structmsDispatcherErrorCode
   STRUCT_DISP_FILE_NOT_OPENED           = 188,
   STRUCT_DISP_ERR_FLUSH_FILE            = 187,
   STRUCT_DISP_ERR_WRITE_FILE            = 186,
+  STRUCT_DISP_ERR_BAD_RECEIVED_LGTH     = 185,
 };
 
+
+#define DISP_BUF_LGTH 255
+
+typedef struct msgParts {
+  uint8_t lgth;
+  uint8_t buf[DISP_BUF_LGTH];
+  uint8_t fieldOffset;
+  uint16_t totalLgth;
+  uint16_t cmdLgth;
+  uint16_t cmdKey;
+  uint16_t fromPart;
+  uint16_t toPart;
+  uint8_t shCmdKey;
+} msgParts_t;
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
@@ -74,6 +91,7 @@ typedef uint8_t (* IMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* BMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* MMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* defaultMsg_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* sendAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts);
 
 
 typedef struct structmsgDispatcher {
@@ -82,14 +100,26 @@ typedef struct structmsgDispatcher {
   uint8_t *FileName;
   uint8_t fileId;
   size_t fileSize;
+  uint16_t flags;
   
-  uartReceiveCb_t uartReceiveCb;
-  createDispatcher_t createDispatcher;
+  structmsgDataView_t *structmsgDataView;
+
+  msgParts_t received;
+  msgParts_t toSend;
+
+  uint16_t McuPart;
+  uint16_t WifiPart;
+  uint16_t AppPart;
+  uint16_t CloudPart;
 
   IMsg_t IMsg;
   BMsg_t BMsg;
   MMsg_t MMsg;
   defaultMsg_t defaultMsg;
+  sendAnswer_t sendAnswer;
+
+  uartReceiveCb_t uartReceiveCb;
+  createDispatcher_t createDispatcher;
 
 } structmsgDispatcher_t;
 
