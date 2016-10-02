@@ -35,7 +35,6 @@
 #include "mem.h"
 #include "c_string.h"
 #include "c_stdlib.h"
-#include "c_stdlib.h"
 #include "structmsg2.h"
 #include "../crypto/mech.h"
 
@@ -1035,36 +1034,6 @@ uint8_t deleteMsg(structmsgData_t *self) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ================================= openFile ====================================
-
-static uint8_t openFile(structmsgData_t *self, const uint8_t *fileName, const uint8_t *fileMode) {
-  return self->structmsgDataDescription->openFile(self->structmsgDataDescription, fileName, fileMode);
-}
-
-// ================================= closeFile ====================================
-
-static uint8_t closeFile(structmsgData_t *self) {
-  return self->structmsgDataDescription->closeFile(self->structmsgDataDescription);
-}
-
-// ================================= flushFile ====================================
-
-static uint8_t flushFile(structmsgData_t *self) {
-  return STRUCT_DATA_DESC_ERR_FLUSH_FILE;
-}
-
-// ================================= readLine ====================================
-
-static uint8_t readLine(structmsgData_t *self, uint8_t **buffer, uint8_t *lgth) {
-  return self->structmsgDataDescription->readLine(self->structmsgDataDescription, buffer, lgth);
-}
-
-// ================================= writeLine ====================================
-
-static uint8_t writeLine(structmsgData_t *self, const uint8_t *buffer, uint8_t lgth) {
-  return self->structmsgDataDescription->writeLine(self->structmsgDataDescription, buffer, lgth);
-}
-
 // ================================= newStructmsgData ====================================
 
 structmsgData_t *newStructmsgData(void) {
@@ -1077,7 +1046,6 @@ structmsgData_t *newStructmsgData(void) {
     return NULL;
   }
   structmsgData->structmsgDefinitionDataView = NULL;
-  structmsgData->structmsgDataDescription = newStructmsgDataDescription();
   
   structmsgData->fields = NULL;
   structmsgData->tableFields = NULL;
@@ -1122,11 +1090,6 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->dumpDefFields = NULL;
   structmsgData->setDefFieldValue = NULL;
   structmsgData->getDefFieldValue = NULL;
-
-  structmsgData->openFile = &openFile;
-  structmsgData->closeFile = &closeFile;
-  structmsgData->readLine = &readLine;
-  structmsgData->writeLine = &writeLine;
 
   return structmsgData;
 }

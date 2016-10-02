@@ -42,8 +42,6 @@
 #define	STRUCTMSG_H
 
 #include "c_types.h"
-#include "structmsgDataView.h"
-#include "structmsgDataDescriptions.h"
 #include "structmsgDispatcher.h"
 
 #ifdef	__cplusplus
@@ -98,12 +96,6 @@ typedef uint8_t (* setDef_t)(structmsgData_t *self, const uint8_t *data);
 typedef uint8_t (* getDef_t)(structmsgData_t *self, uint8_t **data, int *lgth);
 typedef uint8_t (* createMsgFromDef_t)(structmsgData_t *self);
 
-typedef uint8_t (* openFileDesc_t)(structmsgData_t *self, const uint8_t *fileName, const uint8_t *fileMode);
-typedef uint8_t (* closeFileDesc_t)(structmsgData_t *self);
-typedef uint8_t (* flushFileDesc_t)(structmsgData_t *self);
-typedef uint8_t (* readLineDesc_t)(structmsgData_t *self, uint8_t **buffer, uint8_t *lgth);
-typedef uint8_t (* writeLineDesc_t)(structmsgData_t *self, const uint8_t *buffer, uint8_t lgth);
-
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
   structmsgDataView_t *structmsgDefinitionDataView;
@@ -154,11 +146,6 @@ typedef struct structmsgData {
   setDef_t setDef;
   getDef_t getDef;
   createMsgFromDef_t createMsgFromDef;
-
-  openFileDesc_t openFile;
-  closeFileDesc_t closeFile;
-  writeLineDesc_t writeLine;
-  readLineDesc_t readLine;
 
 } structmsgData_t;
 

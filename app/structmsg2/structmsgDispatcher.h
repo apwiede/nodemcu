@@ -41,8 +41,9 @@
 /* struct message data descriptions handling */
 
 #include "structmsgDataView.h"
+#include "structmsgDataDescriptions.h"
 
-enum structmsDispatcherErrorCode
+enum structmsgDispatcherErrorCode
 {
   STRUCT_DISP_ERR_OK                    = 0,
   STRUCT_DISP_ERR_VALUE_NOT_SET         = 255,
@@ -64,6 +65,7 @@ enum structmsDispatcherErrorCode
   STRUCT_DISP_ERR_FLUSH_FILE            = 187,
   STRUCT_DISP_ERR_WRITE_FILE            = 186,
   STRUCT_DISP_ERR_BAD_RECEIVED_LGTH     = 185,
+  STRUCT_DISP_ERR_BAD_FILE_CONTENTS     = 184,
 };
 
 
@@ -87,11 +89,18 @@ typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
 
+typedef uint8_t (* openFileDesc_t)(structmsgDispatcher_t *self, const uint8_t *fileName, const uint8_t *fileMode);
+typedef uint8_t (* closeFileDesc_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* flushFileDesc_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* readLineDesc_t)(structmsgDispatcher_t *self, uint8_t **buffer, uint8_t *lgth);
+typedef uint8_t (* writeLineDesc_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
+
 typedef uint8_t (* IMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* BMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* MMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* defaultMsg_t)(structmsgDispatcher_t *self);
-typedef uint8_t (* sendAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts);
+typedef uint8_t (* sendAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* resetMsgInfo_t)(structmsgDispatcher_t *self, msgParts_t *parts);
 
 
 typedef struct structmsgDispatcher {
@@ -103,6 +112,7 @@ typedef struct structmsgDispatcher {
   uint16_t flags;
   
   structmsgDataView_t *structmsgDataView;
+  structmsgDataDescription_t *structmsgDataDescription;
 
   msgParts_t received;
   msgParts_t toSend;
@@ -116,7 +126,13 @@ typedef struct structmsgDispatcher {
   BMsg_t BMsg;
   MMsg_t MMsg;
   defaultMsg_t defaultMsg;
+  resetMsgInfo_t resetMsgInfo;
   sendAnswer_t sendAnswer;
+
+  openFileDesc_t openFile;
+  closeFileDesc_t closeFile;
+  writeLineDesc_t writeLine;
+  readLineDesc_t readLine;
 
   uartReceiveCb_t uartReceiveCb;
   createDispatcher_t createDispatcher;

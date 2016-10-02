@@ -969,14 +969,14 @@ static int structmsg_openFile( lua_State* L ) {
   const uint8_t *handle;
   const uint8_t *fileName;
   const uint8_t *flags;
-  structmsgData_t *structmsgData;
+  structmsgDispatcher_t *structmsgDispatcher;
 
   handle = luaL_checkstring (L, 1);
   fileName = luaL_checkstring (L, 2);
   flags = luaL_checkstring (L, 3);
-  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  result = structmsgDispatcherGetPtrFromHandle(handle, &structmsgDispatcher);
   checkOKOrErr(L, result, "openFile", "");
-  result = structmsgData->openFile(structmsgData, fileName, flags);
+  result = structmsgDispatcher->openFile(structmsgDispatcher, fileName, flags);
   checkOKOrErr(L, result, "openFile", "");
   return 1;
 }
@@ -987,12 +987,12 @@ static int structmsg_openFile( lua_State* L ) {
 static int structmsg_closeFile( lua_State* L ) {
   int result;
   const uint8_t *handle;
-  structmsgData_t *structmsgData;
+  structmsgDispatcher_t *structmsgDispatcher;
 
   handle = luaL_checkstring (L, 1);
-  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  result = structmsgDispatcherGetPtrFromHandle(handle, &structmsgDispatcher);
   checkOKOrErr(L, result, "closeFile", "");
-  result = structmsgData->closeFile(structmsgData);
+  result = structmsgDispatcher->closeFile(structmsgDispatcher);
   checkOKOrErr(L, result, "closeFile", "");
   return 1;
 }
@@ -1006,12 +1006,12 @@ static int structmsg_readLine( lua_State* L ) {
   uint8_t buffer[255];
   uint8_t *data = buffer;
   uint8_t lgth;
-  structmsgData_t *structmsgData;
+  structmsgDispatcher_t *structmsgDispatcher;
 
   handle = luaL_checkstring (L, 1);
-  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  result = structmsgDispatcherGetPtrFromHandle(handle, &structmsgDispatcher);
   checkOKOrErr(L, result, "readLine", "");
-  result = structmsgData->readLine(structmsgData, &data, &lgth);
+  result = structmsgDispatcher->readLine(structmsgDispatcher, &data, &lgth);
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushlstring(L, data, lgth);
   } else {
@@ -1028,14 +1028,14 @@ static int structmsg_writeLine( lua_State* L ) {
   const uint8_t *handle;
   const uint8_t *buffer;
   uint8_t lgth;
-  structmsgData_t *structmsgData;
+  structmsgDispatcher_t *structmsgDispatcher;
 
   handle = luaL_checkstring (L, 1);
   buffer = luaL_checkstring (L, 2);
   lgth = c_strlen(buffer);
-  result = structmsgGetPtrFromHandle(handle, &structmsgData);
+  result = structmsgDispatcherGetPtrFromHandle(handle, &structmsgDispatcher);
   checkOKOrErr(L, result, "writeLine", "");
-  result = structmsgData->writeLine(structmsgData, buffer, lgth);
+  result = structmsgDispatcher->writeLine(structmsgDispatcher, buffer, lgth);
   checkOKOrErr(L, result, "writeLine", "");
   return 1;
 }

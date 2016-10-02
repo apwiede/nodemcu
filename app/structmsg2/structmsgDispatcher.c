@@ -44,6 +44,7 @@
 #include "flash_fs.h"
 
 #include "c_string.h"
+#include "c_stdlib.h"
 #include "c_stdio.h"
 #include "structmsgDispatcher.h"
 
@@ -197,18 +198,125 @@ static uint8_t defaultMsg(structmsgDispatcher_t *self) {
 
 // ================================= sendAnswer ====================================
 
-static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts) {
+static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
+  uint8_t fileName[30];
+  uint8_t lgth;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  int result;
+  char *endPtr;
+  unsigned long ulgth;
+  uint8_t numEntries;
+
+
+#ifdef NOTDEF
+  uint8_t*cp;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldTypeStr;
+  uint8_t *fieldLgthStr;
+  char *endPtr;
+  uint8_t fieldLgth;
+  uint8_t *flagStr;
+  uint8_t flag;
+  unsigned long lgth;
+  unsigned long uflag;
+  structmsgData_t *structmsgData;
+
+//ets_printf("createMsgFromListInfo: \n");
+  structmsgData = newStructmsgData();
+  if (structmsgData == NULL) {
+    return STRUCT_MSG_ERR_OUT_OF_MEMORY;
+  }
+  result = createMsg(structmsgData, numEntries, handle);
+  checkErrOK(result);
+  listEntry = listVector[0];
+  idx = 0;
+  while(idx < numEntries) {
+    listEntry = listVector[idx];
+    uint8_t buffer[c_strlen(listEntry) + 1];
+    fieldNameStr = buffer;
+    c_memcpy(fieldNameStr, listEntry, c_strlen(listEntry));
+    fieldNameStr[c_strlen(listEntry)] = '\0';
+    cp = fieldNameStr;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    fieldTypeStr = cp;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    fieldLgthStr = cp;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    flagStr = cp;
+    if (c_strcmp(fieldLgthStr,"@numRows") == 0) {
+      fieldLgth = numRows;
+    } else {
+      lgth = c_strtoul(fieldLgthStr, &endPtr, 10);
+      fieldLgth = (uint8_t)lgth;
+    }
+    uflag = c_strtoul(flagStr, &endPtr, 10);
+    flag = (uint8_t)uflag;
+    if (flag == 0) {
+      result = addField(structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
+      checkErrOK(result);
+    } else {
+      if ((flags != 0) && (flag == 2)) {
+        result = addField(structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
+        checkErrOK(result);
+      } else {
+        if ((flags == 0) && (flag == 1)) {
+          result = addField(structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
+          checkErrOK(result);
+        }
+      }
+    }
+
+
+#endif
+
+
   if ((self->flags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->flags & DISP_FLAG_IS_FROM_MCU_MSG)) {
     if (self->flags & DISP_FLAG_SHORT_CMD_KEY) { 
       switch (parts->shCmdKey) {
       case 'I':
-ets_printf("sendAnswer I\n");
+        os_sprintf(fileName, "Desc%c%c.txt", parts->shCmdKey, type);
+ets_printf("sendAnswer I %s\n", fileName);
+        result = self->openFile(self, fileName, "r");
+        checkErrOK(result);
+        result = self->readLine(self, &buffer, &lgth);
+ets_printf("line lgth: %d %s\n", lgth, buf);
+        checkErrOK(result);
+        if ((lgth < 4) || (buffer[0] != '#')) {
+          return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
+        }
+        ulgth = c_strtoul(buffer+2, &endPtr, 10);
+        numEntries = (uint8_t)ulgth;
+ets_printf("numEntries: %d\n", numEntries);
+        while (1) {
+          result = self->readLine(self, &buffer, &lgth);
+ets_printf("line lgth: %d %s\n", lgth, buf);
+          checkErrOK(result);
+          if (lgth == 0) {
+            break;
+          }
+          buffer[lgth] = 0;
+ets_printf("readLine: %s\n", buffer);
+        }
+        result = self->closeFile(self);
+        checkErrOK(result);
+ets_printf("readLines done\n");
         break;
       }
     } else {
     }
   } else {
   }
+  self->resetMsgInfo(self, parts);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -217,57 +325,52 @@ ets_printf("sendAnswer I\n");
 static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
   int result;
   msgParts_t *received = &self->received;
+  dataView_t *dataView;
   uint8_t u8;
 
 ets_printf("§: %d %s§\n", lgth, buffer);
-//  if (lgth != 1) {
-//    return STRUCT_DISP_ERR_BAD_RECEIVED_LGTH;
-//  }
-  if (lgth == 0) {
-    // simulate a '0' char!!
-  }
 //ets_printf("receivedLgth: %d fieldOffset: %d\n", received->lgth, received->fieldOffset);
   if (lgth == 0) {
+    // simulate a '0' char!!
     received->buf[received->lgth++] = 0;
   } else {
     received->buf[received->lgth++] = buffer[0];
   }
-  self->structmsgDataView->dataView->data = received->buf;
-  self->structmsgDataView->dataView->lgth++;
+  dataView = self->structmsgDataView->dataView;
+  dataView->data = received->buf;
+  dataView->lgth++;
   if (received->lgth == RECEIVED_CHECK_TO_SIZE) {
-    result = self->structmsgDataView->dataView->getUint16(self->structmsgDataView->dataView, received->fieldOffset, &received->toPart);
+    result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
     if (received->toPart == self->WifiPart) {
       self->flags |= DISP_FLAG_IS_TO_WIFI_MSG;
     }
     received->fieldOffset += sizeof(uint16_t);
   }
   if (received->lgth == RECEIVED_CHECK_FROM_SIZE) {
-    result = self->structmsgDataView->dataView->getUint16(self->structmsgDataView->dataView, received->fieldOffset, &received->fromPart);
+    result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
     received->fieldOffset += sizeof(uint16_t);
     if (received->fromPart == self->McuPart) {
       self->flags |= DISP_FLAG_IS_FROM_MCU_MSG;
     }
   }
   if (received->lgth == RECEIVED_CHECK_TOTAL_LGTH_SIZE) {
-    result = self->structmsgDataView->dataView->getUint16(self->structmsgDataView->dataView, received->fieldOffset, &received->totalLgth);
+    result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
     received->fieldOffset += sizeof(uint16_t);
   }
   if ((self->flags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->flags & DISP_FLAG_IS_FROM_MCU_MSG)) {
     if (self->flags & DISP_FLAG_SHORT_CMD_KEY) { 
       if (received->lgth == RECEIVED_CHECK_SHORT_CMD_KEY_SIZE) {
-        result = self->structmsgDataView->dataView->getUint8(self->structmsgDataView->dataView, received->fieldOffset, &received->shCmdKey);
+        result = dataView->getUint8(dataView, received->fieldOffset, &received->shCmdKey);
         received->fieldOffset += sizeof(uint8_t);
-ets_printf("start dispatch: to: 0x%04x from: 0x%04x totalLgth: %d cmdKey: %c\n", received->toPart, received->fromPart, received->totalLgth, received->shCmdKey);
       }
       if (received->lgth > RECEIVED_CHECK_SHORT_CMD_KEY_SIZE) {
         if (received->lgth == received->totalLgth) {
-ets_printf("dispatch length reached: to: 0x%04x from: 0x%04x totalLgth: %d cmdKey: %c\n", received->toPart, received->fromPart, received->totalLgth, received->shCmdKey);
-          self->sendAnswer(self, received);
+          self->sendAnswer(self, received, 'A');
         }
       }
     } else {
       if (received->lgth == RECEIVED_CHECK_CMD_KEY_SIZE) {
-        result = self->structmsgDataView->dataView->getUint16(self->structmsgDataView->dataView, received->fieldOffset, &received->cmdKey);
+        result = dataView->getUint16(dataView, received->fieldOffset, &received->cmdKey);
         received->fieldOffset += sizeof(uint16_t);
       }
     }
@@ -278,6 +381,36 @@ ets_printf("dispatch length reached: to: 0x%04x from: 0x%04x totalLgth: %d cmdKe
   } else {
   }
   return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= openFile ====================================
+
+static uint8_t openFile(structmsgDispatcher_t *self, const uint8_t *fileName, const uint8_t *fileMode) {
+  return self->structmsgDataDescription->openFile(self->structmsgDataDescription, fileName, fileMode);
+}
+
+// ================================= closeFile ====================================
+
+static uint8_t closeFile(structmsgDispatcher_t *self) {
+  return self->structmsgDataDescription->closeFile(self->structmsgDataDescription);
+}
+
+// ================================= flushFile ====================================
+
+static uint8_t flushFile(structmsgDispatcher_t *self) {
+  return STRUCT_DATA_DESC_ERR_FLUSH_FILE;
+}
+
+// ================================= readLine ====================================
+
+static uint8_t readLine(structmsgDispatcher_t *self, uint8_t **buffer, uint8_t *lgth) {
+  return self->structmsgDataDescription->readLine(self->structmsgDataDescription, buffer, lgth);
+}
+
+// ================================= writeLine ====================================
+
+static uint8_t writeLine(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
+  return self->structmsgDataDescription->writeLine(self->structmsgDataDescription, buffer, lgth);
 }
 
 // ============================= structmsgDispatcherGetPtrFromHandle ========================
@@ -355,6 +488,8 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   structmsgDispatcherId++;
   structmsgDispatcher->id = structmsgDispatcherId;
 
+  structmsgDispatcher->structmsgDataDescription = newStructmsgDataDescription();
+
   structmsgDispatcher->uartReceiveCb = &uartReceiveCb;
   structmsgDispatcher->createDispatcher = &createDispatcher;
 
@@ -362,7 +497,14 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   structmsgDispatcher->IMsg = &IMsg;
   structmsgDispatcher->MMsg = &MMsg;
   structmsgDispatcher->defaultMsg = &defaultMsg;
+  structmsgDispatcher->resetMsgInfo = &resetMsgInfo;
   structmsgDispatcher->sendAnswer = &sendAnswer;
+
+  structmsgDispatcher->openFile = &openFile;
+  structmsgDispatcher->closeFile = &closeFile;
+  structmsgDispatcher->readLine = &readLine;
+  structmsgDispatcher->writeLine = &writeLine;
+
   return structmsgDispatcher;
 }
 
