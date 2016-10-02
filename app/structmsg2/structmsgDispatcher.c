@@ -46,7 +46,7 @@
 #include "c_string.h"
 #include "c_stdlib.h"
 #include "c_stdio.h"
-#include "structmsgDispatcher.h"
+#include "structmsg2.h"
 
 
 #define DISP_HANDLE_PREFIX "stmsgdisp_"
@@ -196,20 +196,68 @@ static uint8_t defaultMsg(structmsgDispatcher_t *self) {
   return STRUCT_DISP_ERR_OK;
 }
 
-// ================================= sendAnswer ====================================
+// ================================= setMsgValuesFromLines ====================================
 
-static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
-  uint8_t fileName[30];
+static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_t *structmsgData, uint8_t numEntries, uint8_t *handle, uint8_t type) {
+  int idx;
+  uint8_t*cp;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldValueStr;
+  char *endPtr;
+  uint8_t fieldLgth;
+  uint8_t *flagStr;
+  uint8_t flag;
   uint8_t lgth;
+  unsigned long uval;
   uint8_t buf[100];
   uint8_t *buffer = buf;
+  int numericValue;
+  uint8_t *stringValue;
   int result;
-  char *endPtr;
-  unsigned long ulgth;
-  uint8_t numEntries;
 
+  idx = 0;
+  while(idx < numEntries) {
+    result = self->readLine(self, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      break;
+    }
+    buffer[lgth] = 0;
+    fieldNameStr = buffer;
+    cp = fieldNameStr;
+    while (*cp != ',') {
+      cp++;
+    }
+    *cp++ = '\0';
+    fieldValueStr = cp;
+    while (*cp != '\n') {
+      cp++;
+    }
+    *cp++ = '\0';
+    cp--;
+    uval = c_strtoul(fieldValueStr, &endPtr, 10);
+    if (endPtr == (char *)cp) {
+      numericValue = (int)uval;
+      stringValue = NULL;
+    } else {
+      numericValue = 0;
+      stringValue = fieldValueStr;
+    }
+    result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
+    checkErrOK(result);
+    idx++;
+  }
+  result = structmsgData->setFieldValue(structmsgData, "@cmdKey", type, NULL);
+  checkErrOK(result);
+  structmsgData->prepareMsg(structmsgData);
+//  structmsgData->dumpMsg(structmsgData);
+  return STRUCT_DISP_ERR_OK;
+}
 
-#ifdef NOTDEF
+// ================================= createMsgFromLines ====================================
+
+static uint8_t createMsgFromLines(structmsgDispatcher_t *self, structmsgData_t **structmsgData, uint8_t numEntries, uint8_t **handle, uint8_t numRows) {
+  int idx;
   uint8_t*cp;
   uint8_t *fieldNameStr;
   uint8_t *fieldTypeStr;
@@ -218,25 +266,28 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
   uint8_t fieldLgth;
   uint8_t *flagStr;
   uint8_t flag;
-  unsigned long lgth;
+  uint8_t lgth;
   unsigned long uflag;
-  structmsgData_t *structmsgData;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  int result;
 
-//ets_printf("createMsgFromListInfo: \n");
-  structmsgData = newStructmsgData();
-  if (structmsgData == NULL) {
+//ets_printf("createMsgFromLines: \n");
+  *structmsgData = newStructmsgData();
+  if (*structmsgData == NULL) {
     return STRUCT_MSG_ERR_OUT_OF_MEMORY;
   }
-  result = createMsg(structmsgData, numEntries, handle);
+  result = (*structmsgData)->createMsg(*structmsgData, numEntries, handle);
   checkErrOK(result);
-  listEntry = listVector[0];
   idx = 0;
   while(idx < numEntries) {
-    listEntry = listVector[idx];
-    uint8_t buffer[c_strlen(listEntry) + 1];
+    result = self->readLine(self, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      break;
+    }
+    buffer[lgth] = 0;
     fieldNameStr = buffer;
-    c_memcpy(fieldNameStr, listEntry, c_strlen(listEntry));
-    fieldNameStr[c_strlen(listEntry)] = '\0';
     cp = fieldNameStr;
     while (*cp != ',') {
       cp++;
@@ -248,68 +299,69 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
     }
     *cp++ = '\0';
     fieldLgthStr = cp;
-    while (*cp != ',') {
+    while (*cp != '\n') {
       cp++;
     }
     *cp++ = '\0';
-    flagStr = cp;
     if (c_strcmp(fieldLgthStr,"@numRows") == 0) {
       fieldLgth = numRows;
     } else {
       lgth = c_strtoul(fieldLgthStr, &endPtr, 10);
       fieldLgth = (uint8_t)lgth;
     }
-    uflag = c_strtoul(flagStr, &endPtr, 10);
-    flag = (uint8_t)uflag;
-    if (flag == 0) {
-      result = addField(structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
-      checkErrOK(result);
-    } else {
-      if ((flags != 0) && (flag == 2)) {
-        result = addField(structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
-        checkErrOK(result);
-      } else {
-        if ((flags == 0) && (flag == 1)) {
-          result = addField(structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
-          checkErrOK(result);
-        }
-      }
-    }
+    result = (*structmsgData)->addField(*structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
+    checkErrOK(result);
+    idx++;
+  }
+  (*structmsgData)->initMsg(*structmsgData);
+  return STRUCT_DISP_ERR_OK;
+}
 
+// ================================= sendAnswer ====================================
 
-#endif
-
+static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
+  uint8_t fileName[30];
+  uint8_t lgth;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  int result;
+  char *endPtr;
+  uint8_t *handle;
+  unsigned long ulgth;
+  structmsgData_t *structmsgData;
+  uint8_t numEntries;
 
   if ((self->flags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->flags & DISP_FLAG_IS_FROM_MCU_MSG)) {
     if (self->flags & DISP_FLAG_SHORT_CMD_KEY) { 
       switch (parts->shCmdKey) {
       case 'I':
         os_sprintf(fileName, "Desc%c%c.txt", parts->shCmdKey, type);
-ets_printf("sendAnswer I %s\n", fileName);
         result = self->openFile(self, fileName, "r");
         checkErrOK(result);
         result = self->readLine(self, &buffer, &lgth);
-ets_printf("line lgth: %d %s\n", lgth, buf);
         checkErrOK(result);
         if ((lgth < 4) || (buffer[0] != '#')) {
           return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
         }
         ulgth = c_strtoul(buffer+2, &endPtr, 10);
         numEntries = (uint8_t)ulgth;
-ets_printf("numEntries: %d\n", numEntries);
-        while (1) {
-          result = self->readLine(self, &buffer, &lgth);
-ets_printf("line lgth: %d %s\n", lgth, buf);
-          checkErrOK(result);
-          if (lgth == 0) {
-            break;
-          }
-          buffer[lgth] = 0;
-ets_printf("readLine: %s\n", buffer);
-        }
+        result = createMsgFromLines(self, &structmsgData, numEntries, &handle, 0);
+        checkErrOK(result);
         result = self->closeFile(self);
         checkErrOK(result);
-ets_printf("readLines done\n");
+        os_sprintf(fileName, "Val%c%c.txt", parts->shCmdKey, type);
+        result = self->openFile(self, fileName, "r");
+        checkErrOK(result);
+        result = self->readLine(self, &buffer, &lgth);
+        checkErrOK(result);
+        if ((lgth < 4) || (buffer[0] != '#')) {
+          return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
+        }
+        ulgth = c_strtoul(buffer+2, &endPtr, 10);
+        numEntries = (uint8_t)ulgth;
+        result = setMsgValuesFromLines(self, structmsgData, numEntries, handle, parts->shCmdKey);
+        checkErrOK(result);
+//ets_printf("heap: %d\n", system_get_free_heap_size());
         break;
       }
     } else {

@@ -426,6 +426,7 @@ static uint8_t prepareMsg(structmsgData_t *self) {
   int numEntries;
   int idx;
   int result;
+  uint8_t headerLgth;
   structmsgField_t *fieldInfo;
 
   if ((self->flags & STRUCT_MSG_IS_INITTED) == 0) {
@@ -453,7 +454,11 @@ static uint8_t prepareMsg(structmsgData_t *self) {
         fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
         break;
       case STRUCT_MSG_SPEC_FIELD_CRC:
-        result = self->structmsgDataView->setCrc(self->structmsgDataView, fieldInfo, self->headerLgth, self->cmdLgth-fieldInfo->fieldLgth);
+        headerLgth = 0;
+        if (self->flags & STRUCT_MSG_CRC_USE_HEADER_LGTH) {
+            headerLgth = self->headerLgth;
+        }
+        result = self->structmsgDataView->setCrc(self->structmsgDataView, fieldInfo, headerLgth, self->cmdLgth-fieldInfo->fieldLgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
         break;
