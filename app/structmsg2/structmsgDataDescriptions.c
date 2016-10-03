@@ -54,8 +54,8 @@ static volatile int fileFd = FS_OPEN_OK - 1;
 // ================================= openFile ====================================
 
 static uint8_t openFile(structmsgDataDescription_t *self, const uint8_t *fileName, const uint8_t *fileMode) {
+  self->fileName = fileName;
   fileFd = fs_open(fileName, fs_mode2flag(fileMode));
-  
   if (fileFd < FS_OPEN_OK) {
     return STRUCT_DATA_DESC_ERR_OPEN_FILE;
   }
@@ -66,6 +66,7 @@ static uint8_t openFile(structmsgDataDescription_t *self, const uint8_t *fileNam
 
 static uint8_t closeFile(structmsgDataDescription_t *self) {
   if (fileFd != (FS_OPEN_OK - 1)){
+    self->fileName = NULL;
     fs_close(fileFd);
     fileFd = FS_OPEN_OK - 1;
   }

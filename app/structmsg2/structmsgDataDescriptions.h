@@ -73,7 +73,7 @@ typedef uint8_t (* writeLine_t)(structmsgDataDescription_t *self, const uint8_t 
 
 typedef struct structmsgDataDescription {
   uint8_t id;
-  uint8_t *FileName;
+  const uint8_t *fileName;
   uint8_t fileId;
   size_t fileSize;
   

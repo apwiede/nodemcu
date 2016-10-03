@@ -46,6 +46,7 @@
 #include "c_string.h"
 #include "c_stdlib.h"
 #include "c_stdio.h"
+#include "platform.h"
 #include "structmsg2.h"
 
 
@@ -97,7 +98,7 @@ static int addHandle(uint8_t *handle, structmsgDispatcher_t *structmsgDispatcher
     } else {
       structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].handle = handle;
       structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].structmsgDispatcher = structmsgDispatcher;
-     structmsgDispatcherHandles.numHandles++;
+      structmsgDispatcherHandles.numHandles++;
       return STRUCT_DISP_ERR_OK;
     }
   } else {
@@ -115,6 +116,7 @@ static int addHandle(uint8_t *handle, structmsgDispatcher_t *structmsgDispatcher
     checkAllocOK(structmsgDispatcherHandles.handles);
     structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].handle = handle;
     structmsgDispatcherHandles.handles[idx].structmsgDispatcher = structmsgDispatcher;
+    structmsgDispatcherHandles.numHandles++;
   }
   return STRUCT_DISP_ERR_OK;
 }
@@ -202,6 +204,7 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
   int idx;
   uint8_t*cp;
   uint8_t *fieldNameStr;
+  uint8_t fieldNameId;
   uint8_t *fieldValueStr;
   char *endPtr;
   uint8_t fieldLgth;
@@ -243,7 +246,50 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
       numericValue = 0;
       stringValue = fieldValueStr;
     }
-    result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
+// FIXME!!!!
+    if (c_strcmp(fieldNameStr, "MacAddr") == 0) {
+      numericValue = 0;
+      stringValue = fieldValueStr;
+    }
+    if (c_strcmp(fieldNameStr, "IPAddr") == 0) {
+      numericValue = 0;
+      stringValue = fieldValueStr;
+    }
+    if (c_strcmp(fieldNameStr, "FirmVers") == 0) {
+      numericValue = 0;
+      stringValue = fieldValueStr;
+    }
+    if (c_strcmp(fieldNameStr, "SerieNum") == 0) {
+      numericValue = 0;
+      stringValue = fieldValueStr;
+    }
+    if (c_strcmp(fieldNameStr, "date") == 0) {
+      numericValue = 0;
+      stringValue = fieldValueStr;
+    }
+    result = structmsgData->structmsgDataView->getFieldNameIdFromStr(structmsgData->structmsgDataView, fieldNameStr, &fieldNameId, STRUCT_MSG_NO_INCR);
+    checkErrOK(result);
+    switch (fieldNameId) {
+      case STRUCT_MSG_SPEC_FIELD_DST:
+        numericValue = self->received.fromPart;
+        stringValue = NULL;
+        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
+        break;
+      case STRUCT_MSG_SPEC_FIELD_SRC:
+        numericValue = self->received.toPart;
+        stringValue = NULL;
+        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
+        break;
+      case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+        // FIXME ! check for shCmdKey/cmdKey here
+        numericValue = self->received.shCmdKey;
+        stringValue = NULL;
+        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
+        break;
+      default:
+        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
+        break;
+    }
     checkErrOK(result);
     idx++;
   }
@@ -322,6 +368,8 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, structmsgData_t *
 static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
   uint8_t fileName[30];
   uint8_t lgth;
+  int msgLgth;
+  uint8_t *data;
   uint8_t buf[100];
   uint8_t *buffer = buf;
   int result;
@@ -330,11 +378,16 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
   unsigned long ulgth;
   structmsgData_t *structmsgData;
   uint8_t numEntries;
+  int idx;
 
+//ets_printf("§@1@§", parts->shCmdKey);
   if ((self->flags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->flags & DISP_FLAG_IS_FROM_MCU_MSG)) {
     if (self->flags & DISP_FLAG_SHORT_CMD_KEY) { 
       switch (parts->shCmdKey) {
+      case 'B':
       case 'I':
+      case 'M':
+//ets_printf("§@4%c@§", parts->shCmdKey);
         os_sprintf(fileName, "Desc%c%c.txt", parts->shCmdKey, type);
         result = self->openFile(self, fileName, "r");
         checkErrOK(result);
@@ -345,8 +398,10 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
         }
         ulgth = c_strtoul(buffer+2, &endPtr, 10);
         numEntries = (uint8_t)ulgth;
+//ets_printf("§@NE1!%d!@§", numEntries);
         result = createMsgFromLines(self, &structmsgData, numEntries, &handle, 0);
         checkErrOK(result);
+//ets_printf("heap2: %d\n", system_get_free_heap_size());
         result = self->closeFile(self);
         checkErrOK(result);
         os_sprintf(fileName, "Val%c%c.txt", parts->shCmdKey, type);
@@ -359,9 +414,19 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
         }
         ulgth = c_strtoul(buffer+2, &endPtr, 10);
         numEntries = (uint8_t)ulgth;
+//ets_printf("§@NE2!%d!@§", numEntries);
         result = setMsgValuesFromLines(self, structmsgData, numEntries, handle, parts->shCmdKey);
         checkErrOK(result);
-//ets_printf("heap: %d\n", system_get_free_heap_size());
+        result = self->closeFile(self);
+        checkErrOK(result);
+//ets_printf("heap3: %d\n", system_get_free_heap_size());
+        result = structmsgData->getMsgData(structmsgData, &data, &msgLgth);
+        checkErrOK(result);
+        idx = 0;
+        while (idx < msgLgth) {
+          platform_uart_send(0, data[idx]);
+          idx++;
+        }
         break;
       }
     } else {
@@ -380,8 +445,8 @@ static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer,
   dataView_t *dataView;
   uint8_t u8;
 
-ets_printf("§: %d %s§\n", lgth, buffer);
-//ets_printf("receivedLgth: %d fieldOffset: %d\n", received->lgth, received->fieldOffset);
+//ets_printf("§%c§", buffer[0]&0xFF);
+//ets_printf("§receivedLgth: %d fieldOffset: %d\n§", received->lgth, received->fieldOffset);
   if (lgth == 0) {
     // simulate a '0' char!!
     received->buf[received->lgth++] = 0;
@@ -417,12 +482,18 @@ ets_printf("§: %d %s§\n", lgth, buffer);
       }
       if (received->lgth > RECEIVED_CHECK_SHORT_CMD_KEY_SIZE) {
         if (received->lgth == received->totalLgth) {
-          self->sendAnswer(self, received, 'A');
+//ets_printf("heap1: %d\n", system_get_free_heap_size());
+//ets_printf("§@%c@§", received->shCmdKey);
+          result = self->sendAnswer(self, received, 'A');
+          checkErrOK(result);
+          result = self->resetMsgInfo(self, &self->received);
+          checkErrOK(result);
         }
       }
     } else {
       if (received->lgth == RECEIVED_CHECK_CMD_KEY_SIZE) {
         result = dataView->getUint16(dataView, received->fieldOffset, &received->cmdKey);
+        checkErrOK(result);
         received->fieldOffset += sizeof(uint16_t);
       }
     }
@@ -478,8 +549,6 @@ uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatc
 // ================================= initHeadersAndFlags ====================================
 
 static uint8_t initHeadersAndFlags(structmsgDispatcher_t *self) {
-  uint8_t result;
-
   self->flags = 0;
   self->flags |= DISP_FLAG_SHORT_CMD_KEY;
   self->McuPart = 0x4D00;
@@ -492,15 +561,14 @@ static uint8_t initHeadersAndFlags(structmsgDispatcher_t *self) {
 // ================================= resetMsgInfo ====================================
 
 static uint8_t resetMsgInfo(structmsgDispatcher_t *self, msgParts_t *parts) {
-  uint8_t result;
   parts->lgth = 0;
-  parts->fieldOffset;
-  parts->totalLgth;
-  parts->cmdLgth;
-  parts->cmdKey;
-  parts->fromPart;
-  parts->toPart;
-  parts->shCmdKey;
+  parts->fieldOffset = 0;
+  parts->totalLgth = 0;
+  parts->cmdLgth = 0;
+  parts->cmdKey = 0;
+  parts->fromPart = 0;
+  parts->toPart = 0;
+  parts->shCmdKey = 0;
   self->structmsgDataView->dataView->data = parts->buf;
   self->structmsgDataView->dataView->lgth = 0;
   return STRUCT_DISP_ERR_OK;

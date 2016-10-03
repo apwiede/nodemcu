@@ -341,13 +341,15 @@ static uint8_t setCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, si
 
   crc = 0;
   idx = startOffset;
+//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx-startOffset, self->dataView->data[idx], crc);
   while (idx < lgth) {
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crc);
+//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx-startOffset, self->dataView->data[idx], crc);
     crc += self->dataView->data[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
-    self->dataView->setUint8(self->dataView,fieldInfo->fieldOffset,(uint8_t)((crc & 0xFF)));
+//ets_printf("§crc8: 0x%04x 0x%02x\n§", crc, (uint8_t)(crc & 0xFF));
+    self->dataView->setUint8(self->dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
   } else {
     self->dataView->setUint16(self->dataView,fieldInfo->fieldOffset,crc);
   }
@@ -483,7 +485,7 @@ static uint8_t setFieldValue(structmsgDataView_t *self, structmsgField_t *fieldI
     case DATA_VIEW_FIELD_UINT8_T:
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 256)) {
-          result= self->dataView->setInt8(self->dataView, fieldInfo->fieldOffset, (uint8_t)numericValue);
+          result= self->dataView->setUint8(self->dataView, fieldInfo->fieldOffset, (uint8_t)numericValue);
           checkErrOK(result);
         }
       } else {

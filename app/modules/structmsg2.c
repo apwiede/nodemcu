@@ -67,7 +67,7 @@ static int checkOKOrErr( lua_State* L, int result, const uint8_t *where, const u
     lua_pushfstring(L, "OK");
     return 1;
   }
-ets_printf("error result: %d\n", result);
+ets_printf("§error result: %d\n§", result);
   errStr = "ERROR";
   switch (result) {
   case STRUCT_MSG_ERR_VALUE_NOT_SET:
@@ -969,7 +969,7 @@ static int structmsg_openFile( lua_State* L ) {
   const uint8_t *handle;
   const uint8_t *fileName;
   const uint8_t *flags;
-  structmsgDispatcher_t *structmsgDispatcher;
+  structmsgDispatcher_t *structmsgDispatcher = NULL;
 
   handle = luaL_checkstring (L, 1);
   fileName = luaL_checkstring (L, 2);
@@ -1045,7 +1045,7 @@ static int structmsg_writeLine( lua_State* L ) {
 static int structmsg_createDispatcher(lua_State* L)
 {
 size_t numFieldInfos;
-  uint8_t *handle;
+  uint8_t *handle = "??";
   structmsgDispatcher_t *structmsgDispatcher;
   int result;
 
