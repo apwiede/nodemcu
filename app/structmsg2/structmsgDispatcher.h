@@ -58,7 +58,11 @@ enum structmsgDispatcherErrorCode
   // must correspond to the values in dataView.h !!!
   // with the names like DATA_VIEW_ERR_*
 
+  STRUCT_DISP_ERR_FIELD_NOT_FOUND       = 230,
   STRUCT_DISP_ERR_HANDLE_NOT_FOUND      = 227,
+  // be carefull the values up to here
+  // must correspond to the values in structmsgDataView.h !!!
+  // with the names like STRUCT_MSG_ERR_*
 
   STRUCT_DISP_ERR_OPEN_FILE             = 189,
   STRUCT_DISP_FILE_NOT_OPENED           = 188,
@@ -66,10 +70,16 @@ enum structmsgDispatcherErrorCode
   STRUCT_DISP_ERR_WRITE_FILE            = 186,
   STRUCT_DISP_ERR_BAD_RECEIVED_LGTH     = 185,
   STRUCT_DISP_ERR_BAD_FILE_CONTENTS     = 184,
+  STRUCT_DISP_ERR_HEADER_NOT_FOUND      = 183,
 };
 
 
 #define DISP_BUF_LGTH 255
+// dst + src + totalLgth + (optional) GUID + cmdKey/shCmdKey
+// uint16_t + uint16_t + uint16_t + (optional) uint8_t*(16) + uint16_t/uint8_t
+#define DISP_MAX_HEADER_LGTH (sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint16_t) + (16*sizeof(uint8_t)) + sizeof(uint16_t))
+
+typedef struct structmsgData structmsgData_t;
 
 typedef struct msgParts {
   uint8_t lgth;
@@ -82,6 +92,12 @@ typedef struct msgParts {
   uint16_t toPart;
   uint8_t shCmdKey;
 } msgParts_t;
+
+typedef struct msgHeader2MsgPtr {
+  structmsgData_t *structmsgData;
+  uint8_t headerLgth;
+  uint8_t header[DISP_MAX_HEADER_LGTH];
+} msgHeader2MsgPtr_t;
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
@@ -109,8 +125,12 @@ typedef struct structmsgDispatcher {
   uint8_t *FileName;
   uint8_t fileId;
   size_t fileSize;
-  uint16_t flags;
+  uint16_t dispFlags;
   
+  uint8_t numMsgHeaders;
+  uint8_t maxMsgHeaders;
+  msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
+
   structmsgDataView_t *structmsgDataView;
   structmsgDataDescription_t *structmsgDataDescription;
 

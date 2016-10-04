@@ -66,9 +66,6 @@
 #define RECEIVED_CHECK_CMD_KEY_SIZE       8
 #define RECEIVED_CHECK_CMD_LGTH_SIZE      10
 
-//#define checkAllocOK(addr) if(addr == NULL) return STRUCT_DISP_ERR_OUT_OF_MEMORY
-//#define checkErrOK(result) if(result != STRUCT_DISP_ERR_OK) return result
-
 typedef struct handle2Dispatcher
 {
   uint8_t *handle;
@@ -85,6 +82,8 @@ typedef struct structmsgDispatcherHandles
 static structmsgDispatcherHandles_t structmsgDispatcherHandles = { NULL, 0};
 
 static int structmsgDispatcherId = 0;
+// right now we only need one dispatcher!
+static structmsgDispatcher_t *structmsgDispatcherSingleton = NULL;
 
 // ============================= addHandle ========================
 
@@ -198,6 +197,145 @@ static uint8_t defaultMsg(structmsgDispatcher_t *self) {
   return STRUCT_DISP_ERR_OK;
 }
 
+#define checkErrWithResetOK(result) if(result != DATA_VIEW_ERR_OK) { dataView->data = saveData; dataView->lgth= saveLgth; return result; }
+
+// ================================= getMsgPtrFromMsgParts ====================================
+
+static uint8_t getMsgPtrFromMsgParts(structmsgDispatcher_t *self, msgParts_t *msgParts, structmsgData_t **structmsgData, int incrRefCnt) {
+  int firstFreeEntryId;
+  int headerIdx;
+  msgHeader2MsgPtr_t *entry;
+  msgHeader2MsgPtr_t *headerEntry;
+  msgHeader2MsgPtr_t *newHeaderEntry;
+  msgHeader2MsgPtr_t *firstFreeEntry;
+  uint8_t header[DISP_MAX_HEADER_LGTH];
+  uint8_t result;
+  dataView_t *dataView;
+  uint8_t *saveData;
+  uint8_t saveLgth;
+  size_t offset;
+
+  // build header from msgParts
+  offset = 0;
+  dataView = self->structmsgDataView->dataView;
+  saveData = dataView->data;
+  saveLgth = dataView->lgth;
+  dataView->data = header;
+  dataView->lgth = DISP_MAX_HEADER_LGTH;
+  result = dataView->setUint16(dataView, offset, msgParts->fromPart);
+  checkErrWithResetOK(result);
+  offset += sizeof(uint16_t);
+  result = dataView->setUint16(dataView, offset, msgParts->toPart);
+  checkErrWithResetOK(result);
+  offset += sizeof(uint16_t);
+  result = dataView->setUint16(dataView, offset, msgParts->totalLgth);
+  checkErrWithResetOK(result);
+  offset += sizeof(uint16_t);
+  if (self->dispFlags & STRUCT_MSG_SHORT_CMD_KEY) {
+    result = dataView->setUint8(dataView, offset, msgParts->shCmdKey);
+    checkErrWithResetOK(result);
+    offset += sizeof(uint8_t);
+  } else {
+    result = dataView->setUint16(dataView, offset, msgParts->cmdKey);
+    checkErrWithResetOK(result);
+    offset += sizeof(uint16_t);
+  }
+  dataView->data = saveData;
+  dataView->lgth= saveLgth;
+  // end build header from msgParts
+  if ((incrRefCnt == STRUCT_MSG_INCR) && (self->numMsgHeaders >= self->maxMsgHeaders)) {
+    if (self->maxMsgHeaders == 0) {
+      self->maxMsgHeaders = 4;
+      self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_zalloc((self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
+      checkAllocOK(self->msgHeader2MsgPtrs);
+    } else {
+      self->maxMsgHeaders += 2;
+      self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_realloc(self->msgHeader2MsgPtrs, (self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
+      checkAllocOK(self->msgHeader2MsgPtrs);
+    }
+  }
+  firstFreeEntry = NULL;
+  firstFreeEntryId = 0;
+  if (self->numMsgHeaders > 0) {
+    // find header 
+    headerIdx = 0;
+    while (headerIdx < self->numMsgHeaders) {
+      headerEntry = &self->msgHeader2MsgPtrs[headerIdx];
+      if ((headerEntry->structmsgData != NULL) && (ets_memcmp(headerEntry->header, header, offset) == 0)) {
+        if (incrRefCnt < 0) {
+          headerEntry->headerLgth = 0;
+          os_free(headerEntry->structmsgData);
+          headerEntry->structmsgData = NULL;
+          *structmsgData = NULL;
+          return STRUCT_DISP_ERR_OK;
+        }
+        *structmsgData = headerEntry->structmsgData;
+        (*structmsgData)->flags &= ~STRUCT_MSG_IS_PREPARED;
+        return STRUCT_DISP_ERR_OK;
+      }
+      if ((incrRefCnt == STRUCT_MSG_INCR) && (headerEntry->structmsgData == NULL) && (firstFreeEntry == NULL)) {
+        firstFreeEntry = headerEntry;
+        firstFreeEntry->structmsgData = newStructmsgData();
+        firstFreeEntry->headerLgth = offset;
+        c_memcpy(firstFreeEntry->header, header, offset);
+        *structmsgData = firstFreeEntry->structmsgData;
+      }
+      headerIdx++;
+    }
+  }
+  if (incrRefCnt < 0) {
+    return STRUCT_DISP_ERR_OK; // just ignore silently
+  } else {
+    if (incrRefCnt == 0) {
+      return STRUCT_DISP_ERR_HEADER_NOT_FOUND;
+    } else {
+      if (firstFreeEntry != NULL) {
+        *structmsgData = firstFreeEntry->structmsgData;
+        firstFreeEntry->headerLgth = offset;
+        c_memcpy(firstFreeEntry->header, header, offset);
+      } else {
+        newHeaderEntry = &self->msgHeader2MsgPtrs[self->numMsgHeaders];
+        newHeaderEntry->headerLgth = offset;
+        c_memcpy(newHeaderEntry->header, header, offset);
+        newHeaderEntry->structmsgData = newStructmsgData();
+        *structmsgData = newHeaderEntry->structmsgData;
+        self->numMsgHeaders++;
+      }
+    }
+  }
+  return STRUCT_DISP_ERR_OK;
+}
+
+#undef checkErrWithResetOK
+
+// ================================= getFieldType ====================================
+
+static uint8_t getFieldType(structmsgDispatcher_t *self, structmsgData_t *structmsgData, uint8_t fieldNameId, uint8_t *fieldTypeId) {
+  int idx;
+  structmsgField_t *fieldInfo;
+
+  idx = 0;
+  while (idx < structmsgData->numFields) {
+    fieldInfo = &structmsgData->fields[idx];
+    if (fieldInfo->fieldNameId == fieldNameId) {
+      *fieldTypeId = fieldInfo->fieldTypeId;
+      return STRUCT_DISP_ERR_OK;
+    }
+    idx++;
+  }
+  // and now check the table fields
+  idx = 0;
+  while (idx < structmsgData->numTableRowFields) {
+    fieldInfo = &structmsgData->tableFields[idx];
+    if (fieldInfo->fieldNameId == fieldNameId) {
+      *fieldTypeId = fieldInfo->fieldTypeId;
+      return STRUCT_DISP_ERR_OK;
+    }
+    idx++;
+  }
+  return STRUCT_DISP_ERR_FIELD_NOT_FOUND;
+}
+
 // ================================= setMsgValuesFromLines ====================================
 
 static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_t *structmsgData, uint8_t numEntries, uint8_t *handle, uint8_t type) {
@@ -205,6 +343,7 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
   uint8_t*cp;
   uint8_t *fieldNameStr;
   uint8_t fieldNameId;
+  uint8_t fieldTypeId;
   uint8_t *fieldValueStr;
   char *endPtr;
   uint8_t fieldLgth;
@@ -216,9 +355,11 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
   uint8_t *buffer = buf;
   int numericValue;
   uint8_t *stringValue;
+  structmsgDataView_t *dataView;
   int result;
 
   idx = 0;
+  dataView = structmsgData->structmsgDataView;
   while(idx < numEntries) {
     result = self->readLine(self, &buffer, &lgth);
     checkErrOK(result);
@@ -232,43 +373,38 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
       cp++;
     }
     *cp++ = '\0';
+    result = dataView->getFieldNameIdFromStr(dataView, fieldNameStr, &fieldNameId, STRUCT_MSG_NO_INCR);
+    checkErrOK(result);
+    result = getFieldType(self, structmsgData, fieldNameId, &fieldTypeId);
+    checkErrOK(result);
     fieldValueStr = cp;
     while (*cp != '\n') {
       cp++;
     }
     *cp++ = '\0';
-    cp--;
-    uval = c_strtoul(fieldValueStr, &endPtr, 10);
-    if (endPtr == (char *)cp) {
-      numericValue = (int)uval;
-      stringValue = NULL;
-    } else {
+    switch (fieldTypeId) {
+    case DATA_VIEW_FIELD_UINT8_T:
+    case DATA_VIEW_FIELD_INT8_T:
+    case DATA_VIEW_FIELD_UINT16_T:
+    case DATA_VIEW_FIELD_INT16_T:
+    case DATA_VIEW_FIELD_UINT32_T:
+    case DATA_VIEW_FIELD_INT32_T:
+      {
+        uval = c_strtoul(fieldValueStr, &endPtr, 10);
+        if (endPtr == (char *)(cp-1)) {
+          numericValue = (int)uval;
+          stringValue = NULL;
+        } else {
+          numericValue = 0;
+          stringValue = fieldValueStr;
+        }
+      }
+      break;
+    default:
       numericValue = 0;
       stringValue = fieldValueStr;
+      break;
     }
-// FIXME!!!!
-    if (c_strcmp(fieldNameStr, "MacAddr") == 0) {
-      numericValue = 0;
-      stringValue = fieldValueStr;
-    }
-    if (c_strcmp(fieldNameStr, "IPAddr") == 0) {
-      numericValue = 0;
-      stringValue = fieldValueStr;
-    }
-    if (c_strcmp(fieldNameStr, "FirmVers") == 0) {
-      numericValue = 0;
-      stringValue = fieldValueStr;
-    }
-    if (c_strcmp(fieldNameStr, "SerieNum") == 0) {
-      numericValue = 0;
-      stringValue = fieldValueStr;
-    }
-    if (c_strcmp(fieldNameStr, "date") == 0) {
-      numericValue = 0;
-      stringValue = fieldValueStr;
-    }
-    result = structmsgData->structmsgDataView->getFieldNameIdFromStr(structmsgData->structmsgDataView, fieldNameStr, &fieldNameId, STRUCT_MSG_NO_INCR);
-    checkErrOK(result);
     switch (fieldNameId) {
       case STRUCT_MSG_SPEC_FIELD_DST:
         numericValue = self->received.fromPart;
@@ -281,8 +417,12 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
         result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
         break;
       case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
-        // FIXME ! check for shCmdKey/cmdKey here
-        numericValue = self->received.shCmdKey;
+        // check for shCmdKey/cmdKey here
+        if (self->dispFlags & STRUCT_MSG_SHORT_CMD_KEY) {
+          numericValue = self->received.shCmdKey;
+        } else {
+          numericValue = self->received.cmdKey;
+        }
         stringValue = NULL;
         result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
         break;
@@ -302,7 +442,7 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
 
 // ================================= createMsgFromLines ====================================
 
-static uint8_t createMsgFromLines(structmsgDispatcher_t *self, structmsgData_t **structmsgData, uint8_t numEntries, uint8_t **handle, uint8_t numRows) {
+static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type, structmsgData_t **structmsgData, uint8_t **handle) {
   int idx;
   uint8_t*cp;
   uint8_t *fieldNameStr;
@@ -318,10 +458,11 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, structmsgData_t *
   uint8_t *buffer = buf;
   int result;
 
-//ets_printf("createMsgFromLines: \n");
-  *structmsgData = newStructmsgData();
-  if (*structmsgData == NULL) {
-    return STRUCT_MSG_ERR_OUT_OF_MEMORY;
+//ets_printf("§createMsgFromLines:%d!%d! \n§", self->numMsgHeaders, self->maxMsgHeaders);
+  result = getMsgPtrFromMsgParts(self, parts, structmsgData, STRUCT_MSG_INCR);
+  checkErrOK(result);
+  if ((*structmsgData)->flags & STRUCT_MSG_IS_INITTED) {
+    return STRUCT_DISP_ERR_OK;
   }
   result = (*structmsgData)->createMsg(*structmsgData, numEntries, handle);
   checkErrOK(result);
@@ -373,6 +514,7 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
   uint8_t buf[100];
   uint8_t *buffer = buf;
   int result;
+  uint8_t numRows;
   char *endPtr;
   uint8_t *handle;
   unsigned long ulgth;
@@ -381,13 +523,13 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
   int idx;
 
 //ets_printf("§@1@§", parts->shCmdKey);
-  if ((self->flags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->flags & DISP_FLAG_IS_FROM_MCU_MSG)) {
-    if (self->flags & DISP_FLAG_SHORT_CMD_KEY) { 
+  if ((self->dispFlags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->dispFlags & DISP_FLAG_IS_FROM_MCU_MSG)) {
+    if (self->dispFlags & DISP_FLAG_SHORT_CMD_KEY) { 
       switch (parts->shCmdKey) {
       case 'B':
       case 'I':
       case 'M':
-//ets_printf("§@4%c@§", parts->shCmdKey);
+//ets_printf("§@sendAnswer!%c!@§", parts->shCmdKey);
         os_sprintf(fileName, "Desc%c%c.txt", parts->shCmdKey, type);
         result = self->openFile(self, fileName, "r");
         checkErrOK(result);
@@ -399,7 +541,8 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
         ulgth = c_strtoul(buffer+2, &endPtr, 10);
         numEntries = (uint8_t)ulgth;
 //ets_printf("§@NE1!%d!@§", numEntries);
-        result = createMsgFromLines(self, &structmsgData, numEntries, &handle, 0);
+        numRows = 0;
+        result = createMsgFromLines(self, parts, numEntries, numRows, type, &structmsgData, &handle);
         checkErrOK(result);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
         result = self->closeFile(self);
@@ -419,7 +562,7 @@ static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_
         checkErrOK(result);
         result = self->closeFile(self);
         checkErrOK(result);
-//ets_printf("heap3: %d\n", system_get_free_heap_size());
+ets_printf("§heap3: %d§", system_get_free_heap_size());
         result = structmsgData->getMsgData(structmsgData, &data, &msgLgth);
         checkErrOK(result);
         idx = 0;
@@ -459,7 +602,7 @@ static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer,
   if (received->lgth == RECEIVED_CHECK_TO_SIZE) {
     result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
     if (received->toPart == self->WifiPart) {
-      self->flags |= DISP_FLAG_IS_TO_WIFI_MSG;
+      self->dispFlags |= DISP_FLAG_IS_TO_WIFI_MSG;
     }
     received->fieldOffset += sizeof(uint16_t);
   }
@@ -467,15 +610,15 @@ static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer,
     result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
     received->fieldOffset += sizeof(uint16_t);
     if (received->fromPart == self->McuPart) {
-      self->flags |= DISP_FLAG_IS_FROM_MCU_MSG;
+      self->dispFlags |= DISP_FLAG_IS_FROM_MCU_MSG;
     }
   }
   if (received->lgth == RECEIVED_CHECK_TOTAL_LGTH_SIZE) {
     result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
     received->fieldOffset += sizeof(uint16_t);
   }
-  if ((self->flags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->flags & DISP_FLAG_IS_FROM_MCU_MSG)) {
-    if (self->flags & DISP_FLAG_SHORT_CMD_KEY) { 
+  if ((self->dispFlags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->dispFlags & DISP_FLAG_IS_FROM_MCU_MSG)) {
+    if (self->dispFlags & DISP_FLAG_SHORT_CMD_KEY) { 
       if (received->lgth == RECEIVED_CHECK_SHORT_CMD_KEY_SIZE) {
         result = dataView->getUint8(dataView, received->fieldOffset, &received->shCmdKey);
         received->fieldOffset += sizeof(uint8_t);
@@ -483,7 +626,7 @@ static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer,
       if (received->lgth > RECEIVED_CHECK_SHORT_CMD_KEY_SIZE) {
         if (received->lgth == received->totalLgth) {
 //ets_printf("heap1: %d\n", system_get_free_heap_size());
-//ets_printf("§@%c@§", received->shCmdKey);
+//ets_printf("§@received!%c!@§", received->shCmdKey);
           result = self->sendAnswer(self, received, 'A');
           checkErrOK(result);
           result = self->resetMsgInfo(self, &self->received);
@@ -497,7 +640,7 @@ static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer,
         received->fieldOffset += sizeof(uint16_t);
       }
     }
-    if (self->flags & DISP_FLAG_HAVE_CMD_LGTH) { 
+    if (self->dispFlags & DISP_FLAG_HAVE_CMD_LGTH) { 
       if (received->lgth == RECEIVED_CHECK_CMD_LGTH_SIZE) {
       }
     }
@@ -549,8 +692,8 @@ uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatc
 // ================================= initHeadersAndFlags ====================================
 
 static uint8_t initHeadersAndFlags(structmsgDispatcher_t *self) {
-  self->flags = 0;
-  self->flags |= DISP_FLAG_SHORT_CMD_KEY;
+  self->dispFlags = 0;
+  self->dispFlags |= DISP_FLAG_SHORT_CMD_KEY;
   self->McuPart = 0x4D00;
   self->WifiPart = 0x5700;
   self->AppPart = 0x4100;
@@ -596,6 +739,9 @@ static uint8_t createDispatcher(structmsgDispatcher_t *self, uint8_t **handle) {
 // ================================= newStructmsgDispatcher ====================================
 
 structmsgDispatcher_t *newStructmsgDispatcher() {
+  if (structmsgDispatcherSingleton != NULL) {
+    return structmsgDispatcherSingleton;
+  }
   structmsgDispatcher_t *structmsgDispatcher = os_zalloc(sizeof(structmsgDispatcher_t));
   if (structmsgDispatcher == NULL) {
     return NULL;
@@ -607,6 +753,11 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
 
   structmsgDispatcherId++;
   structmsgDispatcher->id = structmsgDispatcherId;
+
+  structmsgDispatcher->numMsgHeaders = 0;
+  structmsgDispatcher->maxMsgHeaders = 0;
+  structmsgDispatcher->msgHeader2MsgPtrs = NULL;
+
 
   structmsgDispatcher->structmsgDataDescription = newStructmsgDataDescription();
 
@@ -625,6 +776,7 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   structmsgDispatcher->readLine = &readLine;
   structmsgDispatcher->writeLine = &writeLine;
 
+  structmsgDispatcherSingleton = structmsgDispatcher;
   return structmsgDispatcher;
 }
 
