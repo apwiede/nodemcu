@@ -71,6 +71,7 @@ enum structmsgDispatcherErrorCode
   STRUCT_DISP_ERR_BAD_RECEIVED_LGTH     = 185,
   STRUCT_DISP_ERR_BAD_FILE_CONTENTS     = 184,
   STRUCT_DISP_ERR_HEADER_NOT_FOUND      = 183,
+  STRUCT_DISP_ERR_DUPLICATE_FIELD       = 182,
 };
 
 
@@ -80,6 +81,38 @@ enum structmsgDispatcherErrorCode
 #define DISP_MAX_HEADER_LGTH (sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint16_t) + (16*sizeof(uint8_t)) + sizeof(uint16_t))
 
 typedef struct structmsgData structmsgData_t;
+
+#define DISP_HAS_DST        (1 << 0)
+#define DISP_HAS_SRC        (1 << 1)
+#define DISP_HAS_TARGET     (1 << 2)
+#define DISP_HAS_TOTAL_LGTH (1 << 3)
+#define DISP_HAS_CMD_LGTH   (1 << 4)
+#define DISP_SHORT_CMD_KEY  (1 << 5)
+#define DISP_IS_ENCRYPTED   (1 << 6)
+#define DISP_HAS_EXTRA_KEY  (1 << 7)
+#define DISP_SHORT_CMD_LGTH (1 << 8)
+
+typedef struct headerParts {
+  uint16_t hdrFromPart;
+  uint16_t hdrToPart;
+  uint16_t hdrTotalLgth;
+  uint16_t hdrCmdKey;
+  uint16_t hdrCmdLgth;
+  uint8_t hdrTargetPart;
+  uint8_t hdrShCmdKey;
+  uint8_t hdrShCmdLgth;
+  uint8_t hdrOffset;
+  uint8_t hdrExtraLgth;
+  uint8_t hdrFlags;
+} headerParts_t;
+
+typedef struct msgHeaderInfos {
+  uint16_t headerFlags;
+  headerParts_t *headerParts;
+  uint8_t numHeaderParts;
+  uint8_t maxHeaderParts;
+  uint8_t headerSequence[6];
+} msgHeaderInfos_t;
 
 typedef struct msgParts {
   uint8_t lgth;
@@ -134,6 +167,7 @@ typedef struct structmsgDispatcher {
   structmsgDataView_t *structmsgDataView;
   structmsgDataDescription_t *structmsgDataDescription;
 
+  msgHeaderInfos_t msgHeaderInfos;
   msgParts_t received;
   msgParts_t toSend;
 

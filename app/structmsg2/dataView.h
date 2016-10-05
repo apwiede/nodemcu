@@ -48,7 +48,7 @@ extern "C" {
 
 enum DataViewFieldType
 {
-  DATA_VIEW_FIELD_NONE_T        = 0,
+  DATA_VIEW_FIELD_UINT0_T       = 0,
   DATA_VIEW_FIELD_UINT8_T       = 1,
   DATA_VIEW_FIELD_INT8_T        = 2,
   DATA_VIEW_FIELD_UINT16_T      = 3,

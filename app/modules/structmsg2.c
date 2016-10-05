@@ -172,7 +172,7 @@ ets_printf("§error result: %d\n§", result);
   case STRUCT_MSG_ERR_OUT_OF_RANGE:
     lua_pushfstring(L, "%s: out of range", errStr);
     break;
-  case STRUCT_MSG_ERR_FIELD_TOTAL_LGTH_MISSIING:
+  case STRUCT_MSG_ERR_FIELD_TOTAL_LGTH_MISSING:
     lua_pushfstring(L, "%s: field @totalLgth missing", errStr);
     break;
   default:

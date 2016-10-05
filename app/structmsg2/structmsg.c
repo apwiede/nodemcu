@@ -553,7 +553,7 @@ static uint8_t initMsg(structmsgData_t *self) {
     os_free(self->structmsgDataView->dataView->data);
   }
   if (self->totalLgth == 0) {
-    return STRUCT_MSG_ERR_FIELD_TOTAL_LGTH_MISSIING;
+    return STRUCT_MSG_ERR_FIELD_TOTAL_LGTH_MISSING;
   }
   result = self->structmsgDataView->dataView->setData(self->structmsgDataView->dataView, self->totalLgth);
   checkErrOK(result);

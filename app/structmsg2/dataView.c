@@ -46,6 +46,7 @@
 #include "dataView.h"
 
 static str2id_t fieldType2Ids[] = {
+  {"uint0_t",   DATA_VIEW_FIELD_UINT0_T},
   {"uint8_t",   DATA_VIEW_FIELD_UINT8_T},
   {"int8_t",    DATA_VIEW_FIELD_INT8_T},
   {"uint16_t",  DATA_VIEW_FIELD_UINT16_T},
