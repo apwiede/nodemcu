@@ -51,20 +51,6 @@
 
 
 #define DISP_HANDLE_PREFIX "stmsgdisp_"
-#define RECEIVED_CHECK_HEADER_SIZE 7
-
-#define DISP_FLAG_SHORT_CMD_KEY    (1 << 0)
-#define DISP_FLAG_HAVE_CMD_LGTH    (1 << 1)
-#define DISP_FLAG_IS_ENCRYPTED     (1 << 2)
-#define DISP_FLAG_IS_TO_WIFI_MSG   (1 << 3)
-#define DISP_FLAG_IS_FROM_MCU_MSG  (1 << 4)
-
-#define RECEIVED_CHECK_TO_SIZE            2
-#define RECEIVED_CHECK_FROM_SIZE          4
-#define RECEIVED_CHECK_TOTAL_LGTH_SIZE    6
-#define RECEIVED_CHECK_SHORT_CMD_KEY_SIZE 7
-#define RECEIVED_CHECK_CMD_KEY_SIZE       8
-#define RECEIVED_CHECK_CMD_LGTH_SIZE      10
 
 typedef struct handle2Dispatcher
 {
@@ -232,7 +218,7 @@ static uint8_t getMsgPtrFromMsgParts(structmsgDispatcher_t *self, msgParts_t *ms
   checkErrWithResetOK(result);
   offset += sizeof(uint16_t);
   if (self->dispFlags & STRUCT_MSG_SHORT_CMD_KEY) {
-    result = dataView->setUint8(dataView, offset, msgParts->shCmdKey);
+    result = dataView->setUint8(dataView, offset, msgParts->u8CmdKey);
     checkErrWithResetOK(result);
     offset += sizeof(uint8_t);
   } else {
@@ -419,7 +405,7 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
       case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
         // check for shCmdKey/cmdKey here
         if (self->dispFlags & STRUCT_MSG_SHORT_CMD_KEY) {
-          numericValue = self->received.shCmdKey;
+          numericValue = self->received.u8CmdKey;
         } else {
           numericValue = self->received.cmdKey;
         }
@@ -504,412 +490,6 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts
   return STRUCT_DISP_ERR_OK;
 }
 
-// ================================= sendAnswer ====================================
-
-static uint8_t sendAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
-  uint8_t fileName[30];
-  int result;
-  uint8_t numEntries;
-  char *endPtr;
-  uint8_t lgth;
-  int msgLgth;
-  uint8_t *data;
-  uint8_t buf[100];
-  uint8_t *buffer = buf;
-  uint8_t numRows;
-  uint8_t *handle;
-  unsigned long ulgth;
-  structmsgData_t *structmsgData;
-  int idx;
-
-//ets_printf("§@1@§", parts->shCmdKey);
-  if ((self->dispFlags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->dispFlags & DISP_FLAG_IS_FROM_MCU_MSG)) {
-    if (self->dispFlags & DISP_FLAG_SHORT_CMD_KEY) { 
-      switch (parts->shCmdKey) {
-      case 'B':
-      case 'I':
-      case 'M':
-//ets_printf("§@sendAnswer!%c!@§", parts->shCmdKey);
-        os_sprintf(fileName, "Desc%c%c.txt", parts->shCmdKey, type);
-        result = self->openFile(self, fileName, "r");
-        checkErrOK(result);
-        result = self->readLine(self, &buffer, &lgth);
-        checkErrOK(result);
-        if ((lgth < 4) || (buffer[0] != '#')) {
-          return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
-        }
-        ulgth = c_strtoul(buffer+2, &endPtr, 10);
-        numEntries = (uint8_t)ulgth;
-//ets_printf("§@NE1!%d!@§", numEntries);
-        numRows = 0;
-        result = createMsgFromLines(self, parts, numEntries, numRows, type, &structmsgData, &handle);
-        checkErrOK(result);
-//ets_printf("heap2: %d\n", system_get_free_heap_size());
-        result = self->closeFile(self);
-        checkErrOK(result);
-        os_sprintf(fileName, "Val%c%c.txt", parts->shCmdKey, type);
-        result = self->openFile(self, fileName, "r");
-        checkErrOK(result);
-        result = self->readLine(self, &buffer, &lgth);
-        checkErrOK(result);
-        if ((lgth < 4) || (buffer[0] != '#')) {
-          return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
-        }
-        ulgth = c_strtoul(buffer+2, &endPtr, 10);
-        numEntries = (uint8_t)ulgth;
-//ets_printf("§@NE2!%d!@§", numEntries);
-        result = setMsgValuesFromLines(self, structmsgData, numEntries, handle, parts->shCmdKey);
-        checkErrOK(result);
-        result = self->closeFile(self);
-        checkErrOK(result);
-//ets_printf("§heap3: %d§", system_get_free_heap_size());
-        result = structmsgData->getMsgData(structmsgData, &data, &msgLgth);
-        checkErrOK(result);
-        idx = 0;
-        while (idx < msgLgth) {
-          platform_uart_send(0, data[idx]);
-          idx++;
-        }
-        break;
-      }
-    } else {
-    }
-  } else {
-  }
-  self->resetMsgInfo(self, parts);
-  return STRUCT_DISP_ERR_OK;
-}
-
-// ================================= readHeadersAndSetFlags ====================================
-
-static uint8_t getIntFromLine(uint8_t *myStr, long *ulgth, uint8_t **ep) {
-  uint8_t *cp;
-  char *endPtr;
-
-  cp = myStr;
-  while (*cp != ',') {
-    cp++;
-  }
-  *cp++ = '\0';
-  *ulgth = c_strtoul(myStr, &endPtr, 10);
-  if (cp-1 != (uint8_t *)endPtr) {
-     return STRUCT_MSG_ERR_BAD_VALUE;
-  }
-  *ep = cp;
-  return STRUCT_DISP_ERR_OK;
-}
-
-#undef checkErrOK
-#define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) { self->closeFile(self); return result; }
-// ================================= readHeadersAndSetFlags ====================================
-
-static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
-  uint8_t fileName[30];
-  int result;
-  int result2;
-  uint8_t numEntries;
-  uint8_t fieldNameId;
-  uint8_t fieldTypeId;
-  char *endPtr;
-  uint8_t lgth;
-  uint8_t buf[100];
-  uint8_t *buffer = buf;
-  long ulgth;
-  uint8_t *myStr;
-  int idx;
-  int seqIdx = 0;
-  int seqIdx2 = 0;
-  uint8_t*cp;
-  uint8_t found;
-  uint8_t isEnd;
-  uint8_t fieldOffset;
-  headerParts_t *hdr;
-  msgHeaderInfos_t *hdrInfos;
-  structmsgDataView_t *dataView;
-  dataView_t *myDataView;
-
-ets_printf("§initHeadersAndFlags!§");
-  dataView = self->structmsgDataView;
-  hdrInfos = &self->msgHeaderInfos;
-  os_sprintf(fileName, "MsgHeads.txt");
-  result = self->openFile(self, fileName, "r");
-  checkErrOK(result);
-  result = self->readLine(self, &buffer, &lgth);
-  checkErrOK(result);
-  if ((lgth < 4) || (buffer[0] != '#')) {
-     return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
-  }
-  ulgth = c_strtoul(buffer+2, &endPtr, 10);
-  numEntries = (uint8_t)ulgth;
-  hdrInfos->headerParts = (headerParts_t *)os_zalloc(numEntries * (sizeof(headerParts_t)));
-  checkAllocOK(self->msgHeaderInfos.headerParts);
-  hdrInfos->numHeaderParts = 0;
-  hdrInfos->maxHeaderParts = numEntries;
-  hdrInfos->headerFlags = 0;
-  // parse header start description
-  result = self->readLine(self, &buffer, &lgth);
-  checkErrOK(result);
-  buffer[lgth] = 0;
-  myStr = buffer;
-  cp = myStr;
-  while (*cp != ',') {
-    cp++;
-  }
-  *cp++ = '\0';
-  if (myStr[0] != '@') {
-    return STRUCT_DISP_ERR_FIELD_NOT_FOUND;
-  }
-ets_printf("§myStr1!%s!§", myStr);
-  result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, STRUCT_MSG_NO_INCR);
-  checkErrOK(result);
-  if (fieldNameId == STRUCT_MSG_SPEC_FIELD_SRC) {
-    hdrInfos->headerSequence[seqIdx++] = DISP_HAS_SRC;
-    hdrInfos->headerFlags |= DISP_HAS_SRC;
-  }
-  if (fieldNameId == STRUCT_MSG_SPEC_FIELD_DST) {
-    hdrInfos->headerSequence[seqIdx++] = DISP_HAS_DST;
-    hdrInfos->headerFlags |= DISP_HAS_DST;
-  }
-  if (fieldNameId == STRUCT_MSG_SPEC_FIELD_TARGET_CMD) {
-    hdrInfos->headerSequence[seqIdx++] = DISP_HAS_TARGET;
-    hdrInfos->headerFlags |= DISP_HAS_TARGET;
-  }
-  myStr = cp;
-  while (*cp != ',') {
-    cp++;
-  }
-  *cp++ = '\0';
-  if (myStr[0] != '@') {
-    return STRUCT_DISP_ERR_FIELD_NOT_FOUND;
-  }
-ets_printf("§myStr2!%s!§", myStr);
-  result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, STRUCT_MSG_NO_INCR);
-  checkErrOK(result);
-  if (fieldNameId == STRUCT_MSG_SPEC_FIELD_SRC) {
-    if (hdrInfos->headerFlags & DISP_HAS_SRC) {
-      return STRUCT_DISP_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerSequence[seqIdx++] = DISP_HAS_SRC;
-  }
-  if (fieldNameId == STRUCT_MSG_SPEC_FIELD_DST) {
-    if (hdrInfos->headerFlags & DISP_HAS_DST) {
-      return STRUCT_DISP_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerSequence[seqIdx++] = DISP_HAS_DST;
-  }
-  if (fieldNameId == STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH) {
-    hdrInfos->headerSequence[seqIdx++] = DISP_HAS_DST;
-  }
-  myStr = cp;
-  while ((*cp != '\n') && (*cp != '\0')) {
-    cp++;
-  }
-  *cp++ = '\0';
-  if (myStr[0] != '\0') {
-    if (myStr[0] != '@') {
-      return STRUCT_DISP_ERR_FIELD_NOT_FOUND;
-    }
-ets_printf("§myStr3!%s!§", myStr);
-    result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, STRUCT_MSG_NO_INCR);
-    checkErrOK(result);
-    if (fieldNameId == STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH) {
-      if (hdrInfos->headerFlags & DISP_HAS_TOTAL_LGTH) {
-        return STRUCT_DISP_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerSequence[seqIdx++] = DISP_HAS_TOTAL_LGTH;
-    }
-  }
-  
-  myDataView = newDataView();
-  checkAllocOK(myDataView);
-  fieldOffset = 0;
-  while(idx < numEntries) {
-ets_printf("§idx: %d§", idx);
-    seqIdx2 = 0;
-    result = self->readLine(self, &buffer, &lgth);
-    checkErrOK(result);
-//ets_printf("§read!%d!%d%s!!§", idx,lgth, buffer);
-    if (lgth == 0) {
-      break;
-    }
-    hdr = &hdrInfos->headerParts[idx];
-    myDataView->data = buffer;
-    myDataView->lgth = lgth;
-    buffer[lgth] = 0;
-    myStr = buffer;
-    result = getIntFromLine(myStr, &ulgth, &cp);
-    checkErrOK(result);
-    found = 0;
-    if (hdrInfos->headerSequence[seqIdx2] & DISP_HAS_SRC) {
-      hdr->hdrFromPart = (uint16_t)ulgth;
-      found = 1;
-    }
-    if (hdrInfos->headerSequence[seqIdx2] & DISP_HAS_DST) {
-      hdr->hdrToPart = (uint16_t)ulgth;
-      found = 1;
-    }
-    if (hdrInfos->headerSequence[seqIdx2] & DISP_HAS_TARGET) {
-      hdr->hdrTargetPart = (uint8_t)ulgth;
-      found = 1;
-    }
-    if (!found) {
-      checkErrOK(STRUCT_MSG_ERR_FIELD_NOT_FOUND);
-    }
-    seqIdx2++;
-    myStr = cp;
-    result = getIntFromLine(myStr, &ulgth, &cp);
-    checkErrOK(result);
-    found = 0;
-    if (hdrInfos->headerSequence[seqIdx2] & DISP_HAS_SRC) {
-      hdr->hdrFromPart = (uint16_t)ulgth;
-      found = 1;
-    }
-    if (hdrInfos->headerSequence[seqIdx2] & DISP_HAS_DST) {
-      hdr->hdrToPart = (uint16_t)ulgth;
-      found = 1;
-    }
-    if (hdrInfos->headerSequence[seqIdx2] & DISP_HAS_TOTAL_LGTH) {
-      hdr->hdrTotalLgth = (uint16_t)ulgth;
-      found = 1;
-    }
-    if (!found) {
-      result = STRUCT_MSG_ERR_FIELD_NOT_FOUND;
-      checkErrOK(result);
-    }
-    seqIdx2++;
-    if (seqIdx > seqIdx2) {
-      found = 0;
-      myStr = cp;
-      result = getIntFromLine(myStr, &ulgth, &cp);
-      checkErrOK(result);
-      if (hdrInfos->headerSequence[seqIdx2] & DISP_HAS_TOTAL_LGTH) {
-        hdr->hdrTotalLgth = (uint16_t)ulgth;
-        found = 1;
-      }
-      if (!found) {
-        result = STRUCT_MSG_ERR_FIELD_NOT_FOUND;
-        checkErrOK(result);
-      }
-    }
-    // extra field lgth 0/<number>
-    myStr = cp;
-    result = getIntFromLine(myStr, &ulgth, &cp);
-    checkErrOK(result);
-    hdr->hdrExtraLgth = (uint8_t)ulgth;
-    // encryption E/N
-    myStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    if (myStr[0] == 'E') {
-ets_printf("§0x%04x!0x%04x!0x%04x!enc!§", hdr->hdrToPart, hdr->hdrFromPart, hdr->hdrTotalLgth);
-      hdr->hdrFlags |= DISP_IS_ENCRYPTED;
-    } else {
-ets_printf("§0x%04x!0x%04x!0x%04x!noenc!§", hdr->hdrToPart, hdr->hdrFromPart, hdr->hdrTotalLgth);
-    }
-    // type of cmdKey
-    myStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, myStr, &fieldTypeId);
-    checkErrOK(result);
-    // cmdKey
-    myStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    switch (fieldTypeId) {
-    case DATA_VIEW_FIELD_UINT8_T:
-      hdr->hdrFlags |= DISP_SHORT_CMD_KEY;
-      hdr->hdrShCmdKey = myStr[0];
-ets_printf("§shCmdKey!0x%02x!§", hdr->hdrShCmdKey);
-      break;
-    case DATA_VIEW_FIELD_UINT16_T:
-      hdr->hdrCmdKey = (myStr[0]<<8)|myStr[1];
-ets_printf("§cmdKey!0x%04x!§", hdr->hdrCmdKey);
-      break;
-    default:
-      checkErrOK(STRUCT_DISP_ERR_BAD_FIELD_TYPE);
-    }
-    // type of cmdLgth
-    myStr = cp;
-    while ((*cp != ',') && (*cp != '\n') && (*cp != '\r') && (*cp != '\0')) {
-      cp++;
-    }
-    isEnd = 0;
-    if ((*cp == '\n') || (*cp != '\r')) {
-      isEnd = 1;
-    }
-    *cp++ = '\0';
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, myStr, &fieldTypeId);
-    checkErrOK(result);
-    // cmdLgth
-    if (!isEnd) {
-      myStr = cp;
-      while ((*cp != ',') && (*cp != '\n') && (*cp != '\n') && (*cp != '\0')) {
-        cp++;
-      }
-      *cp++ = '\0';
-      switch (fieldTypeId) {
-      case DATA_VIEW_FIELD_UINT0_T:
-        break;
-      case DATA_VIEW_FIELD_UINT8_T:
-        hdr->hdrFlags |= DISP_HAS_CMD_LGTH;
-        hdr->hdrFlags |= DISP_SHORT_CMD_LGTH;
-        hdr->hdrShCmdLgth = myStr[0];
-        break;
-      case DATA_VIEW_FIELD_UINT16_T:
-        hdr->hdrFlags |= DISP_HAS_CMD_LGTH;
-        hdr->hdrCmdLgth = (myStr[0]<<8)|myStr[1];
-        break;
-      default:
-        checkErrOK(STRUCT_DISP_ERR_BAD_FIELD_TYPE);
-      }
-    }
-    idx++;
-  }
-  os_free(myDataView);
-  result2 = self->closeFile(self);
-  checkErrOK(result2);
-  return result;
-}
-#undef checkErrOK
-#define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) return result
-
-// ================================= initHeadersAndFlags ====================================
-
-static uint8_t initHeadersAndFlags(structmsgDispatcher_t *self) {
-  uint8_t fileName[30];
-  int result;
-  uint8_t numEntries;
-  uint8_t fieldNameId;
-  char *endPtr;
-  uint8_t lgth;
-  uint8_t buf[100];
-  uint8_t *buffer = buf;
-  long ulgth;
-  uint8_t *myStr;
-  int idx;
-  int seqIdx = 0;
-  int seqIdx2 = 0;
-  uint8_t*cp;
-  headerParts_t *hdr;
-  structmsgDataView_t *dataView;
-
-  self->dispFlags = 0;
-
-  self->dispFlags |= DISP_FLAG_SHORT_CMD_KEY;
-  self->McuPart = 0x4D00;
-  self->WifiPart = 0x5700;
-  self->AppPart = 0x4100;
-  self->CloudPart = 0x4300;
-  return STRUCT_DISP_ERR_OK;
-}
-
 // ================================= resetMsgInfo ====================================
 
 static uint8_t resetMsgInfo(structmsgDispatcher_t *self, msgParts_t *parts) {
@@ -920,7 +500,8 @@ static uint8_t resetMsgInfo(structmsgDispatcher_t *self, msgParts_t *parts) {
   parts->cmdKey = 0;
   parts->fromPart = 0;
   parts->toPart = 0;
-  parts->shCmdKey = 0;
+  parts->u8CmdKey = 0;
+  parts->u8CmdLgth = 0;
   self->structmsgDataView->dataView->data = parts->buf;
   self->structmsgDataView->dataView->lgth = 0;
   return STRUCT_DISP_ERR_OK;
@@ -930,73 +511,21 @@ static uint8_t resetMsgInfo(structmsgDispatcher_t *self, msgParts_t *parts) {
 
 static uint8_t uartReceiveCb(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
   int result;
-  msgParts_t *received = &self->received;
-  dataView_t *dataView;
-  uint8_t u8;
+  int idx;
+  msgParts_t *received;
+  const uint8_t buf[1] = { 0};
+  const uint8_t *myBuffer;
 
+  received = &self->received;
 //ets_printf("§%c§", buffer[0]&0xFF);
-//ets_printf("§receivedLgth: %d fieldOffset: %d\n§", received->lgth, received->fieldOffset);
+  myBuffer = buffer;
   if (lgth == 0) {
     // simulate a '0' char!!
-    received->buf[received->lgth++] = 0;
-  } else {
-    received->buf[received->lgth++] = buffer[0];
+    lgth = 1;
+    myBuffer = buf;
   }
-  if (self->msgHeaderInfos.headerParts == NULL) {
-    result=readHeadersAndSetFlags(self);
-    checkErrOK(result);
-  }
-  dataView = self->structmsgDataView->dataView;
-  dataView->data = received->buf;
-  dataView->lgth++;
-  if (received->lgth == RECEIVED_CHECK_TO_SIZE) {
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
-    if (received->toPart == self->WifiPart) {
-      self->dispFlags |= DISP_FLAG_IS_TO_WIFI_MSG;
-    }
-    received->fieldOffset += sizeof(uint16_t);
-  }
-  if (received->lgth == RECEIVED_CHECK_FROM_SIZE) {
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
-    received->fieldOffset += sizeof(uint16_t);
-    if (received->fromPart == self->McuPart) {
-      self->dispFlags |= DISP_FLAG_IS_FROM_MCU_MSG;
-    }
-  }
-  if (received->lgth == RECEIVED_CHECK_TOTAL_LGTH_SIZE) {
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
-    received->fieldOffset += sizeof(uint16_t);
-  }
-  if ((self->dispFlags & DISP_FLAG_IS_TO_WIFI_MSG) && (self->dispFlags & DISP_FLAG_IS_FROM_MCU_MSG)) {
-    if (self->dispFlags & DISP_FLAG_SHORT_CMD_KEY) { 
-      if (received->lgth == RECEIVED_CHECK_SHORT_CMD_KEY_SIZE) {
-        result = dataView->getUint8(dataView, received->fieldOffset, &received->shCmdKey);
-        received->fieldOffset += sizeof(uint8_t);
-      }
-      if (received->lgth > RECEIVED_CHECK_SHORT_CMD_KEY_SIZE) {
-        if (received->lgth == received->totalLgth) {
-//ets_printf("heap1: %d\n", system_get_free_heap_size());
-//ets_printf("§@received!%c!@§", received->shCmdKey);
-
-          result = self->sendAnswer(self, received, 'A');
-          checkErrOK(result);
-          result = self->resetMsgInfo(self, &self->received);
-          checkErrOK(result);
-        }
-      }
-    } else {
-      if (received->lgth == RECEIVED_CHECK_CMD_KEY_SIZE) {
-        result = dataView->getUint16(dataView, received->fieldOffset, &received->cmdKey);
-        checkErrOK(result);
-        received->fieldOffset += sizeof(uint16_t);
-      }
-    }
-    if (self->dispFlags & DISP_FLAG_HAVE_CMD_LGTH) { 
-      if (received->lgth == RECEIVED_CHECK_CMD_LGTH_SIZE) {
-      }
-    }
-  } else {
-  }
+  result =self->handleReceivedPart(self, myBuffer, lgth);
+ checkErrOK(result);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -1051,7 +580,7 @@ static uint8_t createDispatcher(structmsgDispatcher_t *self, uint8_t **handle) {
     os_free(self);
     return result;
   }
-  initHeadersAndFlags(self);
+  structmsgIdentifyInit(self);
   resetMsgInfo(self, &self->received);
   resetMsgInfo(self, &self->toSend);
   *handle = self->handle;
@@ -1095,7 +624,8 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   structmsgDispatcher->MMsg = &MMsg;
   structmsgDispatcher->defaultMsg = &defaultMsg;
   structmsgDispatcher->resetMsgInfo = &resetMsgInfo;
-  structmsgDispatcher->sendAnswer = &sendAnswer;
+  structmsgDispatcher->createMsgFromLines = &createMsgFromLines;
+  structmsgDispatcher->setMsgValuesFromLines = &setMsgValuesFromLines;
 
   structmsgDispatcher->openFile = &openFile;
   structmsgDispatcher->closeFile = &closeFile;

@@ -72,6 +72,8 @@ enum structmsgDispatcherErrorCode
   STRUCT_DISP_ERR_BAD_FILE_CONTENTS     = 184,
   STRUCT_DISP_ERR_HEADER_NOT_FOUND      = 183,
   STRUCT_DISP_ERR_DUPLICATE_FIELD       = 182,
+  STRUCT_DISP_ERR_BAD_FIELD_NAME        = 181,
+  STRUCT_DISP_ERR_BAD_HANDLE_TYPE       = 180,
 };
 
 
@@ -82,15 +84,33 @@ enum structmsgDispatcherErrorCode
 
 typedef struct structmsgData structmsgData_t;
 
-#define DISP_HAS_DST        (1 << 0)
-#define DISP_HAS_SRC        (1 << 1)
-#define DISP_HAS_TARGET     (1 << 2)
-#define DISP_HAS_TOTAL_LGTH (1 << 3)
-#define DISP_HAS_CMD_LGTH   (1 << 4)
-#define DISP_SHORT_CMD_KEY  (1 << 5)
-#define DISP_IS_ENCRYPTED   (1 << 6)
-#define DISP_HAS_EXTRA_KEY  (1 << 7)
-#define DISP_SHORT_CMD_LGTH (1 << 8)
+// handle types
+// A/G/R/S/W/U/N
+#define STRUCT_DISP_SEND_TO_APP       (1 << 0)
+#define STRUCT_DISP_RECEIVE_FROM_APP  (1 << 1)
+#define STRUCT_DISP_SEND_TO_UART      (1 << 2)
+#define STRUCT_DISP_RECEIVE_FROM_UART (1 << 3)
+#define STRUCT_DISP_TRANSFER_TO_UART  (1 << 4)
+#define STRUCT_DISP_TRANSFER_TO_CONN  (1 << 5)
+#define STRUCT_DISP_NOT_RELEVANT      (1 << 6)
+
+// encryption types
+#define STRUCT_DISP_IS_ENCRYPTED      (1 << 0)
+#define STRUCT_DISP_IS_NOT_ENCRYPTED  (1 << 1)
+
+
+#define STRUCT_DISP_U16_DST           (1 << 0)
+#define STRUCT_DISP_U16_SRC           (1 << 1)
+#define STRUCT_DISP_U8_TARGET         (1 << 2)
+#define STRUCT_DISP_U16_TOTAL_LGTH    (1 << 3)
+#define STRUCT_DISP_U8_EXTRA_KEY_LGTH (1 << 4)
+#define STRUCT_DISP_U8_ENCRYPTION     (1 << 5)
+#define STRUCT_DISP_U8_HANDLE_TYPE    (1 << 6)
+#define STRUCT_DISP_U8_CMD_KEY        (1 << 7)
+#define STRUCT_DISP_U16_CMD_KEY       (1 << 8)
+#define STRUCT_DISP_U0_CMD_LGTH       (1 << 9)
+#define STRUCT_DISP_U8_CMD_LGTH       (1 << 10)
+#define STRUCT_DISP_U16_CMD_LGTH      (1 << 11)
 
 typedef struct headerParts {
   uint16_t hdrFromPart;
@@ -99,31 +119,39 @@ typedef struct headerParts {
   uint16_t hdrCmdKey;
   uint16_t hdrCmdLgth;
   uint8_t hdrTargetPart;
-  uint8_t hdrShCmdKey;
-  uint8_t hdrShCmdLgth;
+  uint8_t hdrU8CmdKey;
+  uint8_t hdrU8CmdLgth;
   uint8_t hdrOffset;
   uint8_t hdrExtraLgth;
-  uint8_t hdrFlags;
+  uint8_t hdrEncryption;
+  uint8_t hdrHandleType;
+  uint32_t hdrFlags;
 } headerParts_t;
 
 typedef struct msgHeaderInfos {
-  uint16_t headerFlags;
+  uint32_t headerFlags;
   headerParts_t *headerParts;
+  uint16_t headerSequence[9];
+  uint8_t headerStartLgth;
   uint8_t numHeaderParts;
   uint8_t maxHeaderParts;
-  uint8_t headerSequence[6];
+  uint8_t currPartIdx;
+  uint8_t seqIdx;
 } msgHeaderInfos_t;
 
 typedef struct msgParts {
-  uint8_t lgth;
-  uint8_t buf[DISP_BUF_LGTH];
-  uint8_t fieldOffset;
   uint16_t totalLgth;
   uint16_t cmdLgth;
   uint16_t cmdKey;
   uint16_t fromPart;
   uint16_t toPart;
-  uint8_t shCmdKey;
+  uint16_t flags;
+  uint8_t targetPart;
+  uint8_t u8CmdLgth;
+  uint8_t u8CmdKey;
+  uint8_t lgth;
+  uint8_t fieldOffset;
+  uint8_t buf[DISP_BUF_LGTH];
 } msgParts_t;
 
 typedef struct msgHeader2MsgPtr {
@@ -137,6 +165,8 @@ typedef struct structmsgDispatcher structmsgDispatcher_t;
 typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
+typedef uint8_t (* createMsgFromLines_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type, structmsgData_t **structmsgData, uint8_t **handle);
+typedef uint8_t (* setMsgValuesFromLines_t)(structmsgDispatcher_t *self, structmsgData_t *structmsgData, uint8_t numEntries, uint8_t *handle, uint8_t type);
 
 typedef uint8_t (* openFileDesc_t)(structmsgDispatcher_t *self, const uint8_t *fileName, const uint8_t *fileMode);
 typedef uint8_t (* closeFileDesc_t)(structmsgDispatcher_t *self);
@@ -150,6 +180,9 @@ typedef uint8_t (* MMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* defaultMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* sendAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 typedef uint8_t (* resetMsgInfo_t)(structmsgDispatcher_t *self, msgParts_t *parts);
+
+typedef uint8_t (* readHeadersAndSetFlags_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* handleReceivedPart_t)(structmsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 
 typedef struct structmsgDispatcher {
@@ -188,11 +221,16 @@ typedef struct structmsgDispatcher {
   writeLineDesc_t writeLine;
   readLineDesc_t readLine;
 
+  readHeadersAndSetFlags_t readHeadersAndSetFlags;
+  handleReceivedPart_t handleReceivedPart;
   uartReceiveCb_t uartReceiveCb;
   createDispatcher_t createDispatcher;
+  createMsgFromLines_t createMsgFromLines;
+  setMsgValuesFromLines_t setMsgValuesFromLines;
 
 } structmsgDispatcher_t;
 
 structmsgDispatcher_t *newStructmsgDispatcher();
 uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatcher_t **structmsgDispatcher);
 void freeStructmsgDispatcher(structmsgDispatcher_t *structmsgDispatcher);
+uint8_t structmsgIdentifyInit(structmsgDispatcher_t *self);
