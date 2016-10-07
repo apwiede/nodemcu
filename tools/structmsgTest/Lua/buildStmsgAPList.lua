@@ -6,15 +6,23 @@ end
 
 function createAPListMsg(useBig,numRows)
   local msgInfos={}
-  msgInfos["1"]="@randomNum,uint32_t,4,0"
-  msgInfos["2"]="@tablerows,uint8_t,@numRows,0"
-  msgInfos["3"]="@tablerowfields,uint8_t,5,2"
-  msgInfos["4"]="@tablerowfields,uint8_t,3,1"
-  msgInfos["5"]="ssid,uint8_t*,32,0"
-  msgInfos["6"]="bssid,uint8_t*, 17,2"
-  msgInfos["7"]="rssi,int8_t,1,0"
-  msgInfos["8"]="authmode,uint8_t,1,2"
-  msgInfos["9"]="channel,uint8_t,1,0"
+  msgInfos["1"]="@src,uint16_t,2,0"
+  msgInfos["2"]="@dst,uint16_t,2,0"
+  msgInfos["3"]="@totalLgth,uint16_t,2,0"
+  msgInfos["4"]="@cmdKey,uint16_t,2,0"
+  msgInfos["5"]="@cmdLgth,uint16_t,2,0"
+  msgInfos["6"]="@numFields,uint8_t,1,0"
+  msgInfos["7"]="@randomNum,uint32_t,4,0"
+  msgInfos["8"]="@tablerows,uint8_t,@numRows,0"
+  msgInfos["9"]="@tablerowfields,uint8_t,5,2"
+  msgInfos["10"]="@tablerowfields,uint8_t,3,1"
+  msgInfos["11"]="ssid,uint8_t*,32,0"
+  msgInfos["12"]="bssid,uint8_t*, 17,2"
+  msgInfos["13"]="rssi,int8_t,1,0"
+  msgInfos["14"]="authmode,uint8_t,1,2"
+  msgInfos["15"]="channel,uint8_t,1,0"
+  msgInfos["16"]="@filler,uint8_t*,0,0"
+  msgInfos["17"]="@crc,uint16_t,2,0"
 
   numEntries=0
   for x,v in pairs(msgInfos) do

@@ -34,7 +34,7 @@ console.log('websocket called: listType: '+listType);
       // onopen
       ws.onopen = function() {
         console.log('ws connected');
-        ws.send('getapdeflist\r\n');
+        ws.send('get\r\n');
       };
 
       // onerror
@@ -44,8 +44,8 @@ console.log('websocket called: listType: '+listType);
 
       // onclose
       ws.onclose = function() {
-        if (numMsg < 1) {
-          console.log('ws closed');
+        console.log('ws closed');
+        if (numMsg < 0) {
           if (numMsg == 0) {
             decryptDefinition(stmsg);
             console.log('decryptDefinition done!!!');
@@ -55,7 +55,7 @@ console.log('websocket called: listType: '+listType);
             console.log('decryptMsg done!!!');
           }
         
-//          setTimeout(callnext,4000) 
+          setTimeout(callnext,4000) 
           numMsg++;
         }
       };
@@ -63,12 +63,12 @@ console.log('websocket called: listType: '+listType);
       // onmessage
       ws.onmessage = function(msgevent) {
         console.log('ws message');
-        console.log('in :', msgevent.data);
+        console.log('in :', msgevent.data," size: ",msgevent.data.byteLength);
         if (numReceived == 0) {
           numReceived++;
           return;
         }
-        console.log('size: ',msgevent.data.length);
+        console.log('size: ',msgevent.data.byteLength);
         if (numReceived == 1) {
           d1 = new DataView(msgevent.data);
           src=d1.getUint16(0);
@@ -86,8 +86,11 @@ console.log('websocket called: listType: '+listType);
           console.log('u8 length: ',stmsg.byteLength);
 	  var hex = '';
           console.log("length: ",stmsg.byteLength);
-	  for(var i=0;i<msgevent.data.byteLength-1;i++) {
-		  hex += ' 0x'+d2.getUint8(i).toString(16);
+	  for(var i=0;i<msgevent.data.byteLength;i++) {
+            if ((i % 10) == 0) {
+              hex += '\n i: ' + i + '  ';
+            }
+            hex += ' 0x'+d2.getUint8(i).toString(16);
 	  }
           console.log('stmsg: ',hex);
           numReceived++;

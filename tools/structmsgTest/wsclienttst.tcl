@@ -42,8 +42,9 @@ source structmsgCmd.tcl
 ::websocket::loglevel debug
 
 set PORT 8080
-set path "/echo"
-set host "192.168.178.42"
+set path "/getaplist"
+#set host "192.168.178.42"
+set host "192.168.4.1"
 
 proc clientHandler { sock type msg } {
 puts stderr "clientHandler: $type $msg!"
@@ -67,6 +68,7 @@ puts stderr "clientHandler: $type $msg!"
 }
 
 proc encryptMsg {pwd} {
+return "get\r"
   set offset 0
   structmsg_create 5 handle
   structmsg_set_fieldValue $handle "@src" 123

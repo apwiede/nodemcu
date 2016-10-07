@@ -72,34 +72,33 @@ numMsg=0
 function srv_listen(sck)
 print("srv_listen")
   srv_sck=sck
-  sck:on("receive",function(sck,payload)
-    print("receive: ".."!"..tostring(payload).."!")
+--  sck:seturl("/getapdeflist")
+--  sck:seturl("/getaplist")
+  sck:on("receive",function(sck,payload,url)
+    print("receive: ".."!"..tostring(payload).." url: "..url.."!")
     srv_sck=sck
-    if (payload == "getaplist\r\n") then
+    if (url == "/getaplist") then
 print("++getaplist")
-      wifi.sta.getap(buildAPList)
-      return
+      if (string.sub(payload,1,3) == "get") then
+        wifi.sta.getap(buildAPList)
+        return
+      end
     end
-    if (tostring(payload) == "getapdeflist\r\n") then
---      srv_sck:send("Hello World",1)
---      return
-      if (numMsg == 0) then
+    if (url == "/getapdeflist") then
+      if (string.sub(payload,1,3) == "get") then
 print("++getapdeflist")
         numRows=2
         encryptedDef=buildStmsgAPDefList(t,useBig,numRows)
-        numMsg = numMsg+1
 print("encryptedDef: "..tostring(string.len(encryptedDef)))
-      else
+        srv_sck:send(encryptedDef,2)
+      end
+      if (payload == "getap\r\n") then
 print("++getaplist")
         wifi.sta.getap(buildAPList)
       end
---      encryptedDef=crypto.encrypt("AES-CBC", cryptkey, "Hello world 1234",cryptkey)
---      srv_sck:send("HELLO: "..encryptedDef,1)
-      offset=1
-      srv_sck:send("",2,part2)
       return
     end
-    srv_sck:send("bad request",srv_close)
+    srv_sck:send("bad request for url: "..url,1,srv_close)
   end)
 --      numRows=2
 --      encryptedDef=buildStmsgAPDefList(t,useBig,numRows)
@@ -110,6 +109,8 @@ end
 
 function srv_connected(sck)
 print("srv_connected")
+  sck:seturl("/getapdeflist")
+  sck:seturl("/getaplist")
   sck:listen(port,srv_listen)
 end
 
@@ -147,7 +148,7 @@ dbgPrint('Provisioning: wifi mode: '..tostring(wifi.getmode()))
 dbgPrint("Provisioning: AP IP: "..tostring(wifi.ap.getip()))
 dbgPrint("Provisioning: STA IP: "..tostring(wifi.sta.getip()))
 --       wifi.sta.getap(listap)
-       srv=websocket.createServer(30,"/getapdeflist",srv_connected)
+       srv=websocket.createServer(30,srv_connected)
      else
 dbgPrint("IP: "..tostring(ip))
      end
