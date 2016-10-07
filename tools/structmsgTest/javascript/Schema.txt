@@ -1,0 +1,41 @@
+Der generelle Ablauf ist:
+  - es wird eine verschlüsselte Nachricht im Structmsg oder StructmsgDefinitions Format gesendet
+  - diese wird auf der Empfängerseite entschlüsselt
+  - danach wird der gepackte Teile mit encode entpackt, d.h. in die einzelnen Value Felder verteilt
+  - auf diese kann dann mit den entsprechenden Funktionen zugegriffen werden
+
+Die Formate sind in OneNote -> K-fee App -> Iot und Electronics -> Struct Message Format beschrieben.
+
+Je nachdem ob getapdeflist oder getaplist aufgerufen wird eine verschlüsselte Nachricht im 
+structmsgDefinitions oder structmsg Format verschickt.
+
+Der generelle Aufbau eines Telegramms ist im Spezifikations Papier von Hr. Michel beschrieben.
+Ein Telegramm besteht aus einem Zielkommando und der Länge diese beiden Werte sind unverschlüssselt
+daran schließt sich der verschlüsselte Teil an, der aus einem Kommando, der Länge des Verschlüsselten Teils,
+einem Zufallswert, den Feldern, einem Füllerwert, der die Länge des verschlüsselten Teils auf modulo 16 auffüllt
+und dem check Summen Wert. Das ist alles in der Spezifikation genauer beschrieben.
+
+Bei mir heissen die Felder:
+Zielkommendo -> targetCmd
+Länge ->totalLgth
+Kommando -> cmdKey
+Länge -> cmdLgth
+Zufallszahl -> randomNum
+Füller -> filler
+check Summe -> crc
+
+Der crc Wert wird aus der Summe der Bytes ab cmdKey (einschliesslich) bis crc (ausschliesslich) berechnet und dann
+ invertiert.
+
+Der veschlüsselte Teil wird mit einem cryptkey (in myConfig.lua zu finden) verschlüsselt, der IntialWert zur
+Verschlüsselung ist ebenfalls der cryptkey.
+
+Der Verschlüsselungs Algorithmus ist AES-128 CBC
+
+Beim Encodieren werden die Werte kompakt mit MSB First aneinandergereiht entsprechend ihrem Datentyp, der in der
+Spezifikation zu finden ist.
+Beim Decodieren wird umgekehrt vorgegangen.
+
+Da Javascript bereits die DataView Funktionen hat, über die auch per optionalem Parameter MSB oder LSB eingestellt
+werden kann ist es damit sehr einfach möglich, die einzelnen Werte zu extrahieren und getrennt in der der Platform
+entsprechenden Byte Reihenfolge abzuspeichern.
