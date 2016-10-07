@@ -324,6 +324,7 @@ static int fillerEncode(uint8_t *data, int offset, uint16_t lgth, uint8_t *value
   uint32_t val;
   int idx;
 
+ets_printf("fillerEncode: offset: %d lgth: %d\n", offset, lgth);
   idx = 0;
   while (lgth >= 4) {
     val = (uint32_t)(rand() & RAND_MAX);
@@ -362,10 +363,15 @@ static int fillerDecode(const uint8_t *data, int offset, uint16_t lgth, uint8_t 
 
 // ============================= crcEncode ========================
 
-static int crcEncode(uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth) {
+static int crcEncode(uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth, uint8_t uint8_crc_flag) {
   int idx;
 
-  lgth -= sizeof(uint16_t);   // uint16_t crc
+//ets_printf("crcEncode: offset: %d lgth: %d headerLgth: %d, uint8_flag: %d\n", offset, lgth, headerLgth, uint8_crc_flag);
+  if (uint8_crc_flag) {
+    lgth -= sizeof(uint8_t);   // uint8_t crc
+  } else {
+    lgth -= sizeof(uint16_t);  // uint16_t crc
+  }
   *crc = 0;
   idx = headerLgth;
   while (idx < lgth) {
@@ -373,17 +379,27 @@ static int crcEncode(uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, ui
     *crc += data[idx++];
   }
   *crc = ~(*crc);
-  offset = uint16Encode(data,offset,*crc);
+  if (uint8_crc_flag) {
+    offset = uint8Encode(data,offset,(uint8_t)((*crc & 0xFF)));
+  } else {
+    offset = uint16Encode(data,offset,*crc);
+  }
+//ets_printf("crc: 0x%02x\n", (uint8_t)((*crc & 0xFF)));
   return offset;
 }
 
 // ============================= crcDecode ========================
 
-static int crcDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth) {
+static int crcDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t *crc, uint8_t headerLgth, uint8_t uint8_crc_flag) {
   uint16_t crcVal;
+  uint8_t uint8_crc;
   int idx;
 
-  lgth -= sizeof(uint16_t);   // uint16_t crc
+  if (uint8_crc_flag) {
+    lgth -= sizeof(uint8_t);   // uint8_t crc
+  } else {
+    lgth -= sizeof(uint16_t);  // uint16_t crc
+  }
   crcVal = 0;
   idx = headerLgth;
   while (idx < lgth + headerLgth) {
@@ -391,10 +407,22 @@ static int crcDecode(const uint8_t *data, int offset, uint16_t lgth, uint16_t *c
     crcVal += data[idx++];
   }
   crcVal = ~crcVal;
-  offset = uint16Decode(data, offset, crc);
+  crc = 0;
+  if (uint8_crc_flag) {
+    offset = uint8Decode(data, offset, &uint8_crc);
+    *crc = (uint16_t)(uint8_crc & 0xFF);
+  } else {
+    offset = uint16Decode(data, offset, crc);
+  }
 ets_printf("crcVal: 0x%04x crc: 0x%04x\n", crcVal, *crc);
-  if (crcVal != *crc) {
-    return -1;
+  if (uint8_crc_flag) {
+    if (crcVal & 0xFF != uint8_crc) {
+      return -1;
+    }
+  } else {
+    if (crcVal != *crc) {
+      return -1;
+    }
   }
   return offset;
 }
@@ -522,7 +550,7 @@ static int definitionEncode(uint8_t *data, int offset, stmsgDefinition_t *defini
 
 // ============================= definitionDecode ========================
 
-static int definitionDecode(const uint8_t *data, int offset, stmsgDefinition_t *definition, fieldNameDefinitions_t *fieldNameDefinitions) {
+static int definitionDecode(const uint8_t *data, int offset, stmsgDefinition_t *definition, fieldNameDefinitions_t *fieldNameDefinitions, uint8_t shortCmdKey) {
   uint16_t definitionLgth;
   uint8_t nameLgth;
   uint8_t numNameEntries;
@@ -565,7 +593,7 @@ static int definitionDecode(const uint8_t *data, int offset, stmsgDefinition_t *
   offset += nameLgth;
   offset = uint8Decode(data, offset, &numFields);
   checkBadOffset(offset);
-  result = structmsg_createStructmsgDefinition (name, numFields);
+  result = structmsg_createStructmsgDefinition (name, numFields, shortCmdKey);
   checkOffsetErrOK(result);
   definitionIdx = 0;
   namesIdx = 0;
@@ -748,6 +776,43 @@ static int decodeField(const uint8_t *msgPtr, fieldInfo_t *fieldInfo, int offset
   return offset;
 }
 
+// ============================= stmsg_setFiller ========================
+
+static int stmsg_setFiller(const uint8_t *handle) {
+  structmsg_t *structmsg;
+  int16_t fillerLgth = 0;
+  int16_t myLgth = 0;
+  uint8_t crcLgth;
+  int result;
+
+  structmsg = structmsg_get_structmsg_ptr(handle);
+  checkHandleOK(structmsg);
+  // space for the numEntries field!!
+//  structmsg->hdr.hdrInfo.hdrKeys.cmdLgth++;
+//  structmsg->hdr.hdrInfo.hdrKeys.totalLgth++;
+  // end space for the numEntries field!!
+  if (structmsg->flags & STRUCT_MSG_HAS_FILLER) {
+    if (structmsg->flags & STRUCT_MSG_UINT8_CRC) {
+      crcLgth = 1;
+    } else {
+      crcLgth = 2;
+    }
+ets_printf("cmdLgth: %d crcLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, crcLgth);
+    myLgth = structmsg->hdr.hdrInfo.hdrKeys.cmdLgth + crcLgth;
+    while ((myLgth % 16) != 0) {
+      myLgth++;
+      fillerLgth++;
+    }
+ets_printf("fillerLgth: %d\n", fillerLgth);
+    result = stmsg_setFieldValue(handle, "@filler", fillerLgth, NULL);
+    checkErrOK(result);
+ets_printf("setFiler end: cmdLgth: %d totalLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+  }
+//  result = stmsg_addField(handle, "@crc", "uint16_t", 2);
+//  checkErrOK(result);
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ============================= stmsg_encodeMsg ========================
 
 int stmsg_encodeMsg(const uint8_t *handle) {
@@ -763,7 +828,7 @@ int stmsg_encodeMsg(const uint8_t *handle) {
   int offset;
   int idx;
   int fieldIdx;
-  int numEntries;
+  int numFields;
   int result;
   int fieldId = 0;
   fieldInfo_t *fieldInfo;
@@ -773,29 +838,48 @@ int stmsg_encodeMsg(const uint8_t *handle) {
   if (structmsg->encoded != NULL) {
     os_free(structmsg->encoded);
   }
-  if ((structmsg->flags & STRUCT_MSG_HAS_CRC) == 0) {
-    result = stmsg_setFillerAndCrc(handle);
+//ets_printf("encodeMsg: hasFiller: 0x%02x shortCmdKey: 0x%02x\n", structmsg->flags & STRUCT_MSG_HAS_FILLER, structmsg->flags & STRUCT_MSG_SHORT_CMD_KEY);
+  if (structmsg->flags & STRUCT_MSG_HAS_FILLER) {
+    result = stmsg_setFiller(handle);
     checkErrOK(result);
-    structmsg->flags |= STRUCT_MSG_HAS_CRC;
+//    structmsg->flags |= STRUCT_MSG_HAS_CRC;
   }
-  structmsg->encoded = (uint8_t *)os_zalloc(structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
+  structmsg->encoded = (uint8_t *)os_zalloc(structmsg->hdr.hdrInfo.hdrKeys.totalLgth + 10);
   msgPtr = structmsg->encoded;
   offset = 0;
   offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.src);
   checkEncodeOffset(offset);
   offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.dst);
   checkEncodeOffset(offset);
+//ets_printf("after dst: offset: %d\n", offset);
+// FIXME temporary!!
+// if we have SHORT_CMD_KEY we assume only the targetCmd at the beginning !!
+// we use the 2nd byte of dst in that case for targetCmd!!
   offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
+//ets_printf("after totalLgth: lgth: %d offset: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, offset);
+  if (structmsg->flags & STRUCT_MSG_SHORT_CMD_KEY) {
+    offset = uint8Encode(msgPtr,offset,(structmsg->hdr.hdrInfo.hdrKeys.cmdKey & 0xFF));
+  } else {
+    offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdKey);
+  }
+//ets_printf("after cmdKey: cmdKey: 0x%02x offset: %d\n", (structmsg->hdr.hdrInfo.hdrKeys.cmdKey & 0xFF), offset);
   checkEncodeOffset(offset);
-  offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+  if (structmsg->flags & STRUCT_MSG_SHORT_CMD_KEY) {
+  } else {
+    offset = uint16Encode(msgPtr,offset,structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+  }
+//ets_printf("after cmdLgth: cmdLgth: 0x%02x offset: %d\n", (structmsg->hdr.hdrInfo.hdrKeys.cmdLgth & 0xFF), offset);
   checkEncodeOffset(offset);
-  numEntries = structmsg->msg.numFieldInfos;
-  offset = uint8Encode(msgPtr,offset,numEntries);
+//ets_printf("encode after cmd: offset: %d\n", offset);
+  numFields = structmsg->msg.numFieldInfos;
+if (structmsg->flags & STRUCT_MSG_SHORT_CMD_KEY) {
+} else {
+  offset = uint8Encode(msgPtr,offset,numFields);
   checkEncodeOffset(offset);
+}
   idx = 0;
-  while (idx < numEntries) {
+  while (idx < structmsg->msg.numFieldInfos) {
     fieldInfo = &structmsg->msg.fieldInfos[idx];
     if (fieldInfo->fieldStr[0] == '@') {
       result = structmsg_getFieldNameId(fieldInfo->fieldStr, &fieldId, STRUCT_MSG_NO_INCR);
@@ -807,6 +891,7 @@ int stmsg_encodeMsg(const uint8_t *handle) {
       case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
       case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
       case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
+      case STRUCT_MSG_SPEC_FIELD_NUM_FIELDS:
 ets_printf("funny should encode: %s\n", fieldInfo->fieldStr);
         break;
       case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
@@ -814,24 +899,28 @@ ets_printf("funny should encode: %s\n", fieldInfo->fieldStr);
         checkEncodeOffset(offset);
         result = stmsg_setFieldValue(handle, "@randomNum", randomNum, NULL);
         checkErrOK(result);
+//ets_printf("encode after randomNum: offset: %d\n", offset);
         break;
       case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
         offset = sequenceNumEncode(msgPtr, offset, structmsg, &sequenceNum);
         checkEncodeOffset(offset);
         result = stmsg_setFieldValue(handle, "@sequenceNum", sequenceNum, NULL);
         checkErrOK(result);
+//ets_printf("encode after sequencenNum: offset: %d\n", offset);
         break;
       case STRUCT_MSG_SPEC_FIELD_FILLER:
         offset = fillerEncode(msgPtr, offset, fieldInfo->fieldLgth, fieldInfo->value.ubyteVector);
         checkEncodeOffset(offset);
         result = stmsg_setFieldValue(handle, "@filler", 0, fieldInfo->value.ubyteVector);
+//ets_printf("encode after filler: offset: %d\n", offset);
         checkErrOK(result);
         break;
       case STRUCT_MSG_SPEC_FIELD_CRC:
-        offset = crcEncode(structmsg->encoded, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, &crc, structmsg->hdr.headerLgth);
+        offset = crcEncode(structmsg->encoded, offset, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, &crc, structmsg->hdr.headerLgth, structmsg->flags & STRUCT_MSG_UINT8_CRC);
         checkEncodeOffset(offset);
         result = stmsg_setFieldValue(handle, "@crc", crc, NULL);
         checkErrOK(result);
+//ets_printf("encode after crc: offset: %d\n", offset);
         break;
       case STRUCT_MSG_SPEC_FIELD_ID:
         return STRUCT_MSG_ERR_BAD_SPECIAL_FIELD;
@@ -849,6 +938,7 @@ ets_printf("funny should encode: %s\n", fieldInfo->fieldStr);
                fieldInfo = &structmsg->msg.tableFieldInfos[cell];
                offset = encodeField(msgPtr, fieldInfo, offset);
                checkEncodeOffset(offset);
+//ets_printf("encode after fld: %s offset: %d\n", fieldInfo->fieldStr, offset);
                col++;
             }
             row++;
@@ -860,10 +950,12 @@ ets_printf("funny should encode: %s\n", fieldInfo->fieldStr);
     } else {
       offset = encodeField(msgPtr, fieldInfo, offset);
       checkEncodeOffset(offset);
+//ets_printf("encode after fld2: %s offset: %d\n", fieldInfo->fieldStr, offset);
     }
     idx++;
   }
   structmsg->flags |= STRUCT_MSG_ENCODED;
+//structmsg_dumpBinary(msgPtr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, "ENCODED");
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -951,7 +1043,7 @@ ets_printf("funny should decode: %s\n", fieldInfo->fieldStr);
         checkDecodeOffset(offset);
         break;
       case STRUCT_MSG_SPEC_FIELD_CRC:
-        offset = crcDecode(msgPtr, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, &fieldInfo->value.ushortVal, structmsg->hdr.headerLgth);
+        offset = crcDecode(msgPtr, offset, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, &fieldInfo->value.ushortVal, structmsg->hdr.headerLgth, structmsg->flags & STRUCT_MSG_UINT8_CRC);
         if (offset < 0) {
           return STRUCT_MSG_ERR_BAD_CRC_VALUE;
         }
@@ -1055,7 +1147,11 @@ int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, 
   }
   normNamesOffsets = os_zalloc(numNormFields * sizeof(id2offset_t) + 1);
   checkAllocOK(normNamesOffsets);
-  payloadSize = STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  if (definition->flags & STRUCT_MSG_SHORT_CMD_KEY) {
+    payloadSize = STRUCT_MSG_SHORT_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  } else {
+    payloadSize = STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  }
   // randomNum
   payloadSize += sizeof(uint32_t);
   // len ids + ids (numNormFields * (uint16_t)) + len Names + names size
@@ -1108,7 +1204,7 @@ int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, 
   uint8_t dummy[fillerSize];
   offset = fillerEncode(encoded, offset, fillerSize, &dummy[0]);
   checkEncodeOffset(offset);
-  offset = crcEncode(encoded, offset, totalLgth, &crc, STRUCT_MSG_HEADER_LENGTH);
+  offset = crcEncode(encoded, offset, totalLgth, &crc, STRUCT_MSG_HEADER_LENGTH,0);
   checkEncodeOffset(offset);
 ets_printf("after crc offset: %d totalLgth :%d crc: 0x%04x\n", offset, totalLgth, crc);
   *data = encoded;
@@ -1119,7 +1215,7 @@ ets_printf("after crc offset: %d totalLgth :%d crc: 0x%04x\n", offset, totalLgth
 
 // ============================= structmsg_decodeDefinition ========================
 
-int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions) {
+int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions, uint8_t shortCmdKey) {
   size_t numSpecFields;
   size_t namesSpecSize;
   size_t numNormFields;
@@ -1165,8 +1261,8 @@ int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgD
   checkDecodeOffset(offset);
   // now check the crc
   crcOffset = totalLgth - sizeof(uint16_t);
-  crcOffset = crcDecode(data, crcOffset, cmdLgth, &crc, STRUCT_MSG_HEADER_LENGTH);
-  offset = definitionDecode(data, offset, definition, fieldNameDefinitions);
+  crcOffset = crcDecode(data, crcOffset, cmdLgth, &crc, STRUCT_MSG_HEADER_LENGTH, 0);
+  offset = definitionDecode(data, offset, definition, fieldNameDefinitions, shortCmdKey);
   checkDecodeOffset(offset);
   myLgth = offset + sizeof(uint16_t);
   fillerSize = 0;
@@ -1181,7 +1277,7 @@ int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgD
 
 // ============================= stmsg_getDefinitionName ========================
 
-int stmsg_getDefinitionName(uint8_t *decrypted, uint8_t **name) {
+int stmsg_getDefinitionName(uint8_t *decrypted, uint8_t **name, uint8_t shortCmdKey) {
   int nameOffset;
   uint8_t numNormFields;
   uint16_t normNamesSize;
@@ -1190,7 +1286,11 @@ int stmsg_getDefinitionName(uint8_t *decrypted, uint8_t **name) {
 
   *name = NULL;
   nameOffset = STRUCT_MSG_HEADER_LENGTH; // src + dst + totalLgth
-  nameOffset += STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  if (shortCmdKey) {
+    nameOffset += STRUCT_MSG_SHORT_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  } else {
+    nameOffset += STRUCT_MSG_CMD_HEADER_LENGTH; // cmdKey + cmdLgth
+  }
   // randomNum
   nameOffset += sizeof(uint32_t);
   // len ids 

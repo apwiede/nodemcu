@@ -347,6 +347,7 @@ static int fixHeaderInfo(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const u
   fieldInfo->fieldType = fieldType;
   fieldInfo->value.byteVector = NULL;
   fieldInfo->flags = 0;
+//ets_printf("fixHeaderInfo1: fld: %s cmdLgth: %d totalLgth: %d\n", fieldStr, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   switch (fieldType) {
     case STRUCT_MSG_FIELD_UINT8_T:
     case STRUCT_MSG_FIELD_INT8_T:
@@ -402,6 +403,7 @@ static int fixHeaderInfo(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const u
   setHandleField(structmsg->handle, STRUCT_MSG_FIELD_CMD_LGTH, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
   setHandleField(structmsg->handle, STRUCT_MSG_FIELD_TOTAL_LGTH, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   fieldInfo->fieldLgth = fieldLgth;
+//ets_printf("fixHeaderInfo2: fld: %s cmdLgth: %d totalLgth: %d\n", fieldStr, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -618,19 +620,25 @@ static int getFieldValue(structmsg_t *structmsg, fieldInfo_t *fieldInfo, const u
 
 // ============================= stmsg_createMsg ========================
 
-int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle) {
+int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle, uint8_t shortCmdKey) {
   uint8_t *ptr;
   hdrInfo_t *hdrInfo;
   int result;
 
+//ets_printf("stmsg_createMsg: shortCmdKey: %d\n", shortCmdKey);
   structmsg_t *structmsg = (void *)os_malloc (sizeof(structmsg_t));
   checkAllocOK(structmsg);
   structmsg->hdr.hdrInfo.hdrKeys.src = 0;
   structmsg->hdr.hdrInfo.hdrKeys.dst = 0;
   structmsg->hdr.hdrInfo.hdrKeys.cmdKey = 0;
-  structmsg->hdr.hdrInfo.hdrKeys.cmdLgth = STRUCT_MSG_CMD_HEADER_LENGTH;
   structmsg->hdr.headerLgth = STRUCT_MSG_HEADER_LENGTH;
-  structmsg->hdr.hdrInfo.hdrKeys.totalLgth = STRUCT_MSG_TOTAL_HEADER_LENGTH;
+  if (shortCmdKey) {
+    structmsg->hdr.hdrInfo.hdrKeys.cmdLgth = STRUCT_MSG_SHORT_CMD_HEADER_LENGTH;
+    structmsg->hdr.hdrInfo.hdrKeys.totalLgth = STRUCT_MSG_SHORT_TOTAL_HEADER_LENGTH;
+  } else {
+    structmsg->hdr.hdrInfo.hdrKeys.cmdLgth = STRUCT_MSG_CMD_HEADER_LENGTH;
+    structmsg->hdr.hdrInfo.hdrKeys.totalLgth = STRUCT_MSG_TOTAL_HEADER_LENGTH;
+  }
   structmsg->msg.numFieldInfos = 0;
   structmsg->msg.maxFieldInfos = numFieldInfos;
   structmsg->msg.numTableRows = 0;
@@ -639,6 +647,9 @@ int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle) {
   structmsg->msg.fieldInfos = newFieldInfos(numFieldInfos);
   structmsg->msg.tableFieldInfos = NULL;
   structmsg->flags = 0;
+  if (shortCmdKey) {
+    structmsg->flags |= STRUCT_MSG_SHORT_CMD_KEY;
+  }
   structmsg->sequenceNum = 0;
   structmsg->encoded = NULL;
   structmsg->todecode = NULL;
@@ -979,15 +990,26 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, const uint8_t
   uint8_t fieldType;
   int row;
   int cellIdx;
-  int result;
+  int result = STRUCT_MSG_ERR_OK;
   structmsg_t *structmsg;
   fieldInfo_t *fieldInfo;
 
   result = structmsg_getFieldTypeId(fieldTypeStr, &fieldType);
   checkErrOK(result);
   structmsg = structmsg_get_structmsg_ptr(handle);
+
 //ets_printf("addfield: %s totalLgth: %d\n", fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth);
   checkHandleOK(structmsg);
+  if (c_strcmp(fieldStr, "@filler") == 0) {
+    fieldInfo_t *fieldInfo = &structmsg->msg.fieldInfos[structmsg->msg.numFieldInfos];
+//ets_printf("filler1: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+    // we use 0 as numTableRows, that forces the *Lgth fields to NOT be modified!!
+    fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, 0, 0);
+//ets_printf("filler2: totalLgth: %d cmdLgth: %d\n", structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
+    structmsg->msg.numFieldInfos++;
+    structmsg->flags |= STRUCT_MSG_HAS_FILLER;
+    return STRUCT_MSG_ERR_OK;
+  }
   if (c_strcmp(fieldStr, "@tablerows") == 0) {
     structmsg->msg.numTableRows = fieldLgth;
 //ets_printf("tablerows1: lgth: %d\n",  fieldLgth);
@@ -1026,6 +1048,14 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, const uint8_t
     numTableRows = 1;
     numTableRowFields = 0;
     fixHeaderInfo(structmsg, fieldInfo, fieldStr, fieldType, fieldLgth, numTableRows);
+
+    if (c_strcmp(fieldStr, "@crc") == 0) {
+      structmsg->flags |= STRUCT_MSG_HAS_CRC;
+      if (c_strcmp(fieldTypeStr, "uint8_t") == 0) {
+        structmsg->flags |= STRUCT_MSG_UINT8_CRC;
+      }
+//ets_printf("flags: 0x%02x HAS_CRC: 0x%02x HAS_FILLER: 0x%02x UINT8_CRC: 0x%02x\n", structmsg->flags, STRUCT_MSG_HAS_CRC, STRUCT_MSG_HAS_FILLER, STRUCT_MSG_UINT8_CRC);
+    }
 //ets_printf("field2: %s totalLgth: %d cmdLgth: %d\n", fieldInfo->fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth);
     result = structmsg_fillHdrInfo(handle, structmsg);
     structmsg->msg.numFieldInfos++;
@@ -1044,32 +1074,6 @@ int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, const uint8_t
   return result;
 }
 
-// ============================= stmsg_setFillerAndCrc ========================
-
-int stmsg_setFillerAndCrc(const uint8_t *handle) {
-  structmsg_t *structmsg;
-  int16_t fillerLgth = 0;
-  int16_t myLgth = 0;
-  int result;
-
-  structmsg = structmsg_get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
-  // space for the numEntries field!!
-  structmsg->hdr.hdrInfo.hdrKeys.cmdLgth++;
-  structmsg->hdr.hdrInfo.hdrKeys.totalLgth++;
-  // end space for the numEntries field!!
-  myLgth = structmsg->hdr.hdrInfo.hdrKeys.cmdLgth + 2;
-  while ((myLgth % 16) != 0) {
-    myLgth++;
-    fillerLgth++;
-  }
-  result = stmsg_addField(handle, "@filler", "uint8_t*", fillerLgth);
-  checkErrOK(result);
-  result = stmsg_addField(handle, "@crc", "uint16_t", 2);
-  checkErrOK(result);
-  return STRUCT_MSG_ERR_OK;
-}
-
 // ============================= stmsg_setFieldValue ========================
 
 int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
@@ -1080,7 +1084,7 @@ int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int num
   int numEntries;
 
   structmsg = structmsg_get_structmsg_ptr(handle);
-  checkHandleOK(structmsg);
+checkHandleOK(structmsg);
   if (c_strcmp(fieldName, "@src") == 0) {
     if (stringValue == NULL) {
       if ((numericValue >= 0) && (numericValue <= 65535)) {
@@ -1130,7 +1134,14 @@ int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int num
   while (idx < numEntries) {
     fieldInfo = &structmsg->msg.fieldInfos[idx];
     if (c_strcmp(fieldName, fieldInfo->fieldStr) == 0) {
-      return setFieldValue(structmsg, fieldInfo, fieldName, numericValue, stringValue);
+      if (c_strcmp(fieldName, "@filler") == 0) {
+//ets_printf("setFillerLgth: %d\n", numericValue);
+        fieldInfo->fieldLgth = (uint16_t)numericValue;
+        fixHeaderInfo(structmsg, fieldInfo, fieldName, fieldInfo->fieldType, fieldInfo->fieldLgth, 1);
+        return STRUCT_MSG_ERR_OK;
+      } else {
+        return setFieldValue(structmsg, fieldInfo, fieldName, numericValue, stringValue);
+      }
     }
     idx++;
   }
@@ -1250,7 +1261,7 @@ int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8
 
 // ============================= structmsg_createMsgFromListInfo ========================
 
-int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle) {
+int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle, uint8_t shortCmdKey) {
   const uint8_t *listEntry;
   int idx;
   int result;
@@ -1266,7 +1277,8 @@ int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntri
   unsigned long lgth;
   unsigned long uflag;
 
-  result = stmsg_createMsg(numEntries, &handle2);
+//ets_printf("structmsg_createMsgFromListInfo: shortCmdKey: %d\n", shortCmdKey);
+  result = stmsg_createMsg(numEntries, &handle2, shortCmdKey);
   checkErrOK(result);
   *handle=handle2;
   listEntry = listVector[0];

@@ -64,82 +64,85 @@ static int structmsg_error( lua_State* L, const char *fmt, ... ) {
 
 static int checkOKOrErr( lua_State* L, int result, const uint8_t *where, const uint8_t *fieldName ) {
   if (result == STRUCT_MSG_ERR_OK) {
-  lua_pushfstring(L, "OK");
-  return 1;
+    lua_pushfstring(L, "OK");
+    return 1;
   }
 ets_printf("error result: %d\n", result);
   errStr = "ERROR";
   switch (result) {
   case STRUCT_MSG_ERR_VALUE_NOT_SET:
-  lua_pushfstring(L, "%s: %s: value for field: %s not set", errStr, where, fieldName);
-  break;
+    lua_pushfstring(L, "%s: %s: value for field: %s not set", errStr, where, fieldName);
+    break;
   case STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE:
-  lua_pushfstring(L, "%s: %s: field: '%s' value out of range", errStr, where, fieldName);
-  break;
+    lua_pushfstring(L, "%s: %s: field: '%s' value out of range", errStr, where, fieldName);
+    break;
   case STRUCT_MSG_ERR_BAD_VALUE:
-  lua_pushfstring(L, "%s: %s: field: '%s' bad value", errStr, where, fieldName);
-  break;
+    lua_pushfstring(L, "%s: %s: field: '%s' bad value", errStr, where, fieldName);
+    break;
   case STRUCT_MSG_ERR_BAD_FIELD_TYPE:
-  lua_pushfstring(L, "%s: %s: field: '%s' bad field type", errStr, where, fieldName);
-  break;
+    lua_pushfstring(L, "%s: %s: field: '%s' bad field type", errStr, where, fieldName);
+    break;
   case STRUCT_MSG_ERR_FIELD_NOT_FOUND:
-  lua_pushfstring(L, "%s: %s: field: '%s' not found", errStr, where, fieldName);
-  break;
+    lua_pushfstring(L, "%s: %s: field: '%s' not found", errStr, where, fieldName);
+    break;
   case STRUCT_MSG_ERR_BAD_HANDLE:
-  lua_pushfstring(L, "%s: bad handle", errStr);
-  break;
+    lua_pushfstring(L, "%s: bad handle", errStr);
+    break;
   case STRUCT_MSG_ERR_OUT_OF_MEMORY:
-  luaL_error(L, "out of memory");
-  break;
+    luaL_error(L, "out of memory");
+    break;
   case STRUCT_MSG_ERR_HANDLE_NOT_FOUND:
-  lua_pushfstring(L, "%s: handle not found", errStr);
-  break;
+    lua_pushfstring(L, "%s: handle not found", errStr);
+    break;
   case STRUCT_MSG_ERR_NOT_ENCODED:
-  lua_pushfstring(L, "%s: not encoded", errStr);
-  break;
+    lua_pushfstring(L, "%s: not encoded", errStr);
+    break;
   case STRUCT_MSG_ERR_DECODE_ERROR:
-  lua_pushfstring(L, "%s: decode error", errStr);
-  break;
+    lua_pushfstring(L, "%s: decode error", errStr);
+    break;
   case STRUCT_MSG_ERR_BAD_CRC_VALUE:
-  lua_pushfstring(L, "%s: bad crc val", errStr);
-  break;
+    lua_pushfstring(L, "%s: bad crc val", errStr);
+    break;
   case STRUCT_MSG_ERR_CRYPTO_INIT_FAILED:
-  lua_pushfstring(L, "%s: crypto init failed", errStr);
-  break;
+    lua_pushfstring(L, "%s: crypto init failed", errStr);
+    break;
   case STRUCT_MSG_ERR_CRYPTO_OP_FAILED:
-  lua_pushfstring(L, "%s: crypto op failed", errStr);
-  break;
+    lua_pushfstring(L, "%s: crypto op failed", errStr);
+    break;
   case STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM:
-  lua_pushfstring(L, "%s: crypto bad mechanism", errStr);
-  break;
+    lua_pushfstring(L, "%s: crypto bad mechanism", errStr);
+    break;
   case STRUCT_MSG_ERR_NOT_ENCRYPTED:
-  lua_pushfstring(L, "%s: not encrypted", errStr);
-  break;
+    lua_pushfstring(L, "%s: not encrypted", errStr);
+    break;
   case STRUCT_MSG_ERR_DEFINITION_NOT_FOUND:
-  lua_pushfstring(L, "%s: definiton not found", errStr);
-  break;
+    lua_pushfstring(L, "%s: definiton not found", errStr);
+    break;
   case STRUCT_MSG_ERR_BAD_SPECIAL_FIELD:
-  lua_pushfstring(L, "%s: bad special field", errStr);
-  break;
+    lua_pushfstring(L, "%s: bad special field", errStr);
+    break;
   case STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS:
-  lua_pushfstring(L, "%s: definition too many fields", errStr);
-  break;
+    lua_pushfstring(L, "%s: definition too many fields", errStr);
+    break;
   case STRUCT_MSG_ERR_BAD_TABLE_ROW:
-  lua_pushfstring(L, "%s: bad table row", errStr);
-  break;
+    lua_pushfstring(L, "%s: bad table row", errStr);
+    break;
   case STRUCT_MSG_ERR_TOO_MANY_FIELDS:
-  lua_pushfstring(L, "%s: too many fields", errStr);
-  break;
+    lua_pushfstring(L, "%s: too many fields", errStr);
+    break;
   case STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY:
-  lua_pushfstring(L, "%s: bad definition cmd key", errStr);
-  break;
+    lua_pushfstring(L, "%s: bad definition cmd key", errStr);
+    break;
   case STRUCT_MSG_ERR_NO_SLOT_FOUND:
-  lua_pushfstring(L, "%s: no slot found", errStr);
-  break;
+    lua_pushfstring(L, "%s: no slot found", errStr);
+    break;
+  case STRUCT_MSG_ERR_BAD_NUM_FIELDS:
+    lua_pushfstring(L, "%s: bad num fields", errStr);
+    break;
   default:
-  lua_pushfstring(L, "%s: funny result error code", errStr);
+    lua_pushfstring(L, "%s: funny result error code", errStr);
 ets_printf("funny result: %d\n", result);
-  break;
+    break;
   }
   return 1;
 }
@@ -163,9 +166,9 @@ static int structmsg_encdec (lua_State *L, bool enc) {
   result = structmsg_encryptdecrypt(handle, NULL, 0, key, klen, iv, ivlen,enc, &buf, &lgth);
 //  result = stmsg_encdec(handle, key, klen, iv, ivlen, enc, &buf, &lgth);
   if (result == STRUCT_MSG_ERR_OK) {
-  lua_pushlstring (L, buf, lgth);
+    lua_pushlstring (L, buf, lgth);
   } else {
-  checkOKOrErr(L, result, "encrypt/decrypt", "");
+    checkOKOrErr(L, result, "encrypt/decrypt", "");
   }
   return 1;
 }
@@ -188,9 +191,9 @@ static int structmsg_encdec_msgDefinition (lua_State *L, bool enc) {
   iv = luaL_optlstring (L, 3, "", &ivlen);
   result = structmsg_encdecDefinition(handle, key, klen, iv, ivlen, enc, &buf, &lgth);
   if (result == STRUCT_MSG_ERR_OK) {
-  lua_pushlstring (L, buf, lgth);
+    lua_pushlstring (L, buf, lgth);
   } else {
-  checkOKOrErr(L, result, "encryptdef/decryptdef", "");
+    checkOKOrErr(L, result, "encryptdef/decryptdef", "");
   }
   return 1;
 }
@@ -201,12 +204,14 @@ static int structmsg_create( lua_State* L )
 {
   uint8_t numFieldInfos;
   uint8_t *handle;
+  uint8_t shortCmdKey;
   int result;
 
   numFieldInfos = luaL_checkinteger( L, 1 );
-  result = stmsg_createMsg ( numFieldInfos, &handle);
+  shortCmdKey = luaL_optinteger( L, 2, 0 );
+    result = stmsg_createMsg ( numFieldInfos, &handle, shortCmdKey);
   if (checkOKOrErr(L, result, "new", "")) {
-  lua_pushstring( L, handle );
+    lua_pushstring( L, handle );
   }
   return 1;
 }
@@ -248,7 +253,7 @@ static int structmsg_get_encoded( lua_State* L ) {
   handle = luaL_checkstring( L, 1 );
   result = stmsg_getEncoded(handle, &encoded, &lgth);
   if (checkOKOrErr(L, result, "getencoded", "")) {
-  lua_pushlstring(L, encoded, lgth);
+    lua_pushlstring(L, encoded, lgth);
   }
   return 1;
 }
@@ -310,9 +315,10 @@ static int structmsg_add_field( lua_State* L ) {
   return 1;
 }
 
+#ifdef NOTDEF
 // ============================= structmsg_set_fillerAndCrc ========================
 
-static int structmsg_set_fillerAndCrc( lua_State* L )
+static int xstructmsg_set_fillerAndCrc( lua_State* L )
 {
   uint16_t src;
   uint16_t dst;
@@ -325,6 +331,7 @@ static int structmsg_set_fillerAndCrc( lua_State* L )
   checkOKOrErr(L, result, "setFillerAndCrc", "");
   return 1;
 }
+#endif
 
 // ============================= structmsg_set_fieldValue ========================
 
@@ -338,11 +345,11 @@ static int structmsg_set_fieldValue( lua_State* L ) {
   handle = luaL_checkstring( L, 1 );
   fieldName = luaL_checkstring( L, 2 );
   if ( lua_isnumber(L, 3) ){
-  numericValue = lua_tointeger(L, 3);
-  stringValue = NULL;
+    numericValue = lua_tointeger(L, 3);
+    stringValue = NULL;
   } else {
-  numericValue = 0;
-  stringValue = lua_tostring(L, 3);
+    numericValue = 0;
+    stringValue = lua_tostring(L, 3);
   }
   result = stmsg_setFieldValue(handle, fieldName, numericValue, stringValue);
   checkOKOrErr(L, result, "setFieldValue", fieldName);
@@ -363,11 +370,11 @@ static int structmsg_set_tableFieldValue( lua_State* L ) {
   fieldName = luaL_checkstring( L, 2 );
   row = luaL_checkinteger(L, 3);
   if ( lua_isnumber(L, 4) ){
-  numericValue = lua_tointeger(L, 4);
-  stringValue = NULL;
+    numericValue = lua_tointeger(L, 4);
+    stringValue = NULL;
   } else {
-  numericValue = 0;
-  stringValue = lua_tostring(L, 4);
+    numericValue = 0;
+    stringValue = lua_tostring(L, 4);
   }
   result = stmsg_setTableFieldValue(handle, fieldName, row, numericValue, stringValue);
   checkOKOrErr(L, result, "setFieldValue", fieldName);
@@ -388,7 +395,7 @@ static int structmsg_get_fieldValue( lua_State* L ) {
   result = stmsg_getFieldValue(handle, fieldName, &numericValue, &stringValue);
   checkOKOrErr(L, result, "getFieldValue", fieldName);
   if (stringValue == NULL) {
-  lua_pushinteger(L, numericValue);
+    lua_pushinteger(L, numericValue);
   } else {
   lua_pushstring(L, stringValue);
   }
@@ -411,9 +418,9 @@ static int structmsg_get_tableFieldValue( lua_State* L ) {
   result = stmsg_getTableFieldValue(handle, fieldName, row, &numericValue, &stringValue);
   checkOKOrErr(L, result, "getFieldValue", fieldName);
   if (stringValue == NULL) {
-  lua_pushinteger(L, numericValue);
+    lua_pushinteger(L, numericValue);
   } else {
-  lua_pushstring(L, stringValue);
+    lua_pushstring(L, stringValue);
   }
   return 1;
 }
@@ -451,9 +458,9 @@ static int structmsg_decrypt_getHandle( lua_State* L ) {
   iv = luaL_optlstring (L, 3, "", &ivlen);
   result = stmsg_decryptGetHandle(encryptedMsg, mlen, key, klen, iv, ivlen, &handle);
   if (result == STRUCT_MSG_ERR_OK) {
-  lua_pushstring (L, handle);
+    lua_pushstring (L, handle);
   } else {
-  checkOKOrErr(L, result, "decryptgethandle", "");
+    checkOKOrErr(L, result, "decryptgethandle", "");
   }
   return 1;
 }
@@ -463,11 +470,13 @@ static int structmsg_decrypt_getHandle( lua_State* L ) {
 static int structmsg_create_msgDefinition( lua_State* L ) {
   const uint8_t *name;
   uint8_t numFields;
+  uint8_t shortCmdKey = 0;
   int result;
 
   name = luaL_checkstring (L, 1);
   numFields = lua_tointeger (L, 2);
-  result = structmsg_createStructmsgDefinition(name, numFields);
+  shortCmdKey = luaL_optinteger (L, 3, 0);
+  result = structmsg_createStructmsgDefinition(name, numFields, shortCmdKey);
   checkOKOrErr(L, result, "createmsgdef", "");
   return 1;
 }
@@ -513,9 +522,9 @@ static int structmsg_encode_fieldDefinitionMessage( lua_State* L ) {
   name = luaL_checkstring( L, 1 );
   result =  structmsg_encodeFieldDefinitionMessage (name, &data, &lgth);
   if (result == STRUCT_MSG_ERR_OK) {
-      lua_pushlstring (L, data, lgth);
+    lua_pushlstring (L, data, lgth);
   } else {
-      checkOKOrErr(L, result, "encodefielddefmsg", "");
+    checkOKOrErr(L, result, "encodefielddefmsg", "");
   }
   return 1;
 }
@@ -525,11 +534,13 @@ static int structmsg_encode_fieldDefinitionMessage( lua_State* L ) {
 static int structmsg_decode_fieldDefinitionMessage( lua_State* L ) {
   const uint8_t *name;
   const uint8_t *encoded;
+  uint8_t shortCmdKey;
   int result;
 
   name = luaL_checkstring( L, 1 );
   encoded = luaL_checkstring( L, 2 );
-  result =  structmsg_decodeFieldDefinitionMessage (name, encoded);
+  shortCmdKey = luaL_optinteger( L, 3, 0 );
+  result =  structmsg_decodeFieldDefinitionMessage (name, encoded, shortCmdKey);
   checkOKOrErr(L, result, "decodefielddefmsg", "");
   return 1;
 }
@@ -559,17 +570,19 @@ static int structmsg_decrypt_getDefinitionName( lua_State* L ) {
   size_t klen;
   const uint8_t *iv;
   size_t ivlen;
+  uint8_t shortCmdKey;
   uint8_t *handle;
   int result;
 
   encryptedMsg = luaL_checklstring( L, 1, &mlen );
   key = luaL_checklstring (L, 2, &klen);
   iv = luaL_optlstring (L, 3, "", &ivlen);
-  result = stmsg_decryptGetDefinitionName(encryptedMsg, mlen, key, klen, iv, ivlen, &handle);
+  shortCmdKey = luaL_optinteger (L, 3, 0);
+  result = stmsg_decryptGetDefinitionName(encryptedMsg, mlen, key, klen, iv, ivlen, &handle, shortCmdKey);
   if (result == STRUCT_MSG_ERR_OK) {
-      lua_pushstring (L, handle);
+    lua_pushstring (L, handle);
   } else {
-      checkOKOrErr(L, result, "decryptgetdefname", "");
+    checkOKOrErr(L, result, "decryptgetdefname", "");
   }
   return 1;
 }
@@ -615,10 +628,12 @@ static int structmsg_delete_msgDefinitions( lua_State* L ) {
 
 static int structmsg_create_msgFromDefinition( lua_State* L ) {
   const uint8_t *name;
+  uint8_t shortCmdKey;
   int result;
 
   name = luaL_checkstring (L, 1);
-  result = structmsg_createMsgFromDefinition(name);
+  shortCmdKey = luaL_optinteger (L, 2, 0);
+  result = structmsg_createMsgFromDefinition(name, shortCmdKey);
   checkOKOrErr(L, result, "createmsgfromdef", "");
   return 1;
 }
@@ -704,13 +719,12 @@ static int structmsg_get_definitionTableFieldInfo( lua_State* L ) {
   return 1;
 }
 
-// ============================= structmsg_create_msgFromListInfo ==================
+// ============================= parse_key ==================
 
 static const uint8_t *parse_key(lua_State* L, int paramNum, const char * key){
   const uint8_t *cp;
   lua_getfield(L, paramNum, key);
-  if( lua_isstring(L, -1) )
-  {
+  if( lua_isstring(L, -1) ) {
     const char *str = luaL_checkstring( L, -1 );
     return str;
   } 
@@ -727,6 +741,7 @@ static int structmsg_create_msgFromListInfo( lua_State* L ) {
   uint8_t numEntries;
   uint16_t flags;
   uint8_t *handle;
+  uint8_t shortCmdKey = 0;
   const uint8_t **listVector;
   int idx;
   int result;
@@ -747,7 +762,8 @@ ets_printf("no table!!\n");
   }
   numRows = luaL_checkinteger (L, 3);
   flags = luaL_checkinteger (L, 4);
-  result = structmsg_createMsgFromListInfo(listVector, numEntries, numRows, flags, &handle);
+  shortCmdKey = luaL_optinteger (L, 5, 0);
+  result = structmsg_createMsgFromListInfo(listVector, numEntries, numRows, flags, &handle, shortCmdKey);
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushstring (L, handle);
   } else {
@@ -763,6 +779,7 @@ static int structmsg_create_msDefinitiongFromListInfo( lua_State* L ) {
   const uint8_t *list;
   const uint8_t *name;
   uint8_t numRows;
+  uint8_t shortCmdKey;
   uint8_t numEntries;
   uint16_t flags;
   const uint8_t **listVector;
@@ -786,7 +803,8 @@ ets_printf("no table!!\n");
   name = luaL_checkstring (L, 3);
   numRows = luaL_checkinteger (L, 4);
   flags = luaL_checkinteger (L, 5);
-  result = structmsg_createMsgDefinitionFromListInfo(name, listVector, numEntries, numRows, flags);
+  shortCmdKey = luaL_checkinteger (L, 6);
+  result = structmsg_createMsgDefinitionFromListInfo(name, listVector, numEntries, numRows, flags, shortCmdKey);
   checkOKOrErr(L, result, "createmsgdeffromlist", "");
   return 1;
 }
@@ -803,7 +821,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },
   { LSTRKEY( "decrypt" ),               LFUNCVAL( structmsg_decrypt ) },
   { LSTRKEY( "addField" ),              LFUNCVAL( structmsg_add_field ) },
-  { LSTRKEY( "setFillerAndCrc" ),       LFUNCVAL( structmsg_set_fillerAndCrc ) },
+//  { LSTRKEY( "setFillerAndCrc" ),       LFUNCVAL( structmsg_set_fillerAndCrc ) },
   { LSTRKEY( "setFieldValue" ),         LFUNCVAL( structmsg_set_fieldValue ) },
   { LSTRKEY( "setTableFieldValue" ),    LFUNCVAL( structmsg_set_tableFieldValue ) },
   { LSTRKEY( "getFieldValue" ),         LFUNCVAL( structmsg_get_fieldValue ) },

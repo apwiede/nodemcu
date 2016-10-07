@@ -248,11 +248,12 @@ static int structmsg_getFieldTypeIdXX (const uint8_t *fieldTypeStr, int *key) {
 
 // ============================= structmsg_createStructmsgDefinition ========================
 
-int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields) {
+int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields, uint8_t shortCmdKey) {
   stmsgDefinition_t *definition;
   size_t lgth;
   int definitionIdx;
 
+ets_printf("structmsg_createStructmsgDefinition: shortCmdKey: %d\n", shortCmdKey);
   if (structmsgDefinitions.numDefinitions >= structmsgDefinitions.maxDefinitions) {
     if (structmsgDefinitions.maxDefinitions == 0) {
       structmsgDefinitions.maxDefinitions = 4;
@@ -274,6 +275,9 @@ int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields) 
       definition->encrypted = NULL;
       definition->numFields = 0;
       definition->maxFields = numFields;
+      if (shortCmdKey) {
+        definition->flags |= STRUCT_MSG_SHORT_CMD_KEY;
+      }
       definition->fieldInfos = (fieldInfoDefinition_t *)os_zalloc(numFields * sizeof(fieldInfoDefinition_t));
       checkAllocOK(definition->fieldInfos);
       if (definitionIdx >= structmsgDefinitions.numDefinitions) {
@@ -377,12 +381,12 @@ int structmsg_encodeFieldDefinitionMessage (const uint8_t *name, uint8_t **data,
 
 // ============================= structmsg_decodeFieldDefinitionMessage ========================
 
-int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *data) {
+int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *data, uint8_t shortCmdKey) {
   // FIXME!!
   uint16_t src = 123;
   uint16_t dst = 987;
 
-  return structmsg_decodeDefinition(name, data, &structmsgDefinitions, &fieldNameDefinitions);
+  return structmsg_decodeDefinition(name, data, &structmsgDefinitions, &fieldNameDefinitions, shortCmdKey);
 }
 
 
@@ -434,7 +438,7 @@ int stmsg_setCryptedDefinition(const uint8_t *name, const uint8_t *crypted, int 
 
 // ============================= stmsg_decryptGetDefinitionName  ========================
 
-int stmsg_decryptGetDefinitionName(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **name) {
+int stmsg_decryptGetDefinitionName(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **name, uint8_t shortCmdKey) {
   uint8_t *decrypted;
   size_t lgth;
   int result;
@@ -445,7 +449,7 @@ int stmsg_decryptGetDefinitionName(const uint8_t *encryptedMsg, size_t mlen, con
    if (result != STRUCT_MSG_ERR_OK) {
      return result;
    }
-   result = stmsg_getDefinitionName(decrypted, name);
+   result = stmsg_getDefinitionName(decrypted, name, shortCmdKey);
    return result;
 }
 
@@ -568,8 +572,9 @@ int structmsg_deleteStructmsgDefinitions() {
 
 // ============================= structmsg_createMsgFromDefinition ========================
 
-int structmsg_createMsgFromDefinition(const uint8_t *name) {
+int structmsg_createMsgFromDefinition(const uint8_t *name, uint8_t shortCmdKey) {
   stmsgDefinition_t *definition;
+  structmsg_t *structmsg;
   fieldInfoDefinition_t *fieldInfo;
   uint8_t *fieldName;
   uint8_t *fieldType;
@@ -578,11 +583,17 @@ int structmsg_createMsgFromDefinition(const uint8_t *name) {
   int fieldIdx;
   int result;
 
+ets_printf("structmsg_createMsgFromDefinition: shortCmdKey: %d\n", shortCmdKey);
   result = structmsg_getDefinitionPtr(name, &definition, &definitionsIdx);
   checkErrOK(result);
-  result = stmsg_createMsg(definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS, &handle);
+  result = stmsg_createMsg(definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS, &handle, shortCmdKey);
 //ets_printf("create: handle: %s numFields: %d\n", handle, definition->numFields - STRUCT_MSG_NUM_HEADER_FIELDS - STRUCT_MSG_NUM_CMD_HEADER_FIELDS);
   checkErrOK(result);
+  // set flags if necessary
+  structmsg = structmsg_get_structmsg_ptr(handle);
+//  if (definition->flags & STRUCT_MSG_SHORT_CMD_KEY) {
+//    structmsg->flags |= STRUCT_MSG_SHORT_CMD_KEY;
+//  }
   while (fieldIdx < definition->numFields) {
     fieldInfo = &definition->fieldInfos[fieldIdx];
     switch (fieldInfo->fieldId) {
@@ -733,7 +744,7 @@ int structmsg_getDefinitionTableFieldInfo(const uint8_t *name, const uint8_t *fi
 
 // ============================= structmsg_createMsgDefinitionFromListInfo ========================
 
-int structmsg_createMsgDefinitionFromListInfo(const uint8_t *name, const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags) {
+int structmsg_createMsgDefinitionFromListInfo(const uint8_t *name, const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags,uint8_t shortCmdKey) {
   const uint8_t *listEntry;
   int idx;
   int result;
@@ -748,7 +759,8 @@ int structmsg_createMsgDefinitionFromListInfo(const uint8_t *name, const uint8_t
   unsigned long lgth;
   unsigned long uflag;
 
-  result = structmsg_createStructmsgDefinition(name, numEntries);
+ets_printf("structmsg_createMsgDefinitionFromListInfo: shortCmdKey: %d\n", shortCmdKey);
+  result = structmsg_createStructmsgDefinition(name, numEntries, shortCmdKey);
   checkErrOK(result);
   listEntry = listVector[0];
   idx = 0;
