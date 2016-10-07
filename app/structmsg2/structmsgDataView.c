@@ -318,14 +318,14 @@ static uint8_t getCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, si
   if (crcLgth == 1) {
     result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-ets_printf("crcVal1: 0x%02x crc: 0x%02x\n", crcVal & 0xFF, uint8_crc);
-    if (crcVal & 0xFF != uint8_crc) {
-      return -1;
+//ets_printf("§crcVal1: 0x%02x crc: 0x%02x§", crcVal & 0xFF, uint8_crc);
+    if ((crcVal & 0xFF) != uint8_crc) {
+      return STRUCT_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
     result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-ets_printf("crcVal2: 0x%04x crc: 0x%04x\n", crcVal, crc);
+//ets_printf("§crcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
     if (crcVal != crc) {
       return STRUCT_MSG_ERR_BAD_CRC_VALUE;
     }

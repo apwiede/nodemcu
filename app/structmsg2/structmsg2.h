@@ -51,7 +51,7 @@ extern "C" {
 #define STRUCT_MSG_HAS_CRC              (1 << 0)
 #define STRUCT_MSG_UINT8_CRC            (1 << 1)
 #define STRUCT_MSG_HAS_FILLER           (1 << 2)
-#define STRUCT_MSG_SHORT_CMD_KEY        (1 << 3)
+#define STRUCT_MSG_U8_CMD_KEY           (1 << 3)
 #define STRUCT_MSG_HAS_TABLE_ROWS       (1 << 4)
 #define STRUCT_MSG_IS_INITTED           (1 << 5)
 #define STRUCT_MSG_IS_PREPARED          (1 << 6)

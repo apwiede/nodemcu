@@ -74,6 +74,7 @@ enum structmsgDispatcherErrorCode
   STRUCT_DISP_ERR_DUPLICATE_FIELD       = 182,
   STRUCT_DISP_ERR_BAD_FIELD_NAME        = 181,
   STRUCT_DISP_ERR_BAD_HANDLE_TYPE       = 180,
+  STRUCT_DISP_ERR_INVALID_BASE64_STRING = 179,
 };
 
 
@@ -111,16 +112,21 @@ typedef struct structmsgData structmsgData_t;
 #define STRUCT_DISP_U0_CMD_LGTH       (1 << 9)
 #define STRUCT_DISP_U8_CMD_LGTH       (1 << 10)
 #define STRUCT_DISP_U16_CMD_LGTH      (1 << 11)
+#define STRUCT_DISP_U0_CRC            (1 << 12)
+#define STRUCT_DISP_U8_CRC            (1 << 13)
+#define STRUCT_DISP_U16_CRC           (1 << 14)
 
 typedef struct headerParts {
   uint16_t hdrFromPart;
   uint16_t hdrToPart;
   uint16_t hdrTotalLgth;
-  uint16_t hdrCmdKey;
-  uint16_t hdrCmdLgth;
+  uint16_t hdrU16CmdKey;
+  uint16_t hdrU16CmdLgth;
+  uint16_t hdrU16Crc;
   uint8_t hdrTargetPart;
   uint8_t hdrU8CmdKey;
   uint8_t hdrU8CmdLgth;
+  uint8_t hdrU8Crc;
   uint8_t hdrOffset;
   uint8_t hdrExtraLgth;
   uint8_t hdrEncryption;
@@ -137,15 +143,16 @@ typedef struct msgHeaderInfos {
   uint8_t maxHeaderParts;
   uint8_t currPartIdx;
   uint8_t seqIdx;
+  uint8_t seqIdxAfterStart;
 } msgHeaderInfos_t;
 
 typedef struct msgParts {
-  uint16_t totalLgth;
-  uint16_t cmdLgth;
-  uint16_t cmdKey;
   uint16_t fromPart;
   uint16_t toPart;
-  uint16_t flags;
+  uint16_t totalLgth;
+  uint16_t u16CmdLgth;
+  uint16_t u16CmdKey;
+  uint16_t partsFlags;
   uint8_t targetPart;
   uint8_t u8CmdLgth;
   uint8_t u8CmdKey;
@@ -178,12 +185,18 @@ typedef uint8_t (* IMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* BMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* MMsg_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* defaultMsg_t)(structmsgDispatcher_t *self);
-typedef uint8_t (* sendAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* prepareNotEncryptedAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 typedef uint8_t (* resetMsgInfo_t)(structmsgDispatcher_t *self, msgParts_t *parts);
+
+typedef uint8_t (* typeRSendAnswer_t)(structmsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 
 typedef uint8_t (* readHeadersAndSetFlags_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedPart_t)(structmsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
+typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
+typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
+typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
+typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
 
 typedef struct structmsgDispatcher {
   uint8_t id;
@@ -214,7 +227,8 @@ typedef struct structmsgDispatcher {
   MMsg_t MMsg;
   defaultMsg_t defaultMsg;
   resetMsgInfo_t resetMsgInfo;
-  sendAnswer_t sendAnswer;
+  prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
+  typeRSendAnswer_t typeRSendAnswer;
 
   openFileDesc_t openFile;
   closeFileDesc_t closeFile;
@@ -228,9 +242,15 @@ typedef struct structmsgDispatcher {
   createMsgFromLines_t createMsgFromLines;
   setMsgValuesFromLines_t setMsgValuesFromLines;
 
+  encryptMsg_t encryptMsg;
+  decryptMsg_t decryptMsg;
+  toBase64_t toBase64;
+  fromBase64_t fromBase64;
+
 } structmsgDispatcher_t;
 
 structmsgDispatcher_t *newStructmsgDispatcher();
 uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatcher_t **structmsgDispatcher);
 void freeStructmsgDispatcher(structmsgDispatcher_t *structmsgDispatcher);
 uint8_t structmsgIdentifyInit(structmsgDispatcher_t *self);
+uint8_t structmsgSendReceiveInit(structmsgDispatcher_t *self);

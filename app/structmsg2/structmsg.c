@@ -36,7 +36,6 @@
 #include "c_string.h"
 #include "c_stdlib.h"
 #include "structmsg2.h"
-#include "../crypto/mech.h"
 
 #define HANDLE_PREFIX "stmsg_"
 
@@ -883,8 +882,8 @@ static uint8_t dumpMsg(structmsgData_t *self) {
   if ((self->flags & STRUCT_MSG_HAS_FILLER) != 0) {
     ets_printf(" STRUCT_MSG_HAS_FILLER");
   }
-  if ((self->flags & STRUCT_MSG_SHORT_CMD_KEY) != 0) {
-    ets_printf(" STRUCT_MSG_SHORT_CMD_KEY");
+  if ((self->flags & STRUCT_MSG_U8_CMD_KEY) != 0) {
+    ets_printf(" STRUCT_MSG_U8_CMD_KEY");
   }
   if ((self->flags & STRUCT_MSG_HAS_TABLE_ROWS) != 0) {
     ets_printf(" STRUCT_MSG_HAS_TABLE_ROWS");
@@ -1129,87 +1128,6 @@ static int getHandle(uint8_t *hdrkey, uint8_t **handle) {
     }
   }
   return STRUCT_MSG_ERR_HANDLE_NOT_FOUND;
-}
-
-// ============================= structmsg_encryptdecrypt ========================
-
-int structmsg_encryptdecrypt(const uint8_t *handle, const uint8_t *msg, size_t mlgth, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth) {
-  structmsg_t *structmsg;
-  const uint8_t *message;
-  size_t mlen;
-  const crypto_mech_t *mech;
-  const char *data;
-  size_t dlen;
-  size_t bs;
-  size_t clen;
-  const uint8_t *what;
-  uint8_t *crypted;
-
-  *buf = NULL;
-  *lgth = 0;
-  if (handle != NULL) {
-    structmsg = structmsg_get_structmsg_ptr(handle);
-    checkHandleOK(structmsg);
-
-    mlen = structmsg->hdr.hdrInfo.hdrKeys.totalLgth;
-    if (enc) {
-      if (structmsg->encoded == NULL) {
-        return STRUCT_MSG_ERR_NOT_ENCODED;
-      }
-      message = structmsg->encoded;
-    } else {
-      if (structmsg->encrypted == NULL) {
-        return STRUCT_MSG_ERR_NOT_ENCRYPTED;
-      }
-      message = structmsg->encrypted;
-    }
-  } else {
-    message = msg;
-    mlen = mlgth;
-  }
-
-  mech = crypto_encryption_mech ("AES-CBC");
-  if (mech == NULL) {
-    return STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM;
-  }
-  bs = mech->block_size;
-  what = enc ? "encrypt": "decrypt";
-//ets_printf("encryptdecrypt bs: %d what: %s enc: %d\n", bs, what, enc);
-  dlen = mlen - STRUCT_MSG_HEADER_LENGTH;
-  data = message + STRUCT_MSG_HEADER_LENGTH;
-  clen = ((dlen + bs - 1) / bs) * bs;
-  *lgth = clen + STRUCT_MSG_HEADER_LENGTH;
-//ets_printf("dlen: %d lgth: %d clen: %d data: %p\n", dlen, *lgth, clen, data);
-  crypted = (uint8_t *)os_zalloc (*lgth);
-  if (!crypted) {
-    return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
-  } 
-  c_memcpy(crypted, message, STRUCT_MSG_HEADER_LENGTH);
-  *buf = crypted;
-  crypted += STRUCT_MSG_HEADER_LENGTH;
-  crypto_op_t op =
-  { 
-    key, klen,
-    iv, ivlen,
-    data, dlen,
-    crypted, clen,
-    enc ? OP_ENCRYPT : OP_DECRYPT
-  }; 
-  if (!mech->run (&op)) { 
-    os_free (*buf);
-    return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
-  } else { 
-    if (enc) {
-      if (handle != NULL) {
-        structmsg->encrypted = *buf;
-      }
-    } else {
-      if (handle != NULL) {
-        structmsg->todecode = *buf;
-      }
-    }
-    return STRUCT_MSG_ERR_OK;
-  }
 }
 
 // ============================= stmsg_setCrypted ========================
