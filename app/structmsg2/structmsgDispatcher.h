@@ -169,6 +169,9 @@ typedef struct msgHeader2MsgPtr {
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
+typedef uint8_t (* addAction_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t mode);
+typedef uint8_t (* runAction_t)(structmsgDispatcher_t *self, uint8_t mode);
+
 typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
@@ -227,8 +230,12 @@ typedef struct structmsgDispatcher {
   MMsg_t MMsg;
   defaultMsg_t defaultMsg;
   resetMsgInfo_t resetMsgInfo;
+
   prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
   typeRSendAnswer_t typeRSendAnswer;
+
+  addAction_t addAction;
+  runAction_t runAction;
 
   openFileDesc_t openFile;
   closeFileDesc_t closeFile;
@@ -254,3 +261,4 @@ uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatc
 void freeStructmsgDispatcher(structmsgDispatcher_t *structmsgDispatcher);
 uint8_t structmsgIdentifyInit(structmsgDispatcher_t *self);
 uint8_t structmsgSendReceiveInit(structmsgDispatcher_t *self);
+uint8_t structmsgActionInit(structmsgDispatcher_t *self);
