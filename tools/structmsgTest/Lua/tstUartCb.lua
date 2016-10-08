@@ -1,5 +1,6 @@
 --print("heap0: "..node.heap())
 handle=structmsg2.createDispatcher()
+result=structmsg2.initDispatcher(handle)
 
 function sendIMsg(handle)
   structmsg2.uartReceiveCb(handle,string.char(tonumber("57",16)),1)

@@ -66,8 +66,11 @@ dict set telegrams 19712 22272 M sendLgth 10
 
 set ::debugBuf ""
 set ::debugTxt ""
-#set ::isStart true
-set ::isStart false
+set ::startBuf ""
+set ::startTxt ""
+set ::startTelegram false
+set ::isStart true
+#set ::isStart false
 
 set ::macAddr "\xAB\xCD\xEF\x12\x34\x56"
 set ::ipAddr "\xD4\xC3\x12\x34"
@@ -82,6 +85,7 @@ set ::errorSub "\x00"
 set ::dat "\x00\x00\x00\x00\x00\x00"
 set ::numSsid "\x2"
 set ::inDebug false
+set ::lastch ""
 
 set ::telegramLgth 99
 
@@ -94,7 +98,7 @@ proc init0 {} {
   set ::fd0 [open $::dev0 w+]
   fconfigure $::fd0 -blocking 0 -translation binary
   fconfigure $::fd0 -mode 115200,n,8,1
-  fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
+#  fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
 }
 
 proc init1 {} {
@@ -106,7 +110,7 @@ proc init1 {} {
   set ::fd1 [open $::dev1 w+]
   fconfigure $::fd1 -blocking 0 -translation binary
   fconfigure $::fd1 -mode 115200,n,8,1
-#  fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
+  fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
 }
 
 
@@ -163,25 +167,67 @@ proc readByte1 {fd bufVar lgthVar} {
   upvar $lgthVar lgth
 
   set ch [read $fd 1]
+##fileevent $fd readable [list]
 #puts stderr "RB@: $ch"
   set pch 0
   binary scan $ch c pch
   if {$::isStart} {
-puts stderr "isStart rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
+#puts stderr "isStart rch: $ch![format 0x%02x [expr {$pch & 0xFF}]]!"
+    if {$ch eq "\n"} {
+      puts stderr "STA!$::startTxt!"
+      set ::startBuf ""
+      set ::startTxt ""
+    }
     if {$ch eq ">"} {
-      set::isStart false
+      set ::isStart false
+puts stderr "isStart end1"
+#      fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
       return
     }
-    if {($ch == "\x57") || ($ch == "§")} {
-      set ::isStart false
+    append ::startTxt $ch
+    if {($ch eq "\x57") || ($ch eq "\x4D")} {
+      set ::lastch $ch
+      append buf $ch
+      incr lgth
+#fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
+      return
+    }
+    if {$ch == 0} {
+      if {($::lastch eq "\x57") || ($::lastch eq "\x4D")} {
+        append buf $ch
+        incr lgth
+        set ::isStart false
+        puts stderr "STA!$::startTxt!"
+        append buf
+        set ::startBuf ""
+        set ::startTxt ""
+#      puts stderr "DBG: $::debugBuf!"
+        puts stderr "DBT: $::debugTxt!"
+        set ::debugBuf ""
+        set ::debugTxt ""
+puts stderr "isStart end2 activate fileevent 0"
+#        fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
+      }
     } else {
+      set ::lastch $ch
+    }
+    if {$ch eq "§"} {
+      puts stderr "STA!$::startTxt!"
+      set ::startBuf ""
+      set ::startTxt ""
+      set ::isStart false
+puts stderr "isStart end3"
+      set ::startTelegram true
+      fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
+    } else {
+#fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
       return
     }
   }
   if {[format 0x%02x [expr {$pch & 0xff}]] eq "0xc2"} {
     return
   }
-  if {$ch == "§"} {
+  if {$ch eq "§"} {
 #puts stderr "inDebug rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
     if {$::inDebug} {
       set ::inDebug false
@@ -189,40 +235,71 @@ puts stderr "isStart rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
       puts stderr "DBT: $::debugTxt!"
       set ::debugBuf ""
       set ::debugTxt ""
-      return
     } else {
       set ::inDebug true
       set ::debugBuf ""
       set ::debugTxt ""
-      return
     }
+#fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
+    return
   }
   if {$::inDebug} {
 #puts stderr "inDebug2 rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
     append ::debugBuf " [format 0x%02x [expr {$pch & 0xff}]]"
     append ::debugTxt "$ch"
 #puts stderr "IND: $::debugBuf!"
+#fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
     return
+  } else {
+#puts stderr "not inDebug rch: lgth!$lgth!$ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
+    append ::debugBuf " [format 0x%02x [expr {$pch & 0xff}]]"
+    append ::debugTxt "$ch"
+    if {$ch eq ">"} {
+      set ::startTelegram true
+      set lgth 0
+      set buf ""
+#      set ::isStart false
+#puts stderr "isStart end4"
+      fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
+      return
+    }
   }
 #puts stderr "rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
 #puts -nonewline $::fd0 $ch
 #flush $::fd0
   append buf $ch
   incr lgth
+  if {$::startTelegram} {
+    if {($ch ne "W") && ($ch ne "M")} {
+      set lgth 0
+      set buf ""
+    } else {
+      set ::startTelegram false
+    }
+  }
   if {$lgth == 7} {
     binary scan $buf SSSc ::dst ::src myLgth ::cmdKey
     set ::cmdKey [format %c $::cmdKey]
 #puts stderr [format "1: dst: 0x%04x src: 0x%04x lgth: %d cmdKey: %s" $::dst $::src $myLgth $::cmdKey]
 #puts stderr "1: 2: dst: $::dst src: $::src lgth: $myLgth cmdKey: $::cmdKey"
     if {![dict exists $::telegrams $::dst $::src $::cmdKey]} {
-      error [format "funny telegram: dst: 0x%04x src: 0x%04x cmdKey: %s" $::dst $::src $::cmdKey]
-    }
-    set ::telegramDict [dict get $::telegrams $::dst $::src $::cmdKey]
-    set expectedLgth [dict get $::telegramDict receivedLgth]
-    if {$expectedLgth != $myLgth} {
-      error "expected length: $expectedLgth got: $myLgth"
+#     error [format "funny telegram: dst: 0x%04x src: 0x%04x cmdKey: %s" $::dst $::src $::cmdKey]
+puts stderr "DBT2: $::debugTxt!"
+puts stderr "lgth!$lgth!buf!$buf!"
+      set ::debugBuf ""
+      set ::debugTxt ""
+      set buf ""
+      set lgth 0
     } else {
-      set ::telegramLgth $expectedLgth
+      set ::debugBuf ""
+      set ::debugTxt ""
+      set ::telegramDict [dict get $::telegrams $::dst $::src $::cmdKey]
+      set expectedLgth [dict get $::telegramDict receivedLgth]
+      if {$expectedLgth != $myLgth} {
+        error "expected length: $expectedLgth got: $myLgth"
+      } else {
+        set ::telegramLgth $expectedLgth
+      }
     }
   }
 #puts stderr "lgth: $lgth telegramLgth: $::telegramLgth!"
@@ -241,6 +318,7 @@ fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
     set buf ""
     set lgth 0
     set ::telegramLgth 99
+puts stderr "reset fileevent readable 1!!"
 fileevent $::fd1 readable [list]
 #    set handleProc [dict get $::telegramDict handleProc]
 #    after 10 [list uplevel 0 [list $handleProc $fd $telegram $lgth]]
