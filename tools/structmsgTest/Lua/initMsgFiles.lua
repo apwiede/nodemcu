@@ -1,0 +1,7 @@
+dofile("writeBMsgDescs.lua")
+dofile("writeIMsgDescs.lua")
+dofile("writeMMsgDescs.lua")
+dofile("writeMsgHeaders.lua")
+dofile("writeMsgActions.lua")
+dofile("tstUartCb.lua")
+--file.rename("tstUartCb.lua","init.lua")
