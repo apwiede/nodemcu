@@ -1044,7 +1044,7 @@ static int structmsg_writeLine( lua_State* L ) {
 
 static int structmsg_createDispatcher(lua_State* L)
 {
-size_t numFieldInfos;
+  size_t numFieldInfos;
   uint8_t *handle = "??";
   structmsgDispatcher_t *structmsgDispatcher;
   int result;
@@ -1058,6 +1058,22 @@ size_t numFieldInfos;
       lua_pushstring(L, handle);
     }
   }
+  return 1;
+}
+
+// ============================= structmsg_initDispatcher ========================
+
+static int structmsg_initDispatcher(lua_State* L)
+{
+  const uint8_t *handle;
+  structmsgDispatcher_t *structmsgDispatcher;
+  int result;
+
+  handle = luaL_checkstring (L, 1);
+  result = structmsgDispatcherGetPtrFromHandle(handle, &structmsgDispatcher);
+  checkOKOrErr(L, result, "initDispatcher", "");
+  result = structmsgDispatcher->initDispatcher(structmsgDispatcher);
+  checkOKOrErr(L, result, "initDispatcher", "");
   return 1;
 }
 
@@ -1113,6 +1129,7 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "writeLine" ),             LFUNCVAL( structmsg_writeLine ) },
 
   { LSTRKEY( "createDispatcher" ),      LFUNCVAL( structmsg_createDispatcher ) },
+  { LSTRKEY( "initDispatcher" ),        LFUNCVAL( structmsg_initDispatcher ) },
   { LSTRKEY( "uartReceiveCb" ),         LFUNCVAL( structmsg_uartReceiveCb ) },
 #ifdef NOtDEF
   { LSTRKEY( "encrypt" ),               LFUNCVAL( structmsg_encrypt ) },

@@ -235,7 +235,6 @@ static uint8_t initHeadersAndFlags(structmsgDispatcher_t *self) {
   int result;
   uint8_t numEntries;
   uint8_t fieldNameId;
-  char *endPtr;
   uint8_t lgth;
   uint8_t buf[100];
   uint8_t *buffer = buf;
@@ -317,7 +316,7 @@ static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
     result = self->readLine(self, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      break;
+      return STRUCT_DISP_ERR_TOO_FEW_FILE_LINES;
     }
     hdr = &hdrInfos->headerParts[idx];
     hdr->hdrFlags = 0;
@@ -839,6 +838,9 @@ static uint8_t handleNotEncryptedPart(structmsgDispatcher_t *self, msgParts_t *r
       } else {
         answerType = 'A';
       }
+      result = self->runAction(self, &answerType);
+ets_printf("§runares!%d!§", result);
+      checkErrOK(result);
       result = self->prepareNotEncryptedAnswer(self, received, answerType);
 //ets_printf("§res NEA!%d!§", result);
       checkErrOK(result);

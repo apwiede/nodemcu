@@ -75,6 +75,9 @@ enum structmsgDispatcherErrorCode
   STRUCT_DISP_ERR_BAD_FIELD_NAME        = 181,
   STRUCT_DISP_ERR_BAD_HANDLE_TYPE       = 180,
   STRUCT_DISP_ERR_INVALID_BASE64_STRING = 179,
+  STRUCT_DISP_ERR_TOO_FEW_FILE_LINES    = 178,
+  STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND = 177,
+  STRUCT_DISP_ERR_DUPLICATE_ENTRY       = 176,
 };
 
 
@@ -169,12 +172,14 @@ typedef struct msgHeader2MsgPtr {
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
-typedef uint8_t (* addAction_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t mode);
-typedef uint8_t (* runAction_t)(structmsgDispatcher_t *self, uint8_t mode);
+typedef uint8_t (* setActionEntry_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
+typedef uint8_t (* runAction_t)(structmsgDispatcher_t *self, uint8_t *answerType);
+typedef uint8_t (* fillMsgValue_t)(structmsgDispatcher_t *self, uint8_t *callbackName, int *numericValue, uint8_t **stringValue, uint8_t answerType, uint8_t fieldTypeId);
 
 typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
+typedef uint8_t (* initDispatcher_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* createMsgFromLines_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type, structmsgData_t **structmsgData, uint8_t **handle);
 typedef uint8_t (* setMsgValuesFromLines_t)(structmsgDispatcher_t *self, structmsgData_t *structmsgData, uint8_t numEntries, uint8_t *handle, uint8_t type);
 
@@ -234,8 +239,9 @@ typedef struct structmsgDispatcher {
   prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
   typeRSendAnswer_t typeRSendAnswer;
 
-  addAction_t addAction;
+  setActionEntry_t setActionEntry;
   runAction_t runAction;
+  fillMsgValue_t fillMsgValue;
 
   openFileDesc_t openFile;
   closeFileDesc_t closeFile;
@@ -246,6 +252,7 @@ typedef struct structmsgDispatcher {
   handleReceivedPart_t handleReceivedPart;
   uartReceiveCb_t uartReceiveCb;
   createDispatcher_t createDispatcher;
+  initDispatcher_t initDispatcher;
   createMsgFromLines_t createMsgFromLines;
   setMsgValuesFromLines_t setMsgValuesFromLines;
 

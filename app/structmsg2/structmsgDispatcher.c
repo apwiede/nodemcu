@@ -447,10 +447,12 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
     result = self->readLine(self, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      break;
+      return STRUCT_DISP_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     fieldNameStr = buffer;
+
+    // fieldName
     cp = fieldNameStr;
     while (*cp != ',') {
       cp++;
@@ -460,33 +462,42 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
     checkErrOK(result);
     result = getFieldType(self, structmsgData, fieldNameId, &fieldTypeId);
     checkErrOK(result);
+
+    // fieldValue
     fieldValueStr = cp;
     while (*cp != '\n') {
       cp++;
     }
     *cp++ = '\0';
-    switch (fieldTypeId) {
-    case DATA_VIEW_FIELD_UINT8_T:
-    case DATA_VIEW_FIELD_INT8_T:
-    case DATA_VIEW_FIELD_UINT16_T:
-    case DATA_VIEW_FIELD_INT16_T:
-    case DATA_VIEW_FIELD_UINT32_T:
-    case DATA_VIEW_FIELD_INT32_T:
-      {
-        uval = c_strtoul(fieldValueStr, &endPtr, 10);
-        if (endPtr == (char *)(cp-1)) {
-          numericValue = (int)uval;
-          stringValue = NULL;
-        } else {
-          numericValue = 0;
-          stringValue = fieldValueStr;
+    if (fieldValueStr[0] == '@') {
+      // call the callback function vor the field!!
+      result = self->fillMsgValue(self, fieldNameStr, &numericValue, &stringValue, type, fieldTypeId);
+ets_printf("§fmv!%s!%d!§", fieldNameStr, result);
+      checkErrOK(result);
+    } else {
+      switch (fieldTypeId) {
+      case DATA_VIEW_FIELD_UINT8_T:
+      case DATA_VIEW_FIELD_INT8_T:
+      case DATA_VIEW_FIELD_UINT16_T:
+      case DATA_VIEW_FIELD_INT16_T:
+      case DATA_VIEW_FIELD_UINT32_T:
+      case DATA_VIEW_FIELD_INT32_T:
+        {
+          uval = c_strtoul(fieldValueStr, &endPtr, 10);
+          if (endPtr == (char *)(cp-1)) {
+            numericValue = (int)uval;
+            stringValue = NULL;
+          } else {
+            numericValue = 0;
+            stringValue = fieldValueStr;
+          }
         }
+        break;
+      default:
+        numericValue = 0;
+        stringValue = fieldValueStr;
+        break;
       }
-      break;
-    default:
-      numericValue = 0;
-      stringValue = fieldValueStr;
-      break;
     }
     switch (fieldNameId) {
       case STRUCT_MSG_SPEC_FIELD_DST:
@@ -513,6 +524,7 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
         result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
         break;
     }
+ets_printf("§fmv2!%s!%d!§", fieldNameStr, result);
     checkErrOK(result);
     idx++;
   }
@@ -554,7 +566,7 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts
     result = self->readLine(self, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      break;
+      return STRUCT_DISP_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     fieldNameStr = buffer;
@@ -719,10 +731,26 @@ uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatc
   return STRUCT_DISP_ERR_OK;
 }
 
+// ================================= initDispatcher ====================================
+
+static uint8_t initDispatcher(structmsgDispatcher_t *self) {
+  uint8_t result;
+
+ets_printf("§initDispatcher!%p!§", self);
+  result = structmsgIdentifyInit(self);
+  checkErrOK(result);
+  result = structmsgSendReceiveInit(self);
+  checkErrOK(result);
+  result = structmsgActionInit(self);
+  checkErrOK(result);
+  return STRUCT_DISP_ERR_OK;
+}
+
 // ================================= createDispatcher ====================================
 
 static uint8_t createDispatcher(structmsgDispatcher_t *self, uint8_t **handle) {
   uint8_t result;
+
   os_sprintf(self->handle, "%s%p", DISP_HANDLE_PREFIX, self);
   result = addHandle(self->handle, self);
   if (result != STRUCT_DISP_ERR_OK) {
@@ -730,8 +758,6 @@ static uint8_t createDispatcher(structmsgDispatcher_t *self, uint8_t **handle) {
     os_free(self);
     return result;
   }
-  structmsgIdentifyInit(self);
-  structmsgSendReceiveInit(self);
   resetMsgInfo(self, &self->received);
   resetMsgInfo(self, &self->toSend);
   *handle = self->handle;
@@ -768,6 +794,7 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   structmsgDispatcher->structmsgDataDescription = newStructmsgDataDescription();
 
   structmsgDispatcher->createDispatcher = &createDispatcher;
+  structmsgDispatcher->initDispatcher = &initDispatcher;
 
   structmsgDispatcher->BMsg = &BMsg;
   structmsgDispatcher->IMsg = &IMsg;
