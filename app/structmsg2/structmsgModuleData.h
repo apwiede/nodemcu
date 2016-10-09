@@ -40,21 +40,52 @@
 
 /* struct message data value handling */
 
-#define MODULE_INFO_MACAddr          (1 << 0)
-#define MODULE_INFO_IPAddr           (1 << 1)
-#define MODULE_INFO_FirmwareVersion  (1 << 2)
-#define MODULE_INFO_SerieNumber      (1 << 3)
-#define MODULE_INFO_RSSI             (1 << 4)
-#define MODULE_INFO_ModuleConnection (1 << 5)
-#define MODULE_INFO_DeviceMode       (1 << 6)
-#define MODULE_INFO_DeviceSecurity   (1 << 7)
-#define MODULE_INFO_ErrorMain        (1 << 8)
-#define MODULE_INFO_ErrorSub         (1 << 9)
-#define MODULE_INFO_DateAndTime      (1 << 10)
-#define MODULE_INFO_SSIDs            (1 << 11)
-#define MODULE_INFO_Reserve1         (1 << 12)
-#define MODULE_INFO_Reserve2         (1 << 13)
-#define MODULE_INFO_Reserve3         (1 << 14)
+// status values: 0/1/2/3/4/5
+#define STATION_STATUS_IDLE           STATION_IDLE
+#define STATION_STATUS_CONNECTING     STATION_CONNECTING
+#define STATION_STATUS_WRONG_PASSWORD STATION_WRONG_PASSWORD
+#define STATION_STATUS_NO_AP_FOUND    STATION_NO_AP_FOUND
+#define STATION_STATUS_CONNECT_FAIL   STATION_CONNECT_FAIL
+#define STATION_STATUS_GOT_IP         STATION_GOT_IP
+
+// modes: 0/1/2/3
+#define OPMODE_NULL       NULL_MODE
+#define OPMODE_STATION    STATION_MODE
+#define OPMODE_SOFTAP     SOFTAP_MODE
+#define OPMODE_STATIONAP  STATIONAP_MODE
+
+// check against structmsgDispatcher.h defines to avoid duplicates!!
+#define STRUCT_DISP_ERR_STATION_SCAN       150
+#define STRUCT_DISP_ERR_GET_STATION_CONFIG 149
+#define STRUCT_DISP_ERR_CANNOT_DISCONNECT  148
+#define STRUCT_DISP_ERR_CANNOT_SET_OPMODE  147
+#define STRUCT_DISP_ERR_REGIST_CONNECT_CB  146
+#define STRUCT_DISP_ERR_TCP_ACCEPT         145
+#define STRUCT_DISP_ERR_REGIST_TIME        144
+
+#define MODULE_INFO_MODULE            (1 << 0)
+#define MODULE_INFO_WIFI              (1 << 1)
+
+#define MODULE_INFO_MACAddr              1
+#define MODULE_INFO_IPAddr               2
+#define MODULE_INFO_FirmwareVersion      3
+#define MODULE_INFO_SerieNumber          4
+#define MODULE_INFO_RSSI                 5
+#define MODULE_INFO_ModuleConnection     6
+#define MODULE_INFO_DeviceMode           7
+#define MODULE_INFO_DeviceSecurity       8
+#define MODULE_INFO_ErrorMain            9
+#define MODULE_INFO_ErrorSub             10
+#define MODULE_INFO_DateAndTime          11
+#define MODULE_INFO_SSIDs                12
+#define MODULE_INFO_Reserve1             13
+#define MODULE_INFO_Reserve2             14
+#define MODULE_INFO_Reserve3             15
+
+#define MODULE_INFO_WIFI_OPMODE          16
+#define MODULE_INFO_PROVISIONING_SSID    17
+#define MODULE_INFO_PROVISIONING_PORT    18
+#define MODULE_INFO_PROVISIONING_IP_ADDR 19
 
 typedef struct structmsgModuleData {
   uint8_t MACAddr[6];
@@ -73,3 +104,10 @@ typedef struct structmsgModuleData {
   uint8_t Reserve2[2];
   uint8_t Reserve3[3];
 } structmsgModuleData_t;
+
+typedef struct structmsgWifiData {
+  uint8_t wifiOpMode;
+  uint8_t provisioningSsid[33];
+  uint16_t provisioningPort;
+  uint8_t provisioningIPAddr[16];
+} structmsgWifiData_t;
