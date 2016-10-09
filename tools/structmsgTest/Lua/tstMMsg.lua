@@ -1,4 +1,4 @@
-MacAddr=tonumber("ABCD",16)..tonumber("EF12",16)..tonumber("3456")
+MACAddr=tonumber("ABCD",16)..tonumber("EF12",16)..tonumber("3456")
 IPAddr=tonumber("D4C3",16)..tonumber("1234",16)
 FirmVers=tonumber("1234",16)..tonumber("56AB",16)..tonumber("CDEF",16)
 SerieNum=tonumber("0213",16)..tonumber("2A10",16)
@@ -17,7 +17,7 @@ function createMAckMsg()
   msgInfos["2"]="@src,uint16_t,2,0"
   msgInfos["3"]="@totalLgth,uint16_t,2,0"
   msgInfos["4"]="@cmdKey,uint8_t,1,0"
-  msgInfos["5"]="MacAddr,uint8_t*,6,0"
+  msgInfos["5"]="MACAddr,uint8_t*,6,0"
   msgInfos["6"]="IPAddr,uint8_t*,4,0"
   msgInfos["7"]="FirmVers,uint8_t*,6,0"
   msgInfos["8"]="SerieNum,uint8_t*,4,0"
@@ -41,7 +41,7 @@ function setMAFieldValues(handleMAck)
   valueInfos["1"]="@dst,"..Mcu..",0"
   valueInfos["2"]="@src,"..Wifi..",0"
   valueInfos["3"]="@cmdKey,"..cmdM..",0"
-  valueInfos["4"]="MacAddr,"..MacAddr..",0"
+  valueInfos["4"]="MACAddr,"..MACAddr..",0"
   valueInfos["5"]="IPAddr,"..IPAddr..",0"
   valueInfos["6"]="FirmVers,"..FirmVers..",0"
   valueInfos["7"]="SerieNum,"..SerieNum..",0"
