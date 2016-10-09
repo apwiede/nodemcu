@@ -839,7 +839,6 @@ static uint8_t handleNotEncryptedPart(structmsgDispatcher_t *self, msgParts_t *r
         answerType = 'A';
       }
       result = self->runAction(self, &answerType);
-ets_printf("§runares!%d!§", result);
       checkErrOK(result);
       result = self->prepareNotEncryptedAnswer(self, received, answerType);
 //ets_printf("§res NEA!%d!§", result);

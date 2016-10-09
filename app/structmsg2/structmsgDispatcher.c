@@ -471,8 +471,7 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
     *cp++ = '\0';
     if (fieldValueStr[0] == '@') {
       // call the callback function vor the field!!
-      result = self->fillMsgValue(self, fieldNameStr, &numericValue, &stringValue, type, fieldTypeId);
-ets_printf("§fmv!%s!%d!§", fieldNameStr, result);
+      result = self->fillMsgValue(self, fieldValueStr, &numericValue, &stringValue, type, fieldTypeId);
       checkErrOK(result);
     } else {
       switch (fieldTypeId) {
@@ -524,7 +523,6 @@ ets_printf("§fmv!%s!%d!§", fieldNameStr, result);
         result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
         break;
     }
-ets_printf("§fmv2!%s!%d!§", fieldNameStr, result);
     checkErrOK(result);
     idx++;
   }
@@ -742,6 +740,8 @@ ets_printf("§initDispatcher!%p!§", self);
   result = structmsgSendReceiveInit(self);
   checkErrOK(result);
   result = structmsgActionInit(self);
+  checkErrOK(result);
+  result = structmsgModuleDataValuesInit(self);
   checkErrOK(result);
   return STRUCT_DISP_ERR_OK;
 }

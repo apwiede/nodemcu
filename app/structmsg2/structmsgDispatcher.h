@@ -38,7 +38,7 @@
  * Created on October 1st, 2016
  */
 
-/* struct message data descriptions handling */
+/* struct message data dispatching */
 
 #include "structmsgDataView.h"
 #include "structmsgDataDescriptions.h"
@@ -177,6 +177,9 @@ typedef uint8_t (* runAction_t)(structmsgDispatcher_t *self, uint8_t *answerType
 typedef uint8_t (* fillMsgValue_t)(structmsgDispatcher_t *self, uint8_t *callbackName, int *numericValue, uint8_t **stringValue, uint8_t answerType, uint8_t fieldTypeId);
 
 typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
+typedef uint8_t (* setModuleValues_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* updateModuleValues_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* getModuleValue_t)(structmsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(structmsgDispatcher_t *self);
@@ -213,6 +216,8 @@ typedef struct structmsgDispatcher {
   uint8_t fileId;
   size_t fileSize;
   uint16_t dispFlags;
+  int numericValue;
+  uint8_t *stringValue;
   
   uint8_t numMsgHeaders;
   uint8_t maxMsgHeaders;
@@ -243,6 +248,10 @@ typedef struct structmsgDispatcher {
   runAction_t runAction;
   fillMsgValue_t fillMsgValue;
 
+  getModuleValue_t getModuleValue;
+  setModuleValues_t setModuleValues;
+  updateModuleValues_t updateModuleValues;
+
   openFileDesc_t openFile;
   closeFileDesc_t closeFile;
   writeLineDesc_t writeLine;
@@ -269,3 +278,4 @@ void freeStructmsgDispatcher(structmsgDispatcher_t *structmsgDispatcher);
 uint8_t structmsgIdentifyInit(structmsgDispatcher_t *self);
 uint8_t structmsgSendReceiveInit(structmsgDispatcher_t *self);
 uint8_t structmsgActionInit(structmsgDispatcher_t *self);
+uint8_t structmsgModuleDataValuesInit(structmsgDispatcher_t *self);

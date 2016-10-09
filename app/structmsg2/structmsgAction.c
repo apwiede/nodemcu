@@ -48,6 +48,7 @@
 #include "c_stdio.h"
 #include "platform.h"
 #include "structmsg2.h"
+#include "structmsgModuleData.h"
 
 typedef uint8_t (* action_t)(structmsgDispatcher_t *self);
 
@@ -126,12 +127,12 @@ ets_printf("§runDeletePasswdC§");
   return STRUCT_DISP_ERR_OK;
 }
 
-// ================================= getMacAddr ====================================
+// ================================= getMACAddr ====================================
 
-static uint8_t getMacAddr(structmsgDispatcher_t *self) {
+static uint8_t getMACAddr(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getMacAddr§");
+  result = self->getModuleValue(self, MODULE_INFO_MACAddr, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -140,7 +141,16 @@ ets_printf("§getMacAddr§");
 static uint8_t getIPAddr(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getMacAddr§");
+  result = self->getModuleValue(self, MODULE_INFO_IPAddr, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= getFirmwareVersion ====================================
+
+static uint8_t getFirmwareVersion(structmsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_FirmwareVersion, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -149,7 +159,7 @@ ets_printf("§getMacAddr§");
 static uint8_t getSerieNumber(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getSerieNumber§");
+  result = self->getModuleValue(self, MODULE_INFO_SerieNumber, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -158,7 +168,7 @@ ets_printf("§getSerieNumber§");
 static uint8_t getRSSI(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getRSSI§");
+  result = self->getModuleValue(self, MODULE_INFO_RSSI, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -167,7 +177,7 @@ ets_printf("§getRSSI§");
 static uint8_t getModuleConnection(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getModuleConnection§");
+  result = self->getModuleValue(self, MODULE_INFO_ModuleConnection, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -176,7 +186,7 @@ ets_printf("§getModuleConnection§");
 static uint8_t getDeviceMode(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getDeviceMode§");
+  result = self->getModuleValue(self, MODULE_INFO_DeviceMode, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -185,7 +195,7 @@ ets_printf("§getDeviceMode§");
 static uint8_t getDeviceSecurity(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getDeviceSecurity§");
+  result = self->getModuleValue(self, MODULE_INFO_DeviceSecurity, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -194,7 +204,7 @@ ets_printf("§getDeviceSecurity§");
 static uint8_t getErrorMain(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getErrorMain§");
+  result = self->getModuleValue(self, MODULE_INFO_ErrorMain, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -203,7 +213,7 @@ ets_printf("§getErrorMain§");
 static uint8_t getErrorSub(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getErrorSub§");
+  result = self->getModuleValue(self, MODULE_INFO_ErrorSub, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -212,7 +222,7 @@ ets_printf("§getErrorSub§");
 static uint8_t getDateAndTime(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getDateAndTime§");
+  result = self->getModuleValue(self, MODULE_INFO_DateAndTime, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -221,7 +231,7 @@ ets_printf("§getDateAndTime§");
 static uint8_t getSSIDs(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getSSIDs§");
+  result = self->getModuleValue(self, MODULE_INFO_SSIDs, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -230,7 +240,25 @@ ets_printf("§getSSIDs§");
 static uint8_t getReserve1(structmsgDispatcher_t *self) {
   int result;
 
-ets_printf("§getReserve1§");
+  result = self->getModuleValue(self, MODULE_INFO_Reserve1, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= getReserve2 ====================================
+
+static uint8_t getReserve2(structmsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_Reserve2, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= getReserve3 ====================================
+
+static uint8_t getReserve3(structmsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_Reserve3, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -242,8 +270,9 @@ static actionName2Action_t actionName2Actions [] = {
   { "runWpsMode",                (action_t)(&runWpsMode),                0, 0, 0 },
   { "runTestMode",               (action_t)(&runModulTestMode),          0, 0, 0 },
   { "runDeletePasswdCMode",      (action_t)(&runDeletePasswdCMode),      0, 0, 0 },
-  { "getMacAddr",                (action_t)(&getMacAddr),                0, 0, 0 },
-  { "getFirmeareVersion",        (action_t)(&getIPAddr),                 0, 0, 0 },
+  { "getMACAddr",                (action_t)(&getMACAddr),                0, 0, 0 },
+  { "getIPAddr",                 (action_t)(&getIPAddr),                 0, 0, 0 },
+  { "getFirmwareVersion",        (action_t)(&getFirmwareVersion),        0, 0, 0 },
   { "getSerieNumber",            (action_t)(&getSerieNumber),            0, 0, 0 },
   { "getRSSI",                   (action_t)(&getRSSI),                   0, 0, 0 },
   { "getModuleConnection",       (action_t)(&getModuleConnection),       0, 0, 0 },
@@ -254,23 +283,10 @@ static actionName2Action_t actionName2Actions [] = {
   { "getDateAndTime",            (action_t)(&getDateAndTime),            0, 0, 0 },
   { "getSSIDs",                  (action_t)(&getSSIDs),                  0, 0, 0 },
   { "getReserve1",               (action_t)(&getReserve1),               0, 0, 0 },
+  { "getReserve2",               (action_t)(&getReserve2),               0, 0, 0 },
+  { "getReserve3",               (action_t)(&getReserve3),               0, 0, 0 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
-
-#ifdef NOTDEF
-MacAddr=tonumber("ABCD",16)..tonumber("EF12",16)..tonumber("3456")
-IPAddr=tonumber("D4C3",16)..tonumber("1234",16)
-FirmVers=tonumber("1234",16)..tonumber("56AB",16)..tonumber("CDEF",16)
-SerieNum=tonumber("0213",16)..tonumber("2A10",16)
-rssi=tonumber("8A",16)
-ModConn=tonumber("41",16)
-DevMode=tonumber("34",16)
-DevSec=tonumber("00",16)
-ErrMain=0
-ErrSub=0
-date=tonumber("0000",16)..tonumber("0000",16)..tonumber("0000",16)
-numSsid=2
-#endif
 
 // ================================= setActionEntry ====================================
 
@@ -317,7 +333,6 @@ static uint8_t runAction(structmsgDispatcher_t *self, uint8_t *answerType) {
 
   if (received->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
     dataView = self->structmsgDataView->dataView;
-ets_printf("§runAction!%c!§", received->u8CmdKey);
     switch (received->u8CmdKey) {
     case 'B':
       result = dataView->getUint8(dataView, 7, &actionMode);
@@ -337,22 +352,6 @@ ets_printf("§runAction!%c!§", received->u8CmdKey);
       }
       return STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND;
       break;
-#ifdef NOTDEF
-    case 'M':
-      idx = 0;
-      actionEntry = &actionName2Actions[idx];
-//ets_printf("§runActionMu8!%s!%c!!§", actionEntry->actionName, received->u8CmdKey);
-      while (actionEntry->actionName != NULL) { 
-//        if ((actionEntry->u8CmdKey == received->u8CmdKey) && (actionMode == actionEntry->mode))
-        if ((actionEntry->u8CmdKey == received->u8CmdKey)) {
-          result = actionEntry->action(self);
-          checkErrOK(result);
-        }
-        idx++;
-        actionEntry = &actionName2Actions[idx];
-      }
-      break;
-#endif
     }
   } else {
 ets_printf("§runActionu16!%c%c!%c!§", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, answerType);
@@ -363,9 +362,26 @@ ets_printf("§runActionu16!%c%c!%c!§", (received->u16CmdKey>>8)&0xFF, received-
 // ================================= fillMsgValue ====================================
 
 static uint8_t fillMsgValue(structmsgDispatcher_t *self, uint8_t *callbackName,int *numericValue, uint8_t **stringValue,  uint8_t answerType, uint8_t fieldTypeId) {
+  int result;
+  actionName2Action_t *actionEntry;
+  int idx;
 
-ets_printf("§fillMsgValue!%s!§");
-  return STRUCT_DISP_ERR_OK;
+  // skip the '@' char!
+  callbackName++;
+  idx = 0;
+  actionEntry = &actionName2Actions[idx];
+  while (actionEntry->actionName != NULL) { 
+    if (c_strcmp(actionEntry->actionName, callbackName) == 0) {
+      result = actionEntry->action(self);
+      checkErrOK(result);
+      *numericValue = self->numericValue;
+      *stringValue = self->stringValue;
+      return STRUCT_DISP_ERR_OK;
+    }
+    idx++;
+    actionEntry = &actionName2Actions[idx];
+  }
+  return STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= structmsgActionInit ====================================
