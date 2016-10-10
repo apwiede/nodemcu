@@ -180,6 +180,8 @@ typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *
 typedef uint8_t (* setModuleValues_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* getModuleValue_t)(structmsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* websocketRunClientMode_t)(structmsgDispatcher_t *self, uint8_t mode);
+typedef uint8_t (* websocketRunAPMode_t)(structmsgDispatcher_t *self);
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(structmsgDispatcher_t *self);
@@ -270,6 +272,9 @@ typedef struct structmsgDispatcher {
   toBase64_t toBase64;
   fromBase64_t fromBase64;
 
+  websocketRunClientMode_t websocketRunClientMode;
+  websocketRunAPMode_t websocketRunAPMode;
+
 } structmsgDispatcher_t;
 
 structmsgDispatcher_t *newStructmsgDispatcher();
@@ -279,3 +284,4 @@ uint8_t structmsgIdentifyInit(structmsgDispatcher_t *self);
 uint8_t structmsgSendReceiveInit(structmsgDispatcher_t *self);
 uint8_t structmsgActionInit(structmsgDispatcher_t *self);
 uint8_t structmsgModuleDataValuesInit(structmsgDispatcher_t *self);
+uint8_t structmsgWebsocketInit(structmsgDispatcher_t *self);

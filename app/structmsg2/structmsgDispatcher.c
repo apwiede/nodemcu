@@ -743,6 +743,8 @@ ets_printf("§initDispatcher!%p!§", self);
   checkErrOK(result);
   result = structmsgModuleDataValuesInit(self);
   checkErrOK(result);
+  result = structmsgWebsocketInit(self);
+  checkErrOK(result);
   return STRUCT_DISP_ERR_OK;
 }
 

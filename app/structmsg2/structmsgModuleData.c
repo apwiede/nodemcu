@@ -146,10 +146,15 @@ static uint8_t getModuleValue(structmsgDispatcher_t *self, uint16_t which, uint8
     *stringValue = structmsgWifiData.provisioningSsid;
     break;
   case MODULE_INFO_PROVISIONING_PORT:
+ets_printf("getModuleValue: port: %d\n", structmsgWifiData.provisioningPort);
     *numericValue = structmsgWifiData.provisioningPort;
     break;
   case MODULE_INFO_PROVISIONING_IP_ADDR:
     *stringValue = structmsgWifiData.provisioningIPAddr;
+ets_printf("getModuleValue: IPAddr: 0x%08x\n", structmsgWifiData.provisioningIPAddr);
+    break;
+  default:
+    return STRUCT_DISP_ERR_BAD_MODULE_VALUE_WHICH;
     break;
   }
   return STRUCT_DISP_ERR_OK;
@@ -329,7 +334,7 @@ static uint8_t setModuleValues(structmsgDispatcher_t *self) {
 
   provisioningSsid = "testDevice_connect";
   c_memcpy(structmsgWifiData.provisioningSsid, provisioningSsid, c_strlen(provisioningSsid));
-  provisioningPort = 80;
+  structmsgWifiData.provisioningPort = 80;
   provisioningIPAddr = "192.168.4.1";
   c_memcpy(structmsgWifiData.provisioningIPAddr, provisioningIPAddr, c_strlen(provisioningIPAddr));
   result = getStationConfig(self);
@@ -340,7 +345,6 @@ static uint8_t setModuleValues(structmsgDispatcher_t *self) {
   return STRUCT_DISP_ERR_OK;
 }
 
-uint8_t runAPMode(structmsgDispatcher_t *self);
 // ================================= structmsgModuleDataValuesInit ====================================
 
 uint8_t structmsgModuleDataValuesInit(structmsgDispatcher_t *self) {
@@ -350,8 +354,6 @@ uint8_t structmsgModuleDataValuesInit(structmsgDispatcher_t *self) {
   self->updateModuleValues = &updateModuleValues;
   self->getModuleValue = &getModuleValue;
   self->setModuleValues(self);
-result = runAPMode(self);
-checkErrOK(result);
   return STRUCT_DISP_ERR_OK;
 }
 
