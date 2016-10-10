@@ -55,6 +55,14 @@
 #include "structmsg2.h"
 #include "structmsgModuleData.h"
 
+enum websocket_opcode {
+  OPCODE_TEXT = 1,
+  OPCODE_BINARY = 2,
+  OPCODE_CLOSE = 8,
+  OPCODE_PING = 9,
+  OPCODE_PONG = 10,
+};
+
 #define TCP ESPCONN_TCP
 
 typedef struct socketInfo {
@@ -64,6 +72,296 @@ typedef struct socketInfo {
 #define MAX_SOCKET 5
 static int socket_num = 0;
 static socketInfo_t *socket[MAX_SOCKET] = { NULL, NULL, NULL, NULL, NULL };
+
+static const char *header_key = "Sec-WebSocket-Key: ";
+static const char *ws_uuid ="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+static const char *HEADER_WEBSOCKETLINE = "Upgrade: websocket";
+
+static char *HEADER_OK = "HTTP/1.x 200 OK \r\n\
+Server: ESP \r\n\
+Connection: close \r\n\
+Cache-Control: max-age=3600, public \r\n\
+Content-Type: text/html \r\n\
+Content-Encoding: gzip \r\n\r\n";
+
+static char *HEADER_WEBSOCKET_START = "\
+HTTP/1.1 101 WebSocket Protocol Handshake\r\n\
+Connection: Upgrade\r\n\
+Upgrade: WebSocket\r\n\
+Access-Control-Allow-Origin: http://";
+
+static char *HEADER_WEBSOCKET_URL = "192.168.178.67";
+
+static char *HEADER_WEBSOCKET_END = "\r\n\
+Access-Control-Allow-Credentials: true\r\n\
+Access-Control-Allow-Headers: content-type \r\n\
+Sec-WebSocket-Accept: ";
+
+static uint8_t err_opcode[5] = {0};
+
+// #define checkAllocOK(addr) if(addr == NULL) checkErrOK(WEBSOCKET_ERR_OUT_OF_MEMORY, "")
+
+enum structmsg_error_code
+{
+  WEBSOCKET_ERR_OK = 0,
+  WEBSOCKET_ERR_OUT_OF_MEMORY = -1,
+  WEBSOCKET_ERR_TOO_MUCH_DATA = -2,
+  WEBSOCKET_ERR_INVALID_FRAME_OPCODE = -3,
+  WEBSOCKET_ERR_USERDATA_IS_NIL = -4,
+  WEBSOCKET_ERR_WRONG_METATABLE = -5,
+  WEBSOCKET_ERR_PESP_CONN_IS_NIL = -6,
+  WEBSOCKET_ERR_MAX_SOCKET_REACHED = -7,
+};
+
+typedef struct websocketUserData {
+  struct espconn *pesp_conn;
+//  int self_ref;
+//  int cb_connect_ref;
+//  int cb_reconnect_ref;
+//  int cb_disconnect_ref;
+//  int cb_receive_ref;
+//  int cb_send_ref;
+//  int cb_dns_found_ref;
+  uint8_t isWebsocket;
+  uint8_t num_urls;
+  uint8_t max_urls;
+  char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
+  char *curr_url; // that is url which has been provided in the received data
+} websocketUserData_t;
+
+static uint8_t websocket_writeData( const char *payload, int size, websocketUserData_t *wud, int opcode);
+
+#define BASE64_INVALID '\xff'
+#define BASE64_PADDING '='
+#define ISBASE64(c) (unbytes64[c] != BASE64_INVALID)
+
+#define SSL_BUFFER_SIZE 5120
+
+static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+// ============================ websocket_parse =========================================
+
+static int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char **resData, int *len, websocketUserData_t *wud) {
+  uint8_t byte = data[0];
+  uint8_t FIN = byte & 0x80;
+  uint8_t opcode = byte & 0x0F;
+
+  if ((opcode > 0x03 && opcode < 0x08) || opcode > 0x0B) {
+    ets_sprintf(err_opcode, "%d", opcode);
+//    checkErrOK(gL, WEBSOCKET_ERR_INVALID_FRAME_OPCODE, err_opcode);
+  }
+
+  //   opcodes: {1 text 2 binary 8 close 9 ping 10 pong}
+  switch (opcode) {
+  case OPCODE_TEXT:
+ets_printf("parse text\n");
+    break;
+  case OPCODE_BINARY:
+ets_printf("parse binary\n");
+    break;
+  case OPCODE_CLOSE:
+    break;
+  case OPCODE_PING:
+    websocket_writeData(" ", 1, wud, OPCODE_PONG);
+    return WEBSOCKET_ERR_OK;
+    break;
+  case OPCODE_PONG:
+    return WEBSOCKET_ERR_OK;
+    break;
+  }
+  byte = data[1];
+
+  char * recv_data;
+  int masked = byte & 0x80;
+  int size = byte & 0x7F;
+  int offset = 2;
+
+  if (size == 126) {
+    size = 0;
+    size = data[3];                  //LSB
+    size |= (uint64_t) data[2] << 8; //MSB
+    offset = 4;
+  } else if (size == 127) {
+    size = 0;
+    size |= (uint64_t) data[2] << 56;
+    size |= (uint64_t) data[3] << 48;
+    size |= (uint64_t) data[4] << 40;
+    size |= (uint64_t) data[5] << 32;
+    size |= (uint64_t) data[6] << 24;
+    size |= (uint64_t) data[7] << 16;
+    size |= (uint64_t) data[8] << 8;
+    size |= (uint64_t) data[9];
+    offset = 10;
+  }
+
+  if (masked) {
+    //read mask key
+    char mask[4];
+    uint64_t i;
+
+    mask[0] = data[offset];
+    mask[1] = data[offset + 1];
+    mask[2] = data[offset + 2];
+    mask[3] = data[offset + 3];
+    offset += 4;
+    for (i = 0; i < size; i++) {
+      data[i + offset] ^= mask[i % 4];
+    }
+  }
+  recv_data = &data[offset];
+for (int i = 0; i < size; i++) {
+  ets_printf("i: %d 0x%02x\n", i, recv_data[i]&0xFF);
+}
+  *resData = recv_data;
+  *len = size;
+  recv_data[size] = 0;
+
+  if (size + offset < dataLenb) {
+    websocket_parse(&data[size + offset], dataLenb - (size + offset), resData, len, wud);
+  }
+  return WEBSOCKET_ERR_OK;
+}
+
+// ============================ toBase64 =========================================
+
+static uint8_t *toBase64 ( const uint8_t *msg, size_t *len){
+  size_t i;
+  size_t n;
+  size_t lgth;
+  uint8_t * q;
+  uint8_t *out;
+
+  n = *len;
+  if (!n)  // handle empty string case 
+    return NULL;
+
+  lgth = (n + 2) / 3 * 4;
+  out = (uint8_t *)os_malloc(lgth + 1);
+  out[lgth] = '\0';
+  if (out == NULL) {
+    return NULL;
+  }
+  uint8 bytes64[sizeof(b64)];
+  c_memcpy(bytes64, b64, sizeof(b64));   //Avoid lots of flash unaligned fetches
+
+  for (i = 0, q = out; i < n; i += 3) {
+    int a = msg[i];
+    int b = (i + 1 < n) ? msg[i + 1] : 0;
+    int c = (i + 2 < n) ? msg[i + 2] : 0;
+    *q++ = bytes64[a >> 2];
+    *q++ = bytes64[((a & 3) << 4) | (b >> 4)];
+    *q++ = (i + 1 < n) ? bytes64[((b & 15) << 2) | (c >> 6)] : BASE64_PADDING;
+    *q++ = (i + 2 < n) ? bytes64[(c & 63)] : BASE64_PADDING;
+  }
+  *q = '\0';
+  *len = q - out;
+  return out;
+}
+
+// ============================ websocket_writeData =======================
+
+static uint8_t websocket_writeData( const char *payload, int size, websocketUserData_t *wud, int opcode)
+{
+  uint8_t hdrBytes[4]; // we have either 2 or 4 bytes depending on length of message
+  int hdrLgth;
+  int fsize;
+  uint8_t*buff;
+  int i;
+
+  hdrLgth = 2;
+  hdrBytes[0] = 0x80; //set first bit
+  hdrBytes[0] |= opcode; //frame->opcode; //set op code
+  if (size < 126) {
+    hdrBytes[1] = size;
+  } else {
+    if (size < SSL_BUFFER_SIZE - sizeof(hdrBytes)) {
+      hdrLgth += 2;
+      hdrBytes[1] = 126;
+      hdrBytes[2] = (size >> 8) & 0xFF;
+      hdrBytes[3] = size & 0xFF;
+    } else {
+      return WEBSOCKET_ERR_TOO_MUCH_DATA;
+    }
+  }
+  fsize = size + hdrLgth;
+  buff = os_malloc(fsize);
+  if (buff == NULL) {
+    return WEBSOCKET_ERR_OUT_OF_MEMORY;
+  }
+  for (i = 0; i < hdrLgth; i++) {
+    buff[i] = hdrBytes[i];
+  }
+
+  os_memcpy(&buff[hdrLgth], (uint8_t *)payload, size);
+  espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
+  os_free(buff);
+  return WEBSOCKET_ERR_OK;
+}
+
+
+// ================================= websocket_recv ====================================
+
+static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **data, int *lgth) {
+  char * key = NULL;
+  int idx;
+  int found;
+
+  idx = 0;
+ets_printf("websocket_recv: %s!%s!\n",string,  wud->curr_url);
+  if ((wud->curr_url != NULL) && (strstr(string, wud->curr_url) != NULL)) {
+    if (strstr(string, header_key) != NULL) {
+      char *begin = strstr(string, header_key) + os_strlen(header_key);
+      char *end = strstr(begin, "\r");
+      key = os_malloc((end - begin) + 1);
+//      checkAllocgLOK(key);
+      os_memcpy(key, begin, end - begin);
+      key[end - begin] = 0;
+    }
+ets_printf("websocket_recv2: key: %s\n", key);
+    const char *trailer;
+    trailer = "\r\n\r\n";
+    int trailerLen;
+    trailerLen = os_strlen(trailer);
+    size_t digestLen;
+    digestLen = 20; //sha1 is always 20 byte long
+    uint8_t digest[digestLen];
+    int payloadLen;
+    char *payload;
+    uint8_t *base64Digest;
+    SHA1_CTX ctx;
+    // Use the SHA* functions in the rom
+    SHA1Init(&ctx);
+    SHA1Update(&ctx, key, os_strlen(key));
+    SHA1Update(&ctx, ws_uuid, os_strlen(ws_uuid));
+    SHA1Final(digest, &ctx);
+
+    base64Digest = toBase64(digest, &digestLen);
+//    checkAllocgLOK(base64Digest);
+    payloadLen = os_strlen(HEADER_WEBSOCKET_START) + os_strlen(HEADER_WEBSOCKET_URL) +os_strlen(HEADER_WEBSOCKET_END) + digestLen + trailerLen;
+    payload = os_malloc(payloadLen);
+//    checkAllocgLOK(payload);
+    os_sprintf(payload, "%s%s%s%s%s\0", HEADER_WEBSOCKET_START, HEADER_WEBSOCKET_URL, HEADER_WEBSOCKET_END, base64Digest, trailer);
+    os_free(base64Digest);
+    struct espconn *pesp_conn = NULL;
+    pesp_conn = wud->pesp_conn;
+
+    // FIXME!! reboot called if setting here for socket!!
+    if (wud->isWebsocket != 1) {
+      wud->isWebsocket = 1;
+    }
+
+ets_printf("payload: %d!%s!\n", payloadLen, payload);
+    int result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
+    os_free(key);
+//    checkErrOK(gL, result, "espconn_sent");
+  } else if (wud->isWebsocket == 1) {
+ets_printf("websocket_parse: %d!%s!curr_ulr: %s!\n", os_strlen(string), string, wud->curr_url);
+    websocket_parse(string, os_strlen(string), data, lgth, wud);
+  }
+  return WEBSOCKET_ERR_OK;
+
+}
 
 // ================================= webSocketRunClientMode ====================================
 
@@ -98,6 +396,9 @@ ets_printf("serverReconnected: arg: %p\n", arg);
 
 static void socketReceived(void *arg, char *pdata, unsigned short len) {
   struct espconn *pesp_conn;
+  char url[50] = { 0 };
+  int idx;
+  websocketUserData_t *wud;
 
   pesp_conn = (struct espconn *)arg;
 ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
@@ -109,6 +410,36 @@ ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
   ets_printf("%d",pesp_conn->proto.tcp->remote_port);
   ets_printf(" received.\n");
 
+
+  wud = (websocketUserData_t *)pesp_conn->reverse;
+  if (strstr(pdata, "GET /") != 0) {
+    char *begin = strstr(pdata, "GET /") + 4;
+    char *end = strstr(begin, " ");
+    os_memcpy(url, begin, end - begin);
+    url[end - begin] = 0;
+  }
+  if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
+    idx = 0;
+    wud->curr_url = NULL;
+    while (idx < wud->num_urls) {
+      if (c_strcmp(url, wud->urls[idx]) == 0) {
+        wud->curr_url = wud->urls[idx];
+        wud->isWebsocket = 1;
+        break;
+      }
+      idx++;
+    }
+  }
+ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
+
+  if(wud->isWebsocket == 1) {
+    char *data = "";
+    int lgth = 0;
+    int result;
+
+    result = websocket_recv(pdata, wud, &data, &lgth);
+//    checkErrOK(gL,result,"websocket_recv");
+  }
 }
 
 // ================================= socketSent  ====================================
@@ -219,6 +550,7 @@ void alarmTimerAP(void *arg) {
   const char *domain;
   unsigned type;
   int result;
+  websocketUserData_t *wud;
 
   timerId = (uint8_t)((uint32_t)arg);
   tmr = &structmsgTimers[timerId];
@@ -243,14 +575,29 @@ ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
   domain = (char *)stringValue;
 domain = "0.0.0.0";
 
+  wud = (websocketUserData_t *)os_zalloc(sizeof(websocketUserData_t));
+//   checkAllocOK(wud);
+ets_printf("wud0: %p\n", wud);
+  wud->isWebsocket = 0;
+  wud->num_urls = 0;
+  wud->max_urls = 4;
+  wud->urls = (char **)c_zalloc(sizeof(char *) * wud->max_urls);
+//  checkAllocgLOK(wud->urls);
+  wud->urls[0] = NULL;
+  wud->curr_url = NULL;
+wud->urls[0] = "/getaplist";
+wud->urls[1] = "/getapdeflist";
+wud->num_urls = 2;
+
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
+  wud->pesp_conn = pesp_conn;
 //  checkAllocOK(pesp_conn);
 
   type = ESPCONN_TCP;
   pesp_conn->type = type;
   pesp_conn->state = ESPCONN_NONE;
   // reverse is for the callback function
-  pesp_conn->reverse = pesp_conn;
+  pesp_conn->reverse = wud;
 
   pesp_conn->proto.tcp = NULL;
   pesp_conn->proto.udp = NULL;
