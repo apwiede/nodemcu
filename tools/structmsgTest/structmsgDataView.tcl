@@ -112,7 +112,7 @@ namespace eval ::structmsg {
   namespace eval structmsgDataView {
     namespace ensemble create
       
-    namespace export structmsgDataView freeStructmsgDataView getFieldNameIdFromStr
+    namespace export structmsgDataView freeStructmsgDataView getFieldNameIdFromStr getCrc
 
     variable specialFieldNames2Ids
     set specialFieldNames2Ids [dict create]
@@ -344,11 +344,11 @@ puts stderr "fni!$fieldNameId!"
     proc getCrc {fieldInfo valueVar startOffset size} {
       upvar $valueVar value
 
-      set crcLgth [dict gget $fieldInfo fieldLgth]
+      set crcLgth [dict get $fieldInfo fieldLgth]
       set value ""
       set lgth [expr {$size - $crcLgth}]
       set crcVal 0
-      set idx $headerOffset
+      set idx $startOffset
       set str [string range $data $idx [expr {$idx + $size - 1}]]
 set cnt 0
       foreach ch [split $str ""] {

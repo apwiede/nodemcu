@@ -50,10 +50,15 @@ namespace eval structmsg {
   namespace eval dataView {
     namespace ensemble create
       
-    namespace export dataView freeDataView setData getFieldTypeIdFromStr
+    namespace export dataView freeDataView setData getFieldTypeIdFromStr appendData
+    namespace export getUint8 getInt8 setUint8 setInt8 getUint16 getInt16 setUint16 setInt16
+    namespace export getUint32 getInt32 setUint32 setInt32
+    namespace export getUint8Vector getInt8Vector setUint8Vector setInt8Vector
+    namespace export getUint16Vector getInt16Vector setUint16Vector setInt16Vector
+    namespace export getUint32Vector getInt32Vector setUint32Vector setInt32Vector
 
-    variable lgth
-    variable data
+    variable lgth 0
+    variable data ""
     variable fieldTypeNames2Ids
     set fieldTypeNames2Ids [dict create]
     dict set fieldTypeNames2Ids uint0_t   DATA_VIEW_FIELD_UINT0_T
@@ -138,7 +143,7 @@ namespace eval structmsg {
 
     # ================================= getInt8 ====================================
     
-    proc getInt8{offset valueVar} {
+    proc getInt8 {offset valueVar} {
       variable lgth
       variable data
       upvar $valueVar value
@@ -157,7 +162,7 @@ namespace eval structmsg {
     
     # ================================= setUint8 ====================================
     
-    proc setUint8{offset value} {
+    proc setUint8 {offset value} {
       variable lgth
       variable data
 
@@ -171,7 +176,7 @@ namespace eval structmsg {
     
     # ================================= setInt8 ====================================
     
-    proc setInt8{offset value} {
+    proc setInt8 {offset value} {
       variable lgth
       variable data
 
@@ -186,7 +191,7 @@ namespace eval structmsg {
     
     # ================================= getUint16 ====================================
     
-    proc getUint16{offset valueVar} {
+    proc getUint16 {offset valueVar} {
       variable lgth
       variable data
       upvar $valueVar value
@@ -213,7 +218,7 @@ namespace eval structmsg {
     
     # ================================= getInt16 ====================================
     
-    proc getInt16{offset valueVar} {
+    proc getInt16 {offset valueVar} {
       variable lgth
       variable data
       upvar $valueVar value
@@ -232,7 +237,7 @@ namespace eval structmsg {
     
     # ================================= setUint16 ====================================
     
-    proc setUint16{offset value} {
+    proc setUint16 {offset value} {
       variable lgth
       variable data
 
@@ -249,7 +254,7 @@ namespace eval structmsg {
     
     # ================================= setInt16 ====================================
     
-    proc setInt16{offset value} {
+    proc setInt16 {offset value} {
       variable lgth
       variable data
 
@@ -267,7 +272,7 @@ namespace eval structmsg {
     
     # ================================= getUint32 ====================================
     
-    proc getUint32{offset valueVar} {
+    proc getUint32 {offset valueVar} {
       variable lgth
       variable data
       upvar $valueVar value
@@ -610,6 +615,17 @@ namespace eval structmsg {
       }
       set data $buffer
       set lgth $size
+      return $::DATA_VIEW_ERR_OK
+    }
+    
+    # ================================= appendData ====================================
+    
+    proc appendData {buffer size} {
+      variable data
+      variable lgth
+
+      append data $buffer
+      incr lgth $size
       return $::DATA_VIEW_ERR_OK
     }
     

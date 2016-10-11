@@ -222,10 +222,6 @@ set STRUCT_MSG_NUM_CMD_HEADER_FIELDS 2
 set STRUCT_MSG_DEFINITION_CMD_KEY 0xFFFF
 set STRUCT_MSG_FREE_FIELD_ID 0xFF
 
-set STRUCT_MSG_NO_INCR 0
-set STRUCT_MSG_INCR    1
-set STRUCT_MSG_DECR    -1
-
 set ::structmsg(prefix) "stmsg_"
 #set ::structmsg(handles) [list]
 set ::structmsg(numHandles) 1
