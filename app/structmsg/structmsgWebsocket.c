@@ -52,7 +52,7 @@
 #include "c_stdlib.h"
 #include "c_stdio.h"
 #include "platform.h"
-#include "structmsg2.h"
+#include "structmsg.h"
 #include "structmsgModuleData.h"
 
 enum websocket_opcode {
