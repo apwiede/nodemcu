@@ -40,289 +40,122 @@
 
 #ifndef STRUCTMSG_H
 #define	STRUCTMSG_H
+
 #include "c_types.h"
+#include "structmsgDispatcher.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
+#define STRUCT_MSG_HAS_CRC              (1 << 0)
+#define STRUCT_MSG_UINT8_CRC            (1 << 1)
+#define STRUCT_MSG_HAS_FILLER           (1 << 2)
+#define STRUCT_MSG_U8_CMD_KEY           (1 << 3)
+#define STRUCT_MSG_HAS_TABLE_ROWS       (1 << 4)
+#define STRUCT_MSG_IS_INITTED           (1 << 5)
+#define STRUCT_MSG_IS_PREPARED          (1 << 6)
+#define STRUCT_DEF_IS_INITTED           (1 << 7)
+#define STRUCT_DEF_IS_PREPARED          (1 << 8)
+#define STRUCT_MSG_CRC_USE_HEADER_LGTH  (1 << 9)
 
-#define HANDLE_PREFIX "stmsg_"
-enum structmsg_field_type
-{
-  STRUCT_MSG_FIELD_NONE_T        = 0,
-  STRUCT_MSG_FIELD_UINT8_T       = 1,
-  STRUCT_MSG_FIELD_INT8_T        = 2,
-  STRUCT_MSG_FIELD_UINT16_T      = 3,
-  STRUCT_MSG_FIELD_INT16_T       = 4,
-  STRUCT_MSG_FIELD_UINT32_T      = 5,
-  STRUCT_MSG_FIELD_INT32_T       = 6,
-  STRUCT_MSG_FIELD_UINT8_VECTOR  = 7,
-  STRUCT_MSG_FIELD_INT8_VECTOR   = 8,
-  STRUCT_MSG_FIELD_UINT16_VECTOR = 9,
-  STRUCT_MSG_FIELD_INT16_VECTOR  = 10,
-  STRUCT_MSG_FIELD_UINT32_VECTOR = 11,
-  STRUCT_MSG_FIELD_INT32_VECTOR  = 12,
-};
+#define STRUCT_MSG_FIELD_IS_SET   (1 << 0)
 
-enum structmsg_special_field_names
-{
-  STRUCT_MSG_SPEC_FIELD_SRC              = 255,
-  STRUCT_MSG_SPEC_FIELD_DST              = 254,
-  STRUCT_MSG_SPEC_FIELD_TARGET_CMD       = 253,
-  STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH       = 252,
-  STRUCT_MSG_SPEC_FIELD_CMD_KEY          = 251,
-  STRUCT_MSG_SPEC_FIELD_CMD_LGTH         = 250,
-  STRUCT_MSG_SPEC_FIELD_RANDOM_NUM       = 249,
-  STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM     = 248,
-  STRUCT_MSG_SPEC_FIELD_FILLER           = 247,
-  STRUCT_MSG_SPEC_FIELD_CRC              = 246,
-  STRUCT_MSG_SPEC_FIELD_ID               = 245,
-  STRUCT_MSG_SPEC_FIELD_TABLE_ROWS       = 244,
-  STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS = 243,
-  STRUCT_MSG_SPEC_FIELD_NUM_FIELDS       = 242,
-  STRUCT_MSG_SPEC_FIELD_LOW              = 241,         // this must be the last entry!!
-};
+#define STRUCT_DEF_NUM_DEF_FIELDS 15
+#define STRUCT_DEF_CMD_KEY 0xFFFF
 
-enum structmsg_error_code
-{
-  STRUCT_MSG_ERR_OK                    = 0,
-  STRUCT_MSG_ERR_VALUE_NOT_SET         = 255,
-  STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE    = 254,
-  STRUCT_MSG_ERR_BAD_VALUE             = 253,
-  STRUCT_MSG_ERR_BAD_FIELD_TYPE        = 252,
-  STRUCT_MSG_ERR_FIELD_NOT_FOUND       = 251,
-  STRUCT_MSG_ERR_VALUE_TOO_BIG         = 250,
-  STRUCT_MSG_ERR_BAD_SPECIAL_FIELD     = 249,
-  STRUCT_MSG_ERR_BAD_HANDLE            = 248,
-  STRUCT_MSG_ERR_OUT_OF_MEMORY         = 247,
-  STRUCT_MSG_ERR_HANDLE_NOT_FOUND      = 246,
-  STRUCT_MSG_ERR_NOT_ENCODED           = 245,
-  STRUCT_MSG_ERR_ENCODE_ERROR          = 244,
-  STRUCT_MSG_ERR_DECODE_ERROR          = 243,
-  STRUCT_MSG_ERR_BAD_CRC_VALUE         = 242,
-  STRUCT_MSG_ERR_CRYPTO_INIT_FAILED    = 241,
-  STRUCT_MSG_ERR_CRYPTO_OP_FAILED      = 240,
-  STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM  = 239,
-  STRUCT_MSG_ERR_NOT_ENCRYPTED         = 238,
-  STRUCT_MSG_ERR_DEFINITION_NOT_FOUND  = 237,
-  STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS = 236,
-  STRUCT_MSG_ERR_BAD_TABLE_ROW         = 235,
-  STRUCT_MSG_ERR_TOO_MANY_FIELDS       = 234,
-  STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY = 233,
-  STRUCT_MSG_ERR_NO_SLOT_FOUND         = 232,
-  STRUCT_MSG_ERR_BAD_NUM_FIELDS        = 231,
-};
+#define STRUCT_DEF_TO_DATA        (1 << 0)
+#define STRUCT_DEF_FROM_DATA      (1 << 1)
 
-enum structmsg_special_fields
-{
-  STRUCT_MSG_FIELD_SRC                = 1,
-  STRUCT_MSG_FIELD_DST                = 2,
-  STRUCT_MSG_FIELD_TOTAL_LGTH         = 3,
-  STRUCT_MSG_FIELD_CMD_KEY            = 4,
-  STRUCT_MSG_FIELD_CMD_LGTH           = 5,
-};
-
-#define STRUCT_MSG_ENCODED       (1 << 0)
-#define STRUCT_MSG_DECODED       (1 << 1)
-#define STRUCT_MSG_FIELD_IS_SET  (1 << 2)
-#define STRUCT_MSG_HAS_CRC       (1 << 3)
-#define STRUCT_MSG_UINT8_CRC     (1 << 4)
-#define STRUCT_MSG_HAS_FILLER    (1 << 5)
-#define STRUCT_MSG_SHORT_CMD_KEY (1 << 6)
-
-// header length: uint16_t src + uint16_t dst + uint16_t totalLgth
-#define STRUCT_MSG_HEADER_LENGTH (sizeof(uint16_t) * 3)
-#define STRUCT_MSG_SHORT_HEADER_LENGTH (sizeof(uint8_t) + sizeof(uint8_t))
-// cmd header length uint16_t cmdKey + unit16_t cmdLgth
-#define STRUCT_MSG_CMD_HEADER_LENGTH (sizeof(uint16_t) * 2)
-#define STRUCT_MSG_SHORT_CMD_HEADER_LENGTH (sizeof(uint8_t))
-#define STRUCT_MSG_TOTAL_HEADER_LENGTH (STRUCT_MSG_HEADER_LENGTH + STRUCT_MSG_CMD_HEADER_LENGTH)
-#define STRUCT_MSG_SHORT_TOTAL_HEADER_LENGTH (STRUCT_MSG_SHORT_HEADER_LENGTH + STRUCT_MSG_SHORT_CMD_HEADER_LENGTH)
-#define STRUCT_MSG_NUM_HEADER_FIELDS 3
-#define STRUCT_MSG_NUM_CMD_HEADER_FIELDS 2
-#define STRUCT_MSG_DEFINITION_CMD_KEY 0xFFFF
-#define STRUCT_MSG_FREE_FIELD_ID 0xFF
-#define STRUCT_MSG_NO_INCR 0
-#define STRUCT_MSG_INCR    1
-#define STRUCT_MSG_DECR    -1
-
-#define checkOffsetErrOK(result) if (result != STRUCT_MSG_ERR_OK) return -result
-#define checkBadOffset(val) if (val < 0) return val
-#define checkEncodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_ENCODE_ERROR
-#define checkDecodeOffset(val) if (val < 0) return STRUCT_MSG_ERR_DECODE_ERROR
-#define checkAllocOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_OUT_OF_MEMORY
 #define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
-#define checkErrOK(result) if(result != STRUCT_MSG_ERR_OK) return result
 
-typedef struct id2offset {
-  uint16_t id;
-  uint16_t offset;
-} id2offset_t;
+typedef struct structmsgData structmsgData_t;
 
-typedef struct str2key {
-  uint8_t *str;
-  uint8_t key;
-} str2key_t;
+typedef uint8_t (* createMsg_t)(structmsgData_t *self, int numFields, uint8_t **handle);
+typedef uint8_t (* deleteMsg_t)(structmsgData_t *self);
+typedef uint8_t (* addField_t)(structmsgData_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
+typedef uint8_t (* getFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* setFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 
-typedef struct name2id {
-  uint8_t *str;
-  uint8_t id;
-  uint8_t refCnt;
-} name2id_t;
+typedef uint8_t (* getTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* setTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
+typedef uint8_t (* dumpMsg_t)(structmsgData_t *self);
+typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
+typedef uint8_t (* initMsg_t)(structmsgData_t *self);
+typedef uint8_t (* prepareMsg_t)(structmsgData_t *self);
+typedef uint8_t (* getMsgData_t)(structmsgData_t *structmsgData, uint8_t **data, int *lgth);
+typedef uint8_t (* setMsgData_t)(structmsgData_t *structmsgData, const uint8_t *data);
+typedef uint8_t (* setMsgFieldFromList_t)(structmsgData_t *selfconst, const uint8_t **listVector, uint8_t numEntries, uint16_t flags);
 
-typedef struct fieldNameDefinitions
-{
-  size_t numDefinitions;
-  size_t maxDefinitions;
-  name2id_t *definitions;
-} fieldNameDefinitions_t;
+typedef uint8_t (* dumpDefFields_t)(structmsgData_t *self);
+typedef uint8_t (* initDef_t)(structmsgData_t *self);
+typedef uint8_t (* prepareDef_t)(structmsgData_t *self);
+typedef uint8_t (* addDefField_t)(structmsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
+typedef uint8_t (* getDefFieldValue_t)(structmsgData_t *self, const uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int idx);
+typedef uint8_t (* setDefFieldValue_t)(structmsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int idx);
+typedef uint8_t (* setDef_t)(structmsgData_t *self, const uint8_t *data);
+typedef uint8_t (* getDef_t)(structmsgData_t *self, uint8_t **data, int *lgth);
+typedef uint8_t (* createMsgFromDef_t)(structmsgData_t *self);
 
-typedef struct fieldInfoDefinition
-{
-  uint16_t fieldId;
-  uint8_t fieldType;
-  uint16_t fieldLgth;
-} fieldInfoDefinition_t;
-
-typedef struct stmsgDefinition
-{
+typedef struct structmsgData {
+  structmsgDataView_t *structmsgDataView;
+  structmsgDataView_t *structmsgDefinitionDataView;
+  structmsgDataDescription_t *structmsgDataDescription;
+  char handle[16];
+  structmsgField_t *fields;
+  structmsgField_t *tableFields;
+  structmsgField_t *defFields;
+  uint16_t flags;
   size_t numFields;
   size_t maxFields;
-  uint8_t *name;
-  uint8_t *encoded;
-  uint8_t *encrypted;
-  uint8_t *todecode;
-  uint16_t totalLgth;
-  uint16_t flags;
-  fieldInfoDefinition_t *fieldInfos;
-} stmsgDefinition_t;
+  size_t numTableRows;         // number of list rows
+  size_t numTableRowFields;    // number of fields within a table row
+  size_t numRowFields;         // for checking how many tableRowFields have been processed
+  size_t numDefFields;         // for checking how many defFields have been processed
+  size_t fieldOffset;
+  size_t defFieldOffset;
+  size_t totalLgth;
+  size_t defTotalLgth;
+  size_t cmdLgth;
+  size_t headerLgth;
+  size_t defNumNormFields;
+  size_t defNormNamesSize;
+  size_t defDefinitionsSize;
+  uint8_t *header;
 
-typedef struct stmsgDefinitions
-{
-  size_t numDefinitions;
-  size_t maxDefinitions;
-  stmsgDefinition_t *definitions;
-} stmsgDefinitions_t;
+  createMsg_t createMsg;
+  deleteMsg_t deleteMsg;
+  addField_t addField;
+  getFieldValue_t getFieldValue;
+  setFieldValue_t setFieldValue;
+  getTableFieldValue_t getTableFieldValue;
+  setTableFieldValue_t setTableFieldValue;
+  dumpMsg_t dumpMsg;
+  dumpBinary_t dumpBinary;
+  initMsg_t initMsg;
+  prepareMsg_t prepareMsg;
+  getMsgData_t getMsgData;
+  setMsgData_t setMsgData;
+  setMsgFieldFromList_t setMsgFieldsFromList;
 
-typedef struct fieldInfo
-{
-  uint8_t *fieldStr;
-  uint8_t fieldType;
-  uint16_t fieldLgth;
-  union {
-    int8_t byteVal;
-    uint8_t ubyteVal;
-    int16_t shortVal;
-    uint16_t ushortVal;
-    int32_t val;
-    uint32_t uval;
-    int8_t *byteVector;
-    uint8_t *ubyteVector;
-    int16_t *shortVector;
-    uint16_t *ushortVector;
-    int32_t *int32Vector;
-    uint32_t *uint32Vector;
-  } value ;
-  uint8_t flags;
-} fieldInfo_t;
+  initDef_t initDef;
+  prepareDef_t prepareDef;
+  dumpDefFields_t dumpDefFields;
+  addDefField_t addDefField;
+  getDefFieldValue_t getDefFieldValue;
+  setDefFieldValue_t setDefFieldValue;
+  setDef_t setDef;
+  getDef_t getDef;
+  createMsgFromDef_t createMsgFromDef;
+
+} structmsgData_t;
 
 
-typedef struct hdrKeys
-{
-  uint16_t src;
-  uint16_t dst;
-  uint16_t totalLgth;
-  uint16_t cmdKey;
-  uint16_t cmdLgth;
-} hdrKeys_t;
-
-typedef struct hdrInfo {
-  hdrKeys_t hdrKeys;
-  uint8_t hdrId[sizeof(hdrKeys_t)];
-} hdrInfo_t;
-
-typedef struct hdr
-{
-  hdrInfo_t hdrInfo;
-  uint8_t headerLgth;
-} hdr_t;
-
-typedef struct msg
-{
-  fieldInfo_t *fieldInfos;
-  fieldInfo_t *tableFieldInfos;
-  uint8_t numFieldInfos;
-  uint8_t maxFieldInfos;
-  uint8_t numTableRows;         // number of list rows
-  uint8_t numTableRowFields;    // number of fields within a table row
-  uint8_t numRowFields;         // for checking how many tableRowFields have been processed
-} msg_t;
-
-typedef struct structmsg
-{
-  hdr_t hdr;
-  msg_t msg;
-  char handle[16];
-  uint32_t sequenceNum;
-  uint16_t flags;
-  uint8_t *encoded;
-  uint8_t *todecode;
-  uint8_t *encrypted;
-  hdrInfo_t *handleHdrInfoPtr;
-} structmsg_t;
-
-extern str2key_t structmsgFieldTypes[];
-
-structmsg_t *structmsg_get_structmsg_ptr( const uint8_t *handle );
-void structmsg_dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where);
-int structmsg_getFieldTypeId(const uint8_t *str, uint8_t *fieldType);
-int structmsg_getIdFieldNameStr (int id, uint8_t **fieldName);
-int structmsg_getFieldNameId (const uint8_t *fieldName, int *id, int incrRefCnt);
-int structmsg_getFieldTypeStr(uint8_t key, uint8_t **fieldType);
-int structmsg_createStructmsgDefinition (const uint8_t *name, size_t numFields, uint8_t shortCmdKey);
-int structmsg_addFieldDefinition (const uint8_t *name, const uint8_t *fieldName, const uint8_t *fieldTypeStr, size_t fieldLgth);
-int structmsg_dumpFieldDefinition (const uint8_t *name);
-int structmsg_deleteStructmsgDefinition(const uint8_t *name);
-int structmsg_deleteStructmsgDefinitions();
-int structmsg_encodeDefinition (const uint8_t *name, uint8_t **data, int *lgth, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
-int structmsg_getDefinitionPtr(const uint8_t *name, stmsgDefinition_t **stmsgDefinition, uint8_t *definitionsIdx);
-int stmsg_getDefinitionName(uint8_t *decrypted, uint8_t **name, uint8_t shortCmdKey);
-int structmsg_decodeDefinition (const uint8_t *name, const uint8_t *data, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions, uint8_t shortCmdKey);
-int structmsg_encdecDefinition(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
-int stmsg_setCryptedDefinition(const uint8_t *name, const uint8_t *crypted, int cryptedLgth);
-int stmsg_decryptGetDefinitionName(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **name, uint8_t shortCmdKey);
-int structmsg_deleteDefinition (const uint8_t *name, stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
-int structmsg_deleteDefinitions (stmsgDefinitions_t *structmsgDefinitions, fieldNameDefinitions_t *fieldNameDefinitions);
-
-int stmsg_createMsg(uint8_t numFieldInfos, uint8_t **handle, uint8_t shortCmdKey);
-int stmsg_deleteMsg(const uint8_t *handle);
-int stmsg_encodeMsg(const uint8_t *handle);
-int stmsg_getEncoded(const uint8_t *handle, uint8_t ** encoded, int *lgth);
-int stmsg_decodeMsg(const uint8_t *handle, const uint8_t *data);
-int stmsg_dumpMsg(const uint8_t *handle);
-int stmsg_encdec(const uint8_t *handle, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
-int stmsg_addField(const uint8_t *handle, const uint8_t *fieldStr, const uint8_t *fieldType, int fieldLgth);
-//int stmsg_setFiller(const uint8_t *handle);
-int stmsg_setFieldValue(const uint8_t *handle, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
-int stmsg_setTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
-int stmsg_getFieldValue(const uint8_t *handle, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
-int stmsg_getTableFieldValue(const uint8_t *handle, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
-int structmsg_encryptdecrypt(const uint8_t *handle, const uint8_t *msg, size_t mlgth, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, bool enc, uint8_t **buf, int *lgth);
-int stmsg_setCrypted(const uint8_t *handle, const uint8_t *crypted, int cryptedLgth);
-int stmsg_decryptGetHandle(const uint8_t *encryptedMsg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **handle);
-int structmsg_encodeFieldDefinitionMessage (const uint8_t *name, uint8_t **data, int *lgth);
-int structmsg_decodeFieldDefinitionMessage (const uint8_t *name, const uint8_t *data, uint8_t shortCmdKey);
-int structmsg_fillHdrInfo(const uint8_t *handle, structmsg_t *structmsg);
-int structmsg_createMsgFromDefinition(const uint8_t *name, uint8_t shortCmdKey);
-int structmsg_getDefinitionNormalFieldNames(const uint8_t *name, uint8_t ***normalFieldNames);
-int structmsg_getDefinitionTableFieldNames(const uint8_t *name, uint8_t ***tableFieldNames);
-int structmsg_getDefinitionNumTableRows(const uint8_t *name, uint8_t *numTableRows);
-int structmsg_getDefinitionNumTableRowFields(const uint8_t *name, uint8_t *numTableRowFields);
-int structmsg_getDefinitionFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo);
-int structmsg_getDefinitionTableFieldInfo(const uint8_t *name, const uint8_t *fieldName, fieldInfoDefinition_t **fieldInfo);
-int structmsg_createMsgFromListInfo(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle, uint8_t shortCmdKey);
-int structmsg_createMsgDefinitionFromListInfo(const uint8_t *name, const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags,uint8_t shortCmdKey);
-
+structmsgData_t *newStructmsgData(void);
+uint8_t structmsgGetPtrFromHandle(const char *handle, structmsgData_t **structmsgData);
+uint8_t newStructmsgDataFromList(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
+uint8_t newStructmsgDefinition(structmsgData_t *structmsgData);
+ 
 #ifdef	__cplusplus
 }
 #endif
