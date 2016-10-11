@@ -41,7 +41,7 @@
 #include "c_string.h"
 #include "c_stdarg.h"
 #include "rom.h"
-#include "structmsg2.h"
+#include "structmsg.h"
 #include "osapi.h"
 #define MEMLEAK_DEBUG 1
 #include "mem.h"
@@ -1156,4 +1156,4 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LNILKEY, LNILVAL }
 };
 
-NODEMCU_MODULE(STRUCTMSG2, "structmsg2", structmsg_map, NULL);
+NODEMCU_MODULE(STRUCTMSG, "structmsg", structmsg_map, NULL);
