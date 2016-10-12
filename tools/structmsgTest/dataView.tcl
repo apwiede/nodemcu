@@ -126,6 +126,7 @@ namespace eval structmsg {
       upvar $valueVar value
 
       if {$offset > $lgth} {
+puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [string range $data $offset $offset]

@@ -33,18 +33,18 @@
 # *
 # ==========================================================================
 
+proc checkErrOk {result} {
+  if {$result != $::STRUCT_MSG_ERR_OK} {
+    puts stderr "result: $result"
+  }
+}
+
 source pdict.tcl
 source dataView.tcl
 source structmsgDataView.tcl
 source structmsgIdentify.tcl
 set result [::structmsg dataView setData "" 0]
 set result [::structmsg structmsgIdentify structmsgIdentify structmsgIdentifyInit]
-puts stderr "result:$result!"
-proc checkErrOk {result} {
-  if {$result != $::STRUCT_MSG_ERR_OK} {
-    puts stderr "result: $result"
-  }
-}
 set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x57 1]
 checkErrOk $result
 set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x00 1]
@@ -61,4 +61,5 @@ set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \
 checkErrOk $result
 set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x0A 1]
 checkErrOk $result
+puts stderr "final result: $result!"
 exit 0

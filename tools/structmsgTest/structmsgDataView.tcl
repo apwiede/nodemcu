@@ -55,6 +55,8 @@ typedef struct fieldNames
 
 }
 
+set ::crcDebug false
+
 set ::STRUCT_MSG_ERR_OK                    0
 set ::STRUCT_MSG_ERR_VALUE_NOT_SET         255
 set ::STRUCT_MSG_ERR_VALUE_OUT_OF_RANGE    254
@@ -171,7 +173,6 @@ namespace eval ::structmsg {
         # find special field name
         if {[dict exists $specialFieldNames2Ids $fieldName]} {
           set fieldNameId [dict get $specialFieldNames2Ids $fieldName]
-puts stderr "fni!$fieldNameId!"
           return $::STRUCT_MSG_ERR_OK
         }
         return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD
@@ -348,25 +349,32 @@ puts stderr "fni!$fieldNameId!"
       set value ""
       set lgth [expr {$size - $crcLgth}]
       set crcVal 0
-      set idx $startOffset
-      set str [string range $data $idx [expr {$idx + $size - 1}]]
+      set offset $startOffset
 set cnt 0
-      foreach ch [split $str ""] {
-        binary scan $ch c pch
+      while {$offset < $size} {
+        set result [::structmsg dataView getUint8 $offset ch]
+       set pch $ch
+        if {![string is integer $ch]} {
+          binary scan $ch c pch
+        }
         set pch [expr {$pch & 0xFF}]
 if {$::crcDebug} {
 puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
 }
         set crcVal [expr {$crcVal + [format "%d" $pch]}]
 incr cnt
-        incr idx
+        incr offset
       }
 if {$::crcDebug} {
 puts stderr "crcVal end: $crcVal!"
 }
+      set offset [dict get $fieldInfo fieldOffset]
       if {$crcLgth == 2} {
         set crcVal [expr {~$crcVal & 0xFFFF}]
-        set result [:.structmsg dataView dataView getuint16 $offset crc]
+        set result [::structmsg dataView dataView getuint16 $offset crc]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
 if {$::crcDebug} {
 puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
 }
@@ -375,7 +383,18 @@ puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x
         }
         set value $crc
       } else  {
-        result = [:.structmsg dataView dataView getUint8 [dict get $fieldInfo fieldOffset] crc]
+        set crcVal [expr {~$crcVal}]
+        set crcVal [expr {$crcVal & 0xFF}]
+if {$::crcDebug} {
+puts stderr "crcVal2 end: $crcVal!"
+}
+        set result [::structmsg dataView getUint8 $offset crc]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
+if {$::crcDebug} {
+puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc: [format 0x%02x $crc]!"
+}
         if {[expr {$crcVal & 0xFF}] != $crc} {
           return $::STRUCT_MSG_ERR_BAD_CRC_VALUE
         }
@@ -542,7 +561,6 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
     # ================================= structmsgDataView ====================================
     
     proc structmsgDataView {command args} {
-puts stderr "structmsgDataView: comand!$command!args!$args!"
       switch $command {
         getFieldNameStrFromId -
         getFieldNameIdFromStr {
