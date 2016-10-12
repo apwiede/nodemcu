@@ -99,7 +99,7 @@ namespace eval structmsg {
     namespace export structmsgIdentify freeStructmsgDataView
     variable hdrInfos [list]
     variable received [list]
-    variable dispFlags
+    variable dispFlags [list]
 
     set received [dict create]
     dict set received buf ""
@@ -483,6 +483,51 @@ namespace eval structmsg {
       close $fd
     #ets_printf{"§heap3: %d§", system_get_free_heap_size(})
       set result [::structmsg structmsgData getMsgData $structmsgData data msgLgth]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+      set result [typeRSendAnswer $data $msgLgth]
+      resetMsgInfo parts
+      return $::STRUCT_MSG_ERR_OK
+    }
+    
+    # ================================= prepareEncryptedAnswer ====================================
+    
+    proc prepareEncryptedAnswer {parts type} {
+      if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
+puts stderr [format "§@prepareEncryptedAnsweru8!%c!t!%c!@§" [dict get $parts u8CmdKey] $type]
+        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
+      } else {
+puts stderr [format "§@prepareNotEncryptedAnsweru16!%c%c!@§" [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
+        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
+      }
+      set fd [open $fileName "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+puts stderr [format "§@NE1!%d!@§" $numEntries]
+      set numRows 0
+      set result [::structmsg structmsgDispatcher createMsgFromLines $fd $parts $numEntries $numRows $type handle]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+      close $lines
+      if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
+        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
+      } else {
+        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
+      }
+      set fd [open $fileName "r"]
+      gets $fd line
+      set flds [split $lines ","]
+      foreach {dummy numEntries} $flds break
+puts stderr [format "§@NE2!%d!@§" $numEntries]
+      set result [setMsgValuesFromLines $structmsgData $numEntries $handle [dict get $parts u8CmdKey]]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+      close $fd
+      set result [::structmsg structmsgData getMsgData data msgLgth]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
@@ -953,6 +998,7 @@ puts stderr "§encrypted message completely receieved![dict get $received totalL
     
     proc structmsgIdentify {command args} {
       switch $command {
+        prepareEncryptedAnswer -
         handleReceivedPart -
         structmsgIdentifyInit {
           return [uplevel 0 $command $args]

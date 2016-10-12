@@ -50,7 +50,7 @@ namespace eval structmsg {
   namespace eval dataView {
     namespace ensemble create
       
-    namespace export dataView freeDataView setData getFieldTypeIdFromStr appendData
+    namespace export dataView freeDataView setData getFieldTypeIdFromStr appendData getData
     namespace export getUint8 getInt8 setUint8 setInt8 getUint16 getInt16 setUint16 setInt16
     namespace export getUint32 getInt32 setUint32 setInt32
     namespace export getUint8Vector getInt8Vector setUint8Vector setInt8Vector
@@ -616,6 +616,19 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       }
       set data $buffer
       set lgth $size
+      return $::DATA_VIEW_ERR_OK
+    }
+    
+    # ================================= getData ====================================
+    
+    proc getData {bufferVar sizeVar} {
+      upvar $bufferVar buffer
+      upvar $sizeVar size
+      variable data
+      variable lgth
+
+      set buffer $data
+      set size $lgth
       return $::DATA_VIEW_ERR_OK
     }
     
