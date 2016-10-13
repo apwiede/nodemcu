@@ -41,7 +41,7 @@ source structmsgCmd.tcl
 
 ::websocket::loglevel debug
 
-set PORT 8080
+set PORT 80
 set path "/getaplist"
 #set host "192.168.178.42"
 set host "192.168.4.1"
@@ -68,18 +68,20 @@ puts stderr "clientHandler: $type $msg!"
 }
 
 proc encryptMsg {pwd} {
-return "get\r"
+return "/getaplist"
   set offset 0
-  structmsg_create 5 handle
-  structmsg_set_fieldValue $handle "@src" 123
-  structmsg_set_fieldValue $handle "@dst" 456
-  structmsg_set_fieldValue $handle "@cmdKey" 789
-  structmsg_add_field $handle "@randomNum" uint32_t 4
-  structmsg_add_field $handle "pwd" uint8_t* 16
-  structmsg_set_fieldValue $handle "pwd" $pwd
-  structmsg_set_fillerAndCrc $handle
-  structmsg_encode $handle
-  set encryptedMsg [structmsg_encrypt $handle "a1b2c3d4e5f6g7h8"]
+  structmsg cmd create 5 handle
+  structmsg cmd set_fieldValue $handle "@src" 123
+  structmsg cmd set_fieldValue $handle "@dst" 456
+  structmsg cmd set_fieldValue $handle "@cmdKey" 789
+  structmsg cmd add_field $handle "@randomNum" uint32_t 4
+  structmsg cmd add_field $handle "pwd" uint8_t* 16
+  structmsg cmd set_fieldValue $handle "pwd" $pwd
+  structmsg cmd set_fillerAndCrc $handle
+  structmsg cmd encode $handle
+  structmsg cmd get_encoded $handle data lgth
+puts stderr "enc: $lgth!$data!"
+  set encryptedMsg [structmsg cmd encrypt $handle "a1b2c3d4e5f6g7h8"]
 
 #  structmsg_dump $handle
 #  structmsg_dump $handle
@@ -94,7 +96,14 @@ proc test { sock } {
 puts stderr "===snd: binary: encrypted pwdMsg!"
     set encryptedMsg [encryptMsg "/dir1/dir2/dir34"]
 puts stderr "encryptedMsg: $encryptedMsg!lgth: [string length $encryptedMsg]!"
-    ::websocket::send $sock binary $encryptedMsg
+set dbgBuf ""
+foreach ch [split $encryptedMsg ""] {
+  binary scan $ch c pch
+  append dbgBuf [format " 0x%02x" [expr {$pch & 0xFF}]]
+}
+puts stderr "dbgBuf!$dbgBuf!"
+#    ::websocket::send $sock binary $encryptedMsg
+    ::websocket::send $sock text /getaplist
 #    ::websocket::send $sock text "load:McuMsg.lua"
 }
 
