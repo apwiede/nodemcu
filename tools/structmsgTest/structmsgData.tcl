@@ -42,18 +42,50 @@ namespace eval structmsg {
     namespace ensemble create
       
     namespace export structmsgDataInit freeStructmsgDataView createMsg addField
-    namespace export initMsg prepareMsg getMsgData
+    namespace export initMsg prepareMsg setMsgdata getMsgData getFieldTypeFromFieldNameId
+    namespace export setFieldValue getFieldValue setTableFieldValue getTableFieldValue
 
     variable structmsgData [dict create]
     variable numHandles 0
     variable structmsgHandles
+
     dict set structmsgData flags [list]
     dict set structmsgData handle [list]
+
     set structmsgHandles [dict create]
     dict set structmsgHandles handles [list]
     dict set structmsgHandles numHandles 0
 
 
+    # ================================= getFieldTypeFromFieldNameId ====================================
+    
+    proc getFieldTypeFromFieldNameId {fieldNameId fieldTypeIdVar} {
+      variable structmsgData
+
+      set idx 0
+      set fields [dict get $structmsgData fields]
+      while {$idx < [dict get $structmsgData numFields]} {
+        set fieldInfo [lindex $fields $idx]
+        if {[dict get $fieldInfo fieldNameId] == $fieldNameId} {
+          set fieldTypeId [dict get $fieldInfo fieldTypeId]
+          return $::STRUCT_DISP_ERR_OK
+        }
+        incr idx
+      }
+      # and now check the table fields
+      set idx 0
+      set fields [dict get $structmsgData tableFields]
+      while {$idx < [dict get $structmsgData numTableRowFields]} {
+        set fieldInfo [lindex fields $idx]
+        if {[dict get $fieldInfo fieldNameId] == $fieldNameId} {
+          set fieldTypeId [dict get $fieldInfo fieldTypeId]
+          return $::STRUCT_DISP_ERR_OK
+        }
+        incr idx
+      }
+      return $::STRUCT_DISP_ERR_FIELD_NOT_FOUND
+    }
+ 
     # ============================= addHandle ========================
     
     proc addHandle {handle headerVar} {
@@ -148,13 +180,80 @@ namespace eval structmsg {
         set entry [lindex $handles $idx]
         if {([dict get $entry handle] ne [list]) && ([dict get $entry handle] eq $handle)} {
           set structmsgData [dict get $entry structmsgData]
-          return $STRUCT_MSG_ERR_OK
+          return $::STRUCT_MSG_ERR_OK
         }
         incr idx
       }
       return $::STRUCT_MSG_ERR_HANDLE_NOT_FOUND
     }
     
+    # ============================= getMsgData ========================
+    
+    proc getMsgData {dataVar lgthVar} {
+      variable structmsgData
+      upvar $dataVar data
+      upvar $lgthVar lgth
+
+      if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_IS_INITTED] < 0} {
+        return $::STRUCT_MSG_ERR_NOT_YET_INITTED
+      }
+      if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_IS_PREPARED] < 0} {
+        return $::STRUCT_MSG_ERR_NOT_YET_PREPARED
+      }
+      set result [::structmsg dataView getData data lgth]
+      set lgth [dict get $structmsgData totalLgth]
+      return $result
+    }
+    
+    # ============================= setMsgData ========================
+    
+    proc setMsgData {data lgth} {
+      variable structmsgData
+
+      if {[lsearch [dct get $structmsgData flags] STRUCT_MSG_IS_INITTED] < 0} {
+        return $::STRUCT_MSG_ERR_NOT_YET_INITTED
+      }
+      set found false
+      # check lgth
+      while {$idx < [dict get $structmsgData numFields]} {
+        set fields [dict get $structmsgData fields]
+        set fieldInfo [linex $fields $idx]
+        if {[dict get $fieldInfo fieldNameId] eq "STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH"} {
+          set found true
+          break
+        }
+        incr idx
+      }
+      if {! $found} {
+        return $::STRUCT_MSG_ERR_NO_SUCH_FIELD
+      } 
+      # temporary replace data entry of dataView by our param data
+      # to be able to use the get* functions for gettting totalLgth entry value
+      set result [::structmsg dataView getData saveData saveLgth]
+      set result [::structmsg dataView setData $data [expr {[dict get $fieldOffset fieldOffset] + 4}]]
+      # get totalLgth value from data
+      set result [::structmsg dataView getUint16 [dict get $fieldInfo fieldOffset] lgth]
+      checkErrOK{result};
+      if {$lgth != [dict get $structmsgData totalLgth]} {
+        return $::STRUCT_MSG_ERR_BAD_DATA_LGTH
+      }
+      # now make a copy of the data to be on the safe side
+      # for freeing the Lua space in Lua set the variable to nil!!
+      set result [::structmsg dataView setData $data [dict get $structmsgDate totalLgth]
+      # and now set the IS_SET flags and other stuff
+      set idx 0
+      while {$idx < [dict get $structmsgData numFields]} {
+        set fields [dict get $structmsgData fields]
+        set fieldInfo [lindex $fields $idx]
+        dict lappend fieldInfo fieldFlags STRUCT_MSG_FIELD_IS_SET
+        set fields [lreplace $fields $idx$idx $fieldInfo]
+        dict set structmsgData fields $fields
+        incr idx
+      }
+      dict lappend structmsgData flags STRUCT_MSG_IS_PREPARED
+      return $::STRUCT_MSG_ERR_OK
+    }
+
     # ============================= structmsgGetPtrFromHandle ========================
     
     proc structmsgGetPtrFromHandle {handle} {
@@ -186,7 +285,6 @@ namespace eval structmsg {
       dict set structmsgData header [list]
       incr numHandles
       set handle [format "${::HANDLE_PREFIX}efff00%02d" $numHandles]
-puts stderr "handle:$handle!"
       set result [addHandle $handle [dict get $structmsgData header]]
       if {$result != $::STRUCT_MSG_ERR_OK} {
 #        deleteHandle(self->handle);
@@ -201,14 +299,11 @@ puts stderr "handle:$handle!"
     proc  addField {fieldName fieldType fieldLgth} {
       variable structmsgData
     
-puts stderr "addField"
-pdict $structmsgData
-puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $fieldType $fieldLgth]
+#puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $fieldType $fieldLgth]
       if {[dict get $structmsgData numFields] >= [dict get $structmsgData maxFields]} {
         return $::STRUCT_MSG_ERR_TOO_MANY_FIELDS
       }
       set result [::structmsg dataView getFieldTypeIdFromStr $fieldType fieldTypeId]
-puts stderr "fieldTypeId!$fieldTypeId!"
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
@@ -265,7 +360,6 @@ puts stderr "fieldTypeId!$fieldTypeId!"
           if {$fieldType eq "uint8_t"} {
             dict lappend structmsgData flags STRUCT_MSG_UINT8_CRC
           }
-puts stderr [format "flags: %s\n" [dict get $structmsgData flags]]
         }
         dict set fieldInfo fieldNameId $fieldNameId
         dict set fieldInfo fieldTypeId $fieldTypeId
@@ -319,36 +413,43 @@ puts stderr [format "flags: %s\n" [dict get $structmsgData flags]]
     proc setFieldValue {fieldName value} {
       variable structmsgData
      
-    #ets_printf{"setFieldValue: fieldName: %s numericValue: %d stringValue: %s flags: 0x%08x\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *}stringValue, self->flags & STRUCT_MSG_IS_INITTED);
-      if {(self->flags & STRUCT_MSG_IS_INITTED} == 0) {
-        return STRUCT_MSG_ERR_NOT_YET_INITTED;
+      if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_IS_INITTED] < 0} {
+        return $::STRUCT_MSG_ERR_NOT_YET_INITTED
       }
-      result = self->structmsgDataView->getFieldNameIdFromStr{self->structmsgDataView, fieldName, &fieldNameId, STRUCT_MSG_NO_INCR};
-      checkErrOK{result};
-      switch {fieldNameId} {
-        case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
-        case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
-        case STRUCT_MSG_SPEC_FIELD_FILLER:
-        case STRUCT_MSG_SPEC_FIELD_CRC:
-        case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
-        case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
-          return STRUCT_MSG_ERR_FIELD_CANNOT_BE_SET;
+      set result [::structmsg structmsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::STRUCT_MSG_NO_INCR]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
       }
-      idx = 0;
-      numEntries = self->numFields;
-    #ets_printf{"numEntries: %d\n", numEntries};
-      while {idx < numEntries} {
-        fieldInfo = &self->fields[idx];
-        if {fieldNameId == fieldInfo->fieldNameId} {
-          result = self->structmsgDataView->setFieldValue{self->structmsgDataView, fieldInfo, numericValue, stringValue, 0};
-          checkErrOK{result};
-          fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
-          break;
+      switch $fieldNameId {
+        STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH -
+        STRUCT_MSG_SPEC_FIELD_CMD_LGTH -
+        STRUCT_MSG_SPEC_FIELD_FILLER -
+        STRUCT_MSG_SPEC_FIELD_CRC -
+        STRUCT_MSG_SPEC_FIELD_RANDOM_NUM -
+        STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM {
+          return $::STRUCT_MSG_ERR_FIELD_CANNOT_BE_SET
         }
-        idx++;
+      }
+      set idx 0
+      set numEntries [dict get $structmsgData numFields]
+    #ets_printf{"numEntries: %d\n", numEntries};
+      while {$idx < $numEntries} {
+        set fields [dict get $structmsgData fields]
+        set fieldInfo [lindex $fields $idx]
+        if {$fieldNameId == [dict get $fieldInfo fieldNameId]} {
+          set result [::structmsg structmsgDataView setFieldValue $fieldInfo $value 0]
+          if {$result != $::STRUCT_MSG_ERR_OK} {
+            return $result
+          }
+          dict lappend  fieldInfo fieldFlags STRUCT_MSG_FIELD_IS_SET
+          set fields [lreplace $fields $idx $idx $fieldInfo]
+          dict set structmsgData fields $fields
+          return $::DATA_VIEW_ERR_OK
+        }
+        incr idx
       }
     #ets_printf{"idx: %d\n", idx};
-      return DATA_VIEW_ERR_OK;
+      return $::DATA_VIEW_ERR_FIELD_NOT_FOUND
     }
     
     
@@ -361,7 +462,7 @@ puts stderr [format "flags: %s\n" [dict get $structmsgData flags]]
       if {(self->flags & STRUCT_MSG_IS_INITTED} == 0) {
         return STRUCT_MSG_ERR_NOT_YET_INITTED;
       }
-      result = self->structmsgDataView->getFieldNameIdFromStr{self->structmsgDataView, fieldName, &fieldNameId, STRUCT_MSG_NO_INCR};
+      result = self->structmsgDataView->getFFIELD_NOT_FOUND{self->structmsgDataView, fieldName, &fieldNameId, STRUCT_MSG_NO_INCR};
       checkErrOK{result};
       if {fieldName[0] == '@'} {
         return STRUCT_MSG_ERR_NO_SUCH_FIELD;
@@ -417,46 +518,55 @@ puts stderr [format "flags: %s\n" [dict get $structmsgData flags]]
     proc prepareMsg {} {
       variable structmsgData
     
-      if {(self->flags & STRUCT_MSG_IS_INITTED} == 0) {
-        return STRUCT_MSG_ERR_NOT_YET_INITTED;
+      if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_IS_INITTED] < 0} {
+        return $::STRUCT_MSG_ERR_NOT_YET_INITTED
       }
       # create the values which are different for each message!!
-      numEntries = self->numFields;
-      idx = 0;
-      while {idx < numEntries} {
-        fieldInfo = &self->fields[idx];
-        switch {fieldInfo->fieldNameId} {
-          case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
-            result = self->structmsgDataView->setRandomNum{self->structmsgDataView, fieldInfo};
-            checkErrOK{result};
-            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
-            break;
-          case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
-            result = self->structmsgDataView->setSequenceNum{self->structmsgDataView, fieldInfo};
-            checkErrOK{result};
-            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
-            break;
-          case STRUCT_MSG_SPEC_FIELD_FILLER:
-            result = self->structmsgDataView->setFiller{self->structmsgDataView, fieldInfo};
-            checkErrOK{result};
-            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
-            break;
-          case STRUCT_MSG_SPEC_FIELD_CRC:
-            headerLgth = 0;
-            lgth = self->cmdLgth-fieldInfo->fieldLgth + self->headerLgth;
-            if {self->flags & STRUCT_MSG_CRC_USE_HEADER_LGTH} {
-                headerLgth = self->headerLgth;
-                lgth -= headerLgth;
+      set numEntries [dict get $structmsgData numFields]
+      set idx 0
+      while {$idx < $numEntries} {
+        set fields [dict get $structmsgData fields]
+        set fieldInfo [lindex $fields $idx]
+        switch [dict get $fieldInfo fieldNameId] {
+          STRUCT_MSG_SPEC_FIELD_RANDOM_NUM {
+            set result [::structmsg structmsgDataView setRandomNum $fieldInfo]
+            if {$result != $::STRUCT_MSG_ERR_OK} {
+              return $result
             }
-            result = self->structmsgDataView->setCrc{self->structmsgDataView, fieldInfo, headerLgth, lgth};
-            checkErrOK{result};
-            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
-            break;
+            dict lappend fieldInfo fieldFlags STRUCT_MSG_FIELD_IS_SET
+          }
+          STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM {
+            set result [::structmsg structmsgDataView setSequenceNum $fieldInfo]
+            if {$result != $::STRUCT_MSG_ERR_OK} {
+              return $result
+            }
+            dict lappend fieldInfo fieldFlags STRUCT_MSG_FIELD_IS_SET
+          }
+          STRUCT_MSG_SPEC_FIELD_FILLER {
+            set result [::structmsg structmsgDataView setFiller $fieldInfo]
+            if {$result != $::STRUCT_MSG_ERR_OK} {
+              return $result
+            }
+            dict lappend fieldInfo fieldFlags STRUCT_MSG_FIELD_IS_SET
+          }
+          STRUCT_MSG_SPEC_FIELD_CRC {
+            set headerLgth 0
+            set lgth [expr {[dict get $structmsgData cmdLgth] - [dict get $fieldInfo fieldLgth] + [dict get $structmsgData headerLgth]}]
+            if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_CRC_USE_HEADER_LGTH] >= 0} {
+                set headerLgth [dict get $structmsgdata headerLgth]
+                set lgth [expr {$lgth - $headerLgth}]
+            }
+            set result [::structmsg structmsgDataView setCrc $fieldInfo $headerLgth $lgth]
+            if {$result != $::STRUCT_MSG_ERR_OK} {
+              return $result
+            }
+            dict lappend fieldInfo fieldFlags STRUCT_MSG_FIELD_IS_SET
+          }
         }
-        idx++;
+        incr idx
       }
-      self->flags |= STRUCT_MSG_IS_PREPARED;
-      return STRUCT_MSG_ERR_OK;
+      dict lappend structmsgData flags STRUCT_MSG_IS_PREPARED
+      return $::STRUCT_MSG_ERR_OK
     }
     
     # ================================= initMsg ====================================
@@ -505,7 +615,7 @@ puts stderr [format "flags: %s\n" [dict get $structmsgData flags]]
           STRUCT_MSG_SPEC_FIELD_FILLER {
             set fillerLgth 0
             set crcLgth 0
-            if {[lsearch [dict get $structmsgData] STRUCT_MSG_HAS_CRC] >= 0} {
+            if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_HAS_CRC] >= 0} {
               if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_UINT8_CRC] >= 0} {
                 set crcLgth 1
               } else {
@@ -529,17 +639,14 @@ puts stderr [format "flags: %s\n" [dict get $structmsgData flags]]
         }
         set fields [lreplace $fields $idx $idx $fieldInfo]
         dict set structmsgData fields $fields
-puts stderr "\nfieldInfo!"
-pdict $fieldInfo
         dict incr structmsgData fieldOffset [dict get $fieldInfo fieldLgth]
         incr idx
       }
-puts stderr "\nfstructmsgData!"
-pdict $structmsgData
       if {[dict get $structmsgData totalLgth] == 0} {
         return $::STRUCT_MSG_ERR_FIELD_TOTAL_LGTH_MISSING;
       }
-      set result [::structmsg dataView setData "" [dict get $structmsgData totalLgth]]
+      set totalLgth [dict get $structmsgData totalLgth]
+      set result [::structmsg dataView setData [string repeat " " $totalLgth] $totalLgth]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }

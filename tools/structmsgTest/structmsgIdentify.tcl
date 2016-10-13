@@ -96,7 +96,7 @@ namespace eval structmsg {
   namespace eval structmsgIdentify {
     namespace ensemble create
       
-    namespace export structmsgIdentify freeStructmsgDataView
+    namespace export structmsgIdentify freeStructmsgDataView prepareEncryptedMsg
     variable hdrInfos [list]
     variable received [list]
     variable dispFlags [list]
@@ -495,17 +495,14 @@ namespace eval structmsg {
     
     proc prepareEncryptedAnswer {parts type} {
       if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
-puts stderr [format "§@prepareEncryptedAnsweru8!%c!t!%c!@§" [dict get $parts u8CmdKey] $type]
         set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
       } else {
-puts stderr [format "§@prepareNotEncryptedAnsweru16!%c%c!@§" [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
         set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
       }
       set fd [open $fileName "r"]
       gets $fd line
       set flds [split $line ","]
       foreach {dummy numEntries} $flds break
-puts stderr [format "§@NE1!%d!@§" $numEntries]
       set numRows 0
       set result [::structmsg structmsgDispatcher createMsgFromLines $fd $parts $numEntries $numRows $type handle]
       if {$result != $::STRUCT_MSG_ERR_OK} {
@@ -521,19 +518,77 @@ puts stderr [format "§@NE1!%d!@§" $numEntries]
       gets $fd line
       set flds [split $line ","]
       foreach {dummy numEntries} $flds break
-puts stderr [format "§@NE2!%d!@§" $numEntries]
       set result [::structmsg structmsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u8CmdKey]]
-puts stderr "RES!$result!"
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
       close $fd
-      set result [::structmsg structmsgDispatcher getMsgData data msgLgth]
-puts stderr "DATA!$data!lgth!$msgLgth!"
+      set result [::structmsg structmsgData getMsgData data msgLgth]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
       set result [typeRSendAnswer $data $msgLgth]
+      resetMsgInfo parts
+      return $::STRUCT_MSG_ERR_OK
+    }
+    
+    # ================================= prepareEncryptedMsg ====================================
+    
+    proc prepareEncryptedMsg {parts type} {
+      variable hdrInfos
+      variable received
+
+      if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
+        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
+      } else {
+        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
+      }
+      set fd [open $fileName "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+      set numRows 0
+      set result [::structmsg structmsgDispatcher createMsgFromLines $fd $parts $numEntries $numRows $type handle]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+      close $fd
+      if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
+        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
+      } else {
+        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
+      }
+      set fd [open $fileName "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+      if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
+        set result [::structmsg structmsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u8CmdKey]]
+      } else {
+        set result [::structmsg structmsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u16CmdKey]]
+      }
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+      close $fd
+      set result [::structmsg structmsgData getMsgData data msgLgth]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+puts stderr "MSG!$msgLgth!$data!"
+      set result [getHeaderIndexFromHeaderFields]
+      set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
+      set extraLgth [dict get $hdr hdrExtraLgth]
+      set encryption [dict get $hdr hdrEncryption]
+      if {$encryption eq "E"} {
+        set encryptionType Encrypted
+      } else {
+        set encryptionType NotEncrypted
+      }
+      set handleType [dict get $hdr hdrHandleType]
+      set fcnName type${handleType}${encryptionType}SendMsg
+puts stderr "call:$fcnName!"
+      set result [$fcnName $data $msgLgth]
       resetMsgInfo parts
       return $::STRUCT_MSG_ERR_OK
     }

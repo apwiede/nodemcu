@@ -106,6 +106,8 @@ set ::STRUCT_MSG_NO_INCR 0
 set ::STRUCT_MSG_INCR    1
 set ::STRUCT_MSG_DECR    -1
 
+set RAND_MAX 0x7FFFFFFF
+
 namespace eval ::structmsg {
   namespace ensemble create
 
@@ -114,8 +116,10 @@ namespace eval ::structmsg {
   namespace eval structmsgDataView {
     namespace ensemble create
       
-    namespace export structmsgDataView freeStructmsgDataView getFieldNameIdFromStr getCrc
+    namespace export structmsgDataView freeStructmsgDataView getFieldNameIdFromStr
     namespace export setFieldValue getFieldValue
+    namespace export setRandomNum getRandomNum setSequenceNum getSequenceNum
+    namespace export setFiller getFiller setCrc getCrc
 
     variable specialFieldNames2Ids
     set specialFieldNames2Ids [dict create]
@@ -275,14 +279,14 @@ namespace eval ::structmsg {
     # ================================= getRandomNum ====================================
     
     proc getRandomNum {fieldInfo value} {
-      return [::structmsg dataView dataView getUint32 [dict get $fieldInfo fieldOffset] value]
+      return [::structmsg dataView getUint32 [dict get $fieldInfo fieldOffset] value]
     }
     
     # ================================= setRandomNum ====================================
     
     proc setRandomNum {fieldInfo} {
       set val [getRandom]
-      return [::structmsg dataView dataView setUint32 [dict get $fieldInfo fieldOffset] val]
+      return [::structmsg dataView setUint32 [dict get $fieldInfo fieldOffset] $val]
     }
     
     
@@ -291,14 +295,14 @@ namespace eval ::structmsg {
     proc getSequenceNum {fieldInfo valueVar} {
       upvar $valueVar value
 
-      return [::structmsg dataView dataView getUint32 [dict get $fieldInfo fieldOffset] value]
+      return [::structmsg dataView getUint32 [dict get $fieldInfo fieldOffset] value]
     }
     
     # ================================= setSequenceNum ====================================
     
     proc setSequenceNum {fieldInfo} {
       incr ::sequenceNum
-      return [::structmsg dataView dataView setUint32 [dict get $fieldInfo fieldOffset] $::sequenceNum]
+      return [::structmsg dataView setUint32 [dict get $fieldInfo fieldOffset] $::sequenceNum]
     }
     
     # ================================= getFiller ====================================
@@ -306,13 +310,14 @@ namespace eval ::structmsg {
     proc getFiller {fieldInfo valueVar} {
       upvar $valueVar value
 
-      return [::structmsg dataView dataView getuint8Vector [dict get $fieldInfo fieldOffset] value [dict get $fieldInfo fieldLgth]]
+      return [::structmsg dataView getuint8Vector [dict get $fieldInfo fieldOffset] value [dict get $fieldInfo fieldLgth]]
     }
     
     # ================================= setFiller ====================================
     
     proc setFiller {fieldInfo} {
       set lgth [dict get $fieldInfo fieldLgth]
+      set offset [dict get $fieldInfo fieldOffset]
       set idx 0
       set value ""
       while {$lgth >= 4} {
@@ -321,20 +326,32 @@ namespace eval ::structmsg {
         append value [binary format c [expr {($myVal >> 16) & 0xFF}]]
         append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
         append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-        set offset [uint32Encode data $offset $myVal]
+        set result [::structmsg dataView setUint32 $offset $myVal]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
+        incr offset 4
         incr lgth -4
       }
       while {$lgth >= 2} {
         set myVal [expr {[getRandom] & 0xFFFF}]
         append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
         append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-        set offset [uint16Encode data $offset $myVal]
+        set result [::structmsg dataView setUint16 $offset $myVal]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
+        incr offset 2
         incr lgth -2
       }
       while {$lgth >= 1} {
         set myVal [expr {[getRandom] & 0xFF}]
         append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-        set offset [uint8Encode data $offset $myVal]
+        set result [::structmsg dataView setUint8 $offset $myVal]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
+        incr offset 1
         incr lgth -1
       }
       return $::DATA_VIEW_ERR_OK
@@ -354,7 +371,7 @@ namespace eval ::structmsg {
 set cnt 0
       while {$offset < $size} {
         set result [::structmsg dataView getUint8 $offset ch]
-       set pch $ch
+        set pch $ch
         if {![string is integer $ch]} {
           binary scan $ch c pch
         }
@@ -372,7 +389,7 @@ puts stderr "crcVal end: $crcVal!"
       set offset [dict get $fieldInfo fieldOffset]
       if {$crcLgth == 2} {
         set crcVal [expr {~$crcVal & 0xFFFF}]
-        set result [::structmsg dataView dataView getuint16 $offset crc]
+        set result [::structmsg dataView getuint16 $offset crc]
         if {$result != $::STRUCT_MSG_ERR_OK} {
           return $result
         }
@@ -407,30 +424,33 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
     # ================================= setCrc ====================================
     
     proc setCrc {fieldInfo startOffset size} {
-
       set crcLgth [dict get $fieldInfo fieldLgth]
       set size [expr {$size - $crcLgth}]
       set crc  0
-      set idx $startOffset
-      set str [string range $data $idx [expr {$idx + $size - 1}]]
+      set offset $startOffset
+      while {$offset < $size} {
 set cnt 0
-      foreach ch [split $str ""] {
-        binary scan $ch c pch
+        set result [::structmsg dataView getUint8 $offset ch]
+        set pch $ch
+        if {![string is integer $ch]} {
+          binary scan $ch c pch
+        }
         set pch [expr {$pch & 0xFF}]
 if {$::crcDebug} {
 puts stderr "encode crc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
 }
         set crc [expr {$crc + [format "%d" $pch]}]
 incr cnt
+        incr offset
       }
 if {$::crcDebug} {
 puts stderr "crc1: $crc![format 0x%04x $crc]!"
 }
       set crc [expr {~$crc & 0xFFFF}]
       if {$crcLgth == 1} {
-        set result [::structmsg dataView dataView setUint8 [dict get $fieldInfo fieldOffset] [expr {$crc & 0xF}]]
+        set result [::structmsg dataView setUint8 [dict get $fieldInfo fieldOffset] [expr {$crc & 0xFF}]]
       } else {
-        set result [::structmsg dataView dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]
+        set result [::structmsg dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]
       }
       return $result
     }
@@ -444,34 +464,34 @@ puts stderr "crc1: $crc![format 0x%04x $crc]!"
       set value ""
       switch [dict get $fieldInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
-          set result [::structmsg dataView dataView getInt8 [dict get $fieldInfo fieldOffset] value]
+          set result [::structmsg dataView getInt8 [dict get $fieldInfo fieldOffset] value]
         }
         DATA_VIEW_FIELD_UINT8_T {
-          set result [::structmsg dataView dataView getUint8 [dict get $fieldInfo fieldOffset] value]
+          set result [::structmsg dataView getUint8 [dict get $fieldInfo fieldOffset] value]
         }
         DATA_VIEW_FIELD_INT16_T {
-          set result [::structmsg dataView dataView getInt16 [dict get $fieldInfo fieldOffset] value]
+          set result [::structmsg dataView getInt16 [dict get $fieldInfo fieldOffset] value]
         }
         DATA_VIEW_FIELD_UINT16_T {
-          set result [::structmsg dataView dataView getUint16 [dict get $fieldInfo fieldOffset] value]
+          set result [::structmsg dataView getUint16 [dict get $fieldInfo fieldOffset] value]
         }
         DATA_VIEW_FIELD_INT32_T {
-          set result [::structmsg dataView dataView getInt32 [dict get $fieldInfo fieldOffset] value]
+          set result [::structmsg dataView getInt32 [dict get $fieldInfo fieldOffset] value]
         }
         DATA_VIEW_FIELD_UINT32_T {
-          set result [::structmsg dataView dataView getUint32 [dict get $fieldInfo fieldOffset] value]
+          set result [::structmsg dataView getUint32 [dict get $fieldInfo fieldOffset] value]
         }
         DATA_VIEW_FIELD_INT8_VECTOR {
-          set result [::structmsg dataView dataView getInt8Vector [expr {[dict get $fieldInfo fieldOffset]}] value]
+          set result [::structmsg dataView getInt8Vector [expr {[dict get $fieldInfo fieldOffset]}] value]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-          set result [::structmsg dataView dataView getUint8Vector [expr {[dict get $fieldInfo fieldOffset]}] value]
+          set result [::structmsg dataView getUint8Vector [expr {[dict get $fieldInfo fieldOffset]}] value]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
-          set result [::structmsg dataView dataView getInt16 [expr {[dict get $fieldInfo fieldOffset] +fieldIdx*2}] value]
+          set result [::structmsg dataView getInt16 [expr {[dict get $fieldInfo fieldOffset] +fieldIdx*2}] value]
         }
         DATA_VIEW_FIELD_UINT16_VECTOR {
-          set result [::structmsg dataView dataView getUint16 [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2]} value]
+          set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2]} value]
         }
         DATA_VIEW_FIELD_INT32_VECTOR {
             return $::STRUCT_MSG_ERR_BAD_VALUE
@@ -492,35 +512,35 @@ puts stderr "crc1: $crc![format 0x%04x $crc]!"
       switch [dict get $fieldInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           if {($alue > -128) && ($value < 128)} {
-            set result [::structmsg dataView dataView setInt8 [dict get $fieldInfo fieldOffset] $value]
+            set result [::structmsg dataView setInt8 [dict get $fieldInfo fieldOffset] $value]
           } else {
             return $::STRUCT_MSG_ERR_VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_UINT8_T {
           if {($alue >= 0) && ($value <= 256)} {
-            set result [::structmsg dataView dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
+            set result [::structmsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
           } else {
             return $::STRUCT_MSG_ERR_BAD_VALUE
           }
         }
         DATA_VIEW_FIELD_INT16_T {
           if {($value > -32767) && ($value < 32767)} {
-            set result [::structmsg dataView dataView setInt16 [dict get $fieldInfo fieldOffset] $value]
+            set result [::structmsg dataView setInt16 [dict get $fieldInfo fieldOffset] $value]
           } else {
             return $::STRUCT_MSG_ERR_VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_UINT16_T {
           if {($value >= 0) && ($value <= 65535)} {
-            set result [::structmsg dataView dataView setUint16 [dict get $fieldInfo fieldOffset] $value]
+            set result [::structmsg dataView setUint16 [dict get $fieldInfo fieldOffset] $value]
           } else {
             return $::STRUCT_MSG_ERR_VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_INT32_T {
           if {($value > -0x7FFFFFFF) && ($value <= 0x7FFFFFFF)} {
-            set result [::structmsg dataView dataView setInt32 [dict get $fieldInfo fieldOffset] $value]
+            set result [::structmsg dataView setInt32 [dict get $fieldInfo fieldOffset] $value]
           } else {
             return $::STRUCT_MSG_ERR_VALUE_TOO_BIG
           }
@@ -528,28 +548,28 @@ puts stderr "crc1: $crc![format 0x%04x $crc]!"
         DATA_VIEW_FIELD_UINT32_T {
           # we have to do the signed check as numericValue is a signed integer!!
           if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
-            set result [::structmsg dataView dataView setUint32 [dict get $fieldInfo fieldOffset] $value]
+            set result [::structmsg dataView setUint32 [dict get $fieldInfo fieldOffset] $value]
           } else {
             return $::STRUCT_MSG_ERR_VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_INT8_VECTOR {
-          set result [::structmsg dataView dataView setInt8Vector [dict get $fieldInfo fieldOffset] $value]
+          set result [::structmsg ataView setInt8Vector [dict get $fieldInfo fieldOffset] $value]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-          set result [::structmsg dataView dataView setUint8Vector [dict get $fieldInfo fieldOffset] $value]
+          set result [::structmsg dataView setUint8Vector [dict get $fieldInfo fieldOffset] $value]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
-          set result [::structmsg dataView dataView setInt16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::structmsg dataView setInt16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_UINT16_VECTOR {
-          set result [::structmsg dataView dataView setUint16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::structmsg dataView setUint16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_INT32_VECTOR {
-          set result [::structmsg dataView dataView setInt32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::structmsg dataView setInt32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_UINT32_VECTOR {
-          set result [::structmsg dataView dataView setUint32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::structmsg dataView setUint32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         default {
 puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
@@ -568,6 +588,7 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
          return [uplevel 0 $command $args]
         }
       }
+puts stderr "structmsgDataView!no such command!$command!"
       return $::STRUCT_MSG_ERR_NO_SUCH_COMMAND
       if {0} {
         structmsgDataView->getFieldNameIdFromStr = &getFieldNameIdFromStr;

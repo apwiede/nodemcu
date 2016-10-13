@@ -45,39 +45,27 @@ source structmsgDataView.tcl
 source structmsgData.tcl
 source structmsgDispatcher.tcl
 source structmsgIdentify.tcl
+source structmsgSendReceive.tcl
+
 set result [::structmsg dataView setData "" 0]
-if {0} {
 set result [::structmsg structmsgIdentify structmsgIdentify structmsgIdentifyInit]
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x57 1]
 checkErrOk $result
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x00 1]
+set result [::structmsg structmsgDispatcher createDispatcher handle]
 checkErrOk $result
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x4D 1]
+
+set received [dict create]
+dict set received partsFlags [list]
+dict set received fromPart 22272
+dict set received toPart 16640
+dict set received totalLgth 22
+dict set received u8CmdKey 0
+dict set received u16CmdKey 16708
+dict set received u8CmdLgth 0
+dict set received u16CmdLgth 0
+dict set received targetPart 0
+dict set received fieldOffset 0
+dict set received lgth 22
+dict set received buf ""
+set result [::structmsg structmsgIdentify prepareEncryptedMsg $received A]
 checkErrOk $result
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x00 1]
-checkErrOk $result
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x00 1]
-checkErrOk $result
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x08 1]
-checkErrOk $result
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x49 1]
-checkErrOk $result
-set result [::structmsg structmsgIdentify structmsgIdentify handleReceivedPart \x0A 1]
-checkErrOk $result
-puts stderr "final result: $result!"
-}
-set toSend [dict create]
-dict set toSend partsFlags [list]
-dict set toSend fromPart 16640
-dict set toSend toPart 22272
-dict set toSend totalLgth 22
-dict set toSend u8CmdKey 0
-dict set toSend u16CmdKey 16708
-dict set toSend u8CmdLgth 0
-dict set toSend u16CmdLgth 0
-dict set toSend targetPart 0
-dict set toSend fieldOffset 0
-dict set toSend lgth 0
-dict set toSend buf ""
-set result [::structmsg structmsgIdentify structmsgIdentify prepareEncryptedAnswer $toSend A]
 exit 0

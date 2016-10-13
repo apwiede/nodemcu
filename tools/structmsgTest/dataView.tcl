@@ -51,7 +51,8 @@ namespace eval structmsg {
     namespace ensemble create
       
     namespace export dataView freeDataView setData getFieldTypeIdFromStr appendData getData
-    namespace export getUint8 getInt8 setUint8 setInt8 getUint16 getInt16 setUint16 setInt16
+    namespace export getUint8 getInt8 setUint8 setInt8
+    namespace export getUint16 getInt16 setUint16 setInt16
     namespace export getUint32 getInt32 setUint32 setInt32
     namespace export getUint8Vector getInt8Vector setUint8Vector setInt8Vector
     namespace export getUint16Vector getInt16Vector setUint16Vector setInt16Vector
@@ -99,7 +100,6 @@ namespace eval structmsg {
       variable fieldTypeNames2Ids
 
       if {![dict exists $fieldTypeNames2Ids $fieldTypeStr]} {
-        return $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
       }
       set fieldTypeId [dict get $fieldTypeNames2Ids $fieldTypeStr]
       return $::DATA_VIEW_ERR_OK
@@ -171,7 +171,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c $value]
-      set data [lreplace $data $offset $offset $sh]
+      set data [string replace $data $offset $offset $ch]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -185,7 +185,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c $value]
-      set data [lreplace $data $offset $offset [expr {$value & 0xFF}]]
+      set data [string replace $data $offset $offset [expr {$value & 0xFF}]]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -246,10 +246,10 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c [expr {($value >> 8) & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       incr offset
       set ch [binary format c [expr {$value & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -263,10 +263,10 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c [expr {($value >> 8) & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       incr offset
       set ch [binary format c [expr {$value & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -346,13 +346,13 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       if {[expr {$offset + 3}] > $lgth} {
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
-      append data [binary format c [expr {($value >> 24) & 0xFF}]]
+      set data [string replace $data $offset $offset [binary format c [expr {($value >> 24) & 0xFF}]]]
       incr offset
-      append data [binary format c [expr {($value >> 16) & 0xFF}]]
+      set data [string replace $data $offset $offset [binary format c [expr {($value >> 16) & 0xFF}]]]
       incr offset
-      append data [binary format c [expr {($value >> 8) & 0xFF}]]
+      set data [string replace $data $offset $offset [binary format c [expr {($value >> 8) & 0xFF}]]]
       incr offset
-      append data [binary format c [expr {$value & 0xFF}]]
+      set data [string replace $data $offset $offset [binary format c [expr {$value & 0xFF}]]]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -366,16 +366,16 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c [expr {($value >> 24) & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       incr offset
       set ch [binary format c [expr {($value >> 16) & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       incr offset
       set ch [binary format c [expr {($value >> 8) & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       incr offset
       set ch [binary format c [expr {$value & 0xFF}]]
-      set data [append data $ch]
+      set data [string replace $data $offset $offset $ch]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -417,7 +417,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       if {[expr {$offset + $size}] > $lgth} {
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
-      append data [string range $value 0 [expr {$size - 1}]]
+      set data [string replace $data $offset [expr {$offset + $size - 1}] [string range $value 0 [expr {$size - 1}]]]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -430,7 +430,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       if {[exprr {$offset + size}] > $lgth} {
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
-      append data [string range $value 0 [expr {$size - 1}]]
+      set data [string replace $data $offset [expr {$offset + $size - 1}] [string range $value 0 [expr {$size - 1}]]]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -653,6 +653,7 @@ puts stderr "dataView: $command $args!"
          return [uplevel 0 $command $args]
        }
       }
+error "dataView!no such command!$command!"
       return $::DATA_VIEW_ERR_NO_SUCH_COMMAND
 if {0} {
       dataView->data = NULL;

@@ -31,6 +31,8 @@
 # *
 # ==========================================================================
 
+set ::DISP_HANDLE_PREFIX "stmsgdisp_"
+
 set ::STRUCT_DISP_ERR_OK                    0
 set ::STRUCT_DISP_ERR_VALUE_NOT_SET         255
 set ::STRUCT_DISP_ERR_VALUE_OUT_OF_RANGE    254
@@ -104,12 +106,39 @@ namespace eval structmsg {
     namespace ensemble create
       
     namespace export structmsgDispatcherInit freeStructmsgDataView createMsgFromLines
-    namespace export createMsgFromLines setMsgValuesFromLines
-    variable structmsgDispatcher [list]
+    namespace export createMsgFromLines setMsgValuesFromLines createDispatcher setMsgParts
+
+    variable structmsgDispatcher [dict create]
+    variable structmsgDispatcherHandles
     variable structmsgData [list]
     variable numMsgHeaders 0
     variable maxMsgHeaders 4
     variable msgHeader2MsgPtrs [list]
+
+    dict set structmsgDispatcher id 0
+    dict set structmsgDispatcher handle [list]
+    dict set structmsgDispatcher received [dict create]
+    dict set structmsgDispatcher toSend [dict create]
+
+    dict set structmsgDispatcherHandles handles [list]
+    dict set structmsgDispatcherHandles nnumHandles 0
+
+    # ============================= setMsgParts ========================
+    
+    proc setMsgParts {which part} {
+      variable structmsgDispatcher
+
+      switch $which {
+        received -
+        toSend {
+          dict set structmsgDispatcher $which $parts
+          return $::STRUCT_MSG_ERR_OK
+        }
+        default {
+          return $::STRUCT_MSG_ERR_BAD_VALUE
+        }
+      }
+    }
 
     # ============================= toBase64 ========================
     
@@ -205,37 +234,38 @@ namespace eval structmsg {
     
     proc addHandle {handle} {
       variable structmsgDispatcher
+      variable structmsgDispatcherHandles
 
-      int idx;
-    
-      if {structmsgDispatcherHandles.handles == NULL} {
-        structmsgDispatcherHandles.handles = os_zalloc{sizeof(handle2Dispatcher_t});
-        if {structmsgDispatcherHandles.handles == NULL} {
-          return STRUCT_DISP_ERR_OUT_OF_MEMORY;
-        } else {
-          structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].handle = handle;
-          structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].structmsgDispatcher = structmsgDispatcher;
-          structmsgDispatcherHandles.numHandles++;
-          return STRUCT_DISP_ERR_OK;
-        }
+      if {[dict get $structmsgDispatcherHandles handles] eq [list]} {
+        set entry [dict create]
+        dict set entry handle $handle
+        dict set entry structmsgDispatcher $structmsgDispatcher
+        dict lappend structmsgDispatcherHandles handles $entry
+        dict incr structmsgDispatcherHandles numHandles 1
+        return $::STRUCT_DISP_ERR_OK
       } else {
         # check for unused slot first
-        idx = 0;
-        while {idx < structmsgDispatcherHandles.numHandles} {
-          if {structmsgDispatcherHandles.handles[idx].handle == NULL} {
-            structmsgDispatcherHandles.handles[idx].handle = handle;
-            structmsgDispatcherHandles.handles[idx].structmsgDispatcher = structmsgDispatcher;
-            return STRUCT_DISP_ERR_OK;
+        set idx 0
+        while {$idx < [dict get $structmsgDispatcherHandles numHandles]} {
+          set handles [dict get $structmsgDispatcherHandles handles]
+          set entry [lindex $handles $idx]
+          if {[dict get $entry handle] eq [list]} {
+            dict set entry handle $handle
+            dict set entry structmsgDispatcher $structmsgDispatcher
+            set handles [lreplace $handles $iidx $idx $entry
+            dict set structmsgDispatcherHandles $handles
+            return $::STRUCT_DISP_ERR_OK
           }
-          idx++;
+          incr idx
         }
-        structmsgDispatcherHandles.handles = os_realloc{structmsgDispatcherHandles.handles, sizeof(handle2Dispatcher_t}*(structmsgDispatcherHandles.numHandles+1));
-        checkAllocOK{structmsgDispatcherHandles.handles};
-        structmsgDispatcherHandles.handles[structmsgDispatcherHandles.numHandles].handle = handle;
-        structmsgDispatcherHandles.handles[idx].structmsgDispatcher = structmsgDispatcher;
-        structmsgDispatcherHandles.numHandles++;
+        set handles [dict get $structmsgDispatcherHandles handles]
+        set entry [dict create]
+        dict set entry handle $handle
+        dict set entry structmsgDispatcher $structmsgDispatcher
+        dict lappend structmsgDispatcherHandles handles $entry
+        dict incr structmsgDispatcherHandles numHandles 1
       }
-      return STRUCT_DISP_ERR_OK;
+      return $::STRUCT_DISP_ERR_OK
     }
     
     # ============================= deleteHandle ========================
@@ -243,10 +273,6 @@ namespace eval structmsg {
     proc deleteHandle {handle} {
       variable structmsgDispatcher
 
-      int idx;
-      int numUsed;
-      int found;
-    
       if {structmsgDispatcherHandles.handles == NULL} {
         return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
       }
@@ -307,7 +333,7 @@ namespace eval structmsg {
       set offset 0
       set result [::structmsg dataView getData saveData saveLgth]
       set lgth [dict get $msgParts totalLgth]
-      ::structmsg dataView setData "" $lgth
+      ::structmsg dataView setData [string repeat " " $lgth] $lgth
       set result [::structmsg dataView setUint16 $offset [dict get $msgParts fromPart]]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
@@ -347,7 +373,6 @@ namespace eval structmsg {
       }
       # end build header from msgParts
       
-puts stderr "DATA!$header!lgth!$headerLgth!"
       set firstFreeEntry [list]
       set firstFreeEntryId 0
       if {$numMsgHeaders > 0} {
@@ -399,57 +424,26 @@ puts stderr "DATA!$header!lgth!$headerLgth!"
           }
         }
       }
+      set result [::structmsg dataView setData $saveData $saveLgth]
       return $::STRUCT_DISP_ERR_OK;
-    }
-    
-    # ================================= getFieldType ====================================
-    
-    proc getFieldType {fieldNameId fieldTypeIdVar} {
-      variable structmsgDispatcher
-      variable structmsgData
-
-      int idx;
-      structmsgField_t *fieldInfo;
-    
-      idx = 0;
-      while {idx < structmsgData->numFields} {
-        fieldInfo = &structmsgData->fields[idx];
-        if {fieldInfo->fieldNameId == fieldNameId} {
-          *fieldTypeId = fieldInfo->fieldTypeId;
-          return STRUCT_DISP_ERR_OK;
-        }
-        idx++;
-      }
-      # and now check the table fields
-      idx = 0;
-      while {idx < structmsgData->numTableRowFields} {
-        fieldInfo = &structmsgData->tableFields[idx];
-        if {fieldInfo->fieldNameId == fieldNameId} {
-          *fieldTypeId = fieldInfo->fieldTypeId;
-          return STRUCT_DISP_ERR_OK;
-        }
-        idx++;
-      }
-      return STRUCT_DISP_ERR_FIELD_NOT_FOUND;
     }
     
     # ================================= setMsgValuesFromLines ====================================
     
     proc setMsgValuesFromLines {fd numEntries handle type} {
       variable structmsgDispatcher
-      variable structmsgData
     
       set idx 0
       while {$idx < $numEntries} {
         gets $fd line
         set flds [split $line ","]
-        foreach {fieldNameStr fieldTypeStr fieldValueStr} $flds break
+        foreach {fieldNameStr fieldValueStr} $flds break
         # fieldName
         set result [::structmsg structmsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::STRUCT_MSG_NO_INCR]
         if {$result != $::STRUCT_MSG_ERR_OK} {
           return $result
         }
-        set result [::structmsg dataView getFieldType $fieldNameId fieldTypeId]
+        set result [::structmsg structmsgData getFieldTypeFromFieldNameId $fieldNameId fieldTypeId]
         if {$result != $::STRUCT_MSG_ERR_OK} {
           return $result
         }
@@ -461,15 +455,17 @@ puts stderr "DATA!$header!lgth!$headerLgth!"
           if {$result != $::STRUCT_MSG_ERR_OK} {
             return $result
           }
+        } else {
+          set value $fieldValueStr
         }
         switch $fieldNameId {
           STRUCT_MSG_SPEC_FIELD_DST {
-            set value [dict get $received fromPart]
-            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+            set value [dict get $structmsgDispatcher received fromPart]
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr $value]
           }
           STRUCT_MSG_SPEC_FIELD_SRC {
-            set value [dict get $received toPart]
-            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+            set value [dict get $structmsgDispatcher received toPart]
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr $value]
           }
           STRUCT_MSG_SPEC_FIELD_CMD_KEY {
             # check for u8CmdKey/u16CmdKey here
@@ -478,10 +474,10 @@ puts stderr "DATA!$header!lgth!$headerLgth!"
             } else {
               set value = [dict get $structmsgDispatcher received u16CmdKey]
             }
-            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr $value]
           }
           default {
-            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr $value]
           }
         }
         if {$result != $::STRUCT_MSG_ERR_OK} {
@@ -508,8 +504,8 @@ puts stderr "DATA!$header!lgth!$headerLgth!"
       upvar $handleVar handle
 
     #ets_printf{"§createMsgFromLines:%d!%d! \n§" $numMsgHeaders $maxMsgHeaders};
+      dict set structmsgDispatcher received $parts
       set result [getMsgPtrFromMsgParts $parts $::STRUCT_MSG_INCR]
-puts stderr "res1!$result!"
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
@@ -547,20 +543,21 @@ puts stderr "res1!$result!"
     
     proc resetMsgInfo {partsVar} {
       variable structmsgDispatcher
-      upvar $partsVar parts
 
-      parts->lgth = 0;
-      parts->fieldOffset = 0;
-      parts->fromPart = 0;
-      parts->toPart = 0;
-      parts->totalLgth = 0;
-      parts->u16CmdLgth = 0;
-      parts->u16CmdKey = 0;
-      parts->u8CmdKey = 0;
-      parts->u8CmdLgth = 0;
-      self->structmsgDataView->dataView->data = parts->buf;
-      self->structmsgDataView->dataView->lgth = 0;
-      return STRUCT_DISP_ERR_OK;
+      set parts [dict create]
+      dict set parts lgth 0
+      dict set parts fieldOffset 0
+      dict set parts fromPart 0
+      dict set parts toPart 0
+      dict set parts totalLgth 0
+      dict set parts u16CmdLgth 0
+      dict set parts u16CmdKey 0
+      dict set parts u8CmdKey 0
+      dict set parts u8CmdLgth 0
+#      self->structmsgDataView->dataView->data = parts->buf;
+#      self->structmsgDataView->dataView->lgth = 0;
+      dict set structmsgDispatcher $partsVar $parts
+      return $::STRUCT_DISP_ERR_OK
     }
     
     # ============================= encryptMsg ========================
@@ -679,21 +676,22 @@ if {0} {
     # ================================= createDispatcher ====================================
     
     proc createDispatcher {handleVar} {
+      variable dispatcher
       upvar $handleVar handle
     
-      os_sprintf{self->handle, "%s%p", DISP_HANDLE_PREFIX, self};
-      result = addHandle {self->handle, self};
-      if {result != STRUCT_DISP_ERR_OK} {
-        deleteHandle {self->handle};
-        os_free {self};
-        return result;
+      dict incr structmsgDispatcher id 1
+      dict set structmsgDispatcher handle "${::DISP_HANDLE_PREFIX}efff00[format %02d [dict get $structmsgDispatcher id]]"
+      set result [addHandle [dict get $structmsgDispatcher handle]]
+      if {$result != $::STRUCT_DISP_ERR_OK} {
+#        deleteHandle(self->handle)
+        return $result;
       }
-      resetMsgInfo {self, &self->received};
-      resetMsgInfo {self, &self->toSend};
-      *handle = self->handle;
-      return STRUCT_DISP_ERR_OK;
+      resetMsgInfo received
+      resetMsgInfo toSend
+      set handle [dict get $structmsgDispatcher handle]
+      return $::STRUCT_DISP_ERR_OK
     }
-    
+
     # ================================= newStructmsgDispatcher ====================================
     
      proc newStructmsgDispatcher {} {
