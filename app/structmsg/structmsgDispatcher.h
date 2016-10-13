@@ -102,21 +102,35 @@ typedef struct structmsgData structmsgData_t;
 #define STRUCT_DISP_IS_ENCRYPTED      (1 << 0)
 #define STRUCT_DISP_IS_NOT_ENCRYPTED  (1 << 1)
 
-
+// 0x01
 #define STRUCT_DISP_U16_DST           (1 << 0)
+// 0x02
 #define STRUCT_DISP_U16_SRC           (1 << 1)
+// 0x04
 #define STRUCT_DISP_U8_TARGET         (1 << 2)
+// 0x08
 #define STRUCT_DISP_U16_TOTAL_LGTH    (1 << 3)
+// 0x10
 #define STRUCT_DISP_U8_EXTRA_KEY_LGTH (1 << 4)
+// 0x20
 #define STRUCT_DISP_U8_ENCRYPTION     (1 << 5)
+// 0x40
 #define STRUCT_DISP_U8_HANDLE_TYPE    (1 << 6)
+// 0x80
 #define STRUCT_DISP_U8_CMD_KEY        (1 << 7)
+// 0x100
 #define STRUCT_DISP_U16_CMD_KEY       (1 << 8)
+// 0x200
 #define STRUCT_DISP_U0_CMD_LGTH       (1 << 9)
+// 0x400
 #define STRUCT_DISP_U8_CMD_LGTH       (1 << 10)
+// 0x800
 #define STRUCT_DISP_U16_CMD_LGTH      (1 << 11)
+// 0x1000
 #define STRUCT_DISP_U0_CRC            (1 << 12)
+// 0x2000
 #define STRUCT_DISP_U8_CRC            (1 << 13)
+// 0x4000
 #define STRUCT_DISP_U16_CRC           (1 << 14)
 
 typedef struct headerParts {

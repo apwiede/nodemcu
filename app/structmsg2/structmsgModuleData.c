@@ -89,6 +89,12 @@ static stationConfig_t stationConfig;
 static structmsgModuleData_t structmsgModuleData;
 static structmsgWifiData_t structmsgWifiData;
 
+void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
+}
+
+void websockeTextReceived(void *arg, char *pdata, unsigned short len) {
+}
+
 // ================================= getModuleValue ====================================
 
 static uint8_t getModuleValue(structmsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue) {
@@ -152,6 +158,14 @@ ets_printf("getModuleValue: port: %d\n", structmsgWifiData.provisioningPort);
   case MODULE_INFO_PROVISIONING_IP_ADDR:
     *stringValue = structmsgWifiData.provisioningIPAddr;
 ets_printf("getModuleValue: IPAddr: 0x%08x\n", structmsgWifiData.provisioningIPAddr);
+    break;
+  case MODULE_INFO_BINARY_CALL_BACK:
+    *numericValue = (int)structmsgWifiData.binaryCb;
+ets_printf("getModuleValue: binaryCb: 0x%08x\n", structmsgWifiData.binaryCb);
+    break;
+  case MODULE_INFO_TEXT_CALL_BACK:
+    *numericValue = (int)structmsgWifiData.textCb;
+ets_printf("getModuleValue: textCb: 0x%08x\n", structmsgWifiData.TextCb);
     break;
   default:
     return STRUCT_DISP_ERR_BAD_MODULE_VALUE_WHICH;
@@ -331,6 +345,9 @@ static uint8_t setModuleValues(structmsgDispatcher_t *self) {
   structmsgModuleData.Reserve3[0] = 'X';
   structmsgModuleData.Reserve3[1] = 'Y';
   structmsgModuleData.Reserve3[2] = 'Z';
+
+  structmsgWifiData.binaryCb = &websockeBinaryReceived;
+  structmsgWifiData.textCb = &websockeTextReceived;
 
   provisioningSsid = "testDevice_connect";
   c_memcpy(structmsgWifiData.provisioningSsid, provisioningSsid, c_strlen(provisioningSsid));

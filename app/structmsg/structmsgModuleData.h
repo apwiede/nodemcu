@@ -87,6 +87,8 @@
 #define MODULE_INFO_PROVISIONING_SSID    17
 #define MODULE_INFO_PROVISIONING_PORT    18
 #define MODULE_INFO_PROVISIONING_IP_ADDR 19
+#define MODULE_INFO_BINARY_CALL_BACK     20
+#define MODULE_INFO_TEXT_CALL_BACK       21
 
 typedef struct structmsgModuleData {
   uint8_t MACAddr[6];
@@ -106,9 +108,14 @@ typedef struct structmsgModuleData {
   uint8_t Reserve3[3];
 } structmsgModuleData_t;
 
+typedef void (* websockeBinaryReceived_t)(void *arg, char *pdata, unsigned short len);
+typedef void (* websockeTextReceived_t)(void *arg, char *pdata, unsigned short len);
+
 typedef struct structmsgWifiData {
   uint8_t wifiOpMode;
   uint8_t provisioningSsid[33];
   uint16_t provisioningPort;
   uint8_t provisioningIPAddr[16];
+  websockeBinaryReceived_t websockeBinaryReceived;
+  websockeTextReceived_t websockeTextReceived;
 } structmsgWifiData_t;

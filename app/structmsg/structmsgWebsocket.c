@@ -116,18 +116,14 @@ enum structmsg_error_code
 
 typedef struct websocketUserData {
   struct espconn *pesp_conn;
-//  int self_ref;
-//  int cb_connect_ref;
-//  int cb_reconnect_ref;
-//  int cb_disconnect_ref;
-//  int cb_receive_ref;
-//  int cb_send_ref;
-//  int cb_dns_found_ref;
   uint8_t isWebsocket;
   uint8_t num_urls;
   uint8_t max_urls;
   char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
   char *curr_url; // that is url which has been provided in the received data
+  structmsgDispatcher_t *structmsgDispatcher;
+  websockeBinaryReceived_t websocketBinaryReceived;
+  websockeTextReceived_t websocketTextReceived;
 } websocketUserData_t;
 
 static uint8_t websocket_writeData( const char *payload, int size, websocketUserData_t *wud, int opcode);
@@ -139,6 +135,9 @@ static uint8_t websocket_writeData( const char *payload, int size, websocketUser
 #define SSL_BUFFER_SIZE 5120
 
 static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+typedef void (* websockeBinaryReceived_t)(void *arg, char *pdata, unsigned short len);
+typedef void (* websockeTextReceived_t)(void *arg, char *pdata, unsigned short len);
 
 // ============================ websocket_parse =========================================
 
@@ -211,8 +210,17 @@ ets_printf("parse binary\n");
   }
   recv_data = &data[offset];
 for (int i = 0; i < size; i++) {
-  ets_printf("i: %d 0x%02x\n", i, recv_data[i]&0xFF);
+//  ets_printf("i: %d 0x%02x\n", i, recv_data[i]&0xFF);
 }
+  switch (opcode) {
+  case OPCODE_TEXT:
+ets_printf("cb text\n");
+    wud->websocketTextReceived(wud->structmsgDispatcher, recv_data, size);
+    break;
+  case OPCODE_BINARY:
+    wud->websocketBinaryReceived(wud->structmsgDispatcher, recv_data, size);
+    break;
+  }
   *resData = recv_data;
   *len = size;
   recv_data[size] = 0;
@@ -547,7 +555,6 @@ void alarmTimerAP(void *arg) {
   struct espconn *pesp_conn = NULL;
   unsigned port;
   ip_addr_t ipaddr;
-  const char *domain;
   unsigned type;
   int result;
   websocketUserData_t *wud;
@@ -570,10 +577,8 @@ ets_printf("IP: %s\n", temp);
 ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
 //  checkErrOK(result);
   port = numericValue;
-  result = self->getModuleValue(self, MODULE_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+//  result = self->getModuleValue(self, MODULE_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
 //  checkErrOK(result);
-  domain = (char *)stringValue;
-domain = "0.0.0.0";
 
   wud = (websocketUserData_t *)os_zalloc(sizeof(websocketUserData_t));
 //   checkAllocOK(wud);
@@ -588,6 +593,13 @@ ets_printf("wud0: %p\n", wud);
 wud->urls[0] = "/getaplist";
 wud->urls[1] = "/getapdeflist";
 wud->num_urls = 2;
+  result = self->getModuleValue(self, MODULE_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
+  wud->websocketBinaryReceived = (websockeBinaryReceived_t)numericValue;
+  result = self->getModuleValue(self, MODULE_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
+  wud->websocketTextReceived = (websockeTextReceived_t)numericValue;
+  wud->structmsgDispatcher = self;
 
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
   wud->pesp_conn = pesp_conn;
@@ -656,11 +668,6 @@ static uint8_t websocketRunAPMode(structmsgDispatcher_t *self) {
   if (!boolResult) {
     return STRUCT_DISP_ERR_CANNOT_DISCONNECT;
   }
-//  boolResult = wifi_set_opmode(OPMODE_STATION);
-//  if (!boolResult) {
-//    return STRUCT_DISP_ERR_CANNOT_SET_OPMODE;
-//  }
-//return STRUCT_DISP_ERR_OK;
   boolResult = wifi_set_opmode(OPMODE_STATIONAP);
   if (!boolResult) {
     return STRUCT_DISP_ERR_CANNOT_SET_OPMODE;
@@ -681,50 +688,23 @@ static uint8_t websocketRunAPMode(structmsgDispatcher_t *self) {
   }
 ets_printf("wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_current_ap_id(), wifi_station_get_hostname());
 
-ets_printf("meminfo\n");
-system_print_meminfo();
-ets_printf("malloc\n");
-system_show_malloc();
-ets_printf("malloc done\n");
-
 ets_printf("register alarmTimerAP: self: %p\n", self);
-int repeat = 1;
-int interval = 1000;
-int timerId = 0;
-int mode = TIMER_MODE_AUTO;
-structmsgTimer_t *tmr = &structmsgTimers[timerId];
-if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
-  ets_timer_disarm(&tmr->timer);
-}
-// this is only preparing
-ets_timer_setfn(&tmr->timer, alarmTimerAP, (void*)timerId);
-tmr->mode = mode | TIMER_IDLE_FLAG;
-// here is the start
-tmr->interval = interval;
-tmr->mode &= ~TIMER_IDLE_FLAG;
-ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
-ets_printf("arm_new done\n");
-
-
-
-#ifdef NOTDEF
-  if srv ~= nil then
-    srv:close()
-    srv=nil
-  end
-
-
-
-
-  if (not tmr.alarm(1,1000,tmr.ALARM_AUTO,function()
-     ip=wifi.ap.getip()
-     if (ip ~= nil) then
-       tmr.stop(1)
-dbgPrint('Provisioning: wifi mode: '..tostring(wifi.getmode()))
-dbgPrint("Provisioning: AP IP: "..tostring(wifi.ap.getip()))
-dbgPrint("Provisioning: STA IP: "..tostring(wifi.sta.getip()))
-       srv=websocket.createServer(30,srv_connected)
-#endif
+  int repeat = 1;
+  int interval = 1000;
+  int timerId = 0;
+  int mode = TIMER_MODE_AUTO;
+  structmsgTimer_t *tmr = &structmsgTimers[timerId];
+  if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
+    ets_timer_disarm(&tmr->timer);
+  }
+  // this is only preparing
+  ets_timer_setfn(&tmr->timer, alarmTimerAP, (void*)timerId);
+  tmr->mode = mode | TIMER_IDLE_FLAG;
+  // here is the start
+  tmr->interval = interval;
+  tmr->mode &= ~TIMER_IDLE_FLAG;
+  ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
+  ets_printf("arm_new done\n");
 
   return STRUCT_DISP_ERR_OK;
 }

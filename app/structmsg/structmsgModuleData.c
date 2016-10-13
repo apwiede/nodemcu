@@ -89,6 +89,27 @@ static stationConfig_t stationConfig;
 static structmsgModuleData_t structmsgModuleData;
 static structmsgWifiData_t structmsgWifiData;
 
+void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
+  structmsgDispatcher_t *structmsgDispatcher;
+  structmsgDispatcher_t *self;
+  uint8_t result;
+
+  structmsgDispatcher = (structmsgDispatcher_t *)arg;
+  self = structmsgDispatcher;
+ets_printf("websockeBinaryReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
+  result = self->resetMsgInfo(self, &self->received);
+//  checkErrOK(result);
+  result = structmsgDispatcher->handleReceivedPart(structmsgDispatcher, (uint8_t *)pdata, (uint8_t)len);
+ets_printf("websockeBinaryReceived end result: %d\n", result);
+}
+
+void websockeTextReceived(void *arg, char *pdata, unsigned short len) {
+  structmsgDispatcher_t *structmsgDispatcher;
+
+  structmsgDispatcher = (structmsgDispatcher_t *)arg;
+ets_printf("websockeTextReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
+}
+
 // ================================= getModuleValue ====================================
 
 static uint8_t getModuleValue(structmsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue) {
@@ -152,6 +173,14 @@ ets_printf("getModuleValue: port: %d\n", structmsgWifiData.provisioningPort);
   case MODULE_INFO_PROVISIONING_IP_ADDR:
     *stringValue = structmsgWifiData.provisioningIPAddr;
 ets_printf("getModuleValue: IPAddr: 0x%08x\n", structmsgWifiData.provisioningIPAddr);
+    break;
+  case MODULE_INFO_BINARY_CALL_BACK:
+    *numericValue = (int)structmsgWifiData.websockeBinaryReceived;
+ets_printf("getModuleValue: binaryCb: 0x%08x\n", structmsgWifiData.websockeBinaryReceived);
+    break;
+  case MODULE_INFO_TEXT_CALL_BACK:
+    *numericValue = (int)structmsgWifiData.websockeTextReceived;
+ets_printf("getModuleValue: textCb: 0x%08x\n", structmsgWifiData.websockeTextReceived);
     break;
   default:
     return STRUCT_DISP_ERR_BAD_MODULE_VALUE_WHICH;
@@ -331,6 +360,9 @@ static uint8_t setModuleValues(structmsgDispatcher_t *self) {
   structmsgModuleData.Reserve3[0] = 'X';
   structmsgModuleData.Reserve3[1] = 'Y';
   structmsgModuleData.Reserve3[2] = 'Z';
+
+  structmsgWifiData.websockeBinaryReceived = &websockeBinaryReceived;
+  structmsgWifiData.websockeTextReceived = &websockeTextReceived;
 
   provisioningSsid = "testDevice_connect";
   c_memcpy(structmsgWifiData.provisioningSsid, provisioningSsid, c_strlen(provisioningSsid));

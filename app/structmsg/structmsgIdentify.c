@@ -606,6 +606,77 @@ static uint8_t prepareNotEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t
   return STRUCT_DISP_ERR_OK;
 }
 
+// ================================= prepareEncryptedAnswer ====================================
+
+static uint8_t prepareEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
+  uint8_t fileName[30];
+  int result;
+  uint8_t numEntries;
+  char *endPtr;
+  uint8_t lgth;
+  int msgLgth;
+  uint8_t *data;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  uint8_t numRows;
+  uint8_t *handle;
+  unsigned long ulgth;
+  structmsgData_t *structmsgData;
+  int idx;
+
+ets_printf("§@1%c!@§\n", parts->u8CmdKey);
+  if (parts->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
+ets_printf("§@prepareEncryptedAnsweru8!%c!t!%c!@§\n", parts->u8CmdKey, type);
+    os_sprintf(fileName, "Desc%c%c.txt", parts->u8CmdKey, type);
+  } else {
+ets_printf("§@prepareEncryptedAnsweru16!%c%c!t!%c!@§\n", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
+    os_sprintf(fileName, "Desc%c%c%c.txt", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
+  }
+ets_printf("fileName: %s\n", fileName);
+return STRUCT_MSG_ERR_OK;
+  result = self->openFile(self, fileName, "r");
+  checkErrOK(result);
+  result = self->readLine(self, &buffer, &lgth);
+  checkErrOK(result);
+  if ((lgth < 4) || (buffer[0] != '#')) {
+    return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  ulgth = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)ulgth;
+//ets_printf("§@NE1!%d!@§", numEntries);
+  numRows = 0;
+  result = self->createMsgFromLines(self, parts, numEntries, numRows, type, &structmsgData, &handle);
+  checkErrOK(result);
+//ets_printf("heap2: %d\n", system_get_free_heap_size());
+  result = self->closeFile(self);
+  checkErrOK(result);
+  if (parts->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
+    os_sprintf(fileName, "Val%c%c.txt", parts->u8CmdKey, type);
+  } else {
+    os_sprintf(fileName, "Val%c%c%c.txt", (parts->u16CmdKey>>8)&0xFF, parts->u16CmdKey&0xFF, type);
+  }
+  result = self->openFile(self, fileName, "r");
+  checkErrOK(result);
+  result = self->readLine(self, &buffer, &lgth);
+  checkErrOK(result);
+  if ((lgth < 4) || (buffer[0] != '#')) {
+    return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  ulgth = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)ulgth;
+//ets_printf("§@NE2!%d!@§", numEntries);
+  result = self->setMsgValuesFromLines(self, structmsgData, numEntries, handle, parts->u8CmdKey);
+  checkErrOK(result);
+  result = self->closeFile(self);
+  checkErrOK(result);
+//ets_printf("§heap3: %d§", system_get_free_heap_size());
+  result = structmsgData->getMsgData(structmsgData, &data, &msgLgth);
+  checkErrOK(result);
+  result = self->typeRSendAnswer(self, data, msgLgth);
+  self->resetMsgInfo(self, parts);
+  return STRUCT_DISP_ERR_OK;
+}
+
 // ================================= nextFittingEntry ====================================
 
 static uint8_t nextFittingEntry(structmsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey) {
@@ -735,7 +806,148 @@ static uint8_t getHeaderIndexFromHeaderFields(structmsgDispatcher_t *self, msgPa
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
 //ets_printf("§fit!%d!%d!§", result, hdrInfos->currPartIdx);
-  checkErrOK(result);
+  return result;
+}
+
+// ================================= handleEncryptedPart ====================================
+    
+static uint8_t handleEncryptedPart(structmsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos) {
+  int result;
+  dataView_t *dataView;
+  headerParts_t *hdr;
+  int hdrIdx;
+  uint8_t answerType;
+  structmsgField_t fieldInfo;
+  bool isU16CmdKey;
+  uint16_t u16;
+  uint8_t u8;
+
+  dataView = self->structmsgDataView->dataView;
+  hdrIdx = hdrInfos->currPartIdx;
+  hdr = &hdrInfos->headerParts[hdrIdx];
+  isU16CmdKey = true;
+  if (received->lgth == hdrInfos->headerStartLgth) {
+  }
+ 
+ets_printf("hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHandleType);
+  switch (hdr->hdrHandleType) {
+  case 'U':
+  case 'W':
+  case 'R':
+  case 'S':
+  case 'A':
+ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHandleType);
+    return STRUCT_DISP_ERR_BAD_HANDLE_TYPE;
+    break;
+  case 'G':
+    // request for APList or ssid and password!
+ets_printf("§el!%d!enc!%c!ht!%c!§\n", hdr->hdrExtraLgth, hdr->hdrEncryption, hdr->hdrHandleType);
+ets_printf("rl: %d rt: %d\n", received->lgth, hdrInfos->headerStartLgth);
+      if (received->lgth == hdrInfos->headerStartLgth + 1) {
+ets_printf("+1 seqIdx: %d 0x%02x\n", hdrInfos->seqIdx, hdrInfos->headerSequence[hdrInfos->seqIdx]);
+        // get the cmdKey, we get its type from the header sequence!
+        switch (hdrInfos->headerSequence[hdrInfos->seqIdx]) {
+          case STRUCT_DISP_U16_CMD_KEY:
+            result = self->structmsgDataView->dataView->getUint16(self->structmsgDataView->dataView, received->fieldOffset, &u16);
+            received->u16CmdKey = u16;
+            received->fieldOffset += 2;
+            received->partsFlags |= STRUCT_DISP_U16_CMD_KEY;
+            isU16CmdKey = true;
+ets_printf("§u16CmdKey!0x%04x!§\n", received->u16CmdKey);
+            while (received->u16CmdKey != hdr->hdrU16CmdKey) {
+              hdrInfos->currPartIdx++;
+              result = nextFittingEntry(self, 0, received->u16CmdKey);
+              checkErrOK(result);
+              hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
+            }
+            break;
+          case STRUCT_DISP_U8_CMD_KEY:
+            result = self->structmsgDataView->dataView->getUint8(self->structmsgDataView->dataView, received->fieldOffset, &u8);
+            received->u8CmdKey = u8;
+            received->fieldOffset++;
+            received->partsFlags |= STRUCT_DISP_U8_CMD_KEY;
+            isU16CmdKey = false;
+ets_printf("§u8CmdKey!0x%02x!§\n", received->u8CmdKey);
+            hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
+            while (received->u8CmdKey !=  hdr->hdrU8CmdKey) {
+              result = nextFittingEntry(self, received->u8CmdKey, 0);
+              checkErrOK(result);
+              hdrInfos->currPartIdx++;
+              hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
+            }
+            break;
+        }
+        hdrInfos->seqIdx++;
+      } else {
+        if (received->lgth == (hdrInfos->headerStartLgth + 2)) {
+          // check if we have a cmdLgth
+          switch (hdrInfos->headerSequence[hdrInfos->seqIdx]) {
+            case STRUCT_DISP_U0_CMD_LGTH:
+              received->fieldOffset += 2;
+//puts stderr "§u0CmdLgth!0!§"
+              break;
+            case STRUCT_DISP_U8_CMD_LGTH:
+              result = self->structmsgDataView->dataView->getUint8(self->structmsgDataView->dataView, received->fieldOffset, &u8);
+              received->u8CmdLgth = u8;
+              received->fieldOffset++;
+//puts stderr [format "§u8CmdLgth!%c!§" [dict get $received u8CmdLgth]]
+              break;
+            case STRUCT_DISP_U16_CMD_LGTH:
+              result = self->structmsgDataView->dataView->getUint16(self->structmsgDataView->dataView, received->fieldOffset, &u16);
+              received->u16CmdLgth = u16;
+              received->fieldOffset += 2;
+//puts stderr [format "§u16CmdLgth!%c!§" [dict get $received u16CmdLgth]
+              break;
+          }
+          hdrInfos->seqIdx++;
+        }
+      }
+      //just get the bytes until totalLgth reached
+      if (received->lgth == received->totalLgth) {
+ets_printf("§encrypted message completely receieved!%d!§\n", received->totalLgth);
+        // check if we have a crc and the type of it
+        // if we have a crc calculate it for the totalLgth
+        switch (hdrInfos->headerSequence[hdrInfos->seqIdx]) {
+          case STRUCT_DISP_U0_CRC:
+ets_printf("§u0Crc!0!§");
+            result = STRUCT_MSG_ERR_OK;
+            break;
+          case STRUCT_DISP_U8_CRC:
+            fieldInfo.fieldLgth = 1;
+            fieldInfo.fieldOffset = received->totalLgth - 1;
+            result = self->structmsgDataView->getCrc(self->structmsgDataView, &fieldInfo, 0, fieldInfo.fieldOffset);
+ets_printf("§u8Crc!res!%d!§", result);
+            break;
+          case STRUCT_DISP_U16_CRC:
+            fieldInfo.fieldLgth = 2;
+            fieldInfo.fieldOffset = received->totalLgth - 2;
+            result = self->structmsgDataView->getCrc(self->structmsgDataView, &fieldInfo, 0, fieldInfo.fieldOffset);
+ets_printf("§u16Crc!res!%d!§", result);
+            break;
+        }
+        hdrInfos->seqIdx++;
+        if (result != STRUCT_MSG_ERR_OK) {
+          answerType = 'N';
+        } else {
+          answerType = 'A';
+        }
+ets_printf("handleEncryptedPart runAction: %c\n", answerType);
+//        result  = self->runAction(answerType);
+//        checkErrOK(result);
+        result = prepareEncryptedAnswer(self, received, answerType);
+ets_printf("§res NEA!%d!§\n", result);
+        checkErrOK(result);
+        result = -self->resetMsgInfo(self, received);
+        checkErrOK(result);
+      }
+      received->lgth++;
+    }
+    break;
+  default:
+    return STRUCT_DISP_ERR_BAD_HANDLE_TYPE;
+    break;
+  }
+  return STRUCT_MSG_ERR_OK;
 }
 
 // ================================= handleNotEncryptedPart ====================================
@@ -868,32 +1080,60 @@ static uint8_t handleReceivedPart(structmsgDispatcher_t *self, const uint8_t * b
   received = &self->received;
   dataView = self->structmsgDataView->dataView;
   dataView->data = received->buf;
-//ets_printf("§headerStartLgth!%d§", hdrInfos->headerStartLgth);
-//ets_printf("§receivedLgth: %d fieldOffset: %d!\n§", received->lgth, received->fieldOffset);
+ets_printf("§headerStartLgth!%d§", hdrInfos->headerStartLgth);
+ets_printf("§receivedLgth: %d fieldOffset: %d!\n§", received->lgth, received->fieldOffset);
   idx = 0;
   while (idx < lgth) {
     received->buf[received->lgth++] = buffer[idx];
     dataView->lgth++;
     if (received->lgth == hdrInfos->headerStartLgth) {
+ets_printf("getHeaderIndexFromHeaderFields\n");
       result = getHeaderIndexFromHeaderFields(self, received, hdrInfos);
+ets_printf("getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
     }
     if (received->lgth > hdrInfos->headerStartLgth) {
+      hdrIdx = hdrInfos->currPartIdx;
+      hdr = &hdrInfos->headerParts[hdrIdx];
       if (received->partsFlags & STRUCT_DISP_IS_NOT_ENCRYPTED) {
-        hdrIdx = hdrInfos->currPartIdx;
-        hdr = &hdrInfos->headerParts[hdrIdx];
+ets_printf("STRUCT_DISP_IS_NOT_ENCRYPTED\n");
         if (hdr->hdrEncryption == 'N') {
           result = handleNotEncryptedPart(self, received, hdrInfos);
+          checkErrOK(result);
         } else {
-          // eventually add the extraField to the headerLgth here!!
-          if (received->lgth == hdrInfos->headerStartLgth + 1) {
-            if (hdr->hdrExtraLgth > 0) {
-              hdrInfos->headerStartLgth += hdr->hdrExtraLgth;
-            }
+ets_printf("partsFlags is not encrypted and hdrEncryption is E");
+        }
+      } else {
+        // eventually add the extraField to the headerLgth here!!
+        if (received->lgth == hdrInfos->headerStartLgth + 1) {
+          if (hdr->hdrExtraLgth > 0) {
+            hdrInfos->headerStartLgth += hdr->hdrExtraLgth;
           }
-          // just get the bytes until totalLgth reached
-          if (received->lgth == received->totalLgth) {
+        }
+        // just get the bytes until totalLgth reached
+        if (received->lgth == received->totalLgth) {
 ets_printf("§encrypted message completely receieved!%d!§", received->totalLgth);
-          }
+          uint8_t *cryptedPtr;
+          uint8_t *cryptKey;
+          uint8_t *decrypted;;
+          uint8_t mlen;
+          uint8_t klen;
+          uint8_t ivlen;
+          int decryptedLgth;
+            // decrypt
+cryptKey = "a1b2c3d4e5f6g7h8";
+            mlen = received->totalLgth - hdrInfos->headerStartLgth;
+            ivlen = 16;
+            klen = 16;
+            cryptedPtr = received->buf + hdrInfos->headerStartLgth;
+            result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
+ets_printf("decrypted: lgth: %d result: %d data: %s\n", decryptedLgth, result, decrypted);
+            checkErrOK(result);
+            c_memcpy(cryptedPtr, decrypted, decryptedLgth);
+            // set received->lgth to end of header for correct working of handleEncryptedPart!!
+            received->lgth = hdrInfos->headerStartLgth;
+            result = handleEncryptedPart(self, received, hdrInfos);
+ets_printf("handleEncryptedPart idx: %d result: %d\n", idx, result);
+            checkErrOK(result);
         }
       }
     }
