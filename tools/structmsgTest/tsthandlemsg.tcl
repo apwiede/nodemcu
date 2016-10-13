@@ -33,11 +33,7 @@
 # *
 # ==========================================================================
 
-proc checkErrOk {result} {
-  if {$result != $::STRUCT_MSG_ERR_OK} {
-    puts stderr "result: $result"
-  }
-}
+package require aes
 
 source pdict.tcl
 source dataView.tcl
@@ -46,6 +42,12 @@ source structmsgData.tcl
 source structmsgDispatcher.tcl
 source structmsgIdentify.tcl
 source structmsgSendReceive.tcl
+
+proc checkErrOk {result} {
+  if {$result != $::STRUCT_MSG_ERR_OK} {
+    puts stderr "result: $result"
+  }
+}
 
 set result [::structmsg dataView setData "" 0]
 set result [::structmsg structmsgIdentify structmsgIdentify structmsgIdentifyInit]
@@ -66,6 +68,6 @@ dict set received targetPart 0
 dict set received fieldOffset 0
 dict set received lgth 22
 dict set received buf ""
-set result [::structmsg structmsgIdentify prepareEncryptedMsg $received A]
+set result [::structmsg structmsgIdentify sendEncryptedMsg nosocket $received A]
 checkErrOk $result
 exit 0

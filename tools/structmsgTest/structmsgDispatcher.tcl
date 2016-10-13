@@ -107,6 +107,7 @@ namespace eval structmsg {
       
     namespace export structmsgDispatcherInit freeStructmsgDataView createMsgFromLines
     namespace export createMsgFromLines setMsgValuesFromLines createDispatcher setMsgParts
+    namespace export encryptMsg decryptMsg resetMsgInfo
 
     variable structmsgDispatcher [dict create]
     variable structmsgDispatcherHandles
@@ -544,6 +545,7 @@ namespace eval structmsg {
     proc resetMsgInfo {partsVar} {
       variable structmsgDispatcher
 
+puts stderr "partsVar!$partsVar!"
       set parts [dict create]
       dict set parts lgth 0
       dict set parts fieldOffset 0
@@ -562,43 +564,13 @@ namespace eval structmsg {
     
     # ============================= encryptMsg ========================
     
-    proc encryptMsg {msg mlen key klen iv ivlen bufVar lgthVar} {
-      upvar $bufVar buf
+    proc encryptMsg {msg mlen key klen iv ivlen dataVar lgthVar} {
+      upvar $dataVar data
       upvar $lgthVar lgth
 
-      const crypto_mech_t *mech;
-      size_t bs;
-      size_t clen;
-      uint8_t *crypted;
-    
-      *buf = NULL;
-      *lgth = 0;
-      mech = crypto_encryption_mech {"AES-CBC"};
-      if {mech == NULL} {
-        return STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM;
-      }
-      bs = mech->block_size;
-      clen = {(mlen + bs - 1} / bs) * bs;
-      *lgth = clen;
-    #ets_printf{"dlen: %d lgth: %d clen: %d data: %p\n", dlen, *lgth, clen, data};
-      crypted = {uint8_t *}os_zalloc (clen);
-      if {!crypted} {
-        return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
-      } 
-      *buf = crypted;
-      crypto_op_t op =
-      { 
-        key, klen,
-        iv, ivlen,
-        msg, mlen,
-        crypted, clen,
-        OP_ENCRYPT
-      }; 
-      if {!mech->run (&op}) { 
-        os_free {*buf};
-        return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
-      } 
-      return STRUCT_MSG_ERR_OK;
+      set data [aes::aes -mode cbc -dir encrypt -key $key -iv $iv $msg]
+      set lgth [string length $data]
+      return $::STRUCT_MSG_ERR_OK
     }
     
     # ============================= decryptMsg ========================
@@ -607,38 +579,9 @@ namespace eval structmsg {
       upvar $bufVar buf
       upvar $lgthVar lgth
 
-      const crypto_mech_t *mech;
-      size_t bs;
-      size_t clen;
-      uint8_t *crypted;
-    
-      *buf = NULL;
-      *lgth = 0;
-      mech = crypto_encryption_mech {"AES-CBC"};
-      if {mech == NULL} {
-        return STRUCT_MSG_ERR_CRYPTO_BAD_MECHANISM;
-      }
-      bs = mech->block_size;
-      clen = {(mlen + bs - 1} / bs) * bs;
-      *lgth = clen;
-      crypted = {uint8_t *}os_zalloc (*lgth);
-      if {!crypted} {
-        return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
-      } 
-      *buf = crypted;
-      crypto_op_t op =
-      { 
-        key, klen,
-        iv, ivlen,
-        msg, mlen,
-        crypted, clen,
-        OP_DECRYPT
-      }; 
-      if {!mech->run (&op}) { 
-        os_free {*buf};
-        return STRUCT_MSG_ERR_CRYPTO_INIT_FAILED;
-      }
-      return STRUCT_MSG_ERR_OK;
+      set data [aes::aes -mode cbc -dir decrypt -key $key -iv $iv $msg]
+      set lgth [string length $data]
+      return $::STRUCT_MSG_ERR_OK
     }
     
     # ============================= structmsgDispatcherGetPtrFromHandle ========================

@@ -46,6 +46,7 @@ set ::STRUCT_DISP_ERR_TOO_FEW_FILE_LINES    178
 set ::STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND 177
 set ::STRUCT_DISP_ERR_DUPLICATE_ENTRY       176
 
+set ::cryptKey "a1b2c3d4e5f6g7h8"
 
 set RECEIVED_CHECK_HEADER_SIZE 7
 
@@ -96,7 +97,7 @@ namespace eval structmsg {
   namespace eval structmsgIdentify {
     namespace ensemble create
       
-    namespace export structmsgIdentify freeStructmsgDataView prepareEncryptedMsg
+    namespace export structmsgIdentify freeStructmsgDataView sendEncryptedMsg
     variable hdrInfos [list]
     variable received [list]
     variable dispFlags [list]
@@ -532,9 +533,9 @@ namespace eval structmsg {
       return $::STRUCT_MSG_ERR_OK
     }
     
-    # ================================= prepareEncryptedMsg ====================================
+    # ================================= sendEncryptedMsg ====================================
     
-    proc prepareEncryptedMsg {parts type} {
+    proc sendEncryptedMsg {sock parts type} {
       variable hdrInfos
       variable received
 
@@ -577,19 +578,27 @@ namespace eval structmsg {
       }
 puts stderr "MSG!$msgLgth!$data!"
       set result [getHeaderIndexFromHeaderFields]
+      set headerLgth [dict get $hdrInfos headerStartLgth]
       set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
       set extraLgth [dict get $hdr hdrExtraLgth]
       set encryption [dict get $hdr hdrEncryption]
       if {$encryption eq "E"} {
         set encryptionType Encrypted
+        set header [string range $data 0 [expr {$headerLgth -1}]]
+        set toCrypt [string range $data $headerLgth end]
+        set result [::structmsg structmsgDispatcher encryptMsg $toCrypt [string length $toCrypt] $::cryptKey [string length $::cryptKey] $::cryptKey [string length $::cryptKey] encrypted encryptedLgth]
+        set data "${header}${encrypted}"
+puts stderr "toCrypt![string length $toCrypt]!$toCrypt!"
+puts stderr "encrypted![string length $encrypted]!$encrypted!"
+        set msgLgth [string length $data]
       } else {
         set encryptionType NotEncrypted
       }
       set handleType [dict get $hdr hdrHandleType]
       set fcnName type${handleType}${encryptionType}SendMsg
 puts stderr "call:$fcnName!"
-      set result [$fcnName $data $msgLgth]
-      resetMsgInfo parts
+      set result [::structmsg structmsgSendReceive $fcnName $sock $data $msgLgth]
+      set result [::structmsg structmsgDispatcher resetMsgInfo received]
       return $::STRUCT_MSG_ERR_OK
     }
     

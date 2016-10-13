@@ -44,9 +44,13 @@ namespace eval structmsg {
     
     # ================================= typeGEncryptedSendMsg ====================================
     
-    proc typeGEncryptedSendMsg {data msgLgth} {
+    proc typeGEncryptedSendMsg {sock data msgLgth} {
     
-      wsSend $data $msgLgth
+      if {$sock eq "nosocket"} {
+        puts stderr "MSG!lgth: $msgLgth!data: $data!"
+      } else {
+        ::websocket::send $sock binary $data
+      }
       return $::STRUCT_DISP_ERR_OK
     }
 
