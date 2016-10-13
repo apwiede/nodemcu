@@ -465,7 +465,7 @@ namespace eval structmsg {
         return $result
       }
     #ets_printf{"heap2: %d\n", system_get_free_heap_size(})
-      close $lines
+      close $fd
       if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
         set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
       } else {
@@ -473,16 +473,16 @@ namespace eval structmsg {
       }
       set fd [open $fileName "r"]
       gets $fd line
-      set flds [split $lines ","]
+      set flds [split $line ","]
       foreach {dummy numEntries} $flds break
     #ets_printf{"§@NE2!%d!@§", numEntries}
-      set result [setMsgValuesFromLines $structmsgData $numEntries $handle [dict get $parts u8CmdKey]]
+      set result [::structmsg structmsgdata setMsgValuesFromLines $numEntries $handle [dict get $parts u8CmdKey]]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
       close $fd
     #ets_printf{"§heap3: %d§", system_get_free_heap_size(})
-      set result [::structmsg structmsgData getMsgData $structmsgData data msgLgth]
+      set result [::structmsg structmsgData getMsgData data msgLgth]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
@@ -511,7 +511,7 @@ puts stderr [format "§@NE1!%d!@§" $numEntries]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
-      close $lines
+      close $fd
       if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
         set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
       } else {
@@ -519,15 +519,17 @@ puts stderr [format "§@NE1!%d!@§" $numEntries]
       }
       set fd [open $fileName "r"]
       gets $fd line
-      set flds [split $lines ","]
+      set flds [split $line ","]
       foreach {dummy numEntries} $flds break
 puts stderr [format "§@NE2!%d!@§" $numEntries]
-      set result [setMsgValuesFromLines $structmsgData $numEntries $handle [dict get $parts u8CmdKey]]
+      set result [::structmsg structmsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u8CmdKey]]
+puts stderr "RES!$result!"
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
       close $fd
-      set result [::structmsg structmsgData getMsgData data msgLgth]
+      set result [::structmsg structmsgDispatcher getMsgData data msgLgth]
+puts stderr "DATA!$data!lgth!$msgLgth!"
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }

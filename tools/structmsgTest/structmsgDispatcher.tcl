@@ -104,7 +104,7 @@ namespace eval structmsg {
     namespace ensemble create
       
     namespace export structmsgDispatcherInit freeStructmsgDataView createMsgFromLines
-    namespace export createMsgFromLines
+    namespace export createMsgFromLines setMsgValuesFromLines
     variable structmsgDispatcher [list]
     variable structmsgData [list]
     variable numMsgHeaders 0
@@ -265,7 +265,7 @@ namespace eval structmsg {
         idx++;
       }
       if {numUsed == 0} {
-        os_free{structmsgDispatcherHandles.handles};
+        os_free {structmsgDispatcherHandles.handles};
         structmsgDispatcherHandles.handles = NULL;
       }
       if {found} {
@@ -435,118 +435,67 @@ puts stderr "DATA!$header!lgth!$headerLgth!"
     
     # ================================= setMsgValuesFromLines ====================================
     
-    proc setMsgValuesFromLines {numEntries handle type} {
+    proc setMsgValuesFromLines {fd numEntries handle type} {
       variable structmsgDispatcher
       variable structmsgData
-      int idx;
-      uint8_t*cp;
-      uint8_t *fieldNameStr;
-      uint8_t fieldNameId;
-      uint8_t fieldTypeId;
-      uint8_t *fieldValueStr;
-      char *endPtr;
-      uint8_t fieldLgth;
-      uint8_t *flagStr;
-      uint8_t flag;
-      uint8_t lgth;
-      unsigned long uval;
-      uint8_t buf[100];
-      uint8_t *buffer = buf;
-      int numericValue;
-      uint8_t *stringValue;
-      structmsgDataView_t *dataView;
-      int result;
     
-      idx = 0;
-      dataView = structmsgData->structmsgDataView;
-      while{idx < numEntries} {
-        result = self->readLine{self, &buffer, &lgth};
-        checkErrOK{result};
-        if {lgth == 0} {
-          return STRUCT_DISP_ERR_TOO_FEW_FILE_LINES;
-        }
-        buffer[lgth] = 0;
-        fieldNameStr = buffer;
-    
+      set idx 0
+      while {$idx < $numEntries} {
+        gets $fd line
+        set flds [split $line ","]
+        foreach {fieldNameStr fieldTypeStr fieldValueStr} $flds break
         # fieldName
-        cp = fieldNameStr;
-        while {*cp != ','} {
-          cp++;
+        set result [::structmsg structmsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::STRUCT_MSG_NO_INCR]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
         }
-        *cp++ = '\0';
-        result = dataView->getFieldNameIdFromStr{dataView, fieldNameStr, &fieldNameId, STRUCT_MSG_NO_INCR};
-        checkErrOK{result};
-        result = getFieldType{self, structmsgData, fieldNameId, &fieldTypeId};
-        checkErrOK{result};
+        set result [::structmsg dataView getFieldType $fieldNameId fieldTypeId]
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
     
         # fieldValue
-        fieldValueStr = cp;
-        while {*cp != '\n'} {
-          cp++;
-        }
-        *cp++ = '\0';
-        if {fieldValueStr[0] == '@'} {
+        if {[string range $fieldValueStr 0 0] eq "@"} {
           # call the callback function vor the field!!
-          result = self->fillMsgValue{self, fieldValueStr, &numericValue, &stringValue, type, fieldTypeId};
-          checkErrOK{result};
-        } else {
-          switch {fieldTypeId} {
-          case DATA_VIEW_FIELD_UINT8_T:
-          case DATA_VIEW_FIELD_INT8_T:
-          case DATA_VIEW_FIELD_UINT16_T:
-          case DATA_VIEW_FIELD_INT16_T:
-          case DATA_VIEW_FIELD_UINT32_T:
-          case DATA_VIEW_FIELD_INT32_T:
-            {
-              uval = c_strtoul{fieldValueStr, &endPtr, 10};
-              if {endPtr == (char *}(cp-1)) {
-                numericValue = {int}uval;
-                stringValue = NULL;
-              } else {
-                numericValue = 0;
-                stringValue = fieldValueStr;
-              }
-            }
-            break;
-          default:
-            numericValue = 0;
-            stringValue = fieldValueStr;
-            break;
+          set result [fillMsgValue $fieldValueStr value $type $fieldTypeId]
+          if {$result != $::STRUCT_MSG_ERR_OK} {
+            return $result
           }
         }
-        switch {fieldNameId} {
-          case STRUCT_MSG_SPEC_FIELD_DST:
-            numericValue = self->received.fromPart;
-            stringValue = NULL;
-            result = structmsgData->setFieldValue{structmsgData, fieldNameStr, numericValue, stringValue};
-            break;
-          case STRUCT_MSG_SPEC_FIELD_SRC:
-            numericValue = self->received.toPart;
-            stringValue = NULL;
-            result = structmsgData->setFieldValue{structmsgData, fieldNameStr, numericValue, stringValue};
-            break;
-          case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+        switch $fieldNameId {
+          STRUCT_MSG_SPEC_FIELD_DST {
+            set value [dict get $received fromPart]
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+          }
+          STRUCT_MSG_SPEC_FIELD_SRC {
+            set value [dict get $received toPart]
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+          }
+          STRUCT_MSG_SPEC_FIELD_CMD_KEY {
             # check for u8CmdKey/u16CmdKey here
-            if {self->dispFlags & STRUCT_MSG_U8_CMD_KEY} {
-              numericValue = self->received.u8CmdKey;
+            if {[lsearch [dict get $structmsgDispatcher dispFlags] STRUCT_MSG_U8_CMD_KEY] >= 0} {
+              set value[dict get $structmsgDispatcher received u8CmdKey]
             } else {
-              numericValue = self->received.u16CmdKey;
+              set value = [dict get $structmsgDispatcher received u16CmdKey]
             }
-            stringValue = NULL;
-            result = structmsgData->setFieldValue{structmsgData, fieldNameStr, numericValue, stringValue};
-            break;
-          default:
-            result = structmsgData->setFieldValue{structmsgData, fieldNameStr, numericValue, stringValue};
-            break;
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+          }
+          default {
+            set result [::structmsg structmsgData setFieldValue $fieldNameStr value]
+          }
         }
-        checkErrOK{result};
-        idx++;
+        if {$result != $::STRUCT_MSG_ERR_OK} {
+          return $result
+        }
+        incr idx
       }
-      result = structmsgData->setFieldValue{structmsgData, "@cmdKey", type, NULL};
-      checkErrOK{result};
-      structmsgData->prepareMsg{structmsgData};
+      set result [::structmsg structmsgData setFieldValue "@cmdKey" $type]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+      set result [::structmsg structmsgData prepareMsg]
     #  structmsgData->dumpMsg{structmsgData};
-      return STRUCT_DISP_ERR_OK;
+      return $result;
     }
     
     # ================================= createMsgFromLines ====================================
@@ -733,14 +682,14 @@ if {0} {
       upvar $handleVar handle
     
       os_sprintf{self->handle, "%s%p", DISP_HANDLE_PREFIX, self};
-      result = addHandle{self->handle, self};
+      result = addHandle {self->handle, self};
       if {result != STRUCT_DISP_ERR_OK} {
-        deleteHandle{self->handle};
-        os_free{self};
+        deleteHandle {self->handle};
+        os_free {self};
         return result;
       }
-      resetMsgInfo{self, &self->received};
-      resetMsgInfo{self, &self->toSend};
+      resetMsgInfo {self, &self->received};
+      resetMsgInfo {self, &self->toSend};
       *handle = self->handle;
       return STRUCT_DISP_ERR_OK;
     }
