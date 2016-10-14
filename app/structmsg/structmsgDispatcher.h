@@ -42,6 +42,7 @@
 
 #include "structmsgDataView.h"
 #include "structmsgDataDescriptions.h"
+#include "structmsgModuleData.h"
 
 enum structmsgDispatcherErrorCode
 {
@@ -98,7 +99,7 @@ typedef struct structmsgData structmsgData_t;
 #define STRUCT_DISP_TRANSFER_TO_CONN  (1 << 5)
 #define STRUCT_DISP_NOT_RELEVANT      (1 << 6)
 
-// encryption types
+// encryption and other types
 #define STRUCT_DISP_IS_ENCRYPTED      (1 << 0)
 #define STRUCT_DISP_IS_NOT_ENCRYPTED  (1 << 1)
 
@@ -186,6 +187,13 @@ typedef struct msgHeader2MsgPtr {
   uint8_t header[DISP_MAX_HEADER_LGTH];
 } msgHeader2MsgPtr_t;
 
+typedef struct buildMsgInfos {
+  uint8_t numEntries;
+  uint8_t type;
+  msgParts_t *parts;
+  uint8_t numRows; 
+} buildMsgInfos_t;
+
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
 typedef uint8_t (* dumpHeaderParts_t)(structmsgDispatcher_t *self, headerParts_t *hdr);
@@ -194,7 +202,9 @@ typedef uint8_t (* dumpMsgParts_t)(structmsgDispatcher_t *self, msgParts_t *msgP
 
 typedef uint8_t (* setActionEntry_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* runAction_t)(structmsgDispatcher_t *self, uint8_t *answerType);
+typedef uint8_t (* getActionMode_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode);
 typedef uint8_t (* fillMsgValue_t)(structmsgDispatcher_t *self, uint8_t *callbackName, int *numericValue, uint8_t **stringValue, uint8_t answerType, uint8_t fieldTypeId);
+typedef uint8_t (* getBssScanInfo_t)(structmsgDispatcher_t *self);
 
 typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 typedef uint8_t (* setModuleValues_t)(structmsgDispatcher_t *self);
@@ -205,7 +215,7 @@ typedef uint8_t (* websocketRunAPMode_t)(structmsgDispatcher_t *self);
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(structmsgDispatcher_t *self);
-typedef uint8_t (* createMsgFromLines_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type, structmsgData_t **structmsgData, uint8_t **handle);
+typedef uint8_t (* createMsgFromLines_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type);
 typedef uint8_t (* setMsgValuesFromLines_t)(structmsgDispatcher_t *self, structmsgData_t *structmsgData, uint8_t numEntries, uint8_t *handle, uint8_t type);
 
 typedef uint8_t (* openFileDesc_t)(structmsgDispatcher_t *self, const uint8_t *fileName, const uint8_t *fileMode);
@@ -230,6 +240,7 @@ typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t 
 typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
 typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
 typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
+typedef uint8_t (* buildMsg_t)(structmsgDispatcher_t *self);
 
 typedef struct structmsgDispatcher {
   uint8_t id;
@@ -240,12 +251,17 @@ typedef struct structmsgDispatcher {
   uint16_t dispFlags;
   int numericValue;
   uint8_t *stringValue;
+  uint8_t actionMode;
+  bssScanInfos_t *bssScanInfos;
+  buildMsgInfos_t buildMsgInfos;
   
   uint8_t numMsgHeaders;
   uint8_t maxMsgHeaders;
   msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
 
   structmsgDataView_t *structmsgDataView;
+  structmsgData_t *structmsgData;
+  uint8_t *msgHandle;
   structmsgDataDescription_t *structmsgDataDescription;
 
   msgHeaderInfos_t msgHeaderInfos;
@@ -257,10 +273,10 @@ typedef struct structmsgDispatcher {
   uint16_t AppPart;
   uint16_t CloudPart;
 
-  IMsg_t IMsg;
-  BMsg_t BMsg;
-  MMsg_t MMsg;
-  defaultMsg_t defaultMsg;
+//  IMsg_t IMsg;
+//  BMsg_t BMsg;
+//  MMsg_t MMsg;
+//  defaultMsg_t defaultMsg;
   resetMsgInfo_t resetMsgInfo;
 
   prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
@@ -268,7 +284,10 @@ typedef struct structmsgDispatcher {
 
   setActionEntry_t setActionEntry;
   runAction_t runAction;
+  getActionMode_t getActionMode;
   fillMsgValue_t fillMsgValue;
+  getBssScanInfo_t getBssScanInfo;
+  buildMsg_t buildMsg;
 
   getModuleValue_t getModuleValue;
   setModuleValues_t setModuleValues;

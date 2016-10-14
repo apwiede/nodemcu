@@ -82,13 +82,51 @@
 #define MODULE_INFO_Reserve1             13
 #define MODULE_INFO_Reserve2             14
 #define MODULE_INFO_Reserve3             15
+#define MODULE_INFO_AP_LIST_CALL_BACK    16
 
-#define MODULE_INFO_WIFI_OPMODE          16
-#define MODULE_INFO_PROVISIONING_SSID    17
-#define MODULE_INFO_PROVISIONING_PORT    18
-#define MODULE_INFO_PROVISIONING_IP_ADDR 19
-#define MODULE_INFO_BINARY_CALL_BACK     20
-#define MODULE_INFO_TEXT_CALL_BACK       21
+#define MODULE_INFO_WIFI_OPMODE          20
+#define MODULE_INFO_PROVISIONING_SSID    21
+#define MODULE_INFO_PROVISIONING_PORT    22
+#define MODULE_INFO_PROVISIONING_IP_ADDR 23
+#define MODULE_INFO_BINARY_CALL_BACK     24
+#define MODULE_INFO_TEXT_CALL_BACK       25
+
+typedef struct structmsgDispatcher structmsgDispatcher_t;
+
+typedef struct bssScanInfo {
+  uint8_t bssid[6];
+  uint8_t bssidStr[18];
+  uint8_t ssid[33];
+  uint8_t ssid_len;
+  uint8_t channel;
+  int8_t  rssi;
+  uint8_t authmode;
+  uint8_t is_hidden;
+  int16_t freq_offset;
+  int16_t freqcal_val;
+} bssScanInfo_t;
+
+typedef struct bssScanInfos {
+  bssScanInfo_t *infos;
+  uint8_t numScanInfos;
+  uint8_t maxScanInfos;
+  bool scanInfoComplete;
+  structmsgDispatcher_t *structmsgDispatcher;
+} bssScanInfos_t;
+
+typedef struct stationConfig {
+  uint8_t ssid[33];
+  uint8_t password[65];
+  uint8_t bssidSet;
+  uint8_t bssid[6];
+  uint8_t bssidStr[18];
+  uint8_t status;
+  uint8_t mode;
+  uint8_t authmode;
+  uint8_t channel;
+  int16_t freq_offset;
+  int16_t freqcal_val;
+} stationConfig_t;
 
 typedef struct structmsgModuleData {
   uint8_t MACAddr[6];
@@ -110,6 +148,7 @@ typedef struct structmsgModuleData {
 
 typedef void (* websockeBinaryReceived_t)(void *arg, char *pdata, unsigned short len);
 typedef void (* websockeTextReceived_t)(void *arg, char *pdata, unsigned short len);
+typedef void (* getAPList_t)(structmsgData_t *self);
 
 typedef struct structmsgWifiData {
   uint8_t wifiOpMode;

@@ -555,32 +555,54 @@ static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
 #undef checkErrOK
 #define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) return result
 
-// ================================= prepareNotEncryptedAnswer ====================================
+// ================================= buildMsg ====================================
 
-static uint8_t prepareNotEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
+static uint8_t buildMsg(structmsgDispatcher_t *self) {
+  int result;
+
+ets_printf("buildMsg\n");
+ets_printf("numBssInfos: numScanInfos: %d complete: %d\n", self->bssScanInfos->numScanInfos, self->bssScanInfos->scanInfoComplete);
+  self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos;
+  result = self->createMsgFromLines(self, self->buildMsgInfos.parts, self->buildMsgInfos.numEntries, self->buildMsgInfos.numRows, self->buildMsgInfos.type);
+ets_printf("buildMsg2 result: %d\n", result);
+  checkErrOK(result);
+  result = self->closeFile(self);
+  checkErrOK(result);
+  result = self->structmsgData->initMsg(self->structmsgData);
+ets_printf("buildMsg3 result: %d\n", result);
+//ets_printf("heap2: %d\n", system_get_free_heap_size());
+self->structmsgData->dumpMsg(self->structmsgData);
+ets_printf("buildMsg End %d\n", result);
+  return result;
+}
+
+// ================================= prepareAnswerMsg ====================================
+
+static uint8_t prepareAnswerMsg(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
   uint8_t fileName[30];
   int result;
   uint8_t numEntries;
   char *endPtr;
+  uint8_t *cp;
   uint8_t lgth;
-  int msgLgth;
-  uint8_t *data;
   uint8_t buf[100];
   uint8_t *buffer = buf;
   uint8_t numRows;
   uint8_t *handle;
   unsigned long ulgth;
   structmsgData_t *structmsgData;
+  uint8_t *prepareValuesCbName;
+  uint8_t actionMode;
   int idx;
 
-//ets_printf("§@1@§", parts->u8CmdKey);
   if (parts->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
-//ets_printf("§@prepareNotEncryptedAnsweru8!%c!t!%c!@§", parts->u8CmdKey, type);
+ets_printf("§@prepareAnswerMsg u8!%c!t!%c!@§\n", parts->u8CmdKey, type);
     os_sprintf(fileName, "Desc%c%c.txt", parts->u8CmdKey, type);
   } else {
-//ets_printf("§@prepareNotEncryptedAnsweru16!%c%c!t!%c!@§", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
+ets_printf("§@prepareAnswerMsg u16!%c%c!t!%c!@§\n", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
     os_sprintf(fileName, "Desc%c%c%c.txt", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
   }
+ets_printf("fileName: %s\n", fileName);
   result = self->openFile(self, fileName, "r");
   checkErrOK(result);
   result = self->readLine(self, &buffer, &lgth);
@@ -590,12 +612,51 @@ static uint8_t prepareNotEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t
   }
   ulgth = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)ulgth;
-//ets_printf("§@NE1!%d!@§", numEntries);
-  numRows = 0;
-  result = self->createMsgFromLines(self, parts, numEntries, numRows, type, &structmsgData, &handle);
-  checkErrOK(result);
-//ets_printf("heap2: %d\n", system_get_free_heap_size());
-  result = self->closeFile(self);
+  cp = (uint8_t *)endPtr;
+  prepareValuesCbName = NULL;
+  if ((*cp == ',') || (*cp == '\n') || (*cp == '\r') || (*cp == '\0')) {
+    *cp = '\0';
+    cp++;
+    prepareValuesCbName = cp;
+  }
+  if (prepareValuesCbName != NULL) {
+    while ((*cp != '\n') &&  (*cp != '\r') && (*cp != '\0')) {
+      cp++;
+    }
+    *cp = '\0';
+  }
+  self->buildMsgInfos.numEntries = numEntries;
+  self->buildMsgInfos.type = type;
+  self->buildMsgInfos.parts = parts;
+  self->buildMsgInfos.numRows = numRows;
+  if (prepareValuesCbName != NULL) {
+    result = self->getActionMode(self, prepareValuesCbName+1, &actionMode);
+    self->actionMode = actionMode;
+    checkErrOK(result);
+    result  = self->runAction(self, &type);
+ets_printf("runAction: result: %d\n", result);
+    checkErrOK(result);
+  } else {
+    result = self->buildMsg(self);
+    return result;
+  }
+}
+
+// ================================= prepareNotEncryptedAnswer ====================================
+
+static uint8_t prepareNotEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type) {
+  int result;
+  uint8_t fileName[30];
+  uint8_t numEntries;
+  char *endPtr;
+  unsigned long ulgth;
+  uint8_t lgth;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  uint8_t *data;
+  int msgLgth;
+
+  result = prepareAnswerMsg(self, parts, type);
   checkErrOK(result);
   if (parts->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
     os_sprintf(fileName, "Val%c%c.txt", parts->u8CmdKey, type);
@@ -612,13 +673,12 @@ static uint8_t prepareNotEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t
   ulgth = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)ulgth;
 //ets_printf("§@NE2!%d!@§", numEntries);
-  result = self->setMsgValuesFromLines(self, structmsgData, numEntries, handle, parts->u8CmdKey);
+  result = self->setMsgValuesFromLines(self, self->structmsgData, numEntries, self->msgHandle, parts->u8CmdKey);
   checkErrOK(result);
   result = self->closeFile(self);
   checkErrOK(result);
 //ets_printf("§heap3: %d§", system_get_free_heap_size());
-  result = structmsgData->getMsgData(structmsgData, &data, &msgLgth);
-  checkErrOK(result);
+  result = self->structmsgData->getMsgData(self->structmsgData, &data, &msgLgth);
   result = self->typeRSendAnswer(self, data, msgLgth);
   self->resetMsgInfo(self, parts);
   return STRUCT_DISP_ERR_OK;
@@ -642,29 +702,7 @@ static uint8_t prepareEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t *p
   structmsgData_t *structmsgData;
   int idx;
 
-  if (parts->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
-ets_printf("§@prepareEncryptedAnsweru8!%c!t!%c!@§\n", parts->u8CmdKey, type);
-    os_sprintf(fileName, "Desc%c%c.txt", parts->u8CmdKey, type);
-  } else {
-ets_printf("§@prepareEncryptedAnsweru16!%c%c!t!%c!@§\n", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
-    os_sprintf(fileName, "Desc%c%c%c.txt", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
-  }
-ets_printf("fileName: %s\n", fileName);
-  result = self->openFile(self, fileName, "r");
-  checkErrOK(result);
-  result = self->readLine(self, &buffer, &lgth);
-  checkErrOK(result);
-  if ((lgth < 4) || (buffer[0] != '#')) {
-    return STRUCT_DISP_ERR_BAD_FILE_CONTENTS;
-  }
-  ulgth = c_strtoul(buffer+2, &endPtr, 10);
-  numEntries = (uint8_t)ulgth;
-ets_printf("§@EncryptedAnswer1!numEntries!%d!@§\n", numEntries);
-  numRows = 0;
-  result = self->createMsgFromLines(self, parts, numEntries, numRows, type, &structmsgData, &handle);
-  checkErrOK(result);
-//ets_printf("heap2: %d\n", system_get_free_heap_size());
-  result = self->closeFile(self);
+  result = prepareAnswerMsg(self, parts, type);
   checkErrOK(result);
 //FIXME  TEMPORARY!!!
 return STRUCT_MSG_ERR_OK;
@@ -756,7 +794,7 @@ static uint8_t nextFittingEntry(structmsgDispatcher_t *self, uint8_t u8CmdKey, u
   } else {
     received->partsFlags |= STRUCT_DISP_IS_ENCRYPTED;
   }
-ets_printf("§found!%d!hdrIdx!%d§\n", found, hdrIdx);
+//ets_printf("§found!%d!hdrIdx!%d§\n", found, hdrIdx);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -823,7 +861,7 @@ static uint8_t getHeaderIndexFromHeaderFields(structmsgDispatcher_t *self, msgPa
   hdrInfos->seqIdxAfterStart = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
-ets_printf("§IndexFromHeaderFields!%d!%d!§\n", result, hdrInfos->currPartIdx);
+//ets_printf("§IndexFromHeaderFields!%d!%d!§\n", result, hdrInfos->currPartIdx);
   return result;
 }
 
@@ -852,7 +890,6 @@ static uint8_t handleEncryptedPart(structmsgDispatcher_t *self, msgParts_t *rece
     }
   }
  
-ets_printf("hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHandleType);
   switch (hdr->hdrHandleType) {
   case 'U':
   case 'W':
@@ -925,7 +962,6 @@ ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHan
         }
       }
       if (received->lgth == received->totalLgth) {
-ets_printf("§encrypted message completely receieved!%d!§\n", received->totalLgth);
         // check if we have a crc and the type of it
         // if we have a crc calculate it for the totalLgth
         startOffset = hdrInfos->headerStartLgth;
@@ -956,10 +992,7 @@ ets_printf("§encrypted message completely receieved!%d!§\n", received->totalLg
           answerType = 'A';
         }
 //ets_printf("handleEncryptedPart runAction: %c\n", answerType);
-//        result  = self->runAction(answerType);
-//        checkErrOK(result);
         result = prepareEncryptedAnswer(self, received, answerType);
-ets_printf("§res prepareEncryptedAnswer!%d!§\n", result);
         checkErrOK(result);
         result = -self->resetMsgInfo(self, received);
         checkErrOK(result);
@@ -1128,7 +1161,6 @@ ets_printf("partsFlags is not encrypted and hdrEncryption is E\n");
       } else {
         if (hdr->hdrEncryption == 'E') {
           if (received->lgth == received->totalLgth) {
-ets_printf("§encrypted message completely receieved!%d!§\n", received->totalLgth);
             uint8_t *cryptedPtr;
             uint8_t *cryptKey;
             uint8_t *decrypted;;
@@ -1170,6 +1202,7 @@ uint8_t structmsgIdentifyInit(structmsgDispatcher_t *self) {
   self->readHeadersAndSetFlags = &readHeadersAndSetFlags;
   self->handleReceivedPart = &handleReceivedPart;
   self->prepareNotEncryptedAnswer = &prepareNotEncryptedAnswer;
+  self->buildMsg = &buildMsg;
   initHeadersAndFlags(self);
   result=self->readHeadersAndSetFlags(self);
   checkErrOK(result);

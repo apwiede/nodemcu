@@ -53,7 +53,6 @@
 #include "c_stdio.h"
 #include "platform.h"
 #include "structmsg.h"
-#include "structmsgModuleData.h"
 
 #define TCP ESPCONN_TCP
 
@@ -272,6 +271,16 @@ static uint8_t getReserve3(structmsgDispatcher_t *self) {
   return STRUCT_DISP_ERR_OK;
 }
 
+// ================================= getAPList ====================================
+
+static uint8_t getAPList(structmsgDispatcher_t *self) {
+  uint8_t result;
+
+ets_printf("getAPList called: %p\n", self);
+  result = self->getBssScanInfo(self);
+  return result;
+}
+
 static actionName2Action_t actionName2Actions [] = {
   { "runClientMode",             (action_t)(&runClientMode),             0, 0, 0 },
   { "runAPMode",                 (action_t)(&runAPMode),                 0, 0, 0 },
@@ -295,8 +304,29 @@ static actionName2Action_t actionName2Actions [] = {
   { "getReserve1",               (action_t)(&getReserve1),               0, 0, 0 },
   { "getReserve2",               (action_t)(&getReserve2),               0, 0, 0 },
   { "getReserve3",               (action_t)(&getReserve3),               0, 0, 0 },
+  { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
+
+// ================================= getActionMode ====================================
+
+static uint8_t getActionMode(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode) {
+  int result;
+  actionName2Action_t *actionEntry;
+  int idx;
+
+  idx = 0;
+  actionEntry = &actionName2Actions[idx];
+  while (actionEntry->actionName != NULL) { 
+    if (c_strcmp(actionEntry->actionName, actionName) == 0) {
+      *actionMode = actionEntry->mode;
+      return STRUCT_DISP_ERR_OK;
+    }
+    idx++;
+    actionEntry = &actionName2Actions[idx];
+  }
+  return STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND;
+}
 
 // ================================= setActionEntry ====================================
 
@@ -335,12 +365,12 @@ static uint8_t setActionEntry(structmsgDispatcher_t *self, uint8_t *actionName, 
 static uint8_t runAction(structmsgDispatcher_t *self, uint8_t *answerType) {
   int result;
   msgParts_t *received;
-  received = &self->received;
   actionName2Action_t *actionEntry;
   int idx;
   uint8_t actionMode;
   dataView_t *dataView;
 
+  received = &self->received;
   if (received->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
     dataView = self->structmsgDataView->dataView;
     switch (received->u8CmdKey) {
@@ -364,7 +394,25 @@ static uint8_t runAction(structmsgDispatcher_t *self, uint8_t *answerType) {
       break;
     }
   } else {
-ets_printf("§runActionu16!%c%c!%c!§", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, answerType);
+//ets_printf("§runAction u16!%c%c!%c!§\n", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, *answerType);
+    dataView = self->structmsgDataView->dataView;
+    switch (self->actionMode) {
+    case MODULE_INFO_AP_LIST_CALL_BACK:
+      idx = 0;
+      actionEntry = &actionName2Actions[idx];
+      while (actionEntry->actionName != NULL) { 
+        if (self->actionMode == actionEntry->mode) {
+//ets_printf("§runAction2 G!%d!%c!§\n", self->actionMode, *answerType);
+          result = actionEntry->action(self);
+          checkErrOK(result);
+          return STRUCT_DISP_ERR_OK;
+        }
+        idx++;
+        actionEntry = &actionName2Actions[idx];
+      }
+      return STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      break;
+    }
   }
   return STRUCT_DISP_ERR_OK;
 }
@@ -417,6 +465,7 @@ uint8_t structmsgActionInit(structmsgDispatcher_t *self) {
 
   self->setActionEntry = &setActionEntry;
   self->runAction = &runAction;
+  self->getActionMode = &getActionMode;
   self->fillMsgValue = &fillMsgValue;
 
   buffer = buf;

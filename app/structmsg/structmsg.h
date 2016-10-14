@@ -42,6 +42,7 @@
 #define	STRUCTMSG_H
 
 #include "c_types.h"
+typedef struct structmsgData structmsgData_t;
 #include "structmsgDispatcher.h"
 
 #ifdef	__cplusplus
@@ -69,7 +70,6 @@ extern "C" {
 
 #define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
 
-typedef struct structmsgData structmsgData_t;
 
 typedef uint8_t (* createMsg_t)(structmsgData_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* deleteMsg_t)(structmsgData_t *self);

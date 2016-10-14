@@ -48,40 +48,6 @@
 #include "c_stdio.h"
 #include "platform.h"
 #include "structmsg.h"
-#include "structmsgModuleData.h"
-
-typedef struct bssScanInfo {
-  uint8_t bssid[6];
-  uint8_t bssidStr[18];
-  uint8_t ssid[33];
-  uint8_t ssid_len;
-  uint8_t channel;
-  int8_t  rssi;
-  uint8_t authmode;
-  uint8_t is_hidden;
-  int16_t freq_offset;
-  int16_t freqcal_val;
-} bssScanInfo_t;
-
-typedef struct bssScanInfos {
-  bssScanInfo_t *infos;
-  uint8_t numScanInfos;
-  uint8_t maxScanInfos;
-} bssScanInfos_t;
-
-typedef struct stationConfig {
-  uint8_t ssid[33];
-  uint8_t password[65];
-  uint8_t bssidSet;
-  uint8_t bssid[6];
-  uint8_t bssidStr[18];
-  uint8_t status;
-  uint8_t mode;
-  uint8_t authmode;
-  uint8_t channel;
-  int16_t freq_offset;
-  int16_t freqcal_val;
-} stationConfig_t;
 
 static bool bssScanRunning = false;
 static bssScanInfos_t bssScanInfos = { NULL, 0, 0};
@@ -91,7 +57,7 @@ static structmsgWifiData_t structmsgWifiData;
 
 // ================================= websockeBinaryReceived ====================================
 
-void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
+static void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
   structmsgDispatcher_t *structmsgDispatcher;
   structmsgDispatcher_t *self;
   uint8_t result;
@@ -107,7 +73,7 @@ void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
 
 // ================================= websockeTextReceived ====================================
 
-void websockeTextReceived(void *arg, char *pdata, unsigned short len) {
+static void websockeTextReceived(void *arg, char *pdata, unsigned short len) {
   structmsgDispatcher_t *structmsgDispatcher;
 
   structmsgDispatcher = (structmsgDispatcher_t *)arg;
@@ -242,6 +208,9 @@ static void bssScanDoneCb(void *arg, STATUS status) {
     bssScanInfos.numScanInfos++;
   }
   bssScanRunning = false;
+ets_printf("bssScanDoneCb call buildMsg\n");
+  bssScanInfos.scanInfoComplete = true;
+  bssScanInfos.structmsgDispatcher->buildMsg(bssScanInfos.structmsgDispatcher);
 }
 
 // ================================= getBssScanInfo ====================================
@@ -259,6 +228,7 @@ static uint8_t getBssScanInfo(structmsgDispatcher_t *self) {
   scan_config.bssid = NULL;
   scan_config.channel = 0;
   scan_config.show_hidden = 1;
+  self->bssScanInfos->scanInfoComplete = false;
   result = wifi_station_scan(&scan_config, bssScanDoneCb);
   if (result != true) {
     return STRUCT_DISP_ERR_STATION_SCAN;
@@ -364,6 +334,8 @@ static uint8_t setModuleValues(structmsgDispatcher_t *self) {
   structmsgWifiData.websockeBinaryReceived = &websockeBinaryReceived;
   structmsgWifiData.websockeTextReceived = &websockeTextReceived;
 
+  self->bssScanInfos = &bssScanInfos;
+
   provisioningSsid = "testDevice_connect";
   c_memcpy(structmsgWifiData.provisioningSsid, provisioningSsid, c_strlen(provisioningSsid));
   structmsgWifiData.provisioningPort = 80;
@@ -371,8 +343,8 @@ static uint8_t setModuleValues(structmsgDispatcher_t *self) {
   c_memcpy(structmsgWifiData.provisioningIPAddr, provisioningIPAddr, c_strlen(provisioningIPAddr));
   result = getStationConfig(self);
   checkErrOK(result);
-  result = getBssScanInfo(self);
-  checkErrOK(result);
+//  result = getBssScanInfo(self);
+//  checkErrOK(result);
 
   return STRUCT_DISP_ERR_OK;
 }
@@ -385,6 +357,9 @@ uint8_t structmsgModuleDataValuesInit(structmsgDispatcher_t *self) {
   self->setModuleValues = &setModuleValues;
   self->updateModuleValues = &updateModuleValues;
   self->getModuleValue = &getModuleValue;
+  self->getBssScanInfo = &getBssScanInfo;
+  bssScanInfos.structmsgDispatcher = self;
+
   self->setModuleValues(self);
   return STRUCT_DISP_ERR_OK;
 }

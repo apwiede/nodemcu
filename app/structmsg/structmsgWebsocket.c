@@ -53,7 +53,7 @@
 #include "c_stdio.h"
 #include "platform.h"
 #include "structmsg.h"
-#include "structmsgModuleData.h"
+
 
 enum websocket_opcode {
   OPCODE_TEXT = 1,
@@ -719,8 +719,8 @@ uint8_t structmsgWebsocketInit(structmsgDispatcher_t *self) {
   self->websocketRunClientMode = &websocketRunClientMode;
   self->websocketRunAPMode = &websocketRunAPMode;
 ets_printf("call webscoketRunAPMode\n");
-result = websocketRunAPMode(self);
-ets_printf("webscoketRunAPMode result: %d\n", result);
+  result = websocketRunAPMode(self);
+  ets_printf("webscoketRunAPMode result: %d\n", result);
 checkErrOK(result);
   return STRUCT_DISP_ERR_OK;
 }

@@ -760,7 +760,7 @@ static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_
 
 // ================================= createMsgFromLines ====================================
 
-static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type, structmsgData_t **structmsgData, uint8_t **handle) {
+static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type) {
   int idx;
   uint8_t*cp;
   uint8_t *fieldNameStr;
@@ -777,12 +777,12 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts
   int result;
 
 //ets_printf("§createMsgFromLines:%d!%d! \n§", self->numMsgHeaders, self->maxMsgHeaders);
-  result = getMsgPtrFromMsgParts(self, parts, structmsgData, STRUCT_MSG_INCR);
+  result = getMsgPtrFromMsgParts(self, parts, &self->structmsgData, STRUCT_MSG_INCR);
   checkErrOK(result);
-  if ((*structmsgData)->flags & STRUCT_MSG_IS_INITTED) {
+  if (self->structmsgData->flags & STRUCT_MSG_IS_INITTED) {
     return STRUCT_DISP_ERR_OK;
   }
-  result = (*structmsgData)->createMsg(*structmsgData, numEntries, handle);
+  result = self->structmsgData->createMsg(self->structmsgData, numEntries, &self->msgHandle);
   checkErrOK(result);
   idx = 0;
   while(idx < numEntries) {
@@ -814,11 +814,10 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts
       lgth = c_strtoul(fieldLgthStr, &endPtr, 10);
       fieldLgth = (uint8_t)lgth;
     }
-    result = (*structmsgData)->addField(*structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
+    result = self->structmsgData->addField(self->structmsgData, fieldNameStr, fieldTypeStr, fieldLgth);
     checkErrOK(result);
     idx++;
   }
-  (*structmsgData)->initMsg(*structmsgData);
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -1022,10 +1021,10 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   structmsgDispatcher->createDispatcher = &createDispatcher;
   structmsgDispatcher->initDispatcher = &initDispatcher;
 
-  structmsgDispatcher->BMsg = &BMsg;
-  structmsgDispatcher->IMsg = &IMsg;
-  structmsgDispatcher->MMsg = &MMsg;
-  structmsgDispatcher->defaultMsg = &defaultMsg;
+//  structmsgDispatcher->BMsg = &BMsg;
+//  structmsgDispatcher->IMsg = &IMsg;
+//  structmsgDispatcher->MMsg = &MMsg;
+//  structmsgDispatcher->defaultMsg = &defaultMsg;
   structmsgDispatcher->resetMsgInfo = &resetMsgInfo;
   structmsgDispatcher->createMsgFromLines = &createMsgFromLines;
   structmsgDispatcher->setMsgValuesFromLines = &setMsgValuesFromLines;
