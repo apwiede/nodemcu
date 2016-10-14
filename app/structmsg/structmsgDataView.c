@@ -311,21 +311,24 @@ static uint8_t getCrc(structmsgDataView_t *self, structmsgField_t *fieldInfo, si
   crcVal = 0;
   idx = startOffset;
   while (idx < lgth) {
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crc);
+//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crcVal);
     crcVal += self->dataView->data[idx++];
   }
+//ets_printf("§crcVal00: 0x%04x§\n", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
+//ets_printf("§crcVal10: 0x%04x§\n", crcVal);
+    crcVal = crcVal & 0xFF;
     result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-//ets_printf("§crcVal1: 0x%02x crc: 0x%02x§", crcVal & 0xFF, uint8_crc);
-    if ((crcVal & 0xFF) != uint8_crc) {
+ets_printf("§crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
+    if (crcVal != uint8_crc) {
       return STRUCT_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
     result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-//ets_printf("§crcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
+ets_printf("§crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
     if (crcVal != crc) {
       return STRUCT_MSG_ERR_BAD_CRC_VALUE;
     }

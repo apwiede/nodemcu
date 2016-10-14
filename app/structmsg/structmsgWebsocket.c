@@ -154,10 +154,10 @@ static int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char 
   //   opcodes: {1 text 2 binary 8 close 9 ping 10 pong}
   switch (opcode) {
   case OPCODE_TEXT:
-ets_printf("parse text\n");
+//ets_printf("parse text\n");
     break;
   case OPCODE_BINARY:
-ets_printf("parse binary\n");
+//ets_printf("parse binary\n");
     break;
   case OPCODE_CLOSE:
     break;
@@ -316,7 +316,7 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
   int found;
 
   idx = 0;
-ets_printf("websocket_recv: %s!%s!\n",string,  wud->curr_url);
+//ets_printf("websocket_recv: %s!%s!\n",string,  wud->curr_url);
   if ((wud->curr_url != NULL) && (strstr(string, wud->curr_url) != NULL)) {
     if (strstr(string, header_key) != NULL) {
       char *begin = strstr(string, header_key) + os_strlen(header_key);
@@ -326,7 +326,7 @@ ets_printf("websocket_recv: %s!%s!\n",string,  wud->curr_url);
       os_memcpy(key, begin, end - begin);
       key[end - begin] = 0;
     }
-ets_printf("websocket_recv2: key: %s\n", key);
+//ets_printf("websocket_recv2: key: %s\n", key);
     const char *trailer;
     trailer = "\r\n\r\n";
     int trailerLen;
@@ -359,12 +359,12 @@ ets_printf("websocket_recv2: key: %s\n", key);
       wud->isWebsocket = 1;
     }
 
-ets_printf("payload: %d!%s!\n", payloadLen, payload);
+//ets_printf("payload: %d!%s!\n", payloadLen, payload);
     int result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
     os_free(key);
 //    checkErrOK(gL, result, "espconn_sent");
   } else if (wud->isWebsocket == 1) {
-ets_printf("websocket_parse: %d!%s!curr_ulr: %s!\n", os_strlen(string), string, wud->curr_url);
+//ets_printf("websocket_parse: %d!%s!curr_ulr: %s!\n", os_strlen(string), string, wud->curr_url);
     websocket_parse(string, os_strlen(string), data, lgth, wud);
   }
   return WEBSOCKET_ERR_OK;
@@ -409,7 +409,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   websocketUserData_t *wud;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
+//ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
   char temp[20] = {0};
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
   ets_printf("remote ");
@@ -438,7 +438,7 @@ ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
       idx++;
     }
   }
-ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
+//ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
 
   if(wud->isWebsocket == 1) {
     char *data = "";
@@ -483,22 +483,22 @@ ets_printf("serverConnected: arg: %p\n", arg);
 //    checkErrOK(gL, WEBSOCKET_ERR_MAX_SOCKET_REACHED, "websocket_server_connected");
     return;
   }
-ets_printf("registstart\n");
+//ets_printf("registstart\n");
   result = espconn_regist_recvcb(pesp_conn, socketReceived);
   if (result != STRUCT_DISP_ERR_OK) {
-ets_printf("regist socketReceived err: %d\n", result);
+//ets_printf("regist socketReceived err: %d\n", result);
   }
   result = espconn_regist_sentcb(pesp_conn, socketSent);
   if (result != STRUCT_DISP_ERR_OK) {
-ets_printf("regist socketSent err: %d\n", result);
+//ets_printf("regist socketSent err: %d\n", result);
   }
   result = espconn_regist_disconcb(pesp_conn, serverDisconnected);
   if (result != STRUCT_DISP_ERR_OK) {
-ets_printf("regist serverDisconnected err: %d\n", result);
+//ets_printf("regist serverDisconnected err: %d\n", result);
   }
   result = espconn_regist_reconcb(pesp_conn, serverReconnected);
   if (result != STRUCT_DISP_ERR_OK) {
-ets_printf("regist serverReconnected err: %d\n", result);
+//ets_printf("regist serverReconnected err: %d\n", result);
   }
 
 }
@@ -562,7 +562,7 @@ void alarmTimerAP(void *arg) {
   timerId = (uint8_t)((uint32_t)arg);
   tmr = &structmsgTimers[timerId];
   self = tmr->self;
-ets_printf("alarmTimerAP: timerId: %d self: %p\n", timerId, self);
+//ets_printf("alarmTimerAP: timerId: %d self: %p\n", timerId, self);
   wifi_get_ip_info(mode, &pTempIp);
   if(pTempIp.ip.addr==0){
 ets_printf("ip: nil\n");
@@ -574,7 +574,7 @@ ets_printf("IP: %s\n", temp);
   ets_timer_disarm(&tmr->timer);
 
   result = self->getModuleValue(self, MODULE_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
-ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
+//ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
 //  checkErrOK(result);
   port = numericValue;
 //  result = self->getModuleValue(self, MODULE_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
@@ -582,7 +582,7 @@ ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
 
   wud = (websocketUserData_t *)os_zalloc(sizeof(websocketUserData_t));
 //   checkAllocOK(wud);
-ets_printf("wud0: %p\n", wud);
+//ets_printf("wud0: %p\n", wud);
   wud->isWebsocket = 0;
   wud->num_urls = 0;
   wud->max_urls = 4;
@@ -594,10 +594,10 @@ wud->urls[0] = "/getaplist";
 wud->urls[1] = "/getapdeflist";
 wud->num_urls = 2;
   result = self->getModuleValue(self, MODULE_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
+//ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
   wud->websocketBinaryReceived = (websockeBinaryReceived_t)numericValue;
   result = self->getModuleValue(self, MODULE_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
+//ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
   wud->websocketTextReceived = (websockeTextReceived_t)numericValue;
   wud->structmsgDispatcher = self;
 
@@ -623,22 +623,22 @@ ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
   pesp_conn->proto.tcp->local_port = port;
 ets_printf("port: %d\n", port);
 
-ets_printf("call regist connectcb\n");
+//ets_printf("call regist connectcb\n");
     result = espconn_regist_connectcb(pesp_conn, serverConnected);
     if (result != STRUCT_DISP_ERR_OK) {
 //      return STRUCT_DISP_ERR_REGIST_CONNECT_CB;
     }
-ets_printf("regist connectcb result: %d\n", result);
+//ets_printf("regist connectcb result: %d\n", result);
     result = espconn_accept(pesp_conn);    // if it's a server, no need to dns.
     if (result != STRUCT_DISP_ERR_OK) {
 //      return STRUCT_DISP_ERR_TCP_ACCEPT;
     }
-ets_printf("regist_accept result: %d\n", result);
+//ets_printf("regist_accept result: %d\n", result);
     result =espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
     if (result != STRUCT_DISP_ERR_OK) {
 //      return STRUCT_DISP_ERR_REGIST_TIME;
     }
-ets_printf("regist_time result: %d\n", result);
+//ets_printf("regist_time result: %d\n", result);
 }
 
 // ================================= initTimers ====================================
@@ -653,7 +653,6 @@ static uint8_t initTimers(structmsgDispatcher_t *self) {
   }
   return STRUCT_DISP_ERR_OK;
 }
-
 
 // ================================= websocketRunAPMode ====================================
 

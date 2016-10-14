@@ -149,6 +149,7 @@ typedef struct headerParts {
   uint8_t hdrEncryption;
   uint8_t hdrHandleType;
   uint32_t hdrFlags;
+  uint16_t fieldSequence[9];
 } headerParts_t;
 
 typedef struct msgHeaderInfos {
@@ -174,6 +175,7 @@ typedef struct msgParts {
   uint8_t u8CmdLgth;
   uint8_t u8CmdKey;
   uint8_t lgth;
+  uint8_t realLgth;
   uint8_t fieldOffset;
   uint8_t buf[DISP_BUF_LGTH];
 } msgParts_t;
@@ -185,6 +187,10 @@ typedef struct msgHeader2MsgPtr {
 } msgHeader2MsgPtr_t;
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
+
+typedef uint8_t (* dumpHeaderParts_t)(structmsgDispatcher_t *self, headerParts_t *hdr);
+typedef uint8_t (* dumpMsgHeaderInfos_t)(structmsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
+typedef uint8_t (* dumpMsgParts_t)(structmsgDispatcher_t *self, msgParts_t *msgParts);
 
 typedef uint8_t (* setActionEntry_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* runAction_t)(structmsgDispatcher_t *self, uint8_t *answerType);
@@ -289,6 +295,9 @@ typedef struct structmsgDispatcher {
   websocketRunClientMode_t websocketRunClientMode;
   websocketRunAPMode_t websocketRunAPMode;
 
+  dumpHeaderParts_t dumpHeaderParts;
+  dumpMsgHeaderInfos_t dumpMsgHeaderInfos;
+  dumpMsgParts_t dumpMsgParts;
 } structmsgDispatcher_t;
 
 structmsgDispatcher_t *newStructmsgDispatcher();

@@ -89,6 +89,8 @@ static stationConfig_t stationConfig;
 static structmsgModuleData_t structmsgModuleData;
 static structmsgWifiData_t structmsgWifiData;
 
+// ================================= websockeBinaryReceived ====================================
+
 void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
   structmsgDispatcher_t *structmsgDispatcher;
   structmsgDispatcher_t *self;
@@ -96,18 +98,20 @@ void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
 
   structmsgDispatcher = (structmsgDispatcher_t *)arg;
   self = structmsgDispatcher;
-ets_printf("websockeBinaryReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
+//ets_printf("websockeBinaryReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
   result = self->resetMsgInfo(self, &self->received);
 //  checkErrOK(result);
   result = structmsgDispatcher->handleReceivedPart(structmsgDispatcher, (uint8_t *)pdata, (uint8_t)len);
-ets_printf("websockeBinaryReceived end result: %d\n", result);
+//ets_printf("websockeBinaryReceived end result: %d\n", result);
 }
+
+// ================================= websockeTextReceived ====================================
 
 void websockeTextReceived(void *arg, char *pdata, unsigned short len) {
   structmsgDispatcher_t *structmsgDispatcher;
 
   structmsgDispatcher = (structmsgDispatcher_t *)arg;
-ets_printf("websockeTextReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
+//ets_printf("websockeTextReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
 }
 
 // ================================= getModuleValue ====================================
@@ -167,20 +171,16 @@ static uint8_t getModuleValue(structmsgDispatcher_t *self, uint16_t which, uint8
     *stringValue = structmsgWifiData.provisioningSsid;
     break;
   case MODULE_INFO_PROVISIONING_PORT:
-ets_printf("getModuleValue: port: %d\n", structmsgWifiData.provisioningPort);
     *numericValue = structmsgWifiData.provisioningPort;
     break;
   case MODULE_INFO_PROVISIONING_IP_ADDR:
     *stringValue = structmsgWifiData.provisioningIPAddr;
-ets_printf("getModuleValue: IPAddr: 0x%08x\n", structmsgWifiData.provisioningIPAddr);
     break;
   case MODULE_INFO_BINARY_CALL_BACK:
     *numericValue = (int)structmsgWifiData.websockeBinaryReceived;
-ets_printf("getModuleValue: binaryCb: 0x%08x\n", structmsgWifiData.websockeBinaryReceived);
     break;
   case MODULE_INFO_TEXT_CALL_BACK:
     *numericValue = (int)structmsgWifiData.websockeTextReceived;
-ets_printf("getModuleValue: textCb: 0x%08x\n", structmsgWifiData.websockeTextReceived);
     break;
   default:
     return STRUCT_DISP_ERR_BAD_MODULE_VALUE_WHICH;

@@ -256,6 +256,231 @@ static int checkHandle(const char *handle, structmsgDispatcher_t **structmsgDisp
   return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
 }
 
+// ================================= dumpHeaderParts ====================================
+
+static uint8_t dumpHeaderParts(structmsgDispatcher_t *self, headerParts_t *hdr) {
+  int idx;
+
+  ets_printf("dumpHeaderParts:\n");
+  ets_printf("headerParts1: from: 0x%04x to: 0x%04x totalLgth: %d u16CmdKey: 0x%04x u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrU16CmdKey, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
+  ets_printf("headerParts2: target: 0x%02x u8CmdKey: 0x%02x u8CmdLgth: %d u8Crc: 0x%02x offset: %d extra: %d\n", hdr->hdrTargetPart, hdr->hdrU8CmdKey, hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrOffset, hdr->hdrExtraLgth);
+  ets_printf("headerParts3: enc: %c handleType: %c\n", hdr->hdrEncryption, hdr->hdrHandleType);
+  ets_printf("hdrFlags: ");
+  if (hdr->hdrFlags & STRUCT_DISP_SEND_TO_APP) {
+    ets_printf(" STRUCT_DISP_SEND_TO_APP");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_RECEIVE_FROM_APP) {
+    ets_printf(" STRUCT_DISP_RECEIVE_FROM_APP");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_SEND_TO_UART) {
+    ets_printf(" STRUCT_DISP_SEND_TO_UART");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_RECEIVE_FROM_UART) {
+    ets_printf(" STRUCT_DISP_RECEIVE_FROM_UART");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_TRANSFER_TO_UART) {
+    ets_printf(" STRUCT_DISP_TRANSFER_TO_UART");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_TRANSFER_TO_CONN) {
+    ets_printf(" STRUCT_DISP_TRANSFER_TO_CONN");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_NOT_RELEVANT) {
+    ets_printf(" STRUCT_DISP_NOT_RELEVANT");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U8_CMD_KEY) {
+    ets_printf(" STRUCT_DISP_U8_CMD_KEY");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U16_CMD_KEY) {
+    ets_printf(" STRUCT_DISP_U16_CMD_KEY");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U0_CMD_LGTH) {
+    ets_printf(" STRUCT_DISP_U0_CMD_LGTH");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U8_CMD_LGTH) {
+    ets_printf(" STRUCT_DISP_U8_CMD_LGTH");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U16_CMD_LGTH) {
+    ets_printf(" STRUCT_DISP_U16_CMD_LGTH");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U0_CRC) {
+    ets_printf(" STRUCT_DISP_U0_CRC");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U8_CRC) {
+    ets_printf(" STRUCT_DISP_U8_CRC");
+  }
+  if (hdr->hdrFlags & STRUCT_DISP_U16_CRC) {
+    ets_printf(" STRUCT_DISP_U16_CRC");
+  }
+  ets_printf("\n");
+  ets_printf("hdr fieldSequence\n");
+  idx = 0;
+  while (idx < 9) {
+    ets_printf(" %d 0x%04x", idx, hdr->fieldSequence[idx]);
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U16_DST) {
+      ets_printf(" STRUCT_DISP_U16_DST");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U16_SRC) {
+      ets_printf(" STRUCT_DISP_U16_SRC");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U8_TARGET) {
+      ets_printf(" STRUCT_DISP_U8_TARGET");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U16_TOTAL_LGTH) {
+      ets_printf(" STRUCT_DISP_U16_TOTAL_LGTH");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U8_EXTRA_KEY_LGTH) {
+      ets_printf(" STRUCT_DISP_U8_EXTRA_KEY_LGTH");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U8_ENCRYPTION) {
+      ets_printf(" STRUCT_DISP_U8_ENCRYPTION");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U8_HANDLE_TYPE) {
+      ets_printf(" STRUCT_DISP_U8_HANDLE_TYPE");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U8_CMD_KEY) {
+      ets_printf(" STRUCT_DISP_U8_CMD_KEY");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U16_CMD_KEY) {
+      ets_printf(" STRUCT_DISP_U16_CMD_KEY");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U0_CMD_LGTH) {
+      ets_printf(" STRUCT_DISP_U0_CMD_LGTH");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U8_CMD_LGTH) {
+      ets_printf(" STRUCT_DISP_U8_CMD_LGTH");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U16_CMD_LGTH) {
+      ets_printf(" STRUCT_DISP_U16_CMD_LGTH");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U0_CRC) {
+      ets_printf(" STRUCT_DISP_U0_CRC");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U8_CRC) {
+      ets_printf(" STRUCT_DISP_U8_CRC");
+    }
+    if (hdr->fieldSequence[idx] & STRUCT_DISP_U16_CRC) {
+      ets_printf(" STRUCT_DISP_U16_CRC");
+    }
+    ets_printf("\n");
+    idx++;
+  }
+  ets_printf("\n");
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= dumpMsgHeaderInfos ====================================
+
+static uint8_t dumpMsgHeaderInfos(structmsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos) {
+  int idx;
+
+  ets_printf("dumpMsgHeaderInfos:\n");
+  ets_printf("headerFlags: ");
+  if (hdrInfos->headerFlags & STRUCT_DISP_U16_SRC) {
+    ets_printf(" STRUCT_DISP_U16_SRC");
+  }
+  if (hdrInfos->headerFlags & STRUCT_DISP_U16_DST) {
+    ets_printf(" STRUCT_DISP_U16_DST");
+  }
+  if (hdrInfos->headerFlags & STRUCT_DISP_U16_TOTAL_LGTH) {
+    ets_printf(" STRUCT_DISP_U16_TOTAL_LGTH");
+  }
+  if (hdrInfos->headerFlags & STRUCT_DISP_U8_TARGET) {
+    ets_printf(" STRUCT_DISP_U8_TARGET");
+  }
+  ets_printf("\n");
+  ets_printf("hdrInfos headerSequence\n");
+  idx = 0;
+  while (idx < 9) {
+    ets_printf(" %d 0x%04x", idx, hdrInfos->headerSequence[idx]);
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U16_DST) {
+      ets_printf(" STRUCT_DISP_U16_DST");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U16_SRC) {
+      ets_printf(" STRUCT_DISP_U16_SRC");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U8_TARGET) {
+      ets_printf(" STRUCT_DISP_U8_TARGET");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U16_TOTAL_LGTH) {
+      ets_printf(" STRUCT_DISP_U16_TOTAL_LGTH");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U8_EXTRA_KEY_LGTH) {
+      ets_printf(" STRUCT_DISP_U8_EXTRA_KEY_LGTH");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U8_ENCRYPTION) {
+      ets_printf(" STRUCT_DISP_U8_ENCRYPTION");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U8_HANDLE_TYPE) {
+      ets_printf(" STRUCT_DISP_U8_HANDLE_TYPE");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U8_CMD_KEY) {
+      ets_printf(" STRUCT_DISP_U8_CMD_KEY");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U16_CMD_KEY) {
+      ets_printf(" STRUCT_DISP_U16_CMD_KEY");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U0_CMD_LGTH) {
+      ets_printf(" STRUCT_DISP_U0_CMD_LGTH");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U8_CMD_LGTH) {
+      ets_printf(" STRUCT_DISP_U8_CMD_LGTH");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U16_CMD_LGTH) {
+      ets_printf(" STRUCT_DISP_U16_CMD_LGTH");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U0_CRC) {
+      ets_printf(" STRUCT_DISP_U0_CRC");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U8_CRC) {
+      ets_printf(" STRUCT_DISP_U8_CRC");
+    }
+    if (hdrInfos->headerSequence[idx] & STRUCT_DISP_U16_CRC) {
+      ets_printf(" STRUCT_DISP_U16_CRC");
+    }
+    ets_printf("\n");
+    idx++;
+  }
+  ets_printf("\n");
+  ets_printf("startLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterStart: %d\n", hdrInfos->headerStartLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterStart);
+  return STRUCT_DISP_ERR_OK;
+}
+
+// ================================= dumpMsgParts ====================================
+
+static uint8_t dumpMsgParts(structmsgDispatcher_t *self, msgParts_t *msgParts) {
+  int idx;
+
+  ets_printf("dumpMsgParts:\n");
+  ets_printf("MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d u16_cmdLgth: %d u16CmdKey: 0x%04x targetPart: 0x%02x\n", msgParts->fromPart, msgParts->toPart, msgParts->totalLgth, msgParts->u16CmdLgth, msgParts->u16CmdKey, msgParts->targetPart);
+
+  ets_printf("MsgParts2 u8CmdLgth: %d u8CmdKey: 0x%02x lgth: %d fieldOffset: %d\n", msgParts->u8CmdLgth, msgParts->u8CmdKey, msgParts->lgth, msgParts->fieldOffset);
+  ets_printf("buf");
+  idx = 0;
+  while (idx < msgParts->realLgth - 1) {
+    ets_printf(" %d 0x%02x", idx, msgParts->buf[idx]);
+    idx++;
+  }
+  ets_printf("\n");
+  ets_printf("partFlags: ");
+  if (msgParts->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
+    ets_printf(" STRUCT_DISP_U8_CMD_KEY");
+  }
+  if (msgParts->partsFlags & STRUCT_DISP_IS_NOT_ENCRYPTED) {
+    ets_printf(" STRUCT_DISP_IS_NOT_ENCRYPTED");
+  }
+  if (msgParts->partsFlags & STRUCT_DISP_IS_ENCRYPTED) {
+    ets_printf(" STRUCT_DISP_IS_ENCRYPTED");
+  }
+  if (msgParts->partsFlags & STRUCT_DISP_U16_CMD_KEY) {
+    ets_printf(" STRUCT_DISP_U16_CMD_KEY");
+  }
+  if (msgParts->partsFlags & STRUCT_DISP_U8_CMD_KEY) {
+    ets_printf(" STRUCT_DISP_U8_CMD_KEY");
+  }
+  ets_printf("\n");
+  return STRUCT_DISP_ERR_OK;
+}
+
 // ================================= BMsg ====================================
 
 static uint8_t BMsg(structmsgDispatcher_t *self) {
@@ -734,7 +959,6 @@ uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatc
 static uint8_t initDispatcher(structmsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("§initDispatcher!%p!§", self);
   result = structmsgIdentifyInit(self);
   checkErrOK(result);
   result = structmsgSendReceiveInit(self);
@@ -815,6 +1039,10 @@ structmsgDispatcher_t *newStructmsgDispatcher() {
   structmsgDispatcher->decryptMsg = &decryptMsg;
   structmsgDispatcher->toBase64 = &toBase64;
   structmsgDispatcher->fromBase64 = &fromBase64;
+
+  structmsgDispatcher->dumpHeaderParts = &dumpHeaderParts;
+  structmsgDispatcher->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
+  structmsgDispatcher->dumpMsgParts = &dumpMsgParts;
 
   structmsgDispatcherSingleton = structmsgDispatcher;
   return structmsgDispatcher;
