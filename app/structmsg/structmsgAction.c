@@ -276,8 +276,16 @@ static uint8_t getReserve3(structmsgDispatcher_t *self) {
 static uint8_t getAPList(structmsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("getAPList called: %p\n", self);
   result = self->getBssScanInfo(self);
+  return result;
+}
+
+// ================================= getTableValue ====================================
+
+static uint8_t getTableValue(structmsgDispatcher_t *self) {
+  uint8_t result;
+
+  result = self->getModuleTableFieldValue(self, MODULE_INFO_AP_LIST_CALL_BACK);
   return result;
 }
 
@@ -305,6 +313,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "getReserve2",               (action_t)(&getReserve2),               0, 0, 0 },
   { "getReserve3",               (action_t)(&getReserve3),               0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
+  { "getTableValue",             (action_t)(&getTableValue),             0x4141, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
 
@@ -419,7 +428,7 @@ static uint8_t runAction(structmsgDispatcher_t *self, uint8_t *answerType) {
 
 // ================================= fillMsgValue ====================================
 
-static uint8_t fillMsgValue(structmsgDispatcher_t *self, uint8_t *callbackName,int *numericValue, uint8_t **stringValue,  uint8_t answerType, uint8_t fieldTypeId) {
+static uint8_t fillMsgValue(structmsgDispatcher_t *self, uint8_t *callbackName, uint8_t answerType, uint8_t fieldTypeId) {
   int result;
   actionName2Action_t *actionEntry;
   int idx;
@@ -432,8 +441,6 @@ static uint8_t fillMsgValue(structmsgDispatcher_t *self, uint8_t *callbackName,i
     if (c_strcmp(actionEntry->actionName, callbackName) == 0) {
       result = actionEntry->action(self);
       checkErrOK(result);
-      *numericValue = self->numericValue;
-      *stringValue = self->stringValue;
       return STRUCT_DISP_ERR_OK;
     }
     idx++;

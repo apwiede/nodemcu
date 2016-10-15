@@ -192,6 +192,18 @@ typedef struct buildMsgInfos {
   uint8_t type;
   msgParts_t *parts;
   uint8_t numRows; 
+  uint8_t u8CmdKey;
+  uint16_t u16CmdKey;
+  uint16_t partsFlags;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldValueStr;
+  uint8_t fieldNameId;
+  uint8_t fieldTypeId;
+  uint8_t tableRow;
+  uint8_t tableCol;
+  int numericValue;
+  uint8_t *stringValue;
+  uint8_t buf[100];
 } buildMsgInfos_t;
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
@@ -203,13 +215,14 @@ typedef uint8_t (* dumpMsgParts_t)(structmsgDispatcher_t *self, msgParts_t *msgP
 typedef uint8_t (* setActionEntry_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* runAction_t)(structmsgDispatcher_t *self, uint8_t *answerType);
 typedef uint8_t (* getActionMode_t)(structmsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode);
-typedef uint8_t (* fillMsgValue_t)(structmsgDispatcher_t *self, uint8_t *callbackName, int *numericValue, uint8_t **stringValue, uint8_t answerType, uint8_t fieldTypeId);
+typedef uint8_t (* fillMsgValue_t)(structmsgDispatcher_t *self, uint8_t *callbackName, uint8_t answerType, uint8_t fieldTypeId);
 typedef uint8_t (* getBssScanInfo_t)(structmsgDispatcher_t *self);
 
 typedef uint8_t (* uartReceiveCb_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 typedef uint8_t (* setModuleValues_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* getModuleValue_t)(structmsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getModuleTableFieldValue_t)(structmsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* websocketRunClientMode_t)(structmsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* websocketRunAPMode_t)(structmsgDispatcher_t *self);
 
@@ -254,6 +267,8 @@ typedef struct structmsgDispatcher {
   uint8_t actionMode;
   bssScanInfos_t *bssScanInfos;
   buildMsgInfos_t buildMsgInfos;
+  uint8_t tableRow;
+  uint8_t tableCol;
   
   uint8_t numMsgHeaders;
   uint8_t maxMsgHeaders;
@@ -292,6 +307,7 @@ typedef struct structmsgDispatcher {
   getModuleValue_t getModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;
+  getModuleTableFieldValue_t getModuleTableFieldValue;
 
   openFileDesc_t openFile;
   closeFileDesc_t closeFile;

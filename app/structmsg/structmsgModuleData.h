@@ -63,6 +63,7 @@
 #define STRUCT_DISP_ERR_TCP_ACCEPT         145
 #define STRUCT_DISP_ERR_REGIST_TIME        144
 #define STRUCT_DISP_ERR_BAD_MODULE_VALUE_WHICH 143
+#define STRUCT_DISP_ERR_BAD_ROW            142
 
 #define MODULE_INFO_MODULE            (1 << 0)
 #define MODULE_INFO_WIFI              (1 << 1)
@@ -90,6 +91,17 @@
 #define MODULE_INFO_PROVISIONING_IP_ADDR 23
 #define MODULE_INFO_BINARY_CALL_BACK     24
 #define MODULE_INFO_TEXT_CALL_BACK       25
+
+#define BSS_INFO_BSSID        1
+#define BSS_INFO_BSSID_STR    2
+#define BSS_INFO_SSID         3
+#define BSS_INFO_SSID_LEN     4
+#define BSS_INFO_CHANNEL      5
+#define BSS_INFO_RSSID        6
+#define BSS_INFO_AUTH_MODE    7
+#define BSS_INFO_IS_HIDDEN    8
+#define BSS_INFO_FREQ_OFFSET  9
+#define BSS_INFO_FREQ_CAL_VAL 10
 
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 

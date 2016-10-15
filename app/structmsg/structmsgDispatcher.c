@@ -644,117 +644,195 @@ static uint8_t getFieldType(structmsgDispatcher_t *self, structmsgData_t *struct
   return STRUCT_DISP_ERR_FIELD_NOT_FOUND;
 }
 
+// ================================= getFieldInfoFromLine ====================================
+
+static uint8_t getFieldInfoFromLine(structmsgDispatcher_t *self) {
+  int idx;
+  int result;
+  unsigned long uval;
+  uint8_t *buffer;
+  uint8_t*cp;
+  char *endPtr;
+  uint8_t lgth;
+  structmsgDataView_t *dataView;
+
+  dataView = self->structmsgData->structmsgDataView;
+  buffer = self->buildMsgInfos.buf;
+  self->buildMsgInfos.numericValue = 0;
+  self->buildMsgInfos.stringValue = NULL;
+  result = self->readLine(self, &buffer, &lgth);
+  checkErrOK(result);
+  if (lgth == 0) {
+    return STRUCT_DISP_ERR_TOO_FEW_FILE_LINES;
+  }
+  buffer[lgth] = 0;
+  self->buildMsgInfos.fieldNameStr = buffer;
+
+  // fieldName
+  cp = self->buildMsgInfos.fieldNameStr;
+  while (*cp != ',') {
+    cp++;
+  }
+  *cp++ = '\0';
+  result = dataView->getFieldNameIdFromStr(dataView, self->buildMsgInfos.fieldNameStr, &self->buildMsgInfos.fieldNameId, STRUCT_MSG_NO_INCR);
+  checkErrOK(result);
+  result = getFieldType(self, self->structmsgData, self->buildMsgInfos.fieldNameId, &self->buildMsgInfos.fieldTypeId);
+  checkErrOK(result);
+
+  // fieldValue
+  self->buildMsgInfos.fieldValueStr = cp;
+  while (*cp != '\n') {
+    cp++;
+  }
+  *cp++ = '\0';
+  if (self->buildMsgInfos.fieldValueStr[0] != '@') {
+    switch (self->buildMsgInfos.fieldTypeId) {
+    case DATA_VIEW_FIELD_UINT8_T:
+    case DATA_VIEW_FIELD_INT8_T:
+    case DATA_VIEW_FIELD_UINT16_T:
+    case DATA_VIEW_FIELD_INT16_T:
+    case DATA_VIEW_FIELD_UINT32_T:
+    case DATA_VIEW_FIELD_INT32_T:
+      {
+        uval = c_strtoul(self->buildMsgInfos.fieldValueStr, &endPtr, 10);
+        if (endPtr == (char *)(cp-1)) {
+          self->buildMsgInfos.numericValue = (int)uval;
+          self->buildMsgInfos.stringValue = NULL;
+        } else {
+          self->buildMsgInfos.numericValue = 0;
+          self->buildMsgInfos.stringValue = self->buildMsgInfos.fieldValueStr;
+        }
+      }
+      break;
+    default:
+      self->buildMsgInfos.numericValue = 0;
+      self->buildMsgInfos.stringValue = self->buildMsgInfos.fieldValueStr;
+      break;
+    }
+  }
+  return STRUCT_MSG_ERR_OK;
+}
+
 // ================================= setMsgValuesFromLines ====================================
 
 static uint8_t setMsgValuesFromLines(structmsgDispatcher_t *self, structmsgData_t *structmsgData, uint8_t numEntries, uint8_t *handle, uint8_t type) {
   int idx;
-  uint8_t*cp;
-  uint8_t *fieldNameStr;
-  uint8_t fieldNameId;
-  uint8_t fieldTypeId;
-  uint8_t *fieldValueStr;
-  char *endPtr;
+  int fieldIdx;
+  int tableFieldIdx;
   uint8_t fieldLgth;
   uint8_t *flagStr;
   uint8_t flag;
-  uint8_t lgth;
   unsigned long uval;
-  uint8_t buf[100];
-  uint8_t *buffer = buf;
-  int numericValue;
-  uint8_t *stringValue;
   structmsgDataView_t *dataView;
   int result;
+  structmsgField_t *fieldInfo;
+  uint8_t numTableRows;
+  uint8_t numTableRowFields;
+  int currTableRow;
+  int currTableCol;
+  int msgCmdKey;
 
   idx = 0;
   dataView = structmsgData->structmsgDataView;
-  while(idx < numEntries) {
-    result = self->readLine(self, &buffer, &lgth);
-    checkErrOK(result);
-    if (lgth == 0) {
-      return STRUCT_DISP_ERR_TOO_FEW_FILE_LINES;
-    }
-    buffer[lgth] = 0;
-    fieldNameStr = buffer;
-
-    // fieldName
-    cp = fieldNameStr;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    result = dataView->getFieldNameIdFromStr(dataView, fieldNameStr, &fieldNameId, STRUCT_MSG_NO_INCR);
-    checkErrOK(result);
-    result = getFieldType(self, structmsgData, fieldNameId, &fieldTypeId);
-    checkErrOK(result);
-
-    // fieldValue
-    fieldValueStr = cp;
-    while (*cp != '\n') {
-      cp++;
-    }
-    *cp++ = '\0';
-    if (fieldValueStr[0] == '@') {
-      // call the callback function vor the field!!
-      result = self->fillMsgValue(self, fieldValueStr, &numericValue, &stringValue, type, fieldTypeId);
-      checkErrOK(result);
+  // loop over MSG Fields, to check if we eventaully have table rows!!
+  result = getFieldInfoFromLine(self);
+  checkErrOK(result);
+  idx++;
+  fieldIdx = 0;
+  tableFieldIdx = 0;
+  numTableRows = 0;
+  numTableRowFields = 0;
+  currTableRow = 0;
+  currTableCol = 0;
+  structmsgData = self->structmsgData;
+//ets_printf("setMsgValuesFromLines: numFields:%d \n", structmsgData->numFields);
+  while ((fieldIdx < structmsgData->numFields) && (idx <= numEntries)) {
+//ets_printf("setMsgValuesFromLines2: fieldIdx: %d atbeleFieldIdx: %d idx: %d numFields:%d \n", fieldIdx, tableFieldIdx, idx, structmsgData->numFields);
+    if (numTableRows > 0) {
+      fieldInfo = &structmsgData->tableFields[tableFieldIdx++];
     } else {
-      switch (fieldTypeId) {
-      case DATA_VIEW_FIELD_UINT8_T:
-      case DATA_VIEW_FIELD_INT8_T:
-      case DATA_VIEW_FIELD_UINT16_T:
-      case DATA_VIEW_FIELD_INT16_T:
-      case DATA_VIEW_FIELD_UINT32_T:
-      case DATA_VIEW_FIELD_INT32_T:
-        {
-          uval = c_strtoul(fieldValueStr, &endPtr, 10);
-          if (endPtr == (char *)(cp-1)) {
-            numericValue = (int)uval;
-            stringValue = NULL;
-          } else {
-            numericValue = 0;
-            stringValue = fieldValueStr;
+      fieldInfo = &structmsgData->fields[fieldIdx++];
+    }
+//ets_printf("fieldNameId: %d numtabrows: %d\n", fieldInfo->fieldNameId, numTableRows);
+    switch (fieldInfo->fieldNameId) {
+    case STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
+      numTableRows = structmsgData->numTableRows;
+      numTableRowFields = structmsgData->numTableRowFields;
+      currTableRow = 0;
+      currTableCol = 0;
+      break;
+    default:
+//ets_printf("default  fieldNameId: %d buildMsgInfo fieldNameId: %d\n", fieldInfo->fieldNameId, self->buildMsgInfos.fieldNameId);
+    if (fieldInfo->fieldNameId == self->buildMsgInfos.fieldNameId) {
+      if (self->buildMsgInfos.fieldValueStr[0] == '@') {
+        // call the callback function for the field!!
+        if (numTableRows > 0) {
+          while (currTableRow < numTableRows) {
+            self->buildMsgInfos.tableRow = currTableRow;
+            self->buildMsgInfos.tableCol = currTableCol;
+            result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
+            checkErrOK(result);
+            result = structmsgData->setTableFieldValue(structmsgData, self->buildMsgInfos.fieldNameStr, currTableRow, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+            currTableRow++;
+          }
+          currTableRow = 0;
+          currTableCol++;
+          if (currTableCol > numTableRowFields) {
+            // tabel rows done
+            numTableRows = 0;
+            numTableRowFields = 0;
+            currTableRow = 0;
+            currTableCol = 0;
+          }
+        } else {
+          result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
+          checkErrOK(result);
+          result = structmsgData->setFieldValue(structmsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+          currTableRow++;
+        }
+      } else {
+        switch (self->buildMsgInfos.fieldNameId) {
+          case STRUCT_MSG_SPEC_FIELD_DST:
+            result = structmsgData->setFieldValue(structmsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+            break;
+          case STRUCT_MSG_SPEC_FIELD_SRC:
+            result = structmsgData->setFieldValue(structmsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+            break;
+          case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+            // check for u8CmdKey/u16CmdKey here
+            if (self->dispFlags & STRUCT_MSG_U8_CMD_KEY) {
+              self->buildMsgInfos.numericValue = self->received.u8CmdKey;
+            } else {
+ets_printf("cmdKey: 0x%04x\n", self->received.u16CmdKey);
+              self->buildMsgInfos.numericValue = self->received.u16CmdKey;
+            }
+            self->buildMsgInfos.stringValue = NULL;
+            result = structmsgData->setFieldValue(structmsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+            break;
+          default:
+            result = structmsgData->setFieldValue(structmsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+            break;
           }
         }
-        break;
-      default:
-        numericValue = 0;
-        stringValue = fieldValueStr;
-        break;
-      }
-    }
-    switch (fieldNameId) {
-      case STRUCT_MSG_SPEC_FIELD_DST:
-        numericValue = self->received.fromPart;
-        stringValue = NULL;
-        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_SRC:
-        numericValue = self->received.toPart;
-        stringValue = NULL;
-        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
-        break;
-      case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
-        // check for u8CmdKey/u16CmdKey here
-        if (self->dispFlags & STRUCT_MSG_U8_CMD_KEY) {
-          numericValue = self->received.u8CmdKey;
-        } else {
-          numericValue = self->received.u16CmdKey;
+        checkErrOK(result);
+        if (idx < numEntries) {
+          result = getFieldInfoFromLine(self);
+          checkErrOK(result);
         }
-        stringValue = NULL;
-        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
-        break;
-      default:
-        result = structmsgData->setFieldValue(structmsgData, fieldNameStr, numericValue, stringValue);
-        break;
+        idx++;
+      }
+      break;
     }
-    checkErrOK(result);
-    idx++;
   }
-  result = structmsgData->setFieldValue(structmsgData, "@cmdKey", type, NULL);
+  if (self->buildMsgInfos.partsFlags & STRUCT_DISP_U8_CMD_KEY) {
+    msgCmdKey = type;
+  } else {
+    msgCmdKey = (self->buildMsgInfos.u16CmdKey & 0xFF00) | type & 0xFF;
+  }
+  result = structmsgData->setFieldValue(structmsgData, "@cmdKey", msgCmdKey, NULL);
   checkErrOK(result);
   structmsgData->prepareMsg(structmsgData);
-//  structmsgData->dumpMsg(structmsgData);
+  structmsgData->dumpMsg(structmsgData);
   return STRUCT_DISP_ERR_OK;
 }
 

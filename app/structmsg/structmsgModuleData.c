@@ -55,6 +55,39 @@ static stationConfig_t stationConfig;
 static structmsgModuleData_t structmsgModuleData;
 static structmsgWifiData_t structmsgWifiData;
 
+static str2id_t bssStr2BssInfoIds [] = {
+  { "bssid",       BSS_INFO_BSSID },
+  { "bssidStr",    BSS_INFO_BSSID_STR },
+  { "ssid",        BSS_INFO_SSID },
+  { "ssid_len",    BSS_INFO_SSID_LEN },
+  { "channel",     BSS_INFO_CHANNEL },
+  { "rssi",        BSS_INFO_RSSID },
+  { "authmode",    BSS_INFO_AUTH_MODE },
+  { "is_hidden",   BSS_INFO_IS_HIDDEN },
+  { "freq_offset", BSS_INFO_FREQ_OFFSET },
+  { "freqcal_val", BSS_INFO_FREQ_CAL_VAL },
+  { NULL,          0 },
+};
+
+// ================================= bssStr2BssInfoId ====================================
+
+static uint8_t bssStr2BssInfoId(uint8_t *fieldName, uint8_t *fieldId) {
+  int idx;
+  str2id_t *entry;
+
+  idx = 0;
+  entry = &bssStr2BssInfoIds[idx];
+  while (entry->str != NULL) {
+    if (c_strcmp(entry->str, fieldName) == 0) {
+      *fieldId = entry->id;
+      return STRUCT_MSG_ERR_OK;
+    }
+    idx++;
+    entry = &bssStr2BssInfoIds[idx];
+  }
+  return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+}
+
 // ================================= websockeBinaryReceived ====================================
 
 static void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
@@ -78,6 +111,59 @@ static void websockeTextReceived(void *arg, char *pdata, unsigned short len) {
 
   structmsgDispatcher = (structmsgDispatcher_t *)arg;
 //ets_printf("websockeTextReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
+}
+
+// ================================= getModuleTableFieldValue ====================================
+
+static uint8_t getModuleTableFieldValue(structmsgDispatcher_t *self, uint8_t actionMode) {
+  uint8_t result;
+  bssScanInfos_t *scanInfos;
+  bssScanInfo_t *scanInfo;
+  uint8_t fieldId;
+  
+//ets_printf("getModuleTableFieldValue: row: %d col: %d actionMode: %d\n", self->buildMsgInfos.tableRow, self->buildMsgInfos.tableCol, actionMode);
+  scanInfos = self->bssScanInfos;
+  self->buildMsgInfos.numericValue = 0;
+  self->buildMsgInfos.stringValue = NULL;
+  switch (actionMode) {
+  case MODULE_INFO_AP_LIST_CALL_BACK:
+    if (self->buildMsgInfos.tableRow > scanInfos->numScanInfos) {
+      return STRUCT_DISP_ERR_BAD_ROW;
+    }
+    scanInfo = &scanInfos->infos[self->buildMsgInfos.tableRow];
+    result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &fieldId);
+//ets_printf("row: %d ssid: %s rssi: %d fieldName: %s fieldId: %d\n", self->buildMsgInfos.tableRow, scanInfo->ssid, scanInfo->rssi, self->buildMsgInfos.fieldNameStr, fieldId);
+    checkErrOK(result);
+    switch ((int)fieldId) {
+    case  BSS_INFO_BSSID:
+      break;
+    case  BSS_INFO_BSSID_STR:
+      break;
+    case  BSS_INFO_SSID:
+      self->buildMsgInfos.stringValue = scanInfo->ssid;
+      return STRUCT_DISP_ERR_OK;
+      break;
+    case  BSS_INFO_SSID_LEN:
+      break;
+    case  BSS_INFO_CHANNEL:
+      break;
+    case  BSS_INFO_RSSID:
+      self->buildMsgInfos.numericValue = scanInfo->rssi;
+      return STRUCT_DISP_ERR_OK;
+      break;
+    case  BSS_INFO_AUTH_MODE:
+      break;
+    case  BSS_INFO_IS_HIDDEN:
+      break;
+    case  BSS_INFO_FREQ_OFFSET:
+      break;
+    case  BSS_INFO_FREQ_CAL_VAL:
+      break;
+    }
+  default:
+    return STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND;
+  }
+  return STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= getModuleValue ====================================
@@ -163,12 +249,20 @@ static void bssScanDoneCb(void *arg, STATUS status) {
   uint8_t numEntries;
   bssScanInfo_t *scanInfo;
 
+//ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssScanRunning, status);
   if (arg == NULL) {
     return;
   }
   if (status != STRUCT_DISP_ERR_OK) {
     return;
   }
+  if (bssScanRunning == false) {
+    return;
+  }
+  if (bssScanRunning == true) {
+    bssScanRunning = false;
+  }
+//ets_printf("bssScanDoneCb bssScanRunning2: %d status: %d!\n", bssScanRunning, status);
   numEntries = 0;
   bss_link = (struct bss_info *)arg;
   while (bss_link != NULL) {
@@ -207,8 +301,7 @@ static void bssScanDoneCb(void *arg, STATUS status) {
     bss_link = bss_link->next.stqe_next;
     bssScanInfos.numScanInfos++;
   }
-  bssScanRunning = false;
-ets_printf("bssScanDoneCb call buildMsg\n");
+//ets_printf("bssScanDoneCb call buildMsg\n");
   bssScanInfos.scanInfoComplete = true;
   bssScanInfos.structmsgDispatcher->buildMsg(bssScanInfos.structmsgDispatcher);
 }
@@ -219,6 +312,7 @@ static uint8_t getBssScanInfo(structmsgDispatcher_t *self) {
   bool result;
   struct scan_config scan_config;
 
+//ets_printf("getBssScanInfo1: \n");
   if (bssScanRunning) {
     // silently ignore 
     return STRUCT_DISP_ERR_OK;
@@ -230,9 +324,11 @@ static uint8_t getBssScanInfo(structmsgDispatcher_t *self) {
   scan_config.show_hidden = 1;
   self->bssScanInfos->scanInfoComplete = false;
   result = wifi_station_scan(&scan_config, bssScanDoneCb);
+//ets_printf("getBssScanInfo2: result: %d\n", result);
   if (result != true) {
     return STRUCT_DISP_ERR_STATION_SCAN;
   }
+//ets_printf("getBssScanInfo3:\n");
   return STRUCT_DISP_ERR_OK;
 }
 
@@ -357,6 +453,7 @@ uint8_t structmsgModuleDataValuesInit(structmsgDispatcher_t *self) {
   self->setModuleValues = &setModuleValues;
   self->updateModuleValues = &updateModuleValues;
   self->getModuleValue = &getModuleValue;
+  self->getModuleTableFieldValue = &getModuleTableFieldValue;
   self->getBssScanInfo = &getBssScanInfo;
   bssScanInfos.structmsgDispatcher = self;
 

@@ -394,6 +394,7 @@ static uint8_t setTableFieldValue(structmsgData_t *self, const uint8_t *fieldNam
   int numEntries;
   int result;
 
+//ets_printf("setTableFieldValue: %s: row: %d value: %d %s\n", fieldName, row, numericValue, stringValue == NULL ? "nil" : (char* )stringValue);
   if ((self->flags & STRUCT_MSG_IS_INITTED) == 0) {
     return STRUCT_MSG_ERR_NOT_YET_INITTED;
   }
