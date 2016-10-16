@@ -63,29 +63,6 @@ set ::RECEIVED_CHECK_SHORT_CMD_KEY_SIZE 7
 set ::RECEIVED_CHECK_CMD_KEY_SIZE       8
 set ::RECEIVED_CHECK_CMD_LGTH_SIZE      10
 
-if {0} {
-set flagId2Strs [dict create]
-  { STRUCT_DISP_U16_DST,           "STRUCT_DISP_U16_DST" },
-  { STRUCT_DISP_U16_SRC,           "STRUCT_DISP_U16_SRC" },
-  { STRUCT_DISP_U8_TARGET,         "STRUCT_DISP_U8_TARGET" },
-  { STRUCT_DISP_U16_TOTAL_LGTH,    "STRUCT_DISP_U16_TOTAL_LGTH" },
-  { STRUCT_DISP_U8_EXTRA_KEY_LGTH, "STRUCT_DISP_U8_EXTRA_KEY_LGTH" },
-  { STRUCT_DISP_IS_ENCRYPTED,      "STRUCT_DISP_IS_ENCRYPTED" },
-  { STRUCT_DISP_IS_NOT_ENCRYPTED,  "STRUCT_DISP_IS_NOT_ENCRYPTED" },
-  { STRUCT_DISP_SEND_TO_APP,       "STRUCT_DISP_SEND_TO_APP" },
-  { STRUCT_DISP_RECEIVE_FROM_APP,  "STRUCT_DISP_RECEIVE_FROM_APP" },
-  { STRUCT_DISP_SEND_TO_UART,      "STRUCT_DISP_SEND_TO_UART" },
-  { STRUCT_DISP_RECEIVE_FROM_UART, "STRUCT_DISP_RECEIVE_FROM_UART" },
-  { STRUCT_DISP_TRANSFER_TO_UART,  "STRUCT_DISP_TRANSFER_TO_UART" },
-  { STRUCT_DISP_TRANSFER_TO_CONN,  "STRUCT_DISP_TRANSFER_TO_CONN" },
-  { STRUCT_DISP_U8_CMD_KEY,        "STRUCT_DISP_U8_CMD_KEY" },
-  { STRUCT_DISP_U16_CMD_KEY,       "STRUCT_DISP_U16_CMD_KEY" },
-  { STRUCT_DISP_U0_CMD_LGTH,       "STRUCT_DISP_U0_CMD_LGTH" },
-  { STRUCT_DISP_U8_CMD_LGTH,       "STRUCT_DISP_U8_CMD_LGTH" },
-  { STRUCT_DISP_U16_CMD_LGTH,      "STRUCT_DISP_U16_CMD_LGTH" },
-
-set flagStr2Ids [dict create]
-}
 
 set ::moduleFilesPath $::env(HOME)/bene-nodemcu-firmware/module_image_files
 
@@ -98,7 +75,7 @@ namespace eval structmsg {
     namespace ensemble create
       
     namespace export structmsgIdentify freeStructmsgDataView sendEncryptedMsg
-    namespace export structmsgIdentifyReset
+    namespace export structmsgIdentifyReset structmsgIdentifyInit
 
     variable hdrInfos [list]
     variable received [list]
@@ -248,6 +225,7 @@ namespace eval structmsg {
 #      myDataView = newDataView{}
       dict set hdrInfos headerParts [list]
       set fieldOffset 0
+      set seqStartIdx $seqIdx
       set idx 0
       while {$idx < $numEntries} {
         dict set hdrInfos headerSequence [lrange [dict get $hdrInfos headerSequence] 0 [expr {$seqIdx -1 }]]
@@ -256,6 +234,13 @@ namespace eval structmsg {
           return $::STRUCT_MSG_ERR_TOO_FEW_FILE_LINES
         }
         set hdr [dict create]
+        set seqIdx2 0
+        set fieldSequence [list]
+        while {$seqIdx2 < $seqStartIdx} {
+          lappend fieldSequence [lindex [dict get $hdrInfos headerSequence] $seqIdx2]
+          incr seqIdx2
+        }
+        dict set hdr fieldSequence $fieldSequence
         dict set hdr hdrFlags [list]
         set flds [split $line ,]
         set seqIdx2 0
@@ -311,10 +296,12 @@ namespace eval structmsg {
         # extra field lgth 0/<number>
         dict set hdr hdrExtraLgth $myPart
         dict lappend hdrInfos headerSequence STRUCT_DISP_U8_EXTRA_KEY_LGTH
+        dict lappend hdr fieldSequence STRUCT_DISP_U8_EXTRA_KEY_LGTH
         incr seqIdx2
         set myPart [lindex $flds $seqIdx2]
         # encryption E/N
         dict lappend hdrInfos headerSequence STRUCT_DISP_U8_ENCRYPTION
+        dict lappend hdr fieldSequence STRUCT_DISP_U8_ENCRYPTION
         dict set hdr hdrEncryption $myPart
         if {$myPart eq "E"} {
           dict lappend hdr hdrFlags STRUCT_DISP_IS_ENCRYPTED
@@ -325,6 +312,7 @@ namespace eval structmsg {
         set myPart [lindex $flds $seqIdx2]
         # handleType A/G/S/R/U/W/N
         dict lappend hdrInfos headerSequence STRUCT_DISP_U8_HANDLE_TYPE
+        dict lappend hdr fieldSequence STRUCT_DISP_U8_HANDLE_TYPE
         dict set hdr hdrHandleType $myPart
         switch $myPart {
           A {
@@ -366,12 +354,14 @@ namespace eval structmsg {
         switch $fieldTypeId {
           DATA_VIEW_FIELD_UINT8_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U8_CMD_KEY
+            dict lappend hdr fieldSequence STRUCT_DISP_U8_CMD_KEY
             dict lappend hdr hdrFlags STRUCT_DISP_U8_CMD_KEY
             dict set hdr hdrU8CmdKey $myPart
             lappend dispFlags STRUCT_MSG_U8_CMD_KEY
           }
           DATA_VIEW_FIELD_UINT16_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U16_CMD_KEY
+            dict lappend hdr fieldSequence STRUCT_DISP_U16_CMD_KEY
             dict lappend hdr hdrFlags STRUCT_DISP_U16_CMD_KEY
             dict set hdr hdrU16CmdKey $myPart
             set myIdx [lsearch $dispFlags STRUCT_MSG_U8_CMD_KEY]
@@ -397,14 +387,17 @@ namespace eval structmsg {
         switch $fieldTypeId {
           DATA_VIEW_FIELD_UINT0_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U0_CMD_Lgth
+            dict lappend hdrs fieldSequence STRUCT_DISP_U0_CMD_Lgth
             dict lappend hdr hdrFlags STRUCT_DISP_U0_CMD_Lgth
           }
           DATA_VIEW_FIELD_UINT8_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U8_CMD_Lgth
+            dict lappend hdr fieldSequence STRUCT_DISP_U8_CMD_Lgth
             dict lappend hdr hdrFlags STRUCT_DISP_U8_CMD_Lgth
           }
           DATA_VIEW_FIELD_UINT16_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U16_CMD_Lgth
+            dict lappend hdr fieldSequence STRUCT_DISP_U16_CMD_Lgth
             dict lappend hdr hdrFlags STRUCT_DISP_U16_CMD_Lgth
           }
           default {
@@ -423,14 +416,17 @@ namespace eval structmsg {
         switch $fieldTypeId {
           DATA_VIEW_FIELD_UINT0_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U0_CRC
+            dict lappend hdr fieldSequence STRUCT_DISP_U0_CRC
             dict lappend hdr hdrFlags STRUCT_DISP_U0_CRC
           }
           DATA_VIEW_FIELD_UINT8_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U8_CRC
+            dict lappend hdr fieldSequence STRUCT_DISP_U8_CRC
             dict lappend hdr hdrFlags STRUCT_DISP_U8_CRC
           }
           DATA_VIEW_FIELD_UINT16_T {
             dict lappend hdrInfos headerSequence STRUCT_DISP_U16_CRC
+            dict lappend hdr fieldSequence STRUCT_DISP_U16_CRC
             dict lappend hdr hdrFlags STRUCT_DISP_U16_CRC
           }
           default {
@@ -623,7 +619,9 @@ puts stderr "call:$fcnName!"
         set hdr [lindex [dict get $hdrInfos headerParts] $hdrIdx]
         if {[dict get $hdr hdrToPart] == [dict get $received toPart]} {
           if {[dict get $hdr hdrFromPart] == [dict get $received fromPart]} {
+puts stderr "LL![dict get $hdr hdrTotalLgth]![dict get $received totalLgth]!hdrIdx!$hdrIdx!"
             if {([dict get $hdr hdrTotalLgth] == [dict get $received totalLgth]) || ([dict get $hdr hdrTotalLgth] == 0)} {
+puts stderr "u8CmdKey!$u8CmdKey!u16CmdKey!$u16CmdKey!"
               if {$u8CmdKey != 0} {
                 if {$u8CmdKey == [dict get $received u8CmdKey]} {
                   set found true
@@ -631,6 +629,7 @@ puts stderr "call:$fcnName!"
                 }
               } else {
                 if {$u16CmdKey != 0} {
+puts stderr "recu16cmdkey![dict get $received u16CmdKey]!"
                   if {$u16CmdKey == [dict get $received u16CmdKey]} {
                     set found true
                     break
@@ -768,87 +767,100 @@ puts stderr "call:$fcnName!"
       G -
       A {
         # got APList!
-        while {[dict get $received lgth] < [dict get $received totalLgth]} {
-puts stderr "§el![dict get $hdr hdrExtraLgth]!enc![dict get $hdr hdrEncryption]!ht![dict get $hdr hdrHandleType]!§"
-puts stderr 1
-        if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 1}]} {
-          # get the cmdKey, we get its type from the header sequence!
-puts stderr 2
-puts stderr "headerSequence![dict get $$hdrInfos headerSequence]!"
-          switch [lindex [dict get $hdrInfos headerSequence] [dict get $hdrInfos seqIdx]] {
-            STRUCT_DISP_U16_CMD_KEY {
-puts stderr "2a"
-              set result [::structmsg dataView getUint16 [dict get $received fieldOffset] value]
-              dict set received u16CmdKey [format "%c%c" [string range $value 0 0] [string range $value 1 1]]
-              dict incr received fieldOffset 2
-              dict lappend received partsFlags STRUCT_DISP_U16_CMD_KEY
-              set isU16CmdKey true
-#puts stderr [format "§u16CmdKey!0x%04x!§" [dict get $received u16CmdKey]]
-puts stderr 3
-              while {[dict get $received u16CmdKey] ne [dict get $hdr hdrU16CmdKey]} {
-puts stderr 4
-                dict incr hdrInfos currPartIdx 1
-                set result [nextFittingEntry 0 [dict get $received u16CmdKey]]
-                if {$result != $::STRUCT_MSG_ERR_OK} {
-                  return $result
-                }
-                set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
-puts stderr 5
-              }
-puts stderr "found entry: [dict get $hdrInfos currPartIdx]!"
-::structmsg strucmsgDispatcher dumpHeaderParts $hdr
+        set myOffset -1
+        while {[dict get $received lgth] <= [dict get $received totalLgth]} {
+#puts stderr "§el![dict get $hdr hdrExtraLgth]!enc![dict get $hdr hdrEncryption]!ht![dict get $hdr hdrHandleType]!§"
+          if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 1}]} {
+            # get the cmdKey, we get its type from the header sequence!
+            if {[dict get $hdr hdrExtraLgth] > 0} {
+              dict set hdrInfos extraStartLgth [dict get $hdr hdrExtraLgth]
+            } else {
+              dict set hdrInfos extraStartLgth 0
             }
-            STRUCT_DISP_U8_CMD_KEY {
-puts stderr "5a"
-              set result [::structmsg dataView getUint8 [dict get $received fieldOffset] value]
-              set val [format "%c" $value]
-              dict set received u8CmdKey $val
-              dict incr received fieldOffset 1
-              dict lappend received partsFlags STRUCT_DISP_U8_CMD_KEY
-              set isU16CmdKey false
-              set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
-              while {[dict get $received u8CmdKey] ne [dict get $hdr hdrU8CmdKey]} {
-                set result [nextFittingEntry [dict get $received u8CmdKey] 0]
-                if {$result != $::STRUCT_MSG_ERR_OK} {
-                  return $result
-                }
-                dict incr hdrInfos currPartIdx 1
-                set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
+            set cmdKeyType [lindex [dict get $hdr fieldSequence] [dict get $hdrInfos seqIdx]]
+            switch $cmdKeyType {
+              STRUCT_DISP_U16_CMD_KEY {
+                set myOffset 2
+              }
+              STRUCT_DISP_U8_CMD_KEY {
+                set myoffset 1
+              }
+              default {
+                error "bad cmdKeyType!$cmdKeyType!"
               }
             }
           }
-          dict incr hdrInfos seqIdx 1
-        } else {
-puts stderr 6
-          if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 2}]} {
-            # check if we have a cmdLgth
-            switch [lindex [dict get $hdrInfos headerSequence] [dict get $hdrInfos seqIdx]] {
-              STRUCT_DISP_U0_CMD_LGTH {
-                dict incr received fieldOffset 2
-#puts stderr "§u0CmdLgth!0!§"
-              }
-              STRUCT_DISP_U8_CMD_LGTH {
-                set result [::structmsg dataView getUint8 [dict get $received fieldOffset] value]
-                set received u8CmdLgth $value
-                dict incr received fieldOffset 1
-#puts stderr [format "§u8CmdLgth!%c!§" [dict get $received u8CmdLgth]]
-              }
-              STRUCT_DISP_U16_CMD_LGTH {
+          if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + $myOffset}]} {
+            switch $cmdKeyType {
+              STRUCT_DISP_U16_CMD_KEY {
+puts stderr "look for u16CmdKey!"
                 set result [::structmsg dataView getUint16 [dict get $received fieldOffset] value]
-                set received u16CmdLgth $value
+puts stderr "value!$value!"
+                dict set received u16CmdKey [format "%c%c" [expr {($value >> 8) & 0xFF}] [expr {$value & 0xFF}]]
                 dict incr received fieldOffset 2
-#puts stderr [format "§u16CmdLgth!%c!§" [dict get $received u16CmdLgth]
+                dict lappend received partsFlags STRUCT_DISP_U16_CMD_KEY
+                set isU16CmdKey true
+#puts stderr [format "§u16CmdKey!0x%04x!§" [dict get $received u16CmdKey]]
+puts stderr "received!"
+pdict $received
+                while {[dict get $received u16CmdKey] ne [dict get $hdr hdrU16CmdKey]} {
+puts stderr "u16:[dict get $received u16CmdKey]![dict get $hdr hdrU16CmdKey]!"
+                  dict incr hdrInfos currPartIdx 1
+                  set result [nextFittingEntry 0 [dict get $received u16CmdKey]]
+                  if {$result != $::STRUCT_MSG_ERR_OK} {
+                    return $result
+                  }
+                  set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
+                }
+puts stderr "found entry: [dict get $hdrInfos currPartIdx]!"
+              }
+              STRUCT_DISP_U8_CMD_KEY {
+                set result [::structmsg dataView getUint8 [dict get $received fieldOffset] value]
+                set val [format "%c" $value]
+                dict set received u8CmdKey $val
+                dict incr received fieldOffset 1
+                dict lappend received partsFlags STRUCT_DISP_U8_CMD_KEY
+                set isU16CmdKey false
+                set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
+                while {[dict get $received u8CmdKey] ne [dict get $hdr hdrU8CmdKey]} {
+                  set result [nextFittingEntry [dict get $received u8CmdKey] 0]
+                  if {$result != $::STRUCT_MSG_ERR_OK} {
+                    return $result
+                  }
+                  dict incr hdrInfos currPartIdx 1
+                  set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
+                }
               }
             }
             dict incr hdrInfos seqIdx 1
+          } else {
+            if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 2}]} {
+              # check if we have a cmdLgth
+              switch [lindex [dict get $hdrInfos headerSequence] [dict get $hdrInfos seqIdx]] {
+                STRUCT_DISP_U0_CMD_LGTH {
+                  dict incr received fieldOffset 2
+#puts stderr "§u0CmdLgth!0!§"
+                }
+                STRUCT_DISP_U8_CMD_LGTH {
+                  set result [::structmsg dataView getUint8 [dict get $received fieldOffset] value]
+                  set received u8CmdLgth $value
+                  dict incr received fieldOffset 1
+#puts stderr [format "§u8CmdLgth!%c!§" [dict get $received u8CmdLgth]]
+                }
+                STRUCT_DISP_U16_CMD_LGTH {
+                  set result [::structmsg dataView getUint16 [dict get $received fieldOffset] value]
+                  set received u16CmdLgth $value
+                  dict incr received fieldOffset 2
+#puts stderr [format "§u16CmdLgth!%c!§" [dict get $received u16CmdLgth]
+                }
+              }
+              dict incr hdrInfos seqIdx 1
+            }
           }
-puts stderr 7
-          # just get the bytes until totalLgth reached
           if {[dict get $received lgth] == [dict get $received totalLgth]} {
-puts stderr 8
     #ets_printf{"§not encrypted message completely receieved!%d!§", received->totalLgth}
-          # check if we have a crc and the type of it
-          # if we have a crc calculate it for the totalLgth
+            # check if we have a crc and the type of it
+            # if we have a crc calculate it for the totalLgth
             set fieldInfo [dict create]
             switch [lindex [dict get $hdrInfos headerSequence] [dict get $hdrInfos seqIdx]] {
               STRUCT_DISP_U0_CRC {
@@ -875,6 +887,7 @@ puts stderr 8
               set answerType A
             }
 puts stderr "handleEncryptedPart runAction: $answerType"
+#::structmsg structmsgData dump
 if {0} {
             set result [runAction answerType]
             if {$result != $::STRUCT_MSG_ERR_OK} {
@@ -890,13 +903,9 @@ if {0} {
               return $result
             }
 }
-puts stderr 9
           }
-puts stderr 10
+          dict incr received lgth 1
         }
-        dict incr received lgth 1
-        }
-puts stderr 11
       }
       default {
         return $::STRUCT_DISP_ERR_BAD_HANDLE_TYPE
@@ -929,7 +938,7 @@ puts stderr 12
             dict incr received fieldOffset 2
             dict lappend received partsFlags STRUCT_DISP_U16_CMD_KEY
             set isU16CmdKey true
-#puts stderr [format "§u16CmdKey!0x%04x!§" [dict get $received u16CmdKey]]
+puts stderr [format "§u16CmdKey!0x%04x!§" [dict get $received u16CmdKey]]
             while {[dict get $received u16CmdKey] ne [dict get $hdr hdrU16CmdKey]} {
               dict incr hdrInfos currPartIdx 1
               set result [nextFittingEntry 0 [dict get $received u16CmdKey]]
@@ -1045,15 +1054,16 @@ if {0} {
         dict set received lgth [expr {[dict get $received lgth] + 1}]
         ::structmsg dataView appendData $buffer $lgth
         if {[dict get $received lgth] == [dict get $hdrInfos headerStartLgth]} {
-puts stderr "hdrInfos!"
-::structmsg structmsgDispatcher dumpMsgHeaderInfos $hdrInfos
 
           set result [getHeaderIndexFromHeaderFields]
           set hdrIdx [dict get $hdrInfos currPartIdx]
-puts stderr "hdrIdx!$hdrIdx!"
           set hdr [lindex [dict get $hdrInfos headerParts] $hdrIdx]
-puts stderr "HDR!"
+          if {[dict get $hdr hdrTotalLgth] == 0} {
+            # we have a varying lgth, so get it here
+            dict set hdr hdrTotalLgth [dict get $received totalLgth]
+puts stderr "headers2"
 ::structmsg structmsgDispatcher dumpHeaderParts $hdr
+          }
         }
         if {[dict get $received lgth] > [dict get $hdrInfos headerStartLgth]} {
           set hdrIdx [dict get $hdrInfos currPartIdx]
@@ -1068,22 +1078,14 @@ pdict $hdr
 error "partsFlags is not encrypted and hdrEncryption is E"
             }
           } else {
-            if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 1}]} {
-puts stderr "set extraStartLgth!"
-              # eventually add the extraField to the headerLgth here!!
-              if {[dict get $hdr hdrExtraLgth] > 0} {
-                dict set hdrInfos extraStartLgth [dict get $hdr hdrExtraLgth]
-              } else {
-                dict set hdrInfos extraStartLgth 0
-              }
-            }
             if {[dict get $hdr hdrEncryption] eq "E"} {
               if {[dict get $received lgth] == [dict get $received totalLgth]} {
 puts stderr "§encrypted message completely receieved![dict get $received totalLgth]!§"
                 if {[lsearch [dict get $received partsFlags] STRUCT_DISP_IS_NOT_ENCRYPTED] >= 0} {
                 } else {
 puts stderr "seems to be an encrypted msg!"
-                  set myHeaderLgth [expr {[dict get $hdrInfos headerStartLgth] + [dict get $hdrInfos extraStartLgth]}]
+                  set myHeaderLgth [expr {[dict get $hdrInfos headerStartLgth] + [dict get $hdr hdrExtraLgth]}]
+pdict $hdr
                   if {[dict get $hdr hdrEncryption] eq "E"} {
                     set myHeader [string range $buffer 0 [expr {$myHeaderLgth - 1}]]
                     set mlen [expr {$lgth - $myHeaderLgth}]
@@ -1096,6 +1098,7 @@ puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
 puts stderr "decrypt error"
                     }
                     set buffer "${myHeader}${decrypted}"
+                    set result [::structmsg dataView setData $buffer $mlen]
 ::structmsg structmsgData dumpBinary $buffer $lgth "decrypted"
                   }
                   dict set received lgth [dict get $hdrInfos headerStartLgth]

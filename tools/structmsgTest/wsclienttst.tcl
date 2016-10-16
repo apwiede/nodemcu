@@ -242,7 +242,7 @@ if {0} {
 }
 
 set result [::structmsg dataView setData "" 0]
-set result [::structmsg structmsgIdentify structmsgIdentify structmsgIdentifyInit]
+set result [::structmsg structmsgIdentify structmsgIdentifyInit]
 checkErrOk $result
 set result [::structmsg structmsgDispatcher createDispatcher handle]
 checkErrOk $result
@@ -283,8 +283,22 @@ puts stderr "clientHandler: $type $msg!"
         puts stderr "val: $val!"
       }
 puts stderr "need handler for received MSG!lgth: [string length $msg]!"
+      binary scan $msg cccccc ch0 ch1 ch2 ch3 ch4 ch5
+      binary scan $msg SSS totalLgth defLgth msgLgth
+puts stderr "totalLgth!$totalLgth!defLgth!$defLgth!msgLgth!$msgLgth!"
+      set defData [string range $msg 6 [expr {6 + $defLgth - 1}]]
+      set msgData [string range $msg [expr {6 + $defLgth}] [expr {$totalLgth - 1}]]
+puts stderr "defDataLgth: [string length $defData]!"
+puts stderr "msgDataLgth: [string length $msgData]!"
       ::structmsg structmsgIdentify structmsgIdentifyReset
-      ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $msg [string length $msg]
+      ::structmsg dataView setData "" 0
+      ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $defData $defLgth
+
+if {1} {
+      ::structmsg structmsgIdentify structmsgIdentifyReset
+      ::structmsg dataView setData "" 0
+      ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $msgData $msgLgth
+}
     }
   }
 }

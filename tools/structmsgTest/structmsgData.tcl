@@ -71,6 +71,9 @@ namespace eval structmsg {
         }
         puts stderr "$idx: $ch [format 0x%02x [expr {$pch & 0xFF}]]!"
         incr idx
+        if {$idx > $lgth} {
+          break
+        }
       }
     }
 

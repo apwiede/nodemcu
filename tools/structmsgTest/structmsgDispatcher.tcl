@@ -297,7 +297,7 @@ namespace eval structmsg {
     proc dumpHeaderParts {hdr} {
       variable structmsgDispatcher
     
-      puts stderr "dumpHeaderParts:\n"
+      puts stderr "dumpHeaderParts:"
       if {![dict exists $hdr hdrOffset]} {
         dict set hdr hdrOffset 0
       }
@@ -332,7 +332,7 @@ namespace eval structmsg {
       puts stderr "hdr fieldSequence"
       set idx 0
       while {$idx < 9} {
-        puts stderr [format " %s" $idx [lindex [dict get $hdr fieldSequence] $idx]]
+        puts stderr [format "%d %s" $idx [lindex [dict get $hdr fieldSequence] $idx]]
         incr idx
       }
       return $::STRUCT_DISP_ERR_OK
@@ -621,6 +621,7 @@ puts stderr "partsVar!$partsVar!"
       dict set parts u16CmdKey 0
       dict set parts u8CmdKey 0
       dict set parts u8CmdLgth 0
+      dict set parts buf "" 
 #      self->structmsgDataView->dataView->data = parts->buf;
 #      self->structmsgDataView->dataView->lgth = 0;
       dict set structmsgDispatcher $partsVar $parts
