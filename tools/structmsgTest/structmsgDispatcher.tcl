@@ -67,36 +67,6 @@ set ::STRUCT_DISP_ERR_TOO_FEW_FILE_LINES    178
 set ::STRUCT_DISP_ERR_ACTION_NAME_NOT_FOUND 177
 set ::STRUCT_DISP_ERR_DUPLICATE_ENTRY       176
 
-if {0} {
-#define BASE64_INVALID '\xff'
-#define BASE64_PADDING '='
-#define ISBASE64(c) (unbytes64[c] != BASE64_INVALID)
-
-#define DISP_HANDLE_PREFIX "stmsgdisp_"
-
-typedef struct handle2Dispatcher
-{
-  uint8_t *handle;
-  structmsgDispatcher_t *structmsgDispatcher;
-} handle2Dispatcher_t;
-
-typedef struct structmsgDispatcherHandles
-{
-  handle2Dispatcher_t *handles;
-  int numHandles;
-} structmsgDispatcherHandles_t;
-
-// create an object
-static structmsgDispatcherHandles_t structmsgDispatcherHandles = { NULL, 0};
-
-static int structmsgDispatcherId = 0;
-// right now we only need one dispatcher!
-static structmsgDispatcher_t *structmsgDispatcherSingleton = NULL;
-
-static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-}
-
-
 namespace eval structmsg {
   namespace ensemble create
 
@@ -108,6 +78,7 @@ namespace eval structmsg {
     namespace export structmsgDispatcherInit freeStructmsgDataView createMsgFromLines
     namespace export createMsgFromLines setMsgValuesFromLines createDispatcher setMsgParts
     namespace export encryptMsg decryptMsg resetMsgInfo
+    namespace export dumpMsgParts dumpHeaderParts dumpMsgHeaderInfos
 
     variable structmsgDispatcher [dict create]
     variable structmsgDispatcherHandles
@@ -321,6 +292,100 @@ namespace eval structmsg {
       return STRUCT_DISP_ERR_HANDLE_NOT_FOUND;
     }
     
+    # ================================= dumpHeaderParts ====================================
+    
+    proc dumpHeaderParts {hdr} {
+      variable structmsgDispatcher
+    
+      puts stderr "dumpHeaderParts:\n"
+      if {![dict exists $hdr hdrOffset]} {
+        dict set hdr hdrOffset 0
+      }
+      if {![dict exists $hdr hdrU16CmdKey]} {
+        dict set hdr hdrU16CmdKey ""
+      }
+      if {![dict exists $hdr hdrU8CmdKey]} {
+        dict set hdr hdrU8CmdKey ""
+      }
+      if {![dict exists $hdr hdrU16CmdLgth]} {
+        dict set hdr hdrU16CmdLgth 0
+      }
+      if {![dict exists $hdr hdrU8CmdLgth]} {
+        dict set hdr hdrU8CmdLgth 0
+      }
+      if {![dict exists $hdr hdrU16Crc]} {
+        dict set hdr hdrU16Crc 0
+      }
+      if {![dict exists $hdr hdrU8Crc]} {
+        dict set hdr hdrU8Crc 0
+      }
+      if {![dict exists $hdr hdrTargetPart]} {
+        dict set hdr hdrTargetPart 0
+      }
+      if {![dict exists $hdr fieldSequence]} {
+        dict set hdr fieldSequence [list]
+      }
+      puts stderr [format "headerParts1: from: 0x%04x to: 0x%04x totalLgth: %d u16CmdKey: %s u16CmdLgth: 0x%04x u16Crc: 0x%04x" [dict get $hdr hdrFromPart] [dict get $hdr hdrToPart] [dict get $hdr hdrTotalLgth] [dict get $hdr hdrU16CmdKey] [dict get $hdr hdrU16CmdLgth] [dict get $hdr hdrU16Crc]]
+      puts stderr [format "headerParts2: target: 0x%02x u8CmdKey: %s u8CmdLgth: %d u8Crc: 0x%02x offset: %d extra: %d" [dict get $hdr hdrTargetPart] [dict get $hdr hdrU8CmdKey] [dict get $hdr hdrU8CmdLgth] [dict get $hdr hdrU8Crc] [dict get $hdr hdrOffset] [dict get $hdr hdrExtraLgth]]
+      puts stderr [format "headerParts3: enc: %s handleType: %s" [dict get $hdr hdrEncryption] [dict get $hdr hdrHandleType]]
+      puts stderr "hdrFlags: [dict get $hdr hdrFlags]"
+      puts stderr "hdr fieldSequence"
+      set idx 0
+      while {$idx < 9} {
+        puts stderr [format " %s" $idx [lindex [dict get $hdr fieldSequence] $idx]]
+        incr idx
+      }
+      return $::STRUCT_DISP_ERR_OK
+    }
+    
+    # ================================= dumpMsgHeaderInfos ====================================
+    
+    proc dumpMsgHeaderInfos {hdrInfos} {
+      variable structmsgDispatcher
+    
+      puts stderr "dumpMsgHeaderInfos:\n"
+      if {![dict exists $hdrInfos maxHeaderParts]} {
+        dict set hdrInfos maxHeaderParts 0
+      }
+      if {![dict exists $hdrInfos currPartIdx]} {
+        dict set hdrInfos currPartIdx 0
+      }
+      if {![dict exists $hdrInfos seqIdx]} {
+        dict set hdrInfos seqIdx 0
+      }
+      if {![dict exists $hdrInfos seqIdxAfterStart]} {
+        dict set hdrInfos seqIdxAfterStart 0
+      }
+      puts stderr "headerFlags: [dict get $hdrInfos headerFlags]"
+      puts stderr "hdrInfos headerSequence\n"
+      set idx 0
+      while {$idx < 9} {
+        puts stderr [format " %d %s" $idx [lindex [dict get $hdrInfos headerSequence] $idx]]
+        incr idx
+      }
+      puts stderr [format "startLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterStart: %d\n" [dict get $hdrInfos headerStartLgth] [dict get $hdrInfos numHeaderParts] [dict get $hdrInfos maxHeaderParts] [dict get $hdrInfos currPartIdx] [dict get $hdrInfos seqIdx] [dict get $hdrInfos seqIdxAfterStart]]
+      return $::STRUCT_DISP_ERR_OK
+    }
+    
+    # ================================= dumpMsgParts ====================================
+    
+    proc dumpMsgParts {msgParts} {
+      variable structmsgDispatcher
+    
+      puts stderr "dumpMsgParts:\n"
+      puts stderr [format "MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d u16_cmdLgth: %d u16CmdKey: 0x%04x targetPart: 0x%02x\n" [dict get $msgParts fromPart] [dict get $msgParts toPart] [dict get $msgParts totalLgth] [dict get $ msgParts u16CmdLgth] [dict get $msgParts u16CmdKey] [dict get $msgParts targetPart]]
+    
+      puts stderr [formaat "MsgParts2 u8CmdLgth: %d u8CmdKey: 0x%02x lgth: %d fieldOffset: %d\n" [dict get $msgParts u8CmdLgth] [dict get $msgParts u8CmdKey] [dict get $msgParts lgth] [dict get $msgParts fieldOffset]]
+      puts stderr "buf"
+      set idx 0
+      while {$idx < [expr {[dict get $msgParts realLgth] - 1}]} {
+        puts stderr [format " %d %s" $idx [lindex [dict get $msgParts buf] $idx]]
+        incr idx
+      }
+      puts stderr "partFlags: [dict get $msgParts partsFlags]"
+      return $::STRUCT_DISP_ERR_OK
+    }
+
     # ================================= getMsgPtrFromMsgParts ====================================
     
     proc getMsgPtrFromMsgParts {msgParts incrRefCnt} {
@@ -579,8 +644,8 @@ puts stderr "partsVar!$partsVar!"
       upvar $bufVar buf
       upvar $lgthVar lgth
 
-      set data [aes::aes -mode cbc -dir decrypt -key $key -iv $iv $msg]
-      set lgth [string length $data]
+      set buf [aes::aes -mode cbc -dir decrypt -key $key -iv $iv $msg]
+      set lgth [string length $buf]
       return $::STRUCT_MSG_ERR_OK
     }
     

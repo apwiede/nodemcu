@@ -104,7 +104,6 @@ namespace eval apwWin {
     proc CreateScrolledTablelist { w useAutoScroll titleStr args } {
         return [CreateScrolledWidget tablelist::tablelist $w $useAutoScroll $titleStr {*}$args]
     }
-
 }
 
 namespace eval showDefinition {

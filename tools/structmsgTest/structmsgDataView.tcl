@@ -426,6 +426,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
     proc setCrc {fieldInfo startOffset size} {
       set crcLgth [dict get $fieldInfo fieldLgth]
       set size [expr {$size - $crcLgth}]
+set ::crcDebug true
       set crc  0
       set offset $startOffset
       while {$offset < $size} {
@@ -437,7 +438,7 @@ set cnt 0
         }
         set pch [expr {$pch & 0xFF}]
 if {$::crcDebug} {
-puts stderr "encode crc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
+puts stderr "setrCrc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
 }
         set crc [expr {$crc + [format "%d" $pch]}]
 incr cnt

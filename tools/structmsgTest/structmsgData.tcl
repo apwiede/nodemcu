@@ -44,6 +44,7 @@ namespace eval structmsg {
     namespace export structmsgDataInit freeStructmsgDataView createMsg addField
     namespace export initMsg prepareMsg setMsgdata getMsgData getFieldTypeFromFieldNameId
     namespace export setFieldValue getFieldValue setTableFieldValue getTableFieldValue
+    namespace export addFlag deleteFlag dumpBinary
 
     variable structmsgData [dict create]
     variable numHandles 0
@@ -56,6 +57,22 @@ namespace eval structmsg {
     dict set structmsgHandles handles [list]
     dict set structmsgHandles numHandles 0
 
+
+    # ================================= dumpBinary ====================================
+    
+    proc dumpBinary {data lgth what} {
+      variable structmsgData
+
+      set idx 0
+      foreach ch [split $data ""] {
+        set pch $ch
+        if {![string is integer $ch]} {
+          binary scan $ch c pch
+        }
+        puts stderr "$idx: $ch [format 0x%02x [expr {$pch & 0xFF}]]!"
+        incr idx
+      }
+    }
 
     # ================================= getFieldTypeFromFieldNameId ====================================
     
@@ -341,7 +358,7 @@ namespace eval structmsg {
         dict set fieldInfo fieldTypeId $fieldTypeId
         dict set fieldInfo fieldLgth $fieldLgth
         dict lappend structmsgData fields $fieldInfo
-        set numTableFields [expr {[dict get $structmsgdata numTableRows] * [dict get $structmsgData numTableRowFields]}]
+        set numTableFields [expr {[dict get $structmsgData numTableRows] * [dict get $structmsgData numTableRowFields]}]
         if {([dict get $structmsgData tableFields] eq [list]) && ([dict get $structmsgData numTableFields] != 0)} {
         }
         dict incr structmsgData numFields 1
@@ -550,13 +567,12 @@ namespace eval structmsg {
             dict lappend fieldInfo fieldFlags STRUCT_MSG_FIELD_IS_SET
           }
           STRUCT_MSG_SPEC_FIELD_CRC {
-            set headerLgth 0
-            set lgth [expr {[dict get $structmsgData cmdLgth] - [dict get $fieldInfo fieldLgth] + [dict get $structmsgData headerLgth]}]
+            set startOffset 0
             if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_CRC_USE_HEADER_LGTH] >= 0} {
-                set headerLgth [dict get $structmsgdata headerLgth]
-                set lgth [expr {$lgth - $headerLgth}]
+                set startOffset [dict get $structmsgData headerLgth]
             }
-            set result [::structmsg structmsgDataView setCrc $fieldInfo $headerLgth $lgth]
+            set lgth [dict get $structmsgData totalLgth]
+            set result [::structmsg structmsgDataView setCrc $fieldInfo $startOffset $lgth]
             if {$result != $::STRUCT_MSG_ERR_OK} {
               return $result
             }
@@ -569,6 +585,23 @@ namespace eval structmsg {
       return $::STRUCT_MSG_ERR_OK
     }
     
+    # ================================= addFlag ====================================
+    
+    proc addFlag {flag} {
+      variable structmsgData
+    
+      dict lappend structmsgData flags $flag
+puts stderr "structmsgData: flags![dict get $structmsgData flags]!"
+      return $::STRUCT_MSG_ERR_OK
+    }
+
+    # ================================= deleteFlag ====================================
+    
+    proc deleteFlag {flag} {
+      variable structmsgData
+    
+    }
+
     # ================================= initMsg ====================================
     
     proc initMsg {} {
@@ -582,7 +615,7 @@ namespace eval structmsg {
       dict set structmsgData fieldOffset 0
       set numEntries [dict get $structmsgData numFields]
       set idx 0
-      dict set structmsgdata headerLgth 0
+      dict set structmsgData headerLgth 0
       while {$idx < $numEntries} {
         set fields [dict get $structmsgData fields]
         set fieldInfo [lindex $fields $idx]

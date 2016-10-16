@@ -98,6 +98,8 @@ namespace eval structmsg {
     namespace ensemble create
       
     namespace export structmsgIdentify freeStructmsgDataView sendEncryptedMsg
+    namespace export structmsgIdentifyReset
+
     variable hdrInfos [list]
     variable received [list]
     variable dispFlags [list]
@@ -477,7 +479,7 @@ namespace eval structmsg {
       set flds [split $line ","]
       foreach {dummy numEntries} $flds break
     #ets_printf{"§@NE2!%d!@§", numEntries}
-      set result [::structmsg structmsgdata setMsgValuesFromLines $numEntries $handle [dict get $parts u8CmdKey]]
+      set result [::structmsg structmsgData setMsgValuesFromLines $numEntries $handle [dict get $parts u8CmdKey]]
       if {$result != $::STRUCT_MSG_ERR_OK} {
         return $result
       }
@@ -495,6 +497,9 @@ namespace eval structmsg {
     # ================================= prepareEncryptedAnswer ====================================
     
     proc prepareEncryptedAnswer {parts type} {
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
       if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
         set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
       } else {
@@ -554,6 +559,7 @@ namespace eval structmsg {
         return $result
       }
       close $fd
+      set result [::structmsg structmsgData addFlag STRUCT_MSG_CRC_USE_HEADER_LGTH]
       if {[lsearch [dict get $parts partsFlags] STRUCT_DISP_U8_CMD_KEY] >= 0} {
         set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
       } else {
@@ -750,38 +756,50 @@ puts stderr "call:$fcnName!"
       set hdrIdx [dict get $hdrInfos currPartIdx]
       set hdr [lindex [dict get $hdrInfos headerParts] $hdrIdx]
       set isU16CmdKey true
+      set isU8CmdKey false
       switch [dict get $hdr hdrHandleType] {
       U -
       W -
       R -
-      S -
-      G {
+      S {
         error "unexpected hdrHandleType: [dict get $hdr hdrHandleType] in handleEncryptedPart!"
         return $::STRUCT_DISP_ERR_BAD_HANDLE_TYPE
       }
+      G -
       A {
         # got APList!
-#puts stderr "§el![dict get $hdr hdrExtraLgth]!enc![dict get $hdr hdrEncryption]!ht![dict get $hdr hdrHandleType]!§"
+        while {[dict get $received lgth] < [dict get $received totalLgth]} {
+puts stderr "§el![dict get $hdr hdrExtraLgth]!enc![dict get $hdr hdrEncryption]!ht![dict get $hdr hdrHandleType]!§"
+puts stderr 1
         if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 1}]} {
           # get the cmdKey, we get its type from the header sequence!
+puts stderr 2
+puts stderr "headerSequence![dict get $$hdrInfos headerSequence]!"
           switch [lindex [dict get $hdrInfos headerSequence] [dict get $hdrInfos seqIdx]] {
             STRUCT_DISP_U16_CMD_KEY {
+puts stderr "2a"
               set result [::structmsg dataView getUint16 [dict get $received fieldOffset] value]
               dict set received u16CmdKey [format "%c%c" [string range $value 0 0] [string range $value 1 1]]
               dict incr received fieldOffset 2
               dict lappend received partsFlags STRUCT_DISP_U16_CMD_KEY
               set isU16CmdKey true
 #puts stderr [format "§u16CmdKey!0x%04x!§" [dict get $received u16CmdKey]]
+puts stderr 3
               while {[dict get $received u16CmdKey] ne [dict get $hdr hdrU16CmdKey]} {
+puts stderr 4
                 dict incr hdrInfos currPartIdx 1
                 set result [nextFittingEntry 0 [dict get $received u16CmdKey]]
                 if {$result != $::STRUCT_MSG_ERR_OK} {
                   return $result
                 }
                 set hdr [lindex [dict get $hdrInfos headerParts] [dict get $hdrInfos currPartIdx]]
+puts stderr 5
               }
+puts stderr "found entry: [dict get $hdrInfos currPartIdx]!"
+::structmsg strucmsgDispatcher dumpHeaderParts $hdr
             }
             STRUCT_DISP_U8_CMD_KEY {
+puts stderr "5a"
               set result [::structmsg dataView getUint8 [dict get $received fieldOffset] value]
               set val [format "%c" $value]
               dict set received u8CmdKey $val
@@ -801,6 +819,7 @@ puts stderr "call:$fcnName!"
           }
           dict incr hdrInfos seqIdx 1
         } else {
+puts stderr 6
           if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 2}]} {
             # check if we have a cmdLgth
             switch [lindex [dict get $hdrInfos headerSequence] [dict get $hdrInfos seqIdx]] {
@@ -823,8 +842,10 @@ puts stderr "call:$fcnName!"
             }
             dict incr hdrInfos seqIdx 1
           }
+puts stderr 7
           # just get the bytes until totalLgth reached
           if {[dict get $received lgth] == [dict get $received totalLgth]} {
+puts stderr 8
     #ets_printf{"§not encrypted message completely receieved!%d!§", received->totalLgth}
           # check if we have a crc and the type of it
           # if we have a crc calculate it for the totalLgth
@@ -869,13 +890,19 @@ if {0} {
               return $result
             }
 }
+puts stderr 9
           }
+puts stderr 10
         }
+        dict incr received lgth 1
+        }
+puts stderr 11
       }
       default {
         return $::STRUCT_DISP_ERR_BAD_HANDLE_TYPE
       }
       }
+puts stderr 12
       return $::STRUCT_MSG_ERR_OK
     }
 
@@ -1018,12 +1045,20 @@ if {0} {
         dict set received lgth [expr {[dict get $received lgth] + 1}]
         ::structmsg dataView appendData $buffer $lgth
         if {[dict get $received lgth] == [dict get $hdrInfos headerStartLgth]} {
+puts stderr "hdrInfos!"
+::structmsg structmsgDispatcher dumpMsgHeaderInfos $hdrInfos
+
           set result [getHeaderIndexFromHeaderFields]
+          set hdrIdx [dict get $hdrInfos currPartIdx]
+puts stderr "hdrIdx!$hdrIdx!"
+          set hdr [lindex [dict get $hdrInfos headerParts] $hdrIdx]
+puts stderr "HDR!"
+::structmsg structmsgDispatcher dumpHeaderParts $hdr
         }
         if {[dict get $received lgth] > [dict get $hdrInfos headerStartLgth]} {
+          set hdrIdx [dict get $hdrInfos currPartIdx]
+          set hdr [lindex [dict get $hdrInfos headerParts] $hdrIdx]
           if {[lsearch [dict get $received partsFlags] STRUCT_DISP_IS_NOT_ENCRYPTED] >= 0} {
-            set hdrIdx [dict get $hdrInfos currPartIdx]
-            set hdr [lindex [dict get $hdrInfos headerParts] $hdrIdx]
             if {[dict get $hdr hdrEncryption] eq "N"} {
 puts stderr "§not encrypted message completely receieved![dict get $received totalLgth]!§"
               set result [handleNotEncryptedPart]
@@ -1033,23 +1068,63 @@ pdict $hdr
 error "partsFlags is not encrypted and hdrEncryption is E"
             }
           } else {
-            # eventually add the extraField to the headerLgth here!!
             if {[dict get $received lgth] == [expr {[dict get $hdrInfos headerStartLgth] + 1}]} {
+puts stderr "set extraStartLgth!"
+              # eventually add the extraField to the headerLgth here!!
               if {[dict get $hdr hdrExtraLgth] > 0} {
                 dict set hdrInfos extraStartLgth [dict get $hdr hdrExtraLgth]
+              } else {
+                dict set hdrInfos extraStartLgth 0
               }
             }
-            # just get the bytes until totalLgth reached
-            if {[dict get $received lgth] == [dict get $received totalLgth]} {
+            if {[dict get $hdr hdrEncryption] eq "E"} {
+              if {[dict get $received lgth] == [dict get $received totalLgth]} {
 puts stderr "§encrypted message completely receieved![dict get $received totalLgth]!§"
-              set result [handleEncryptedPart]
-              return $result
+                if {[lsearch [dict get $received partsFlags] STRUCT_DISP_IS_NOT_ENCRYPTED] >= 0} {
+                } else {
+puts stderr "seems to be an encrypted msg!"
+                  set myHeaderLgth [expr {[dict get $hdrInfos headerStartLgth] + [dict get $hdrInfos extraStartLgth]}]
+                  if {[dict get $hdr hdrEncryption] eq "E"} {
+                    set myHeader [string range $buffer 0 [expr {$myHeaderLgth - 1}]]
+                    set mlen [expr {$lgth - $myHeaderLgth}]
+                    set crypted [string range $buffer $myHeaderLgth end]
+puts stderr "cryptedLgth: [string length $crypted]!"
+                    set cryptKey "a1b2c3d4e5f6g7h8"
+                    set result [::structmsg structmsgDispatcher decryptMsg $crypted $mlen $cryptKey 16 $cryptKey 16 decrypted decryptedLgth]
+puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
+                    if {$result != $::STRUCT_MSG_ERR_OK} {
+puts stderr "decrypt error"
+                    }
+                    set buffer "${myHeader}${decrypted}"
+::structmsg structmsgData dumpBinary $buffer $lgth "decrypted"
+                  }
+                  dict set received lgth [dict get $hdrInfos headerStartLgth]
+                  set result [handleEncryptedPart]
+                  return $result
+                }
+              }
+            } else {
+puts stderr "partsFlags is encrypted and hdrEncryption is N\n"
             }
           }
         }
         incr idx
       }
       return $::STRUCT_MSG_ERR_OK
+    }
+    
+    # ================================= structmsgIdentifyReset ====================================
+    
+    proc structmsgIdentifyReset {} {
+      variable received
+
+      set result [::structmsg structmsgDispatcher resetMsgInfo received]
+      set hdrInfos [dict create]
+      set received [dict create]
+      dict set received buf ""
+      dict set received lgth 0
+      set dispFlags [list]
+      return $result
     }
     
     # ================================= structmsgIdentifyInit ====================================
