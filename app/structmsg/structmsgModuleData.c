@@ -88,29 +88,30 @@ static uint8_t bssStr2BssInfoId(uint8_t *fieldName, uint8_t *fieldId) {
   return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
 
-// ================================= websockeBinaryReceived ====================================
+// ================================= websocketBinaryReceived ====================================
 
-static void websockeBinaryReceived(void *arg, char *pdata, unsigned short len) {
+static void websocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned short len) {
   structmsgDispatcher_t *structmsgDispatcher;
   structmsgDispatcher_t *self;
   uint8_t result;
 
   structmsgDispatcher = (structmsgDispatcher_t *)arg;
   self = structmsgDispatcher;
-//ets_printf("websockeBinaryReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
+//ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
   result = self->resetMsgInfo(self, &self->received);
 //  checkErrOK(result);
+  self->wud = wud;
   result = structmsgDispatcher->handleReceivedPart(structmsgDispatcher, (uint8_t *)pdata, (uint8_t)len);
-//ets_printf("websockeBinaryReceived end result: %d\n", result);
+ets_printf("websocketBinaryReceived end result: %d\n", result);
 }
 
-// ================================= websockeTextReceived ====================================
+// ================================= websocketTextReceived ====================================
 
-static void websockeTextReceived(void *arg, char *pdata, unsigned short len) {
+static void websocketTextReceived(void *arg, void *wud, char *pdata, unsigned short len) {
   structmsgDispatcher_t *structmsgDispatcher;
 
   structmsgDispatcher = (structmsgDispatcher_t *)arg;
-//ets_printf("websockeTextReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
+//ets_printf("websocketTextReceived: len: %d dispatcher: %p\n", len, structmsgDispatcher);
 }
 
 // ================================= getModuleTableFieldValue ====================================
@@ -229,10 +230,10 @@ static uint8_t getModuleValue(structmsgDispatcher_t *self, uint16_t which, uint8
     *stringValue = structmsgWifiData.provisioningIPAddr;
     break;
   case MODULE_INFO_BINARY_CALL_BACK:
-    *numericValue = (int)structmsgWifiData.websockeBinaryReceived;
+    *numericValue = (int)structmsgWifiData.websocketBinaryReceived;
     break;
   case MODULE_INFO_TEXT_CALL_BACK:
-    *numericValue = (int)structmsgWifiData.websockeTextReceived;
+    *numericValue = (int)structmsgWifiData.websocketTextReceived;
     break;
   default:
     return STRUCT_DISP_ERR_BAD_MODULE_VALUE_WHICH;
@@ -427,8 +428,8 @@ static uint8_t setModuleValues(structmsgDispatcher_t *self) {
   structmsgModuleData.Reserve3[1] = 'Y';
   structmsgModuleData.Reserve3[2] = 'Z';
 
-  structmsgWifiData.websockeBinaryReceived = &websockeBinaryReceived;
-  structmsgWifiData.websockeTextReceived = &websockeTextReceived;
+  structmsgWifiData.websocketBinaryReceived = &websocketBinaryReceived;
+  structmsgWifiData.websocketTextReceived = &websocketTextReceived;
 
   self->bssScanInfos = &bssScanInfos;
 

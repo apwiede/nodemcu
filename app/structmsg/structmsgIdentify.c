@@ -616,24 +616,21 @@ ets_printf("need to encrypt message!%s\n", data);
     uint8_t ivlen;
     int encryptedLgth;
 
-self->structmsgData->dumpBinary(data, msgLgth, "DATA to encrypt");
     // encrypt encrypted message part (after header)
 cryptKey = "a1b2c3d4e5f6g7h8";
     mlen = self->structmsgData->totalLgth - self->structmsgData->headerLgth;
     ivlen = 16;
     klen = 16;
-ets_printf("toencrypt: total: %d header: %d\n", self->structmsgData->totalLgth, self->structmsgData->headerLgth);
     toCryptPtr = data + self->structmsgData->headerLgth;
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encrypted, &encryptedLgth);
     checkErrOK(result);
     c_memcpy(toCryptPtr, encrypted, encryptedLgth);
-self->structmsgData->dumpBinary(data, msgLgth, "DATA encrypted");
 ets_printf("crypted: len: %d!%s!\n", encryptedLgth, data);
     
   }
 ets_printf("ready to send Msg\n");
-//FIXME !! in case of call via callback need to decide which function to use for sending the message!!
-  
+  result = self->websocketSendData(self->wud, data, msgLgth, OPCODE_BINARY);
+ets_printf("Msg sent\n");
   result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
   return result;
 }

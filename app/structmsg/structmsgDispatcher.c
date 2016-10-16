@@ -481,30 +481,6 @@ static uint8_t dumpMsgParts(structmsgDispatcher_t *self, msgParts_t *msgParts) {
   return STRUCT_DISP_ERR_OK;
 }
 
-// ================================= BMsg ====================================
-
-static uint8_t BMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DISP_ERR_OK;
-}
-
-// ================================= IMsg ====================================
-
-static uint8_t IMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DISP_ERR_OK;
-}
-
-// ================================= MMsg ====================================
-
-static uint8_t MMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DISP_ERR_OK;
-}
-
-// ================================= defaultMsg ====================================
-
-static uint8_t defaultMsg(structmsgDispatcher_t *self) {
-  return STRUCT_DISP_ERR_OK;
-}
-
 #define checkErrWithResetOK(result) if(result != DATA_VIEW_ERR_OK) { dataView->data = saveData; dataView->lgth= saveLgth; return result; }
 
 // ================================= getMsgPtrFromMsgParts ====================================

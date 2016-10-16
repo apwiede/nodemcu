@@ -206,6 +206,7 @@ typedef struct buildMsgInfos {
   uint8_t buf[100];
 } buildMsgInfos_t;
 
+typedef struct websocketUserData websocketUserData_t;
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
 typedef uint8_t (* dumpHeaderParts_t)(structmsgDispatcher_t *self, headerParts_t *hdr);
@@ -225,6 +226,7 @@ typedef uint8_t (* getModuleValue_t)(structmsgDispatcher_t *self, uint16_t which
 typedef uint8_t (* getModuleTableFieldValue_t)(structmsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* websocketRunClientMode_t)(structmsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* websocketRunAPMode_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *payload, int size, int opcode);
 
 typedef uint8_t (* createDispatcher_t)(structmsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(structmsgDispatcher_t *self);
@@ -269,6 +271,7 @@ typedef struct structmsgDispatcher {
   buildMsgInfos_t buildMsgInfos;
   uint8_t tableRow;
   uint8_t tableCol;
+  void *wud;
   
   uint8_t numMsgHeaders;
   uint8_t maxMsgHeaders;
@@ -329,6 +332,7 @@ typedef struct structmsgDispatcher {
 
   websocketRunClientMode_t websocketRunClientMode;
   websocketRunAPMode_t websocketRunAPMode;
+  websocketSendData_t websocketSendData;
 
   dumpHeaderParts_t dumpHeaderParts;
   dumpMsgHeaderInfos_t dumpMsgHeaderInfos;

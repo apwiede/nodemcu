@@ -55,14 +55,6 @@
 #include "structmsg.h"
 
 
-enum websocket_opcode {
-  OPCODE_TEXT = 1,
-  OPCODE_BINARY = 2,
-  OPCODE_CLOSE = 8,
-  OPCODE_PING = 9,
-  OPCODE_PONG = 10,
-};
-
 #define TCP ESPCONN_TCP
 
 typedef struct socketInfo {
@@ -122,11 +114,9 @@ typedef struct websocketUserData {
   char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
   char *curr_url; // that is url which has been provided in the received data
   structmsgDispatcher_t *structmsgDispatcher;
-  websockeBinaryReceived_t websocketBinaryReceived;
-  websockeTextReceived_t websocketTextReceived;
+  websocketBinaryReceived_t websocketBinaryReceived;
+  websocketTextReceived_t websocketTextReceived;
 } websocketUserData_t;
-
-static uint8_t websocket_writeData( const char *payload, int size, websocketUserData_t *wud, int opcode);
 
 #define BASE64_INVALID '\xff'
 #define BASE64_PADDING '='
@@ -136,8 +126,49 @@ static uint8_t websocket_writeData( const char *payload, int size, websocketUser
 
 static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-typedef void (* websockeBinaryReceived_t)(void *arg, char *pdata, unsigned short len);
-typedef void (* websockeTextReceived_t)(void *arg, char *pdata, unsigned short len);
+typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+
+// ============================ websocketSendData =======================
+
+static uint8_t websocketSendData(websocketUserData_t *wud, const char *payload, int size, int opcode)
+{
+  uint8_t hdrBytes[4]; // we have either 2 or 4 bytes depending on length of message
+  int hdrLgth;
+  int fsize;
+  uint8_t*buff;
+  int i;
+
+ets_printf("websocketSendData: size: %d\n", size);
+  hdrLgth = 2;
+  hdrBytes[0] = 0x80; //set first bit
+  hdrBytes[0] |= opcode; //frame->opcode; //set op code
+  if (size < 126) {
+    hdrBytes[1] = size;
+  } else {
+    if (size < SSL_BUFFER_SIZE - sizeof(hdrBytes)) {
+      hdrLgth += 2;
+      hdrBytes[1] = 126;
+      hdrBytes[2] = (size >> 8) & 0xFF;
+      hdrBytes[3] = size & 0xFF;
+    } else {
+      return WEBSOCKET_ERR_TOO_MUCH_DATA;
+    }
+  }
+  fsize = size + hdrLgth;
+  buff = os_malloc(fsize);
+  if (buff == NULL) {
+    return WEBSOCKET_ERR_OUT_OF_MEMORY;
+  }
+  for (i = 0; i < hdrLgth; i++) {
+    buff[i] = hdrBytes[i];
+  }
+
+  os_memcpy(&buff[hdrLgth], (uint8_t *)payload, size);
+  espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
+  os_free(buff);
+  return WEBSOCKET_ERR_OK;
+}
 
 // ============================ websocket_parse =========================================
 
@@ -162,7 +193,7 @@ static int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char 
   case OPCODE_CLOSE:
     break;
   case OPCODE_PING:
-    websocket_writeData(" ", 1, wud, OPCODE_PONG);
+    websocketSendData(wud, " ", 1, OPCODE_PONG);
     return WEBSOCKET_ERR_OK;
     break;
   case OPCODE_PONG:
@@ -215,10 +246,10 @@ for (int i = 0; i < size; i++) {
   switch (opcode) {
   case OPCODE_TEXT:
 ets_printf("cb text\n");
-    wud->websocketTextReceived(wud->structmsgDispatcher, recv_data, size);
+    wud->websocketTextReceived(wud->structmsgDispatcher, wud, recv_data, size);
     break;
   case OPCODE_BINARY:
-    wud->websocketBinaryReceived(wud->structmsgDispatcher, recv_data, size);
+    wud->websocketBinaryReceived(wud->structmsgDispatcher, wud, recv_data, size);
     break;
   }
   *resData = recv_data;
@@ -265,46 +296,6 @@ static uint8_t *toBase64 ( const uint8_t *msg, size_t *len){
   *q = '\0';
   *len = q - out;
   return out;
-}
-
-// ============================ websocket_writeData =======================
-
-static uint8_t websocket_writeData( const char *payload, int size, websocketUserData_t *wud, int opcode)
-{
-  uint8_t hdrBytes[4]; // we have either 2 or 4 bytes depending on length of message
-  int hdrLgth;
-  int fsize;
-  uint8_t*buff;
-  int i;
-
-  hdrLgth = 2;
-  hdrBytes[0] = 0x80; //set first bit
-  hdrBytes[0] |= opcode; //frame->opcode; //set op code
-  if (size < 126) {
-    hdrBytes[1] = size;
-  } else {
-    if (size < SSL_BUFFER_SIZE - sizeof(hdrBytes)) {
-      hdrLgth += 2;
-      hdrBytes[1] = 126;
-      hdrBytes[2] = (size >> 8) & 0xFF;
-      hdrBytes[3] = size & 0xFF;
-    } else {
-      return WEBSOCKET_ERR_TOO_MUCH_DATA;
-    }
-  }
-  fsize = size + hdrLgth;
-  buff = os_malloc(fsize);
-  if (buff == NULL) {
-    return WEBSOCKET_ERR_OUT_OF_MEMORY;
-  }
-  for (i = 0; i < hdrLgth; i++) {
-    buff[i] = hdrBytes[i];
-  }
-
-  os_memcpy(&buff[hdrLgth], (uint8_t *)payload, size);
-  espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
-  os_free(buff);
-  return WEBSOCKET_ERR_OK;
 }
 
 
@@ -595,10 +586,10 @@ wud->urls[1] = "/getapdeflist";
 wud->num_urls = 2;
   result = self->getModuleValue(self, MODULE_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
-  wud->websocketBinaryReceived = (websockeBinaryReceived_t)numericValue;
+  wud->websocketBinaryReceived = (websocketBinaryReceived_t)numericValue;
   result = self->getModuleValue(self, MODULE_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
-  wud->websocketTextReceived = (websockeTextReceived_t)numericValue;
+  wud->websocketTextReceived = (websocketTextReceived_t)numericValue;
   wud->structmsgDispatcher = self;
 
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
@@ -718,6 +709,7 @@ uint8_t structmsgWebsocketInit(structmsgDispatcher_t *self) {
 
   self->websocketRunClientMode = &websocketRunClientMode;
   self->websocketRunAPMode = &websocketRunAPMode;
+  self->websocketSendData = websocketSendData;
 ets_printf("call webscoketRunAPMode\n");
   result = websocketRunAPMode(self);
   ets_printf("webscoketRunAPMode result: %d\n", result);

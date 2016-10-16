@@ -103,6 +103,14 @@
 #define BSS_INFO_FREQ_OFFSET  9
 #define BSS_INFO_FREQ_CAL_VAL 10
 
+enum websocket_opcode {
+  OPCODE_TEXT = 1,
+  OPCODE_BINARY = 2,
+  OPCODE_CLOSE = 8,
+  OPCODE_PING = 9,
+  OPCODE_PONG = 10,
+};
+
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
 typedef struct bssScanInfo {
@@ -158,8 +166,8 @@ typedef struct structmsgModuleData {
   uint8_t Reserve3[3];
 } structmsgModuleData_t;
 
-typedef void (* websockeBinaryReceived_t)(void *arg, char *pdata, unsigned short len);
-typedef void (* websockeTextReceived_t)(void *arg, char *pdata, unsigned short len);
+typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 typedef void (* getAPList_t)(structmsgData_t *self);
 
 typedef struct structmsgWifiData {
@@ -167,6 +175,6 @@ typedef struct structmsgWifiData {
   uint8_t provisioningSsid[33];
   uint16_t provisioningPort;
   uint8_t provisioningIPAddr[16];
-  websockeBinaryReceived_t websockeBinaryReceived;
-  websockeTextReceived_t websockeTextReceived;
+  websocketBinaryReceived_t websocketBinaryReceived;
+  websocketTextReceived_t websocketTextReceived;
 } structmsgWifiData_t;
