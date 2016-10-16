@@ -315,6 +315,7 @@ static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
   myDataView = newDataView();
   checkAllocOK(myDataView);
   fieldOffset = 0;
+  idx = 0;
   while(idx < numEntries) {
     result = self->readLine(self, &buffer, &lgth);
     checkErrOK(result);
@@ -322,10 +323,12 @@ static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
       return STRUCT_DISP_ERR_TOO_FEW_FILE_LINES;
     }
     hdr = &hdrInfos->headerParts[idx];
-    seqIdx2 = 0;
-    while (seqIdx2 < seqIdx) {
-      hdr->fieldSequence[seqIdx2] = hdrInfos->headerSequence[seqIdx2];
-      seqIdx2++;
+    if (idx == 0) {
+      seqIdx2 = 0;
+      while (seqIdx2 < seqIdx) {
+        hdr->fieldSequence[seqIdx2] = hdrInfos->headerSequence[seqIdx2];
+        seqIdx2++;
+      }
     }
     hdr->hdrFlags = 0;
     myDataView->data = buffer;
@@ -594,6 +597,8 @@ static uint8_t buildMsg(structmsgDispatcher_t *self) {
   int result;
   int msgLgth;
   uint8_t *data;
+  int defLgth;
+  uint8_t *defData;
 
   self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos;
   result = self->createMsgFromLines(self, self->buildMsgInfos.parts, self->buildMsgInfos.numEntries, self->buildMsgInfos.numRows, self->buildMsgInfos.type);
@@ -606,31 +611,70 @@ static uint8_t buildMsg(structmsgDispatcher_t *self) {
   checkErrOK(result);
   result = self->structmsgData->getMsgData(self->structmsgData, &data, &msgLgth);
   checkErrOK(result);
+
+result = self->structmsgData->prepareDef(self->structmsgData);
+checkErrOK(result);
+result = self->structmsgData->getDef(self->structmsgData, &defData, &defLgth);
+ets_printf("getDef result: %d defLgth: %d defData: %s!\n", result, defLgth, defData);
+checkErrOK(result);
+
+    uint8_t headerLgth = 6;
   if (self->buildMsgInfos.partsFlags & STRUCT_DISP_IS_ENCRYPTED) {
 ets_printf("need to encrypt message!%s\n", data);
     uint8_t *toCryptPtr;
+    uint8_t *defToCryptPtr;
     uint8_t *cryptKey;
-    uint8_t *encrypted;;
+    uint8_t *defEncrypted;
+    uint8_t deflen;
+    uint8_t *encrypted;
     uint8_t mlen;
     uint8_t klen;
     uint8_t ivlen;
+    int defEncryptedLgth;
     int encryptedLgth;
 
     // encrypt encrypted message part (after header)
 cryptKey = "a1b2c3d4e5f6g7h8";
-    mlen = self->structmsgData->totalLgth - self->structmsgData->headerLgth;
     ivlen = 16;
     klen = 16;
+
+    deflen = defLgth - self->structmsgData->headerLgth;
+ets_printf("defLgth!%d!deflen: %d, headerLgth!%d\n", defLgth, deflen, self->structmsgData->headerLgth);
+    defToCryptPtr = defData + self->structmsgData->headerLgth;
+    result = self->encryptMsg(defToCryptPtr, deflen, cryptKey, klen, cryptKey, ivlen, &defEncrypted, &defEncryptedLgth);
+    checkErrOK(result);
+    c_memcpy(defToCryptPtr, defEncrypted, defEncryptedLgth);
+self->structmsgData->dumpBinary(defData, 10, "defdata");
+ets_printf("defEncrypted: len: %d!%s!\n", defEncryptedLgth, defData);
+
+    headerLgth = self->structmsgData->headerLgth;
+    mlen = self->structmsgData->totalLgth - headerLgth;
     toCryptPtr = data + self->structmsgData->headerLgth;
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encrypted, &encryptedLgth);
     checkErrOK(result);
     c_memcpy(toCryptPtr, encrypted, encryptedLgth);
 ets_printf("crypted: len: %d!%s!\n", encryptedLgth, data);
     
-  }
+  uint8_t totalLgth = 6+headerLgth+defEncryptedLgth+headerLgth+encryptedLgth;
+  uint8_t totalData [totalLgth];
+  char *cp = totalData;
+ets_printf("totalLgth-2: 0x%04x, defLgth: 0x%04x stotal: 0x%04x\n", totalLgth, defLgth, self->structmsgData->totalLgth);
+  cp[0] = (totalLgth >> 8) & 0xFF;
+  cp[1] = totalLgth & 0xFF;
+  cp[2] = ((headerLgth+defEncryptedLgth) >> 8) & 0xFF;
+  cp[3] = (headerLgth+defEncryptedLgth) & 0xFF;
+  cp[4] = ((headerLgth+encryptedLgth) >> 8) & 0xFF;
+  cp[5] = (headerLgth+encryptedLgth) & 0xFF;
+ets_printf("cp: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5]);
+self->structmsgData->dumpBinary((uint8_t *)cp, 6, "LENGTH");
+  c_memcpy(cp+6, defData, headerLgth+defEncryptedLgth);
+  c_memcpy(cp+6+headerLgth+defEncryptedLgth, data, headerLgth+encryptedLgth);
 ets_printf("ready to send Msg\n");
-  result = self->websocketSendData(self->wud, data, msgLgth, OPCODE_BINARY);
+  result = self->websocketSendData(self->wud, cp, totalLgth, OPCODE_BINARY);
 ets_printf("Msg sent\n");
+  } else {
+    // FIXME !! need code here
+  }
   result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
   return result;
 }
@@ -746,6 +790,8 @@ static uint8_t prepareEncryptedAnswer(structmsgDispatcher_t *self, msgParts_t *p
   uint8_t numEntries;
   char *endPtr;
   uint8_t lgth;
+  int defLgth;
+  uint8_t *defData;
   int msgLgth;
   uint8_t *data;
   uint8_t buf[100];
@@ -782,6 +828,16 @@ return STRUCT_MSG_ERR_OK;
 //ets_printf("§heap3: %d§", system_get_free_heap_size());
   result = structmsgData->getMsgData(structmsgData, &data, &msgLgth);
   checkErrOK(result);
+
+ets_printf("prepareDef\n");
+result = self->structmsgData->prepareDef(self->structmsgData);
+ets_printf("prepareDef result: %d\n", result);
+checkErrOK(result);
+result = self->structmsgData->getDef(self->structmsgData, &defData, &defLgth);
+ets_printf("defLgth: %d defData: %s!\n", defLgth, defData);
+checkErrOK(result);
+self->structmsgData->dumpBinary(defData, defLgth, "defData");
+
   result = self->typeRSendAnswer(self, data, msgLgth);
   self->resetMsgInfo(self, parts);
   return STRUCT_DISP_ERR_OK;

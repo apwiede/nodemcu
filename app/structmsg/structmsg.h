@@ -63,7 +63,7 @@ extern "C" {
 #define STRUCT_MSG_FIELD_IS_SET   (1 << 0)
 
 #define STRUCT_DEF_NUM_DEF_FIELDS 15
-#define STRUCT_DEF_CMD_KEY 0xFFFF
+#define STRUCT_DEF_CMD_KEY 0x5959
 
 #define STRUCT_DEF_TO_DATA        (1 << 0)
 #define STRUCT_DEF_FROM_DATA      (1 << 1)
