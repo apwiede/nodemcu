@@ -49,747 +49,920 @@ namespace eval structmsg {
   namespace eval def {
     namespace ensemble create
       
+    variable strutcmsgData
+
     namespace export initFieldTypeDefines initSpecialFieldNames getFieldNameId
     namespace export getFieldTypeId createDefinition addFieldDefinition deleteFieldDefinition
-    namespace export deleteFieldDefinitions dumpFieldDefinition encryptDefinition decryptDefinition
-    namespace export encodeFieldDefinition decodeFieldDefinition getIdFieldNameStr getFieldTypeStr
-    namespace export createMsgFromDefinition getDefinitionNormalFieldNames getDefinitionTableFieldNames
-    namespace expor getDefinitionNumTableRows decryptGetDefinitionName setCryptedDefinition
-    namespace export getDefinitionNumTableRowFields getDefinitionFieldInfo getDefinitionTableFieldInfo
 
-    # ============================= initFieldTypeDefines ========================
-    
-    proc initFieldTypeDefines {} {
-      set fieldTypeDefinesDict [dict create]
-      dict set fieldTypeDefinesDict "uint8_t"    1
-      dict set fieldTypeDefinesDict "int8_t"     2
-      dict set fieldTypeDefinesDict "uint16_t"   3
-      dict set fieldTypeDefinesDict "int16_t"    4
-      dict set fieldTypeDefinesDict "uint32_t"   5
-      dict set fieldTypeDefinesDict "int32_t"    6
-      dict set fieldTypeDefinesDict "uint8_t*"   7
-      dict set fieldTypeDefinesDict "int8_t*"    8
-      dict set fieldTypeDefinesDict "uint16_t*"  9
-      dict set fieldTypeDefinesDict "int16_t*"   10
-      dict set fieldTypeDefinesDict "uint32_t*"  11
-      dict set fieldTypeDefinesDict "int32_t*"   12
-      set ::structmsg(fieldTypeDefines) $fieldTypeDefinesDict
-      set fieldTypeIdsDict [dict create]
-      dict set fieldTypeIdsDict 1  "uint8_t"
-      dict set fieldTypeIdsDict 2  "int8_t"
-      dict set fieldTypeIdsDict 3  "uint16_t"
-      dict set fieldTypeIdsDict 4  "int16_t"
-      dict set fieldTypeIdsDict 5  "uint32_t"
-      dict set fieldTypeIdsDict 6  "int32_t"
-      dict set fieldTypeIdsDict 7  "uint8_t*"
-      dict set fieldTypeIdsDict 8  "int8_t*"
-      dict set fieldTypeIdsDict 9  "uint16_t*"
-      dict set fieldTypeIdsDict 10 "int16_t*"
-      dict set fieldTypeIdsDict 11 "uint32_t*"
-      dict set fieldTypeIdsDict 12 "int32_t*"
-      set ::structmsg(fieldTypeIds) $fieldTypeIdsDict
-    }
-    
-    # ============================= initSpecialFieldNames ========================
-    
-    proc initSpecialFieldNames {} {
-      set specialFieldNamesDict [dict create]
-      dict set specialFieldNamesDict "@src"            255
-      dict set specialFieldNamesDict "@dst"            254
-      dict set specialFieldNamesDict "@targetCmd"      253
-      dict set specialFieldNamesDict "@totalLgth"      252
-      dict set specialFieldNamesDict "@cmdKey"         251
-      dict set specialFieldNamesDict "@cmdLgth"        250
-      dict set specialFieldNamesDict "@randomNum"      249
-      dict set specialFieldNamesDict "@sequenceNum"    248
-      dict set specialFieldNamesDict "@filler"         247
-      dict set specialFieldNamesDict "@crc"            246
-      dict set specialFieldNamesDict "@id"             245
-      dict set specialFieldNamesDict "@tablerows"      244
-      dict set specialFieldNamesDict "@tablerowfields" 243
-      dict set specialFieldNamesDict "@low"            242
-      set ::structmsg(specialFieldNames) $specialFieldNamesDict
-      set specialFieldIdsDict [dict create]
-      dict set specialFieldIdsDict 255 "@src"
-      dict set specialFieldIdsDict 254 "@dst"
-      dict set specialFieldIdsDict 253 "@targetCmd"
-      dict set specialFieldIdsDict 252 "@totalLgth"
-      dict set specialFieldIdsDict 251 "@cmdKey"
-      dict set specialFieldIdsDict 250 "@cmdLgth"
-      dict set specialFieldIdsDict 249 "@randomNum"
-      dict set specialFieldIdsDict 248 "@sequenceNum"
-      dict set specialFieldIdsDict 247 "@filler"
-      dict set specialFieldIdsDict 246 "@crc"
-      dict set specialFieldIdsDict 245 "@id"
-      dict set specialFieldIdsDict 244 "@tablerows"
-      dict set specialFieldIdsDict 243 "@tablerowfields"
-      dict set specialFieldIdsDict 242 "@low"
-      set ::structmsg(specialFieldIds) $specialFieldIdsDict
-    }
-    
-    # ============================= getFieldTypeStr ========================
-    
-    proc getFieldTypeStr {id fieldTypeVar} {
-      upvar $fieldTypeVar fieldType
-    
-      set fieldTypes $::structmsg(fieldTypeDefines)
-      foreach name [dict keys $fieldTypes] {
-        set fieldId [dict get $fieldTypes $name]
-        if {$fieldId == $id} {
-          set fieldType $name
-          return $::STRUCT_MSG_ERR_OK;
+    # ================================= dumpDefDefinitions ====================================
+
+    proc dumpDefDefinitions {fieldInfo indent2 fieldIdx names} {
+      variable strutcmsgData
+
+      valueIdx = 0;
+      while {valueIdx < fieldInfo->fieldLgth / sizeof(uint16_t}) {
+        result = self->structmsgDefinitionDataView->getFieldValue{self->structmsgDefinitionDataView, fieldInfo, &fieldNameId, &stringValue, valueIdx++};
+        result = self->structmsgDefinitionDataView->getFieldValue{self->structmsgDefinitionDataView, fieldInfo, &fieldTypeId, &stringValue, valueIdx++};
+        result = self->structmsgDefinitionDataView->getFieldValue{self->structmsgDefinitionDataView, fieldInfo, &fieldLgth, &stringValue, valueIdx++};
+        result = self->structmsgDataView->dataView->getFieldTypeStrFromId{self->structmsgDataView->dataView, fieldTypeId, &fieldTypeStr};
+        checkErrOK{result};
+        if {fieldNameId > STRUCT_MSG_SPEC_FIELD_LOW} {
+          result = self->structmsgDataView->getFieldNameStrFromId{self->structmsgDataView, fieldNameId, &fieldNameStr};
+          checkErrOK{result};
+        } else {
+          fieldNameStr = names+fieldNameId;
         }
+        ets_printf{"        defIdx: %3d fieldName: %3d %-20s fieldType: %3d %-8s fieldLgth: %5d\r\n", valueIdx/3, fieldNameId, fieldNameStr, fieldTypeId, fieldTypeStr, fieldLgth};
       }
-      return $::STRUCT_MSG_ERR_BAD_FIELD_TYPE
+      return DATA_VIEW_ERR_OK;
     }
-    
-    # ============================= getFieldNameId ========================
-    
-    proc getFieldNameId {fieldName id_var incrVal} {
-      upvar $id_var id
-    
-      set fieldNameDefinitionsDict $::structmsg(fieldNameDefinitions)
-      switch -glob -- $fieldName {
-        "@*" {
-          if {![dict exists $::structmsg(specialFieldNames) $fieldName]} {
-            error "bad special field name: $fieldName!"
+
+    # ================================= dumpDefFieldValue ====================================
+
+    proc dumpDefFieldValue {fieldInfo indent2 fieldIdx} {
+      variable strutcmsgData
+
+      result = self->structmsgDefinitionDataView->getFieldValue{self->structmsgDefinitionDataView, fieldInfo, &numericValue, &stringValue, fieldIdx};
+      checkErrOK{result};
+      switch {fieldInfo->fieldTypeId} {
+      case DATA_VIEW_FIELD_INT8_T:
+        ets_printf{"      %svalue: 0x%02x %d\n", indent2, numericValue & 0xFF, numericValue};
+        break;
+      case DATA_VIEW_FIELD_UINT8_T:
+        ets_printf{"      %svalue: 0x%02x %d\n", indent2, numericValue & 0xFF, numericValue & 0xFF};
+        break;
+      case DATA_VIEW_FIELD_INT16_T:
+        ets_printf{"      %svalue: 0x%04x %d\n", indent2, numericValue & 0xFFFF, numericValue};
+        break;
+      case DATA_VIEW_FIELD_UINT16_T:
+        ets_printf{"      %svalue: 0x%04x %d\n", indent2, numericValue & 0xFFFF, numericValue & 0xFFFF};
+        break;
+      case DATA_VIEW_FIELD_INT32_T:
+        ets_printf{"      %svalue: 0x%08x %d\n", indent2, numericValue & 0xFFFFFFFF, numericValue};
+        break;
+      case DATA_VIEW_FIELD_UINT32_T:
+        ets_printf{"      %svalue: 0x%08x %d\n", indent2, numericValue & 0xFFFFFFFF, numericValue & 0xFFFFFFFF};
+        break;
+      case DATA_VIEW_FIELD_INT8_VECTOR:
+        valueIdx = 0;
+        ets_printf{"      %svalues:", indent2};
+        while {valueIdx < fieldInfo->fieldLgth} {
+          ch = stringValue[valueIdx];
+          ets_printf{"        %sidx: %d value: %c 0x%02x\n", indent2, valueIdx, (char}ch, (uint8_t)(ch & 0xFF));
+          valueIdx++;
+        }
+        ets_printf{"\n"};
+        break;
+      case DATA_VIEW_FIELD_UINT8_VECTOR:
+        valueIdx = 0;
+        ets_printf{"      %svalues:\n", indent2};
+        while {valueIdx < fieldInfo->fieldLgth} {
+          uch = stringValue[valueIdx];
+          ets_printf{"        %sidx: %d value: %c 0x%02x\n", indent2, valueIdx, (char}uch, (uint8_t)(uch & 0xFF));
+          valueIdx++;
+        }
+        break;
+      case DATA_VIEW_FIELD_INT16_VECTOR:
+        valueIdx = 0;
+        ets_printf{"      %svalues:", indent2};
+        while {valueIdx < fieldInfo->fieldLgth/sizeof(int16_t}) {
+          result = self->structmsgDefinitionDataView->dataView->getInt16{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset+valueIdx*sizeof(int16_t}, &sh);
+          checkErrOK{result};
+          ets_printf{"        %sidx: %d value: 0x%04x\n", indent2, valueIdx, sh};
+          valueIdx++;
+        }
+        ets_printf{"\n"};
+        break;
+      case DATA_VIEW_FIELD_UINT16_VECTOR:
+        valueIdx = 0;
+        ets_printf{"      %svalues:\n", indent2};
+        while {valueIdx < fieldInfo->fieldLgth/sizeof(uint16_t}) {
+          result = self->structmsgDefinitionDataView->getFieldValue{self->structmsgDefinitionDataView, fieldInfo, &numericValue, &stringValue, valueIdx};
+          checkErrOK{result};
+          ets_printf{"        %sidx: %d value: 0x%04x\n", indent2, valueIdx, (uint16_t}(numericValue & 0xFFFF));
+          valueIdx++;
+        }
+        break;
+#ifdef NOTDEF
+      case DATA_VIEW_FIELD_INT32_VECTOR:
+        valueIdx = 0;
+        ets_printf{"      %svalues:", indent2};
+        while {valueIdx < fieldInfo->fieldLgth} {
+          val = fieldInfo->value.int32Vector[valueIdx];
+          ets_printf{"        %sidx: %d value: 0x%08x\n", indent2, valueIdx, (int32_t}(val & 0xFFFFFFFF));
+          valueIdx++;
+        }
+        ets_printf{"\n"};
+        break;
+      case DATA_VIEW_FIELD_UINT32_VECTOR:
+        valueIdx = 0;
+        ets_printf{"      %svalues:\n", indent2};
+        while {valueIdx < fieldInfo->fieldLgth} {
+          uval = fieldInfo->value.uint32Vector[valueIdx];
+          ets_printf{"        %sidx: %d value: 0x%08x\n", indent2, valueIdx, (uint32_t}(uval & 0xFFFFFFFF));
+          valueIdx++;
+        }
+        break;
+#endif
+      }
+      return DATA_VIEW_ERR_OK;
+    }
+
+    # ============================= dumpDefFields ========================
+
+    proc  dumpDefFields {} {
+      variable strutcmsgData
+
+      numEntries = self->numDefFields;
+      ets_printf{"  defHandle: %s\r\n", self->handle};
+      ets_printf{"    numDefFields: %d\r\n", numEntries};
+      idx = 0;
+      while {idx < numEntries} {
+        fieldInfo = &self->defFields[idx];
+        result = self->structmsgDataView->dataView->getFieldTypeStrFromId{self->structmsgDataView->dataView, fieldInfo->fieldTypeId, &fieldTypeStr};
+        checkErrOK{result};
+        result = self->structmsgDataView->getFieldNameStrFromId{self->structmsgDataView, fieldInfo->fieldNameId, &fieldNameStr};
+        checkErrOK{result};
+        ets_printf{"      idx: %d fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d \r\n", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset};
+        if {fieldInfo->fieldFlags & STRUCT_MSG_FIELD_IS_SET} {
+          if {fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_DEFINITIONS} {
+            result = dumpDefDefinitions{self, fieldInfo, "  ", 0, stringValue};
+            checkErrOK{result};
           } else {
-            set id [dict get $::structmsg(specialFieldNames) $fieldName]
+            result = dumpDefFieldValue{self, fieldInfo, "  ", 0};
+            checkErrOK{result};
+          }
+          if {fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES} {
+            result = self->structmsgDefinitionDataView->getFieldValue{self->structmsgDefinitionDataView, fieldInfo, &numericValue, &stringValue, 0};
           }
         }
-        default {
-          set firstFreeEntry [list]
-          set firstFreeEntryIdx 0
-          set numDefinitions [dict get $::structmsg(fieldNameDefinitions) numDefinitions]
-          if {$numDefinitions > 0} {
-            # find fieldName
-            set nameIdx 0
-            set definitions [dict get $::structmsg(fieldNameDefinitions) definitions]
-            foreach entry $definitions {
-              if {[dict get $entry fieldName] eq $fieldName} {
-                if {$incrVal < 0} {
-                  if {[dict get $entry refCnt] > 0} {
-                    dict set entry refCnt [expr {[dict get $entry refCnt] - 1}]
-                  }
-                  if {[dict get $entry refCnt] == 0} {
-                    dict set entry id $::STRUCT_MSG_FREE_FIELD_ID
-                    dict set entry fieldName ""
-                  }
-                } else {
-                  if {$incrVal > 0} {
-                    dict set entry refCnt [expr {[dict get $entry refCnt] + 1}]
-                  } else {
-                    # just get the entry, do not modify
-                  }
-                }
-                set id [dict get $entry id]
-                return $::STRUCT_MSG_ERR_OK
-              }
-              if {($incrVal == $::STRUCT_MSG_INCR) && ([dict get $entry id] eq $::STRUCT_MSG_FREE_FIELD_ID) && ($firstFreeEntry eq "")} {
-                dict set firstFreeEntry id [expr {$nameIdx + 1}]
-              }
-              incr nameIdx
+        idx++;
+      }
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= addDefField ========================
+
+    proc addDefField {fieldNameId fieldTypeId fieldLgth} {
+      variable strutcmsgData
+
+      if {self->numDefFields >= STRUCT_DEF_NUM_DEF_FIELDS} {
+        return STRUCT_MSG_ERR_TOO_MANY_FIELDS;
+      }
+      defFieldInfo = &self->defFields[self->numDefFields];
+      defFieldInfo->fieldNameId = fieldNameId;
+      defFieldInfo->fieldTypeId = fieldTypeId;
+      defFieldInfo->fieldLgth = fieldLgth;
+      defFieldInfo->fieldOffset = self->defFieldOffset;
+      self->defFieldOffset += fieldLgth;
+      self->numDefFields++;
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= getDefFieldValue ========================
+
+    proc getDefFieldValue {fieldNameId valueVar fieldIdx} {
+      variable strutcmsgData
+      upvar $valueVar value
+
+      if {(self->flags & STRUCT_DEF_IS_INITTED} == 0) {
+        return STRUCT_DEF_ERR_NOT_YET_INITTED;
+      }
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= setDefFieldValue ========================
+
+    proc  setDefFieldValue {fieldNameId value fieldIdx} {
+      variable strutcmsgData
+
+      found = false;
+      if {(self->flags & STRUCT_DEF_IS_INITTED} == 0) {
+        return STRUCT_DEF_ERR_NOT_YET_INITTED;
+      }
+      idx = 0;
+      numEntries = self->numDefFields;
+      while {idx < numEntries} {
+        fieldInfo = &self->defFields[idx];
+        if {fieldNameId == fieldInfo->fieldNameId} {
+          result = self->structmsgDefinitionDataView->setFieldValue{self->structmsgDefinitionDataView, fieldInfo, numericValue, stringValue, fieldIdx};
+          checkErrOK{result};
+          fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+          found = true;
+          break;
+        }
+        idx++;
+      }
+      if {!found} {
+ets_printf{"fieldNameId: %d found: %d\n", fieldNameId, found};  
+        return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+      }
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= addDefFields ========================
+
+    proc addDefFields {numNormFields normNamesSize definitionsSize direction} {
+      variable strutcmsgData
+
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_DST, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_SRC, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      headerLgth = self->defFieldOffset;
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_CMD_KEY, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_CMD_LGTH, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_RANDOM_NUM, DATA_VIEW_FIELD_UINT32_T, 4};
+      checkErrOK{result};
+      if {direction == STRUCT_DEF_FROM_DATA} {
+        result = self->structmsgDefinitionDataView->dataView->getUint8{self->structmsgDefinitionDataView->dataView, self->defFieldOffset, &numNormEntries};
+        checkErrOK{result};
+        numNormFields = numNormEntries;
+        self->defNumNormFields = numNormFields;
+      }
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS, DATA_VIEW_FIELD_UINT8_T, 1};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, DATA_VIEW_FIELD_UINT16_VECTOR, numNormFields*sizeof(uint16});
+      checkErrOK{result};
+      if {direction == STRUCT_DEF_FROM_DATA} {
+        result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, self->defFieldOffset, &normNamesSize};
+        checkErrOK{result};
+        self->defNormNamesSize = normNamesSize;
+      }
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES, DATA_VIEW_FIELD_UINT8_VECTOR, normNamesSize};
+      checkErrOK{result};
+      if {direction == STRUCT_DEF_FROM_DATA} {
+        result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, self->defFieldOffset, &definitionsSize};
+        checkErrOK{result};
+        self->defDefinitionsSize = definitionsSize;
+      }
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, DATA_VIEW_FIELD_UINT16_VECTOR, definitionsSize};
+      checkErrOK{result};
+        fillerLgth = 0;
+        crcLgth = 2;
+        myLgth = self->defFieldOffset + crcLgth - headerLgth;
+        while {(myLgth % 16} != 0) {
+          myLgth++;
+          fillerLgth++;
+        }
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_FILLER, DATA_VIEW_FIELD_UINT8_VECTOR, fillerLgth};
+      checkErrOK{result};
+      result = addDefField{self, STRUCT_MSG_SPEC_FIELD_CRC, DATA_VIEW_FIELD_UINT16_T, 2};
+      checkErrOK{result};
+      self->flags |= STRUCT_DEF_IS_INITTED;
+      if {direction == STRUCT_DEF_TO_DATA} {
+        self->structmsgDefinitionDataView->dataView->data = os_zalloc{self->defFieldOffset};
+        checkAllocOK{self->structmsgDefinitionDataView->dataView->data};
+      }
+      self->structmsgDefinitionDataView->dataView->lgth = self->defFieldOffset;
+      self->defTotalLgth = self->defFieldOffset;
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= setStaticDefFields ========================
+
+    proc setStaticDefFields {numNormFields normNamesSize normNamesOffsets definitionsSize} {
+      variable strutcmsgData
+
+    # FIXME src and dst are dummy values for now!!
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DST, 16640, NULL, 0};
+      checkErrOK{result};
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_SRC, 22272, NULL, 0};
+      checkErrOK{result};
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH, self->defFieldOffset, NULL, 0};
+      checkErrOK{result};
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_CMD_KEY, STRUCT_DEF_CMD_KEY, NULL, 0};
+      checkErrOK{result};
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_CMD_LGTH, self->defFieldOffset-headerLgth, NULL, 0};
+      checkErrOK{result};
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS, numNormFields, NULL, 0};
+      checkErrOK{result};
+      idx = 0;
+      while {idx < numNormFields} {
+        result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS, normNamesOffsets[idx].offset, NULL, idx};
+        checkErrOK{result};
+        idx++;
+      }
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE, normNamesSize, NULL, 0};
+      checkErrOK{result};
+      uint8_t names[normNamesSize];
+      idx = 0;
+      namesOffset = 0;
+      while {idx < numNormFields} {
+        c_memcpy{names+namesOffset, normNamesOffsets[idx].name,c_strlen(normNamesOffsets[idx].name});
+ets_printf{"name: idx: %d %s\n", idx, normNamesOffsets[idx].name};
+        namesOffset += c_strlen{normNamesOffsets[idx].name};
+        names[namesOffset] = 0;
+        namesOffset++;
+        idx++;
+      }
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES, 0, names, 0};
+      checkErrOK{result};
+      result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE, definitionsSize, NULL, 0};
+      checkErrOK{result};
+      fieldIdx = 0;
+      idx = 0;
+      namesIdx = 0;
+      while {idx < self->numFields} {
+        fieldInfo = &self->fields[idx];
+        if {fieldInfo->fieldNameId < STRUCT_MSG_SPEC_FIELD_LOW} {
+          result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, normNamesOffsets[namesIdx++].offset, NULL, fieldIdx++};
+          checkErrOK{result};
+          result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldTypeId, NULL, fieldIdx++};
+          checkErrOK{result};
+          result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldLgth, NULL, fieldIdx++};
+          checkErrOK{result};
+ets_printf{"norm offset: %d fieldTypeId: %d fieldLgth: %d\n", normNamesOffsets[namesIdx-1].offset, fieldInfo->fieldTypeId, fieldInfo->fieldLgth};
+        } else {
+          result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldNameId, NULL, fieldIdx++};
+          checkErrOK{result};
+          result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldTypeId, NULL, fieldIdx++};
+          checkErrOK{result};
+          fieldLgth = fieldInfo->fieldLgth;
+          if {fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TABLE_ROWS} {
+            fieldLgth = self->numTableRows;
+          }
+          if {fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS} {
+            fieldLgth = self->numTableRowFields;
+          }
+          result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldLgth, NULL, fieldIdx++};
+          checkErrOK{result};
+          if {fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS} {
+            tabIdx = 0;
+            while {tabIdx < self->numTableRowFields} {
+              tabFieldInfo = &self->tableFields[tabIdx];
+              result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, normNamesOffsets[namesIdx++].offset, NULL, fieldIdx++};
+              checkErrOK{result};
+              result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, tabFieldInfo->fieldTypeId, NULL, fieldIdx++};
+              checkErrOK{result};
+              result = setDefFieldValue{self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, tabFieldInfo->fieldLgth, NULL, fieldIdx++};
+              checkErrOK{result};
+              tabIdx++;
             }
           }
-          if {$incrVal == $::STRUCT_MSG_DECR} {
-            return $::STRUCT_MSG_ERR_OK ; # sjust ignore silently
-          } else {
-            if {$incrVal == $::STRUCT_MSG_NO_INCR} {
-              return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
-            } else {
-              if {$firstFreeEntry ne ""} {
-                set id [dict get $firstFreeEntry id]
-                dict set firstFreeEntry refCnt 1
-                dict set firstFreeEntry fieldName $fieldName
-                set definitions [lreplace $definitions $firstFreeEntryIdx $firstFreeEntryIdx $firstFreeEntry]
-              } else {
-                incr numDefinitions
-                dict set ::structmsg(fieldNameDefinitions) numDefinitions $numDefinitions
-                set entry [dict create]
-                dict set entry refCnt 1
-                dict set entry id $numDefinitions
-                dict set entry fieldName $fieldName
-                set id $numDefinitions
-                lappend definitions $entry
-              }
+        }
+        idx++;
+      }
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= initDef ========================
+
+    proc initDef {} {
+      variable strutcmsgData
+
+      if {(self->flags & STRUCT_DEF_IS_INITTED} != 0) {
+        return STRUCT_DEF_ERR_ALREADY_INITTED;
+      }
+      numFields = self->numFields + self->numTableRowFields;
+      definitionsSize = numFields * {sizeof(uint16_t} + sizeof(uint16_t) * sizeof(uint16_t));
+      id2offset_t normNamesOffsets[numFields];
+      numNormFields = 0;
+      normNamesSize = 0;
+      namesOffset = 0;
+      idx = 0;
+      while {idx < self->numFields} {
+        fieldInfo = &self->fields[idx];
+        if {fieldInfo->fieldNameId < STRUCT_MSG_SPEC_FIELD_LOW} {
+          result = self->structmsgDataView->getFieldNameStrFromId{self->structmsgDataView, fieldInfo->fieldNameId, &fieldNameStr};
+          checkErrOK{result};
+          normNamesOffsets[numNormFields].id = fieldInfo->fieldNameId;
+          normNamesOffsets[numNormFields].offset = namesOffset;
+          normNamesOffsets[numNormFields].name = fieldNameStr;
+          normNamesSize += c_strlen{fieldNameStr} + 1;
+          namesOffset += c_strlen{fieldNameStr} + 1;
+          numNormFields++;
+        } else {
+          if {fieldInfo->fieldNameId == STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS} {
+            tabIdx = 0;
+            while {tabIdx < self->numTableRowFields} {
+              tabFieldInfo = &self->tableFields[tabIdx];
+              result = self->structmsgDataView->getFieldNameStrFromId{self->structmsgDataView, tabFieldInfo->fieldNameId, &fieldNameStr};
+              checkErrOK{result};
+              normNamesOffsets[numNormFields].id = fieldInfo->fieldNameId;
+              normNamesOffsets[numNormFields].offset = namesOffset;
+              normNamesOffsets[numNormFields].name = fieldNameStr;
+              normNamesSize += c_strlen{fieldNameStr} + 1;
+              namesOffset += c_strlen{fieldNameStr} + 1;
+              numNormFields++;
+              tabIdx++;
             }
           }
-          dict set ::structmsg(fieldNameDefinitions) definitions $definitions
         }
+        idx++;
       }
-      return $::STRUCT_MSG_ERR_OK
+      result = addDefFields{self, numNormFields, normNamesSize, definitionsSize, STRUCT_DEF_TO_DATA};
+      checkErrOK{result};
+      result = setStaticDefFields{self, numNormFields, normNamesSize, normNamesOffsets, definitionsSize};
+      checkErrOK{result};
+      return STRUCT_MSG_ERR_OK;
     }
-    
-    # ============================= getIdFieldNameStr ========================
-    
-    proc getIdFieldNameStr {id fieldNameVar} {
-      upvar $fieldNameVar fieldName
-    
-      # first try to find special field name
-      set specialFieldNames $::structmsg(specialFieldNames)
-      foreach name [dict keys $specialFieldNames] {
-        set fieldId [dict get $specialFieldNames $name]
-        if {$fieldId == $id} {
-          set fieldName $name
-          return $::STRUCT_MSG_ERR_OK;
-        }
+
+    # ============================= prepareDef ========================
+
+    proc prepareDef {} {
+      variable strutcmsgData
+
+      if {(self->flags & STRUCT_DEF_IS_INITTED} == 0) {
+ets_printf{"prepareDef not yet initted\n"};
+        return STRUCT_DEF_ERR_NOT_YET_INITTED;
       }
-      # find field name
-      set idx 0
-      set fieldNameDefinitions $::structmsg(fieldNameDefinitions)
-      while {$idx < [dict get $fieldNameDefinitions numDefinitions]} {
-        set nameEntry [lindex  [dict get $fieldNameDefinitions definitions] $idx]
-        if {[dict get $nameEntry id] == $id} {
-          set fieldName [dict get $nameEntry fieldName]
-          return $::STRUCT_MSG_ERR_OK;
+          # create the values which are different for each message!!
+      numEntries = self->numDefFields;
+      idx = 0;
+      while {idx < numEntries} {
+        fieldInfo = &self->defFields[idx];
+        switch {fieldInfo->fieldNameId} {
+          case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
+            result = self->structmsgDefinitionDataView->setRandomNum{self->structmsgDefinitionDataView, fieldInfo};
+            checkErrOK{result};
+            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+            break;
+          case STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM:
+            result = self->structmsgDefinitionDataView->setSequenceNum{self->structmsgDefinitionDataView, fieldInfo};
+            checkErrOK{result};
+            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+            break;
+          case STRUCT_MSG_SPEC_FIELD_FILLER:
+            result = self->structmsgDefinitionDataView->setFiller{self->structmsgDefinitionDataView, fieldInfo};
+            checkErrOK{result};
+            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+            break;
+          case STRUCT_MSG_SPEC_FIELD_CRC:
+            result = self->structmsgDefinitionDataView->setCrc{self->structmsgDefinitionDataView, fieldInfo, self->headerLgth+1, self->cmdLgth-fieldInfo->fieldLgth};
+            checkErrOK{result};
+            fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+            break;
         }
-        incr idx
+        idx++;
       }
-      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+      self->flags |= STRUCT_DEF_IS_PREPARED;
+      return STRUCT_MSG_ERR_OK;
     }
-    
-    
-    # ============================= getFieldTypeId ========================
-    
-    proc getFieldTypeId {fieldType fieldTypeVar} {
-      upvar $fieldTypeVar fieldTypeId
-    
-      set fieldTypeDefinesDict $::structmsg(fieldTypeDefines)
-      if {![dict exists $fieldTypeDefinesDict $fieldType]} {
-    #  return $::STRUCT_MSG_ERR_BAD_FIELD_TYPE;
-          error "bad field type: $fieldType!"
+
+    # ============================= setDef ========================
+
+    proc setDef {data} {
+      variable strutcmsgData
+
+      if {self->structmsgDefinitionDataView == NULL} {
+        result = newStructmsgDefinition{self};
+        checkErrOK{result};
       } else {
-          set fieldTypeId [dict get $fieldTypeDefinesDict $fieldType]
+        if {self->structmsgDataView->dataView->data != NULL} {
+              # free no longer used we cannot reuse as the size can be different!
+          os_free{self->structmsgDataView->dataView->data};
+          self->structmsgDataView->dataView->data = NULL;
+              # we do net free self->defFields, we just reuse them it is always the same number of defFields
+          os_free{self->defFields};
+          self->defFields = NULL;
+          self->numDefFields = 0;
+          self->defFieldOffset = 0;
+        }
       }
-      return $::STRUCT_MSG_ERR_OK
-    }
-    
-    # ============================= createDefinition ========================
-    
-    proc createDefinition {name numFields} {
-      if {![dict exists $::structmsg(structmsgDefinitions) numDefinitions]} {
-        dict set ::structmsg(structmsgDefinitions) numDefinitions 0
-        dict set ::structmsg(structmsgDefinitions) maxDefinitions 0
-        dict set ::structmsg(structmsgDefinitions) definitions [list]
-      }
-      # check for unused slot!
-      set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
-      set definitionIdx 0
-      while {$definitionIdx < [dict get $::structmsg(structmsgDefinitions) maxDefinitions]} {
-        set definition [lindex $definitions $definitionIdx]
-        if {[dict get $definition name] eq ""} {
-          dict set definition numFields 0
-          dict set definition maxFields $numFields
-          dict set definition name $name
-          dict set definition fieldInfos [list]
-          set definitions [lreplace $definitions $definitionIdx $definitionIdx $definition]
-          dict set ::structmsg(structmsgDefinitions) definitions $definitions
-          return $::STRUCT_MSG_ERR_OK;
-        } 
-        incr definitionIdx
-      }
-      if {$definitionIdx >= [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
-        dict set ::structmsg(structmsgDefinitions) numDefinitions [expr {[dict get $::structmsg(structmsgDefinitions) numDefinitions] + 1}]
-        dict set ::structmsg(structmsgDefinitions) maxDefinitions [expr {[dict get $::structmsg(structmsgDefinitions) maxDefinitions] + 1}]
-      }
-      dict set definition numFields 0
-      dict set definition maxFields $numFields
-      dict set definition name $name
-      dict set definition fieldInfos [list]
-      lappend definitions $definition    
-      dict set ::structmsg(structmsgDefinitions) definitions $definitions
-      return $::STRUCT_MSG_ERR_OK;
-    }
-    
-    # ============================= addFieldDefinition ========================
-    
-    proc addFieldDefinition {name fieldName fieldType fieldLgth} {
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      if {[dict get $definition numFields] >= [dict get $definition maxFields]} {
-        return $::STRUCT_MSG_ERR_DEFINITION_TOO_MANY_FIELDS
-      }
-#puts stderr "add_field: fieldName: $fieldName fieldtype: $fieldType fieldLgth: $fieldLgth!"
-      set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
-      set fieldInfos [dict get $definition fieldInfos]
-      set result [getFieldNameId $fieldName fieldNameId $::STRUCT_MSG_INCR]
-      set result [getFieldTypeId $fieldType fieldTypeId]
-      set fielNameDict [dict create]
-      dict set fieldNameDict fieldId $fieldNameId
-      dict set fieldNameDict fieldType $fieldTypeId
-      dict set fieldNameDict fieldLgth $fieldLgth
-      lappend fieldInfos $fieldNameDict
-      dict set definition fieldInfos $fieldInfos
-      dict set definition numFields [expr {[dict get $definition numFields] + 1}]
-      set definitions [lreplace $definitions $definitionsIdx $definitionsIdx $definition]
-      dict set ::structmsg(structmsgDefinitions) definitions $definitions
-      return $::STRUCT_MSG_ERR_OK
-    }
-    
-    # ============================= dumpFieldDefinition ========================
-    
-    proc dumpFieldDefinition {name} {
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      puts [format "definition: %s numFields: %d" $name [dict get $definition numFields]]
-      set idx 0
-      while {$idx < [dict get $definition numFields]} {
-        set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
-        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldIdStr]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        set result [getFieldTypeStr [dict get $fieldInfo fieldType] fieldTypeStr]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        puts [format "  idx: %d id: %d %s type: %d %s lgth: %d" $idx [dict get $fieldInfo fieldId] $fieldIdStr [dict get $fieldInfo fieldType] $fieldTypeStr [dict get $fieldInfo fieldLgth]]
-        incr idx
-      }
-      return $::STRUCT_MSG_ERR_OK;
-    }
-    
-    # ============================= createMsgFromDefinition ========================
-    
-    proc createMsgFromDefinition {name handleVar} {
-      upvar $handleVar handle
+          # temporary replace data entry of dataView by our param data
+          # to be able to use the get* functions for gettting totalLgth entry value
+      self->structmsgDefinitionDataView->dataView->data = {uint8_t *}data;
+      self->structmsgDefinitionDataView->dataView->lgth = 10;
+          # get totalLgth value from data
+      result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, 4, &lgth};
+      checkErrOK{result};
 
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set result [::structmsg cmd create [expr {[dict get $definition numFields] - $::STRUCT_MSG_NUM_HEADER_FIELDS - $::STRUCT_MSG_NUM_CMD_HEADER_FIELDS}] handle]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set fieldIdx 0
-      while {$fieldIdx < [dict get $definition numFields]} {
-        set fieldInfos [dict get $definition fieldInfos]
-        set fieldInfo [lindex $fieldInfos $fieldIdx]
-        set fieldId [dict get $fieldInfo fieldId]
-        set fieldName "??"
-        if {[dict exists $::structmsg(specialFieldIds) $fieldId]} {
-          set fieldName [dict get $::structmsg(specialFieldIds) $fieldId]
-        }
-        switch $fieldName { 
-          @src -
-          @dst -
-          @targetCmd -
-          @totalLgth -
-          @cmdKey -
-          @cmdLgth {
-            # nothing to do!
-          }
-          default {
-            set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
-#      checkErrOK(result);
-            set result [getFieldTypeStr [dict get $fieldInfo fieldType] fieldType]
-#      checkErrOK(result);
-            # @filler and @crc are handled in encode!!
-            if {!(($fieldName eq "@filler") || ($fieldName eq "@crc"))} {
-              set result [::structmsg cmd add_field $handle $fieldName $fieldType [dict get $fieldInfo fieldLgth]]
-            }
-          }
-        } 
-        incr fieldIdx
+    #FIXME!! check crc!!
+
+          # now make a copy of the data to be on the safe side
+          # for freeing the Lua space in Lua set the variable to nil!!
+      self->structmsgDefinitionDataView->dataView->data = os_zalloc{lgth};
+      checkAllocOK{self->structmsgDefinitionDataView->dataView->data};
+      c_memcpy{self->structmsgDefinitionDataView->dataView->data, data, lgth};
+      self->structmsgDefinitionDataView->dataView->lgth = lgth;
+      self->defTotalLgth = lgth;
+
+      numNormFields = 0;
+      normNamesSize = 0;
+      definitionsSize = 0;
+      result = addDefFields{self, numNormFields, normNamesSize, definitionsSize, STRUCT_DEF_FROM_DATA};
+      checkErrOK{result};
+
+          # and now set the IS_SET flags and other stuff
+      self->flags |= STRUCT_DEF_IS_INITTED;
+      idx = 0;
+      while {idx < self->numDefFields} {
+        fieldInfo = &self->defFields[idx];
+        fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
+        idx++;
       }
-      return $::STRUCT_MSG_ERR_OK
+      self->flags |= STRUCT_DEF_IS_PREPARED;
+      return STRUCT_MSG_ERR_OK;
     }
-    
-    # ============================= getDefinitionDict ========================
-    
-    proc getDefinitionDict {name definitionVar definitionsIdxVar} {
-      upvar $definitionVar definition
-      upvar $definitionsIdxVar definitionsIdx
-    
-      set definitionsIdx 0
-      foreach definition [dict get $::structmsg(structmsgDefinitions) definitions] {
-        if {([dict get $definition name] ne "") && ($name eq [dict get $definition name])} {
-          return $::STRUCT_MSG_ERR_OK
-        }
-        incr definitionsIdx
-      }
-      return $::STRUCT_MSG_ERR_DEFINITION_NOT_FOUND;
-    }
-    
-    # ============================= encodeFieldDefinition ========================
-    
-    proc encodeFieldDefinition {name dataVar lgthVar} {
+
+    # ============================= getDef ========================
+
+    proc getDef {dataVar lgthVar} {
+      variable strutcmsgData
       upvar $dataVar data
       upvar $lgthVar lgth
-    
-      set src 123
-      set dst 987
-      set cmdKey $::STRUCT_MSG_DEFINITION_CMD_KEY
-    
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set numNormFields 0
-      set normNamesSize 0
-      set idx 0
-      while {$idx < [dict get $definition numFields]} {
-        set fieldInfo [lindex [dict get $definition fieldInfos] $idx]
-        if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
-          set result [::structmsg encdec getFieldIdName [dict get $fieldInfo fieldId] fieldName]
-          if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-    #puts stderr [format "fieldName: %s" $fieldName]
-          incr numNormFields
-          set normNamesSize [expr {$normNamesSize + [string length $fieldName] + 1}]
-        }
-        incr idx
+
+      if {(self->flags & STRUCT_DEF_IS_INITTED} == 0) {
+        return STRUCT_DEF_ERR_NOT_YET_INITTED;
       }
-      set normNamesOffsets [list]
-      # nameLgth + name of Definition
-      set definitionPayloadSize [expr {[sizeof uint8_t] + [string length $name] + 1}]
-      # fieldId uint16_t, fieldType uint8_t, fieldLgth uint16_t
-      set definitionPayloadSize [expr {$definitionPayloadSize + [dict get $definition numFields] * ([sizeof uint16_t] + [sizeof uint8_t] + [sizeof uint16_t])}]
-      set payloadSize $::STRUCT_MSG_CMD_HEADER_LENGTH ; # cmdKey + cmdLgth
-      # numEntries uint8_t randomNum
-      set payloadSize [expr {$payloadSize + [sizeof uint8_t] + [sizeof uint32_t]}]
-      # len ids + ids (numNormFields * (uint16_t)) + len Names + names size
-      set payloadSize [expr {$payloadSize + [sizeof uint8_t] + $numNormFields * [sizeof uint16_t] + [sizeof uint16_t] + $normNamesSize}]
-      # size definitionPayload + definitionPayload
-      set payloadSize [expr {$payloadSize + [sizeof uint16_t] + $definitionPayloadSize}]
-      set fillerSize 0
-      set myLgth [expr {$payloadSize + [sizeof uint16_t]}] ; # sizeof(uint16_t) for CRC
-      while {($myLgth % 16) != 0} {
-        incr myLgth
-        incr fillerSize
+      if {(self->flags & STRUCT_DEF_IS_PREPARED} == 0) {
+        return STRUCT_DEF_ERR_NOT_YET_PREPARED;
       }
-      set cmdLgth [expr {$payloadSize + $fillerSize + [sizeof uint16_t]}]
-      set totalLgth [expr {$::STRUCT_MSG_HEADER_LENGTH + $cmdLgth}]
-puts stderr [format "cmdLgth: %d totalLgth: %d" $cmdLgth $totalLgth]
-      dict set definition encoded [list]
-      set encoded ""
-      set offset 0
-      set offset [::structmsg encdec uint16Encode encoded $offset $src]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint16Encode encoded $offset $dst]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint16Encode encoded $offset $totalLgth]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint16Encode encoded $offset $cmdKey]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint16Encode encoded $offset $cmdLgth]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec randomNumEncode encoded $offset randomNum]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec normalFieldNamesEncode encoded $offset $definition normNamesOffsets $numNormFields $normNamesSize]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint16Encode encoded $offset $definitionPayloadSize]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint8Encode encoded $offset [expr {[string length $name] + 1}]]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint8VectorEncode encoded $offset $name [string length $name ]]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec uint8Encode encoded $offset 0]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec definitionEncode encoded $offset $definition $normNamesOffsets]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec fillerEncode encoded $offset $fillerSize dummy]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-      set offset [::structmsg encdec crcEncode encoded $offset $totalLgth crc $::STRUCT_MSG_HEADER_LENGTH]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_ENCODE_ERROR }
-puts stderr [format "after crc offset: %d totalLgth :%d crc: 0x%04x" $offset $totalLgth $crc]
-      set data $encoded
-      set lgth $totalLgth
-      return $::STRUCT_MSG_ERR_OK
+      *data = self->structmsgDefinitionDataView->dataView->data;
+      *lgth = self->defTotalLgth;
+      return STRUCT_MSG_ERR_OK;
     }
-    
-    # ============================= decodeFieldDefinition ========================
-    
-    proc decodeFieldDefinition {name data} {
-      set offset 0
-      set offset [::structmsg encdec uint16Decode $data $offset src]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      set offset [::structmsg encdec uint16Decode $data $offset dst]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      set offset [::structmsg encdec uint16Decode $data $offset totalLgth]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      set offset [::structmsg encdec uint16Decode $data $offset cmdKey]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      if {$cmdKey != $::STRUCT_MSG_DEFINITION_CMD_KEY} {
-        return $::STRUCT_MSG_ERR_BAD_DEFINTION_CMD_KEY
+
+    # ============================= createMsgFromDef ========================
+
+    proc createMsgFromDef {} {
+      variable strutcmsgData
+
+          # lopp over def Fields and extract infos
+      id2offset_t normNamesOffsets[self->defNumNormFields];
+      fieldIdx = 0;
+      while {fieldIdx < self->numDefFields} {
+        fieldInfo = &self->defFields[fieldIdx];
+        switch {fieldInfo->fieldNameId} {
+        case STRUCT_MSG_SPEC_FIELD_SRC:
+        case STRUCT_MSG_SPEC_FIELD_DST:
+        case STRUCT_MSG_SPEC_FIELD_TARGET_CMD:
+        case STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH:
+        case STRUCT_MSG_SPEC_FIELD_CMD_KEY:
+        case STRUCT_MSG_SPEC_FIELD_CMD_LGTH:
+        case STRUCT_MSG_SPEC_FIELD_RANDOM_NUM:
+        case STRUCT_MSG_SPEC_FIELD_FILLER:
+        case STRUCT_MSG_SPEC_FIELD_CRC:
+              # nothing to do!
+          break;
+        case STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS:
+          result = self->structmsgDefinitionDataView->dataView->getUint8{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset, &numNormFlds};
+          checkErrOK{result};
+          break;
+        case STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS:
+          idx = 0;
+          while {idx < numNormFlds} {
+            result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset+idx*sizeof(uint16_t}, &val);
+            checkErrOK{result};
+            normNamesOffsets[idx].offset = val;
+            normNamesOffsets[idx].name = names+val;
+            idx++;
+          }
+          break;
+        case STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE:
+          result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset, &normFldNamesSize};
+          checkErrOK{result};
+          break;
+        case STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES:
+          result = self->structmsgDefinitionDataView->dataView->getUint8Vector{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset, &names, fieldInfo->fieldLgth};
+          checkErrOK{result};
+          break;
+        case STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE:
+          result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset, &definitionsSize};
+          checkErrOK{result};
+          break;
+        case STRUCT_MSG_SPEC_FIELD_DEFINITIONS:
+          idx = 0;
+          namesIdx = 0;
+          while {idx < definitionsSize / sizeof(uint16_t}) {
+            result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset+(idx++*sizeof(uint16_t}), &fieldNameId);
+            checkErrOK{result};
+            if {fieldNameId > STRUCT_MSG_SPEC_FIELD_LOW} {
+              result = self->structmsgDataView->getFieldNameStrFromId{self->structmsgDataView, fieldNameId, &fieldNameStr};
+              checkErrOK{result};
+            } else {
+              fieldNameStr = normNamesOffsets[namesIdx++].name;
+              checkErrOK{result};
+            }
+            result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset+(idx++*sizeof(uint16_t}), &fieldTypeId);
+            checkErrOK{result};
+            result = self->structmsgDataView->dataView->getFieldTypeStrFromId{self->structmsgDataView->dataView, fieldTypeId, &fieldTypeStr};
+            checkErrOK{result};
+            result = self->structmsgDefinitionDataView->dataView->getUint16{self->structmsgDefinitionDataView->dataView, fieldInfo->fieldOffset+(idx++*sizeof(uint16_t}), &fieldLgth);
+            checkErrOK{result};
+            result = self->addField{self, fieldNameStr, fieldTypeStr, fieldLgth};
+            checkErrOK{result};
+          }
+          break;
+          
+        }
+        fieldIdx++;
       }
-      set offset [::structmsg encdec uint16Decode $data $offset cmdLgth]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      set offset [::structmsg encdec uint32Decode $data $offset randomNum]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      # now check the crc
-      set crcOffset [expr {$totalLgth - [sizeof uint16_t]}]
-      set crcOffset [::structmsg encdec crcDecode $data $crcOffset $cmdLgth crc $::STRUCT_MSG_HEADER_LENGTH]
-if {$::crcDebug} {
-  puts stderr "crcOffset: $crcOffset!offset: $offset!"
+      result = self->initMsg{self};
+
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= newStructmsgDefinition ========================
+
+    proc newStructmsgDefinition {} {
+      variable strutcmsgData
+      if {self->structmsgDefinitionDataView != NULL} {
+        return STRUCT_DEF_ERR_ALREADY_CREATED; 
+      }
+      self->structmsgDefinitionDataView = newStructmsgDataView{};
+      if {self->structmsgDefinitionDataView == NULL} {
+        return STRUCT_MSG_ERR_OUT_OF_MEMORY;
+      }
+      self->defFields = os_zalloc{STRUCT_DEF_NUM_DEF_FIELDS * sizeof(structmsgField_t});
+      if {self->defFields == NULL} {
+        return STRUCT_MSG_ERR_OUT_OF_MEMORY;
+      }
+
+      self->initDef = &initDef;
+      self->prepareDef = &prepareDef;
+      self->addDefField = &addDefField;
+      self->dumpDefFields = &dumpDefFields;
+      self->setDefFieldValue = &setDefFieldValue;
+      self->getDefFieldValue = &getDefFieldValue;
+      self->setDef = &setDef;
+      self->getDef = &getDef;
+      self->createMsgFromDef = &createMsgFromDef;
+
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= structmsg_deleteDefinition ========================
+
+    proc structmsg_deleteDefinition {name structmsgDefinitions fieldNameDefinitions} {
+      variable strutcmsgData
+
+      result =  structmsg_getDefinitionPtr{name, &definition, &definitionsIdx};
+      checkErrOK{result};
+      idx = 0;
+      while {idx < definition->numFields} {
+        fieldInfo = &definition->fieldInfos[idx];
+        nameIdx = 0;
+        nameFound = 0;
+        if {fieldInfo->fieldId < STRUCT_MSG_SPEC_FIELD_LOW} {
+          while {nameIdx < fieldNameDefinitions->numDefinitions} {
+            nameEntry = &fieldNameDefinitions->definitions[nameIdx];
+            if {fieldInfo->fieldId == nameEntry->id} {
+              result = structmsg_getFieldNameId{nameEntry->str, &fieldId, STRUCT_MSG_DECR};
+              checkErrOK{result};
+              nameFound = 1;
+              break;
+            }
+            nameIdx++;
+          }
+          if {!nameFound} {
+            return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+          }
+        }
+        idx++;
+      }
+          # nameDefinitions deleted
+
+      definition->numFields = 0;
+      definition->maxFields = 0;
+      os_free{definition->name};
+      definition->name = NULL;
+      if {definition->encoded != NULL} {
+        os_free{definition->encoded};
+        definition->encoded = NULL;
+      }
+      os_free{definition->fieldInfos};
+      definition->fieldInfos = NULL;
+      if {definition->encoded != NULL} {
+        os_free{definition->encoded};
+        definition->encoded = NULL;
+      }
+      if {definition->encrypted != NULL} {
+        os_free{definition->encrypted};
+        definition->encrypted = NULL;
+      }
+      if {definition->todecode != NULL} {
+        os_free{definition->todecode};
+        definition->todecode = NULL;
+      }
+      definition->totalLgth = 0;
+          # definition deleted
+
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= structmsg_deleteDefinitions ========================
+
+    proc structmsg_deleteDefinitions {fieldNameDefinitions} {
+      variable strutcmsgData
+          # delete the whole structmsgDefinitions info, including fieldNameDefinitions info
+      stmsgDefinition_t *definition;
+      fieldInfoDefinition_t *fieldInfo;
+      name2id_t *nameEntry;
+      uint8_t *name;
+      int idx;
+      int nameIdx;
+      int found;
+      int nameFound;
+      int result;
+      int fieldId;
+
+      idx = 0;
+      while {idx < structmsgDefinitions->numDefinitions} {
+        definition = &structmsgDefinitions->definitions[idx];
+        if {definition->name != NULL} {
+          structmsg_deleteDefinition{definition->name, structmsgDefinitions, fieldNameDefinitions};
+        }
+        idx++;
+      }
+      structmsgDefinitions->numDefinitions = 0;
+      structmsgDefinitions->maxDefinitions = 0;
+      os_free{structmsgDefinitions->definitions};
+      structmsgDefinitions->definitions = NULL;
+
+      fieldNameDefinitions->numDefinitions = 0;
+      fieldNameDefinitions->maxDefinitions = 0;
+      os_free{fieldNameDefinitions->definitions};
+      fieldNameDefinitions->definitions = NULL;
+
+          # all deleted/reset
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= structmsg_deleteStructmsgDefinition ========================
+
+    proc structmsg_deleteStructmsgDefinition {name} {
+      variable strutcmsgData
+      return structmsg_deleteDefinition{name, &structmsgDefinitions, &fieldNameDefinitions};
+    }
+
+    # ============================= structmsg_deleteStructmsgDefinitions ========================
+
+    proc structmsg_deleteStructmsgDefinitions {} {
+      variable strutcmsgData
+          # delete the whole structmsgDefinitions info, including fieldNameDefinitions info
+      return structmsg_deleteDefinitions{&structmsgDefinitions, &fieldNameDefinitions};
+    }
+
+    # ============================= structmsg_getDefinitionNormalFieldNames ========================
+
+    proc structmsg_getDefinitionNormalFieldNames {name normalFieldNames} {
+      variable strutcmsgData
+
+      result = structmsg_getDefinitionPtr{name, &definition, &definitionsIdx};
+      checkErrOK{result};
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= structmsg_getDefinitionTableFieldNames ========================
+
+    proc structmsg_getDefinitionTableFieldNames {name tableFieldNames} {
+      variable strutcmsgData
+
+      result = structmsg_getDefinitionPtr{name, &definition, &definitionsIdx};
+      checkErrOK{result};
+      return STRUCT_MSG_ERR_OK;
+    }
+
+    # ============================= structmsg_getDefinitionNumTableRows ========================
+
+    proc structmsg_getDefinitionNumTableRows {name numTableRows} {
+      variable strutcmsgData
+
+      result = structmsg_getDefinitionPtr{name, &definition, &definitionsIdx};
+      checkErrOK{result};
+      idx = 0;
+      while{idx < definition->numFields} {
+        fieldInfo = &definition->fieldInfos[idx];
+        result  = structmsg_getIdFieldNameStr {fieldInfo->fieldId, &fieldName};
+        checkErrOK{result};
+        if {c_strcmp(fieldName, "@tablerows"} == 0) {
+          *numTableRows = fieldInfo->fieldLgth;
+          return STRUCT_MSG_ERR_OK;
+        }
+      }
+      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    }
+
+    # ============================= structmsg_getDefinitionNumTableRowFields ========================
+
+    proc structmsg_getDefinitionNumTableRowFields {name numTableRowFields} {
+      variable strutcmsgData
+
+      result = structmsg_getDefinitionPtr{name, &definition, &definitionsIdx};
+      checkErrOK{result};
+      idx = 0;
+      while{idx < definition->numFields} {
+        fieldInfo = &definition->fieldInfos[idx];
+        result  = structmsg_getIdFieldNameStr {fieldInfo->fieldId, &fieldName};
+        checkErrOK{result};
+        if {c_strcmp(fieldName, "@tablerowfields"} == 0) {
+          *numTableRowFields = fieldInfo->fieldLgth;
+          return STRUCT_MSG_ERR_OK;
+        }
+      }
+      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+    }
+
+    # ============================= structmsg_getDefinitionFieldInfo ========================
+
+    proc structmsg_getDefinitionFieldInfo {name fieldName fieldInfo} {
+      variable strutcmsgData
+
+      result = structmsg_getDefinitionPtr{name, &definition, &definitionsIdx};
+      checkErrOK{result};
+      idx = 0;
+      while{idx < definition->numFields} {
+        *fieldInfo = &definition->fieldInfos[idx];
+        result  = structmsg_getIdFieldNameStr {(*fieldInfo}->fieldId, &lookupFieldName);
+        checkErrOK{result};
+        if {c_strcmp(lookupFieldName, fieldName} == 0) {
+          return STRUCT_MSG_ERR_OK;
+        }
+      }
+      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
 }
-      set offset [::structmsg encdec definitionDecode $data $offset]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      set myLgth [expr {$offset - $::STRUCT_MSG_HEADER_LENGTH + [sizeof uint16_t]}]
-      set fillerSize 0
-      while {($myLgth % 16) != 0} {
-        incr myLgth
-        incr fillerSize
-      }
-      set offset [::structmsg encdec fillerDecode $data $offset $fillerSize filler]
-      if {$offset < 0} { return $::STRUCT_MSG_ERR_DECODE_ERROR }
-      return $::STRUCT_MSG_ERR_OK
-    }
 
-    # ============================= setCryptedDefinition ========================
-    
-    proc setCryptedDefinition {name crypted} {
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      dict set definition encrypted $crypted
-      set definitions [dict get $::strucmsg(structmsgDefinitions) definitions]
-      set defintions [lreplace $definitions $definitionsIdx $definitionsIdx $definition]
-      set ::strucmsg(structmsgDefinitions) $definitions
-      return $::STRUCT_MSG_ERR_OK
-    }
+    # ============================= structmsg_getDefinitionTableFieldInfo ========================
 
-    # ============================= decryptGetDefinitionName ========================
-    
-    proc decryptGetDefinitionName {encrypted key iv nameVar} {
-      upvar $nameVar name
+    proc structmsg_getDefinitionTableFieldInfo {name fieldName fieldInfo} {
+      stmsgDefinition_t *definition;
+      uint8_t definitionsIdx;
+      int idx;
+      int result;
+      uint8_t *lookupFieldName;
 
-      set decrypted [list]
-      set lgth 0
-      set result [::structmsg cmd decrypt "" $encrypted [string length $encrypted] $key $iv $encrypted decrypted lgth]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set result [::structmsg encdec getDefinitionName $decrypted name]
-      return $result
-    }
-
-    # ============================= encryptDefinition ========================
-    
-    proc encryptDefinition {name key iv bufVar lgthVar} {
-      upvar $bufVar buf
-      upvar $lgthVar lgth
-
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set result [::structmsg cmd encrypt $tocrypt [string length $tocrypt] $key $iv buf lgth]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      return $::STRUCT_MSG_ERR_OK
-    }
-
-    # ============================= decryptDefinition ========================
-    
-    proc decryptDefinition {name key iv encrypted bufVar lgthVar} {
-      upvar $bufVar buf
-      upvar $lgthVar lgth
-
-      if {$encrypted eq [list]} {
-        set result [getDefinitionDict $name definition definitionsIdx]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        set encrypted [dict get $definition encrypted]
-      }
-      set result [::structmsg cmd decrypt "" $encrypted [string length $encrypted] $key $iv "" buf lgth]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      return $::STRUCT_MSG_ERR_OK
-    }
-
-    # ============================= deleteFieldDefinition ========================
-    
-    proc deleteFieldDefinition {name} {
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set definitions [dict get $::structmsg(structmsgDefinitions) definitions]
-      set definitionIdx 0
-      while {$definitionIdx < [dict get $definition numFields]} {
-        set fieldInfo [lindex [dict get $definition fieldInfos] $definitionIdx]
-        set nameIdx 0
-        set nameFound 0
-        if {[dict get $fieldInfo fieldId] < $::STRUCT_MSG_SPEC_FIELD_LOW} {
-          while {$nameIdx < [dict get $::structmsg(fieldNameDefinitions) numDefinitions]} {
-            set nameEntry [lindex [dict get $::structmsg(fieldNameDefinitions) definitions] $nameIdx]
-            if {[dict get $fieldInfo fieldId] == [dict get $nameEntry id]} {
-              set result [getFieldNameId [dict get $nameEntry fieldName] fieldId $::STRUCT_MSG_DECR]
-              if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-              set nameFound 1
-              break
-            }
-            incr nameIdx
-          }
-          if {!$nameFound} {
-            return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
-          }
+      result = structmsg_getDefinitionPtr{name, &definition, &definitionsIdx};
+      checkErrOK{result};
+      idx = 0;
+      while{idx < definition->numFields} {
+        *fieldInfo = &definition->fieldInfos[idx];
+        result  = structmsg_getIdFieldNameStr {(*fieldInfo}->fieldId, &lookupFieldName);
+        checkErrOK{result};
+        if {c_strcmp(lookupFieldName, fieldName} == 0) {
+          return STRUCT_MSG_ERR_OK;
         }
-        incr definitionIdx
       }
-      # nameDefinitions deleted
-    
-      dict set definition numFields 0
-      dict set definition maxFields 0
-      dict set definition name ""
-      if {[dict exists $definition encoded]} {
-        dict set definition encoded ""
-      }
-      dict set definition fieldInfos ""
-      set definitions [lreplace $definitions $definitionsIdx $definitionsIdx $definition]
-      dict set ::structmsg(structmsgDefinitions) definitions $definitions
-      # definition deleted
-    
-      return $::STRUCT_MSG_ERR_OK
-    }
-    
-    # ============================= deleteFieldDefinitions ========================
-    
-    proc deleteFieldDefinitions {} {
-      # delete the whole structmsgDefinitions info, including fieldNameDefinitions info
-    
-      set idx 0
-      while {$idx < [dict get $::structmsg(structmsgDefinitions) numDefinitions]} {
-        set definition [dict get $::structmsg(structmsgDefinitions) definitions] $idx]
-        if {[dict get $definition name] ne ""} {
-          deleteFieldDefinition [dict get $definition name]
-        }
-        incr idx
-      }
-      dict set ::structmsg(structmsgDefinitions) numDefinitions 0
-      dict set ::structmsg(structmsgDefinitions) maxDefinitions 0
-      dict set ::structmsg(structmsgDefinitions) definitions [list]
-    
-      dict set ::structmsg(fieldNameDefinitions) numDefinitions 0
-      dict set ::structmsg(fieldNameDefinitions) maxDefinitions 0
-      dict set ::structmsg(fieldNameDefinitions) definitions [list]
-    
-      # all deleted/reset
-      return $::STRUCT_MSG_ERR_OK
+      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
     }
 
-    # ============================= getDefinitionNormalFieldNames ========================
-    
-    proc getDefinitionNormalFieldNames {name normalFieldNamesVar} {
-      upvar $normalFieldNamesVar normalFieldNames
-  
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set normalFieldNames [list]
-      set inTableRows false
-      foreach fieldInfo [dict get $definition fieldInfos] {
-        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        if {[string range $fieldName 0 0] ne "@"} {
-          if {$inTableRows} {
-            incr tableRowFields
-            if {$tableRowFields >= $numTableRowFields} {
-              set inTableRows false
-            }
+    # ============================= structmsg_createMsgDefinitionFromListInfo ========================
+
+    proc structmsg_createMsgDefinitionFromListInfo {name listVector numEntries numRows flags shortCmdKey} {
+      variable strutcmsgData
+
+ets_printf{"structmsg_createMsgDefinitionFromListInfo: shortCmdKey: %d\n", shortCmdKey};
+      result = structmsg_createStructmsgDefinition{name, numEntries, shortCmdKey};
+      checkErrOK{result};
+      listEntry = listVector[0];
+      idx = 0;
+      while{idx < numEntries} {
+        listEntry = listVector[idx];
+        uint8_t buffer[c_strlen{listEntry} + 1];
+        fieldName = buffer;
+        c_memcpy{fieldName, listEntry, c_strlen(listEntry});
+        fieldName[c_strlen{listEntry}] = '\0';
+        cp = fieldName;
+        while {*cp != ','} {
+          cp++;
+        }
+        *cp++ = '\0';
+        fieldType = cp;
+        while {*cp != ','} {
+          cp++;
+        }
+        *cp++ = '\0';
+        fieldLgthStr = cp;
+        while {*cp != ','} {
+          cp++;
+        }
+        *cp++ = '\0';
+        flagStr = cp;
+        if {c_strcmp(fieldLgthStr,"@numRows"} == 0) {
+          fieldLgth = numRows;
+        } else {
+          lgth = c_strtoul{fieldLgthStr, &endPtr, 10};
+          fieldLgth = {uint8_t}lgth;
+        }
+        uflag = c_strtoul{flagStr, &endPtr, 10};
+        flag = {uint8_t}uflag;
+        if {flag == 0} {
+          result = structmsg_addFieldDefinition{name, fieldName, fieldType, fieldLgth};
+          checkErrOK{result};
+        } else {
+          if {(flags != 0} && (flag == 2)) {
+            result = structmsg_addFieldDefinition{name, fieldName, fieldType, fieldLgth};
+            checkErrOK{result};
           } else {
-            lappend normalFieldNames $fieldName
-          }
-        } else {
-          if {$fieldName eq "@tablerowfields"} {
-            set inTableRows true
-            set tableRowFields 0
-            set numTableRowFields [dict get $fieldInfo fieldLgth]
-          }
-        }
-      }
-      return $::STRUCT_MSG_ERR_OK
-    }
-
-    # ============================= getDefinitionTableFieldNames ========================
-    
-    proc getDefinitionTableFieldNames {name tableFieldNamesVar} {
-      upvar $tableFieldNamesVar tableFieldNames
-  
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      set tableFieldNames [list]
-      set inTableRows false
-      foreach fieldInfo [dict get $definition fieldInfos] {
-        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        if {[string range $fieldName 0 0] ne "@"} {
-          if {$inTableRows} {
-            incr tableRowFields
-            lappend tableFieldNames $fieldName
-            if {$tableRowFields >= $numTableRowFields} {
-              set inTableRows false
+            if {(flags == 0} && (flag == 1)) {
+              result = structmsg_addFieldDefinition{name, fieldName, fieldType, fieldLgth};
+              checkErrOK{result};
             }
           }
-        } else {
-          if {$fieldName eq "@tablerowfields"} {
-            set inTableRows true
-            set tableRowFields 0
-            set numTableRowFields [dict get $fieldInfo fieldLgth]
-          }
         }
+        idx++;
       }
-      return $::STRUCT_MSG_ERR_OK
-    }
-
-    # ============================= getDefinitionNumTableRows ========================
-    
-    proc getDefinitionNumTableRows {name numTableRowsVar} {
-      upvar $numTableRowsVar numTableRows
-  
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      foreach fieldInfo [dict get $definition fieldInfos] {
-        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        if {$fieldName eq "@tablerows"} {
-          set numTableRows [dict get $fieldInfo fieldLgth]
-          return $::STRUCT_MSG_ERR_OK
-        }
-      }
-      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
-    }
-
-    # ============================= getDefinitionNumTableRowFields ========================
-    
-    proc getDefinitionNumTableRowFields {name numTableRowFieldsVar} {
-      upvar $numTableRowFieldsVar numTableRowFields
-  
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      foreach fieldInfo [dict get $definition fieldInfos] {
-        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        if {$fieldName eq "@tablerowfields"} {
-          set numTableRowFields [dict get $fieldInfo fieldLgth]
-          return $::STRUCT_MSG_ERR_OK
-        }
-      }
-      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
-    }
-
-    # ============================= getDefinitionFieldInfo ========================
-    
-    proc getDefinitionFieldInfo {name lookupFieldName fieldInfoVar} {
-      upvar $fieldInfoVar fieldInfo
-  
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      foreach lookupFieldInfo [dict get $definition fieldInfos] {
-        set result [getIdFieldNameStr [dict get $lookupFieldInfo fieldId] fieldName]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        if {$fieldName eq $lookupFieldName} {
-            set result [getFieldTypeStr [dict get $lookupFieldInfo fieldType] fieldType]
-            if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-              set fieldInfo [dict create]
-              dict set fieldInfo fieldName $fieldName
-              dict set fieldInfo fieldType $fieldType
-              dict set fieldInfo fieldLgth [dict get $lookupFieldInfo fieldLgth]
-          return $::STRUCT_MSG_ERR_OK
-        }
-      }
-      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
-    }
-
-    # ============================= getDefinitionTableFieldInfo ========================
-    
-    proc getDefinitionTableFieldInfo {name lookupFieldName row fieldInfoVar} {
-      upvar $fieldInfoVar fieldInfo
-  
-      set result [getDefinitionDict $name definition definitionsIdx]
-      if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-      foreach fieldInfo [dict get $definition fieldInfos] {
-        set result [getIdFieldNameStr [dict get $fieldInfo fieldId] fieldName]
-        if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-        if {$fieldName eq $lookupFieldName} {
-          set result [getFieldTypeStr [dict get $fieldInfo fieldType] fieldType]
-          if {$result != $::STRUCT_MSG_ERR_OK} { return $result }
-          return $::STRUCT_MSG_ERR_OK
-        }
-      }
-      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
+      return STRUCT_MSG_ERR_OK;
     }
 
   } ; # namespace def
-
 } ; # namespace structmsg
