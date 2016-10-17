@@ -50,7 +50,7 @@ namespace eval structmsg {
   namespace eval dataView {
     namespace ensemble create
       
-    namespace export dataView freeDataView setData getFieldTypeIdFromStr appendData getData
+    namespace export dataView freeDataView setData getFieldTypeIdFromStr getFieldTypeStrFromId appendData getData
     namespace export getUint8 getInt8 setUint8 setInt8
     namespace export getUint16 getInt16 setUint16 setInt16
     namespace export getUint32 getInt32 setUint32 setInt32
@@ -92,6 +92,21 @@ namespace eval structmsg {
     dict set fieldTypeIds2Names DATA_VIEW_FIELD_UINT32_VECTOR uint32_t* 
     dict set fieldTypeIds2Names DATA_VIEW_FIELD_INT32_VECTOR int32_t*  
 
+    variable fieldTypeInts2Ids
+    set fieldTypeInts2Ids [dict create]
+    dict set fieldTypeInts2Ids 0 DATA_VIEW_FIELD_UINT0_T
+    dict set fieldTypeInts2Ids 1 DATA_VIEW_FIELD_UINT8_T
+    dict set fieldTypeInts2Ids 2 DATA_VIEW_FIELD_INT8_T
+    dict set fieldTypeInts2Ids 3 DATA_VIEW_FIELD_UINT16_T
+    dict set fieldTypeInts2Ids 4 DATA_VIEW_FIELD_INT16_T
+    dict set fieldTypeInts2Ids 5 DATA_VIEW_FIELD_UINT32_T
+    dict set fieldTypeInts2Ids 6 DATA_VIEW_FIELD_INT32_T
+    dict set fieldTypeInts2Ids 7 DATA_VIEW_FIELD_UINT8_VECTOR
+    dict set fieldTypeInts2Ids 8 DATA_VIEW_FIELD_INT8_VECTOR
+    dict set fieldTypeInts2Ids 9 DATA_VIEW_FIELD_UINT16_VECTOR
+    dict set fieldTypeInts2Ids 10 DATA_VIEW_FIELD_INT16_VECTOR
+    dict set fieldTypeInts2Ids 11 DATA_VIEW_FIELD_UINT32_VECTOR
+    dict set fieldTypeInts2Ids 12 DATA_VIEW_FIELD_INT32_VECTOR
 
     # ================================= getFieldTypeIdFromStr ====================================
 
@@ -100,6 +115,7 @@ namespace eval structmsg {
       variable fieldTypeNames2Ids
 
       if {![dict exists $fieldTypeNames2Ids $fieldTypeStr]} {
+        return $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
       }
       set fieldTypeId [dict get $fieldTypeNames2Ids $fieldTypeStr]
       return $::DATA_VIEW_ERR_OK
@@ -108,9 +124,16 @@ namespace eval structmsg {
     # ================================= getFieldTypeStrFromId ====================================
 
     proc getFieldTypeStrFromId {fieldTypeId fieldTypeStrVar} {
-      upvar $fieldTypeStrVar fieldTypeId
+      upvar $fieldTypeStrVar fieldTypeStr
       variable fieldTypeIds2Names
+      variable fieldTypeInts2Ids
 
+      if {[string is integer $fieldTypeId]} {
+        if {![dict exists $fieldTypeInts2Ids $fieldTypeId]} {
+          return $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
+        }
+        set fieldTypeId [dict get $fieldTypeInts2Ids $fieldTypeId]
+      }
       if {![dict exists $fieldTypeIds2Names $fieldTypeId]} {
         return $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
       }

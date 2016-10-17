@@ -106,6 +106,28 @@ set ::STRUCT_MSG_NO_INCR 0
 set ::STRUCT_MSG_INCR    1
 set ::STRUCT_MSG_DECR    -1
 
+set ::STRUCT_MSG_SPEC_FIELD_SRC                 255
+set ::STRUCT_MSG_SPEC_FIELD_DST                 254
+set ::STRUCT_MSG_SPEC_FIELD_TARGET_CMD          253
+set ::STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH          252
+set ::STRUCT_MSG_SPEC_FIELD_CMD_KEY             251
+set ::STRUCT_MSG_SPEC_FIELD_CMD_LGTH            250
+set ::STRUCT_MSG_SPEC_FIELD_RANDOM_NUM          249
+set ::STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM        248
+set ::STRUCT_MSG_SPEC_FIELD_FILLER              247
+set ::STRUCT_MSG_SPEC_FIELD_CRC                 246
+set ::STRUCT_MSG_SPEC_FIELD_ID                  245
+set ::STRUCT_MSG_SPEC_FIELD_TABLE_ROWS          244
+set ::STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS    243
+set ::STRUCT_MSG_SPEC_FIELD_GUID                242
+set ::STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS       241
+set ::STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS        240
+set ::STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE 239
+set ::STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      238
+set ::STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    237
+set ::STRUCT_MSG_SPEC_FIELD_DEFINITIONS         236
+set ::STRUCT_MSG_SPEC_FIELD_LOW                 235  ; # this must be the last entry!!
+
 set RAND_MAX 0x7FFFFFFF
 
 namespace eval ::structmsg {
@@ -117,9 +139,9 @@ namespace eval ::structmsg {
     namespace ensemble create
       
     namespace export structmsgDataView freeStructmsgDataView getFieldNameIdFromStr
-    namespace export setFieldValue getFieldValue
+    namespace export setFieldValue getFieldValue getFieldNameStrFromId
     namespace export setRandomNum getRandomNum setSequenceNum getSequenceNum
-    namespace export setFiller getFiller setCrc getCrc
+    namespace export setFiller getFiller setCrc getCrc getSpecialFieldNameIntFromId
 
     variable specialFieldNames2Ids
     set specialFieldNames2Ids [dict create]
@@ -167,6 +189,68 @@ namespace eval ::structmsg {
     dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    "@definitionsSize"
     dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_DEFINITIONS         "@definitions"
 
+    variable specialFieldIds2Ints
+    set specialFieldIds2Ints [dict create]
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_SRC                 255
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_DST                 254
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_TARGET_CMD          253
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH          252
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_CMD_KEY             251
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_CMD_LGTH            250
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_RANDOM_NUM          249
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM        248
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_FILLER              247
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_CRC                 246
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_ID                  245
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_TABLE_ROWS          244
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS    243
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_GUID                242
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS       241
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS        240
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE 239
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      238
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    237
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_DEFINITIONS         236
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_LOW                 235  ; # this must be the last entry!!
+
+    variable specialFieldInts2Ids
+    set specialFieldInts2Ids [dict create]
+    dict set specialFieldInts2Ids 255 STRUCT_MSG_SPEC_FIELD_SRC
+    dict set specialFieldInts2Ids 254 STRUCT_MSG_SPEC_FIELD_DST
+    dict set specialFieldInts2Ids 253 STRUCT_MSG_SPEC_FIELD_TARGET_CMD
+    dict set specialFieldInts2Ids 252 STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH
+    dict set specialFieldInts2Ids 251 STRUCT_MSG_SPEC_FIELD_CMD_KEY 
+    dict set specialFieldInts2Ids 250 STRUCT_MSG_SPEC_FIELD_CMD_LGTH
+    dict set specialFieldInts2Ids 249 STRUCT_MSG_SPEC_FIELD_RANDOM_NUM
+    dict set specialFieldInts2Ids 248 STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM
+    dict set specialFieldInts2Ids 247 STRUCT_MSG_SPEC_FIELD_FILLER
+    dict set specialFieldInts2Ids 246 vSTRUCT_MSG_SPEC_FIELD_CRC
+    dict set specialFieldInts2Ids 245 vSTRUCT_MSG_SPEC_FIELD_ID
+    dict set specialFieldInts2Ids 244 vSTRUCT_MSG_SPEC_FIELD_TABLE_ROWS
+    dict set specialFieldInts2Ids 243 vSTRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS
+    dict set specialFieldInts2Ids 242 vSTRUCT_MSG_SPEC_FIELD_GUID
+    dict set specialFieldInts2Ids 241 vSTRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS
+    dict set specialFieldInts2Ids 240 vSTRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS
+    dict set specialFieldInts2Ids 239 vSTRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE
+    dict set specialFieldInts2Ids 238 vSTRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES
+    dict set specialFieldInts2Ids 237 vSTRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE
+    dict set specialFieldInts2Ids 236 vSTRUCT_MSG_SPEC_FIELD_DEFINITIONS
+    dict set specialFieldInts2Ids 235 vSTRUCT_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
+
+
+    # ================================= getSpecialFieldNameIntFromId ====================================
+    
+    proc getSpecialFieldNameIntFromId {fieldNameId fieldNameIntVar} {
+      upvar $fieldNameIntVar fieldNameInt
+      variable specialFieldIds2Ints
+
+      if {[dict exists $specialFieldIds2Ints $fieldNameId]} {
+puts stderr 21
+        set fieldNameInt [dict get $specialFieldId2Ints $fieldNameId]
+        return $::STRUCT_MSG_ERR_OK
+      }
+      return $::STRUCT_MSG_ERR_BAD_SPECIAL_FIELD
+    }
 
     # ================================= getFieldNameIdFromStr ====================================
     
@@ -248,10 +332,16 @@ namespace eval ::structmsg {
     proc getFieldNameStrFromId {fieldNameId fieldNameVar} {
       upvar $fieldNameVar fieldName
       variable specialFieldId2Names
+      variable specialFieldInts2Ids
 
+      if {[string is integer $fieldNameId]} {
+        if {[dict exists $specialFieldInts2Ids $fieldNameId]} {
+          set fieldNameId [dict get $specialFieldInts2Ids $fieldNameId]
+        }
+      }
       # first try to find special field name
-      if {[dict exists $specialFielId2Names $fieldNameId]} {
-        set fieldName [dict get $specialFieldIds2Names $fieldNameId]
+      if {[dict exists $specialFieldId2Names $fieldNameId]} {
+        set fieldName [dict get $specialFieldId2Names $fieldNameId]
         return $::STRUCT_MSG_ERR_OK
       }
       # find field name
@@ -462,6 +552,7 @@ puts stderr "crc1: $crc![format 0x%04x $crc]!"
     proc getFieldValue {fieldInfo valueVar fieldIdx} {
       upvar $valueVar value
 
+if {[catch {
       set value ""
       switch [dict get $fieldInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
@@ -486,13 +577,13 @@ puts stderr "crc1: $crc![format 0x%04x $crc]!"
           set result [::structmsg dataView getInt8Vector [expr {[dict get $fieldInfo fieldOffset]}] value]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-          set result [::structmsg dataView getUint8Vector [expr {[dict get $fieldInfo fieldOffset]}] value]
+          set result [::structmsg dataView getUint8Vector [expr {[dict get $fieldInfo fieldOffset]}] value [dict get $fieldInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
           set result [::structmsg dataView getInt16 [expr {[dict get $fieldInfo fieldOffset] +fieldIdx*2}] value]
         }
         DATA_VIEW_FIELD_UINT16_VECTOR {
-          set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2]} value]
+          set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] value]
         }
         DATA_VIEW_FIELD_INT32_VECTOR {
             return $::STRUCT_MSG_ERR_BAD_VALUE
@@ -504,6 +595,9 @@ puts stderr "crc1: $crc![format 0x%04x $crc]!"
           return $::STRUCT_MSG_ERR_BAD_FIELD_TYPE
         }
       }
+} msg]} {
+puts stderr "getFieldValue: $msg!$fieldInfo!"
+}
       return $result
     }
     

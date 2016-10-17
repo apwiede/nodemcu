@@ -32,6 +32,7 @@
 # ==========================================================================
 
 set ::HANDLE_PREFIX "stmsg_"
+set ::STRUCT_DEF_NUM_DEF_FIELDS 15
 
 namespace eval structmsg {
   namespace ensemble create
@@ -48,7 +49,6 @@ namespace eval structmsg {
 
     variable structmsgData [dict create]
     variable numHandles 0
-    variable structmsgHandles
 
     dict set structmsgData flags [list]
     dict set structmsgData handle [list]
@@ -113,7 +113,8 @@ namespace eval structmsg {
       variable structmsgHandles
       upvar $headerVar header
     
-      if {[dict get $structmsgHandles handles] eq [list]} {
+puts stderr "1!$structmsgHandles!"
+      if {[llength [dict get $structmsgHandles handles]] eq 0} {
         set handleDict [dict create]
         dict set handleDict handle $handle
         dict set handleDict structmsgData $structmsgData
@@ -125,8 +126,14 @@ namespace eval structmsg {
       } else {
         # check for unused slot first
         set idx 0
+        set handles [dict get $structmsgHandles handles]
+puts stderr "lhandles:[llength $handles]!"
         while {$idx < [dict get $structmsgHandles numHandles]} {
-          if {[dict get [lindex [dict get $structmsgHandles handles] $idx] handle] eq [list]} {
+puts stderr "idx!$idx!"
+           set handleDict [lindex $handles $idx]
+puts stderr "handleDict!$handleDict![dict get $handleDict handle]!"
+          if {[dict get $handleDict handle] eq [list]} {
+puts stderr "2"
             set handles [dict get $structmsgHandles handles]
             set entry [lindex $handles $idx]
             dict set entry handle $handle
@@ -138,8 +145,8 @@ namespace eval structmsg {
           }
           incr idx
         }
-        set handles [dict get $structmsgHandles handles]
-        set idx [dict get structmsgHandles numHandles]
+        set idx [dict get $structmsgHandles numHandles]
+puts stderr "4!$idx!"
         set entry [lindex $handles $idx]
         dict set entry handle $handle
         dict set entry structmsgData $structmsgData
@@ -148,6 +155,7 @@ namespace eval structmsg {
         set header [list]
         dict incr structmsgHandles numHandles 1
       }
+puts stderr "5"
       return $::STRUCT_MSG_ERR_OK;
     }
     
@@ -290,6 +298,7 @@ namespace eval structmsg {
       variable numHandles
       variable structmsgData
 
+puts stderr "createMsg start"
       dict set structmsgData fields [list]
       dict set structmsgData tableFields [list]
       dict set structmsgData flags [list]
@@ -305,12 +314,14 @@ namespace eval structmsg {
       dict set structmsgData header [list]
       incr numHandles
       set handle [format "${::HANDLE_PREFIX}efff00%02d" $numHandles]
+puts stderr "createMsg addHandle"
       set result [addHandle $handle [dict get $structmsgData header]]
       if {$result != $::STRUCT_MSG_ERR_OK} {
 #        deleteHandle(self->handle);
         return $result
       }
       set handle [dict get $structmsgData handle]
+puts stderr "createMsg end"
       return $::STRUCT_MSG_ERR_OK
     }
 
@@ -319,7 +330,7 @@ namespace eval structmsg {
     proc  addField {fieldName fieldType fieldLgth} {
       variable structmsgData
     
-#puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $fieldType $fieldLgth]
+puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $fieldType $fieldLgth]
       if {[dict get $structmsgData numFields] >= [dict get $structmsgData maxFields]} {
         return $::STRUCT_MSG_ERR_TOO_MANY_FIELDS
       }

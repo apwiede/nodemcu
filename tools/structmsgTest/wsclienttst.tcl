@@ -51,6 +51,7 @@ source structmsgData.tcl
 source structmsgDispatcher.tcl
 source structmsgIdentify.tcl
 source structmsgSendReceive.tcl
+source structmsgDefinitions.tcl
 
 proc checkErrOk {result} {
   if {$result != $::STRUCT_MSG_ERR_OK} {

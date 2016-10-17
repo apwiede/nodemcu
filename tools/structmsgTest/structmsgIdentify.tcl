@@ -886,6 +886,28 @@ puts stderr "found entry: [dict get $hdrInfos currPartIdx]!"
             } else {
               set answerType A
             }
+            if {[lsearch [dict get $received partsFlags] STRUCT_DISP_U16_CMD_KEY] >= 0} {
+              set u16CmdKey [dict get $received u16CmdKey]
+              if {$u16CmdKey eq "YY"} {
+                set result [::structmsg def newStructmsgDefinition]
+                if {$result != $::STRUCT_MSG_ERR_OK} {
+                  return $result
+                }
+                set result [::structmsg def setDef [dict get $received buf]]
+set result [::structmsg def dumpDefFields]
+                if {$result != $::STRUCT_MSG_ERR_OK} {
+                  return $result
+                }
+puts stderr "createMsgFromDef!"
+                set result [::structmsg def createMsgFromDef]
+puts stderr "createMsgFromDef!result!$result!"
+                if {$result != $::STRUCT_MSG_ERR_OK} {
+                  return $result
+                }
+                return $::STRUCT_MSG_ERR_OK
+              }
+            }
+
 puts stderr "handleEncryptedPart runAction: $answerType"
 #::structmsg structmsgData dump
 if {0} {
@@ -1100,6 +1122,7 @@ puts stderr "decrypt error"
                     set buffer "${myHeader}${decrypted}"
                     set result [::structmsg dataView setData $buffer $mlen]
 ::structmsg structmsgData dumpBinary $buffer $lgth "decrypted"
+                    dict set received buf $buffer
                   }
                   dict set received lgth [dict get $hdrInfos headerStartLgth]
                   set result [handleEncryptedPart]
