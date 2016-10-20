@@ -83,7 +83,7 @@ function ProvisioningServerStart(big)
   end
   wifi.sta.disconnect()
   wifi.setmode(wifi.STATIONAP)
-  wifi.ap.config({ssid="SPIRIT21_Connect",auth=wifi.AUTH_OPEN})
+  wifi.ap.config({ssid="testDeviceConnect",auth=wifi.AUTH_OPEN})
 
   if (not tmr.alarm(1,1000,tmr.ALARM_AUTO,function()
      ip=wifi.ap.getip()
