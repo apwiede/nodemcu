@@ -625,9 +625,9 @@ ets_printf("need to encrypt message!%s\n", data);
     uint8_t *defToCryptPtr;
     uint8_t *cryptKey;
     uint8_t *defEncrypted;
-    uint8_t deflen;
+    uint16_t deflen;
     uint8_t *encrypted;
-    uint8_t mlen;
+    uint16_t mlen;
     uint8_t klen;
     uint8_t ivlen;
     int defEncryptedLgth;
@@ -649,16 +649,17 @@ ets_printf("defEncrypted: len: %d!%s!\n", defEncryptedLgth, defData);
 
     headerLgth = self->structmsgData->headerLgth;
     mlen = self->structmsgData->totalLgth - headerLgth;
+ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->structmsgData->totalLgth, mlen, self->structmsgData->headerLgth);
     toCryptPtr = data + self->structmsgData->headerLgth;
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encrypted, &encryptedLgth);
     checkErrOK(result);
     c_memcpy(toCryptPtr, encrypted, encryptedLgth);
 ets_printf("crypted: len: %d!%s!\n", encryptedLgth, data);
     
-  uint8_t totalLgth = 6+headerLgth+defEncryptedLgth+headerLgth+encryptedLgth;
-  uint8_t totalData [totalLgth];
+  uint16_t totalLgth = 6+headerLgth+defEncryptedLgth+headerLgth+encryptedLgth;
+  uint8_t *totalData = os_zalloc(totalLgth);
   char *cp = totalData;
-ets_printf("totalLgth-2: 0x%04x, defLgth: 0x%04x stotal: 0x%04x\n", totalLgth, defLgth, self->structmsgData->totalLgth);
+ets_printf("totalLgth: 0x%04x, defLgth: 0x%04x stotal: 0x%04x\n", totalLgth, defLgth, self->structmsgData->totalLgth);
   cp[0] = (totalLgth >> 8) & 0xFF;
   cp[1] = totalLgth & 0xFF;
   cp[2] = ((headerLgth+defEncryptedLgth) >> 8) & 0xFF;
@@ -672,10 +673,11 @@ self->structmsgData->dumpBinary((uint8_t *)cp, 6, "LENGTH");
 ets_printf("ready to send Msg\n");
   result = self->websocketSendData(self->wud, cp, totalLgth, OPCODE_BINARY);
 ets_printf("Msg sent\n");
+//  os_free(totalData);
   } else {
     // FIXME !! need code here
   }
-  result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
+//  result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
   return result;
 }
 

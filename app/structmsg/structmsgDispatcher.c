@@ -808,7 +808,7 @@ ets_printf("cmdKey: 0x%04x\n", self->received.u16CmdKey);
   result = structmsgData->setFieldValue(structmsgData, "@cmdKey", msgCmdKey, NULL);
   checkErrOK(result);
   structmsgData->prepareMsg(structmsgData);
-  structmsgData->dumpMsg(structmsgData);
+//structmsgData->dumpMsg(structmsgData);
   return STRUCT_DISP_ERR_OK;
 }
 
