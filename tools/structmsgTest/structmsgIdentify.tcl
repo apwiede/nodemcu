@@ -898,9 +898,7 @@ set result [::structmsg def dumpDefFields]
                 if {$result != $::STRUCT_MSG_ERR_OK} {
                   return $result
                 }
-puts stderr "createMsgFromDef!"
-                set result [::structmsg def createMsgFromDef]
-puts stderr "createMsgFromDef!result!$result!"
+                set result [::structmsg def createMsgFromDef handle]
                 if {$result != $::STRUCT_MSG_ERR_OK} {
                   return $result
                 }
@@ -908,8 +906,31 @@ puts stderr "createMsgFromDef!result!$result!"
               }
             }
 
+$::APTableId configure -columns [list 0 ssid 0 rssi]
+
 puts stderr "handleEncryptedPart runAction: $answerType"
-#::structmsg structmsgData dump
+set result [::structmsg structmsgData getFieldValue "@tablerows" numTabRows]
+puts stderr "numTabRows!$numTabRows!result!$result!"
+set result [::structmsg structmsgData getFieldValue "@tablerowfields" numTabFields]
+puts stderr "numTabFields!$numTabFields!result!$result!"
+
+  set row 0
+  while {$row < $numTabRows} {
+    foreach name [list ssid rssi] {
+      set result [::structmsg structmsgData getTableFieldValue $name $row value]
+      set value [string trimright $value "\0"]
+      lappend rowLst $value
+    }
+    lappend valueLst $rowLst
+    set rowLst [list]
+    incr row
+  }
+#puts stderr "valueLst!$valueLst!"
+
+  foreach rowLst $valueLst {
+    $::APTableId insert end $rowLst
+  }
+
 if {0} {
             set result [runAction answerType]
             if {$result != $::STRUCT_MSG_ERR_OK} {
@@ -933,7 +954,7 @@ if {0} {
         return $::STRUCT_DISP_ERR_BAD_HANDLE_TYPE
       }
       }
-puts stderr 12
+puts stderr "handleEncryptedPart end"
       return $::STRUCT_MSG_ERR_OK
     }
 
@@ -1071,6 +1092,7 @@ if {0} {
 
       
       set idx 0
+puts stderr "bufferl:[string length $buffer]!$lgth!"
       while {$idx < $lgth} {
         dict append received buf [string range $buffer $idx $idx]
         dict set received lgth [expr {[dict get $received lgth] + 1}]
@@ -1101,6 +1123,7 @@ error "partsFlags is not encrypted and hdrEncryption is E"
             }
           } else {
             if {[dict get $hdr hdrEncryption] eq "E"} {
+puts stderr "hdr!rl![dict get $received lgth]!tl![dict get $received totalLgth]!lgth!$lgth!"
               if {[dict get $received lgth] == [dict get $received totalLgth]} {
 puts stderr "§encrypted message completely receieved![dict get $received totalLgth]!§"
                 if {[lsearch [dict get $received partsFlags] STRUCT_DISP_IS_NOT_ENCRYPTED] >= 0} {

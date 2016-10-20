@@ -113,13 +113,12 @@ namespace eval structmsg {
       variable structmsgHandles
       upvar $headerVar header
     
-puts stderr "1!$structmsgHandles!"
       if {[llength [dict get $structmsgHandles handles]] eq 0} {
         set handleDict [dict create]
         dict set handleDict handle $handle
         dict set handleDict structmsgData $structmsgData
         dict set handleDict header [list]
-        lappend structmsgHandles handles $handleDict
+        dict lappend structmsgHandles handles $handleDict
         dict incr structmsgHandles numHandles 1
         set header [list]
         return $::STRUCT_MSG_ERR_OK
@@ -127,13 +126,9 @@ puts stderr "1!$structmsgHandles!"
         # check for unused slot first
         set idx 0
         set handles [dict get $structmsgHandles handles]
-puts stderr "lhandles:[llength $handles]!"
         while {$idx < [dict get $structmsgHandles numHandles]} {
-puts stderr "idx!$idx!"
            set handleDict [lindex $handles $idx]
-puts stderr "handleDict!$handleDict![dict get $handleDict handle]!"
           if {[dict get $handleDict handle] eq [list]} {
-puts stderr "2"
             set handles [dict get $structmsgHandles handles]
             set entry [lindex $handles $idx]
             dict set entry handle $handle
@@ -145,17 +140,13 @@ puts stderr "2"
           }
           incr idx
         }
-        set idx [dict get $structmsgHandles numHandles]
-puts stderr "4!$idx!"
-        set entry [lindex $handles $idx]
+        set entry [dict create]
         dict set entry handle $handle
         dict set entry structmsgData $structmsgData
-        set handles [lreplace $handles $idx $idx $entry]
-        dict set structmsgHandles handles $handles
+        dict lappend structmsgHandles handles $entry
         set header [list]
         dict incr structmsgHandles numHandles 1
       }
-puts stderr "5"
       return $::STRUCT_MSG_ERR_OK;
     }
     
@@ -298,7 +289,6 @@ puts stderr "5"
       variable numHandles
       variable structmsgData
 
-puts stderr "createMsg start"
       dict set structmsgData fields [list]
       dict set structmsgData tableFields [list]
       dict set structmsgData flags [list]
@@ -314,14 +304,12 @@ puts stderr "createMsg start"
       dict set structmsgData header [list]
       incr numHandles
       set handle [format "${::HANDLE_PREFIX}efff00%02d" $numHandles]
-puts stderr "createMsg addHandle"
       set result [addHandle $handle [dict get $structmsgData header]]
       if {$result != $::STRUCT_MSG_ERR_OK} {
 #        deleteHandle(self->handle);
         return $result
       }
       set handle [dict get $structmsgData handle]
-puts stderr "createMsg end"
       return $::STRUCT_MSG_ERR_OK
     }
 
@@ -330,7 +318,6 @@ puts stderr "createMsg end"
     proc  addField {fieldName fieldType fieldLgth} {
       variable structmsgData
     
-puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $fieldType $fieldLgth]
       if {[dict get $structmsgData numFields] >= [dict get $structmsgData maxFields]} {
         return $::STRUCT_MSG_ERR_TOO_MANY_FIELDS
       }
@@ -363,7 +350,7 @@ puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $field
         dict set fieldInfo fieldLgth $fieldLgth
         dict lappend structmsgData fields $fieldInfo
         dict incr structmsg numFields 1
-        return STRUCT_MSG_ERR_OK;
+        return $::STRUCT_MSG_ERR_OK;
       }
       if {$fieldName eq "@tablerowfields"} {
         dict set structmsgData numTableRowFields $fieldLgth
@@ -373,7 +360,7 @@ puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $field
         dict set fieldInfo fieldLgth $fieldLgth
         dict lappend structmsgData fields $fieldInfo
         set numTableFields [expr {[dict get $structmsgData numTableRows] * [dict get $structmsgData numTableRowFields]}]
-        if {([dict get $structmsgData tableFields] eq [list]) && ([dict get $structmsgData numTableFields] != 0)} {
+        if {([dict get $structmsgData tableFields] eq [list]) && ($numTableFields != 0)} {
         }
         dict incr structmsgData numFields 1
         return $::STRUCT_MSG_ERR_OK;
@@ -399,16 +386,31 @@ puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $field
         dict incr structmsgData numFields 1
       } else {
         set row 0
+        set tableFields [list]
+        set tabIdx 0
+        set numTabFlds [expr {$numTableRowFields * $numTableRows}]
+        if {[llength [dict get $structmsgData tableFields]] == 0} {
+          while {$tabIdx < $numTabFlds} {
+            lappend tableFields [list]
+            incr tabIdx
+          }
+puts stderr "ll tableFields![llength $tableFields]!"
+          dict set structmsgData tableFields $tableFields
+        }
+        set tableFields [dict get $structmsgData tableFields]
         while {$row < $numTableRows} {
           set cellIdx [expr {[dict get $structmsgData numRowFields] + $row * $numTableRowFields}]
           set fieldInfo [dict create]
     #ets_printf{"table field1: %s totalLgth: %d cmdLgth: %d\n", fieldInfo->fieldStr, structmsg->hdr.hdrInfo.hdrKeys.totalLgth, structmsg->hdr.hdrInfo.hdrKeys.cmdLgth};
+puts stderr "TAB!$fieldNameId!$row!$cellIdx!"
           dict set fieldInfo fieldNameId $fieldNameId
           dict set fieldInfo fieldTypeId $fieldTypeId
           dict set fieldInfo fieldLgth $fieldLgth
-          dict lappend structmsgData tableFields $fieldInfo
+          set tableFields [lreplace $tableFields $cellIdx $cellIdx $fieldInfo]
           incr row
         }
+        dict set structmsgData tableFields $tableFields
+puts stderr "tableFields!$tableFields!"
         dict incr structmsgData numRowFields 1
       } 
       return $::STRUCT_MSG_ERR_OK;
@@ -420,23 +422,41 @@ puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $field
       variable structmsgData
       upvar $valueVar value
     
-      if {(self->flags & STRUCT_MSG_IS_INITTED} == 0) {
-        return STRUCT_MSG_ERR_NOT_YET_INITTED;
+#puts stderr "getFieldValue:$fieldName!"
+      if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_IS_INITTED] < 0} {
+        return $::STRUCT_MSG_ERR_NOT_YET_INITTED
       }
-      result = self->structmsgDataView->getFieldNameIdFromStr{self->structmsgDataView, fieldName, &fieldNameId, STRUCT_MSG_NO_INCR};
-      checkErrOK{result};
-      idx = 0;
-      numEntries = self->numFields;
-      while {idx < numEntries} {
-        fieldInfo = &self->fields[idx];
-        if {fieldNameId == fieldInfo->fieldNameId} {
-          result = self->structmsgDataView->getFieldValue{self->structmsgDataView, fieldInfo, numericValue, stringValue, 0};
-          checkErrOK{result};
-          break;
+      set result [::structmsg structmsgDataView getFieldNameIdFromStr $fieldName fieldNameId STRUCT_MSG_NO_INCR]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
+      }
+      set idx 0
+      set numEntries [dict get $structmsgData numFields]
+      while {$idx < $numEntries} {
+        set fields [dict get $structmsgData fields]
+        set fieldInfo [lindex $fields $idx]
+        if {$fieldNameId == [dict get $fieldInfo fieldNameId]} {
+          switch $fieldNameId {
+            STRUCT_MSG_SPEC_FIELD_TABLE_ROWS {
+             set value [dict get $structmsgData numTabRows]
+             set result $::STRUCT_MSG_ERR_OK
+            }
+            STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
+             set value [dict get $structmsgData numTabRowFields]
+             set result $::STRUCT_MSG_ERR_OK
+            }
+            default {
+              set result [::structmsg structmsgDataView getFieldValue $fieldInfo value 0]
+            }
+          }
+          if {$result != $::STRUCT_MSG_ERR_OK} {
+            return $result
+          }
+          break
         }
-        idx++;
+        incr idx
       }
-      return DATA_VIEW_ERR_OK;
+      return $::DATA_VIEW_ERR_OK
     }
     
     # ================================= setFieldValue ====================================
@@ -490,28 +510,33 @@ puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $field
       variable structmsgData
       upvar $valueVar value
     
-      if {(self->flags & STRUCT_MSG_IS_INITTED} == 0) {
-        return STRUCT_MSG_ERR_NOT_YET_INITTED;
+#puts stderr "getTableFieldValue!"
+      if {[lsearch [dict get $structmsgData flags] STRUCT_MSG_IS_INITTED] < 0} {
+        return $::STRUCT_MSG_ERR_NOT_YET_INITTED
       }
-      result = self->structmsgDataView->getFFIELD_NOT_FOUND{self->structmsgDataView, fieldName, &fieldNameId, STRUCT_MSG_NO_INCR};
-      checkErrOK{result};
-      if {fieldName[0] == '@'} {
-        return STRUCT_MSG_ERR_NO_SUCH_FIELD;
+      set result [::structmsg structmsgDataView getFieldNameIdFromStr $fieldName fieldNameId STRUCT_MSG_NO_INCR]
+      if {$result != $::STRUCT_MSG_ERR_OK} {
+        return $result
       }
-      if {row >= self->numTableRows} {
-        return STRUCT_MSG_ERR_BAD_TABLE_ROW;
+      if {[string range $fieldName 0 0] eq "@"} {
+        return $::STRUCT_MSG_ERR_NO_SUCH_FIELD
       }
-      idx = 0;
-      cellIdx = 0 + row * self->numRowFields;
-      while {idx < self->numRowFields} {
-        fieldInfo = &self->tableFields[cellIdx];
-        if {fieldNameId == fieldInfo->fieldNameId} {
-          return self->structmsgDataView->getFieldValue{self->structmsgDataView, fieldInfo, numericValue, stringValue, 0};
+      if {$row >= [dict get $structmsgData numTableRows]} {
+        return $::STRUCT_MSG_ERR_BAD_TABLE_ROW
+      }
+
+      set idx 0
+      set cellIdx [expr {$row * [dict get $structmsgData numRowFields]}]
+      set tableFields [dict get $structmsgData tableFields]
+      while {$idx < [dict get $structmsgData numRowFields]} {
+        set fieldInfo [lindex $tableFields $cellIdx]
+        if {$fieldNameId == [dict get $fieldInfo fieldNameId]} {
+          return [::structmsg structmsgDataView getFieldValue $fieldInfo value 0]
         }
-        cellIdx++;
-        idx++;
+        incr cellIdx
+        incr idx
       }
-      return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
+      return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
     }
     
     # ================================= setTableFieldValue ====================================
@@ -605,7 +630,6 @@ puts stderr [format "addfield: %s fieldType: %s fieldLgth: %d" $fieldName $field
       variable structmsgData
     
       dict lappend structmsgData flags $flag
-puts stderr "structmsgData: flags![dict get $structmsgData flags]!"
       return $::STRUCT_MSG_ERR_OK
     }
 
@@ -618,7 +642,7 @@ puts stderr "structmsgData: flags![dict get $structmsgData flags]!"
 
     # ================================= initMsg ====================================
     
-    proc initMsg {} {
+    proc initMsg {numTableRows numTableRowFields} {
       variable structmsgData
     
       # initialize field offsets for each field
@@ -642,16 +666,23 @@ puts stderr "structmsgData: flags![dict get $structmsgData flags]!"
             dict incr structmsgData headerLgth [dict get $fieldInfo fieldLgth]
             dict set structmsgData totalLgth [expr {[dict get $structmsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
           }
+          STRUCT_MSG_SPEC_FIELD_TABLE_ROWS {
+#            dict set fieldInfo fieldLgth $numTableRows
+dict set structmsgData numTabRows $numTableRows
+          }
           STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
+#            dict set fieldInfo fieldLgth $numTableRowFields
+dict set structmsgData numTabRowFields $numTableRowFields
             set row 0
             set col 0
             set tableFields [dict get $structmsgData tableFields]
             while {$row < [dict get $structmsgData numTableRows]} {
               while {$col < [dict get $structmsgData numTableRowFields]} {
-                set cellIdx [expr{$col + $row * [dict get $structmsgData numRowFields]}]
+                set cellIdx [expr {$col + $row * [dict get $structmsgData numRowFields]}]
                 set fieldInfo2 [lindex $tableFields $cellIdx]
                 dict set fieldInfo2 fieldOffset [dict get $structmsgData fieldOffset]
                 set tableFields [lreplace $tableFields $cellIdx $cellIdx $fieldInfo2]
+                dict set structmsgData tableFields $tableFields
                 dict incr structmsgData fieldOffset [dict get $fieldInfo2 fieldLgth]
                 incr col
               }
@@ -724,6 +755,7 @@ puts stderr "structmsgData: flags![dict get $structmsgData flags]!"
         incr idx
       }
       dict set structmsgData fields $fields
+puts stderr "initMsg done!"
       return $::STRUCT_MSG_ERR_OK
     }
     

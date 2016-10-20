@@ -601,7 +601,7 @@ namespace eval structmsg {
         }
         incr idx
       }
-      ::structmsg structmsgData initMsg
+      ::structmsg structmsgData initMsg 0 0
       return $::STRUCT_DISP_ERR_OK;
     }
     

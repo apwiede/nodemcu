@@ -195,6 +195,7 @@ proc buildAPListWidget {} {
   set rowLst [list]
   set row 0
 
+set ::APTableId $tableId
   $tableId configure -width 100
   $tableId configure -columns $lst
   foreach rowLst $valueLst {
@@ -220,6 +221,7 @@ if {0} {
   checkErrOK $result
   set result [::structmsg get_definitionNumTableRowFields $def numTableRowFields]
   checkErrOK $result
+  set row 0
   while {$row < $numTableRows} {
     foreach name $tableFieldNames {
       structmsg get_definitionTableFieldInfo $def $name 0 fieldInfo

@@ -128,6 +128,7 @@ set ::STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    237
 set ::STRUCT_MSG_SPEC_FIELD_DEFINITIONS         236
 set ::STRUCT_MSG_SPEC_FIELD_LOW                 235  ; # this must be the last entry!!
 
+set ::STRUCT_MSG_FREE_FIELD_ID 0xFF
 set RAND_MAX 0x7FFFFFFF
 
 namespace eval ::structmsg {
@@ -224,18 +225,18 @@ namespace eval ::structmsg {
     dict set specialFieldInts2Ids 249 STRUCT_MSG_SPEC_FIELD_RANDOM_NUM
     dict set specialFieldInts2Ids 248 STRUCT_MSG_SPEC_FIELD_SEQUENCE_NUM
     dict set specialFieldInts2Ids 247 STRUCT_MSG_SPEC_FIELD_FILLER
-    dict set specialFieldInts2Ids 246 vSTRUCT_MSG_SPEC_FIELD_CRC
-    dict set specialFieldInts2Ids 245 vSTRUCT_MSG_SPEC_FIELD_ID
-    dict set specialFieldInts2Ids 244 vSTRUCT_MSG_SPEC_FIELD_TABLE_ROWS
-    dict set specialFieldInts2Ids 243 vSTRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS
-    dict set specialFieldInts2Ids 242 vSTRUCT_MSG_SPEC_FIELD_GUID
-    dict set specialFieldInts2Ids 241 vSTRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS
-    dict set specialFieldInts2Ids 240 vSTRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS
-    dict set specialFieldInts2Ids 239 vSTRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE
-    dict set specialFieldInts2Ids 238 vSTRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES
-    dict set specialFieldInts2Ids 237 vSTRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE
-    dict set specialFieldInts2Ids 236 vSTRUCT_MSG_SPEC_FIELD_DEFINITIONS
-    dict set specialFieldInts2Ids 235 vSTRUCT_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
+    dict set specialFieldInts2Ids 246 STRUCT_MSG_SPEC_FIELD_CRC
+    dict set specialFieldInts2Ids 245 STRUCT_MSG_SPEC_FIELD_ID
+    dict set specialFieldInts2Ids 244 STRUCT_MSG_SPEC_FIELD_TABLE_ROWS
+    dict set specialFieldInts2Ids 243 STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS
+    dict set specialFieldInts2Ids 242 STRUCT_MSG_SPEC_FIELD_GUID
+    dict set specialFieldInts2Ids 241 STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS
+    dict set specialFieldInts2Ids 240 STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS
+    dict set specialFieldInts2Ids 239 STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE
+    dict set specialFieldInts2Ids 238 STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES
+    dict set specialFieldInts2Ids 237 STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE
+    dict set specialFieldInts2Ids 236 STRUCT_MSG_SPEC_FIELD_DEFINITIONS
+    dict set specialFieldInts2Ids 235 STRUCT_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
 
 
     # ================================= getSpecialFieldNameIntFromId ====================================
@@ -290,7 +291,7 @@ puts stderr 21
                   # just get the entry, do not modify
                 }
               }
-              set id [dict get $entry id]
+              set fieldNameId [dict get $entry id]
               return $::STRUCT_MSG_ERR_OK
             }
             if {($incrVal == $::STRUCT_MSG_INCR) && ([dict get $entry id] eq $::STRUCT_MSG_FREE_FIELD_ID) && ($firstFreeEntry eq "")} {
@@ -300,13 +301,14 @@ puts stderr 21
           }
         }
         if {$incrVal == $::STRUCT_MSG_DECR} {
-          return $::STRUCT_MSG_ERR_OK ; # sjust ignore silently
+          return $::STRUCT_MSG_ERR_OK ; # just ignore silently
         } else {
           if {$incrVal == $::STRUCT_MSG_NO_INCR} {
             return $::STRUCT_MSG_ERR_FIELD_NOT_FOUND
           } else {
+puts stderr "new entry!$fieldName!"
             if {$firstFreeEntry ne ""} {
-              set id [dict get $firstFreeEntry id]
+              set fieldNameId [dict get $firstFreeEntry id]
               dict set firstFreeEntry refCnt 1
               dict set firstFreeEntry fieldName $fieldName
               set definitions [lreplace $definitions $firstFreeEntryIdx $firstFreeEntryIdx $firstFreeEntry]
@@ -317,7 +319,7 @@ puts stderr 21
               dict set entry refCnt 1
               dict set entry id $numDefinitions
               dict set entry fieldName $fieldName
-              set id $numDefinitions
+              set fieldNameId $numDefinitions
               lappend definitions $entry
             }
           }

@@ -90,7 +90,7 @@ namespace eval structmsg {
         }
         if {$fieldNameInt > $::STRUCT_MSG_SPEC_FIELD_LOW} {
           # yes it is a special name 
-            set result [::structmsg structmsgDataView getFieldNameStrFromId $fieldNameId fieldNameStr]
+          set result [::structmsg structmsgDataView getFieldNameStrFromId $fieldNameId fieldNameStr]
         } else {
           set idx $fieldNameId
           while {true} {
@@ -240,7 +240,11 @@ namespace eval structmsg {
         puts stderr [format "      idx: %d fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d" $idx $fieldNameStr $fieldTypeStr [dict get $fieldInfo fieldLgth] [dict get $fieldInfo fieldOffset]]
         if {[lsearch [dict get $fieldInfo fieldFlags] STRUCT_MSG_FIELD_IS_SET] >= 0} {
           if {[dict get $fieldInfo fieldNameId] eq "STRUCT_MSG_SPEC_FIELD_DEFINITIONS"} {
+if {[catch {
             set result [dumpDefDefinitions $fieldInfo "  " 0 $names]
+} msg]} {
+puts stderr "dumpdDefDef error: $msg!"
+}
             if {$result != $::STRUCT_MSG_ERR_OK} {
               return $result
             }
@@ -681,17 +685,16 @@ puts stderr "setDef done"
 
     # ============================= createMsgFromDef ========================
 
-    proc createMsgFromDef {} {
+    proc createMsgFromDef {handleVar} {
       variable structmsgData
+      upvar $handleVar handle
 
-# FIXME TEMEPORARY!!
-#set ::structmsg structmsgData structmsgData $structmsgData
+puts stderr "createMsgFromDef!"
        # loop over def Fields and extract infos
       set fieldIdx 0
       while {$fieldIdx < [dict get $structmsgData numDefFields]} {
         set defFields [dict get $structmsgData defFields]
         set fieldInfo [lindex $defFields $fieldIdx]
-puts stderr "fieldInfo:$fieldInfo!"
         switch [dict get $fieldInfo fieldNameId] {
         STRUCT_MSG_SPEC_FIELD_SRC -
         STRUCT_MSG_SPEC_FIELD_DST -
@@ -720,7 +723,6 @@ puts stderr "fieldInfo:$fieldInfo!"
             dict set normNamesOffsets $idx offset $val
             incr idx
           }
-puts stderr "normNamesOffsets!$normNamesOffsets!"
         }
         STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE {
           set result [::structmsg dataView getUint16 [dict get $fieldInfo fieldOffset] normFldNamesSize]
@@ -746,12 +748,11 @@ puts stderr "normNamesOffsets!$normNamesOffsets!"
               if {$pch == 0} {
                 break
               }
-puts stderr "nameIdx!$nameIdx!"
               incr nameIdx
             }
+            incr nameIdx -1 ; # do not use \0 char
             set fieldNameStr [string range $names $val $nameIdx]
             dict set normNamesOffsets $idx name [string range $names $val $nameIdx]
-puts stderr "normNamesOffsets!$normNamesOffsets!"
             incr idx
           }
         }
@@ -762,15 +763,13 @@ puts stderr "normNamesOffsets!$normNamesOffsets!"
           }
         }
         STRUCT_MSG_SPEC_FIELD_DEFINITIONS {
-          set idx 0
+          set msgIdx 0
           set namesIdx 0
-puts stderr "STRUCT_MSG_SPEC_FIELD_DEFINITIONS!"
-#          ::structmsg structmsgData createMsg [expr {$definitionsSize / 2}] handle
-puts stderr "need to fix addHandel first!!"
-puts stderr "after createMsg!"
-          while {$idx < [expr {$definitionsSize / 2}]} {
-            set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset]+($idx*2)}] fieldNameId]
-            incr idx
+          ::structmsg structmsgData createMsg [expr {$definitionsSize / 2}] handle
+          set myLgth [expr {$definitionsSize / 2}]
+          while {$msgIdx < $myLgth} {
+            set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset]+($msgIdx*2)}] fieldNameId]
+            incr msgIdx
             if {$result != $::STRUCT_MSG_ERR_OK} {
               return $result
             }
@@ -786,8 +785,8 @@ puts stderr "after createMsg!"
                 return $result
               }
             }
-            set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset]+($idx*2)}] fieldTypeId]
-            incr idx
+            set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset]+($msgIdx*2)}] fieldTypeId]
+            incr msgIdx
             if {$result != $::STRUCT_MSG_ERR_OK} {
               return $result
             }
@@ -795,23 +794,31 @@ puts stderr "after createMsg!"
             if {$result != $::STRUCT_MSG_ERR_OK} {
               return $result
             }
-            set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset]+($idx*2)}] fieldLgth]
-            incr idx
+            set result [::structmsg dataView getUint16 [expr {[dict get $fieldInfo fieldOffset]+($msgIdx*2)}] fieldLgth]
+            incr msgIdx
             if {$result != $::STRUCT_MSG_ERR_OK} {
               return $result
             }
-puts stderr "addField!$fieldNameStr!"
-puts stderr "need to fix addHandel first!!"
-#            set result [::structmsg structmsgData addField $fieldNameStr $fieldTypeStr $fieldLgth]
-#            if {$result != $::STRUCT_MSG_ERR_OK} {
-#              return $result
-#            }
+puts stderr "addField!$fieldNameStr $fieldTypeStr $fieldLgth!"
+# FIXME!!!
+if {$fieldNameStr eq "@tablerows"} {
+dict set structmsgData numTableRows $fieldLgth
+}
+if {$fieldNameStr eq "@tablerowfields"} {
+dict set structmsgData numTableRowFields $fieldLgth
+}
+            set result [::structmsg structmsgData addField $fieldNameStr $fieldTypeStr $fieldLgth]
+            if {$result != $::STRUCT_MSG_ERR_OK} {
+              return $result
+            }
           }
         }
         }
         incr fieldIdx
       }
-      set result [initMsg]
+puts stderr "initMsg!"
+      set result [::structmsg structmsgData initMsg [dict get $structmsgData numTableRows] [dict get $structmsgData numTableRowFields]]
+puts stderr "initMsg done!"
       return $::STRUCT_MSG_ERR_OK
     }
 
