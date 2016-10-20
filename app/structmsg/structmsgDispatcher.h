@@ -82,7 +82,7 @@ enum structmsgDispatcherErrorCode
 };
 
 
-#define DISP_BUF_LGTH 255
+#define DISP_BUF_LGTH 1024
 // dst + src + totalLgth + (optional) GUID + cmdKey/shCmdKey
 // uint16_t + uint16_t + uint16_t + (optional) uint8_t*(16) + uint16_t/uint8_t
 #define DISP_MAX_HEADER_LGTH (sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint16_t) + (16*sizeof(uint8_t)) + sizeof(uint16_t))
@@ -177,7 +177,7 @@ typedef struct msgParts {
   uint8_t u8CmdKey;
   uint8_t lgth;
   uint8_t realLgth;
-  uint8_t fieldOffset;
+  size_t fieldOffset;
   uint8_t buf[DISP_BUF_LGTH];
 } msgParts_t;
 
