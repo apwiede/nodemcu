@@ -35,7 +35,7 @@
 #include "mem.h"
 #include "c_string.h"
 #include "c_stdlib.h"
-#include "structmsg.h"
+#include "structmsgData.h"
 
 typedef struct id2offset {
   uint16_t id;

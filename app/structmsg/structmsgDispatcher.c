@@ -48,7 +48,7 @@
 #include "c_stdio.h"
 #include "c_limits.h"
 #include "platform.h"
-#include "structmsg.h"
+#include "structmsgData.h"
 #include "../crypto/mech.h"
 
 #define BASE64_INVALID '\xff'
