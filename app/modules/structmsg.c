@@ -41,7 +41,7 @@
 #include "c_string.h"
 #include "c_stdarg.h"
 #include "rom.h"
-#include "structmsg.h"
+#include "structmsgData.h"
 #include "osapi.h"
 #define MEMLEAK_DEBUG 1
 #include "mem.h"
