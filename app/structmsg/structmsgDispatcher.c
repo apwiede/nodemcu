@@ -875,11 +875,15 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts
     idx++;
   }
   if (self->structmsgData->numTableRows > 0) {
-  result = newStructmsgDefinition(self->structmsgData);
-  checkErrOK(result);
+    result = newStructmsgDefinition(self->structmsgData);
+    checkErrOK(result);
     result = self->structmsgData->initDef(self->structmsgData);
     checkErrOK(result);
 self->structmsgData->dumpDefFields(self->structmsgData);
+    result = newStructmsgList(self->structmsgData);
+    checkErrOK(result);
+    result = self->structmsgData->initList(self->structmsgData);
+    checkErrOK(result);
   }
   return STRUCT_DISP_ERR_OK;
 }

@@ -1048,11 +1048,9 @@ structmsgData_t *newStructmsgData(void) {
   if (structmsgData->structmsgDataView == NULL) {
     return NULL;
   }
-  structmsgData->structmsgDefinitionDataView = NULL;
   
   structmsgData->fields = NULL;
   structmsgData->tableFields = NULL;
-  structmsgData->defFields = NULL;
   structmsgData->header = NULL;
   structmsgData->flags = 0;
   structmsgData->numFields = 0;
@@ -1060,25 +1058,46 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->numTableRows = 0;
   structmsgData->numTableRowFields = 0;
   structmsgData->numRowFields = 0;
-  structmsgData->numDefFields = 0;
   structmsgData->fieldOffset = 0;
-  structmsgData->defFieldOffset = 0;
   structmsgData->totalLgth = 0;
-  structmsgData->defTotalLgth = 0;
   structmsgData->cmdLgth = 0;
   structmsgData->headerLgth = 0;
+
+  // definitionMsg
+  structmsgData->structmsgDefinitionDataView = NULL;
+  structmsgData->defFields = NULL;
+  structmsgData->numDefFields = 0;
+  structmsgData->defFieldOffset = 0;
+  structmsgData->defTotalLgth = 0;
   structmsgData->defNumNormFields = 0;
   structmsgData->defNormNamesSize = 0;
   structmsgData->defDefinitionsSize = 0;
+  structmsgData->defHeaderLgth = 0;
 
-  structmsgData->structmsgDefinitionDataView = NULL;
   structmsgData->initDef = NULL;
   structmsgData->prepareDef = NULL;
   structmsgData->addDefField = NULL;
   structmsgData->dumpDefFields = NULL;
   structmsgData->setDefFieldValue = NULL;
   structmsgData->getDefFieldValue = NULL;
+  structmsgData->setDefData = NULL;
+  structmsgData->getDefData = NULL;
+  structmsgData->createMsgFromDef = NULL;
 
+
+  // listMsg
+  structmsgData->numListMsgs = 0;
+  structmsgData->structmsgListDataView = NULL;
+  structmsgData->listFields = NULL;
+  structmsgData->listFieldOffset = 0;
+  structmsgData->listTotalLgth = 0;
+  structmsgData->listHeaderLgth = 0;
+
+  structmsgData->initList = NULL;
+  structmsgData->prepareList = NULL;
+  structmsgData->addListMsg = NULL;
+
+  // normalMsg
   structmsgData->createMsg = &createMsg;
   structmsgData->deleteMsg = &deleteMsg;
   structmsgData->addField = &addField;

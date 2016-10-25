@@ -59,6 +59,8 @@ extern "C" {
 #define STRUCT_DEF_IS_INITTED           (1 << 7)
 #define STRUCT_DEF_IS_PREPARED          (1 << 8)
 #define STRUCT_MSG_CRC_USE_HEADER_LGTH  (1 << 9)
+#define STRUCT_LIST_IS_INITTED          (1 << 10)
+#define STRUCT_LIST_IS_PREPARED         (1 << 11)
 
 #define STRUCT_MSG_FIELD_IS_SET   (1 << 0)
 
@@ -67,6 +69,9 @@ extern "C" {
 
 #define STRUCT_DEF_TO_DATA        (1 << 0)
 #define STRUCT_DEF_FROM_DATA      (1 << 1)
+
+#define STRUCT_LIST_NUM_LIST_FIELDS 8
+#define STRUCT_LIST_CMD_KEY 0x5A5A
 
 #define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
 
@@ -87,6 +92,7 @@ typedef uint8_t (* setMsgData_t)(structmsgData_t *structmsgData, const uint8_t *
 typedef uint8_t (* setMsgFieldFromList_t)(structmsgData_t *selfconst, const uint8_t **listVector, uint8_t numEntries, uint16_t flags);
 typedef uint8_t ( *setDispatcher_t)(structmsgData_t *self, structmsgDispatcher_t *dispatcher);
 
+// definitionMsg
 typedef uint8_t (* dumpDefFields_t)(structmsgData_t *self);
 typedef uint8_t (* initDef_t)(structmsgData_t *self);
 typedef uint8_t (* prepareDef_t)(structmsgData_t *self);
@@ -97,34 +103,66 @@ typedef uint8_t (* setDefData_t)(structmsgData_t *self, const uint8_t *data);
 typedef uint8_t (* getDefData_t)(structmsgData_t *self, uint8_t **data, int *lgth);
 typedef uint8_t (* createMsgFromDef_t)(structmsgData_t *self);
 
+// listMsg
+typedef uint8_t (* initList_t)(structmsgData_t *self);
+typedef uint8_t (* prepareList_t)(structmsgData_t *self);
+typedef uint8_t (* addListMsg_t)(structmsgData_t *self, size_t msgLgth, uint8_t *msgData);
+typedef uint8_t (* addListField_t)(structmsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
+
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
-  structmsgDataView_t *structmsgDefinitionDataView;
   structmsgDataDescription_t *structmsgDataDescription;
   structmsgDispatcher_t *structmsgDispatcher;
   char handle[16];
   structmsgField_t *fields;
   structmsgField_t *tableFields;
-  structmsgField_t *defFields;
   uint16_t flags;
   size_t numFields;
   size_t maxFields;
   size_t numTableRows;         // number of list rows
   size_t numTableRowFields;    // number of fields within a table row
   size_t numRowFields;         // for checking how many tableRowFields have been processed
-  size_t numDefFields;         // for checking how many defFields have been processed
   size_t fieldOffset;
-  size_t defFieldOffset;
   size_t totalLgth;
-  size_t defTotalLgth;
   size_t cmdLgth;
   size_t headerLgth;
+  uint8_t *header;
+
+  // definitionMsg
+  structmsgDataView_t *structmsgDefinitionDataView;
+  structmsgField_t *defFields;
+  size_t numDefFields;         // for checking how many defFields have been processed
+  size_t defFieldOffset;
+  size_t defTotalLgth;
   size_t defHeaderLgth;
   size_t defNumNormFields;
   size_t defNormNamesSize;
   size_t defDefinitionsSize;
-  uint8_t *header;
 
+  initDef_t initDef;
+  prepareDef_t prepareDef;
+  dumpDefFields_t dumpDefFields;
+  addDefField_t addDefField;
+  getDefFieldValue_t getDefFieldValue;
+  setDefFieldValue_t setDefFieldValue;
+  setDefData_t setDefData;
+  getDefData_t getDefData;
+  createMsgFromDef_t createMsgFromDef;
+
+  // listMsg
+  structmsgDataView_t *structmsgListDataView;
+  structmsgField_t *listFields;
+  size_t numListMsgs;         // for checking how many listMsgs have been processed
+  size_t listFieldOffset;
+  size_t listTotalLgth;
+  size_t listHeaderLgth;
+
+  initList_t initList;
+  prepareList_t prepareList;
+  addListMsg_t addListMsg;
+  addListField_t addListField;
+
+  // normalMsg
   createMsg_t createMsg;
   deleteMsg_t deleteMsg;
   addField_t addField;
@@ -139,15 +177,6 @@ typedef struct structmsgData {
   setMsgData_t setMsgData;
   setMsgFieldFromList_t setMsgFieldsFromList;
 
-  initDef_t initDef;
-  prepareDef_t prepareDef;
-  dumpDefFields_t dumpDefFields;
-  addDefField_t addDefField;
-  getDefFieldValue_t getDefFieldValue;
-  setDefFieldValue_t setDefFieldValue;
-  setDefData_t setDefData;
-  getDefData_t getDefData;
-  createMsgFromDef_t createMsgFromDef;
   setDispatcher_t setDispatcher;
 
 } structmsgData_t;
@@ -157,6 +186,7 @@ structmsgData_t *newStructmsgData(void);
 uint8_t structmsgGetPtrFromHandle(const char *handle, structmsgData_t **structmsgData);
 uint8_t newStructmsgDataFromList(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
 uint8_t newStructmsgDefinition(structmsgData_t *structmsgData);
+uint8_t newStructmsgList(structmsgData_t *structmsgData);
  
 #ifdef	__cplusplus
 }

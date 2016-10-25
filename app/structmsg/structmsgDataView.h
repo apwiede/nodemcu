@@ -93,6 +93,10 @@ enum structmsgErrorCode
   STRUCT_DEF_ERR_NOT_YET_PREPARED      = 203,
   STRUCT_DEF_ERR_ALREADY_CREATED       = 202,
   STRUCT_MSG_ERR_FIELD_TOTAL_LGTH_MISSING = 201,
+  STRUCT_LIST_ERR_ALREADY_INITTED      = 200,
+  STRUCT_LIST_ERR_NOT_YET_INITTED      = 199,
+  STRUCT_LIST_ERR_NOT_YET_PREPARED     = 198,
+  STRUCT_LIST_ERR_ALREADY_CREATED      = 197,
 };
 
 enum structmsgSpecialFieldNames
@@ -118,7 +122,10 @@ enum structmsgSpecialFieldNames
   STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      = 237,
   STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    = 236,
   STRUCT_MSG_SPEC_FIELD_DEFINITIONS         = 235,
-  STRUCT_MSG_SPEC_FIELD_LOW                 = 234,         // this must be the last entry!!
+  STRUCT_MSG_SPEC_FIELD_NUM_MSGS            = 234,
+  STRUCT_MSG_SPEC_FIELD_MSG_SIZES           = 233,
+  STRUCT_MSG_SPEC_FIELD_MSGS                = 232,
+  STRUCT_MSG_SPEC_FIELD_LOW                 = 231,         // this must be the last entry!!
 };
 
 #define STRUCT_MSG_NO_INCR 0

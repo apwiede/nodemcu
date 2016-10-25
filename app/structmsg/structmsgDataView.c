@@ -83,6 +83,10 @@ static str2id_t specialFieldNames[] = {
   {"@normFldNames",     STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES},
   {"@definitionsSize",  STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE},
   {"@definitions",      STRUCT_MSG_SPEC_FIELD_DEFINITIONS},
+  {"@numMsgs",          STRUCT_MSG_SPEC_FIELD_NUM_MSGS},
+  {"@msgSizes",         STRUCT_MSG_SPEC_FIELD_MSG_SIZES},
+  {"@msgs",             STRUCT_MSG_SPEC_FIELD_MSGS},
+
   {NULL, -1},
 };
 
