@@ -297,11 +297,9 @@ puts stderr "msgDataLgth: [string length $msgData]!"
       ::structmsg dataView setData "" 0
       ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $defData $defLgth
 
-if {1} {
       ::structmsg structmsgIdentify structmsgIdentifyReset
       ::structmsg dataView setData "" 0
       ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $msgData $msgLgth
-}
     }
   }
 }

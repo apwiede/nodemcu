@@ -918,6 +918,7 @@ puts stderr "numTabFields!$numTabFields!result!$result!"
   while {$row < $numTabRows} {
     foreach name [list ssid rssi] {
       set result [::structmsg structmsgData getTableFieldValue $name $row value]
+puts stderr "LL: $name [string length $value]!$value!!"
       set value [string trimright $value "\0"]
       lappend rowLst $value
     }
