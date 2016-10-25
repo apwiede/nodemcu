@@ -285,10 +285,10 @@ static void bssScanDoneCb(void *arg, STATUS status) {
   while (bss_link != NULL) {
     scanInfo = &bssScanInfos.infos[bssScanInfos.numScanInfos];
     c_memset(scanInfo->ssid, 0, sizeof(scanInfo->ssid));
-    if (c_strlen(bss_link->ssid) <= sizeof(scanInfo->ssid)-1) {
-      c_memcpy(scanInfo->ssid, bss_link->ssid, c_strlen(bss_link->ssid));
+    if (bss_link->ssid_len <= sizeof(scanInfo->ssid)) {
+      c_memcpy(scanInfo->ssid, bss_link->ssid, bss_link->ssid_len);
     } else {
-      c_memcpy(scanInfo->ssid, bss_link->ssid, sizeof(scanInfo->ssid)-1);
+      c_memcpy(scanInfo->ssid, bss_link->ssid, sizeof(scanInfo->ssid));
     }
     c_memset(scanInfo->bssidStr, 0, sizeof(scanInfo->bssidStr));
     c_memcpy(scanInfo->bssid, bss_link->bssid, sizeof(scanInfo->bssid));
@@ -346,15 +346,15 @@ static uint8_t getStationConfig(structmsgDispatcher_t *self) {
   }
   c_memset(stationConfig.ssid, 0, sizeof(stationConfig.ssid));
   if (c_strlen(station_config.ssid) <= sizeof(stationConfig.ssid)) {
-    c_memcpy(stationConfig.ssid, station_config.ssid, c_strlen(station_config.ssid)-1);
+    c_memcpy(stationConfig.ssid, station_config.ssid, c_strlen(station_config.ssid));
   } else {
-    c_memcpy(stationConfig.ssid, station_config.ssid, sizeof(stationConfig.ssid)-1);
+    c_memcpy(stationConfig.ssid, station_config.ssid, sizeof(stationConfig.ssid));
   }
   c_memset(stationConfig.password, 0, sizeof(stationConfig.password));
-  if (c_strlen(station_config.password) <= sizeof(stationConfig.password)-1) {
+  if (c_strlen(station_config.password) <= sizeof(stationConfig.password)) {
     c_memcpy(stationConfig.password, station_config.password, c_strlen(station_config.password));
   } else {
-    c_memcpy(stationConfig.password, station_config.password, sizeof(stationConfig.password)-1);
+    c_memcpy(stationConfig.password, station_config.password, sizeof(stationConfig.password));
   }
   c_memset(stationConfig.bssidStr, 0, sizeof(stationConfig.bssidStr));
   c_memcpy(stationConfig.bssid, station_config.bssid, sizeof(stationConfig.bssid));

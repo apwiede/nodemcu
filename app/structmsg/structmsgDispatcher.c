@@ -560,6 +560,7 @@ static uint8_t getMsgPtrFromMsgParts(structmsgDispatcher_t *self, msgParts_t *ms
       if ((incrRefCnt == STRUCT_MSG_INCR) && (headerEntry->structmsgData == NULL) && (firstFreeEntry == NULL)) {
         firstFreeEntry = headerEntry;
         firstFreeEntry->structmsgData = newStructmsgData();
+        firstFreeEntry->structmsgData->setDispatcher(firstFreeEntry->structmsgData, self);
         firstFreeEntry->headerLgth = offset;
         c_memcpy(firstFreeEntry->header, header, offset);
         *structmsgData = firstFreeEntry->structmsgData;
@@ -582,6 +583,7 @@ static uint8_t getMsgPtrFromMsgParts(structmsgDispatcher_t *self, msgParts_t *ms
         newHeaderEntry->headerLgth = offset;
         c_memcpy(newHeaderEntry->header, header, offset);
         newHeaderEntry->structmsgData = newStructmsgData();
+        newHeaderEntry->structmsgData->setDispatcher(newHeaderEntry->structmsgData, self);
         *structmsgData = newHeaderEntry->structmsgData;
         self->numMsgHeaders++;
       }
@@ -874,7 +876,6 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts
   }
   if (self->structmsgData->numTableRows > 0) {
   result = newStructmsgDefinition(self->structmsgData);
-ets_printf("newStructmsgDefinition result: %d\n", result);
   checkErrOK(result);
     result = self->structmsgData->initDef(self->structmsgData);
     checkErrOK(result);
@@ -1021,6 +1022,8 @@ static uint8_t initDispatcher(structmsgDispatcher_t *self) {
   uint8_t result;
 
   result = structmsgIdentifyInit(self);
+  checkErrOK(result);
+  result = structmsgBuildMsgInit(self);
   checkErrOK(result);
   result = structmsgSendReceiveInit(self);
   checkErrOK(result);

@@ -441,6 +441,19 @@ ets_printf("dataView freeing data in setData %p\n", self->data);
   return DATA_VIEW_ERR_OK;
 }
 
+// ============================= dumpBinary ========================
+
+static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
+  int idx;
+
+  ets_printf("%s\n", where);
+  idx = 0;
+  while (idx < lgth) {
+     ets_printf("idx: %d ch: %c 0x%02x\n", idx, data[idx], data[idx] & 0xFF);
+    idx++;
+  }
+}
+
 // ================================= newDataView ====================================
 
 dataView_t *newDataView(void) {
@@ -487,6 +500,7 @@ dataView_t *newDataView(void) {
   dataView->setInt32Vector = &setInt32Vector;
 
   dataView->setData = &setData;
+  dataView->dumpBinary = &dumpBinary;
   return dataView;
 }
 

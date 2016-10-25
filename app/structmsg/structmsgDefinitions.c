@@ -276,7 +276,6 @@ static uint8_t setDefFieldValue(structmsgData_t *self, uint8_t fieldNameId, int 
     idx++;
   }
   if (!found) {
-ets_printf("fieldNameId: %d found: %d\n", fieldNameId, found);  
     return STRUCT_MSG_ERR_FIELD_NOT_FOUND;
   }
   return STRUCT_MSG_ERR_OK;
@@ -293,7 +292,6 @@ static uint8_t addDefFields(structmsgData_t *self, uint16_t numNormFields, uint1
   size_t crcLgth;
   size_t myLgth;
   uint16_t fillerLgth;
-  size_t headerLgth;
   size_t namesOffset;
 
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DST, DATA_VIEW_FIELD_UINT16_T, 2);
@@ -302,7 +300,7 @@ static uint8_t addDefFields(structmsgData_t *self, uint16_t numNormFields, uint1
   checkErrOK(result);
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_TOTAL_LGTH, DATA_VIEW_FIELD_UINT16_T, 2);
   checkErrOK(result);
-  headerLgth = self->defFieldOffset;
+  self->defHeaderLgth = self->defFieldOffset;
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CMD_KEY, DATA_VIEW_FIELD_UINT16_T, 2);
   checkErrOK(result);
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CMD_LGTH, DATA_VIEW_FIELD_UINT16_T, 2);
@@ -339,7 +337,7 @@ static uint8_t addDefFields(structmsgData_t *self, uint16_t numNormFields, uint1
   checkErrOK(result);
     fillerLgth = 0;
     crcLgth = 2;
-    myLgth = self->defFieldOffset + crcLgth - headerLgth;
+    myLgth = self->defFieldOffset + crcLgth - self->defHeaderLgth;
     while ((myLgth % 16) != 0) {
       myLgth++;
       fillerLgth++;
@@ -398,7 +396,6 @@ static uint8_t setStaticDefFields(structmsgData_t *self, int numNormFields, int 
   namesOffset = 0;
   while (idx < numNormFields) {
     c_memcpy(names+namesOffset, normNamesOffsets[idx].name,c_strlen(normNamesOffsets[idx].name));
-ets_printf("name: idx: %d %s\n", idx, normNamesOffsets[idx].name);
     namesOffset += c_strlen(normNamesOffsets[idx].name);
     names[namesOffset] = 0;
     namesOffset++;
@@ -420,7 +417,6 @@ ets_printf("name: idx: %d %s\n", idx, normNamesOffsets[idx].name);
       checkErrOK(result);
       result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldLgth, NULL, fieldIdx++);
       checkErrOK(result);
-ets_printf("norm offset: %d fieldTypeId: %d fieldLgth: %d\n", normNamesOffsets[namesIdx-1].offset, fieldInfo->fieldTypeId, fieldInfo->fieldLgth);
     } else {
       result = setDefFieldValue(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, fieldInfo->fieldNameId, NULL, fieldIdx++);
       checkErrOK(result);
@@ -563,9 +559,9 @@ ets_printf("prepareDef not yet initted\n");
 }
 
 
-// ============================= setDef ========================
+// ============================= setDefData ========================
 
-static uint8_t setDef(structmsgData_t *self, const  uint8_t *data) {
+static uint8_t setDefData(structmsgData_t *self, const  uint8_t *data) {
   int idx;
   int result;
   uint16_t lgth;
@@ -625,9 +621,9 @@ static uint8_t setDef(structmsgData_t *self, const  uint8_t *data) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= getDef ========================
+// ============================= getDefData ========================
 
-static uint8_t getDef(structmsgData_t *self, uint8_t **data, int *lgth) {
+static uint8_t getDefData(structmsgData_t *self, uint8_t **data, int *lgth) {
   if ((self->flags & STRUCT_DEF_IS_INITTED) == 0) {
     return STRUCT_DEF_ERR_NOT_YET_INITTED;
   }
@@ -757,8 +753,8 @@ uint8_t newStructmsgDefinition(structmsgData_t *self) {
   self->dumpDefFields = &dumpDefFields;
   self->setDefFieldValue = &setDefFieldValue;
   self->getDefFieldValue = &getDefFieldValue;
-  self->setDef = &setDef;
-  self->getDef = &getDef;
+  self->setDefData = &setDefData;
+  self->getDefData = &getDefData;
   self->createMsgFromDef = &createMsgFromDef;
 
   return STRUCT_MSG_ERR_OK;

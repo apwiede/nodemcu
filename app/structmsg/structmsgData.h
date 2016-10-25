@@ -80,12 +80,12 @@ typedef uint8_t (* setFieldValue_t)(structmsgData_t *self, const uint8_t *fieldN
 typedef uint8_t (* getTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setTableFieldValue_t)(structmsgData_t *self, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
 typedef uint8_t (* dumpMsg_t)(structmsgData_t *self);
-typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
 typedef uint8_t (* initMsg_t)(structmsgData_t *self);
 typedef uint8_t (* prepareMsg_t)(structmsgData_t *self);
 typedef uint8_t (* getMsgData_t)(structmsgData_t *structmsgData, uint8_t **data, int *lgth);
 typedef uint8_t (* setMsgData_t)(structmsgData_t *structmsgData, const uint8_t *data);
 typedef uint8_t (* setMsgFieldFromList_t)(structmsgData_t *selfconst, const uint8_t **listVector, uint8_t numEntries, uint16_t flags);
+typedef uint8_t ( *setDispatcher_t)(structmsgData_t *self, structmsgDispatcher_t *dispatcher);
 
 typedef uint8_t (* dumpDefFields_t)(structmsgData_t *self);
 typedef uint8_t (* initDef_t)(structmsgData_t *self);
@@ -93,14 +93,15 @@ typedef uint8_t (* prepareDef_t)(structmsgData_t *self);
 typedef uint8_t (* addDefField_t)(structmsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
 typedef uint8_t (* getDefFieldValue_t)(structmsgData_t *self, const uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int idx);
 typedef uint8_t (* setDefFieldValue_t)(structmsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int idx);
-typedef uint8_t (* setDef_t)(structmsgData_t *self, const uint8_t *data);
-typedef uint8_t (* getDef_t)(structmsgData_t *self, uint8_t **data, int *lgth);
+typedef uint8_t (* setDefData_t)(structmsgData_t *self, const uint8_t *data);
+typedef uint8_t (* getDefData_t)(structmsgData_t *self, uint8_t **data, int *lgth);
 typedef uint8_t (* createMsgFromDef_t)(structmsgData_t *self);
 
 typedef struct structmsgData {
   structmsgDataView_t *structmsgDataView;
   structmsgDataView_t *structmsgDefinitionDataView;
   structmsgDataDescription_t *structmsgDataDescription;
+  structmsgDispatcher_t *structmsgDispatcher;
   char handle[16];
   structmsgField_t *fields;
   structmsgField_t *tableFields;
@@ -118,6 +119,7 @@ typedef struct structmsgData {
   size_t defTotalLgth;
   size_t cmdLgth;
   size_t headerLgth;
+  size_t defHeaderLgth;
   size_t defNumNormFields;
   size_t defNormNamesSize;
   size_t defDefinitionsSize;
@@ -131,7 +133,6 @@ typedef struct structmsgData {
   getTableFieldValue_t getTableFieldValue;
   setTableFieldValue_t setTableFieldValue;
   dumpMsg_t dumpMsg;
-  dumpBinary_t dumpBinary;
   initMsg_t initMsg;
   prepareMsg_t prepareMsg;
   getMsgData_t getMsgData;
@@ -144,9 +145,10 @@ typedef struct structmsgData {
   addDefField_t addDefField;
   getDefFieldValue_t getDefFieldValue;
   setDefFieldValue_t setDefFieldValue;
-  setDef_t setDef;
-  getDef_t getDef;
+  setDefData_t setDefData;
+  getDefData_t getDefData;
   createMsgFromDef_t createMsgFromDef;
+  setDispatcher_t setDispatcher;
 
 } structmsgData_t;
 

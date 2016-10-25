@@ -412,7 +412,8 @@ static uint8_t setTableFieldValue(structmsgData_t *self, const uint8_t *fieldNam
     fieldInfo = &self->tableFields[cellIdx];
     if (fieldNameId == fieldInfo->fieldNameId) {
       fieldInfo->fieldFlags |= STRUCT_MSG_FIELD_IS_SET;
-      return self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue, 0);
+      result = self->structmsgDataView->setFieldValue(self->structmsgDataView, fieldInfo, numericValue, stringValue, 0);
+      return result;
     }
     cellIdx++;
     idx++;
@@ -993,19 +994,6 @@ static uint8_t setMsgData(structmsgData_t *self, const uint8_t *data) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= dumpBinary ========================
-
-static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
-  int idx;
-
-  ets_printf("%s\n", where);
-  idx = 0;
-  while (idx < lgth) {
-     ets_printf("idx: %d ch: 0x%02x\n", idx, data[idx] & 0xFF);
-    idx++;
-  }
-}
-
 // ================================= freeStructmsgData ====================================
 
 static uint8_t freeStructmsgData(structmsgData_t *self) {
@@ -1034,11 +1022,18 @@ static uint8_t freeStructmsgData(structmsgData_t *self) {
 
 // ================================= deleteMsg ====================================
 
-uint8_t deleteMsg(structmsgData_t *self) {
+static uint8_t deleteMsg(structmsgData_t *self) {
   int result;
 
   result = freeStructmsgData(self); 
   checkErrOK(result);
+  return STRUCT_MSG_ERR_OK;
+}
+
+// ================================= setDispatcher ====================================
+
+static uint8_t setDispatcher(structmsgData_t *self, structmsgDispatcher_t *dispatcher) {
+  self->structmsgDispatcher = dispatcher;
   return STRUCT_MSG_ERR_OK;
 }
 
@@ -1076,6 +1071,14 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->defNormNamesSize = 0;
   structmsgData->defDefinitionsSize = 0;
 
+  structmsgData->structmsgDefinitionDataView = NULL;
+  structmsgData->initDef = NULL;
+  structmsgData->prepareDef = NULL;
+  structmsgData->addDefField = NULL;
+  structmsgData->dumpDefFields = NULL;
+  structmsgData->setDefFieldValue = NULL;
+  structmsgData->getDefFieldValue = NULL;
+
   structmsgData->createMsg = &createMsg;
   structmsgData->deleteMsg = &deleteMsg;
   structmsgData->addField = &addField;
@@ -1084,20 +1087,12 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->getTableFieldValue = &getTableFieldValue;
   structmsgData->setTableFieldValue = &setTableFieldValue;
   structmsgData->dumpMsg = &dumpMsg;
-  structmsgData->dumpBinary = &dumpBinary;
   structmsgData->initMsg = &initMsg;
   structmsgData->prepareMsg = &prepareMsg;
   structmsgData->getMsgData = &getMsgData;
   structmsgData->setMsgData = &setMsgData;
   structmsgData->setMsgFieldsFromList = &setMsgFieldsFromList;
-
-  structmsgData->structmsgDefinitionDataView = NULL;
-  structmsgData->initDef = NULL;
-  structmsgData->prepareDef = NULL;
-  structmsgData->addDefField = NULL;
-  structmsgData->dumpDefFields = NULL;
-  structmsgData->setDefFieldValue = NULL;
-  structmsgData->getDefFieldValue = NULL;
+  structmsgData->setDispatcher = &setDispatcher;
 
   return structmsgData;
 }

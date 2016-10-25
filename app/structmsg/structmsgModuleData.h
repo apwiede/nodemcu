@@ -116,7 +116,7 @@ typedef struct structmsgDispatcher structmsgDispatcher_t;
 typedef struct bssScanInfo {
   uint8_t bssid[6];
   uint8_t bssidStr[18];
-  uint8_t ssid[33];
+  uint8_t ssid[32];
   uint8_t ssid_len;
   uint8_t channel;
   int8_t  rssi;
@@ -135,8 +135,8 @@ typedef struct bssScanInfos {
 } bssScanInfos_t;
 
 typedef struct stationConfig {
-  uint8_t ssid[33];
-  uint8_t password[65];
+  uint8_t ssid[32];
+  uint8_t password[64];
   uint8_t bssidSet;
   uint8_t bssid[6];
   uint8_t bssidStr[18];

@@ -206,6 +206,19 @@ typedef struct buildMsgInfos {
   uint8_t buf[100];
 } buildMsgInfos_t;
 
+typedef struct buildListMsgInfos {
+  size_t msgHeaderLgth;
+  size_t msgDataLgth;
+  uint8_t *msgData;
+  size_t defDataLgth;
+  size_t defHeaderLgth;
+  uint8_t *defData;
+  size_t encryptedMsgDataLgth;
+  uint8_t *encryptedMsgData;
+  size_t encryptedDefDataLgth;
+  uint8_t *encryptedDefData;
+} buildListMsgInfos_t;
+
 typedef struct websocketUserData websocketUserData_t;
 typedef struct structmsgDispatcher structmsgDispatcher_t;
 
@@ -239,16 +252,21 @@ typedef uint8_t (* flushFileDesc_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* readLineDesc_t)(structmsgDispatcher_t *self, uint8_t **buffer, uint8_t *lgth);
 typedef uint8_t (* writeLineDesc_t)(structmsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 
-typedef uint8_t (* IMsg_t)(structmsgDispatcher_t *self);
-typedef uint8_t (* BMsg_t)(structmsgDispatcher_t *self);
-typedef uint8_t (* MMsg_t)(structmsgDispatcher_t *self);
-typedef uint8_t (* defaultMsg_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* buildMsg_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* buildListMsg_t)(structmsgDispatcher_t *self, size_t *totalLgth, uint8_t **totalData);
+
+typedef uint8_t (* setMsgValues_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* prepareAnswerMsg_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* handleEncryptedPart_t)(structmsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
+typedef uint8_t (* handleNotEncryptedPart_t)(structmsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* prepareNotEncryptedAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* prepareEncryptedAnswer_t)(structmsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 typedef uint8_t (* resetMsgInfo_t)(structmsgDispatcher_t *self, msgParts_t *parts);
 
 typedef uint8_t (* typeRSendAnswer_t)(structmsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 
 typedef uint8_t (* readHeadersAndSetFlags_t)(structmsgDispatcher_t *self);
+typedef uint8_t (* nextFittingEntry_t)(structmsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleReceivedPart_t)(structmsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
@@ -269,6 +287,7 @@ typedef struct structmsgDispatcher {
   uint8_t actionMode;
   bssScanInfos_t *bssScanInfos;
   buildMsgInfos_t buildMsgInfos;
+  buildListMsgInfos_t buildListMsgInfos;
   uint8_t tableRow;
   uint8_t tableCol;
   void *wud;
@@ -291,13 +310,8 @@ typedef struct structmsgDispatcher {
   uint16_t AppPart;
   uint16_t CloudPart;
 
-//  IMsg_t IMsg;
-//  BMsg_t BMsg;
-//  MMsg_t MMsg;
-//  defaultMsg_t defaultMsg;
   resetMsgInfo_t resetMsgInfo;
 
-  prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
   typeRSendAnswer_t typeRSendAnswer;
 
   setActionEntry_t setActionEntry;
@@ -305,7 +319,15 @@ typedef struct structmsgDispatcher {
   getActionMode_t getActionMode;
   fillMsgValue_t fillMsgValue;
   getBssScanInfo_t getBssScanInfo;
+
   buildMsg_t buildMsg;
+  buildListMsg_t buildListMsg;
+  setMsgValues_t setMsgValues;
+  prepareAnswerMsg_t prepareAnswerMsg;
+  handleEncryptedPart_t handleEncryptedPart;
+  handleNotEncryptedPart_t handleNotEncryptedPart;
+  prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
+  prepareEncryptedAnswer_t prepareEncryptedAnswer;
 
   getModuleValue_t getModuleValue;
   setModuleValues_t setModuleValues;
@@ -318,6 +340,7 @@ typedef struct structmsgDispatcher {
   readLineDesc_t readLine;
 
   readHeadersAndSetFlags_t readHeadersAndSetFlags;
+  nextFittingEntry_t nextFittingEntry;
   handleReceivedPart_t handleReceivedPart;
   uartReceiveCb_t uartReceiveCb;
   createDispatcher_t createDispatcher;
@@ -343,6 +366,7 @@ structmsgDispatcher_t *newStructmsgDispatcher();
 uint8_t structmsgDispatcherGetPtrFromHandle(const char *handle, structmsgDispatcher_t **structmsgDispatcher);
 void freeStructmsgDispatcher(structmsgDispatcher_t *structmsgDispatcher);
 uint8_t structmsgIdentifyInit(structmsgDispatcher_t *self);
+uint8_t structmsgBuildMsgInit(structmsgDispatcher_t *self);
 uint8_t structmsgSendReceiveInit(structmsgDispatcher_t *self);
 uint8_t structmsgActionInit(structmsgDispatcher_t *self);
 uint8_t structmsgModuleDataValuesInit(structmsgDispatcher_t *self);

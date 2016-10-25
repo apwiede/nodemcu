@@ -787,9 +787,9 @@ static int structmsg_delete_msgDefinitions( lua_State* L ) {
 #endif
 
 
-// ============================= structmsg_setDef ========================
+// ============================= structmsg_setDefData ========================
 
-static int structmsg_setDef( lua_State* L ) {
+static int structmsg_setDefData( lua_State* L ) {
   const uint8_t *handle;
   const uint8_t *data;
   structmsgData_t *structmsgData;
@@ -798,15 +798,15 @@ static int structmsg_setDef( lua_State* L ) {
   handle = luaL_checkstring (L, 1);
   data = luaL_checkstring (L, 2);
   result = structmsgGetPtrFromHandle(handle, &structmsgData);
-  checkOKOrErr(L, result, "setDef", "");
-  result = structmsgData->setDef(structmsgData, data);
-  checkOKOrErr(L, result, "setDef", "");
+  checkOKOrErr(L, result, "setDefData", "");
+  result = structmsgData->setDefData(structmsgData, data);
+  checkOKOrErr(L, result, "setDefData", "");
   return 1;
 }
 
-// ============================= structmsg_getDef ========================
+// ============================= structmsg_getDefData ========================
 
-static int structmsg_getDef( lua_State* L ) {
+static int structmsg_getDefData( lua_State* L ) {
   const uint8_t *handle;
   uint8_t *data;
   int lgth;
@@ -815,12 +815,12 @@ static int structmsg_getDef( lua_State* L ) {
 
   handle = luaL_checkstring (L, 1);
   result = structmsgGetPtrFromHandle(handle, &structmsgData);
-  checkOKOrErr(L, result, "getDef", "");
-  result = structmsgData->getDef(structmsgData, &data, &lgth);
+  checkOKOrErr(L, result, "getDefData", "");
+  result = structmsgData->getDefData(structmsgData, &data, &lgth);
   if (result == STRUCT_MSG_ERR_OK) {
     lua_pushlstring (L, data, lgth);
   } else {
-    checkOKOrErr(L, result, "getDef", "");
+    checkOKOrErr(L, result, "getDefData", "");
   }
   return 1;
 }
@@ -1120,8 +1120,8 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "initDef" ),               LFUNCVAL( structmsg_initDef ) },
   { LSTRKEY( "prepareDef" ),            LFUNCVAL( structmsg_prepareDef ) },
   { LSTRKEY( "dumpDefFields" ),         LFUNCVAL( structmsg_dumpDefFields ) },
-  { LSTRKEY( "setDef" ),                LFUNCVAL( structmsg_setDef ) },
-  { LSTRKEY( "getDef" ),                LFUNCVAL( structmsg_getDef ) },
+  { LSTRKEY( "setDefData" ),            LFUNCVAL( structmsg_setDefData ) },
+  { LSTRKEY( "getDefData" ),            LFUNCVAL( structmsg_getDefData ) },
   { LSTRKEY( "createMsgFromDef" ),      LFUNCVAL( structmsg_createMsgFromDef ) },
   { LSTRKEY( "openFile" ),              LFUNCVAL( structmsg_openFile ) },
   { LSTRKEY( "closeFile" ),             LFUNCVAL( structmsg_closeFile ) },
