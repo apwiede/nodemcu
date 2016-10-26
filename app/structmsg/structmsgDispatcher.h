@@ -217,6 +217,8 @@ typedef struct buildListMsgInfos {
   uint8_t *encryptedMsgData;
   size_t encryptedDefDataLgth;
   uint8_t *encryptedDefData;
+  uint16_t src;
+  uint16_t dst;
 } buildListMsgInfos_t;
 
 typedef struct websocketUserData websocketUserData_t;

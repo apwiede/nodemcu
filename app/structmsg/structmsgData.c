@@ -1074,8 +1074,8 @@ structmsgData_t *newStructmsgData(void) {
   structmsgData->defDefinitionsSize = 0;
   structmsgData->defHeaderLgth = 0;
 
-  structmsgData->initDef = NULL;
-  structmsgData->prepareDef = NULL;
+  structmsgData->initDefMsg = NULL;
+  structmsgData->prepareDefMsg = NULL;
   structmsgData->addDefField = NULL;
   structmsgData->dumpDefFields = NULL;
   structmsgData->setDefFieldValue = NULL;
@@ -1086,15 +1086,20 @@ structmsgData_t *newStructmsgData(void) {
 
 
   // listMsg
+  structmsgData->numListFields = 0;
   structmsgData->numListMsgs = 0;
+  structmsgData->listMsgSizesSize = 0;
+  structmsgData->listMsgsSize = 0;
   structmsgData->structmsgListDataView = NULL;
   structmsgData->listFields = NULL;
   structmsgData->listFieldOffset = 0;
   structmsgData->listTotalLgth = 0;
   structmsgData->listHeaderLgth = 0;
+  structmsgData->listMsgSizes = NULL;
+  structmsgData->listMsgs = NULL;
 
-  structmsgData->initList = NULL;
-  structmsgData->prepareList = NULL;
+  structmsgData->initListMsg = NULL;
+  structmsgData->prepareListMsg = NULL;
   structmsgData->addListMsg = NULL;
 
   // normalMsg

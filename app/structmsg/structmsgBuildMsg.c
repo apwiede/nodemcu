@@ -91,9 +91,37 @@ static uint8_t buildListMsg(structmsgDispatcher_t *self, size_t *totalLgth, uint
   char *cp2;
   int lgth;
   size_t listMsgHeaderLgth;
+  size_t msgsLgth;
+  structmsgData_t *structmsgData;
 
   result = STRUCT_MSG_ERR_OK;
 
+  structmsgData = self->structmsgData;
+  structmsgData->listSrc = self->buildListMsgInfos.src; 
+  structmsgData->listDst = self->buildListMsgInfos.dst; 
+  structmsgData->numListMsgs = 2;
+  structmsgData->listMsgSizes = os_zalloc(structmsgData->numListMsgs * sizeof(uint16_t));
+  checkAllocOK(structmsgData->listMsgSizes);
+  msgsLgth = 0;
+  structmsgData->listMsgSizes[0] = self->buildListMsgInfos.defHeaderLgth + self->buildListMsgInfos.encryptedDefDataLgth;
+  msgsLgth += structmsgData->listMsgSizes[0];
+  structmsgData->listMsgSizes[1] = self->buildListMsgInfos.msgHeaderLgth + self->buildListMsgInfos.encryptedMsgDataLgth;
+  msgsLgth += structmsgData->listMsgSizes[1];
+  structmsgData->listMsgs = os_zalloc(msgsLgth);
+  checkAllocOK(structmsgData->listMsgSizes);
+  cp = (char *)structmsgData->listMsgs;
+  cp2 = cp;
+  c_memcpy(cp, self->buildListMsgInfos.defData, self->buildListMsgInfos.defHeaderLgth);
+  cp += self->buildListMsgInfos.defHeaderLgth;
+  c_memcpy(cp, self->buildListMsgInfos.encryptedDefData, self->buildListMsgInfos.encryptedDefDataLgth);
+  cp += self->buildListMsgInfos.encryptedDefDataLgth;
+  c_memcpy(cp, self->buildListMsgInfos.msgData, self->buildListMsgInfos.msgHeaderLgth);
+  cp += self->buildListMsgInfos.msgHeaderLgth;
+  c_memcpy(cp, self->buildListMsgInfos.encryptedMsgData, self->buildListMsgInfos.encryptedMsgDataLgth);
+  cp += self->buildListMsgInfos.encryptedMsgDataLgth;
+  structmsgData->listMsgsSize = cp - cp2;
+
+#ifdef NOTDEF
   listMsgHeaderLgth = 6;
   // FIXME eventually need to add extra length to second headerLgth!!
   *totalLgth = listMsgHeaderLgth;
@@ -112,16 +140,25 @@ cp2 = cp;
   cp[4] = ((self->buildListMsgInfos.msgHeaderLgth + self->buildListMsgInfos.encryptedMsgDataLgth) >> 8) & 0xFF;
   cp[5] = (self->buildListMsgInfos.msgHeaderLgth + self->buildListMsgInfos.encryptedMsgDataLgth) & 0xFF;
 ets_printf("cp: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5]);
-  cp += listMsgHeaderLgth;
-  c_memcpy(cp, self->buildListMsgInfos.defData, self->buildListMsgInfos.defHeaderLgth);
-  cp += self->buildListMsgInfos.defHeaderLgth;
-  c_memcpy(cp, self->buildListMsgInfos.encryptedDefData, self->buildListMsgInfos.encryptedDefDataLgth);
-  cp += self->buildListMsgInfos.encryptedDefDataLgth;
-  c_memcpy(cp, self->buildListMsgInfos.msgData, self->buildListMsgInfos.msgHeaderLgth);
-  cp += self->buildListMsgInfos.msgHeaderLgth;
-  c_memcpy(cp, self->buildListMsgInfos.encryptedMsgData, self->buildListMsgInfos.encryptedMsgDataLgth);
-  cp += self->buildListMsgInfos.encryptedMsgDataLgth;
+#endif
 ets_printf("ready to send Msg cp: %p %p %d\n", cp, cp2, cp-cp2);
+  result = self->structmsgData->initListMsg(self->structmsgData);
+  checkErrOK(result);
+  // and now set the values
+  result = self->structmsgData->setListFieldValue(self->structmsgData, STRUCT_MSG_SPEC_FIELD_NUM_LIST_MSGS, structmsgData->numListMsgs, NULL, 0);
+  checkErrOK(result);
+  result = self->structmsgData->setListFieldValue(self->structmsgData, STRUCT_MSG_SPEC_FIELD_LIST_MSG_SIZES, structmsgData->listMsgSizes[0], NULL, 0);
+  checkErrOK(result);
+  result = self->structmsgData->setListFieldValue(self->structmsgData, STRUCT_MSG_SPEC_FIELD_LIST_MSG_SIZES, structmsgData->listMsgSizes[1], NULL, 1);
+  checkErrOK(result);
+  os_free(structmsgData->listMsgSizes);
+  result = self->structmsgData->setListFieldValue(self->structmsgData, STRUCT_MSG_SPEC_FIELD_LIST_MSGS, 0, structmsgData->listMsgs, 0);
+  checkErrOK(result);
+  result = self->structmsgData->prepareListMsg(self->structmsgData);
+  checkErrOK(result);
+self->structmsgData->dumpListFields(self->structmsgData);
+  result = self->structmsgData->getListData(self->structmsgData, totalData, totalLgth);
+  checkErrOK(result);
   return result;
 }
 
@@ -136,6 +173,9 @@ static uint8_t buildMsg(structmsgDispatcher_t *self) {
   uint8_t *cryptKey;
   uint8_t klen;
   uint8_t ivlen;
+  uint8_t *stringValue;
+  int src;
+  int dst;
 
   self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos;
   result = self->createMsgFromLines(self, self->buildMsgInfos.parts, self->buildMsgInfos.numEntries, self->buildMsgInfos.numRows, self->buildMsgInfos.type);
@@ -146,6 +186,12 @@ static uint8_t buildMsg(structmsgDispatcher_t *self) {
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
   result = setMsgValues(self);
   checkErrOK(result);
+  result = self->structmsgData->getFieldValue(self->structmsgData, "@dst", &dst, &stringValue);
+  checkErrOK(result);
+  self->buildListMsgInfos.dst = dst;
+  result = self->structmsgData->getFieldValue(self->structmsgData, "@src", &src, &stringValue);
+  checkErrOK(result);
+  self->buildListMsgInfos.src = src;
   result = self->structmsgData->getMsgData(self->structmsgData, &msgData, &msgLgth);
 ets_printf("getMsgData result: %d msgLgth: %d msgData: %s!\n", result, msgLgth, msgData);
   checkErrOK(result);
@@ -190,7 +236,7 @@ ets_printf("crypted: len: %d!%s!\n", encryptedMsgDataLgth, msgData);
 
   if (self->buildMsgInfos.numRows > 0) {
     // we have a definition and the message
-    result = self->structmsgData->prepareDef(self->structmsgData);
+    result = self->structmsgData->prepareDefMsg(self->structmsgData);
     checkErrOK(result);
     result = self->structmsgData->getDefData(self->structmsgData, &defData, &defLgth);
 ets_printf("getDef result: %d defLgth: %d defData: %s!\n", result, defLgth, defData);
@@ -392,9 +438,9 @@ return STRUCT_MSG_ERR_OK;
   result = structmsgData->getMsgData(structmsgData, &data, &msgLgth);
   checkErrOK(result);
 
-ets_printf("prepareDef\n");
-result = self->structmsgData->prepareDef(self->structmsgData);
-ets_printf("prepareDef result: %d\n", result);
+ets_printf("prepareDefMsg\n");
+result = self->structmsgData->prepareDefMsg(self->structmsgData);
+ets_printf("prepareDefMsg result: %d\n", result);
 checkErrOK(result);
 result = self->structmsgData->getDefData(self->structmsgData, &defData, &defLgth);
 ets_printf("defLgth: %d defData: %s!\n", defLgth, defData);

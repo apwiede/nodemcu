@@ -335,13 +335,13 @@ static uint8_t addDefFields(structmsgData_t *self, uint16_t numNormFields, uint1
   checkErrOK(result);
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_DEFINITIONS, DATA_VIEW_FIELD_UINT16_VECTOR, definitionsSize);
   checkErrOK(result);
-    fillerLgth = 0;
-    crcLgth = 2;
-    myLgth = self->defFieldOffset + crcLgth - self->defHeaderLgth;
-    while ((myLgth % 16) != 0) {
-      myLgth++;
-      fillerLgth++;
-    }
+  fillerLgth = 0;
+  crcLgth = 2;
+  myLgth = self->defFieldOffset + crcLgth - self->defHeaderLgth;
+  while ((myLgth % 16) != 0) {
+    myLgth++;
+    fillerLgth++;
+  }
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_FILLER, DATA_VIEW_FIELD_UINT8_VECTOR, fillerLgth);
   checkErrOK(result);
   result = addDefField(self, STRUCT_MSG_SPEC_FIELD_CRC, DATA_VIEW_FIELD_UINT16_T, 2);
@@ -450,9 +450,9 @@ static uint8_t setStaticDefFields(structmsgData_t *self, int numNormFields, int 
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= initDef ========================
+// ============================= initDefMsg ========================
 
-static uint8_t initDef(structmsgData_t *self) {
+static uint8_t initDefMsg(structmsgData_t *self) {
   uint8_t numNormFields;
   uint16_t normNamesSize;
   int idx;
@@ -513,9 +513,9 @@ static uint8_t initDef(structmsgData_t *self) {
   return STRUCT_MSG_ERR_OK;
 }
 
-// ============================= prepareDef ========================
+// ============================= prepareDefMsg ========================
 
-static uint8_t prepareDef(structmsgData_t *self) {
+static uint8_t prepareDefMsg(structmsgData_t *self) {
   int numEntries;
   int idx;
   int result;
@@ -747,8 +747,8 @@ uint8_t newStructmsgDefinition(structmsgData_t *self) {
     return STRUCT_MSG_ERR_OUT_OF_MEMORY;
   }
 
-  self->initDef = &initDef;
-  self->prepareDef = &prepareDef;
+  self->initDefMsg = &initDefMsg;
+  self->prepareDefMsg = &prepareDefMsg;
   self->addDefField = &addDefField;
   self->dumpDefFields = &dumpDefFields;
   self->setDefFieldValue = &setDefFieldValue;

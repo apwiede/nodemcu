@@ -69,8 +69,10 @@ extern "C" {
 
 #define STRUCT_DEF_TO_DATA        (1 << 0)
 #define STRUCT_DEF_FROM_DATA      (1 << 1)
+#define STRUCT_LIST_TO_DATA       (1 << 2)
+#define STRUCT_LIST_FROM_DATA     (1 << 3)
 
-#define STRUCT_LIST_NUM_LIST_FIELDS 8
+#define STRUCT_LIST_NUM_LIST_FIELDS 9
 #define STRUCT_LIST_CMD_KEY 0x5A5A
 
 #define checkHandleOK(addr) if(addr == NULL) return STRUCT_MSG_ERR_BAD_HANDLE
@@ -94,8 +96,8 @@ typedef uint8_t ( *setDispatcher_t)(structmsgData_t *self, structmsgDispatcher_t
 
 // definitionMsg
 typedef uint8_t (* dumpDefFields_t)(structmsgData_t *self);
-typedef uint8_t (* initDef_t)(structmsgData_t *self);
-typedef uint8_t (* prepareDef_t)(structmsgData_t *self);
+typedef uint8_t (* initDefMsg_t)(structmsgData_t *self);
+typedef uint8_t (* prepareDefMsg_t)(structmsgData_t *self);
 typedef uint8_t (* addDefField_t)(structmsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
 typedef uint8_t (* getDefFieldValue_t)(structmsgData_t *self, const uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int idx);
 typedef uint8_t (* setDefFieldValue_t)(structmsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int idx);
@@ -104,8 +106,13 @@ typedef uint8_t (* getDefData_t)(structmsgData_t *self, uint8_t **data, int *lgt
 typedef uint8_t (* createMsgFromDef_t)(structmsgData_t *self);
 
 // listMsg
-typedef uint8_t (* initList_t)(structmsgData_t *self);
-typedef uint8_t (* prepareList_t)(structmsgData_t *self);
+typedef uint8_t (* dumpListFields_t)(structmsgData_t *self);
+typedef uint8_t (* getListFieldValue_t)(structmsgData_t *self, uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int fieldIdx);
+typedef uint8_t (* setListFieldValue_t)(structmsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int fieldIdx);
+typedef uint8_t (* initListMsg_t)(structmsgData_t *self);
+typedef uint8_t (* prepareListMsg_t)(structmsgData_t *self);
+typedef uint8_t (* setListData_t)(structmsgData_t *self, const  uint8_t *data);
+typedef uint8_t (* getListData_t)(structmsgData_t *self, uint8_t **data, int *lgth);
 typedef uint8_t (* addListMsg_t)(structmsgData_t *self, size_t msgLgth, uint8_t *msgData);
 typedef uint8_t (* addListField_t)(structmsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
 
@@ -139,8 +146,8 @@ typedef struct structmsgData {
   size_t defNormNamesSize;
   size_t defDefinitionsSize;
 
-  initDef_t initDef;
-  prepareDef_t prepareDef;
+  initDefMsg_t initDefMsg;
+  prepareDefMsg_t prepareDefMsg;
   dumpDefFields_t dumpDefFields;
   addDefField_t addDefField;
   getDefFieldValue_t getDefFieldValue;
@@ -152,13 +159,25 @@ typedef struct structmsgData {
   // listMsg
   structmsgDataView_t *structmsgListDataView;
   structmsgField_t *listFields;
-  size_t numListMsgs;         // for checking how many listMsgs have been processed
+  size_t numListFields;         // for checking how many listMsgs have been processed
+  size_t numListMsgs;
+  size_t listMsgSizesSize;
+  size_t listMsgsSize;
   size_t listFieldOffset;
   size_t listTotalLgth;
   size_t listHeaderLgth;
+  uint16_t listSrc;
+  uint16_t listDst;
+  uint16_t *listMsgSizes;
+  uint8_t *listMsgs;
 
-  initList_t initList;
-  prepareList_t prepareList;
+  dumpListFields_t dumpListFields;
+  setListFieldValue_t setListFieldValue;
+  getListFieldValue_t getListFieldValue;
+  setListData_t setListData;
+  getListData_t getListData;
+  initListMsg_t initListMsg;
+  prepareListMsg_t prepareListMsg;
   addListMsg_t addListMsg;
   addListField_t addListField;
 

@@ -660,24 +660,24 @@ static int structmsg_createMsgDefinition( lua_State* L ) {
   return 1;
 }
 
-// ============================= structmsg_initDef ========================
+// ============================= structmsg_initDefMsg ========================
 
-static int structmsg_initDef( lua_State* L ) {
+static int structmsg_initDefMsg( lua_State* L ) {
   const uint8_t *handle;
   structmsgData_t *structmsgData;
   int result;
 
   handle = luaL_checkstring (L, 1);
   result = structmsgGetPtrFromHandle(handle, &structmsgData);
-  checkOKOrErr(L, result, "initDef", "");
-  result = structmsgData->initDef(structmsgData);
-  checkOKOrErr(L, result, "initDef", "");
+  checkOKOrErr(L, result, "initDefMsg", "");
+  result = structmsgData->initDefMsg(structmsgData);
+  checkOKOrErr(L, result, "initDefMsg", "");
   return 1;
 }
 
-// ============================= structmsg_prepareDef ========================
+// ============================= structmsg_prepareDefMsg ========================
 
-static int structmsg_prepareDef( lua_State* L ) {
+static int structmsg_prepareDefMsg( lua_State* L ) {
   const uint8_t *handle;
   uint8_t numFields;
   structmsgData_t *structmsgData;
@@ -685,9 +685,9 @@ static int structmsg_prepareDef( lua_State* L ) {
 
   handle = luaL_checkstring (L, 1);
   result = structmsgGetPtrFromHandle(handle, &structmsgData);
-  checkOKOrErr(L, result, "prepareDef", "");
-  result = structmsgData->prepareDef(structmsgData);
-  checkOKOrErr(L, result, "prepareDef", "");
+  checkOKOrErr(L, result, "prepareDefMsg", "");
+  result = structmsgData->prepareDefMsg(structmsgData);
+  checkOKOrErr(L, result, "prepareDefMsg", "");
   return 1;
 }
 
@@ -1117,8 +1117,8 @@ static const LUA_REG_TYPE structmsg_map[] =  {
   { LSTRKEY( "setMsgFieldsFromList" ),  LFUNCVAL( structmsg_setMsgFieldsFromList ) },
 
   { LSTRKEY( "createMsgDef" ),          LFUNCVAL( structmsg_createMsgDefinition ) },
-  { LSTRKEY( "initDef" ),               LFUNCVAL( structmsg_initDef ) },
-  { LSTRKEY( "prepareDef" ),            LFUNCVAL( structmsg_prepareDef ) },
+  { LSTRKEY( "initDefMsg" ),            LFUNCVAL( structmsg_initDefMsg ) },
+  { LSTRKEY( "prepareDefMsg" ),         LFUNCVAL( structmsg_prepareDefMsg ) },
   { LSTRKEY( "dumpDefFields" ),         LFUNCVAL( structmsg_dumpDefFields ) },
   { LSTRKEY( "setDefData" ),            LFUNCVAL( structmsg_setDefData ) },
   { LSTRKEY( "getDefData" ),            LFUNCVAL( structmsg_getDefData ) },

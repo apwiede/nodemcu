@@ -877,13 +877,14 @@ static uint8_t createMsgFromLines(structmsgDispatcher_t *self, msgParts_t *parts
   if (self->structmsgData->numTableRows > 0) {
     result = newStructmsgDefinition(self->structmsgData);
     checkErrOK(result);
-    result = self->structmsgData->initDef(self->structmsgData);
+    result = self->structmsgData->initDefMsg(self->structmsgData);
     checkErrOK(result);
 self->structmsgData->dumpDefFields(self->structmsgData);
     result = newStructmsgList(self->structmsgData);
     checkErrOK(result);
-    result = self->structmsgData->initList(self->structmsgData);
-    checkErrOK(result);
+// the next 2 lines are too early here the necessary data are not yet provided!!
+//    result = self->structmsgData->initListMsg(self->structmsgData);
+//    checkErrOK(result);
   }
   return STRUCT_DISP_ERR_OK;
 }
