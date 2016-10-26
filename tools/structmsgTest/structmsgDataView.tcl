@@ -100,6 +100,10 @@ set ::STRUCT_DEF_ERR_NOT_YET_INITTED            204
 set ::STRUCT_DEF_ERR_NOT_YET_PREPARED           203
 set ::STRUCT_DEF_ERR_ALREADY_CREATED            202
 set ::STRUCT_MSG_ERR_FIELD_TOTAL_LGTH_MISSING   201
+set ::STRUCT_LIST_ERR_ALREADY_INITTED           200
+set ::STRUCT_LIST_ERR_NOT_YET_INITTED           199
+set ::STRUCT_LIST_ERR_NOT_YET_PREPARED          198
+set ::STRUCT_LIST_ERR_ALREADY_CREATED           197
 set ::STRUCT_MSG_ERR_NO_SUCH_COMMAND            100
 
 set ::STRUCT_MSG_NO_INCR 0
@@ -126,7 +130,10 @@ set ::STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE 239
 set ::STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      238
 set ::STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    237
 set ::STRUCT_MSG_SPEC_FIELD_DEFINITIONS         236
-set ::STRUCT_MSG_SPEC_FIELD_LOW                 235  ; # this must be the last entry!!
+set ::STRUCT_MSG_SPEC_FIELD_NUM_LIST_MSGS       234
+set ::STRUCT_MSG_SPEC_FIELD_LIST_MSG_SIZES      233
+set ::STRUCT_MSG_SPEC_FIELD_LIST_MSGS           232
+set ::STRUCT_MSG_SPEC_FIELD_LOW                 231  ; # this must be the last entry!!
 
 set ::STRUCT_MSG_FREE_FIELD_ID 0xFF
 set RAND_MAX 0x7FFFFFFF
@@ -166,6 +173,9 @@ namespace eval ::structmsg {
     dict set specialFieldNames2Ids "@normFldNames"     STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES
     dict set specialFieldNames2Ids "@definitionsSize"  STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE
     dict set specialFieldNames2Ids "@definitions"      STRUCT_MSG_SPEC_FIELD_DEFINITIONS
+    dict set specialFieldNames2Ids "@numListMsgs"      STRUCT_MSG_SPEC_FIELD_NUM_LIST_MSGS
+    dict set specialFieldNames2Ids "@listMsgSizesSize" STRUCT_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE
+    dict set specialFieldNames2Ids "@listMsgs"         STRUCT_MSG_SPEC_FIELD_LIST_MSGS
 
     variable specialFieldId2Names
     set specialFieldId2Names [dict create]
@@ -189,6 +199,9 @@ namespace eval ::structmsg {
     dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      "@normFldNames"
     dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    "@definitionsSize"
     dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_DEFINITIONS         "@definitions"
+    dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_NUM_LIST_MSGS       "@numListMsgs"
+    dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE "@listMsgSizesSize"
+    dict set specialFieldId2Names STRUCT_MSG_SPEC_FIELD_LIST_MSGS           "@listMsgs"
 
     variable specialFieldIds2Ints
     set specialFieldIds2Ints [dict create]
@@ -205,14 +218,18 @@ namespace eval ::structmsg {
     dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_ID                  245
     dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_TABLE_ROWS          244
     dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS    243
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_GUID                242
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS       241
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS        240
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE 239
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      238
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    237
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_DEFINITIONS         236
-    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_LOW                 235  ; # this must be the last entry!!
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NUM_FIELDS          242
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_GUID                241
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS       240
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS        239
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE 238
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES      237
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE    236
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_DEFINITIONS         235
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_NUM_LIST_MSGS       234
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE 233
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_LIST_MSGS           232
+    dict set specialFieldIds2Ints STRUCT_MSG_SPEC_FIELD_LOW                 231  ; # this must be the last entry!!
 
     variable specialFieldInts2Ids
     set specialFieldInts2Ids [dict create]
@@ -229,14 +246,18 @@ namespace eval ::structmsg {
     dict set specialFieldInts2Ids 245 STRUCT_MSG_SPEC_FIELD_ID
     dict set specialFieldInts2Ids 244 STRUCT_MSG_SPEC_FIELD_TABLE_ROWS
     dict set specialFieldInts2Ids 243 STRUCT_MSG_SPEC_FIELD_TABLE_ROW_FIELDS
-    dict set specialFieldInts2Ids 242 STRUCT_MSG_SPEC_FIELD_GUID
-    dict set specialFieldInts2Ids 241 STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS
-    dict set specialFieldInts2Ids 240 STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS
-    dict set specialFieldInts2Ids 239 STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE
-    dict set specialFieldInts2Ids 238 STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES
-    dict set specialFieldInts2Ids 237 STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE
-    dict set specialFieldInts2Ids 236 STRUCT_MSG_SPEC_FIELD_DEFINITIONS
-    dict set specialFieldInts2Ids 235 STRUCT_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
+    dict set specialFieldInts2Ids 242 STRUCT_MSG_SPEC_FIELD_NUM_FIELDS
+    dict set specialFieldInts2Ids 241 STRUCT_MSG_SPEC_FIELD_GUID
+    dict set specialFieldInts2Ids 240 STRUCT_MSG_SPEC_FIELD_NUM_NORM_FLDS
+    dict set specialFieldInts2Ids 239 STRUCT_MSG_SPEC_FIELD_NORM_FLD_IDS
+    dict set specialFieldInts2Ids 238 STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE
+    dict set specialFieldInts2Ids 237 STRUCT_MSG_SPEC_FIELD_NORM_FLD_NAMES
+    dict set specialFieldInts2Ids 236 STRUCT_MSG_SPEC_FIELD_DEFINITIONS_SIZE
+    dict set specialFieldInts2Ids 235 STRUCT_MSG_SPEC_FIELD_DEFINITIONS
+    dict set specialFieldInts2Ids 234 STRUCT_MSG_SPEC_FIELD_NUM_LIST_MSGS
+    dict set specialFieldInts2Ids 233 STRUCT_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE
+    dict set specialFieldInts2Ids 232 STRUCT_MSG_SPEC_FIELD_LIST_MSGS
+    dict set specialFieldInts2Ids 232 STRUCT_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
 
 
     # ================================= getSpecialFieldNameIntFromId ====================================

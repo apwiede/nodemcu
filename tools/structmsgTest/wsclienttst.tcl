@@ -52,6 +52,7 @@ source structmsgDispatcher.tcl
 source structmsgIdentify.tcl
 source structmsgSendReceive.tcl
 source structmsgDefinitions.tcl
+source structmsgListMsg.tcl
 
 proc checkErrOk {result} {
   if {$result != $::STRUCT_MSG_ERR_OK} {
@@ -265,8 +266,7 @@ dict set ::received lgth 22
 dict set ::received buf ""
 
 set PORT 80
-set path "/getaplist"
-#set host "192.168.178.42"
+set path /getaplist
 set host "192.168.4.1"
 
 proc clientHandler { sock type msg } {
@@ -282,10 +282,14 @@ puts stderr "clientHandler: $type $msg!"
     dis* {
     }
     binary {
-      foreach val [split $msg ""] {
-        puts stderr "val: $val!"
-      }
+::structmsg structmsgData dumpBinary $msg [string length $msg] "MSG"
 puts stderr "need handler for received MSG!lgth: [string length $msg]!"
+
+      ::structmsg structmsgIdentify structmsgIdentifyReset
+      ::structmsg dataView setData "" 0
+      ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $msg [string length $msg]
+
+if {0} {
       binary scan $msg cccccc ch0 ch1 ch2 ch3 ch4 ch5
       binary scan $msg SSS totalLgth defLgth msgLgth
 puts stderr "totalLgth!$totalLgth!defLgth!$defLgth!msgLgth!$msgLgth!"
@@ -293,6 +297,9 @@ puts stderr "totalLgth!$totalLgth!defLgth!$defLgth!msgLgth!$msgLgth!"
       set msgData [string range $msg [expr {6 + $defLgth}] [expr {$totalLgth - 1}]]
 puts stderr "defDataLgth: [string length $defData]!"
 puts stderr "msgDataLgth: [string length $msgData]!"
+}
+
+if {0} {
       ::structmsg structmsgIdentify structmsgIdentifyReset
       ::structmsg dataView setData "" 0
       ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $defData $defLgth
@@ -300,6 +307,8 @@ puts stderr "msgDataLgth: [string length $msgData]!"
       ::structmsg structmsgIdentify structmsgIdentifyReset
       ::structmsg dataView setData "" 0
       ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $msgData $msgLgth
+}
+
     }
   }
 }
