@@ -62,11 +62,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   unsigned long ulgth;
   char *endPtr;
 
-  if (self->buildMsgInfos.partsFlags & COMP_DISP_U8_CMD_KEY) {
-    os_sprintf(fileName, "Val%c%c.txt", self->buildMsgInfos.u8CmdKey, self->buildMsgInfos.type);
-  } else {
-    os_sprintf(fileName, "Val%c%c%c.txt", (self->buildMsgInfos.u16CmdKey>>8)&0xFF, self->buildMsgInfos.u16CmdKey&0xFF, self->buildMsgInfos.type);
-  }
+  os_sprintf(fileName, "Val%c%c%c.txt", (self->buildMsgInfos.u16CmdKey>>8)&0xFF, self->buildMsgInfos.u16CmdKey&0xFF, self->buildMsgInfos.type);
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
   result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
@@ -309,13 +305,8 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgParts_t *parts, ui
   uint8_t *data;
   int msgLgth;
 
-  if (parts->partsFlags & COMP_DISP_U8_CMD_KEY) {
-//ets_printf("§@prepareAnswerMsg u8!%c!t!%c!@§\n", parts->u8CmdKey, type);
-    os_sprintf(fileName, "Desc%c%c.txt", parts->u8CmdKey, type);
-  } else {
 //ets_printf("§@prepareAnswerMsg u16!%c%c!t!%c!@§\n", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
-    os_sprintf(fileName, "Desc%c%c%c.txt", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
-  }
+  os_sprintf(fileName, "Desc%c%c%c.txt", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
 ets_printf("fileName: %s\n", fileName);
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
@@ -342,7 +333,6 @@ ets_printf("fileName: %s\n", fileName);
   self->buildMsgInfos.numEntries = numEntries;
   self->buildMsgInfos.type = type;
   self->buildMsgInfos.parts = parts;
-  self->buildMsgInfos.u8CmdKey = parts->u8CmdKey;
   self->buildMsgInfos.u16CmdKey = parts->u16CmdKey;
   self->buildMsgInfos.partsFlags = parts->partsFlags;
   self->buildMsgInfos.numRows = numRows;
@@ -415,11 +405,7 @@ static uint8_t prepareEncryptedAnswer(compMsgDispatcher_t *self, msgParts_t *par
   checkErrOK(result);
 //FIXME  TEMPORARY!!!
 return COMP_MSG_ERR_OK;
-  if (parts->partsFlags & COMP_DISP_U8_CMD_KEY) {
-    os_sprintf(fileName, "Val%c%c.txt", parts->u8CmdKey, type);
-  } else {
-    os_sprintf(fileName, "Val%c%c%c.txt", (parts->u16CmdKey>>8)&0xFF, parts->u16CmdKey&0xFF, type);
-  }
+  os_sprintf(fileName, "Val%c%c%c.txt", (parts->u16CmdKey>>8)&0xFF, parts->u16CmdKey&0xFF, type);
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
   result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
@@ -430,7 +416,7 @@ return COMP_MSG_ERR_OK;
   ulgth = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)ulgth;
 //ets_printf("§@NE2!%d!@§", numEntries);
-  result = self->setMsgValuesFromLines(self, compMsgData, numEntries, handle, parts->u8CmdKey);
+  result = self->setMsgValuesFromLines(self, compMsgData, numEntries, handle, type);
   checkErrOK(result);
   result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
   checkErrOK(result);
@@ -471,11 +457,6 @@ static uint8_t handleEncryptedPart(compMsgDispatcher_t *self, msgParts_t *receiv
   hdr = &hdrInfos->headerParts[hdrIdx];
   isU16CmdKey = true;
   // eventually add the extraField to the headerLgth here!!
-  if (received->lgth == hdrInfos->headerLgth + 1) {
-    if (hdr->hdrExtraLgth > 0) {
-      hdrInfos->headerLgth += hdr->hdrExtraLgth;
-    }
-  }
  
   switch (hdr->hdrHandleType) {
   case 'U':
@@ -507,21 +488,6 @@ ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHan
               hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
             }
             break;
-          case COMP_DISP_U8_CMD_KEY:
-            result = self->compMsgDataView->dataView->getUint8(self->compMsgDataView->dataView, received->fieldOffset, &u8);
-            received->u8CmdKey = u8;
-            received->fieldOffset++;
-            received->partsFlags |= COMP_DISP_U8_CMD_KEY;
-            isU16CmdKey = false;
-//ets_printf("§u8CmdKey!0x%02x!§\n", received->u8CmdKey);
-            hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
-            while (received->u8CmdKey !=  hdr->hdrU8CmdKey) {
-              result = self->nextFittingEntry(self, received->u8CmdKey, 0);
-              checkErrOK(result);
-              hdrInfos->currPartIdx++;
-              hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
-            }
-            break;
         }
         hdrInfos->seqIdx++;
       } else {
@@ -531,12 +497,6 @@ ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHan
             case COMP_DISP_U0_CMD_LGTH:
               received->fieldOffset += 2;
 //ets_printf("§u0CmdLgth!0!§\n");
-              break;
-            case COMP_DISP_U8_CMD_LGTH:
-              result = self->compMsgDataView->dataView->getUint8(self->compMsgDataView->dataView, received->fieldOffset, &u8);
-              received->u8CmdLgth = u8;
-              received->fieldOffset++;
-//puts stderr [format "§u8CmdLgth!%c!§" [dict get $received u8CmdLgth]]
               break;
             case COMP_DISP_U16_CMD_LGTH:
               result = self->compMsgDataView->dataView->getUint16(self->compMsgDataView->dataView, received->fieldOffset, &u16);
@@ -626,18 +586,6 @@ static uint8_t handleNotEncryptedPart(compMsgDispatcher_t *self, msgParts_t *rec
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
         hdrInfos->currPartIdx++;
         result = self->nextFittingEntry(self, 0, received->u16CmdKey);
-        checkErrOK(result);
-        hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
-      }
-      break;
-    case COMP_DISP_U8_CMD_KEY:
-      result = dataView->getUint8(dataView, received->fieldOffset, &received->u8CmdKey);
-      received->fieldOffset += sizeof(uint8_t);
-      received->partsFlags |= COMP_DISP_U8_CMD_KEY;
-      isU16CmdKey = false;
-      while (received->u8CmdKey != hdr->hdrU8CmdKey) {
-        hdrInfos->currPartIdx++;
-        result = self->nextFittingEntry(self, received->u8CmdKey, 0);
         checkErrOK(result);
         hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
       }

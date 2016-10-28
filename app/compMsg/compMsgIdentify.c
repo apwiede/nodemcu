@@ -72,18 +72,11 @@ typedef struct flag2Str {
 static flag2Str_t flag2Strs [] = {
   { COMP_DISP_U16_DST,           "COMP_DISP_U16_DST" },
   { COMP_DISP_U16_SRC,           "COMP_DISP_U16_SRC" },
-  { COMP_DISP_U8_TARGET,         "COMP_DISP_U8_TARGET" },
   { COMP_DISP_U16_TOTAL_LGTH,    "COMP_DISP_U16_TOTAL_LGTH" },
-  { COMP_DISP_U8_EXTRA_KEY_LGTH, "COMP_DISP_U8_EXTRA_KEY_LGTH" },
+  { COMP_DISP_U8_VECTOR_GUID,    "COMP_DISP_U8_VECTOR_GUID" },
+  { COMP_DISP_U16_SENDER_ID,     "COMP_DISP_U16_SENDER_ID" },
   { COMP_DISP_IS_ENCRYPTED,      "COMP_DISP_IS_ENCRYPTED" },
   { COMP_DISP_IS_NOT_ENCRYPTED,  "COMP_DISP_IS_NOT_ENCRYPTED" },
-  { COMP_DISP_SEND_TO_APP,       "COMP_DISP_SEND_TO_APP" },
-  { COMP_DISP_RECEIVE_FROM_APP,  "COMP_DISP_RECEIVE_FROM_APP" },
-  { COMP_DISP_SEND_TO_UART,      "COMP_DISP_SEND_TO_UART" },
-  { COMP_DISP_RECEIVE_FROM_UART, "COMP_DISP_RECEIVE_FROM_UART" },
-  { COMP_DISP_TRANSFER_TO_UART,  "COMP_DISP_TRANSFER_TO_UART" },
-  { COMP_DISP_TRANSFER_TO_CONN,  "COMP_DISP_TRANSFER_TO_CONN" },
-  { COMP_DISP_U8_CMD_KEY,        "COMP_DISP_U8_CMD_KEY" },
   { COMP_DISP_U16_CMD_KEY,       "COMP_DISP_U16_CMD_KEY" },
   { COMP_DISP_U0_CMD_LGTH,       "COMP_DISP_U0_CMD_LGTH" },
   { COMP_DISP_U8_CMD_LGTH,       "COMP_DISP_U8_CMD_LGTH" },
@@ -174,21 +167,14 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
     if (hdr->hdrToPart == received->toPart) {
       if (hdr->hdrFromPart == received->fromPart) {
         if ((hdr->hdrTotalLgth == received->totalLgth) || (hdr->hdrTotalLgth == 0)) {
-          if (u8CmdKey != 0) {
-            if (u8CmdKey == received->u8CmdKey) {
+          if (u16CmdKey != 0) {
+            if (u16CmdKey == received->u16CmdKey) {
               found = 1;
               break;
             }
           } else {
-            if (u16CmdKey != 0) {
-              if (u16CmdKey == received->u16CmdKey) {
-                found = 1;
-                break;
-              }
-            } else {
-              found = 1;
-              break;
-            }
+            found = 1;
+            break;
           }
         }
       }
@@ -240,11 +226,6 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
     checkErrOK(result);
     received->fieldOffset += sizeof(uint16_t);
     break;
-  case COMP_DISP_U8_TARGET:
-    result = dataView->getUint8(dataView, received->fieldOffset, &received->targetPart);
-    checkErrOK(result);
-    received->fieldOffset += sizeof(uint8_t);
-    break;
   }
   hdrInfos->seqIdx++;
   switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
@@ -269,6 +250,30 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
     switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
     case COMP_DISP_U16_TOTAL_LGTH:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
+      checkErrOK(result);
+      received->fieldOffset += sizeof(uint16_t);
+      break;
+    }
+  }
+  if (received->fieldOffset < hdrInfos->headerLgth) {
+    hdrInfos->seqIdx++;
+    switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
+    case COMP_DISP_U8_VECTOR_GUID:
+    {
+      uint8_t *cp;
+      cp = received->GUID;
+      result = dataView->getUint8Vector(dataView, received->fieldOffset, &cp, sizeof(received->GUID));
+      checkErrOK(result);
+      received->fieldOffset += sizeof(received->GUID);
+      break;
+    }
+    }
+  }
+  if (received->fieldOffset < hdrInfos->headerLgth) {
+    hdrInfos->seqIdx++;
+    switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
+    case COMP_DISP_U16_SENDER_ID:
+      result = dataView->getUint16(dataView, received->fieldOffset, &received->senderId);
       checkErrOK(result);
       received->fieldOffset += sizeof(uint16_t);
       break;

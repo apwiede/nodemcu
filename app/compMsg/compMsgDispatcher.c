@@ -262,8 +262,8 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   int idx;
 
   ets_printf("dumpHeaderPart:\n");
-  ets_printf("headerPart1: from: 0x%04x to: 0x%04x totalLgth: %d u16CmdKey: 0x%04x u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrU16CmdKey, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
-  ets_printf("headerPart2: target: 0x%02x u8CmdKey: 0x%02x u8CmdLgth: %d u8Crc: 0x%02x offset: %d extra: %d\n", hdr->hdrTargetPart, hdr->hdrU8CmdKey, hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrOffset, hdr->hdrExtraLgth);
+  ets_printf("headerPart1: from: 0x%04x to: 0x%04x totalLgth: %d GUID: %d senderId: %d u16CmdKey: 0x%04x u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrGUID, hdr->hdrSenderId, hdr->hdrU16CmdKey, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
+  ets_printf("headerPart2: u8CmdLgth: %d u8Crc: 0x%02x offset: %d \n", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrOffset);
   ets_printf("headerPart3: enc: %c handleType: %c\n", hdr->hdrEncryption, hdr->hdrHandleType);
   ets_printf("hdrFlags: ");
   if (hdr->hdrFlags & COMP_DISP_SEND_TO_APP) {
@@ -286,9 +286,6 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   }
   if (hdr->hdrFlags & COMP_DISP_NOT_RELEVANT) {
     ets_printf(" COMP_DISP_NOT_RELEVANT");
-  }
-  if (hdr->hdrFlags & COMP_DISP_U8_CMD_KEY) {
-    ets_printf(" COMP_DISP_U8_CMD_KEY");
   }
   if (hdr->hdrFlags & COMP_DISP_U16_CMD_KEY) {
     ets_printf(" COMP_DISP_U16_CMD_KEY");
@@ -322,23 +319,8 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC) {
       ets_printf(" COMP_DISP_U16_SRC");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_TARGET) {
-      ets_printf(" COMP_DISP_U8_TARGET");
-    }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
       ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_EXTRA_KEY_LGTH) {
-      ets_printf(" COMP_DISP_U8_EXTRA_KEY_LGTH");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_ENCRYPTION) {
-      ets_printf(" COMP_DISP_U8_ENCRYPTION");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_HANDLE_TYPE) {
-      ets_printf(" COMP_DISP_U8_HANDLE_TYPE");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_CMD_KEY) {
-      ets_printf(" COMP_DISP_U8_CMD_KEY");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_KEY) {
       ets_printf(" COMP_DISP_U16_CMD_KEY");
@@ -385,9 +367,6 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
   if (hdrInfos->headerFlags & COMP_DISP_U16_TOTAL_LGTH) {
     ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
   }
-  if (hdrInfos->headerFlags & COMP_DISP_U8_TARGET) {
-    ets_printf(" COMP_DISP_U8_TARGET");
-  }
   ets_printf("\n");
   ets_printf("hdrInfos headerSequence\n");
   idx = 0;
@@ -399,23 +378,8 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_SRC) {
       ets_printf(" COMP_DISP_U16_SRC");
     }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_TARGET) {
-      ets_printf(" COMP_DISP_U8_TARGET");
-    }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
       ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_EXTRA_KEY_LGTH) {
-      ets_printf(" COMP_DISP_U8_EXTRA_KEY_LGTH");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_ENCRYPTION) {
-      ets_printf(" COMP_DISP_U8_ENCRYPTION");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_HANDLE_TYPE) {
-      ets_printf(" COMP_DISP_U8_HANDLE_TYPE");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_CMD_KEY) {
-      ets_printf(" COMP_DISP_U8_CMD_KEY");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_CMD_KEY) {
       ets_printf(" COMP_DISP_U16_CMD_KEY");
@@ -453,9 +417,9 @@ static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
   int idx;
 
   ets_printf("dumpMsgParts:\n");
-  ets_printf("MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d u16_cmdLgth: %d u16CmdKey: 0x%04x targetPart: 0x%02x\n", msgParts->fromPart, msgParts->toPart, msgParts->totalLgth, msgParts->u16CmdLgth, msgParts->u16CmdKey, msgParts->targetPart);
+  ets_printf("MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d GUID: %d senderId: %d u16_cmdKey: %d\n", msgParts->fromPart, msgParts->toPart, msgParts->totalLgth, msgParts->GUID, msgParts->senderId, msgParts->u16CmdKey);
 
-  ets_printf("MsgParts2 u8CmdLgth: %d u8CmdKey: 0x%02x lgth: %d fieldOffset: %d\n", msgParts->u8CmdLgth, msgParts->u8CmdKey, msgParts->lgth, msgParts->fieldOffset);
+  ets_printf("MsgParts2 lgth: %d fieldOffset: %d\n", msgParts->lgth, msgParts->fieldOffset);
   ets_printf("buf");
   idx = 0;
   while (idx < msgParts->realLgth - 1) {
@@ -464,20 +428,17 @@ static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
   }
   ets_printf("\n");
   ets_printf("partFlags: ");
-  if (msgParts->partsFlags & COMP_DISP_U8_CMD_KEY) {
-    ets_printf(" COMP_DISP_U8_CMD_KEY");
-  }
-  if (msgParts->partsFlags & COMP_DISP_IS_NOT_ENCRYPTED) {
-    ets_printf(" COMP_DISP_IS_NOT_ENCRYPTED");
-  }
-  if (msgParts->partsFlags & COMP_DISP_IS_ENCRYPTED) {
-    ets_printf(" COMP_DISP_IS_ENCRYPTED");
-  }
   if (msgParts->partsFlags & COMP_DISP_U16_CMD_KEY) {
     ets_printf(" COMP_DISP_U16_CMD_KEY");
   }
-  if (msgParts->partsFlags & COMP_DISP_U8_CMD_KEY) {
-    ets_printf(" COMP_DISP_U8_CMD_KEY");
+  if (msgParts->partsFlags & COMP_DISP_U8_VECTOR_GUID) {
+    ets_printf(" COMP_DISP_U8_VECTOR_GUID");
+  }
+  if (msgParts->partsFlags & COMP_DISP_U16_SENDER_ID) {
+    ets_printf(" COMP_DISP_U16_SENDER_ID");
+  }
+  if (msgParts->partsFlags & COMP_DISP_U16_CMD_KEY) {
+    ets_printf(" COMP_DISP_U16_CMD_KEY");
   }
   ets_printf("\n");
   return COMP_DISP_ERR_OK;
@@ -517,15 +478,9 @@ static uint8_t getMsgPtrFromMsgParts(compMsgDispatcher_t *self, msgParts_t *msgP
   result = dataView->setUint16(dataView, offset, msgParts->totalLgth);
   checkErrWithResetOK(result);
   offset += sizeof(uint16_t);
-  if (self->dispFlags & COMP_MSG_U8_CMD_KEY) {
-    result = dataView->setUint8(dataView, offset, msgParts->u8CmdKey);
-    checkErrWithResetOK(result);
-    offset += sizeof(uint8_t);
-  } else {
-    result = dataView->setUint16(dataView, offset, msgParts->u16CmdKey);
-    checkErrWithResetOK(result);
-    offset += sizeof(uint16_t);
-  }
+  result = dataView->setUint16(dataView, offset, msgParts->u16CmdKey);
+  checkErrWithResetOK(result);
+  offset += sizeof(uint16_t);
   dataView->data = saveData;
   dataView->lgth= saveLgth;
   // end build header from msgParts
@@ -780,12 +735,8 @@ static uint8_t setMsgValuesFromLines(compMsgDispatcher_t *self, compMsgData_t *c
             break;
           case COMP_MSG_SPEC_FIELD_CMD_KEY:
             // check for u8CmdKey/u16CmdKey here
-            if (self->dispFlags & COMP_MSG_U8_CMD_KEY) {
-              self->buildMsgInfos.numericValue = self->received.u8CmdKey;
-            } else {
 ets_printf("cmdKey: 0x%04x\n", self->received.u16CmdKey);
-              self->buildMsgInfos.numericValue = self->received.u16CmdKey;
-            }
+            self->buildMsgInfos.numericValue = self->received.u16CmdKey;
             self->buildMsgInfos.stringValue = NULL;
             result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
             break;
@@ -804,11 +755,7 @@ ets_printf("cmdKey: 0x%04x\n", self->received.u16CmdKey);
       break;
     }
   }
-  if (self->buildMsgInfos.partsFlags & COMP_DISP_U8_CMD_KEY) {
-    msgCmdKey = type;
-  } else {
-    msgCmdKey = (self->buildMsgInfos.u16CmdKey & 0xFF00) | type & 0xFF;
-  }
+  msgCmdKey = (self->buildMsgInfos.u16CmdKey & 0xFF00) | type & 0xFF;
   result = compMsgData->setFieldValue(compMsgData, "@cmdKey", msgCmdKey, NULL);
   checkErrOK(result);
   compMsgData->prepareMsg(compMsgData);
@@ -899,10 +846,9 @@ static uint8_t resetMsgInfo(compMsgDispatcher_t *self, msgParts_t *parts) {
   parts->fromPart = 0;
   parts->toPart = 0;
   parts->totalLgth = 0;
-  parts->u16CmdLgth = 0;
+  c_memcpy(parts->GUID, "                ", 16);
+  parts->senderId = 0;
   parts->u16CmdKey = 0;
-  parts->u8CmdKey = 0;
-  parts->u8CmdLgth = 0;
   self->compMsgDataView->dataView->data = parts->buf;
   self->compMsgDataView->dataView->lgth = 0;
   return COMP_DISP_ERR_OK;

@@ -373,28 +373,25 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
   dataView_t *dataView;
 
   received = &self->received;
-  if (received->partsFlags & COMP_DISP_U8_CMD_KEY) {
-    dataView = self->compMsgDataView->dataView;
-    switch (received->u8CmdKey) {
-    case 'B':
-      result = dataView->getUint8(dataView, 7, &actionMode);
-      checkErrOK(result);
-      idx = 0;
-      actionEntry = &actionName2Actions[idx];
-      while (actionEntry->actionName != NULL) { 
-//ets_printf("§runActionBu8!%s!%c!%c!§", actionEntry->actionName, received->u8CmdKey, actionMode);
-        if ((actionEntry->u8CmdKey == received->u8CmdKey) && (actionMode == actionEntry->mode)) {
-//ets_printf("§runActionu8!%c!%c!§", received->u8CmdKey, *answerType);
-          result = actionEntry->action(self);
-          checkErrOK(result);
-          return COMP_DISP_ERR_OK;
-        }
-        idx++;
-        actionEntry = &actionName2Actions[idx];
+  dataView = self->compMsgDataView->dataView;
+  if (received->u16CmdKey == 0x4244) { // "BD"
+    // FIXME need to get the real offset here instead of 7!!
+    result = dataView->getUint8(dataView, 7, &actionMode);
+    checkErrOK(result);
+    idx = 0;
+    actionEntry = &actionName2Actions[idx];
+    while (actionEntry->actionName != NULL) { 
+//ets_printf("§runActionBu8!%s!%c!%c!%c!§", actionEntry->actionName, (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, actionMode);
+      if ((actionEntry->u16CmdKey == received->u16CmdKey) && (actionMode == actionEntry->mode)) {
+//ets_printf("§runActionu8!0x%04x!%c!§", received->u16CmdKey, *answerType);
+        result = actionEntry->action(self);
+        checkErrOK(result);
+        return COMP_DISP_ERR_OK;
       }
-      return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
-      break;
+      idx++;
+      actionEntry = &actionName2Actions[idx];
     }
+    return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
   } else {
 //ets_printf("§runAction u16!%c%c!%c!§\n", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, *answerType);
     dataView = self->compMsgDataView->dataView;

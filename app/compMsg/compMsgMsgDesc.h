@@ -71,53 +71,49 @@ enum compMsgDataErrorCode
 
 // handle types
 // A/G/R/S/W/U/N
-#define COMP_DISP_SEND_TO_APP       (1 << 0)
-#define COMP_DISP_RECEIVE_FROM_APP  (1 << 1)
-#define COMP_DISP_SEND_TO_UART      (1 << 2)
-#define COMP_DISP_RECEIVE_FROM_UART (1 << 3)
-#define COMP_DISP_TRANSFER_TO_UART  (1 << 4)
-#define COMP_DISP_TRANSFER_TO_CONN  (1 << 5)
-#define COMP_DISP_NOT_RELEVANT      (1 << 6)
+#define COMP_DISP_SEND_TO_APP       'A'
+#define COMP_DISP_RECEIVE_FROM_APP  'G'
+#define COMP_DISP_SEND_TO_UART      'R'
+#define COMP_DISP_RECEIVE_FROM_UART 'S'
+#define COMP_DISP_TRANSFER_TO_UART  'W'
+#define COMP_DISP_TRANSFER_TO_CONN  'U'
+#define COMP_DISP_NOT_RELEVANT      'N'
 
-// encryption and other types
-#define COMP_DISP_IS_ENCRYPTED      (1 << 0)
-#define COMP_DISP_IS_NOT_ENCRYPTED  (1 << 1)
+// encryption
+enum compMsgEncyptedCode
+{
+  COMP_DISP_IS_NOT_ENCRYPTED  = 0,
+  COMP_DISP_IS_ENCRYPTED      = 1,
+  COMP_DISP_U8_ENCRYPTION     = 2,
+  COMP_DISP_U8_HANDLE_TYPE    = 4,
+};
 
-// 0x01
-#define COMP_DISP_U16_DST           (1 << 0)
-// 0x02
-#define COMP_DISP_U16_SRC           (1 << 1)
-// 0x04
-#define COMP_DISP_U8_TARGET         (1 << 2)
-// 0x08
-#define COMP_DISP_U16_TOTAL_LGTH    (1 << 3)
-// 0x10
-#define COMP_DISP_U8_EXTRA_KEY_LGTH (1 << 4)
-// 0x20
-#define COMP_DISP_U8_ENCRYPTION     (1 << 5)
-// 0x40
-#define COMP_DISP_U8_HANDLE_TYPE    (1 << 6)
-// 0x80
-#define COMP_DISP_U8_CMD_KEY        (1 << 7)
-// 0x100
-#define COMP_DISP_U16_CMD_KEY       (1 << 8)
-// 0x200
-#define COMP_DISP_U0_CMD_LGTH       (1 << 9)
-// 0x400
-#define COMP_DISP_U8_CMD_LGTH       (1 << 10)
-// 0x800
-#define COMP_DISP_U16_CMD_LGTH      (1 << 11)
-// 0x1000
-#define COMP_DISP_U0_CRC            (1 << 12)
-// 0x2000
-#define COMP_DISP_U8_CRC            (1 << 13)
-// 0x4000
-#define COMP_DISP_U16_CRC           (1 << 14)
+#define COMP_DISP_U16_DST          0x01
+#define COMP_DISP_U16_SRC          0x02
+#define COMP_DISP_U16_TOTAL_LGTH   0x04
+#define COMP_DISP_U8_VECTOR_GUID   0x08
+#define COMP_DISP_U16_SENDER_ID    0x10
+#define COMP_DISP_U8_VECTOR_FILLER 0x20
+#define COMP_DISP_U16_CMD_KEY      0x40
+#define COMP_DISP_U0_CMD_LGTH      0x80
+#define COMP_DISP_U8_CMD_LGTH      0x100
+#define COMP_DISP_U16_CMD_LGTH     0x200
+#define COMP_DISP_U0_CRC           0x400
+#define COMP_DISP_U8_CRC           0x800
+#define COMP_DISP_U16_CRC          0x1000
+
+// the next value must equal the number of defines above!!
+#define COMP_DISP_MAX_SEQUENCE     13
+
+#define GUID_LGTH 16
 
 typedef struct headerPart {
   uint16_t hdrFromPart;
   uint16_t hdrToPart;
   uint16_t hdrTotalLgth;
+  uint8_t hdrGUID[GUID_LGTH];
+  uint16_t hdrSenderId;
+  uint8_t hdrfiller[38];
   uint16_t hdrU16CmdKey;
   uint16_t hdrU16CmdLgth;
   uint16_t hdrU16Crc;
@@ -126,16 +122,16 @@ typedef struct headerPart {
   uint8_t hdrU8CmdLgth;
   uint8_t hdrU8Crc;
   uint8_t hdrOffset;
-  uint8_t hdrExtraLgth;
   uint8_t hdrEncryption;
+  uint8_t hdrExtraLgth;
   uint8_t hdrHandleType;
   uint32_t hdrFlags;
-  uint16_t fieldSequence[9];
+  uint16_t fieldSequence[COMP_DISP_MAX_SEQUENCE];
 } headerPart_t;
 
 typedef struct msgHeaderInfos {
-  uint32_t headerFlags;        // these are the flags for the 2 line in the heads file!!
-  uint16_t headerSequence[9];  // this is the sequence of the 2 line in the heads file!!
+  uint32_t headerFlags;        // these are the flags for the 2nd line in the heads file!!
+  uint16_t headerSequence[COMP_DISP_MAX_SEQUENCE];  // this is the sequence of the 2nd line in the heads file!!
   uint8_t headerLgth;
   headerPart_t *headerParts;
   uint8_t numHeaderParts;
@@ -149,12 +145,13 @@ typedef struct msgParts {
   uint16_t fromPart;
   uint16_t toPart;
   uint16_t totalLgth;
-  uint16_t u16CmdLgth;
-  uint16_t u16CmdKey;
+  uint8_t GUID[GUID_LGTH];
+  uint16_t senderId;
+  uint8_t hdrFiller[38];
   uint16_t partsFlags;
-  uint8_t targetPart;
+  uint16_t u16CmdKey;
   uint8_t u8CmdLgth;
-  uint8_t u8CmdKey;
+  uint16_t u16CmdLgth;
   uint8_t lgth;
   uint8_t realLgth;
   size_t fieldOffset;
@@ -187,8 +184,8 @@ typedef struct compMsgMsgDesc {
   readLine_t readLine;
   writeLine_t writeLine;
   getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
-  readActions_t readActions;
   readHeadersAndSetFlags_t readHeadersAndSetFlags;
+  readActions_t readActions;
 
 } compMsgMsgDesc_t;
 
