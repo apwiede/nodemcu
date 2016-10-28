@@ -74,7 +74,7 @@ static flag2Str_t flag2Strs [] = {
   { COMP_DISP_U16_SRC,           "COMP_DISP_U16_SRC" },
   { COMP_DISP_U16_TOTAL_LGTH,    "COMP_DISP_U16_TOTAL_LGTH" },
   { COMP_DISP_U8_VECTOR_GUID,    "COMP_DISP_U8_VECTOR_GUID" },
-  { COMP_DISP_U16_SENDER_ID,     "COMP_DISP_U16_SENDER_ID" },
+  { COMP_DISP_U16_SRC_ID,        "COMP_DISP_U16_SRC_ID" },
   { COMP_DISP_IS_ENCRYPTED,      "COMP_DISP_IS_ENCRYPTED" },
   { COMP_DISP_IS_NOT_ENCRYPTED,  "COMP_DISP_IS_NOT_ENCRYPTED" },
   { COMP_DISP_U16_CMD_KEY,       "COMP_DISP_U16_CMD_KEY" },
@@ -272,8 +272,8 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
   if (received->fieldOffset < hdrInfos->headerLgth) {
     hdrInfos->seqIdx++;
     switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
-    case COMP_DISP_U16_SENDER_ID:
-      result = dataView->getUint16(dataView, received->fieldOffset, &received->senderId);
+    case COMP_DISP_U16_SRC_ID:
+      result = dataView->getUint16(dataView, received->fieldOffset, &received->srcId);
       checkErrOK(result);
       received->fieldOffset += sizeof(uint16_t);
       break;

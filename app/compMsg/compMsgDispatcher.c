@@ -262,31 +262,11 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   int idx;
 
   ets_printf("dumpHeaderPart:\n");
-  ets_printf("headerPart1: from: 0x%04x to: 0x%04x totalLgth: %d GUID: %d senderId: %d u16CmdKey: 0x%04x u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrGUID, hdr->hdrSenderId, hdr->hdrU16CmdKey, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
+  ets_printf("headerPart1: from: 0x%04x to: 0x%04x totalLgth: %d GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrGUID, hdr->hdrSrcId,
+ hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
   ets_printf("headerPart2: u8CmdLgth: %d u8Crc: 0x%02x offset: %d \n", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrOffset);
   ets_printf("headerPart3: enc: %c handleType: %c\n", hdr->hdrEncryption, hdr->hdrHandleType);
-  ets_printf("hdrFlags: ");
-  if (hdr->hdrFlags & COMP_DISP_SEND_TO_APP) {
-    ets_printf(" COMP_DISP_SEND_TO_APP");
-  }
-  if (hdr->hdrFlags & COMP_DISP_RECEIVE_FROM_APP) {
-    ets_printf(" COMP_DISP_RECEIVE_FROM_APP");
-  }
-  if (hdr->hdrFlags & COMP_DISP_SEND_TO_UART) {
-    ets_printf(" COMP_DISP_SEND_TO_UART");
-  }
-  if (hdr->hdrFlags & COMP_DISP_RECEIVE_FROM_UART) {
-    ets_printf(" COMP_DISP_RECEIVE_FROM_UART");
-  }
-  if (hdr->hdrFlags & COMP_DISP_TRANSFER_TO_UART) {
-    ets_printf(" COMP_DISP_TRANSFER_TO_UART");
-  }
-  if (hdr->hdrFlags & COMP_DISP_TRANSFER_TO_CONN) {
-    ets_printf(" COMP_DISP_TRANSFER_TO_CONN");
-  }
-  if (hdr->hdrFlags & COMP_DISP_NOT_RELEVANT) {
-    ets_printf(" COMP_DISP_NOT_RELEVANT");
-  }
+  ets_printf("hdrFlags: 0x%04x", hdr->hdrFlags);
   if (hdr->hdrFlags & COMP_DISP_U16_CMD_KEY) {
     ets_printf(" COMP_DISP_U16_CMD_KEY");
   }
@@ -311,7 +291,10 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   ets_printf("\n");
   ets_printf("hdr fieldSequence\n");
   idx = 0;
-  while (idx < 9) {
+  while (idx < COMP_DISP_MAX_SEQUENCE) {
+    if (hdr->fieldSequence[idx] == 0) {
+      break;
+    }
     ets_printf(" %d 0x%04x", idx, hdr->fieldSequence[idx]);
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_DST) {
       ets_printf(" COMP_DISP_U16_DST");
@@ -321,6 +304,15 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
       ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
+      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC_ID) {
+      ets_printf(" COMP_DISP_U16_SRC_ID");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
+      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_KEY) {
       ets_printf(" COMP_DISP_U16_CMD_KEY");
@@ -356,7 +348,6 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
   int idx;
 
   ets_printf("dumpMsgHeaderInfos:\n");
-#ifdef NOTDEF
   ets_printf("headerFlags: ");
   if (hdrInfos->headerFlags & COMP_DISP_U16_SRC) {
     ets_printf(" COMP_DISP_U16_SRC");
@@ -370,7 +361,10 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
   ets_printf("\n");
   ets_printf("hdrInfos headerSequence\n");
   idx = 0;
-  while (idx < 9) {
+  while (idx < COMP_DISP_MAX_SEQUENCE) {
+    if (hdrInfos->headerSequence[idx] == 0) {
+      break;
+    }
     ets_printf(" %d 0x%04x", idx, hdrInfos->headerSequence[idx]);
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_DST) {
       ets_printf(" COMP_DISP_U16_DST");
@@ -381,8 +375,14 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
       ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
     }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_CMD_KEY) {
-      ets_printf(" COMP_DISP_U16_CMD_KEY");
+    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
+      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
+    }
+    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_SRC_ID) {
+      ets_printf(" COMP_DISP_U16_SRC_ID");
+    }
+    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
+      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_CMD_LGTH) {
       ets_printf(" COMP_DISP_U0_CMD_LGTH");
@@ -406,7 +406,6 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
     idx++;
   }
   ets_printf("\n");
-#endif
   ets_printf("headerLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterHeader: %d\n", hdrInfos->headerLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterHeader);
   return COMP_DISP_ERR_OK;
 }
@@ -417,7 +416,7 @@ static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
   int idx;
 
   ets_printf("dumpMsgParts:\n");
-  ets_printf("MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d GUID: %d senderId: %d u16_cmdKey: %d\n", msgParts->fromPart, msgParts->toPart, msgParts->totalLgth, msgParts->GUID, msgParts->senderId, msgParts->u16CmdKey);
+  ets_printf("MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d GUID: %d srcId: %d u16_cmdKey: %d\n", msgParts->fromPart, msgParts->toPart, msgParts->totalLgth, msgParts->GUID, msgParts->srcId, msgParts->u16CmdKey);
 
   ets_printf("MsgParts2 lgth: %d fieldOffset: %d\n", msgParts->lgth, msgParts->fieldOffset);
   ets_printf("buf");
@@ -434,8 +433,8 @@ static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
   if (msgParts->partsFlags & COMP_DISP_U8_VECTOR_GUID) {
     ets_printf(" COMP_DISP_U8_VECTOR_GUID");
   }
-  if (msgParts->partsFlags & COMP_DISP_U16_SENDER_ID) {
-    ets_printf(" COMP_DISP_U16_SENDER_ID");
+  if (msgParts->partsFlags & COMP_DISP_U16_SRC_ID) {
+    ets_printf(" COMP_DISP_U16_SRC_ID");
   }
   if (msgParts->partsFlags & COMP_DISP_U16_CMD_KEY) {
     ets_printf(" COMP_DISP_U16_CMD_KEY");
@@ -847,7 +846,7 @@ static uint8_t resetMsgInfo(compMsgDispatcher_t *self, msgParts_t *parts) {
   parts->toPart = 0;
   parts->totalLgth = 0;
   c_memcpy(parts->GUID, "                ", 16);
-  parts->senderId = 0;
+  parts->srcId = 0;
   parts->u16CmdKey = 0;
   self->compMsgDataView->dataView->data = parts->buf;
   self->compMsgDataView->dataView->lgth = 0;

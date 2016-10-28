@@ -65,6 +65,7 @@ enum compMsgDataErrorCode
   COMP_MSG_DESC_FILE_NOT_OPENED           = 188,
   COMP_MSG_DESC_ERR_FLUSH_FILE            = 187,
   COMP_MSG_DESC_ERR_WRITE_FILE            = 186,
+  COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS    = 185,
 };
 
 #define DISP_BUF_LGTH 1024
@@ -88,19 +89,19 @@ enum compMsgEncyptedCode
   COMP_DISP_U8_HANDLE_TYPE    = 4,
 };
 
-#define COMP_DISP_U16_DST          0x01
-#define COMP_DISP_U16_SRC          0x02
-#define COMP_DISP_U16_TOTAL_LGTH   0x04
-#define COMP_DISP_U8_VECTOR_GUID   0x08
-#define COMP_DISP_U16_SENDER_ID    0x10
-#define COMP_DISP_U8_VECTOR_FILLER 0x20
-#define COMP_DISP_U16_CMD_KEY      0x40
-#define COMP_DISP_U0_CMD_LGTH      0x80
-#define COMP_DISP_U8_CMD_LGTH      0x100
-#define COMP_DISP_U16_CMD_LGTH     0x200
-#define COMP_DISP_U0_CRC           0x400
-#define COMP_DISP_U8_CRC           0x800
-#define COMP_DISP_U16_CRC          0x1000
+#define COMP_DISP_U16_DST              0x01
+#define COMP_DISP_U16_SRC              0x02
+#define COMP_DISP_U16_TOTAL_LGTH       0x04
+#define COMP_DISP_U8_VECTOR_GUID       0x08
+#define COMP_DISP_U16_SRC_ID           0x10
+#define COMP_DISP_U8_VECTOR_HDR_FILLER 0x20
+#define COMP_DISP_U16_CMD_KEY          0x40
+#define COMP_DISP_U0_CMD_LGTH          0x80
+#define COMP_DISP_U8_CMD_LGTH          0x100
+#define COMP_DISP_U16_CMD_LGTH         0x200
+#define COMP_DISP_U0_CRC               0x400
+#define COMP_DISP_U8_CRC               0x800
+#define COMP_DISP_U16_CRC              0x1000
 
 // the next value must equal the number of defines above!!
 #define COMP_DISP_MAX_SEQUENCE     13
@@ -112,7 +113,7 @@ typedef struct headerPart {
   uint16_t hdrToPart;
   uint16_t hdrTotalLgth;
   uint8_t hdrGUID[GUID_LGTH];
-  uint16_t hdrSenderId;
+  uint16_t hdrSrcId;
   uint8_t hdrfiller[38];
   uint16_t hdrU16CmdKey;
   uint16_t hdrU16CmdLgth;
@@ -125,6 +126,7 @@ typedef struct headerPart {
   uint8_t hdrEncryption;
   uint8_t hdrExtraLgth;
   uint8_t hdrHandleType;
+  uint8_t hdrLgth;
   uint32_t hdrFlags;
   uint16_t fieldSequence[COMP_DISP_MAX_SEQUENCE];
 } headerPart_t;
@@ -133,6 +135,7 @@ typedef struct msgHeaderInfos {
   uint32_t headerFlags;        // these are the flags for the 2nd line in the heads file!!
   uint16_t headerSequence[COMP_DISP_MAX_SEQUENCE];  // this is the sequence of the 2nd line in the heads file!!
   uint8_t headerLgth;
+  uint8_t lgth;
   headerPart_t *headerParts;
   uint8_t numHeaderParts;
   uint8_t maxHeaderParts;
@@ -146,7 +149,7 @@ typedef struct msgParts {
   uint16_t toPart;
   uint16_t totalLgth;
   uint8_t GUID[GUID_LGTH];
-  uint16_t senderId;
+  uint16_t srcId;
   uint8_t hdrFiller[38];
   uint16_t partsFlags;
   uint16_t u16CmdKey;
@@ -161,7 +164,8 @@ typedef struct msgParts {
 typedef struct compMsgMsgDesc compMsgMsgDesc_t;
 typedef struct compMsgData compMsgData_t;
 
-typedef uint8_t (* getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep);
+typedef uint8_t (* getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd);
+typedef uint8_t (* getStrFromLine_t)(uint8_t *myStr, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDataView_t *dataView, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
 typedef uint8_t (* openFile_t)(compMsgMsgDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode);
 typedef uint8_t (* closeFile_t)(compMsgMsgDesc_t *self);
@@ -177,12 +181,13 @@ typedef struct compMsgMsgDesc {
   uint8_t fileId;
   size_t fileSize;
   
-  getIntFromLine_t getIntFromLine;
   openFile_t openFile;
   closeFile_t closeFile;
   flushFile_t flushFile;
   readLine_t readLine;
   writeLine_t writeLine;
+  getIntFromLine_t getIntFromLine;
+  getStrFromLine_t getStrFromLine;
   getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
   readHeadersAndSetFlags_t readHeadersAndSetFlags;
   readActions_t readActions;
