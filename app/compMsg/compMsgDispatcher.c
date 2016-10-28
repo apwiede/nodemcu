@@ -638,7 +638,7 @@ static uint8_t getFieldInfoFromLine(compMsgDispatcher_t *self) {
   buffer = self->buildMsgInfos.buf;
   self->buildMsgInfos.numericValue = 0;
   self->buildMsgInfos.stringValue = NULL;
-  result = self->readLine(self, &buffer, &lgth);
+  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
   checkErrOK(result);
   if (lgth == 0) {
     return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -842,7 +842,7 @@ static uint8_t createMsgFromLines(compMsgDispatcher_t *self, msgParts_t *parts, 
   checkErrOK(result);
   idx = 0;
   while(idx < numEntries) {
-    result = self->readLine(self, &buffer, &lgth);
+    result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -981,36 +981,6 @@ static uint8_t decryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, s
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= openFile ====================================
-
-static uint8_t openFile(compMsgDispatcher_t *self, const uint8_t *fileName, const uint8_t *fileMode) {
-  return self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, fileMode);
-}
-
-// ================================= closeFile ====================================
-
-static uint8_t closeFile(compMsgDispatcher_t *self) {
-  return self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
-}
-
-// ================================= flushFile ====================================
-
-static uint8_t flushFile(compMsgDispatcher_t *self) {
-  return COMP_DATA_DESC_ERR_FLUSH_FILE;
-}
-
-// ================================= readLine ====================================
-
-static uint8_t readLine(compMsgDispatcher_t *self, uint8_t **buffer, uint8_t *lgth) {
-  return self->compMsgDataDesc->readLine(self->compMsgDataDesc, buffer, lgth);
-}
-
-// ================================= writeLine ====================================
-
-static uint8_t writeLine(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
-  return self->compMsgDataDesc->writeLine(self->compMsgDataDesc, buffer, lgth);
-}
-
 // ============================= compMsgDispatcherGetPtrFromHandle ========================
 
 uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher) {
@@ -1091,18 +1061,9 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->createDispatcher = &createDispatcher;
   compMsgDispatcher->initDispatcher = &initDispatcher;
 
-//  compMsgDispatcher->BMsg = &BMsg;
-//  compMsgDispatcher->IMsg = &IMsg;
-//  compMsgDispatcher->MMsg = &MMsg;
-//  compMsgDispatcher->defaultMsg = &defaultMsg;
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
   compMsgDispatcher->createMsgFromLines = &createMsgFromLines;
   compMsgDispatcher->setMsgValuesFromLines = &setMsgValuesFromLines;
-
-  compMsgDispatcher->openFile = &openFile;
-  compMsgDispatcher->closeFile = &closeFile;
-  compMsgDispatcher->readLine = &readLine;
-  compMsgDispatcher->writeLine = &writeLine;
 
   compMsgDispatcher->encryptMsg = &encryptMsg;
   compMsgDispatcher->decryptMsg = &decryptMsg;

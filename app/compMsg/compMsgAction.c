@@ -482,11 +482,11 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
 
   dataView = self->compMsgDataView;
   os_sprintf(fileName, "MsgActions.txt");
-  result = self->openFile(self, fileName, "r");
+  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { self->closeFile(self); return result; }
-  result = self->readLine(self, &buffer, &lgth);
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { self->compMsgDataDesc->closeFile(self->compMsgDataDesc); return result; }
+  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
@@ -498,7 +498,7 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   while(idx < numEntries) {
     u8CmdKey = 0;
     u16CmdKey = 0;
-    result = self->readLine(self, &buffer, &lgth);
+    result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -552,7 +552,7 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   }
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
-  result = self->closeFile(self);
+  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }

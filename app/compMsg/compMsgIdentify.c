@@ -49,7 +49,7 @@
 #include "platform.h"
 #include "compMsgData.h"
 
-#define RECEIVED_CHECK_HEADER_SIZE 7
+#define MSG_HEADS_FILE_NAME "CompMsgHeads.txt"
 
 #define DISP_FLAG_SHORT_CMD_KEY    (1 << 0)
 #define DISP_FLAG_HAVE_CMD_LGTH    (1 << 1)
@@ -91,125 +91,6 @@ static flag2Str_t flag2Strs [] = {
   { 0,                             NULL },
 };
 
-// ================================= getIntFromLine ====================================
-
-static uint8_t getIntFromLine(uint8_t *myStr, long *ulgth, uint8_t **ep) {
-  uint8_t *cp;
-  char *endPtr;
-
-  cp = myStr;
-  while (*cp != ',') {
-    cp++;
-  }
-  *cp++ = '\0';
-  *ulgth = c_strtoul(myStr, &endPtr, 10);
-  if (cp-1 != (uint8_t *)endPtr) {
-     return COMP_MSG_ERR_BAD_VALUE;
-  }
-  *ep = cp;
-  return COMP_DISP_ERR_OK;
-}
-
-// ================================= getStartFieldsFromLine ====================================
-
-static uint8_t getStartFieldsFromLine(compMsgDataView_t *dataView, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx) {
-  int result;
-  uint8_t *cp;
-  uint8_t fieldNameId;
-
-//ets_printf("numHeaderParts: %d seqidx: %d\n", hdrInfos->numHeaderParts, *seqIdx);
-  cp = myStr;
-  while (*cp != ',') {
-    cp++;
-  }
-  *cp++ = '\0';
-  if (myStr[0] != '@') {
-    return COMP_DISP_ERR_FIELD_NOT_FOUND;
-  }
-  hdrInfos->headerStartLgth = 0;
-  result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_SRC:
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
-    hdrInfos->headerFlags |= COMP_DISP_U16_SRC;
-    hdrInfos->headerStartLgth += sizeof(uint16_t);
-    break;
-  case COMP_MSG_SPEC_FIELD_DST:
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
-    hdrInfos->headerFlags |= COMP_DISP_U16_DST;
-    hdrInfos->headerStartLgth += sizeof(uint16_t);
-    break;
-  case COMP_MSG_SPEC_FIELD_TARGET_CMD:
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_TARGET;
-    hdrInfos->headerFlags |= COMP_DISP_U8_TARGET;
-    hdrInfos->headerStartLgth += sizeof(uint8_t);
-    break;
-  default:
-    checkErrOK(COMP_DISP_ERR_BAD_FIELD_NAME);
-    break;
-  }
-  myStr = cp;
-  while (*cp != ',') {
-    cp++;
-  }
-  *cp++ = '\0';
-  if (myStr[0] != '@') {
-    return COMP_DISP_ERR_FIELD_NOT_FOUND;
-  }
-  result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_SRC:
-    if (hdrInfos->headerFlags & COMP_DISP_U16_SRC) {
-      return COMP_DISP_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
-    hdrInfos->headerStartLgth += sizeof(uint16_t);
-    break;
-  case COMP_MSG_SPEC_FIELD_DST:
-    if (hdrInfos->headerFlags & COMP_DISP_U16_DST) {
-      return COMP_DISP_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerStartLgth += sizeof(uint16_t);
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
-    break;
-  case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
-    hdrInfos->headerStartLgth += sizeof(uint16_t);
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
-    break;
-  default:
-    checkErrOK(COMP_DISP_ERR_BAD_FIELD_NAME);
-    break;
-  }
-  myStr = cp;
-  while ((*cp != '\n') && (*cp != '\0')) {
-    cp++;
-  }
-  *cp++ = '\0';
-  if (myStr[0] != '\0') {
-    if (myStr[0] != '@') {
-      return COMP_DISP_ERR_FIELD_NOT_FOUND;
-    }
-    result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, COMP_MSG_NO_INCR);
-    checkErrOK(result);
-    switch (fieldNameId) {
-    case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
-      if (hdrInfos->headerFlags & COMP_DISP_U16_TOTAL_LGTH) {
-        return COMP_DISP_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerStartLgth += sizeof(uint16_t);
-      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
-    default:
-      checkErrOK(COMP_DISP_ERR_BAD_FIELD_NAME);
-      break;
-    }
-  }
-ets_printf("§headerStartLgth!%d§", hdrInfos->headerStartLgth);
-  *ep = cp;
-  return COMP_DISP_ERR_OK;
-}
-  
 // ================================= getFlagStr ====================================
 
 static uint8_t *getFlagStr(uint32_t flags) {
@@ -258,7 +139,7 @@ static uint8_t initHeadersAndFlags(compMsgDispatcher_t *self) {
 }
 
 #undef checkErrOK
-#define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) { self->closeFile(self); return result; }
+#define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) { self->compMsgDataDesc->closeFile(self->compMsgDataDesc); return result; }
 // ================================= readHeadersAndSetFlags ====================================
 
 static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
@@ -290,10 +171,10 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
   dataView = self->compMsgDataView;
   hdrInfos = &self->msgHeaderInfos;
   hdrInfos->currPartIdx = 0;
-  os_sprintf(fileName, "MsgHeads.txt");
-  result = self->openFile(self, fileName, "r");
+  os_sprintf(fileName, MSG_HEADS_FILE_NAME);
+  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
   checkErrOK(result);
-  result = self->readLine(self, &buffer, &lgth);
+  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
      return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -306,18 +187,18 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
   hdrInfos->maxHeaderParts = numEntries;
   hdrInfos->headerFlags = 0;
   // parse header start description
-  result = self->readLine(self, &buffer, &lgth);
+  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
   checkErrOK(result);
   seqIdx = 0;
   buffer[lgth] = 0;
   myStr = buffer;
-  result = getStartFieldsFromLine(dataView, hdrInfos, myStr, &cp, &seqIdx);
+  result = self->compMsgDataDesc->getStartFieldsFromLine(dataView, hdrInfos, myStr, &cp, &seqIdx);
   myDataView = newDataView();
   checkAllocOK(myDataView);
   fieldOffset = 0;
   idx = 0;
   while(idx < numEntries) {
-    result = self->readLine(self, &buffer, &lgth);
+    result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -336,7 +217,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
     buffer[lgth] = 0;
     myStr = buffer;
     seqIdx2 = 0;
-    result = getIntFromLine(myStr, &ulgth, &cp);
+    result = self->compMsgDataDesc->getIntFromLine(myStr, &ulgth, &cp);
     checkErrOK(result);
     found = 0;
     if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_SRC) {
@@ -356,7 +237,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
     }
     seqIdx2++;
     myStr = cp;
-    result = getIntFromLine(myStr, &ulgth, &cp);
+    result = self->compMsgDataDesc->getIntFromLine(myStr, &ulgth, &cp);
     checkErrOK(result);
     found = 0;
     if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_SRC) {
@@ -379,7 +260,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
     if (seqIdx > seqIdx2) {
       found = 0;
       myStr = cp;
-      result = getIntFromLine(myStr, &ulgth, &cp);
+      result = self->compMsgDataDesc->getIntFromLine(myStr, &ulgth, &cp);
       checkErrOK(result);
       if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_TOTAL_LGTH) {
         hdr->hdrTotalLgth = (uint16_t)ulgth;
@@ -393,7 +274,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
     }
     // extra field lgth 0/<number>
     myStr = cp;
-    result = getIntFromLine(myStr, &ulgth, &cp);
+    result = self->compMsgDataDesc->getIntFromLine(myStr, &ulgth, &cp);
     checkErrOK(result);
     hdr->hdrExtraLgth = (uint8_t)ulgth;
     hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_EXTRA_KEY_LGTH;
@@ -551,7 +432,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self) {
     idx++;
   }
   os_free(myDataView);
-  result2 = self->closeFile(self);
+  result2 = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
   checkErrOK(result2);
   return result;
 }

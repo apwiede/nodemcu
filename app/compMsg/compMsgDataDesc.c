@@ -45,12 +45,132 @@
 
 #include "c_string.h"
 #include "c_stdio.h"
+#include "c_stdlib.h"
 #include "compMsgDataDesc.h"
 
 
 static int compMsgDataDescId = 0;
 static volatile int fileFd = FS_OPEN_OK - 1;
 
+// ================================= getIntFromLine ====================================
+
+static uint8_t getIntFromLine(uint8_t *myStr, long *ulgth, uint8_t **ep) {
+  uint8_t *cp;
+  char *endPtr;
+
+  cp = myStr;
+  while (*cp != ',') {
+    cp++;
+  }
+  *cp++ = '\0';
+  *ulgth = c_strtoul(myStr, &endPtr, 10);
+  if (cp-1 != (uint8_t *)endPtr) {
+     return COMP_DATA_DESC_ERR_BAD_VALUE;
+  }
+  *ep = cp;
+  return COMP_DATA_DESC_ERR_OK;
+}
+
+// ================================= getStartFieldsFromLine ====================================
+
+static uint8_t getStartFieldsFromLine(compMsgDataView_t *dataView, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx) {
+  int result;
+  uint8_t *cp;
+  uint8_t fieldNameId;
+
+//ets_printf("numHeaderParts: %d seqidx: %d\n", hdrInfos->numHeaderParts, *seqIdx);
+  cp = myStr;
+  while (*cp != ',') {
+    cp++;
+  }
+  *cp++ = '\0';
+  if (myStr[0] != '@') {
+    return COMP_MSG_ERR_NO_SUCH_FIELD;
+  }
+  hdrInfos->headerStartLgth = 0;
+  result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, COMP_MSG_NO_INCR);
+  checkErrOK(result);
+  switch (fieldNameId) {
+  case COMP_MSG_SPEC_FIELD_SRC:
+    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
+    hdrInfos->headerFlags |= COMP_DISP_U16_SRC;
+    hdrInfos->headerStartLgth += sizeof(uint16_t);
+    break;
+  case COMP_MSG_SPEC_FIELD_DST:
+    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
+    hdrInfos->headerFlags |= COMP_DISP_U16_DST;
+    hdrInfos->headerStartLgth += sizeof(uint16_t);
+    break;
+  case COMP_MSG_SPEC_FIELD_TARGET_CMD:
+    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_TARGET;
+    hdrInfos->headerFlags |= COMP_DISP_U8_TARGET;
+    hdrInfos->headerStartLgth += sizeof(uint8_t);
+    break;
+  default:
+    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
+    break;
+  }
+  myStr = cp;
+  while (*cp != ',') {
+    cp++;
+  }
+  *cp++ = '\0';
+  if (myStr[0] != '@') {
+    return COMP_MSG_ERR_NO_SUCH_FIELD;
+  }
+  result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, COMP_MSG_NO_INCR);
+  checkErrOK(result);
+  switch (fieldNameId) {
+  case COMP_MSG_SPEC_FIELD_SRC:
+    if (hdrInfos->headerFlags & COMP_DISP_U16_SRC) {
+      return COMP_MSG_ERR_DUPLICATE_FIELD;
+    }
+    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
+    hdrInfos->headerStartLgth += sizeof(uint16_t);
+    break;
+  case COMP_MSG_SPEC_FIELD_DST:
+    if (hdrInfos->headerFlags & COMP_DISP_U16_DST) {
+      return COMP_MSG_ERR_DUPLICATE_FIELD;
+    }
+    hdrInfos->headerStartLgth += sizeof(uint16_t);
+    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
+    break;
+  case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
+    hdrInfos->headerStartLgth += sizeof(uint16_t);
+    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
+    break;
+  default:
+    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
+    break;
+  }
+  myStr = cp;
+  while ((*cp != '\n') && (*cp != '\0')) {
+    cp++;
+  }
+  *cp++ = '\0';
+  if (myStr[0] != '\0') {
+    if (myStr[0] != '@') {
+      return COMP_MSG_ERR_NO_SUCH_FIELD;
+    }
+    result = dataView->getFieldNameIdFromStr(dataView, myStr, &fieldNameId, COMP_MSG_NO_INCR);
+    checkErrOK(result);
+    switch (fieldNameId) {
+    case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
+      if (hdrInfos->headerFlags & COMP_DISP_U16_TOTAL_LGTH) {
+        return COMP_MSG_ERR_DUPLICATE_FIELD;
+      }
+      hdrInfos->headerStartLgth += sizeof(uint16_t);
+      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
+    default:
+      checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
+      break;
+    }
+  }
+ets_printf("§headerStartLgth!%d§", hdrInfos->headerStartLgth);
+  *ep = cp;
+  return COMP_MSG_ERR_OK;
+}
+  
 // ================================= openFile ====================================
 
 static uint8_t openFile(compMsgDataDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode) {
@@ -138,6 +258,8 @@ compMsgDataDesc_t *newCompMsgDataDesc() {
   compMsgDataDescId++;
   compMsgDataDesc->id = compMsgDataDescId;
 
+  compMsgDataDesc->getIntFromLine = &getIntFromLine;
+  compMsgDataDesc->getStartFieldsFromLine = &getStartFieldsFromLine;
   compMsgDataDesc->openFile = &openFile;
   compMsgDataDesc->closeFile = &closeFile;
   compMsgDataDesc->flushFile = &flushFile;

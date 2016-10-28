@@ -67,9 +67,9 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   } else {
     os_sprintf(fileName, "Val%c%c%c.txt", (self->buildMsgInfos.u16CmdKey>>8)&0xFF, self->buildMsgInfos.u16CmdKey&0xFF, self->buildMsgInfos.type);
   }
-  result = self->openFile(self, fileName, "r");
+  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
   checkErrOK(result);
-  result = self->readLine(self, &buffer, &lgth);
+  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -79,7 +79,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
 //ets_printf("§@setMsgValues numEntries!%d!@§\n", numEntries);
   result = self->setMsgValuesFromLines(self, self->compMsgData, numEntries, self->msgHandle, self->buildMsgInfos.type);
   checkErrOK(result);
-  result = self->closeFile(self);
+  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
   return result;
 }
 
@@ -180,7 +180,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos;
   result = self->createMsgFromLines(self, self->buildMsgInfos.parts, self->buildMsgInfos.numEntries, self->buildMsgInfos.numRows, self->buildMsgInfos.type);
   checkErrOK(result);
-  result = self->closeFile(self);
+  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
   checkErrOK(result);
   result = self->compMsgData->initMsg(self->compMsgData);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
@@ -317,9 +317,9 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgParts_t *parts, ui
     os_sprintf(fileName, "Desc%c%c%c.txt", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
   }
 ets_printf("fileName: %s\n", fileName);
-  result = self->openFile(self, fileName, "r");
+  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
   checkErrOK(result);
-  result = self->readLine(self, &buffer, &lgth);
+  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -420,9 +420,9 @@ return COMP_MSG_ERR_OK;
   } else {
     os_sprintf(fileName, "Val%c%c%c.txt", (parts->u16CmdKey>>8)&0xFF, parts->u16CmdKey&0xFF, type);
   }
-  result = self->openFile(self, fileName, "r");
+  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
   checkErrOK(result);
-  result = self->readLine(self, &buffer, &lgth);
+  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -432,7 +432,7 @@ return COMP_MSG_ERR_OK;
 //ets_printf("§@NE2!%d!@§", numEntries);
   result = self->setMsgValuesFromLines(self, compMsgData, numEntries, handle, parts->u8CmdKey);
   checkErrOK(result);
-  result = self->closeFile(self);
+  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
   checkErrOK(result);
 //ets_printf("§heap3: %d§", system_get_free_heap_size());
   result = compMsgData->getMsgData(compMsgData, &data, &msgLgth);

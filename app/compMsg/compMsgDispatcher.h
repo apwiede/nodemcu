@@ -40,7 +40,6 @@
 
 /* composite message data dispatching */
 
-#include "compMsgDataView.h"
 #include "compMsgDataDesc.h"
 #include "compMsgModuleData.h"
 
@@ -82,104 +81,11 @@ enum compMsgDispatcherErrorCode
 };
 
 
-#define DISP_BUF_LGTH 1024
 // dst + src + totalLgth + (optional) GUID + cmdKey/shCmdKey
 // uint16_t + uint16_t + uint16_t + (optional) uint8_t*(16) + uint16_t/uint8_t
 #define DISP_MAX_HEADER_LGTH (sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint16_t) + (16*sizeof(uint8_t)) + sizeof(uint16_t))
 
 typedef struct compMsgData compMsgData_t;
-
-// handle types
-// A/G/R/S/W/U/N
-#define COMP_DISP_SEND_TO_APP       (1 << 0)
-#define COMP_DISP_RECEIVE_FROM_APP  (1 << 1)
-#define COMP_DISP_SEND_TO_UART      (1 << 2)
-#define COMP_DISP_RECEIVE_FROM_UART (1 << 3)
-#define COMP_DISP_TRANSFER_TO_UART  (1 << 4)
-#define COMP_DISP_TRANSFER_TO_CONN  (1 << 5)
-#define COMP_DISP_NOT_RELEVANT      (1 << 6)
-
-// encryption and other types
-#define COMP_DISP_IS_ENCRYPTED      (1 << 0)
-#define COMP_DISP_IS_NOT_ENCRYPTED  (1 << 1)
-
-// 0x01
-#define COMP_DISP_U16_DST           (1 << 0)
-// 0x02
-#define COMP_DISP_U16_SRC           (1 << 1)
-// 0x04
-#define COMP_DISP_U8_TARGET         (1 << 2)
-// 0x08
-#define COMP_DISP_U16_TOTAL_LGTH    (1 << 3)
-// 0x10
-#define COMP_DISP_U8_EXTRA_KEY_LGTH (1 << 4)
-// 0x20
-#define COMP_DISP_U8_ENCRYPTION     (1 << 5)
-// 0x40
-#define COMP_DISP_U8_HANDLE_TYPE    (1 << 6)
-// 0x80
-#define COMP_DISP_U8_CMD_KEY        (1 << 7)
-// 0x100
-#define COMP_DISP_U16_CMD_KEY       (1 << 8)
-// 0x200
-#define COMP_DISP_U0_CMD_LGTH       (1 << 9)
-// 0x400
-#define COMP_DISP_U8_CMD_LGTH       (1 << 10)
-// 0x800
-#define COMP_DISP_U16_CMD_LGTH      (1 << 11)
-// 0x1000
-#define COMP_DISP_U0_CRC            (1 << 12)
-// 0x2000
-#define COMP_DISP_U8_CRC            (1 << 13)
-// 0x4000
-#define COMP_DISP_U16_CRC           (1 << 14)
-
-typedef struct headerParts {
-  uint16_t hdrFromPart;
-  uint16_t hdrToPart;
-  uint16_t hdrTotalLgth;
-  uint16_t hdrU16CmdKey;
-  uint16_t hdrU16CmdLgth;
-  uint16_t hdrU16Crc;
-  uint8_t hdrTargetPart;
-  uint8_t hdrU8CmdKey;
-  uint8_t hdrU8CmdLgth;
-  uint8_t hdrU8Crc;
-  uint8_t hdrOffset;
-  uint8_t hdrExtraLgth;
-  uint8_t hdrEncryption;
-  uint8_t hdrHandleType;
-  uint32_t hdrFlags;
-  uint16_t fieldSequence[9];
-} headerParts_t;
-
-typedef struct msgHeaderInfos {
-  uint32_t headerFlags;
-  headerParts_t *headerParts;
-  uint16_t headerSequence[9];
-  uint8_t headerStartLgth;
-  uint8_t numHeaderParts;
-  uint8_t maxHeaderParts;
-  uint8_t currPartIdx;
-  uint8_t seqIdx;
-  uint8_t seqIdxAfterStart;
-} msgHeaderInfos_t;
-
-typedef struct msgParts {
-  uint16_t fromPart;
-  uint16_t toPart;
-  uint16_t totalLgth;
-  uint16_t u16CmdLgth;
-  uint16_t u16CmdKey;
-  uint16_t partsFlags;
-  uint8_t targetPart;
-  uint8_t u8CmdLgth;
-  uint8_t u8CmdKey;
-  uint8_t lgth;
-  uint8_t realLgth;
-  size_t fieldOffset;
-  uint8_t buf[DISP_BUF_LGTH];
-} msgParts_t;
 
 typedef struct msgHeader2MsgPtr {
   compMsgData_t *compMsgData;
@@ -247,12 +153,6 @@ typedef uint8_t (* createDispatcher_t)(compMsgDispatcher_t *self, uint8_t **hand
 typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* createMsgFromLines_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type);
 typedef uint8_t (* setMsgValuesFromLines_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t numEntries, uint8_t *handle, uint8_t type);
-
-typedef uint8_t (* openFileDesc_t)(compMsgDispatcher_t *self, const uint8_t *fileName, const uint8_t *fileMode);
-typedef uint8_t (* closeFileDesc_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* flushFileDesc_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* readLineDesc_t)(compMsgDispatcher_t *self, uint8_t **buffer, uint8_t *lgth);
-typedef uint8_t (* writeLineDesc_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* buildListMsg_t)(compMsgDispatcher_t *self, size_t *totalLgth, uint8_t **totalData);
@@ -336,11 +236,6 @@ typedef struct compMsgDispatcher {
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;
   getModuleTableFieldValue_t getModuleTableFieldValue;
-
-  openFileDesc_t openFile;
-  closeFileDesc_t closeFile;
-  writeLineDesc_t writeLine;
-  readLineDesc_t readLine;
 
   readHeadersAndSetFlags_t readHeadersAndSetFlags;
   resetHeaderInfos_t resetHeaderInfos;
