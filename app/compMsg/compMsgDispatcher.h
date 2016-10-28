@@ -40,7 +40,12 @@
 
 /* composite message data dispatching */
 
-#include "compMsgDataDesc.h"
+#ifndef COMP_MSG_DISPATCHER
+#define	COMP_MSG_DISPATCHER
+
+typedef struct compMsgDispatcher compMsgDispatcher_t;
+
+#include "compMsgMsgDesc.h"
 #include "compMsgModuleData.h"
 
 enum compMsgDispatcherErrorCode
@@ -130,7 +135,7 @@ typedef struct buildListMsgInfos {
 typedef struct websocketUserData websocketUserData_t;
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-typedef uint8_t (* dumpHeaderParts_t)(compMsgDispatcher_t *self, headerParts_t *hdr);
+typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
 typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
 
@@ -168,7 +173,6 @@ typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts)
 typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 
 typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* readHeadersAndSetFlags_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
@@ -195,6 +199,9 @@ typedef struct compMsgDispatcher {
   uint8_t tableCol;
   void *wud;
   
+  msgHeaderInfos_t msgHeaderInfos;
+
+  // this is for mapping a msg handle from teaf header to a compMsgPtr
   uint8_t numMsgHeaders;
   uint8_t maxMsgHeaders;
   msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
@@ -202,9 +209,8 @@ typedef struct compMsgDispatcher {
   compMsgDataView_t *compMsgDataView;
   compMsgData_t *compMsgData;
   uint8_t *msgHandle;
-  compMsgDataDesc_t *compMsgDataDesc;
+  compMsgMsgDesc_t *compMsgMsgDesc;
 
-  msgHeaderInfos_t msgHeaderInfos;
   msgParts_t received;
   msgParts_t toSend;
 
@@ -237,7 +243,6 @@ typedef struct compMsgDispatcher {
   updateModuleValues_t updateModuleValues;
   getModuleTableFieldValue_t getModuleTableFieldValue;
 
-  readHeadersAndSetFlags_t readHeadersAndSetFlags;
   resetHeaderInfos_t resetHeaderInfos;
   nextFittingEntry_t nextFittingEntry;
   handleReceivedPart_t handleReceivedPart;
@@ -256,7 +261,7 @@ typedef struct compMsgDispatcher {
   websocketRunAPMode_t websocketRunAPMode;
   websocketSendData_t websocketSendData;
 
-  dumpHeaderParts_t dumpHeaderParts;
+  dumpHeaderPart_t dumpHeaderPart;
   dumpMsgHeaderInfos_t dumpMsgHeaderInfos;
   dumpMsgParts_t dumpMsgParts;
 } compMsgDispatcher_t;
@@ -270,3 +275,5 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self);
 uint8_t compMsgActionInit(compMsgDispatcher_t *self);
 uint8_t compMsgModuleDataValuesInit(compMsgDispatcher_t *self);
 uint8_t compMsgWebsocketInit(compMsgDispatcher_t *self);
+
+#endif	/* COMP_MSG_DISPATCHER_H */

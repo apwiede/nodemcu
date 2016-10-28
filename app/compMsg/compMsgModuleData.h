@@ -38,7 +38,10 @@
  * Created on October 9th, 2016
  */
 
-/* struct message data value handling */
+/* comp message data value handling */
+
+#ifndef COMP_MSG_MODULE_DATA_H
+#define	COMP_MSG_MODULE_DATA_H
 
 // status values: 0/1/2/3/4/5
 #define STATION_STATUS_IDLE           STATION_IDLE
@@ -178,3 +181,5 @@ typedef struct compMsgWifiData {
   websocketBinaryReceived_t websocketBinaryReceived;
   websocketTextReceived_t websocketTextReceived;
 } compMsgWifiData_t;
+
+#endif	/* COMP_MSG_MODULE_DATA_H */

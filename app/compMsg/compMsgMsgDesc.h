@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   compMsgDataDescs.h
+ * File:   compMsgMsgDesc.h
  * Author: Arnulf P. Wiedemann
  *
  * Created on October 1st, 2016
@@ -40,27 +40,31 @@
 
 /* composite message data descriptions handling */
 
+#ifndef COMP_MSG_MSG_DESC_H
+#define	COMP_MSG_MSG_DESC_H
+
 #include "compMsgDataView.h"
+#include "compMsgData.h"
 
 enum compMsgDataErrorCode
 {
-  COMP_DATA_DESC_ERR_OK                    = 0,
-  COMP_DATA_DESC_ERR_VALUE_NOT_SET         = 255,
-  COMP_DATA_DESC_ERR_VALUE_OUT_OF_RANGE    = 254,
-  COMP_DATA_DESC_ERR_BAD_VALUE             = 253,
-  COMP_DATA_DESC_ERR_BAD_FIELD_TYPE        = 252,
-  COMP_DATA_DESC_ERR_FIELD_TYPE_NOT_FOUND  = 251,
-  COMP_DATA_DESC_ERR_VALUE_TOO_BIG         = 250,
-  COMP_DATA_DESC_ERR_OUT_OF_MEMORY         = 249,
-  COMP_DATA_DESC_ERR_OUT_OF_RANGE          = 248,
+  COMP_MSG_DESC_ERR_OK                    = 0,
+  COMP_MSG_DESC_ERR_VALUE_NOT_SET         = 255,
+  COMP_MSG_DESC_ERR_VALUE_OUT_OF_RANGE    = 254,
+  COMP_MSG_DESC_ERR_BAD_VALUE             = 253,
+  COMP_MSG_DESC_ERR_BAD_FIELD_TYPE        = 252,
+  COMP_MSG_DESC_ERR_FIELD_TYPE_NOT_FOUND  = 251,
+  COMP_MSG_DESC_ERR_VALUE_TOO_BIG         = 250,
+  COMP_MSG_DESC_ERR_OUT_OF_MEMORY         = 249,
+  COMP_MSG_DESC_ERR_OUT_OF_RANGE          = 248,
   // be carefull the values up to here
   // must correspond to the values in dataView.h !!!
   // with the names like DATA_VIEW_ERR_*
 
-  COMP_DATA_DESC_ERR_OPEN_FILE             = 189,
-  COMP_DATA_DESC_FILE_NOT_OPENED           = 188,
-  COMP_DATA_DESC_ERR_FLUSH_FILE            = 187,
-  COMP_DATA_DESC_ERR_WRITE_FILE            = 186,
+  COMP_MSG_DESC_ERR_OPEN_FILE             = 189,
+  COMP_MSG_DESC_FILE_NOT_OPENED           = 188,
+  COMP_MSG_DESC_ERR_FLUSH_FILE            = 187,
+  COMP_MSG_DESC_ERR_WRITE_FILE            = 186,
 };
 
 #define DISP_BUF_LGTH 1024
@@ -110,7 +114,7 @@ enum compMsgDataErrorCode
 // 0x4000
 #define COMP_DISP_U16_CRC           (1 << 14)
 
-typedef struct headerParts {
+typedef struct headerPart {
   uint16_t hdrFromPart;
   uint16_t hdrToPart;
   uint16_t hdrTotalLgth;
@@ -127,18 +131,18 @@ typedef struct headerParts {
   uint8_t hdrHandleType;
   uint32_t hdrFlags;
   uint16_t fieldSequence[9];
-} headerParts_t;
+} headerPart_t;
 
 typedef struct msgHeaderInfos {
-  uint32_t headerFlags;
-  headerParts_t *headerParts;
-  uint16_t headerSequence[9];
-  uint8_t headerStartLgth;
+  uint32_t headerFlags;        // these are the flags for the 2 line in the heads file!!
+  uint16_t headerSequence[9];  // this is the sequence of the 2 line in the heads file!!
+  uint8_t headerLgth;
+  headerPart_t *headerParts;
   uint8_t numHeaderParts;
   uint8_t maxHeaderParts;
   uint8_t currPartIdx;
   uint8_t seqIdx;
-  uint8_t seqIdxAfterStart;
+  uint8_t seqIdxAfterHeader;
 } msgHeaderInfos_t;
 
 typedef struct msgParts {
@@ -157,32 +161,38 @@ typedef struct msgParts {
   uint8_t buf[DISP_BUF_LGTH];
 } msgParts_t;
 
-typedef struct compMsgDataDesc compMsgDataDesc_t;
+typedef struct compMsgMsgDesc compMsgMsgDesc_t;
+typedef struct compMsgData compMsgData_t;
 
 typedef uint8_t (* getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep);
-typedef uint8_t (* getStartFieldsFromLine_t)(compMsgDataView_t *dataView, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
-typedef uint8_t (* openFile_t)(compMsgDataDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode);
-typedef uint8_t (* closeFile_t)(compMsgDataDesc_t *self);
-typedef uint8_t (* flushFile_t)(compMsgDataDesc_t *self);
-typedef uint8_t (* readLine_t)(compMsgDataDesc_t *self, uint8_t **buffer, uint8_t *lgth);
-typedef uint8_t (* writeLine_t)(compMsgDataDesc_t *self, const uint8_t *buffer, uint8_t lgth);
+typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDataView_t *dataView, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
+typedef uint8_t (* openFile_t)(compMsgMsgDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode);
+typedef uint8_t (* closeFile_t)(compMsgMsgDesc_t *self);
+typedef uint8_t (* flushFile_t)(compMsgMsgDesc_t *self);
+typedef uint8_t (* readLine_t)(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t *lgth);
+typedef uint8_t (* writeLine_t)(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t lgth);
+typedef uint8_t (*readActions_t)(compMsgDispatcher_t *self, uint8_t *fileName);
+typedef uint8_t (* readHeadersAndSetFlags_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 
-
-typedef struct compMsgDataDesc {
+typedef struct compMsgMsgDesc {
   uint8_t id;
   const uint8_t *fileName;
   uint8_t fileId;
   size_t fileSize;
   
   getIntFromLine_t getIntFromLine;
-  getStartFieldsFromLine_t getStartFieldsFromLine;
   openFile_t openFile;
   closeFile_t closeFile;
   flushFile_t flushFile;
   readLine_t readLine;
   writeLine_t writeLine;
+  getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
+  readActions_t readActions;
+  readHeadersAndSetFlags_t readHeadersAndSetFlags;
 
-} compMsgDataDesc_t;
+} compMsgMsgDesc_t;
 
-compMsgDataDesc_t *newCompMsgDataDesc();
-void freeCompMsgDataDesc(compMsgDataDesc_t *compMsgDataDesc);
+compMsgMsgDesc_t *newCompMsgMsgDesc();
+void freeCompMsgMsgDesc(compMsgMsgDesc_t *compMsgMsgDesc);
+
+#endif	/* COMP_MSG_MSG_DESC_H */

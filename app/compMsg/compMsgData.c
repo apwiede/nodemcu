@@ -35,7 +35,7 @@
 #include "mem.h"
 #include "c_string.h"
 #include "c_stdlib.h"
-#include "compMsgData.h"
+#include "compMsgDispatcher.h"
 
 #define HANDLE_PREFIX "stmsg_"
 

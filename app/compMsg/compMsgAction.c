@@ -41,14 +41,13 @@
 #include "osapi.h"
 #include "c_types.h"
 #include "mem.h"
-#include "flash_fs.h"
 #include "c_string.h"
 #include "c_stdlib.h"
 #include "c_stdio.h"
 #include "platform.h"
-#include "compMsgData.h"
+#include "compMsgDispatcher.h"
 
-#define TCP ESPCONN_TCP
+#define COMP_MSG_ACTIONS_FILE_NAME "CompMsgActions.txt"
 
 typedef uint8_t (* action_t)(compMsgDispatcher_t *self);
 
@@ -447,29 +446,12 @@ static uint8_t fillMsgValue(compMsgDispatcher_t *self, uint8_t *callbackName, ui
 
 uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   uint8_t result;
-  uint8_t fileName[30];
-  long ulgth;
-  uint8_t numEntries;
-  uint8_t*cp;
-  char *endPtr;
-  int idx;
-  uint8_t lgth;
-  uint8_t buf[100];
-  uint8_t *buffer;
-  uint8_t *actionName;
-  uint8_t actionMode;
-  compMsgDataView_t *dataView;
-  uint8_t *myStr;
-  uint8_t fieldTypeId;
-  uint8_t u8CmdKey;
-  uint16_t u16CmdKey;
 
   self->setActionEntry = &setActionEntry;
   self->runAction = &runAction;
   self->getActionMode = &getActionMode;
   self->fillMsgValue = &fillMsgValue;
 
-  buffer = buf;
   compMsgActionEntries.numActionEntries = 0;
   compMsgActionEntries.maxActionEntries = 10;
   compMsgActionEntries.actionEntries = (actionName2Action_t **)os_zalloc(compMsgActionEntries.maxActionEntries * sizeof(actionName2Action_t *));
@@ -480,80 +462,7 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   compMsgActions.actions = (actionName2Action_t **)os_zalloc(compMsgActions.maxActions * sizeof(actionName2Action_t  **));
   checkAllocOK(compMsgActions.actions);
 
-  dataView = self->compMsgDataView;
-  os_sprintf(fileName, "MsgActions.txt");
-  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
-  checkErrOK(result);
-#undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { self->compMsgDataDesc->closeFile(self->compMsgDataDesc); return result; }
-  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
-  checkErrOK(result);
-  buffer[lgth] = 0;
-  if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
-  }
-  ulgth = c_strtoul(buffer+2, &endPtr, 10);
-  numEntries = (uint8_t)ulgth;
-  idx = 0;
-  while(idx < numEntries) {
-    u8CmdKey = 0;
-    u16CmdKey = 0;
-    result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
-    checkErrOK(result);
-    if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
-    }
-    buffer[lgth] = 0;
-    cp = buffer;
-    // actionName
-    actionName = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-
-    // actionMode
-    myStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    ulgth = c_strtoul(myStr, &endPtr, 10);
-    actionMode = (uint8_t)ulgth;
-
-    // type of cmdKey
-    myStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, myStr, &fieldTypeId);
-    checkErrOK(result);
-    // cmdKey
-    myStr = cp;
-    while ((*cp != ',') && (*cp != '\n') && (*cp != '\r') && (*cp != '\0')) {
-      cp++;
-    }
-    *cp++ = '\0';
-    switch (fieldTypeId) {
-    case DATA_VIEW_FIELD_UINT8_T:
-      u8CmdKey = myStr[0];
-      break;
-    case DATA_VIEW_FIELD_UINT16_T:
-      u16CmdKey = (myStr[0]<<8)|myStr[1];
-      break;
-    default:
-      checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
-    }
-    result = setActionEntry(self, actionName, actionMode, u8CmdKey, u16CmdKey);
-    checkErrOK(result);
-    idx++;
-  }
-#undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
-  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
-  checkErrOK(result);
-  return COMP_DISP_ERR_OK;
+  result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
+  return result;
 }
 

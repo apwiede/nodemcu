@@ -47,7 +47,7 @@
 #include "c_stdlib.h"
 #include "c_stdio.h"
 #include "platform.h"
-#include "compMsgData.h"
+#include "compMsgDispatcher.h"
 
 static bool bssScanRunning = false;
 static bssScanInfos_t bssScanInfos = { NULL, 0, 0};

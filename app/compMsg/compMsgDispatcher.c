@@ -48,7 +48,7 @@
 #include "c_stdio.h"
 #include "c_limits.h"
 #include "platform.h"
-#include "compMsgData.h"
+#include "compMsgDispatcher.h"
 #include "../crypto/mech.h"
 
 #define BASE64_INVALID '\xff'
@@ -256,15 +256,15 @@ static int checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatch
   return COMP_DISP_ERR_HANDLE_NOT_FOUND;
 }
 
-// ================================= dumpHeaderParts ====================================
+// ================================= dumpHeaderPart ====================================
 
-static uint8_t dumpHeaderParts(compMsgDispatcher_t *self, headerParts_t *hdr) {
+static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   int idx;
 
-  ets_printf("dumpHeaderParts:\n");
-  ets_printf("headerParts1: from: 0x%04x to: 0x%04x totalLgth: %d u16CmdKey: 0x%04x u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrU16CmdKey, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
-  ets_printf("headerParts2: target: 0x%02x u8CmdKey: 0x%02x u8CmdLgth: %d u8Crc: 0x%02x offset: %d extra: %d\n", hdr->hdrTargetPart, hdr->hdrU8CmdKey, hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrOffset, hdr->hdrExtraLgth);
-  ets_printf("headerParts3: enc: %c handleType: %c\n", hdr->hdrEncryption, hdr->hdrHandleType);
+  ets_printf("dumpHeaderPart:\n");
+  ets_printf("headerPart1: from: 0x%04x to: 0x%04x totalLgth: %d u16CmdKey: 0x%04x u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrU16CmdKey, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
+  ets_printf("headerPart2: target: 0x%02x u8CmdKey: 0x%02x u8CmdLgth: %d u8Crc: 0x%02x offset: %d extra: %d\n", hdr->hdrTargetPart, hdr->hdrU8CmdKey, hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrOffset, hdr->hdrExtraLgth);
+  ets_printf("headerPart3: enc: %c handleType: %c\n", hdr->hdrEncryption, hdr->hdrHandleType);
   ets_printf("hdrFlags: ");
   if (hdr->hdrFlags & COMP_DISP_SEND_TO_APP) {
     ets_printf(" COMP_DISP_SEND_TO_APP");
@@ -374,6 +374,7 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
   int idx;
 
   ets_printf("dumpMsgHeaderInfos:\n");
+#ifdef NOTDEF
   ets_printf("headerFlags: ");
   if (hdrInfos->headerFlags & COMP_DISP_U16_SRC) {
     ets_printf(" COMP_DISP_U16_SRC");
@@ -441,7 +442,8 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
     idx++;
   }
   ets_printf("\n");
-  ets_printf("startLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterStart: %d\n", hdrInfos->headerStartLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterStart);
+#endif
+  ets_printf("headerLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterHeader: %d\n", hdrInfos->headerLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterHeader);
   return COMP_DISP_ERR_OK;
 }
 
@@ -638,7 +640,7 @@ static uint8_t getFieldInfoFromLine(compMsgDispatcher_t *self) {
   buffer = self->buildMsgInfos.buf;
   self->buildMsgInfos.numericValue = 0;
   self->buildMsgInfos.stringValue = NULL;
-  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   if (lgth == 0) {
     return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -842,7 +844,7 @@ static uint8_t createMsgFromLines(compMsgDispatcher_t *self, msgParts_t *parts, 
   checkErrOK(result);
   idx = 0;
   while(idx < numEntries) {
-    result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
+    result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -1051,12 +1053,12 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->maxMsgHeaders = 0;
   compMsgDispatcher->msgHeader2MsgPtrs = NULL;
 
-  compMsgDispatcher->msgHeaderInfos.headerFlags = 0;
+//  compMsgDispatcher->msgHeaderInfos.headerFlags = 0;
   compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
   compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
   compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
 
-  compMsgDispatcher->compMsgDataDesc = newCompMsgDataDesc();
+  compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
 
   compMsgDispatcher->createDispatcher = &createDispatcher;
   compMsgDispatcher->initDispatcher = &initDispatcher;
@@ -1070,7 +1072,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->toBase64 = &toBase64;
   compMsgDispatcher->fromBase64 = &fromBase64;
 
-  compMsgDispatcher->dumpHeaderParts = &dumpHeaderParts;
+  compMsgDispatcher->dumpHeaderPart = &dumpHeaderPart;
   compMsgDispatcher->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
   compMsgDispatcher->dumpMsgParts = &dumpMsgParts;
 

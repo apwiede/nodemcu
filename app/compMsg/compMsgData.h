@@ -38,8 +38,8 @@
  * Created on August 1, 2016
  */
 
-#ifndef COMP_MSG_H
-#define	COMP_MSG_H
+#ifndef COMP_MSG_DATA_H
+#define	COMP_MSG_DATA_H
 
 #include "c_types.h"
 typedef struct compMsgData compMsgData_t;
@@ -210,4 +210,4 @@ uint8_t newCompMsgList(compMsgData_t *compMsgData);
 }
 #endif
 
-#endif	/* COMP_MSG_H */
+#endif	/* COMP_MSG_DATA_H */

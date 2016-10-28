@@ -52,8 +52,7 @@
 #include "c_stdlib.h"
 #include "c_stdio.h"
 #include "platform.h"
-#include "compMsgData.h"
-
+#include "compMsgDispatcher.h"
 
 #define TCP ESPCONN_TCP
 

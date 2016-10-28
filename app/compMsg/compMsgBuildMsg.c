@@ -47,7 +47,7 @@
 #include "c_stdlib.h"
 #include "c_stdio.h"
 #include "platform.h"
-#include "compMsgData.h"
+#include "compMsgDispatcher.h"
 
 
 // ================================= setMsgValues ====================================
@@ -67,9 +67,9 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   } else {
     os_sprintf(fileName, "Val%c%c%c.txt", (self->buildMsgInfos.u16CmdKey>>8)&0xFF, self->buildMsgInfos.u16CmdKey&0xFF, self->buildMsgInfos.type);
   }
-  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
+  result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
-  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -79,7 +79,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
 //ets_printf("§@setMsgValues numEntries!%d!@§\n", numEntries);
   result = self->setMsgValuesFromLines(self, self->compMsgData, numEntries, self->msgHandle, self->buildMsgInfos.type);
   checkErrOK(result);
-  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
+  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
   return result;
 }
 
@@ -180,7 +180,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos;
   result = self->createMsgFromLines(self, self->buildMsgInfos.parts, self->buildMsgInfos.numEntries, self->buildMsgInfos.numRows, self->buildMsgInfos.type);
   checkErrOK(result);
-  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
+  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
   checkErrOK(result);
   result = self->compMsgData->initMsg(self->compMsgData);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
@@ -317,9 +317,9 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgParts_t *parts, ui
     os_sprintf(fileName, "Desc%c%c%c.txt", (parts->u16CmdKey>>8)& 0xFF, parts->u16CmdKey&0xFF, type);
   }
 ets_printf("fileName: %s\n", fileName);
-  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
+  result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
-  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -420,9 +420,9 @@ return COMP_MSG_ERR_OK;
   } else {
     os_sprintf(fileName, "Val%c%c%c.txt", (parts->u16CmdKey>>8)&0xFF, parts->u16CmdKey&0xFF, type);
   }
-  result = self->compMsgDataDesc->openFile(self->compMsgDataDesc, fileName, "r");
+  result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
-  result = self->compMsgDataDesc->readLine(self->compMsgDataDesc, &buffer, &lgth);
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -432,7 +432,7 @@ return COMP_MSG_ERR_OK;
 //ets_printf("§@NE2!%d!@§", numEntries);
   result = self->setMsgValuesFromLines(self, compMsgData, numEntries, handle, parts->u8CmdKey);
   checkErrOK(result);
-  result = self->compMsgDataDesc->closeFile(self->compMsgDataDesc);
+  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
   checkErrOK(result);
 //ets_printf("§heap3: %d§", system_get_free_heap_size());
   result = compMsgData->getMsgData(compMsgData, &data, &msgLgth);
@@ -457,7 +457,7 @@ self->compMsgDataView->dataView->dumpBinary(defData, defLgth, "defData");
 static uint8_t handleEncryptedPart(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos) {
   int result;
   dataView_t *dataView;
-  headerParts_t *hdr;
+  headerPart_t *hdr;
   int hdrIdx;
   uint8_t answerType;
   compMsgField_t fieldInfo;
@@ -471,9 +471,9 @@ static uint8_t handleEncryptedPart(compMsgDispatcher_t *self, msgParts_t *receiv
   hdr = &hdrInfos->headerParts[hdrIdx];
   isU16CmdKey = true;
   // eventually add the extraField to the headerLgth here!!
-  if (received->lgth == hdrInfos->headerStartLgth + 1) {
+  if (received->lgth == hdrInfos->headerLgth + 1) {
     if (hdr->hdrExtraLgth > 0) {
-      hdrInfos->headerStartLgth += hdr->hdrExtraLgth;
+      hdrInfos->headerLgth += hdr->hdrExtraLgth;
     }
   }
  
@@ -490,7 +490,7 @@ ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHan
     // request for APList or ssid and password!
 //ets_printf("§el!%d!enc!%c!ht!%c!§\n", hdr->hdrExtraLgth, hdr->hdrEncryption, hdr->hdrHandleType);
     while (received->lgth <= received->totalLgth) {
-      if (received->lgth == hdrInfos->headerStartLgth + 1) {
+      if (received->lgth == hdrInfos->headerLgth + 1) {
         // get the cmdKey, we get its type from the header sequence!
         switch (hdr->fieldSequence[hdrInfos->seqIdx]) {
           case COMP_DISP_U16_CMD_KEY:
@@ -525,7 +525,7 @@ ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHan
         }
         hdrInfos->seqIdx++;
       } else {
-        if (received->lgth == (hdrInfos->headerStartLgth + 2)) {
+        if (received->lgth == (hdrInfos->headerLgth + 2)) {
           // check if we have a cmdLgth
           switch (hdr->fieldSequence[hdrInfos->seqIdx]) {
             case COMP_DISP_U0_CMD_LGTH:
@@ -551,7 +551,7 @@ ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHan
       if (received->lgth == received->totalLgth) {
         // check if we have a crc and the type of it
         // if we have a crc calculate it for the totalLgth
-        startOffset = hdrInfos->headerStartLgth;
+        startOffset = hdrInfos->headerLgth;
         switch (hdr->fieldSequence[hdrInfos->seqIdx]) {
           case COMP_DISP_U0_CRC:
 //ets_printf("§u0Crc!0!§");
@@ -599,7 +599,7 @@ ets_printf("unexpected hdrHandleType: %c in handleEncryptedPart!\n", hdr->hdrHan
 static uint8_t handleNotEncryptedPart(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos) {
   int result;
   dataView_t *dataView;
-  headerParts_t *hdr;
+  headerPart_t *hdr;
   int hdrIdx;
   uint8_t answerType;
   compMsgField_t fieldInfo;
@@ -614,7 +614,7 @@ static uint8_t handleNotEncryptedPart(compMsgDispatcher_t *self, msgParts_t *rec
     return COMP_DISP_ERR_BAD_HANDLE_TYPE;
   }
 //ets_printf("§el!%d!enc!%c!ht!%c!§", hdr->hdrExtraLgth, hdr->hdrEncryption, hdr->hdrHandleType);
-  if (received->lgth == hdrInfos->headerStartLgth + 1) {
+  if (received->lgth == hdrInfos->headerLgth + 1) {
     // get the cmdKey, we get its type from the header sequence!
     switch(hdr->fieldSequence[hdrInfos->seqIdx]) {
     case COMP_DISP_U16_CMD_KEY:
@@ -645,7 +645,7 @@ static uint8_t handleNotEncryptedPart(compMsgDispatcher_t *self, msgParts_t *rec
     }
     hdrInfos->seqIdx++;
   } else {
-    if (received->lgth == hdrInfos->headerStartLgth + 2) {
+    if (received->lgth == hdrInfos->headerLgth + 2) {
       // check if we have a cmdLgth
       switch(hdr->fieldSequence[hdrInfos->seqIdx]) {
       case COMP_DISP_U0_CMD_LGTH:
