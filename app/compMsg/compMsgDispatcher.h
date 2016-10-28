@@ -135,8 +135,6 @@ typedef struct buildListMsgInfos {
 typedef struct websocketUserData websocketUserData_t;
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
-typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
 
 typedef uint8_t (* setActionEntry_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
@@ -261,8 +259,6 @@ typedef struct compMsgDispatcher {
   websocketRunAPMode_t websocketRunAPMode;
   websocketSendData_t websocketSendData;
 
-  dumpHeaderPart_t dumpHeaderPart;
-  dumpMsgHeaderInfos_t dumpMsgHeaderInfos;
   dumpMsgParts_t dumpMsgParts;
 } compMsgDispatcher_t;
 
