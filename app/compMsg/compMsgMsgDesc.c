@@ -751,6 +751,8 @@ self->compMsgMsgDesc->dumpMsgHeaderInfos(self, hdrInfos);
 #undef checkErrOK
 #define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) return result
 
+#undef checkIsEnd
+#define checkIsEnd(val) { if (val) return result; }
 // ================================= readActions ====================================
 
 static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
@@ -763,8 +765,10 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   long ulgth;
   uint8_t numEntries;
   uint8_t*cp;
+  uint8_t*ep;
   char *endPtr;
   int idx;
+  bool isEnd;
   uint8_t lgth;
   uint8_t buf[100];
   uint8_t *buffer;
@@ -799,47 +803,44 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
     cp = buffer;
     // actionName
     actionName = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
 
     // actionMode
-    myStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    ulgth = c_strtoul(myStr, &endPtr, 10);
+    result = self->compMsgMsgDesc->getIntFromLine(cp, &ulgth, &ep, &isEnd);
+    checkErrOK(result);
     actionMode = (uint8_t)ulgth;
+    checkIsEnd(isEnd);
+    cp = ep;
 
     // type of cmdKey
-    myStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, myStr, &fieldTypeId);
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
+    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+
     // cmdKey
-    myStr = cp;
-    while ((*cp != ',') && (*cp != '\n') && (*cp != '\r') && (*cp != '\0')) {
-      cp++;
-    }
-    *cp++ = '\0';
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_UINT8_T:
-      u8CmdKey = myStr[0];
+      u8CmdKey = cp[0];
       break;
     case DATA_VIEW_FIELD_UINT16_T:
-      u16CmdKey = (myStr[0]<<8)|myStr[1];
+      u16CmdKey = (cp[0]<<8)|cp[1];
       break;
     default:
       checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
     }
     result = self->setActionEntry(self, actionName, actionMode, u8CmdKey, u16CmdKey);
     checkErrOK(result);
+    if (!isEnd) {
+      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    }
     idx++;
   }
 #undef checkErrOK
@@ -848,6 +849,7 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   checkErrOK(result);
   return COMP_MSG_DESC_ERR_OK;
 }
+#undef checkIsEnd
 
 // ================================= newCompMsgMsgDesc ====================================
 

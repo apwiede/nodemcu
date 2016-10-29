@@ -106,24 +106,9 @@ static uint8_t *getFlagStr(uint32_t flags) {
 // ================================= initHeadersAndFlags ====================================
 
 static uint8_t initHeadersAndFlags(compMsgDispatcher_t *self) {
-  uint8_t fileName[30];
   int result;
-  uint8_t numEntries;
-  uint8_t fieldNameId;
-  uint8_t lgth;
-  uint8_t buf[100];
-  uint8_t *buffer = buf;
-  long ulgth;
-  uint8_t *myStr;
-  int idx;
-  int seqIdx = 0;
-  int seqIdx2 = 0;
-  uint8_t*cp;
-  headerPart_t *hdr;
-  compMsgDataView_t *dataView;
 
   self->dispFlags = 0;
-
   self->McuPart = 0x4D00;
   self->WifiPart = 0x5700;
   self->AppPart = 0x4100;
@@ -191,13 +176,8 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   hdrInfos->seqIdx++;
   // next sequence field is handle type (skip, we have it in hdr fields)
   hdrInfos->seqIdx++;
-  if (hdr->hdrEncryption == 'N') {
-    received->partsFlags |= COMP_DISP_IS_NOT_ENCRYPTED;
-    // skip extraLgth, encrypted and handle Type
-  } else {
-    received->partsFlags |= COMP_DISP_IS_ENCRYPTED;
-  }
-//ets_printf("§found!%d!hdrIdx!%d§\n", found, hdrIdx);
+  received->encryption = hdr->hdrEncryption;
+ets_printf("§nextFitting!found!%d!hdrIdx!%d§\n", found, hdrIdx);
   return COMP_DISP_ERR_OK;
 }
 
@@ -283,8 +263,101 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
   hdrInfos->seqIdxAfterHeader = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
-//ets_printf("§IndexFromHeaderFields!%d!%d!§\n", result, hdrInfos->currPartIdx);
+ets_printf("§IndexFromHeaderFields!result!%d!currPartIdx!%d!§\n", result, hdrInfos->currPartIdx);
   return result;
+}
+
+// ================================= handleReceivedMsg ====================================
+    
+static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos) {
+  int result;
+  dataView_t *dataView;
+  headerPart_t *hdr;
+  int hdrIdx;
+  uint8_t answerType;
+  compMsgField_t fieldInfo;
+  uint16_t u16;
+  uint8_t u8;
+  uint8_t startOffset;
+  uint16_t sequenceEntry;
+
+  dataView = self->compMsgDataView->dataView;
+  hdrIdx = hdrInfos->currPartIdx;
+  hdr = &hdrInfos->headerParts[hdrIdx];
+
+  // set received->lgth to end of the header
+  received->lgth = hdrInfos->headerLgth;
+  // we loop over the fieldSequence entries and handle them as needed
+  // attention not all entries of the message are handled here, only some special entries!
+ 
+  received->fieldOffset = hdrInfos->headerLgth;
+  while (hdr->fieldSequence[hdrInfos->seqIdx] != 0) {
+    sequenceEntry = hdr->fieldSequence[hdrInfos->seqIdx];
+    switch (sequenceEntry) {
+    case COMP_DISP_U16_CMD_KEY:
+      result = self->compMsgDataView->dataView->getUint16(self->compMsgDataView->dataView, received->fieldOffset, &u16);
+      received->u16CmdKey = u16;
+      received->fieldOffset += 2;
+      received->partsFlags |= COMP_DISP_U16_CMD_KEY;
+//ets_printf("§u16CmdKey!0x%04x!§\n", received->u16CmdKey);
+      while (received->u16CmdKey != hdr->hdrU16CmdKey) {
+        hdrInfos->currPartIdx++;
+        result = self->nextFittingEntry(self, 0, received->u16CmdKey);
+        checkErrOK(result);
+        hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
+      }
+      break;
+    case COMP_DISP_U0_CMD_LGTH:
+      received->fieldOffset += 2;
+//ets_printf("§u0CmdLgth!0!§\n");
+      break;
+    case COMP_DISP_U16_CMD_LGTH:
+      result = self->compMsgDataView->dataView->getUint16(self->compMsgDataView->dataView, received->fieldOffset, &u16);
+      received->u16CmdLgth = u16;
+      received->fieldOffset += 2;
+//puts stderr [format "§u16CmdLgth!%c!§" [dict get $received u16CmdLgth]
+      break;
+    case COMP_DISP_U0_CRC:
+//ets_printf("§u0Crc!0!§");
+      result = COMP_MSG_ERR_OK;
+      break;
+    case COMP_DISP_U8_CRC:
+      fieldInfo.fieldLgth = 1;
+      fieldInfo.fieldOffset = received->totalLgth - 1;
+      startOffset = hdrInfos->headerLgth;
+      result = self->compMsgDataView->getCrc(self->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
+//ets_printf("§u8Crc!res!%d!§", result);
+      break;
+    case COMP_DISP_U16_CRC:
+      fieldInfo.fieldLgth = 2;
+      fieldInfo.fieldOffset = received->totalLgth - 2;
+      startOffset = hdrInfos->headerLgth;
+      result = self->compMsgDataView->getCrc(self->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
+//ets_printf("§u16Crc!res!%d!§", result);
+      break;
+    }
+    hdrInfos->seqIdx++;
+  }
+#ifdef DOACTIONS
+        if (result != COMP_MSG_ERR_OK) {
+// FIXME !! TEMPORARY!!
+//          answerType = 'N';
+          answerType = 'A';
+        } else {
+          answerType = 'A';
+        }
+      result = self->runAction(self, &answerType);
+      checkErrOK(result);
+      result = self->prepareNotEncryptedAnswer(self, received, answerType);
+//ets_printf("handleEncryptedPart runAction: %c\n", answerType);
+//FIXME !!!
+//        result = prepareEncryptedAnswer(self, received, answerType);
+//        checkErrOK(result);
+//FIXME !!!
+#endif
+  result = -self->resetMsgInfo(self, received);
+  checkErrOK(result);
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= handleReceivedPart ====================================
@@ -315,47 +388,32 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
       result = getHeaderIndexFromHeaderFields(self, received, hdrInfos);
 //ets_printf("getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
     }
-    if (received->lgth > hdrInfos->headerLgth) {
+    // loop until we have full message then decrypt if necessary and then handle the message
+    if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
-      if (received->partsFlags & COMP_DISP_IS_NOT_ENCRYPTED) {
-ets_printf("COMP_DISP_IS_NOT_ENCRYPTED\n");
-        if (hdr->hdrEncryption == 'N') {
-          result = self->handleNotEncryptedPart(self, received, hdrInfos);
-          checkErrOK(result);
-        } else {
-ets_printf("partsFlags is not encrypted and hdrEncryption is E\n");
-        }
-      } else {
-        if (hdr->hdrEncryption == 'E') {
-          if (received->lgth == received->totalLgth) {
-            uint8_t *cryptedPtr;
-            uint8_t *cryptKey;
-            uint8_t *decrypted;;
-            uint8_t mlen;
-            uint8_t klen;
-            uint8_t ivlen;
-            int decryptedLgth;
-              // decrypt encrypted message part (after header)
-cryptKey = "a1b2c3d4e5f6g7h8";
-              mlen = received->totalLgth - hdrInfos->headerLgth;
-              ivlen = 16;
-              klen = 16;
-              cryptedPtr = received->buf + hdrInfos->headerLgth;
-              result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
-              checkErrOK(result);
-              c_memcpy(cryptedPtr, decrypted, decryptedLgth);
+      if (hdr->hdrEncryption == 'E') {
+        uint8_t *cryptedPtr;
+        uint8_t *cryptKey;
+        uint8_t *decrypted;;
+        uint8_t mlen;
+        uint8_t klen;
+        uint8_t ivlen;
+        int decryptedLgth;
 
-              // set received->lgth to end of header for correct working of handleEncryptedPart!!
-              received->lgth = hdrInfos->headerLgth;
-              result = self->handleEncryptedPart(self, received, hdrInfos);
-ets_printf("handleEncryptedPart end idx: %d result: %d\n", idx, result);
-              checkErrOK(result);
-          }
-        } else {
-ets_printf("partsFlags is encrypted and hdrEncryption is N\n");
-        }
+        // decrypt encrypted message part (after header)
+cryptKey = "a1b2c3d4e5f6g7h8";
+        mlen = received->totalLgth - hdrInfos->headerLgth;
+        ivlen = 16;
+        klen = 16;
+        cryptedPtr = received->buf + hdrInfos->headerLgth;
+        result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
+        checkErrOK(result);
+        c_memcpy(cryptedPtr, decrypted, decryptedLgth);
       }
+      result = self->handleReceivedMsg(self, received, hdrInfos);
+ets_printf("handleReceivedMsg end idx: %d result: %d\n", idx, result);
+      checkErrOK(result);
     }
     idx++;
   }
@@ -370,8 +428,9 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   self->resetHeaderInfos = &resetHeaderInfos;
   self->handleReceivedPart = &handleReceivedPart;
   self->nextFittingEntry = &nextFittingEntry;
+  self->handleReceivedMsg = &handleReceivedMsg;
   initHeadersAndFlags(self);
   result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
   checkErrOK(result);
-return COMP_DISP_ERR_OK;
+  return COMP_DISP_ERR_OK;
 }

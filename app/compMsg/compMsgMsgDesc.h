@@ -156,6 +156,7 @@ typedef struct msgParts {
   uint8_t u8CmdLgth;
   uint16_t u16CmdLgth;
   uint8_t lgth;
+  uint8_t encryption;
   uint8_t realLgth;
   size_t fieldOffset;
   uint8_t buf[DISP_BUF_LGTH];

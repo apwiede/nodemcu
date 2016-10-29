@@ -162,8 +162,7 @@ typedef uint8_t (* buildListMsg_t)(compMsgDispatcher_t *self, size_t *totalLgth,
 
 typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
-typedef uint8_t (* handleEncryptedPart_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
-typedef uint8_t (* handleNotEncryptedPart_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
+typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* prepareNotEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 typedef uint8_t (* prepareEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts);
@@ -231,8 +230,7 @@ typedef struct compMsgDispatcher {
   buildListMsg_t buildListMsg;
   setMsgValues_t setMsgValues;
   prepareAnswerMsg_t prepareAnswerMsg;
-  handleEncryptedPart_t handleEncryptedPart;
-  handleNotEncryptedPart_t handleNotEncryptedPart;
+  handleReceivedMsg_t handleReceivedMsg;
   prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
   prepareEncryptedAnswer_t prepareEncryptedAnswer;
 
