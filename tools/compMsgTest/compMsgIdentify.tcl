@@ -65,6 +65,7 @@ set ::RECEIVED_CHECK_CMD_LGTH_SIZE      10
 
 
 set ::moduleFilesPath $::env(HOME)/bene-nodemcu-firmware/module_image_files
+set ::MSG_HEADS_FILE_NAME "CompMsgHeads.txt"
 
 namespace eval compMsg {
   namespace ensemble create
@@ -961,7 +962,7 @@ puts stderr "partsFlags is encrypted and hdrEncryption is N\n"
     
     proc compMsgIdentifyInit {} {
       initHeadersAndFlags
-      set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags]
+      set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags $::MSG_HEADS_FILE_NAME]
       return $result
     }
     

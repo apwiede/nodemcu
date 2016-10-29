@@ -108,7 +108,7 @@ namespace eval compMsg {
   namespace eval compMsgMsgDesc {
     namespace ensemble create
       
-    namespace export getStartFieldsFromLine readHeadersAndSetFlags
+    namespace export readHeadersAndSetFlags
 
     variable headerInfos [list]
     variable received [list]
@@ -123,7 +123,11 @@ namespace eval compMsg {
       set flds [split $line ,]
       dict set headerInfos headerLgth 0
      
-      set fieldName [lindex $flds 0]
+      set fieldIdx 0
+      set headerInfos headerLgth [lindex $flds $fildIdx]
+      incr fieldIdx
+      set fieldName [lindex $flds $fieldIdx]
+      incr fieldIdx
       if {[string range $fieldName 0 0] ne "@"} {
         return $::COMP_MSG_ERR_FIELD_NOT_FOUND
       }
@@ -136,26 +140,24 @@ namespace eval compMsg {
           dict lappend headerInfos headerSequence COMP_DISP_U16_SRC
           incr seqIdx
           dict lappend headerInfos headerFlags COMP_DISP_U16_SRC
-          dict incr headerInfos headerLgth 2
         }
         COMP_MSG_SPEC_FIELD_DST {
           dict lappend headerInfos headerSequence COMP_DISP_U16_DST
           incr seqIdx
           dict lappend headerInfos headerFlags COMP_DISP_U16_DST
-          dict incr headerInfos headerLgth 2
         }
         COMP_MSG_SPEC_FIELD_TARGET_CMD {
           dict lappend headerInfos headerSequence COMP_DISP_U8_TARGET
           incr seqIdx
           dict lappend headerInfos headerFlags COMP_DISP_U8_TARGET
-          dict incr headerInfos headerLgth 1
         }
         default {
           return $::COMP_MSG_ERR_BAD_FIELD_NAME
         }
       }
+      incr fieldIdx
 
-      set fieldName [lindex $flds 1]
+      set fieldName [lindex $flds $fieldIdx]
       if {[string range $fieldName 0 0] ne "@"} {
         return $::COMP_MSG_ERR_FIELD_NOT_FOUND
       }
@@ -171,7 +173,6 @@ namespace eval compMsg {
           dict lappend headerInfos headerSequence COMP_DISP_U16_SRC
           incr seqIdx
           dict lappend headerInfos headerFlags COMP_DISP_U16_SRC
-          dict incr headerInfos headerLgth 2
         }
         COMP_MSG_SPEC_FIELD_DST {
           if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U16_DST] >= 0} {
@@ -180,21 +181,20 @@ namespace eval compMsg {
           dict lappend headerInfos headerSequence COMP_DISP_U16_DST
           incr seqIdx
           dict lappend headerInfos headerFlags COMP_DISP_U16_DST
-          dict incr headerInfos headerLgth 2
         }
         COMP_MSG_SPEC_FIELD_TOTAL_LGTH {
           dict lappend headerInfos headerSequence COMP_DISP_U16_TOTAL_LGTH
           incr seqIdx
           dict lappend headerInfos headerFlags COMP_DISP_U16_TOTAL_LGTH
-          dict incr headerInfos headerLgth 2
         }
         default {
            return $::COMP_MSG_ERR_BAD_FIELD_NAME
         }
       }
+      incr fieldIdx
 
-      if {[llength $flds] > 2} {
-        set fieldName [lindex $flds 2]
+      if {[llength $flds] > $fieldIdx} {
+        set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
           return $::COMP_MSG_ERR_FIELD_NOT_FOUND
         }
@@ -210,7 +210,78 @@ namespace eval compMsg {
             dict lappend headerInfos headerSequence COMP_DISP_U16_TOTAL_LGTH
             incr seqIdx
             dict lappend headerInfos headerFlags COMP_DISP_U16_TOTAL_LGTH
-            dict incr headerInfos headerLgth 2
+          }
+          default {
+            return $::COMP_MSG_ERR_BAD_FIELD_NAME
+          }
+        }
+      }
+      incr fieldIdx
+      if {[llength $flds] > $fieldIdx} {
+        set fieldName [lindex $flds $fieldIdx]
+        if {[string range $fieldName 0 0] ne "@"} {
+          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+        }
+        set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        switch $fieldNameId {
+          COMP_MSG_SPEC_FIELD_GUID {
+            if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U8_VECTOR_GUID] >= 0} {
+              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+            }
+            dict lappend headerInfos headerSequence COMP_DISP_U8_VECTOR_GUID
+            incr seqIdx
+            dict lappend headerInfos headerFlags COMP_DISP_U8_VECTOR_GUID
+          }
+          default {
+            return $::COMP_MSG_ERR_BAD_FIELD_NAME
+          }
+        }
+      }
+      incr fieldIdx
+      if {[llength $flds] > $fieldIdx} {
+        set fieldName [lindex $flds $fieldIdx]
+        if {[string range $fieldName 0 0] ne "@"} {
+          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+        }
+        set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        switch $fieldNameId {
+          COMP_MSG_SPEC_FIELD_SRC_ID {
+            if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U16_SRC_ID] >= 0} {
+              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+            }
+            dict lappend headerInfos headerSequence COMP_DISP_U16_SRC_ID
+            incr seqIdx
+            dict lappend headerInfos headerFlags COMP_DISP_U16_SRC_ID
+          }
+          default {
+            return $::COMP_MSG_ERR_BAD_FIELD_NAME
+          }
+        }
+      }
+      incr fieldIdx
+      if {[llength $flds] > $fieldIdx} {
+        set fieldName [lindex $flds $fieldIdx]
+        if {[string range $fieldName 0 0] ne "@"} {
+          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+        }
+        set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        switch $fieldNameId {
+          COMP_MSG_SPEC_FIELD_HDR_FILLER {
+            if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U8_VECTOR_HDR_FILLER] >= 0} {
+              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+            }
+            dict lappend headerInfos headerSequence COMP_DISP_U8_VECTOR_HDR_FILLER
+            incr seqIdx
+            dict lappend headerInfos headerFlags COMP_DISP_U8_VECTOR_HDR_FILLER
           }
           default {
             return $::COMP_MSG_ERR_BAD_FIELD_NAME
@@ -222,11 +293,11 @@ namespace eval compMsg {
       
     # ================================= readHeadersAndSetFlags ====================================
     
-    proc readHeadersAndSetFlags {} {
+    proc readHeadersAndSetFlags {fileName} {
       variable headerInfos
       variable dispFlags
     
-      set fd [open $::moduleFilesPath/MsgHeads.txt r]
+      set fd [open $fileName r]
       gets $fd line
       set flds [split $line ,]
       foreach {dummy numEntries} $flds break
@@ -237,7 +308,6 @@ namespace eval compMsg {
       gets $fd line
       set seqIdx 0
       set result [getStartFieldsFromLine $line seqIdx]
-#      myDataView = newDataView{}
       dict set headerInfos headerParts [list]
       set fieldOffset 0
       set seqStartIdx $seqIdx
