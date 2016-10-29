@@ -56,7 +56,7 @@ namespace eval compMsg {
   namespace eval compMsgBuildMsg {
     namespace ensemble create
       
-    namespace export setMsgValues
+    namespace export setMsgValues buildMsgFromHeaderPart
 
     variable buildMsgInfos
 
@@ -86,6 +86,7 @@ namespace eval compMsg {
     proc buildMsgFromHeaderPart {hdr} {
       variable buildMsgInfos
 
+pdict $hdr
       return $::COMP_MSG_ERR_OK
     }
 

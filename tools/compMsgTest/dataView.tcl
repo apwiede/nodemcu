@@ -224,19 +224,9 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
-      set ch [string range $data $offset $offset]
-      set pch $ch
-      if {![string is integer $ch]} {
-        binary scan $ch c pch
-      }
-      set value [expr {$value + ([expr {$pch & 0xFF}] << 8)}]
+      set sh [string range $data $offset [expr {$offset + 1}]]
+      binary scan $sh S value
       incr offset
-      set ch [string range $data $offset $offset]
-      set pch $ch
-      if {![string is integer $ch]} {
-        binary scan $ch c pch
-      }
-      set value [expr {$value + ([expr {$pch & 0xFF}] << 0)}]
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -251,11 +241,8 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
-      binary scan [string range $data $offset $offset] c ch
-      set value [expr {$value + ([expr {$ch & 0xFF}] << 8)}]
-      incr offset
-      binary scan [string range $data $offset $offset] c ch
-      set value [expr {$value + ([expr {$ch & 0xFF}] << 0)}]
+      set sh [string range $data $offset [expr {$offset + 1}]]
+      binary scan $sh S value
       return $::DATA_VIEW_ERR_OK
     }
     
@@ -268,11 +255,9 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       if {[expr {$offset + 1}] > $lgth} {
         return $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
-      set ch [binary format c [expr {($value >> 8) & 0xFF}]]
-      set data [string replace $data $offset $offset $ch]
+      set sh [binary format S $value]
+      set data [string replace $data $offset [expr {$offset +1}] $sh]
       incr offset
-      set ch [binary format c [expr {$value & 0xFF}]]
-      set data [string replace $data $offset $offset $ch]
       return $::DATA_VIEW_ERR_OK
     }
     

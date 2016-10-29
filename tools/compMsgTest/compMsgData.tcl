@@ -31,6 +31,30 @@
 # *
 # ==========================================================================
 
+# comMsgData dict
+#   flags
+#   handle
+#   fields
+#     fieldNameId
+#     fieldTypeId
+#     fieldLgth
+#     fieldOffset
+#   tableFields
+#     fieldNameId
+#     fieldTypeId
+#     fieldLgth
+#     fieldOffset
+#   numFields
+#   maxFields
+#   numTableRows
+#   numTableRowFields
+#   numRowFields
+#   fieldOffset
+#   totalLgth
+#   cmdLgth
+#   headerLgth
+#   header
+
 set ::HANDLE_PREFIX "compmsg_"
 set ::COMP_DEF_NUM_DEF_FIELDS 15
 
@@ -43,9 +67,9 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export compMsgDataInit freeCompMsgDataView createMsg addField
-    namespace export initMsg prepareMsg setMsgdata getMsgData getFieldTypeFromFieldNameId
+    namespace export initMsg prepareMsg setMsgData getMsgData getFieldTypeFromFieldNameId
     namespace export setFieldValue getFieldValue setTableFieldValue getTableFieldValue
-    namespace export addFlag deleteFlag dumpBinary
+    namespace export addFlag deleteFlag dumpBinary dumpMsg
 
     variable compMsgData [dict create]
     variable numHandles 0
@@ -66,9 +90,7 @@ namespace eval compMsg {
       set idx 0
       foreach ch [split $data ""] {
         set pch $ch
-        if {![string is integer $ch]} {
-          binary scan $ch c pch
-        }
+        binary scan $ch c pch
         puts stderr "$idx: $ch [format 0x%02x [expr {$pch & 0xFF}]]!"
         incr idx
         if {$idx > $lgth} {
@@ -77,6 +99,101 @@ namespace eval compMsg {
       }
     }
 
+    # ===================== dumpValues =============================
+    
+    proc dumpValues {data} {
+      puts -nonewline stderr "      values: "
+      set cnt 0
+    if {[catch {
+      foreach ch [split $data ""] {
+        set pch $ch
+        binary scan $ch c pch
+        puts -nonewline stderr "  $ch [format 0x%02x [expr {$pch & 0xFF}]]"
+        incr cnt
+        if {($cnt > 0) && (($cnt % 10) == 0)} {
+          puts -nonewline stderr "\n              "
+        }
+      }
+    } msg]} {
+      puts stderr "\nMSG: $msg!"
+      foreach ch [split $data ""] {
+        set pch [binaryScanChar $ch]
+    puts stderr "\n!${ch}!${pch}!"
+      }
+    }
+      puts stderr ""
+    }
+    
+    # ===================== dumpMsg =============================
+    
+    proc dumpMsg {} {
+      variable compMsgData
+
+      puts stderr "dumpMsg handle: [dict get $compMsgData handle]"
+      puts stderr [format "  numFields: %d max: %d" [dict get $compMsgData numFields] [dict get $compMsgData maxFields]]
+      puts stderr [format "  numTableRows: %d numTableRowFields: %d numRowFields: %d" [dict get $compMsgData numTableRows] [dict get $compMsgData numTableRowFields] [dict get $compMsgData numRowFields]]
+      puts stderr [format "  headerLgth: %d totalLgth: %d fieldOffset: %d" [dict get $compMsgData headerLgth] [dict get $compMsgData totalLgth] [dict get $compMsgData fieldOffset]]
+      puts stderr [format "  flags: %s" [dict get $compMsgData flags]]
+
+      set numEntries [dict get $compMsgData numFields]
+      puts stderr "  fields:"
+      set idx 0
+      set fields [dict get $compMsgData fields]
+      while {$idx < $numEntries} {
+        set fieldInfo [lindex $fields $idx]
+        set result [::compMsg dataView getFieldTypeStrFromId [dict get $fieldInfo fieldTypeId] fieldType]
+        set result [::compMsg compMsgDataView getFieldNameStrFromId [dict get $fieldInfo fieldNameId] fieldName]
+        puts stderr [format "    idx %d: key: %-20s type: %-8s lgth: %.5d offset: %.3d flags: %s" $idx $fieldName $fieldType [dict get $fieldInfo fieldLgth] [dict get $fieldInfo fieldOffset] [dict get $fieldInfo fieldFlags]]
+        if {[lsearch [dict get $fieldInfo fieldFlags] "COMP_MSG_FIELD_IS_SET"] >= 0} {
+          set result [::compMsg compMsgDataView getFieldValue $fieldInfo value 0]
+          switch [dict get $fieldInfo fieldTypeId] {
+            DATA_VIEW_FIELD_UINT8_T {
+              puts stderr [format "      value: 0x%02x %d" $value $value]
+            }
+            DATA_VIEW_FIELD_INT8_T {
+              puts stderr [format "      value: 0x%02x %d" $value $value]
+            }
+            DATA_VIEW_FIELD_UINT16_T {
+              puts stderr [format "      value: 0x%04x %d" $value $value]
+            }
+            DATA_VIEW_FIELD_INT16_T {
+              puts stderr [format "      value: 0x%04x %d" $value $value]
+            }
+            DATA_VIEW_FIELD_UINT32_T {
+              puts stderr [format "      value: 0x%08x %d" $value $value]
+            }
+            DATA_VIEW_FIELD_INT32_T {
+              puts stderr [format "      value: 0x%08x %d" $value $value]
+            }
+            DATA_VIEW_FIELD_UINT8_VECTOR {
+              if {[string is print $value]} {
+                puts stderr [format "      value: %s" $value]
+              }
+              set lgth [string length $value]
+              dumpValues $value
+            }
+            DATA_VIEW_FIELD_INT8_VECTOR {
+              puts stderr [format "      value: %s" $value]
+            }
+            DATA_VIEW_FIELD_UINT16_VECTOR {
+              puts stderr [format "      value: %s" $value]
+            }
+            DATA_VIEW_FIELD_INT16_VECTOR {
+              puts stderr [format "      value: %s" $value]
+            }
+            DATA_VIEW_FIELD_UINT32_VECTOR {
+              puts stderr [format "      value: %s" $value]
+            }
+            DATA_VIEW_FIELD_INT32_VECTOR {
+              puts stderr [format "      value: %s" $value]
+            }
+          }
+        }
+        incr idx
+      }
+      return $::COMP_MSG_ERR_OK
+    }
+    
     # ================================= getFieldTypeFromFieldNameId ====================================
     
     proc getFieldTypeFromFieldNameId {fieldNameId fieldTypeIdVar} {
@@ -304,6 +421,7 @@ namespace eval compMsg {
       dict set compMsgData header [list]
       incr numHandles
       set handle [format "${::HANDLE_PREFIX}efff00%02d" $numHandles]
+      dict set compMsgData handle $handle
       set result [addHandle $handle [dict get $compMsgData header]]
       if {$result != $::COMP_MSG_ERR_OK} {
 #        deleteHandle(self->handle);
@@ -337,6 +455,7 @@ namespace eval compMsg {
         dict set fieldInfo fieldNameId $fieldNameId
         dict set fieldInfo fieldTypeId $fieldTypeId
         dict set fieldInfo fieldLgth $fieldLgth
+        dict set fieldInfo fieldFlags [list]
         dict lappend compMsgData fields $fieldInfo
         dict incr compMsgData numFields 1
         return $::COMP_MSG_ERR_OK;
@@ -348,6 +467,7 @@ namespace eval compMsg {
         dict set fieldInfo fieldNameId $fieldNameId
         dict set fieldInfo fieldTypeId $fieldTypeId
         dict set fieldInfo fieldLgth $fieldLgth
+        dict set fieldInfo fieldFlags [list]
         dict lappend compMsgData fields $fieldInfo
         dict incr compMsg numFields 1
         return $::COMP_MSG_ERR_OK;
@@ -358,6 +478,7 @@ namespace eval compMsg {
         dict set fieldInfo fieldNameId $fieldNameId
         dict set fieldInfo fieldTypeId $fieldTypeId
         dict set fieldInfo fieldLgth $fieldLgth
+        dict set fieldInfo fieldFlags [list]
         dict lappend compMsgData fields $fieldInfo
         set numTableFields [expr {[dict get $compMsgData numTableRows] * [dict get $compMsgData numTableRowFields]}]
         if {([dict get $compMsgData tableFields] eq [list]) && ($numTableFields != 0)} {
@@ -382,6 +503,7 @@ namespace eval compMsg {
         dict set fieldInfo fieldNameId $fieldNameId
         dict set fieldInfo fieldTypeId $fieldTypeId
         dict set fieldInfo fieldLgth $fieldLgth
+        dict set fieldInfo fieldFlags [list]
         dict lappend compMsgData fields $fieldInfo
         dict incr compMsgData numFields 1
       } else {
@@ -406,6 +528,7 @@ puts stderr "TAB!$fieldNameId!$row!$cellIdx!"
           dict set fieldInfo fieldNameId $fieldNameId
           dict set fieldInfo fieldTypeId $fieldTypeId
           dict set fieldInfo fieldLgth $fieldLgth
+          dict set fieldInfo fieldFlags [list]
           set tableFields [lreplace $tableFields $cellIdx $cellIdx $fieldInfo]
           incr row
         }
@@ -446,6 +569,8 @@ puts stderr "tableFields!$tableFields!"
              set result $::COMP_MSG_ERR_OK
             }
             default {
+puts stderr "GET"
+pdict $fieldInfo
               set result [::compMsg compMsgDataView getFieldValue $fieldInfo value 0]
             }
           }
@@ -580,8 +705,8 @@ puts stderr "tableFields!$tableFields!"
       # create the values which are different for each message!!
       set numEntries [dict get $compMsgData numFields]
       set idx 0
+      set fields [dict get $compMsgData fields]
       while {$idx < $numEntries} {
-        set fields [dict get $compMsgData fields]
         set fieldInfo [lindex $fields $idx]
         switch [dict get $fieldInfo fieldNameId] {
           COMP_MSG_SPEC_FIELD_RANDOM_NUM {
@@ -598,6 +723,7 @@ puts stderr "tableFields!$tableFields!"
             }
             dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }
+          COMP_MSG_SPEC_FIELD_HDR_FILLER -
           COMP_MSG_SPEC_FIELD_FILLER {
             set result [::compMsg compMsgDataView setFiller $fieldInfo]
             if {$result != $::COMP_MSG_ERR_OK} {
@@ -618,8 +744,10 @@ puts stderr "tableFields!$tableFields!"
             dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }
         }
+        set fields [lreplace $fields $idx $idx $fieldInfo]
         incr idx
       }
+      dict set compMsgData fields $fields
       dict lappend compMsgData flags COMP_MSG_IS_PREPARED
       return $::COMP_MSG_ERR_OK
     }
@@ -661,8 +789,10 @@ puts stderr "tableFields!$tableFields!"
         switch [dict get $fieldInfo fieldNameId] {
           COMP_MSG_SPEC_FIELD_SRC -
           COMP_MSG_SPEC_FIELD_DST -
-          COMP_MSG_SPEC_FIELD_TOTAL_LGTH {
-    #      COMP_MSG_SPEC_FIELD_GUID -
+          COMP_MSG_SPEC_FIELD_TOTAL_LGTH -
+          COMP_MSG_SPEC_FIELD_GUID -
+          COMP_MSG_SPEC_FIELD_SRC_ID -
+          COMP_MSG_SPEC_FIELD_HDR_FILLER {
             dict incr compMsgData headerLgth [dict get $fieldInfo fieldLgth]
             dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
           }

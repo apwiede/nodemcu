@@ -523,11 +523,11 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
     proc setCrc {fieldInfo startOffset size} {
       set crcLgth [dict get $fieldInfo fieldLgth]
       set size [expr {$size - $crcLgth}]
-set ::crcDebug true
+#set ::crcDebug true
+set cnt 0
       set crc  0
       set offset $startOffset
       while {$offset < $size} {
-set cnt 0
         set result [::compMsg dataView getUint8 $offset ch]
         set pch $ch
         if {![string is integer $ch]} {
@@ -545,6 +545,9 @@ if {$::crcDebug} {
 puts stderr "crc1: $crc![format 0x%04x $crc]!"
 }
       set crc [expr {~$crc & 0xFFFF}]
+if {$::crcDebug} {
+puts stderr "crc11: $crc![format 0x%04x $crc]!"
+}
       if {$crcLgth == 1} {
         set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] [expr {$crc & 0xFF}]]
       } else {
@@ -634,6 +637,10 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           }
         }
         DATA_VIEW_FIELD_UINT16_T {
+          if {![string is integer $value]} {
+            binary scan $value S val
+            set value $val
+          }
           if {($value >= 0) && ($value <= 65535)} {
             set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $value]
           } else {
@@ -659,7 +666,7 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           set result [::compMsg ataView setInt8Vector [dict get $fieldInfo fieldOffset] $value]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-          set result [::compMsg dataView setUint8Vector [dict get $fieldInfo fieldOffset] $value]
+          set result [::compMsg dataView setUint8Vector [dict get $fieldInfo fieldOffset] $value [dict get $fieldInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
           set result [::compMsg dataView setInt16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]

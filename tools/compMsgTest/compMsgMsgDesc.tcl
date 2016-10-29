@@ -109,7 +109,8 @@ namespace eval compMsg {
   namespace eval compMsgMsgDesc {
     namespace ensemble create
       
-    namespace export readHeadersAndSetFlags dumpHeaderPart
+    namespace export readHeadersAndSetFlags dumpHeaderPart getHeaderFromUniqueFields
+    namespace export createMsgFromHeaderPart
 
     variable headerInfos [list]
     variable received [list]
@@ -558,7 +559,135 @@ namespace eval compMsg {
       close $fd
       return $result
     }
+      
+    # ================================= getHeaderFromUniqueFields ====================================
     
+    proc getHeaderFromUniqueFields {dst src cmdKey hdrVar} {
+      variable headerInfos
+      upvar $hdrVar hdr
+
+      set headerParts [dict get $headerInfos headerParts]
+      set idx 0
+      while {$idx < [dict get $headerInfos numHeaderParts]} {
+        set hdr [lindex $headerParts $idx]
+        if {[dict get $hdr hdrToPart] eq $dst} {
+          if {[dict get $hdr hdrFromPart] eq $src} {
+            if {[dict get $hdr hdrU16CmdKey] eq $cmdKey} {
+               return $::COMP_MSG_ERR_OK
+            }
+          }
+        }
+        incr idx
+      }
+      return $::COMP_DISP_ERR_HEADER_NOT_FOUND
+    }
+    
+    # ================================= createMsgFromHeaderPart ====================================
+    
+    proc createMsgFromHeaderPart {hdr handleVar} {
+      variable headerInfos
+      upvar $handleVar handle
+
+      set fileName [format "%s/CompDesc%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]]
+      set fd [open $fileName "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+      set result [::compMsg compMsgData createMsg $numEntries handle]
+      if {$result != $::COMP_MSG_ERR_OK} {
+        return $result
+      }
+      set numRows 0
+      set idx 0
+      while {$idx < $numEntries} {
+        gets $fd line
+        if {$line eq ""} {
+          return $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+        }
+        set flds [split $line ","]
+        foreach {fieldNameStr fieldTypeStr fieldLgthStr} $flds break
+        if {$fieldLgthStr eq "@numRows"} {
+          set fieldLgth $numRows
+        } else {
+          set fieldLgth $fieldLgthStr
+        }
+        set result [::compMsg compMsgData addField $fieldNameStr $fieldTypeStr $fieldLgth]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        incr idx
+      }
+      close $fd
+      set result [::compMsg compMsgData initMsg 0 0]
+      if {$result != $::COMP_MSG_ERR_OK} {
+        return $result
+      }
+      set fileName [format "%s/CompVal%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]]
+      set fd [open $fileName "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+      set numRows 0
+      set idx 0
+      while {$idx < $numEntries} {
+        gets $fd line
+        if {$line eq ""} {
+          return $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+        }
+        set flds [split $line ","]
+        foreach {fieldNameStr fieldValueStr} $flds break
+        # fieldName
+        set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_NO_INCR]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        set result [::compMsg compMsgData getFieldTypeFromFieldNameId $fieldNameId fieldTypeId]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+    
+        # fieldValue
+        if {[string range $fieldValueStr 0 0] eq "@"} {
+          # call the callback function vor the field!!
+          set result [fillMsgValue $fieldValueStr value $type $fieldTypeId]
+          if {$result != $::COMP_MSG_ERR_OK} {
+            return $result
+          }
+        } else {
+          set value $fieldValueStr
+        }
+        switch $fieldNameId {
+          COMP_MSG_SPEC_FIELD_DST {
+            set value [dict get $hdr hdrFromPart]
+            set result [::compMsg compMsgData setFieldValue $fieldNameStr $value]
+          }
+          COMP_MSG_SPEC_FIELD_SRC {
+            set value [dict get $hdr hdrToPart]
+            set result [::compMsg compMsgData setFieldValue $fieldNameStr $value]
+          }
+          COMP_MSG_SPEC_FIELD_CMD_KEY {
+            # check for u8CmdKey/u16CmdKey here
+            set value = [dict get $hdr hdrU16CmdKey]
+            set result [::compMsg compMsgData setFieldValue $fieldNameStr $value]
+          }
+          default {
+            set result [::compMsg compMsgData setFieldValue $fieldNameStr $value]
+          }
+        }
+        incr idx
+      }
+      close $fd
+      set result [::compMsg compMsgData setFieldValue "@cmdKey" [dict get $hdr hdrU16CmdKey]]
+      if {$result != $::COMP_MSG_ERR_OK} {
+        return $result
+      }
+      set result [::compMsg compMsgData prepareMsg]
+      if {$result != $::COMP_MSG_ERR_OK} {
+        return $result
+      }
+::compMsg compMsgData dumpMsg
+      return $::COMP_MSG_ERR_OK
+    }
   } ; # namespace compMsgMsgDesc
 } ; # namespace compMsg
 
