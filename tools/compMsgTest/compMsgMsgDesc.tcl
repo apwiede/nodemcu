@@ -51,8 +51,8 @@ set ::COMP_MSG_DESC_ERR_FLUSH_FILE            187
 set ::COMP_MSG_DESC_ERR_WRITE_FILE            186
 set ::COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS    185
 
-// handle types
-// A/G/R/S/W/U/N
+# handle types
+# A/G/R/S/W/U/N
 set ::COMP_DISP_SEND_TO_APP       "A"
 set ::COMP_DISP_RECEIVE_FROM_APP  "G"
 set ::COMP_DISP_SEND_TO_UART      "R"
@@ -62,6 +62,7 @@ set ::COMP_DISP_TRANSFER_TO_CONN  "U"
 set ::COMP_DISP_NOT_RELEVANT      "N"
 
 set ::GUID_LGTH 16
+set ::HDR_FILLER_LGTH 40
 
 # headerPart dict
 #   hdrFromPart
@@ -108,12 +109,89 @@ namespace eval compMsg {
   namespace eval compMsgMsgDesc {
     namespace ensemble create
       
-    namespace export readHeadersAndSetFlags
+    namespace export readHeadersAndSetFlags dumpHeaderPart
 
     variable headerInfos [list]
     variable received [list]
     variable dispFlags [list]
 
+    # ================================= dumpHeaderPart ====================================
+    
+    proc dumpHeaderPart {hdr} {
+      variable compMsgDispatcher
+    
+      puts stderr "dumpHeaderPart:"
+      if {![dict exists $hdr hdrOffset]} {
+        dict set hdr hdrOffset 0
+      }
+      if {![dict exists $hdr hdrU16CmdKey]} {
+        dict set hdr hdrU16CmdKey ""
+      }
+      if {![dict exists $hdr hdrU8CmdKey]} {
+        dict set hdr hdrU8CmdKey ""
+      }
+      if {![dict exists $hdr hdrU16CmdLgth]} {
+        dict set hdr hdrU16CmdLgth 0
+      }
+      if {![dict exists $hdr hdrU8CmdLgth]} {
+        dict set hdr hdrU8CmdLgth 0
+      }
+      if {![dict exists $hdr hdrU16Crc]} {
+        dict set hdr hdrU16Crc 0
+      }
+      if {![dict exists $hdr hdrU8Crc]} {
+        dict set hdr hdrU8Crc 0
+      }
+      if {![dict exists $hdr hdrTargetPart]} {
+        dict set hdr hdrTargetPart 0
+      }
+      if {![dict exists $hdr fieldSequence]} {
+        dict set hdr fieldSequence [list]
+      }
+      puts stderr [format "headerParts1: from: 0x%04x to: 0x%04x totalLgth: %d u16CmdKey: %s u16CmdLgth: 0x%04x u16Crc: 0x%04x" [dict get $hdr hdrFromPart] [dict get $hdr hdrToPart] [dict get $hdr hdrTotalLgth] [dict get $hdr hdrU16CmdKey] [dict get $hdr hdrU16CmdLgth] [dict get $hdr hdrU16Crc]]
+      puts stderr [format "headerParts2: target: 0x%02x u8CmdKey: %s u8CmdLgth: %d u8Crc: 0x%02x offset: %d extra: %d" [dict get $hdr hdrTargetPart] [dict get $hdr hdrU8CmdKey] [dict get $hdr hdrU8CmdLgth] [dict get $hdr hdrU8Crc] [dict get $hdr hdrOffset] [dict get $hdr hdrExtraLgth]]
+      puts stderr [format "headerParts3: enc: %s handleType: %s" [dict get $hdr hdrEncryption] [dict get $hdr hdrHandleType]]
+      puts stderr "hdrFlags: [dict get $hdr hdrFlags]"
+      puts stderr "hdr fieldSequence"
+      set fieldSequence [dict get $hdr fieldSequence]
+      set idx 0
+      while {[lindex $fieldSequence $idx] ne [list]} {
+        puts stderr [format "%d %s" $idx [lindex $fieldSequence $idx]]
+        incr idx
+      }
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= dumpMsgHeaderInfos ====================================
+    
+    proc dumpMsgHeaderInfos {hdrInfos} {
+      variable compMsgDispatcher
+    
+      puts stderr "dumpMsgHeaderInfos:\n"
+      if {![dict exists $hdrInfos maxHeaderParts]} {
+        dict set hdrInfos maxHeaderParts 0
+      }
+      if {![dict exists $hdrInfos currPartIdx]} {
+        dict set hdrInfos currPartIdx 0
+      }
+      if {![dict exists $hdrInfos seqIdx]} {
+        dict set hdrInfos seqIdx 0
+      }
+      if {![dict exists $hdrInfos seqIdxAfterStart]} {
+        dict set hdrInfos seqIdxAfterStart 0
+      }
+      puts stderr "headerFlags: [dict get $hdrInfos headerFlags]"
+      puts stderr "hdrInfos headerSequence\n"
+      set idx 0
+      set headerSequence [dict get $hdrInfos headerSequence]
+      while {[lindex $headerSequence $idx] ne [list]} {
+        puts stderr [format " %d %s" $idx [lindex $headerSequence $idx]]
+        incr idx
+      }
+      puts stderr [format "startLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterStart: %d\n" [dict get $hdrInfos headerLgth] [dict get $hdrInfos numHeaderParts] [dict get $hdrInfos maxHeaderParts] [dict get $hdrInfos currPartIdx] [dict get $hdrInfos seqIdx] [dict get $hdrInfos seqIdxAfterStart]]
+      return $::COMP_DISP_ERR_OK
+    }
+    
     # ================================= getStartFieldsFromLine ====================================
     
     proc getStartFieldsFromLine {line seqIdxVar} {
@@ -121,15 +199,12 @@ namespace eval compMsg {
       upvar $seqIdxVar seqIdx
     
       set flds [split $line ,]
-      dict set headerInfos headerLgth 0
-     
       set fieldIdx 0
-      set headerInfos headerLgth [lindex $flds $fildIdx]
+      dict set headerInfos headerLgth [lindex $flds $fieldIdx]
       incr fieldIdx
       set fieldName [lindex $flds $fieldIdx]
-      incr fieldIdx
       if {[string range $fieldName 0 0] ne "@"} {
-        return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+        return $::COMP_MSG_ERR_NO_SUCH_FIELD
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
       if {$result != $::COMP_MSG_ERR_OK} {
@@ -152,14 +227,14 @@ namespace eval compMsg {
           dict lappend headerInfos headerFlags COMP_DISP_U8_TARGET
         }
         default {
-          return $::COMP_MSG_ERR_BAD_FIELD_NAME
+          return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
       }
       incr fieldIdx
 
       set fieldName [lindex $flds $fieldIdx]
       if {[string range $fieldName 0 0] ne "@"} {
-        return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+        return $::COMP_MSG_ERR_NO_SUCH_FIELD
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
       if {$result != $::COMP_MSG_ERR_OK} {
@@ -188,7 +263,7 @@ namespace eval compMsg {
           dict lappend headerInfos headerFlags COMP_DISP_U16_TOTAL_LGTH
         }
         default {
-           return $::COMP_MSG_ERR_BAD_FIELD_NAME
+           return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
       }
       incr fieldIdx
@@ -196,7 +271,7 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+          return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
         if {$result != $::COMP_MSG_ERR_OK} {
@@ -212,7 +287,7 @@ namespace eval compMsg {
             dict lappend headerInfos headerFlags COMP_DISP_U16_TOTAL_LGTH
           }
           default {
-            return $::COMP_MSG_ERR_BAD_FIELD_NAME
+            return $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
@@ -220,7 +295,7 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+          return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
         if {$result != $::COMP_MSG_ERR_OK} {
@@ -236,7 +311,7 @@ namespace eval compMsg {
             dict lappend headerInfos headerFlags COMP_DISP_U8_VECTOR_GUID
           }
           default {
-            return $::COMP_MSG_ERR_BAD_FIELD_NAME
+            return $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
@@ -244,7 +319,7 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+          return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
         if {$result != $::COMP_MSG_ERR_OK} {
@@ -260,7 +335,7 @@ namespace eval compMsg {
             dict lappend headerInfos headerFlags COMP_DISP_U16_SRC_ID
           }
           default {
-            return $::COMP_MSG_ERR_BAD_FIELD_NAME
+            return $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
@@ -268,7 +343,7 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+          return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
         if {$result != $::COMP_MSG_ERR_OK} {
@@ -284,10 +359,11 @@ namespace eval compMsg {
             dict lappend headerInfos headerFlags COMP_DISP_U8_VECTOR_HDR_FILLER
           }
           default {
-            return $::COMP_MSG_ERR_BAD_FIELD_NAME
+            return $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
+      dict set headerInfos seqIdxAfterStart $seqIdx
       return $::COMP_MSG_ERR_OK
     }
       
@@ -313,7 +389,7 @@ namespace eval compMsg {
       set seqStartIdx $seqIdx
       set idx 0
       while {$idx < $numEntries} {
-        dict set headerInfos headerSequence [lrange [dict get $headerInfos headerSequence] 0 [expr {$seqIdx -1 }]]
+        dict set headerInfos headerSequence [lrange [dict get $headerInfos headerSequence] 0 [expr {$seqIdx - 1 }]]
         gets $fd line
         if {[string length $line] == 0} {
           return $::COMP_MSG_ERR_TOO_FEW_FILE_LINES
@@ -321,8 +397,9 @@ namespace eval compMsg {
         set hdr [dict create]
         set seqIdx2 0
         set fieldSequence [list]
+        set headerSequence [dict get $headerInfos headerSequence]
         while {$seqIdx2 < $seqStartIdx} {
-          lappend fieldSequence [lindex [dict get $headerInfos headerSequence] $seqIdx2]
+          lappend fieldSequence [lindex $headerSequence $seqIdx2]
           incr seqIdx2
         }
         dict set hdr fieldSequence $fieldSequence
@@ -331,103 +408,66 @@ namespace eval compMsg {
         set seqIdx2 0
         set found false
         set myPart [lindex $flds $seqIdx2]
-        if {[lsearch [lindex [dict get $headerInfos headerSequence] $seqIdx2] COMP_DISP_U16_SRC] >= 0} {
+        if {[lindex $headerSequence $seqIdx2] eq "COMP_DISP_U16_SRC"} {
           dict set hdr hdrFromPart $myPart
           set found true
         }
-        if {[lsearch [lindex [dict get $headerInfos headerSequence] $seqIdx2] COMP_DISP_U16_DST] >= 0} {
+        if {[lindex $headerSequence $seqIdx2] eq "COMP_DISP_U16_DST"} {
           dict set hdr hdrToPart $myPart
           set found true
         }
-        if {[lsearch [lindex [dict get $headerInfos headerSequence] $seqIdx2] COMP_DISP_U8_TARGET] >= 0} {
+        if {[lindex $headerSequence $seqIdx2] eq "COMP_DISP_U8_TARGET"} {
           dict set hdr hdrTargetPart $myPart
           set found true
         }
         if {!$found} {
-          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+          return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         incr seqIdx2
         set myPart [lindex $flds $seqIdx2]
         set found false
-        if {[lsearch [lindex [dict get $headerInfos headerSequence] $seqIdx2] COMP_DISP_U16_SRC] >= 0} {
+        if {[lindex $headerSequence $seqIdx2] eq "COMP_DISP_U16_SRC"} {
           dict set hdr hdrFromPart $myPart
           set found true
         }
-        if {[lsearch [lindex [dict get $headerInfos headerSequence] $seqIdx2] COMP_DISP_U16_DST] >= 0} {
+        if {[lindex $headerSequence $seqIdx2] eq "COMP_DISP_U16_DST"} {
           dict set hdr hdrToPart $myPart
           set found true
         }
-        if {[lsearch [lindex [dict get $headerInfos headerSequence] $seqIdx2] COMP_DISP_U16_TOTAL_LGTH] >= 0} {
+        if {[lindex $headerSequence $seqIdx2] eq "COMP_DISP_U16_TOTAL_LGTH"} {
           dict set hdr hdrTotalLgth $myPart
           set found true
         }
         if {!$found} {
-          return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+          return $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         incr seqIdx2
         set myPart [lindex $flds $seqIdx2]
         if {$seqIdx > $seqIdx2} {
           set found false
-          if {[lsearch [lindex [dict get $headerInfos headerSequence] $seqIdx2] COMP_DISP_U16_TOTAL_LGTH] >= 0} {
+          if {[lindex $headerSequence $seqIdx2] eq "COMP_DISP_U16_TOTAL_LGTH"} {
             dict set hdr hdrTotalLgth $myPart
             set found true
           }
           if {!$found} {
-            return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+            return $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
           incr seqIdx2
         }
-        set myPart [lindex $flds $seqIdx2]
+        set seqIdx3 $seqIdx2
+        set myPart [lindex $flds $seqIdx3]
         # extra field lgth 0/<number>
         dict set hdr hdrExtraLgth $myPart
-        dict lappend headerInfos headerSequence COMP_DISP_U8_EXTRA_KEY_LGTH
-        dict lappend hdr fieldSequence COMP_DISP_U8_EXTRA_KEY_LGTH
-        incr seqIdx2
-        set myPart [lindex $flds $seqIdx2]
+        incr seqIdx3
+        set myPart [lindex $flds $seqIdx3]
         # encryption E/N
-        dict lappend headerInfos headerSequence COMP_DISP_U8_ENCRYPTION
-        dict lappend hdr fieldSequence COMP_DISP_U8_ENCRYPTION
         dict set hdr hdrEncryption $myPart
-        if {$myPart eq "E"} {
-          dict lappend hdr hdrFlags COMP_DISP_IS_ENCRYPTED
-        } else {
-          dict lappend hdr hdrFlags COMP_DISP_IS_NOT_ENCRYPTED
-        }
-        incr seqIdx2
-        set myPart [lindex $flds $seqIdx2]
+        incr seqIdx3
+        set myPart [lindex $flds $seqIdx3]
         # handleType A/G/S/R/U/W/N
-        dict lappend headerInfos headerSequence COMP_DISP_U8_HANDLE_TYPE
-        dict lappend hdr fieldSequence COMP_DISP_U8_HANDLE_TYPE
         dict set hdr hdrHandleType $myPart
-        switch $myPart {
-          A {
-            dict lappend hdr hdrFlags COMP_DISP_SEND_TO_APP
-          }
-          G {
-            dict lappend hdr hdrFlags COMP_DISP_RECEIVE_FROM_APP
-          }
-          S {
-            dict lappend hdr hdrFlags COMP_DISP_SEND_TO_UART
-          }
-          R {
-            dict lappend hdr hdrFlags COMP_DISP_RECEIVE_FROM_UART
-          }
-          U {
-            dict lappend hdr hdrFlags COMP_DISP_TRANSFER_TO_UART
-          }
-          W {
-            dict lappend hdr hdrFlags COMP_DISP_TRANSFER_TO_CONN
-          }
-          N {
-            dict lappend hdr hdrFlags COMP_DISP_NOT_RELEVANT
-          }
-          default {
-            return $::COMP_MSG_ERR_BAD_VALUE
-          }
-        }
-        incr seqIdx2
-        set seqIdx3 $seqIdx2
-        set myPart [lindex $flds $seqIdx2]
+        incr seqIdx3
+        set myPart [lindex $flds $seqIdx3]
         # type of cmdKey
         set result [::compMsg dataView getFieldTypeIdFromStr $myPart fieldTypeId]
         if {$result != $::COMP_MSG_ERR_OK} {
@@ -438,14 +478,12 @@ namespace eval compMsg {
         # cmdKey
         switch $fieldTypeId {
           DATA_VIEW_FIELD_UINT8_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U8_CMD_KEY
             dict lappend hdr fieldSequence COMP_DISP_U8_CMD_KEY
             dict lappend hdr hdrFlags COMP_DISP_U8_CMD_KEY
             dict set hdr hdrU8CmdKey $myPart
             lappend dispFlags COMP_MSG_U8_CMD_KEY
           }
           DATA_VIEW_FIELD_UINT16_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U16_CMD_KEY
             dict lappend hdr fieldSequence COMP_DISP_U16_CMD_KEY
             dict lappend hdr hdrFlags COMP_DISP_U16_CMD_KEY
             dict set hdr hdrU16CmdKey $myPart
@@ -471,17 +509,14 @@ namespace eval compMsg {
         }
         switch $fieldTypeId {
           DATA_VIEW_FIELD_UINT0_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U0_CMD_Lgth
             dict lappend hdrs fieldSequence COMP_DISP_U0_CMD_Lgth
             dict lappend hdr hdrFlags COMP_DISP_U0_CMD_Lgth
           }
           DATA_VIEW_FIELD_UINT8_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U8_CMD_Lgth
             dict lappend hdr fieldSequence COMP_DISP_U8_CMD_Lgth
             dict lappend hdr hdrFlags COMP_DISP_U8_CMD_Lgth
           }
           DATA_VIEW_FIELD_UINT16_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U16_CMD_Lgth
             dict lappend hdr fieldSequence COMP_DISP_U16_CMD_Lgth
             dict lappend hdr hdrFlags COMP_DISP_U16_CMD_Lgth
           }
@@ -500,17 +535,14 @@ namespace eval compMsg {
         }
         switch $fieldTypeId {
           DATA_VIEW_FIELD_UINT0_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U0_CRC
             dict lappend hdr fieldSequence COMP_DISP_U0_CRC
             dict lappend hdr hdrFlags COMP_DISP_U0_CRC
           }
           DATA_VIEW_FIELD_UINT8_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U8_CRC
             dict lappend hdr fieldSequence COMP_DISP_U8_CRC
             dict lappend hdr hdrFlags COMP_DISP_U8_CRC
           }
           DATA_VIEW_FIELD_UINT16_T {
-            dict lappend headerInfos headerSequence COMP_DISP_U16_CRC
             dict lappend hdr fieldSequence COMP_DISP_U16_CRC
             dict lappend hdr hdrFlags COMP_DISP_U16_CRC
           }
@@ -520,6 +552,7 @@ namespace eval compMsg {
         }
         dict lappend headerInfos headerParts $hdr
         dict set headerInfos numHeaderParts [expr {[dict get $headerInfos numHeaderParts] + 1}]
+#dumpHeaderPart $hdr
         incr idx
       }
       close $fd
