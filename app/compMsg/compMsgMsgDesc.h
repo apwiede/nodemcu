@@ -62,7 +62,7 @@ enum compMsgDataErrorCode
   // with the names like DATA_VIEW_ERR_*
 
   COMP_MSG_DESC_ERR_OPEN_FILE             = 189,
-  COMP_MSG_DESC_FILE_NOT_OPENED           = 188,
+  COMP_MSG_DESC_ERR_FILE_NOT_OPENED       = 188,
   COMP_MSG_DESC_ERR_FLUSH_FILE            = 187,
   COMP_MSG_DESC_ERR_WRITE_FILE            = 186,
   COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS    = 185,

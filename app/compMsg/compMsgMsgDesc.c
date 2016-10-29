@@ -78,7 +78,7 @@ static uint8_t closeFile(compMsgMsgDesc_t *self) {
 
 static uint8_t flushFile(compMsgMsgDesc_t *self) {
   if (fileFd == (FS_OPEN_OK - 1)) {
-    return COMP_MSG_DESC_FILE_NOT_OPENED;
+    return COMP_MSG_DESC_ERR_FILE_NOT_OPENED;
   }
   if (fs_flush(fileFd) == 0) {
     return COMP_MSG_DESC_ERR_OK;
@@ -96,7 +96,7 @@ static uint8_t readLine(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t *lgth)
   uint8_t end_char = '\n';
 
   if (fileFd == (FS_OPEN_OK - 1)) {
-    return COMP_MSG_DESC_FILE_NOT_OPENED;
+    return COMP_MSG_DESC_ERR_FILE_NOT_OPENED;
   }
   n = fs_read(fileFd, buf, n);
   cp = *buffer;
@@ -120,7 +120,7 @@ static uint8_t writeLine(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t 
   int result;
 
   if (fileFd == (FS_OPEN_OK - 1)) {
-    return COMP_MSG_DESC_FILE_NOT_OPENED;
+    return COMP_MSG_DESC_ERR_FILE_NOT_OPENED;
   }
   result = fs_write(fileFd, buffer, lgth);
   if (result == lgth) {
@@ -382,15 +382,18 @@ ets_printf("headerLgth: %d\n", uval);
       return COMP_MSG_ERR_DUPLICATE_FIELD;
     }
     hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
+    hdrInfos->headerFlags |= COMP_DISP_U16_SRC;
     break;
   case COMP_MSG_SPEC_FIELD_DST:
     if (hdrInfos->headerFlags & COMP_DISP_U16_DST) {
       return COMP_MSG_ERR_DUPLICATE_FIELD;
     }
     hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
+    hdrInfos->headerFlags |= COMP_DISP_U16_DST;
     break;
   case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
     hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
+    hdrInfos->headerFlags |= COMP_DISP_U16_TOTAL_LGTH;
     break;
   default:
     checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
@@ -411,6 +414,7 @@ ets_printf("headerLgth: %d\n", uval);
       return COMP_MSG_ERR_DUPLICATE_FIELD;
     }
     hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
+    hdrInfos->headerFlags |= COMP_DISP_U16_TOTAL_LGTH;
     break;
   default:
     checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
@@ -431,6 +435,7 @@ ets_printf("headerLgth: %d\n", uval);
       return COMP_MSG_ERR_DUPLICATE_FIELD;
     }
     hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_GUID;
+    hdrInfos->headerFlags |= COMP_DISP_U8_VECTOR_GUID;;
     break;
   default:
     checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
@@ -451,6 +456,7 @@ ets_printf("headerLgth: %d\n", uval);
       return COMP_MSG_ERR_DUPLICATE_FIELD;
     }
     hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC_ID;
+    hdrInfos->headerFlags |= COMP_DISP_U16_SRC_ID;
     break;
   default:
     checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
@@ -471,6 +477,7 @@ ets_printf("headerLgth: %d\n", uval);
       return COMP_MSG_ERR_DUPLICATE_FIELD;
     }
     hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_HDR_FILLER;
+    hdrInfos->headerFlags |= COMP_DISP_U8_VECTOR_HDR_FILLER;
     break;
   default:
     checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);

@@ -413,7 +413,7 @@ cryptKey = "a1b2c3d4e5f6g7h8";
       }
       result = self->handleReceivedMsg(self, received, hdrInfos);
 ets_printf("handleReceivedMsg end idx: %d result: %d\n", idx, result);
-      checkErrOK(result);
+      return result;
     }
     idx++;
   }
