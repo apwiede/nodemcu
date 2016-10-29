@@ -865,6 +865,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
 
   compMsgDispatcher->dumpMsgParts = &dumpMsgParts;
 
+  compMsgDispatcher->getFieldType = &getFieldType;
   compMsgDispatcherSingleton = compMsgDispatcher;
   return compMsgDispatcher;
 }

@@ -157,6 +157,7 @@ typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* createMsgFromLines_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type);
 typedef uint8_t (* setMsgValuesFromLines_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t numEntries, uint8_t *handle, uint8_t type);
 
+typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* buildListMsg_t)(compMsgDispatcher_t *self, size_t *totalLgth, uint8_t **totalData);
 
@@ -216,6 +217,7 @@ typedef struct compMsgDispatcher {
   uint16_t AppPart;
   uint16_t CloudPart;
 
+  getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
 
   typeRSendAnswer_t typeRSendAnswer;

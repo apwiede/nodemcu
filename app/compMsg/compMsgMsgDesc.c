@@ -856,7 +856,173 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   checkErrOK(result);
   return COMP_MSG_DESC_ERR_OK;
 }
+
+// ================================= createMsgFromHeaderPart ====================================
+
+static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t *handle) {
+  uint8_t result;
+  char fileName[100];
+  uint8_t numEntries;
+  uint8_t *fieldValueStr;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldTypeStr;
+  uint8_t *fieldLgthStr;
+  uint8_t fieldNameId;
+  uint8_t fieldTypeId;
+  char *endPtr;
+  uint8_t lgth;
+  uint8_t fieldLgth;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  long ulgth;
+  uint8_t *myStr;
+  int idx;
+  int numericValue;
+  uint8_t numRows;
+  uint8_t*cp;
+  uint8_t*ep;
+  bool isEnd;
+
+  os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
+  result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
+  checkErrOK(result);
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc); return result; }
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  ulgth = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)ulgth;
+  result = self->compMsgData->createMsg(self->compMsgData, numEntries, &handle);
+  checkErrOK(result);
+  numRows = 0;
+  idx = 0;
+  while(idx < numEntries) {
+    result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    // fieldName
+    fieldNameStr = cp;
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldType
+    fieldTypeStr = cp;
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldLgth
+    fieldLgthStr = cp;
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    if (c_strcmp(fieldLgthStr,"@numRows") == 0) {
+      fieldLgth = numRows;
+    } else {
+      lgth = c_strtoul(fieldLgthStr, &endPtr, 10);
+      fieldLgth = (uint8_t)lgth;
+    }
+    result = self->compMsgData->addField(self->compMsgData, fieldNameStr, fieldTypeStr, fieldLgth);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+    idx++;
+  }
+  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
+  checkErrOK(result);
+  result = self->compMsgData->initMsg(self->compMsgData);
+  checkErrOK(result);
+  os_sprintf(fileName, "CompVal%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
+  result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
+  checkErrOK(result);
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  ulgth = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)ulgth;
+  idx = 0;
+  while(idx < numEntries) {
+    result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    // fieldName
+    fieldNameStr = cp;
+    result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR);
+    checkErrOK(result);
+    result = self->getFieldType(self, self->compMsgData, fieldNameId, &fieldTypeId);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldValue
+    fieldValueStr = cp;
+    if (fieldValueStr[0] == '@') {
+      uint8_t type = 'X';
+      // call the callback function vor the field!!
+      result = self->fillMsgValue(self, fieldValueStr, type,  fieldTypeId);
+      checkErrOK(result);
+    } else {
+numericValue = 0;
+      result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+    }
+numericValue = 0;
+    switch (fieldNameId) {
+    case COMP_MSG_SPEC_FIELD_DST:
+      numericValue = hdr->hdrFromPart;
+      fieldValueStr = NULL;
+      result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+      break;
+    case COMP_MSG_SPEC_FIELD_SRC:
+      fieldValueStr = NULL;
+      numericValue = hdr->hdrToPart;
+      result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+      break;
+    case COMP_MSG_SPEC_FIELD_CMD_KEY:
+      // check for u8CmdKey/u16CmdKey here
+      fieldValueStr = NULL;
+      numericValue = hdr->hdrU16CmdKey;
+      result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+      break;
+    default:
+      result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+      break;
+    }
+    idx++;
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
+  checkErrOK(result);
+#ifdef NOTDEF
+  set result [::compMsg compMsgData setFieldValue "@cmdKey" [dict get $hdr hdrU16CmdKey]]
+  if {$result != $::COMP_MSG_ERR_OK} {
+    return $result
+  }
+#endif
+  result = self->compMsgData->prepareMsg(self->compMsgData);
+  checkErrOK(result);
+//::compMsg compMsgData dumpMsg
+  return COMP_MSG_ERR_OK;
+}
 #undef checkIsEnd
+
 
 // ================================= newCompMsgMsgDesc ====================================
 
