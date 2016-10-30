@@ -62,7 +62,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   unsigned long ulgth;
   char *endPtr;
 
-  os_sprintf(fileName, "Val%c%c%c.txt", (self->buildMsgInfos.u16CmdKey>>8)&0xFF, self->buildMsgInfos.u16CmdKey&0xFF, self->buildMsgInfos.type);
+  os_sprintf(fileName, "CompVal%c%c.txt", (self->buildMsgInfos.u16CmdKey>>8)&0xFF, self->buildMsgInfos.u16CmdKey&0xFF, self->buildMsgInfos.type);
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
   result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
@@ -72,7 +72,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   }
   ulgth = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)ulgth;
-//ets_printf("§@setMsgValues numEntries!%d!@§\n", numEntries);
+ets_printf("§@setMsgValues numEntries!%d!@§\n", numEntries);
   result = self->setMsgValuesFromLines(self, self->compMsgData, numEntries, self->msgHandle, self->buildMsgInfos.type);
   checkErrOK(result);
   result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
@@ -173,15 +173,15 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   int src;
   int dst;
 
-  self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos;
-  result = self->createMsgFromLines(self, self->buildMsgInfos.parts, self->buildMsgInfos.numEntries, self->buildMsgInfos.numRows, self->buildMsgInfos.type);
-  checkErrOK(result);
-  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
-  checkErrOK(result);
+ets_printf("buildMsg has been called, we finish here temporarely!\n");
+  self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos; // FIXME shoulbd be moved to bssScanInfoCb!!!
+// FIXME that is to early for keyValue messages!!
   result = self->compMsgData->initMsg(self->compMsgData);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
   result = setMsgValues(self);
+ets_printf("buildMsg setMsgValues has been called, we finish here temporarely!\n");
   checkErrOK(result);
+return COMP_MSG_ERR_OK;
   result = self->compMsgData->getFieldValue(self->compMsgData, "@dst", &dst, &stringValue);
   checkErrOK(result);
   self->buildListMsgInfos.dst = dst;

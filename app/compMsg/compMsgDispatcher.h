@@ -45,8 +45,9 @@
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-#include "compMsgMsgDesc.h"
 #include "compMsgModuleData.h"
+#include "compMsgWifiData.h"
+#include "compMsgMsgDesc.h"
 
 enum compMsgDispatcherErrorCode
 {

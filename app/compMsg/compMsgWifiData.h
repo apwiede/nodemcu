@@ -88,6 +88,17 @@
 #define BSS_INFO_FREQ_OFFSET  9
 #define BSS_INFO_FREQ_CAL_VAL 10
 
+#define KEY_VALUE_KEY_SSID         1
+#define KEY_VALUE_KEY_PASSWORD     2
+#define KEY_VALUE_KEY_BSSIDSET     3
+#define KEY_VALUE_KEY_BSSID        4
+#define KEY_VALUE_KEY_STATUS       5
+#define KEY_VALUE_KEY_MODE         6
+#define KEY_VALUE_KEY_AUTHMODE     7
+#define KEY_VALUE_KEY_CHANNEL      8
+#define KEY_VALUE_KEY_FREQ_OFFSET  9
+#define KEY_VALUE_KEY_FREQCAL_VAL  10
+
 enum websocket_opcode {
   OPCODE_TEXT = 1,
   OPCODE_BINARY = 2,
@@ -137,6 +148,16 @@ typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, un
 typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 
 typedef struct compMsgWifiData {
+  uint16_t key_ssid;
+  uint16_t key_ssid_len;
+  uint16_t key_bssid;
+  uint16_t key_channel;
+  uint16_t key_rssi;
+  uint16_t key_authmode;
+  uint16_t key_freq_offset;
+  uint16_t key_freqcal_val;
+  uint16_t key_is_hidden;
+
   uint8_t wifiOpMode;
   uint8_t provisioningSsid[33];
   uint16_t provisioningPort;

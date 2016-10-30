@@ -563,11 +563,11 @@ ets_printf("ip: nil\n");
 ets_printf("IP: %s\n", temp);
   ets_timer_disarm(&tmr->timer);
 
-  result = self->getModuleValue(self, MODULE_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->getModuleValue(self, WIFI_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
 //ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
 //  checkErrOK(result);
   port = numericValue;
-//  result = self->getModuleValue(self, MODULE_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+//  result = self->getModuleValue(self, WIFI_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
 //  checkErrOK(result);
 
   wud = (websocketUserData_t *)os_zalloc(sizeof(websocketUserData_t));
@@ -583,10 +583,10 @@ ets_printf("IP: %s\n", temp);
 wud->urls[0] = "/getaplist";
 wud->urls[1] = "/getapdeflist";
 wud->num_urls = 2;
-  result = self->getModuleValue(self, MODULE_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->getModuleValue(self, WIFI_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
   wud->websocketBinaryReceived = (websocketBinaryReceived_t)numericValue;
-  result = self->getModuleValue(self, MODULE_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->getModuleValue(self, WIFI_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
   wud->websocketTextReceived = (websocketTextReceived_t)numericValue;
   wud->compMsgDispatcher = self;
@@ -662,7 +662,7 @@ static uint8_t websocketRunAPMode(compMsgDispatcher_t *self) {
     return COMP_DISP_ERR_CANNOT_SET_OPMODE;
   }
   c_memset(softap_config.ssid,0,sizeof(softap_config.ssid));
-  result = self->getModuleValue(self, MODULE_INFO_PROVISIONING_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->getModuleValue(self, WIFI_INFO_PROVISIONING_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
   checkErrOK(result);
   c_memcpy(softap_config.ssid, stringValue, c_strlen(stringValue));
   softap_config.ssid_len = c_strlen(stringValue);
@@ -677,7 +677,6 @@ static uint8_t websocketRunAPMode(compMsgDispatcher_t *self) {
   }
 ets_printf("wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_current_ap_id(), wifi_station_get_hostname());
 
-ets_printf("register alarmTimerAP: self: %p\n", self);
   int repeat = 1;
   int interval = 1000;
   int timerId = 0;
@@ -693,8 +692,6 @@ ets_printf("register alarmTimerAP: self: %p\n", self);
   tmr->interval = interval;
   tmr->mode &= ~TIMER_IDLE_FLAG;
   ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
-  ets_printf("arm_new done\n");
-
   return COMP_DISP_ERR_OK;
 }
 
@@ -709,9 +706,7 @@ uint8_t compMsgWebsocketInit(compMsgDispatcher_t *self) {
   self->websocketRunClientMode = &websocketRunClientMode;
   self->websocketRunAPMode = &websocketRunAPMode;
   self->websocketSendData = websocketSendData;
-ets_printf("call webscoketRunAPMode\n");
   result = websocketRunAPMode(self);
-  ets_printf("webscoketRunAPMode result: %d\n", result);
-checkErrOK(result);
+  checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }

@@ -872,6 +872,7 @@ static uint8_t  getHeaderFromUniqueFields (compMsgDispatcher_t *self, uint16_t d
   }
   return COMP_DISP_ERR_HEADER_NOT_FOUND;
 }
+
 // ================================= createMsgFromHeaderPart ====================================
 
 static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
@@ -896,6 +897,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   uint8_t numRows;
   uint8_t*cp;
   uint8_t*ep;
+  uint8_t prepareValuesCbName[50];
   bool isEnd;
 
   os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
@@ -906,11 +908,30 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
-  if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  cp = buffer;
+  result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+  checkErrOK(result);
+  if (isEnd) {
+    return COMP_DISP_ERR_BAD_FILE_CONTENTS;
   }
-  uval = c_strtoul(buffer+2, &endPtr, 10);
+  if (cp[0] != '#') {
+    return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  cp = ep;
+  result = self->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+  checkErrOK(result);
   numEntries = (uint8_t)uval;
+  cp = ep;
+  prepareValuesCbName[0] = '\0';
+  if (!isEnd) {
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    c_memcpy(prepareValuesCbName,cp, c_strlen(cp));
+    prepareValuesCbName[c_strlen(cp)] = '\0';
+  }
+  if (!isEnd) {
+    return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+  }
   result = self->compMsgData->createMsg(self->compMsgData, numEntries, handle);
   checkErrOK(result);
   numRows = 0;
@@ -957,6 +978,36 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   }
   result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
   checkErrOK(result);
+
+  // runAction calls at the end buildMsg
+  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
+  if (prepareValuesCbName != NULL) {
+    uint8_t actionMode;
+    uint8_t type;
+
+    result = self->getActionMode(self, prepareValuesCbName+1, &actionMode);
+    self->actionMode = actionMode;
+    checkErrOK(result);
+    result  = self->runAction(self, &type);
+    // runAction starts a call with a callback and returns here before the callback has been running!!
+    // when when coming here we are finished and the callback will do the work later on!
+ets_printf("runAction done\n");
+    return result;
+  } else {
+    result = self->buildMsg(self);
+#ifdef NOTDEF
+    result = setMsgValues(self);
+    checkErrOK(result);
+//ets_printf("§heap3: %d§", system_get_free_heap_size());
+    result = self->compMsgData->getMsgData(self->compMsgData, &data, &msgLgth);
+    checkErrOK(result);
+#endif
+    // FIXME !! here we need a call to send the (eventually encrypted) message!!
+  }
+
+
+#ifdef NOTDEF
+
   result = self->compMsgData->initMsg(self->compMsgData);
   checkErrOK(result);
   os_sprintf(fileName, "CompVal%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
@@ -983,10 +1034,14 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     fieldNameStr = cp;
     result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR);
-    checkErrOK(result);
-    result = self->getFieldType(self, self->compMsgData, fieldNameId, &fieldTypeId);
-    checkErrOK(result);
+    if (fieldNameStr[0] == '#') {
+ets_printf("keyValue field: %s\n", fieldNameStr);
+    } else {
+      result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR);
+      checkErrOK(result);
+      result = self->getFieldType(self, self->compMsgData, fieldNameId, &fieldTypeId);
+      checkErrOK(result);
+    }
     checkIsEnd(isEnd);
     cp = ep;
 
@@ -996,53 +1051,61 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     checkErrOK(result);
     if (fieldValueStr[0] == '@') {
       uint8_t type = 'X';
-      // call the callback function vor the field!!
-      result = self->fillMsgValue(self, fieldValueStr, type,  fieldTypeId);
-      checkErrOK(result);
+      if (fieldNameStr[0] == '#') {
+ets_printf("value of keyValue: %s\n", fieldValueStr);
+      } else {
+        // call the callback function vor the field!!
+        result = self->fillMsgValue(self, fieldValueStr, type,  fieldTypeId);
+        checkErrOK(result);
+      }
     } else {
-      numericValue = 0;
-      switch (fieldNameId) {
-      case COMP_MSG_SPEC_FIELD_DST:
-        numericValue = hdr->hdrFromPart;
-        fieldValueStr = NULL;
-        result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-        break;
-      case COMP_MSG_SPEC_FIELD_SRC:
-        fieldValueStr = NULL;
-        numericValue = hdr->hdrToPart;
-        result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-        break;
-      case COMP_MSG_SPEC_FIELD_CMD_KEY:
-        // check for u8CmdKey/u16CmdKey here
-        fieldValueStr = NULL;
-        numericValue = hdr->hdrU16CmdKey;
-        result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-        break;
-      default:
-        switch (fieldTypeId) {
-        case DATA_VIEW_FIELD_UINT8_T:
-        case DATA_VIEW_FIELD_INT8_T:
-        case DATA_VIEW_FIELD_UINT16_T:
-        case DATA_VIEW_FIELD_INT16_T:
-        case DATA_VIEW_FIELD_UINT32_T:
-        case DATA_VIEW_FIELD_INT32_T:
-          {
-            uval = c_strtoul(fieldValueStr, &endPtr, 10);
-            if (endPtr == (char *)(ep-1)) {
-              numericValue = (int)uval;
-              fieldValueStr = NULL;
-            } else {
-              numericValue = 0;
-            }
-          }
+      if (fieldNameStr[0] == '#') {
+ets_printf("value of keyValue: %s\n", fieldValueStr);
+      } else {
+        numericValue = 0;
+        switch (fieldNameId) {
+        case COMP_MSG_SPEC_FIELD_DST:
+          numericValue = hdr->hdrFromPart;
+          fieldValueStr = NULL;
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+          break;
+        case COMP_MSG_SPEC_FIELD_SRC:
+          fieldValueStr = NULL;
+          numericValue = hdr->hdrToPart;
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+          break;
+        case COMP_MSG_SPEC_FIELD_CMD_KEY:
+          // check for u8CmdKey/u16CmdKey here
+          fieldValueStr = NULL;
+          numericValue = hdr->hdrU16CmdKey;
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
           break;
         default:
-          numericValue = 0;
+          switch (fieldTypeId) {
+          case DATA_VIEW_FIELD_UINT8_T:
+          case DATA_VIEW_FIELD_INT8_T:
+          case DATA_VIEW_FIELD_UINT16_T:
+          case DATA_VIEW_FIELD_INT16_T:
+          case DATA_VIEW_FIELD_UINT32_T:
+          case DATA_VIEW_FIELD_INT32_T:
+            {
+              uval = c_strtoul(fieldValueStr, &endPtr, 10);
+              if (endPtr == (char *)(ep-1)) {
+                numericValue = (int)uval;
+                fieldValueStr = NULL;
+              } else {
+                numericValue = 0;
+              }
+            }
+            break;
+          default:
+            numericValue = 0;
+            break;
+          }
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+          checkErrOK(result);
           break;
         }
-        result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-        checkErrOK(result);
-        break;
       }
     }
     if (!isEnd) {
@@ -1059,8 +1122,177 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   result = self->compMsgData->prepareMsg(self->compMsgData);
   checkErrOK(result);
 self->compMsgData->dumpMsg(self->compMsgData);
+#endif
   return COMP_MSG_ERR_OK;
 }
+
+// ================================= getFieldInfoFromLine ====================================
+
+static uint8_t getFieldInfoFromLine(compMsgDispatcher_t *self) {
+  int idx;
+  int result;
+  unsigned long uval;
+  uint8_t *buffer;
+  uint8_t*cp;
+  uint8_t*ep;
+  char *endPtr;
+  uint8_t lgth;
+  compMsgDataView_t *dataView;
+  bool isEnd;
+
+  dataView = self->compMsgData->compMsgDataView;
+  buffer = self->buildMsgInfos.buf;
+  self->buildMsgInfos.numericValue = 0;
+  self->buildMsgInfos.stringValue = NULL;
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  if (lgth == 0) {
+    return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+  }
+  buffer[lgth] = 0;
+  cp = buffer;
+  self->buildMsgInfos.fieldNameStr = cp;
+
+  // fieldName
+  result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+  checkErrOK(result);
+  if (self->buildMsgInfos.fieldNameStr[0] != '#') {
+    result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, self->buildMsgInfos.fieldNameStr, &self->buildMsgInfos.fieldNameId, COMP_MSG_NO_INCR);
+    checkErrOK(result);
+    result = self->getFieldType(self, self->compMsgData, self->buildMsgInfos.fieldNameId, &self->buildMsgInfos.fieldTypeId);
+    checkErrOK(result);
+  }
+  checkIsEnd(isEnd);
+  cp = ep;
+
+  // fieldValue
+  self->buildMsgInfos.fieldValueStr = cp;
+  result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+  checkErrOK(result);
+  if (self->buildMsgInfos.fieldNameStr[0] == '#') {
+  } else {
+    if (self->buildMsgInfos.fieldValueStr[0] != '@') {
+      switch (self->buildMsgInfos.fieldTypeId) {
+      case DATA_VIEW_FIELD_UINT8_T:
+      case DATA_VIEW_FIELD_INT8_T:
+      case DATA_VIEW_FIELD_UINT16_T:
+      case DATA_VIEW_FIELD_INT16_T:
+      case DATA_VIEW_FIELD_UINT32_T:
+      case DATA_VIEW_FIELD_INT32_T:
+        {
+          uval = c_strtoul(self->buildMsgInfos.fieldValueStr, &endPtr, 10);
+          if (endPtr == (char *)(ep-1)) {
+            self->buildMsgInfos.numericValue = (int)uval;
+            self->buildMsgInfos.stringValue = NULL;
+          } else {
+            self->buildMsgInfos.numericValue = 0;
+            self->buildMsgInfos.stringValue = self->buildMsgInfos.fieldValueStr;
+          }
+        }
+        break;
+      default:
+        self->buildMsgInfos.numericValue = 0;
+        self->buildMsgInfos.stringValue = self->buildMsgInfos.fieldValueStr;
+        break;
+      }
+    }
+  }
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getWifiKeyValueKeys ====================================
+
+static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t *compMsgWifiData) {
+  uint8_t result;
+  char fileName[100];
+  uint8_t numEntries;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldValueStr;
+  char *endPtr;
+  uint8_t lgth;
+  uint8_t fieldLgth;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  long uval;
+  uint8_t *myStr;
+  int idx;
+  int numericValue;
+  uint8_t*cp;
+  uint8_t*ep;
+  bool isEnd;
+
+  result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, "CompMsgKeyValueKeys.txt", "r");
+  checkErrOK(result);
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc); return result; }
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  uval = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)uval;
+  idx = 0;
+  while(idx < numEntries) {
+    result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    // fieldName
+    fieldNameStr = cp;
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldValue
+    fieldValueStr = cp;
+    result = self->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+    checkErrOK(result);
+    if (strcmp("@key_ssid", fieldNameStr) == 0) {
+      compMsgWifiData->key_ssid = (uint16_t)uval;
+    }
+    if (strcmp("@key_rssi", fieldNameStr) == 0) {
+      compMsgWifiData->key_rssi = (uint16_t)uval;
+    }
+    if (strcmp("@key_ssid_len", fieldNameStr) == 0) {
+      compMsgWifiData->key_ssid_len = (uint16_t)uval;
+    }
+    if (strcmp("@key_bssid", fieldNameStr) == 0) {
+      compMsgWifiData->key_bssid = (uint16_t)uval;
+    }
+    if (strcmp("@key_channel", fieldNameStr) == 0) {
+      compMsgWifiData->key_channel = (uint16_t)uval;
+    }
+    if (strcmp("@key_authmode", fieldNameStr) == 0) {
+      compMsgWifiData->key_authmode = (uint16_t)uval;
+    }
+    if (strcmp("@key_freq_offset", fieldNameStr) == 0) {
+      compMsgWifiData->key_freq_offset = (uint16_t)uval;
+    }
+    if (strcmp("@key_freqcal_val", fieldNameStr) == 0) {
+      compMsgWifiData->key_freqcal_val = (uint16_t)uval;
+    }
+    if (strcmp("@key_is_hidden", fieldNameStr) == 0) {
+      compMsgWifiData->key_is_hidden = (uint16_t)uval;
+    }
+    if (!isEnd) {
+      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    }
+    cp = ep;
+    idx++;
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
+  checkErrOK(result);
+  return COMP_MSG_ERR_OK;
+}
+
 #undef checkIsEnd
 
 
@@ -1088,6 +1320,9 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->readHeadersAndSetFlags = &readHeadersAndSetFlags;
   compMsgMsgDesc->createMsgFromHeaderPart = &createMsgFromHeaderPart;
   compMsgMsgDesc->getHeaderFromUniqueFields = &getHeaderFromUniqueFields;
+  compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;
+  compMsgMsgDesc->getFieldInfoFromLine = &getFieldInfoFromLine;
+
   return compMsgMsgDesc;
 }
 

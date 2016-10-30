@@ -129,7 +129,8 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_LIST_MSGS           = 232,
   COMP_MSG_SPEC_FIELD_SRC_ID              = 231,
   COMP_MSG_SPEC_FIELD_HDR_FILLER          = 230,
-  COMP_MSG_SPEC_FIELD_LOW                 = 229,         // this must be the last entry!!
+  COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES      = 229,
+  COMP_MSG_SPEC_FIELD_LOW                 = 228,         // this must be the last entry!!
 };
 
 #define COMP_MSG_NO_INCR 0
@@ -143,6 +144,7 @@ typedef struct compMsgField {
   uint8_t fieldTypeId;
   uint8_t fieldLgth;
   uint8_t fieldFlags;
+  uint16_t fieldKey;
   size_t fieldOffset;
 } compMsgField_t;
 

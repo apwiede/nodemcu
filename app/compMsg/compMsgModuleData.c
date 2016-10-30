@@ -119,13 +119,14 @@ static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t
   case MODULE_INFO_Reserve3:
     *stringValue = compMsgModuleData.Reserve3;
     break;
-
-  case MODULE_INFO_PROVISIONING_SSID:
-  case MODULE_INFO_PROVISIONING_PORT:
-  case MODULE_INFO_PROVISIONING_IP_ADDR:
-  case MODULE_INFO_BINARY_CALL_BACK:
-  case MODULE_INFO_TEXT_CALL_BACK:
-    return self->getWifiValue(self, which, valueTypeId, numericValue, stringValue);
+  case WIFI_INFO_PROVISIONING_SSID:
+  case WIFI_INFO_PROVISIONING_PORT:
+  case WIFI_INFO_PROVISIONING_IP_ADDR:
+  case WIFI_INFO_BINARY_CALL_BACK:
+  case WIFI_INFO_TEXT_CALL_BACK:
+    result = self->getWifiValue(self, which, valueTypeId, numericValue, stringValue);
+    checkErrOK(result);
+    break;
   default:
     return COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH;
     break;
@@ -186,8 +187,6 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.Reserve3[0] = 'X';
   compMsgModuleData.Reserve3[1] = 'Y';
   compMsgModuleData.Reserve3[2] = 'Z';
-
-  result = self->setWifiValues(self);
 
   return COMP_DISP_ERR_OK;
 }

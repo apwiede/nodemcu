@@ -120,7 +120,7 @@ static void bssScanDoneCb(void *arg, STATUS status) {
   uint8_t numEntries;
   bssScanInfo_t *scanInfo;
 
-//ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssScanRunning, status);
+ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssScanRunning, status);
   if (arg == NULL) {
     return;
   }
@@ -172,7 +172,7 @@ static void bssScanDoneCb(void *arg, STATUS status) {
     bss_link = bss_link->next.stqe_next;
     bssScanInfos.numScanInfos++;
   }
-//ets_printf("bssScanDoneCb call buildMsg\n");
+ets_printf("bssScanDoneCb call buildMsg numScanInfos: %d\n", bssScanInfos.numScanInfos);
   bssScanInfos.scanInfoComplete = true;
   bssScanInfos.compMsgDispatcher->buildMsg(bssScanInfos.compMsgDispatcher);
 }
@@ -183,7 +183,7 @@ static uint8_t getBssScanInfo(compMsgDispatcher_t *self) {
   bool result;
   struct scan_config scan_config;
 
-//ets_printf("getBssScanInfo1: \n");
+ets_printf("getBssScanInfo1: \n");
   if (bssScanRunning) {
     // silently ignore 
     return COMP_DISP_ERR_OK;
@@ -297,23 +297,23 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   *numericValue = 0;
   *stringValue = NULL;
   switch (which) {
-  case MODULE_INFO_PROVISIONING_SSID:
+  case WIFI_INFO_PROVISIONING_SSID:
     *stringValue = compMsgWifiData.provisioningSsid;
     break;
-  case MODULE_INFO_PROVISIONING_PORT:
+  case WIFI_INFO_PROVISIONING_PORT:
     *numericValue = compMsgWifiData.provisioningPort;
     break;
-  case MODULE_INFO_PROVISIONING_IP_ADDR:
+  case WIFI_INFO_PROVISIONING_IP_ADDR:
     *stringValue = compMsgWifiData.provisioningIPAddr;
     break;
-  case MODULE_INFO_BINARY_CALL_BACK:
+  case WIFI_INFO_BINARY_CALL_BACK:
     *numericValue = (int)compMsgWifiData.websocketBinaryReceived;
     break;
-  case MODULE_INFO_TEXT_CALL_BACK:
+  case WIFI_INFO_TEXT_CALL_BACK:
     *numericValue = (int)compMsgWifiData.websocketTextReceived;
     break;
   default:
-    return COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH;
+    return COMP_DISP_ERR_BAD_WIFI_VALUE_WHICH;
     break;
   }
   return COMP_DISP_ERR_OK;
@@ -353,8 +353,9 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->setWifiValues = &setWifiValues;
 
   bssScanInfos.compMsgDispatcher = self;
-
+  self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);
+  result = self->setWifiValues(self);
+  checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }
-
 

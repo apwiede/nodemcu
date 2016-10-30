@@ -62,7 +62,8 @@ extern "C" {
 #define COMP_LIST_IS_INITTED          (1 << 10)
 #define COMP_LIST_IS_PREPARED         (1 << 11)
 
-#define COMP_MSG_FIELD_IS_SET   (1 << 0)
+#define COMP_MSG_FIELD_IS_SET         (1 << 0)
+#define COMP_MSG_KEY_VALUE_FIELD      (1 << 1)
 
 #define COMP_DEF_NUM_DEF_FIELDS 15
 #define COMP_DEF_CMD_KEY 0x5959
@@ -86,6 +87,9 @@ typedef uint8_t (* setFieldValue_t)(compMsgData_t *self, const uint8_t *fieldNam
 
 typedef uint8_t (* getTableFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setTableFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
+typedef uint8_t (* dumpFieldValue_t)(compMsgData_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2);
+typedef uint8_t (* dumpTableRowFields_t)(compMsgData_t *self);
+typedef uint8_t (* dumpKeyValueFields_t)(compMsgData_t *self, size_t offset);
 typedef uint8_t (* dumpMsg_t)(compMsgData_t *self);
 typedef uint8_t (* initMsg_t)(compMsgData_t *self);
 typedef uint8_t (* prepareMsg_t)(compMsgData_t *self);
@@ -122,12 +126,15 @@ typedef struct compMsgData {
   char handle[16];
   compMsgField_t *fields;
   compMsgField_t *tableFields;
+  compMsgField_t *keyValueFields;
   uint16_t flags;
   size_t numFields;
   size_t maxFields;
   size_t numTableRows;         // number of list rows
   size_t numTableRowFields;    // number of fields within a table row
   size_t numRowFields;         // for checking how many tableRowFields have been processed
+  size_t numKeyValueFields;    // number of key value fields
+  size_t numValueFields;       // for checking how many keyValueFields have been processed
   size_t fieldOffset;
   size_t totalLgth;
   size_t cmdLgth;
@@ -188,6 +195,9 @@ typedef struct compMsgData {
   setFieldValue_t setFieldValue;
   getTableFieldValue_t getTableFieldValue;
   setTableFieldValue_t setTableFieldValue;
+  dumpFieldValue_t dumpFieldValue;
+  dumpTableRowFields_t dumpTableRowFields;
+  dumpKeyValueFields_t dumpKeyValueFields;
   dumpMsg_t dumpMsg;
   initMsg_t initMsg;
   prepareMsg_t prepareMsg;

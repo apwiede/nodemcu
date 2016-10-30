@@ -88,6 +88,7 @@ static str2id_t specialFieldNames[] = {
   {"@listMsgs",         COMP_MSG_SPEC_FIELD_LIST_MSGS},
   {"@srcId",            COMP_MSG_SPEC_FIELD_SRC_ID},
   {"@hdrFiller",        COMP_MSG_SPEC_FIELD_HDR_FILLER},
+  {"@numKeyValues",     COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES},
 
   {NULL, -1},
 };
