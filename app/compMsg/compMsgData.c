@@ -450,6 +450,7 @@ static uint8_t prepareMsg(compMsgData_t *self) {
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
+      case COMP_MSG_SPEC_FIELD_HDR_FILLER:
       case COMP_MSG_SPEC_FIELD_FILLER:
         result = self->compMsgDataView->setFiller(self->compMsgDataView, fieldInfo);
         checkErrOK(result);
@@ -504,7 +505,9 @@ static uint8_t initMsg(compMsgData_t *self) {
       case COMP_MSG_SPEC_FIELD_SRC:
       case COMP_MSG_SPEC_FIELD_DST:
       case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
-//      case COMP_MSG_SPEC_FIELD_GUID:
+      case COMP_MSG_SPEC_FIELD_GUID:
+      case COMP_MSG_SPEC_FIELD_SRC_ID:
+      case COMP_MSG_SPEC_FIELD_HDR_FILLER:
         self->headerLgth += fieldInfo->fieldLgth;
         self->totalLgth = self->fieldOffset + fieldInfo->fieldLgth;
         break;
@@ -872,9 +875,6 @@ static uint8_t dumpMsg(compMsgData_t *self) {
   ets_printf("  numFields: %d maxFields: %d\r\n", numEntries, (int)self->maxFields);
   ets_printf("  headerLgth: %d cmdLgth: %d totalLgth: %d\r\n", self->headerLgth, self->cmdLgth, self->totalLgth);
   ets_printf("  flags:");
-  if ((self->flags & COMP_MSG_FIELD_IS_SET) != 0) {
-    ets_printf(" COMP_MSG_FIELD_IS_SET");
-  }
   if ((self->flags & COMP_MSG_HAS_CRC) != 0) {
     ets_printf(" COMP_MSG_HAS_CRC");
   }
@@ -916,7 +916,11 @@ static uint8_t dumpMsg(compMsgData_t *self) {
       idx++;
       continue;
     }
-    ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d\r\n", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+    ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+    if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
+      ets_printf(" COMP_MSG_FIELD_IS_SET");
+    }
+    ets_printf("\r\n");
     if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
       result = dumpFieldValue(self, fieldInfo, "");
       checkErrOK(result);

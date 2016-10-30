@@ -179,6 +179,7 @@ typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t 
 typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
 typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getNewCompMsgDataPtr_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgDispatcher {
   uint8_t id;
@@ -249,6 +250,7 @@ typedef struct compMsgDispatcher {
   initDispatcher_t initDispatcher;
   createMsgFromLines_t createMsgFromLines;
   setMsgValuesFromLines_t setMsgValuesFromLines;
+  getNewCompMsgDataPtr_t getNewCompMsgDataPtr;
 
   encryptMsg_t encryptMsg;
   decryptMsg_t decryptMsg;

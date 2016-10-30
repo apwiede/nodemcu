@@ -396,6 +396,33 @@ static uint8_t getMsgPtrFromMsgParts(compMsgDispatcher_t *self, msgParts_t *msgP
 
 #undef checkErrWithResetOK
 
+// ================================= getNewCompMsgDataPtr ====================================
+
+static uint8_t getNewCompMsgDataPtr(compMsgDispatcher_t *self) {
+  int firstFreeEntryId;
+  msgHeader2MsgPtr_t *newHeaderEntry;
+  uint8_t result;
+
+  if (self->numMsgHeaders >= self->maxMsgHeaders) {
+    if (self->maxMsgHeaders == 0) {
+      self->maxMsgHeaders = 4;
+      self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_zalloc((self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
+      checkAllocOK(self->msgHeader2MsgPtrs);
+    } else {
+      self->maxMsgHeaders += 2;
+      self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_realloc(self->msgHeader2MsgPtrs, (self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
+      checkAllocOK(self->msgHeader2MsgPtrs);
+    }
+  }
+  newHeaderEntry = &self->msgHeader2MsgPtrs[self->numMsgHeaders];
+  newHeaderEntry->headerLgth = 0;
+  newHeaderEntry->compMsgData = newCompMsgData();
+  newHeaderEntry->compMsgData->setDispatcher(newHeaderEntry->compMsgData, self);
+  self->compMsgData = newHeaderEntry->compMsgData;
+  self->numMsgHeaders++;
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= getFieldType ====================================
 
 static uint8_t getFieldType(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId) {
@@ -788,6 +815,8 @@ uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_
 
 static uint8_t initDispatcher(compMsgDispatcher_t *self) {
   uint8_t result;
+headerPart_t *hdr;
+uint8_t *handle;
 
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
@@ -801,6 +830,15 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self) {
   checkErrOK(result);
   result = compMsgWebsocketInit(self);
   checkErrOK(result);
+if (self->compMsgData == NULL) {
+result = self->getNewCompMsgDataPtr(self);
+checkErrOK(result);
+}
+result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 22272,19712, 0x4944, &hdr);
+checkErrOK(result);
+result = self->compMsgMsgDesc->createMsgFromHeaderPart(self, hdr, &handle);
+ets_printf("handle: %s result: %d\n", handle, result);
+checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }
 
@@ -857,6 +895,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
   compMsgDispatcher->createMsgFromLines = &createMsgFromLines;
   compMsgDispatcher->setMsgValuesFromLines = &setMsgValuesFromLines;
+  compMsgDispatcher->getNewCompMsgDataPtr = &getNewCompMsgDataPtr;
 
   compMsgDispatcher->encryptMsg = &encryptMsg;
   compMsgDispatcher->decryptMsg = &decryptMsg;
