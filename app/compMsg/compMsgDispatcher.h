@@ -135,15 +135,19 @@ typedef struct buildListMsgInfos {
 typedef struct websocketUserData websocketUserData_t;
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
-
+// Action stuff
 typedef uint8_t (* setActionEntry_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* runAction_t)(compMsgDispatcher_t *self, uint8_t *answerType);
 typedef uint8_t (* getActionMode_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode);
 typedef uint8_t (* fillMsgValue_t)(compMsgDispatcher_t *self, uint8_t *callbackName, uint8_t answerType, uint8_t fieldTypeId);
-typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 
-typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
+// Wifi stuff
+typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getScanInfoTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
+typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* setWifiValues_t)(compMsgDispatcher_t *self);
+
+// ModuleData stuff
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
@@ -152,34 +156,42 @@ typedef uint8_t (* websocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t 
 typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *payload, int size, int opcode);
 
+// Dispatcher stuff
+typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
+typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
+
 typedef uint8_t (* createDispatcher_t)(compMsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* createMsgFromLines_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type);
 typedef uint8_t (* setMsgValuesFromLines_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t numEntries, uint8_t *handle, uint8_t type);
-
-typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
-typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* buildListMsg_t)(compMsgDispatcher_t *self, size_t *totalLgth, uint8_t **totalData);
-
-typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
-typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
-typedef uint8_t (* prepareNotEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
-typedef uint8_t (* prepareEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
-typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts);
-
-typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
-
-typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
-typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
-
 typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
 typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
 typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
 typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
+typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
+
+typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
+
+// BuildMsg stuff
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* buildListMsg_t)(compMsgDispatcher_t *self, size_t *totalLgth, uint8_t **totalData);
+
+// Identify stuff
+typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
+typedef uint8_t (* prepareNotEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* prepareEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
+typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
+
+typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
+
+typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
+
+
+// MsgData stuff
 typedef uint8_t (* getNewCompMsgDataPtr_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts);
 
 typedef struct compMsgDispatcher {
   uint8_t id;
@@ -257,6 +269,10 @@ typedef struct compMsgDispatcher {
   toBase64_t toBase64;
   fromBase64_t fromBase64;
 
+  getScanInfoTableFieldValue_t getScanInfoTableFieldValue;
+  getWifiValue_t getWifiValue;
+  setWifiValues_t setWifiValues;
+
   websocketRunClientMode_t websocketRunClientMode;
   websocketRunAPMode_t websocketRunAPMode;
   websocketSendData_t websocketSendData;
@@ -271,7 +287,8 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self);
 uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self);
 uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self);
 uint8_t compMsgActionInit(compMsgDispatcher_t *self);
-uint8_t compMsgModuleDataValuesInit(compMsgDispatcher_t *self);
+uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self);
+uint8_t compMsgWifiInit(compMsgDispatcher_t *self);
 uint8_t compMsgWebsocketInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_DISPATCHER_H */

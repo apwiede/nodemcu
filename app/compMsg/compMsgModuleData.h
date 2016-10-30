@@ -151,6 +151,11 @@ typedef struct stationConfig {
   int16_t freqcal_val;
 } stationConfig_t;
 
+typedef struct compMsgModuleDataName2Value {
+  uint8_t *name;
+  uint8_t *value;
+} compMsgModuleDataName2Value_t;
+
 typedef struct compMsgModuleData {
   uint8_t MACAddr[6];
   uint8_t IPAddr[4];
@@ -171,7 +176,6 @@ typedef struct compMsgModuleData {
 
 typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
-typedef void (* getAPList_t)(compMsgData_t *self);
 
 typedef struct compMsgWifiData {
   uint8_t wifiOpMode;
