@@ -670,6 +670,176 @@ compMsgData->dumpMsg(compMsgData);
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= createMsgFromHeaderPart ====================================
+
+static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
+  uint8_t result;
+  int idx;
+  bool isEnd;
+  msgDescPart_t *msgDescPart;
+  msgValPart_t *msgValPart;
+
+  result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
+  checkErrOK(result);
+  result = self->compMsgData->createMsg(self->compMsgData, self->compMsgMsgDesc->numMsgDescParts, handle);
+  checkErrOK(result);
+  idx = 0;
+  while(idx < self->compMsgMsgDesc->numMsgDescParts) {
+    msgDescPart = &self->compMsgMsgDesc->msgDescParts[idx];
+    result = self->compMsgData->addField(self->compMsgData, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
+    checkErrOK(result);
+    idx++;
+  }
+
+ets_printf("heap4: %d\n", system_get_free_heap_size());
+  // runAction calls at the end buildMsg
+  self->resetBuildMsgInfos(self);
+  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
+  if (self->compMsgMsgDesc->prepareValuesCbName != NULL) {
+    uint8_t actionMode;
+    uint8_t type;
+
+    result = self->getActionMode(self, self->compMsgMsgDesc->prepareValuesCbName+1, &actionMode);
+    self->actionMode = actionMode;
+    checkErrOK(result);
+    result  = self->runAction(self, &type);
+    // runAction starts a call with a callback and returns here before the callback has been running!!
+    // when when coming here we are finished and the callback will do the work later on!
+ets_printf("runAction done\n");
+    return result;
+  } else {
+    result = self->buildMsg(self);
+#ifdef NOTDEF
+    result = setMsgValues(self);
+    checkErrOK(result);
+//ets_printf("§heap3: %d§", system_get_free_heap_size());
+    result = self->compMsgData->getMsgData(self->compMsgData, &data, &msgLgth);
+    checkErrOK(result);
+#endif
+    // FIXME !! here we need a call to send the (eventually encrypted) message!!
+  }
+
+
+#ifdef NOTDEF
+
+  result = self->compMsgData->initMsg(self->compMsgData);
+  checkErrOK(result);
+  os_sprintf(fileName, "CompVal%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
+  result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
+  checkErrOK(result);
+  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  uval = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)uval;
+  idx = 0;
+  while(idx < numEntries) {
+    result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    // fieldName
+    fieldNameStr = cp;
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    if (fieldNameStr[0] == '#') {
+ets_printf("keyValue field: %s\n", fieldNameStr);
+    } else {
+      result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR);
+      checkErrOK(result);
+      result = self->getFieldType(self, self->compMsgData, fieldNameId, &fieldTypeId);
+      checkErrOK(result);
+    }
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldValue
+    fieldValueStr = cp;
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    if (fieldValueStr[0] == '@') {
+      uint8_t type = 'X';
+      if (fieldNameStr[0] == '#') {
+ets_printf("value of keyValue: %s\n", fieldValueStr);
+      } else {
+        // call the callback function vor the field!!
+        result = self->fillMsgValue(self, fieldValueStr, type,  fieldTypeId);
+        checkErrOK(result);
+      }
+    } else {
+      if (fieldNameStr[0] == '#') {
+ets_printf("value of keyValue: %s\n", fieldValueStr);
+      } else {
+        numericValue = 0;
+        switch (fieldNameId) {
+        case COMP_MSG_SPEC_FIELD_DST:
+          numericValue = hdr->hdrFromPart;
+          fieldValueStr = NULL;
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+          break;
+        case COMP_MSG_SPEC_FIELD_SRC:
+          fieldValueStr = NULL;
+          numericValue = hdr->hdrToPart;
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+          break;
+        case COMP_MSG_SPEC_FIELD_CMD_KEY:
+          // check for u8CmdKey/u16CmdKey here
+          fieldValueStr = NULL;
+          numericValue = hdr->hdrU16CmdKey;
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+          break;
+        default:
+          switch (fieldTypeId) {
+          case DATA_VIEW_FIELD_UINT8_T:
+          case DATA_VIEW_FIELD_INT8_T:
+          case DATA_VIEW_FIELD_UINT16_T:
+          case DATA_VIEW_FIELD_INT16_T:
+          case DATA_VIEW_FIELD_UINT32_T:
+          case DATA_VIEW_FIELD_INT32_T:
+            {
+              uval = c_strtoul(fieldValueStr, &endPtr, 10);
+              if (endPtr == (char *)(ep-1)) {
+                numericValue = (int)uval;
+                fieldValueStr = NULL;
+              } else {
+                numericValue = 0;
+              }
+            }
+            break;
+          default:
+            numericValue = 0;
+            break;
+          }
+          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
+          checkErrOK(result);
+          break;
+        }
+      }
+    }
+    if (!isEnd) {
+      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    }
+    idx++;
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+  result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
+  checkErrOK(result);
+  result = self->compMsgData->setFieldValue(self->compMsgData, "@cmdKey", hdr->hdrU16CmdKey, NULL);
+  checkErrOK(result);
+  result = self->compMsgData->prepareMsg(self->compMsgData);
+  checkErrOK(result);
+self->compMsgData->dumpMsg(self->compMsgData);
+#endif
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= createMsgFromLines ====================================
 
 static uint8_t createMsgFromLines(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type) {
@@ -873,7 +1043,7 @@ checkErrOK(result);
 }
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
 checkErrOK(result);
-result = self->compMsgMsgDesc->createMsgFromHeaderPart(self, hdr, &handle);
+result = self->createMsgFromHeaderPart(self, hdr, &handle);
 ets_printf("handle: %s result: %d\n", handle, result);
 checkErrOK(result);
   return COMP_DISP_ERR_OK;
@@ -930,6 +1100,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->initDispatcher = &initDispatcher;
 
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
+  compMsgDispatcher->createMsgFromHeaderPart = &createMsgFromHeaderPart;
   compMsgDispatcher->createMsgFromLines = &createMsgFromLines;
   compMsgDispatcher->setMsgValuesFromLines = &setMsgValuesFromLines;
   compMsgDispatcher->getNewCompMsgDataPtr = &getNewCompMsgDataPtr;

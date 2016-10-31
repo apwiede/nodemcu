@@ -166,6 +166,7 @@ typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgPar
 
 typedef uint8_t (* createDispatcher_t)(compMsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* createMsgFromHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle);
 typedef uint8_t (* createMsgFromLines_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type);
 typedef uint8_t (* setMsgValuesFromLines_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t numEntries, uint8_t *handle, uint8_t type);
 typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
@@ -263,13 +264,14 @@ typedef struct compMsgDispatcher {
   updateModuleValues_t updateModuleValues;
   getModuleTableFieldValue_t getModuleTableFieldValue;
 
-  // MsgDesc
+  // Dispatcher
   resetHeaderInfos_t resetHeaderInfos;
   nextFittingEntry_t nextFittingEntry;
   handleReceivedPart_t handleReceivedPart;
   uartReceiveCb_t uartReceiveCb;
   createDispatcher_t createDispatcher;
   initDispatcher_t initDispatcher;
+  createMsgFromHeaderPart_t createMsgFromHeaderPart;
   createMsgFromLines_t createMsgFromLines;
   setMsgValuesFromLines_t setMsgValuesFromLines;
   getNewCompMsgDataPtr_t getNewCompMsgDataPtr;
