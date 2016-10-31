@@ -272,48 +272,80 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
   scanInfos = self->bssScanInfos;
   self->buildMsgInfos.numericValue = 0;
   self->buildMsgInfos.stringValue = NULL;
-    if (self->buildMsgInfos.tableRow > scanInfos->numScanInfos) {
-      return COMP_DISP_ERR_BAD_ROW;
-    }
-    scanInfo = &scanInfos->infos[self->buildMsgInfos.tableRow];
-    result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &fieldId);
+  if (self->buildMsgInfos.tableRow > scanInfos->numScanInfos) {
+    return COMP_DISP_ERR_BAD_ROW;
+  }
+  scanInfo = &scanInfos->infos[self->buildMsgInfos.tableRow];
+  result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &fieldId);
 //ets_printf("row: %d ssid: %s rssi: %d fieldName: %s fieldId: %d\n", self->buildMsgInfos.tableRow, scanInfo->ssid, scanInfo->rssi, self->buildMsgInfos.fieldNameStr, fieldId);
-    checkErrOK(result);
-    switch ((int)fieldId) {
-    case  BSS_INFO_BSSID:
-      break;
-    case  BSS_INFO_BSSID_STR:
-      break;
-    case  BSS_INFO_SSID:
-      self->buildMsgInfos.stringValue = scanInfo->ssid;
-      return COMP_DISP_ERR_OK;
-      break;
-    case  BSS_INFO_SSID_LEN:
-      break;
-    case  BSS_INFO_CHANNEL:
-      break;
-    case  BSS_INFO_RSSID:
-      self->buildMsgInfos.numericValue = scanInfo->rssi;
-      return COMP_DISP_ERR_OK;
-      break;
-    case  BSS_INFO_AUTH_MODE:
-      break;
-    case  BSS_INFO_IS_HIDDEN:
-      break;
-    case  BSS_INFO_FREQ_OFFSET:
-      break;
-    case  BSS_INFO_FREQ_CAL_VAL:
-      break;
-    }
+  checkErrOK(result);
+  switch ((int)fieldId) {
+  case  BSS_INFO_BSSID:
+    break;
+  case  BSS_INFO_BSSID_STR:
+    break;
+  case  BSS_INFO_SSID:
+    self->buildMsgInfos.stringValue = scanInfo->ssid;
+    return COMP_DISP_ERR_OK;
+    break;
+  case  BSS_INFO_SSID_LEN:
+    break;
+  case  BSS_INFO_CHANNEL:
+    break;
+  case  BSS_INFO_RSSID:
+    self->buildMsgInfos.numericValue = scanInfo->rssi;
+    return COMP_DISP_ERR_OK;
+    break;
+  case  BSS_INFO_AUTH_MODE:
+    break;
+  case  BSS_INFO_IS_HIDDEN:
+    break;
+  case  BSS_INFO_FREQ_OFFSET:
+    break;
+  case  BSS_INFO_FREQ_CAL_VAL:
+    break;
+  }
   return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 
-// ================================= getWifiKeyValues ====================================
+// ================================= getWifiKeyValue ====================================
 
-static uint8_t getWifiKeyValues(compMsgDispatcher_t *self, uint8_t *key) {
+static uint8_t getWifiKeyValue(compMsgDispatcher_t *self) {
   uint8_t result;
+  uint8_t bssInfoType;
 
-  return COMP_DISP_ERR_OK;
+  result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &bssInfoType);
+ets_printf("getWifiKeyValue: %s %d %d\n", self->buildMsgInfos.fieldNameStr, bssInfoType, result);
+  checkErrOK(result);
+  switch ((int)bssInfoType) {
+  case  BSS_INFO_BSSID:
+    break;
+  case  BSS_INFO_BSSID_STR:
+    break;
+  case  BSS_INFO_SSID:
+    self->buildMsgInfos.numericValue = compMsgWifiData.key_ssid;
+    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.ssidSize;
+    return COMP_DISP_ERR_OK;
+    break;
+  case  BSS_INFO_SSID_LEN:
+    break;
+  case  BSS_INFO_CHANNEL:
+    break;
+  case  BSS_INFO_RSSID:
+    self->buildMsgInfos.numericValue = compMsgWifiData.key_rssi;
+    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.rssiSize;
+    return COMP_DISP_ERR_OK;
+    break;
+  case  BSS_INFO_AUTH_MODE:
+    break;
+  case  BSS_INFO_IS_HIDDEN:
+    break;
+  case  BSS_INFO_FREQ_OFFSET:
+    break;
+  case  BSS_INFO_FREQ_CAL_VAL:
+    break;
+  }
+  return COMP_DISP_ERR_FIELD_NOT_FOUND;
 }
 
 // ================================= getWifiValue ====================================
@@ -378,7 +410,8 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->getScanInfoTableFieldValue = &getScanInfoTableFieldValue;
   self->getWifiValue = &getWifiValue;
   self->setWifiValues = &setWifiValues;
-  self->getWifiKeyValues = &getWifiKeyValues;
+  self->getWifiKeyValue = &getWifiKeyValue;
+  self->bssStr2BssInfoId = &bssStr2BssInfoId;
 
   bssScanInfos.compMsgDispatcher = self;
   self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);

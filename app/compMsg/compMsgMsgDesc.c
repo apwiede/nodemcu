@@ -1104,6 +1104,8 @@ self->compMsgMsgDesc->dumpMsgDescPart(self->compMsgMsgDesc, msgDescPart);
     checkAllocOK(msgValPart->fieldNameStr);
     c_memcpy(msgValPart->fieldNameStr, fieldNameStr, c_strlen(fieldNameStr));
     checkIsEnd(isEnd);
+    result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldNameStr, &msgValPart->fieldNameId, COMP_MSG_INCR);
+    checkErrOK(result);
     cp = ep;
 
     // fieldValue
@@ -1128,80 +1130,6 @@ ets_printf("heap2: %d\n", system_get_free_heap_size());
   return COMP_MSG_DESC_ERR_OK;
 }
 
-// ================================= getFieldInfoFromLine ====================================
-
-static uint8_t getFieldInfoFromLine(compMsgDispatcher_t *self) {
-  int idx;
-  int result;
-  unsigned long uval;
-  uint8_t *buffer;
-  uint8_t*cp;
-  uint8_t*ep;
-  char *endPtr;
-  uint8_t lgth;
-  compMsgDataView_t *dataView;
-  bool isEnd;
-
-  dataView = self->compMsgData->compMsgDataView;
-  buffer = self->buildMsgInfos.buf;
-  self->buildMsgInfos.numericValue = 0;
-  self->buildMsgInfos.stringValue = NULL;
-  result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
-  checkErrOK(result);
-  if (lgth == 0) {
-    return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
-  }
-  buffer[lgth] = 0;
-  cp = buffer;
-  self->buildMsgInfos.fieldNameStr = cp;
-
-  // fieldName
-  result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
-  checkErrOK(result);
-  if (self->buildMsgInfos.fieldNameStr[0] != '#') {
-    result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, self->buildMsgInfos.fieldNameStr, &self->buildMsgInfos.fieldNameId, COMP_MSG_NO_INCR);
-    checkErrOK(result);
-    result = self->getFieldType(self, self->compMsgData, self->buildMsgInfos.fieldNameId, &self->buildMsgInfos.fieldTypeId);
-    checkErrOK(result);
-  }
-  checkIsEnd(isEnd);
-  cp = ep;
-
-  // fieldValue
-  self->buildMsgInfos.fieldValueStr = cp;
-  result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
-  checkErrOK(result);
-  if (self->buildMsgInfos.fieldNameStr[0] == '#') {
-  } else {
-    if (self->buildMsgInfos.fieldValueStr[0] != '@') {
-      switch (self->buildMsgInfos.fieldTypeId) {
-      case DATA_VIEW_FIELD_UINT8_T:
-      case DATA_VIEW_FIELD_INT8_T:
-      case DATA_VIEW_FIELD_UINT16_T:
-      case DATA_VIEW_FIELD_INT16_T:
-      case DATA_VIEW_FIELD_UINT32_T:
-      case DATA_VIEW_FIELD_INT32_T:
-        {
-          uval = c_strtoul(self->buildMsgInfos.fieldValueStr, &endPtr, 10);
-          if (endPtr == (char *)(ep-1)) {
-            self->buildMsgInfos.numericValue = (int)uval;
-            self->buildMsgInfos.stringValue = NULL;
-          } else {
-            self->buildMsgInfos.numericValue = 0;
-            self->buildMsgInfos.stringValue = self->buildMsgInfos.fieldValueStr;
-          }
-        }
-        break;
-      default:
-        self->buildMsgInfos.numericValue = 0;
-        self->buildMsgInfos.stringValue = self->buildMsgInfos.fieldValueStr;
-        break;
-      }
-    }
-  }
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getWifiKeyValueKeys ====================================
 
 static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t *compMsgWifiData) {
@@ -1222,6 +1150,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   uint8_t*cp;
   uint8_t*ep;
   bool isEnd;
+  uint8_t bssInfoType;
 
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, "CompMsgKeyValueKeys.txt", "r");
   checkErrOK(result);
@@ -1255,6 +1184,39 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     fieldValueStr = cp;
     result = self->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
     checkErrOK(result);
+    result = self->bssStr2BssInfoId(fieldNameStr + c_strlen("@key_"), &bssInfoType);
+ets_printf("bssInfoType: %d result: %s\n", bssInfoType, result);
+    checkErrOK(result);
+    switch (bssInfoType) {
+    case BSS_INFO_BSSID:
+      compMsgWifiData->key_bssid = (uint16_t)uval;
+      break;
+    case BSS_INFO_SSID:
+      compMsgWifiData->key_ssid = (uint16_t)uval;
+      break;
+    case BSS_INFO_SSID_LEN:
+      compMsgWifiData->key_ssid_len = (uint16_t)uval;
+      break;
+    case BSS_INFO_CHANNEL:
+      compMsgWifiData->key_channel = (uint16_t)uval;
+      break;
+    case BSS_INFO_RSSID:
+      compMsgWifiData->key_rssi = (uint16_t)uval;
+      break;
+    case BSS_INFO_AUTH_MODE:
+      compMsgWifiData->key_authmode = (uint16_t)uval;
+      break;
+    case BSS_INFO_IS_HIDDEN:
+      compMsgWifiData->key_freq_offset = (uint16_t)uval;
+      break;
+    case BSS_INFO_FREQ_OFFSET:
+      compMsgWifiData->key_freqcal_val = (uint16_t)uval;
+      break;
+    case BSS_INFO_FREQ_CAL_VAL:
+      compMsgWifiData->key_is_hidden = (uint16_t)uval;
+      break;
+    }
+#ifdef NOTDEF
     if (strcmp("@key_ssid", fieldNameStr) == 0) {
       compMsgWifiData->key_ssid = (uint16_t)uval;
     }
@@ -1282,6 +1244,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     if (strcmp("@key_is_hidden", fieldNameStr) == 0) {
       compMsgWifiData->key_is_hidden = (uint16_t)uval;
     }
+#endif
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }
@@ -1327,7 +1290,6 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->getMsgPartsFromHeaderPart = &getMsgPartsFromHeaderPart;
   compMsgMsgDesc->getHeaderFromUniqueFields = &getHeaderFromUniqueFields;
   compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;
-  compMsgMsgDesc->getFieldInfoFromLine = &getFieldInfoFromLine;
 
   return compMsgMsgDesc;
 }

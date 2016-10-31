@@ -287,8 +287,8 @@ static uint8_t getTableValue(compMsgDispatcher_t *self) {
 static uint8_t getWifiKeyValues(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("getWifiKeyValues called: key: %s\n", self->buildMsgInfos.key);
-  result = self->getWifiKeyValues(self, self->buildMsgInfos.key);
+ets_printf("getWifiKeyValues called: key: %s\n", self->buildMsgInfos.fieldNameStr);
+  result = self->getWifiKeyValue(self);
   return result;
 }
 

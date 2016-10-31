@@ -193,7 +193,6 @@ typedef uint8_t (*readActions_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* readHeadersAndSetFlags_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* getHeaderFromUniqueFields_t)(compMsgDispatcher_t *self, uint16_t dst, uint16_t src, uint16_t cmdKey, headerPart_t **hdr);
 typedef uint8_t (* getMsgPartsFromHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle);
-typedef uint8_t (* getFieldInfoFromLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiKeyValueKeys_t)(compMsgDispatcher_t *self, compMsgWifiData_t *compMsgWifiData);
 typedef uint8_t (* dumpMsgDescPart_t)(compMsgMsgDesc_t *compMsgMsgDesc, msgDescPart_t *msgDescPart);
 typedef uint8_t (* dumpMsgValPart_t)(compMsgMsgDesc_t *compMsgMsgDesc, msgValPart_t *msgValPart);
@@ -231,7 +230,6 @@ typedef struct compMsgMsgDesc {
   resetMsgDescParts_t resetMsgDescParts;
   resetMsgValParts_t resetMsgValParts;
   getMsgPartsFromHeaderPart_t getMsgPartsFromHeaderPart;
-  getFieldInfoFromLine_t getFieldInfoFromLine;
   getWifiKeyValueKeys_t getWifiKeyValueKeys;
 
 } compMsgMsgDesc_t;
