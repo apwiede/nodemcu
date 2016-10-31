@@ -451,10 +451,138 @@ static uint8_t getFieldType(compMsgDispatcher_t *self, compMsgData_t *compMsgDat
   return COMP_DISP_ERR_FIELD_NOT_FOUND;
 }
 
+// ================================= resetBuildMsgInfos ====================================
+
+static uint8_t resetBuildMsgInfos(compMsgDispatcher_t *self) {
+  self->buildMsgInfos.numEntries = 0;
+  self->buildMsgInfos.type = 0;
+  self->buildMsgInfos.parts = NULL;
+  self->buildMsgInfos.numRows = 0;
+  self->buildMsgInfos.u8CmdKey = 0;
+  self->buildMsgInfos.u16CmdKey = 0;
+  self->buildMsgInfos.partsFlags = 0;
+  self->buildMsgInfos.fieldNameStr = NULL;
+  self->buildMsgInfos.fieldValueStr = NULL;
+  self->buildMsgInfos.fieldNameId = 0;
+  self->buildMsgInfos.fieldTypeId = 0;
+  self->buildMsgInfos.tableRow = 0;
+  self->buildMsgInfos.tableCol = 0;
+  self->buildMsgInfos.numericValue = 0;
+  self->buildMsgInfos.stringValue = NULL;
+  self->buildMsgInfos.buf[0] = '\0';
+  self->buildMsgInfos.key[0] = '\0';
+  self->buildMsgInfos.actionName = NULL;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= setMsgFieldValue ====================================
+
+static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows, uint8_t *numTableRowFields, bool *nextFieldEntry, uint8_t type) {
+  uint8_t result;
+  int currTableRow;
+  int currTableCol;
+  uint8_t *fieldNameStr;
+  uint8_t *stringValue;
+  int numericValue;
+  compMsgData_t *compMsgData;
+
+  compMsgData = self->compMsgData;
+  *nextFieldEntry = false;
+  if (self->buildMsgInfos.fieldValueStr[0] == '@') {
+    // call the callback function for the field!!
+    if (*numTableRows > 0) {
+      currTableRow = 0;
+      currTableCol = 0;
+      while (currTableRow < *numTableRows) {
+        self->buildMsgInfos.tableRow = currTableRow;
+        self->buildMsgInfos.tableCol = currTableCol;
+        result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
+        checkErrOK(result);
+        result = compMsgData->setTableFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, currTableRow, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+        currTableRow++;
+      }
+      currTableRow = 0;
+      currTableCol++;
+      if (currTableCol > *numTableRowFields) {
+        // table rows done
+        *numTableRows = 0;
+        *numTableRowFields = 0;
+        currTableRow = 0;
+        currTableCol = 0;
+      }
+    } else {
+      result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
+      checkErrOK(result);
+      result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+      currTableRow++;
+    }
+  } else {
+    fieldNameStr = self->buildMsgInfos.fieldNameStr;
+    stringValue = self->buildMsgInfos.stringValue;
+    numericValue = self->buildMsgInfos.numericValue;
+    switch (self->buildMsgInfos.fieldNameId) {
+      case COMP_MSG_SPEC_FIELD_DST:
+        result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        break;
+      case COMP_MSG_SPEC_FIELD_SRC:
+        result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        break;
+      case COMP_MSG_SPEC_FIELD_CMD_KEY:
+        // check for u8CmdKey/u16CmdKey here
+ets_printf("cmdKey: 0x%04x\n", self->received.u16CmdKey);
+        self->buildMsgInfos.numericValue = self->received.u16CmdKey;
+        self->buildMsgInfos.stringValue = NULL;
+        result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        break;
+      default:
+        result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        break;
+    }
+    checkErrOK(result);
+    *nextFieldEntry = true;
+  }
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= setMsgKeyValue ====================================
+
+static uint8_t setMsgKeyValues(compMsgDispatcher_t *self, uint8_t numEntries, uint8_t *entryIdx, uint8_t type, size_t *extraOffset) {
+  uint8_t result;
+  uint8_t actionMode;
+
+  self->buildMsgInfos.actionName = self->buildMsgInfos.fieldValueStr+1;
+  c_memcpy(self->buildMsgInfos.key, self->buildMsgInfos.fieldNameStr, c_strlen(self->buildMsgInfos.fieldNameStr));
+  result = self->getActionMode(self, self->buildMsgInfos.fieldValueStr+1, &actionMode);
+  self->actionMode = actionMode;
+  checkErrOK(result);
+  result  = self->runAction(self, &type);
+  checkErrOK(result);
+  *extraOffset += 11;
+  while (*entryIdx < numEntries) {
+    result = self->compMsgMsgDesc->getFieldInfoFromLine(self);
+    checkErrOK(result);
+    if (self->buildMsgInfos.fieldNameStr[0] != '#') {
+      // end of key value pairs
+      return COMP_MSG_ERR_OK;
+    }
+    (*entryIdx)++;
+    self->buildMsgInfos.actionName = self->buildMsgInfos.fieldValueStr+1;
+    c_memcpy(self->buildMsgInfos.key, self->buildMsgInfos.fieldNameStr, c_strlen(self->buildMsgInfos.fieldNameStr));
+    result = self->getActionMode(self, self->buildMsgInfos.fieldValueStr+1, &actionMode);
+    self->actionMode = actionMode;
+    checkErrOK(result);
+    result  = self->runAction(self, &type);
+    checkErrOK(result);
+    *extraOffset += 11;
+  }
+  return result;
+}
+
 // ================================= setMsgValuesFromLines ====================================
 
 static uint8_t setMsgValuesFromLines(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t numEntries, uint8_t *handle, uint8_t type) {
-  int idx;
+  uint8_t entryIdx;
+  uint8_t startEntryIdx;
   int fieldIdx;
   int tableFieldIdx;
   uint8_t fieldLgth;
@@ -466,119 +594,79 @@ static uint8_t setMsgValuesFromLines(compMsgDispatcher_t *self, compMsgData_t *c
   compMsgField_t *fieldInfo;
   uint8_t numTableRows;
   uint8_t numTableRowFields;
-  int currTableRow;
-  int currTableCol;
   int msgCmdKey;
+  bool nextFieldEntry;
+  bool fixOffset;
+  size_t extraOffset;
 
-  idx = 0;
+  entryIdx = 0;
   dataView = compMsgData->compMsgDataView;
   // loop over MSG Fields, to check if we eventaully have table rows!!
   result = self->compMsgMsgDesc->getFieldInfoFromLine(self);
   checkErrOK(result);
-  idx++;
+  entryIdx++;
   fieldIdx = 0;
+  fixOffset = false;
+  extraOffset = 0;
   tableFieldIdx = 0;
   numTableRows = 0;
   numTableRowFields = 0;
-  currTableRow = 0;
-  currTableCol = 0;
   compMsgData = self->compMsgData;
 ets_printf("setMsgValuesFromLines: numFields:%d numRows: %d\n", compMsgData->numFields, self->buildMsgInfos.numRows);
-  while ((fieldIdx < compMsgData->numFields) && (idx <= numEntries)) {
-//ets_printf("setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d idx: %d numFields:%d \n", fieldIdx, tableFieldIdx, idx, compMsgData->numFields);
-//ets_printf("fieldIdx: %d idx: %d numtableRows: %d\n", fieldIdx, idx, numTableRows);
+  while ((fieldIdx < compMsgData->numFields) && (entryIdx <= numEntries)) {
+//ets_printf("setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData->numFields);
+//ets_printf("fieldIdx: %d entryIdx: %d numtableRows: %d\n", fieldIdx, entryIdx, numTableRows);
     if (numTableRows > 0) {
       fieldInfo = &compMsgData->tableFields[tableFieldIdx++];
     } else {
       fieldInfo = &compMsgData->fields[fieldIdx++];
     }
 //ets_printf("fieldNameId: %d numtabrows: %d\n", fieldInfo->fieldNameId, numTableRows);
-ets_printf("fieldNameId: %d lgth: %d\n", fieldInfo->fieldNameId, fieldInfo->fieldLgth);
+    if (fixOffset) {
+ets_printf("fixOffset: fieldIdx: %d extraOffset: %d\n", fieldIdx, extraOffset);
+      fieldInfo->fieldOffset += extraOffset;
+    }
     switch (fieldInfo->fieldNameId) {
     case COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
       numTableRows = compMsgData->numTableRows;
       numTableRowFields = compMsgData->numTableRowFields;
-      currTableRow = 0;
-      currTableCol = 0;
       break;
     case COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES:
-ets_printf("NUM_KEY_VALUES idx: %d\n", idx);
-ets_printf("value: %s %d %s\n", self->buildMsgInfos.fieldValueStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue == NULL ? "nil" : (char *)self->buildMsgInfos.stringValue);
-ets_printf("name: %s\n", self->buildMsgInfos.fieldNameStr);
-
-      while (idx < numEntries) {
-        result = self->compMsgMsgDesc->getFieldInfoFromLine(self);
-ets_printf("name: %s\n", self->buildMsgInfos.fieldNameStr);
-ets_printf("value3: %s %d %s\n", self->buildMsgInfos.fieldValueStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue == NULL ? "nil" : (char *)self->buildMsgInfos.stringValue);
-        checkErrOK(result);
+      startEntryIdx = entryIdx;
+      compMsgData->numValueFields = self->buildMsgInfos.numRows;
+      result = self->setMsgKeyValues(self, numEntries, &entryIdx, type, &extraOffset);
+      checkErrOK(result);
+      result = compMsgData->setFieldValue(compMsgData, "@numKeyValues", (int)(entryIdx-startEntryIdx+1), NULL);
+      checkErrOK(result);
+      if ((entryIdx-startEntryIdx) > 0) {
+        compMsgData->totalLgth += extraOffset;
+        compMsgData->cmdLgth += extraOffset;
+        fixOffset = true;
       }
       break;
     default:
-//ets_printf("default  fieldNameId: %d buildMsgInfo fieldNameId: %d\n", fieldInfo->fieldNameId, self->buildMsgInfos.fieldNameId);
-ets_printf("default  fieldNameId: %d buildMsgInfo fieldNameId: %d\n", fieldInfo->fieldNameId, self->buildMsgInfos.fieldNameId);
+//ets_printf("default fieldNameId: %d buildMsgInfo fieldNameId: %d\n", fieldInfo->fieldNameId, self->buildMsgInfos.fieldNameId);
       if (fieldInfo->fieldNameId == self->buildMsgInfos.fieldNameId) {
-        if (self->buildMsgInfos.fieldValueStr[0] == '@') {
-          // call the callback function for the field!!
-          if (numTableRows > 0) {
-            while (currTableRow < numTableRows) {
-              self->buildMsgInfos.tableRow = currTableRow;
-              self->buildMsgInfos.tableCol = currTableCol;
-              result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
-              checkErrOK(result);
-              result = compMsgData->setTableFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, currTableRow, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
-              currTableRow++;
-            }
-            currTableRow = 0;
-            currTableCol++;
-            if (currTableCol > numTableRowFields) {
-              // tabel rows done
-              numTableRows = 0;
-              numTableRowFields = 0;
-              currTableRow = 0;
-              currTableCol = 0;
-            }
-          } else {
-            result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
-            checkErrOK(result);
-            result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
-            currTableRow++;
-          }
-        } else {
-          switch (self->buildMsgInfos.fieldNameId) {
-            case COMP_MSG_SPEC_FIELD_DST:
-              result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
-              break;
-            case COMP_MSG_SPEC_FIELD_SRC:
-              result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
-              break;
-            case COMP_MSG_SPEC_FIELD_CMD_KEY:
-              // check for u8CmdKey/u16CmdKey here
-ets_printf("cmdKey: 0x%04x\n", self->received.u16CmdKey);
-              self->buildMsgInfos.numericValue = self->received.u16CmdKey;
-              self->buildMsgInfos.stringValue = NULL;
-              result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
-              break;
-            default:
-              result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
-              break;
-          }
-          checkErrOK(result);
-          if (idx < numEntries) {
+        result = self->setMsgFieldValue(self, &numTableRows, &numTableRowFields, &nextFieldEntry, type);
+        checkErrOK(result);
+        if (nextFieldEntry) {
+          if (entryIdx < numEntries) {
             result = self->compMsgMsgDesc->getFieldInfoFromLine(self);
-ets_printf("value2: %s %d %s\n", self->buildMsgInfos.fieldValueStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue == NULL ? "nil" : (char *)self->buildMsgInfos.stringValue);
             checkErrOK(result);
           }
-          idx++;
+          entryIdx++;
         }
       }
       break;
     }
   }
+ets_printf("u16cmdKey: 0x%04x\n", self->buildMsgInfos.u16CmdKey);
   msgCmdKey = (self->buildMsgInfos.u16CmdKey & 0xFF00) | type & 0xFF;
   result = compMsgData->setFieldValue(compMsgData, "@cmdKey", msgCmdKey, NULL);
   checkErrOK(result);
   compMsgData->prepareMsg(compMsgData);
-//compMsgData->dumpMsg(compMsgData);
+  checkErrOK(result);
+compMsgData->dumpMsg(compMsgData);
   return COMP_DISP_ERR_OK;
 }
 
@@ -850,6 +938,9 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->decryptMsg = &decryptMsg;
   compMsgDispatcher->toBase64 = &toBase64;
   compMsgDispatcher->fromBase64 = &fromBase64;
+  compMsgDispatcher->resetBuildMsgInfos =&resetBuildMsgInfos;
+  compMsgDispatcher->setMsgFieldValue = &setMsgFieldValue;
+  compMsgDispatcher->setMsgKeyValues = &setMsgKeyValues;
 
   compMsgDispatcher->dumpMsgParts = &dumpMsgParts;
 

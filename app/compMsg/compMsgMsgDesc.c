@@ -343,6 +343,7 @@ static uint8_t getHeaderFieldsFromLine(compMsgDataView_t *dataView, msgHeaderInf
   cp = myStr;
   result = getIntFromLine(cp, &uval, ep, &isEnd);
   checkErrOK(result);
+ets_printf("desc: headerLth: %d\n", uval);
   hdrInfos->headerLgth = (uint8_t)uval;
   checkIsEnd(isEnd);
   cp = *ep;
@@ -980,6 +981,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   checkErrOK(result);
 
   // runAction calls at the end buildMsg
+  self->resetBuildMsgInfos(self);
   self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
   if (prepareValuesCbName != NULL) {
     uint8_t actionMode;

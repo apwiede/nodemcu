@@ -317,7 +317,7 @@ static uint8_t setFieldValue(compMsgData_t *self, const uint8_t *fieldName, int 
   int numEntries;
   int result;
 
-//ets_printf("setFieldValue: fieldName: %s numericValue: %d stringValue: %s flags: 0x%08x\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, self->flags & COMP_MSG_IS_INITTED);
+ets_printf("setFieldValue: fieldName: %s numericValue: %d stringValue: %s flags: 0x%08x\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, self->flags & COMP_MSG_IS_INITTED);
   if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
@@ -434,6 +434,7 @@ static uint8_t prepareMsg(compMsgData_t *self) {
   if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
+ets_printf("prepareMsg\n");
   // create the values which are different for each message!!
   numEntries = self->numFields;
   idx = 0;
@@ -452,11 +453,14 @@ static uint8_t prepareMsg(compMsgData_t *self) {
         break;
       case COMP_MSG_SPEC_FIELD_HDR_FILLER:
       case COMP_MSG_SPEC_FIELD_FILLER:
+ets_printf("fillers\n");
         result = self->compMsgDataView->setFiller(self->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
+ets_printf("fillers done\n");
         break;
       case COMP_MSG_SPEC_FIELD_CRC:
+ets_printf("crc\n");
         headerLgth = 0;
         lgth = self->cmdLgth-fieldInfo->fieldLgth + self->headerLgth;
         if (self->flags & COMP_MSG_CRC_USE_HEADER_LGTH) {
@@ -466,6 +470,7 @@ static uint8_t prepareMsg(compMsgData_t *self) {
         result = self->compMsgDataView->setCrc(self->compMsgDataView, fieldInfo, headerLgth, lgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
+ets_printf("crc done\n");
         break;
     }
     idx++;
@@ -510,9 +515,6 @@ static uint8_t initMsg(compMsgData_t *self) {
       case COMP_MSG_SPEC_FIELD_HDR_FILLER:
         self->headerLgth += fieldInfo->fieldLgth;
         self->totalLgth = self->fieldOffset + fieldInfo->fieldLgth;
-        break;
-      case COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES:
-ets_printf("initMsg COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES\n");
         break;
       case COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS:
         row = 0;
@@ -901,6 +903,30 @@ static uint8_t dumpKeyValueFields(compMsgData_t *self, size_t offset) {
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= dumpFieldInfo ====================================
+
+static uint8_t dumpFieldInfo(compMsgData_t *self, compMsgField_t *fieldInfo) {
+  int idx;
+  int result;
+  uint8_t *fieldTypeStr;
+  uint8_t *fieldNameStr;
+
+  result = self->compMsgDataView->dataView->getFieldTypeStrFromId(self->compMsgDataView->dataView, fieldInfo->fieldTypeId, &fieldTypeStr);
+  checkErrOK(result);
+  result = self->compMsgDataView->getFieldNameStrFromId(self->compMsgDataView, fieldInfo->fieldNameId, &fieldNameStr);
+  checkErrOK(result);
+  ets_printf(" fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d flags: ", fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+  if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
+    ets_printf(" COMP_MSG_FIELD_IS_SET");
+  }
+  if (fieldInfo->fieldFlags & COMP_MSG_KEY_VALUE_FIELD) {
+    ets_printf(" COMP_MSG_KEY_VALUE_FIELD");
+  }
+  ets_printf("\r\n");
+  ets_printf(" fieldNameId: %.5d fieldTypeId: %.5d fieldKey: 0x%04x %d\r\n", fieldInfo->fieldNameId, fieldInfo->fieldTypeId, fieldInfo->fieldKey, fieldInfo->fieldKey);
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= dumpMsg ====================================
 
 static uint8_t dumpMsg(compMsgData_t *self) {
@@ -947,19 +973,30 @@ static uint8_t dumpMsg(compMsgData_t *self) {
     result = self->compMsgDataView->getFieldNameStrFromId(self->compMsgDataView, fieldInfo->fieldNameId, &fieldNameStr);
     checkErrOK(result);
     if (c_strcmp(fieldNameStr, "@tablerows") == 0) {
-      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, self->numTableRows);
+      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, self->numTableRows, fieldInfo->fieldOffset);
       idx++;
       continue;
     }
     if (c_strcmp(fieldNameStr, "@tablerowfields") == 0) {
-      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, self->numRowFields);
+      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, self->numRowFields, fieldInfo->fieldOffset);
       result = dumpTableRowFields(self);
       checkErrOK(result);
       idx++;
       continue;
     }
     if (c_strcmp(fieldNameStr, "@numKeyValues") == 0) {
-      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d\r\n", idx, fieldNameStr, fieldTypeStr, self->numValueFields);
+      ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %.5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
+        ets_printf(" COMP_MSG_FIELD_IS_SET");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_KEY_VALUE_FIELD) {
+        ets_printf(" COMP_MSG_KEY_VALUE_FIELD");
+      }
+      ets_printf("\r\n");
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
+        result = dumpFieldValue(self, fieldInfo, "");
+        checkErrOK(result);
+      }
       result = dumpKeyValueFields(self, fieldInfo->fieldOffset + fieldInfo->fieldLgth);
       checkErrOK(result);
       idx++;
@@ -1169,6 +1206,7 @@ compMsgData_t *newCompMsgData(void) {
   compMsgData->dumpFieldValue = &dumpFieldValue;
   compMsgData->dumpTableRowFields = &dumpTableRowFields;
   compMsgData->dumpKeyValueFields = &dumpKeyValueFields;
+  compMsgData->dumpFieldInfo = &dumpFieldInfo;
   compMsgData->dumpMsg = &dumpMsg;
   compMsgData->initMsg = &initMsg;
   compMsgData->prepareMsg = &prepareMsg;

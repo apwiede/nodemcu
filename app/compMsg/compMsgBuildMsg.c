@@ -173,15 +173,12 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   int src;
   int dst;
 
-ets_printf("buildMsg has been called, we finish here temporarely!\n");
-  self->buildMsgInfos.numRows = self->bssScanInfos->numScanInfos; // FIXME shoulbd be moved to bssScanInfoCb!!!
-// FIXME that is to early for keyValue messages!!
   result = self->compMsgData->initMsg(self->compMsgData);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
   result = setMsgValues(self);
-ets_printf("buildMsg setMsgValues has been called, we finish here temporarely!\n");
+ets_printf("buildMsg setMsgValues has been called, we finish here temporarely! result: %d\n", result);
   checkErrOK(result);
-return COMP_MSG_ERR_OK;
+return result;
   result = self->compMsgData->getFieldValue(self->compMsgData, "@dst", &dst, &stringValue);
   checkErrOK(result);
   self->buildListMsgInfos.dst = dst;

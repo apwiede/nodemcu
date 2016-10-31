@@ -116,6 +116,8 @@ typedef struct buildMsgInfos {
   int numericValue;
   uint8_t *stringValue;
   uint8_t buf[100];
+  uint8_t key[50];
+  uint8_t *actionName;
 } buildMsgInfos_t;
 
 typedef struct buildListMsgInfos {
@@ -147,6 +149,7 @@ typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getScanInfoTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setWifiValues_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getWifiKeyValues_t)(compMsgDispatcher_t *self, uint8_t *key);
 
 // ModuleData stuff
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
@@ -170,7 +173,9 @@ typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t 
 typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
 typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
 typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
-
+typedef uint8_t (* resetBuildMsgInfos_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t *numTableRows, uint8_t *numTableRowFields, bool *nextFieldEntry, uint8_t type);
+typedef uint8_t (* setMsgKeyValues_t)(compMsgDispatcher_t *self, uint8_t numEntries, uint8_t *entryIdx, uint8_t type, size_t *extraOffset);
 typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
 
 // BuildMsg stuff
@@ -236,12 +241,14 @@ typedef struct compMsgDispatcher {
 
   typeRSendAnswer_t typeRSendAnswer;
 
+  // Action
   setActionEntry_t setActionEntry;
   runAction_t runAction;
   getActionMode_t getActionMode;
   fillMsgValue_t fillMsgValue;
   getBssScanInfo_t getBssScanInfo;
 
+  // BuildMsg
   buildMsg_t buildMsg;
   buildListMsg_t buildListMsg;
   setMsgValues_t setMsgValues;
@@ -250,11 +257,13 @@ typedef struct compMsgDispatcher {
   prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
   prepareEncryptedAnswer_t prepareEncryptedAnswer;
 
+  // ModuleData
   getModuleValue_t getModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;
   getModuleTableFieldValue_t getModuleTableFieldValue;
 
+  // MsgDesc
   resetHeaderInfos_t resetHeaderInfos;
   nextFittingEntry_t nextFittingEntry;
   handleReceivedPart_t handleReceivedPart;
@@ -265,15 +274,20 @@ typedef struct compMsgDispatcher {
   setMsgValuesFromLines_t setMsgValuesFromLines;
   getNewCompMsgDataPtr_t getNewCompMsgDataPtr;
 
+  // dispatcher
   encryptMsg_t encryptMsg;
   decryptMsg_t decryptMsg;
   toBase64_t toBase64;
   fromBase64_t fromBase64;
+  resetBuildMsgInfos_t resetBuildMsgInfos;
+  setMsgFieldValue_t setMsgFieldValue;
+  setMsgKeyValues_t setMsgKeyValues;
 
+  // wifi
   getScanInfoTableFieldValue_t getScanInfoTableFieldValue;
   getWifiValue_t getWifiValue;
   setWifiValues_t setWifiValues;
-
+  getWifiKeyValues_t getWifiKeyValues;
   websocketRunClientMode_t websocketRunClientMode;
   websocketRunAPMode_t websocketRunAPMode;
   websocketSendData_t websocketSendData;

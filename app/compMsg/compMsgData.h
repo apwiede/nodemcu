@@ -90,6 +90,7 @@ typedef uint8_t (* setTableFieldValue_t)(compMsgData_t *self, const uint8_t *fie
 typedef uint8_t (* dumpFieldValue_t)(compMsgData_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2);
 typedef uint8_t (* dumpTableRowFields_t)(compMsgData_t *self);
 typedef uint8_t (* dumpKeyValueFields_t)(compMsgData_t *self, size_t offset);
+typedef uint8_t (* dumpFieldInfo_t)(compMsgData_t *self, compMsgField_t *fieldInfo);
 typedef uint8_t (* dumpMsg_t)(compMsgData_t *self);
 typedef uint8_t (* initMsg_t)(compMsgData_t *self);
 typedef uint8_t (* prepareMsg_t)(compMsgData_t *self);
@@ -198,6 +199,7 @@ typedef struct compMsgData {
   dumpFieldValue_t dumpFieldValue;
   dumpTableRowFields_t dumpTableRowFields;
   dumpKeyValueFields_t dumpKeyValueFields;
+  dumpFieldInfo_t dumpFieldInfo;
   dumpMsg_t dumpMsg;
   initMsg_t initMsg;
   prepareMsg_t prepareMsg;

@@ -282,6 +282,16 @@ static uint8_t getTableValue(compMsgDispatcher_t *self) {
   return result;
 }
 
+// ================================= getWifiKeyValues ====================================
+
+static uint8_t getWifiKeyValues(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+ets_printf("getWifiKeyValues called: key: %s\n", self->buildMsgInfos.key);
+  result = self->getWifiKeyValues(self, self->buildMsgInfos.key);
+  return result;
+}
+
 static actionName2Action_t actionName2Actions [] = {
   { "runClientMode",             (action_t)(&runClientMode),             0, 0, 0 },
   { "runAPMode",                 (action_t)(&runAPMode),                 0, 0, 0 },
@@ -307,6 +317,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "getReserve3",               (action_t)(&getReserve3),               0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "getTableValue",             (action_t)(&getTableValue),             0x4141, 0, MODULE_INFO_AP_LIST_CALL_BACK },
+  { "getWifiKeyValues",          (action_t)(&getWifiKeyValues),          0x4141, 0, 8 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
 
@@ -322,6 +333,7 @@ static uint8_t getActionMode(compMsgDispatcher_t *self, uint8_t *actionName, uin
   while (actionEntry->actionName != NULL) { 
     if (c_strcmp(actionEntry->actionName, actionName) == 0) {
       *actionMode = actionEntry->mode;
+ets_printf("actionMode: %d\n", *actionMode);
       return COMP_DISP_ERR_OK;
     }
     idx++;
@@ -383,7 +395,7 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
     while (actionEntry->actionName != NULL) { 
 //ets_printf("§runActionBu8!%s!%c!%c!%c!§", actionEntry->actionName, (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, actionMode);
       if ((actionEntry->u16CmdKey == received->u16CmdKey) && (actionMode == actionEntry->mode)) {
-//ets_printf("§runActionu8!0x%04x!%c!§", received->u16CmdKey, *answerType);
+ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
         result = actionEntry->action(self);
         checkErrOK(result);
         return COMP_DISP_ERR_OK;
@@ -396,12 +408,15 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
 //ets_printf("§runAction u16!%c%c!%c!§\n", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, *answerType);
     dataView = self->compMsgDataView->dataView;
     switch (self->actionMode) {
+    case 8:
     case MODULE_INFO_AP_LIST_CALL_BACK:
       idx = 0;
       actionEntry = &actionName2Actions[idx];
       while (actionEntry->actionName != NULL) { 
+//ets_printf("an2: %s %s am: %d %d\n", actionEntry->actionName, self->buildMsgInfos.actionName, actionMode, actionEntry->mode);
         if (self->actionMode == actionEntry->mode) {
 //ets_printf("§runAction2 G!%d!%c!§\n", self->actionMode, *answerType);
+ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
           result = actionEntry->action(self);
           checkErrOK(result);
           return COMP_DISP_ERR_OK;
@@ -413,7 +428,7 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
       break;
     }
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= fillMsgValue ====================================

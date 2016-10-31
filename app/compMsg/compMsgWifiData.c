@@ -152,28 +152,47 @@ ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssSca
     return;
   }
   bss_link = (struct bss_info *)arg;
+  compMsgWifiData.bssScanSizes.bssidSize = 0;
+  compMsgWifiData.bssScanSizes.bssidStrSize = 0;
+  compMsgWifiData.bssScanSizes.ssidSize = 0;
+  compMsgWifiData.bssScanSizes.channelSize = 0;
+  compMsgWifiData.bssScanSizes.rssiSize = 0;
+  compMsgWifiData.bssScanSizes.authmodeSize = 0;
+  compMsgWifiData.bssScanSizes.is_hiddenSize = 0;
+  compMsgWifiData.bssScanSizes.freq_offsetSize = 0;
+  compMsgWifiData.bssScanSizes.freqcal_valSize = 0;
   while (bss_link != NULL) {
     scanInfo = &bssScanInfos.infos[bssScanInfos.numScanInfos];
     c_memset(scanInfo->ssid, 0, sizeof(scanInfo->ssid));
     if (bss_link->ssid_len <= sizeof(scanInfo->ssid)) {
       c_memcpy(scanInfo->ssid, bss_link->ssid, bss_link->ssid_len);
+      compMsgWifiData.bssScanSizes.ssidSize += bss_link->ssid_len + 1;
     } else {
       c_memcpy(scanInfo->ssid, bss_link->ssid, sizeof(scanInfo->ssid));
+      compMsgWifiData.bssScanSizes.ssidSize += sizeof(scanInfo->ssid) + 1;
     }
     c_memset(scanInfo->bssidStr, 0, sizeof(scanInfo->bssidStr));
     c_memcpy(scanInfo->bssid, bss_link->bssid, sizeof(scanInfo->bssid));
+    compMsgWifiData.bssScanSizes.bssidSize += sizeof(scanInfo->bssid) + 1;
     c_sprintf(scanInfo->bssidStr,MACSTR, MAC2STR(bss_link->bssid));
     scanInfo->channel = bss_link->channel;
+    compMsgWifiData.bssScanSizes.channelSize += 1;
     scanInfo->rssi = bss_link->rssi;
+    compMsgWifiData.bssScanSizes.rssiSize += 1;
     scanInfo->authmode = bss_link->authmode;
+    compMsgWifiData.bssScanSizes.authmodeSize += 1;
     scanInfo->is_hidden = bss_link->is_hidden;
+    compMsgWifiData.bssScanSizes.is_hiddenSize += 1;
     scanInfo->freq_offset = bss_link->freq_offset;
+    compMsgWifiData.bssScanSizes.freq_offsetSize += 2;
     scanInfo->freqcal_val = bss_link->freqcal_val;
+    compMsgWifiData.bssScanSizes.freqcal_valSize += 2;
     bss_link = bss_link->next.stqe_next;
     bssScanInfos.numScanInfos++;
   }
-ets_printf("bssScanDoneCb call buildMsg numScanInfos: %d\n", bssScanInfos.numScanInfos);
+  bssScanInfos.compMsgDispatcher->buildMsgInfos.numRows = bssScanInfos.numScanInfos;
   bssScanInfos.scanInfoComplete = true;
+ets_printf("bssScanDoneCb call buildMsg numScanInfos: %d\n", bssScanInfos.compMsgDispatcher->buildMsgInfos.numRows);
   bssScanInfos.compMsgDispatcher->buildMsg(bssScanInfos.compMsgDispatcher);
 }
 
@@ -289,6 +308,14 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
   return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 
+// ================================= getWifiKeyValues ====================================
+
+static uint8_t getWifiKeyValues(compMsgDispatcher_t *self, uint8_t *key) {
+  uint8_t result;
+
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= getWifiValue ====================================
 
 static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue) {
@@ -351,6 +378,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->getScanInfoTableFieldValue = &getScanInfoTableFieldValue;
   self->getWifiValue = &getWifiValue;
   self->setWifiValues = &setWifiValues;
+  self->getWifiKeyValues = &getWifiKeyValues;
 
   bssScanInfos.compMsgDispatcher = self;
   self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);
