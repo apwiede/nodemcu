@@ -893,7 +893,20 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
 // ================================= dumpMsgValPart ====================================
 
 static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPart) {
-  ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s\n", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr);
+  uint8_t result;
+  getFieldSizeCallback_t callback;
+  uint8_t *callbackName;
+
+  callbackName = "nil";
+  if (msgValPart->getFieldValueCallback != NULL) {
+    result = self->getActionCallbackName(self, msgValPart->getFieldValueCallback, &callbackName);
+    checkErrOK(result);
+  }
+  ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
+  if (msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
+     ets_printf(" COMP_DISP_DESC_VALUE_IS_NUMBER");
+  }
+  ets_printf("\n");
   return COMP_DISP_ERR_OK;
 }
 
@@ -1134,6 +1147,15 @@ self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
     msgValPart->fieldValueStr = os_zalloc(c_strlen(fieldValueStr)+ 1);
     checkAllocOK(msgValPart->fieldValueStr);
     c_memcpy(msgValPart->fieldValueStr, fieldValueStr, c_strlen(fieldValueStr));
+    uval = c_strtoul(fieldValueStr, &endPtr, 10);
+    if ((endPtr - (char *)fieldValueStr) == c_strlen(fieldValueStr)) {
+      msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+      msgValPart->fieldValue = (uint32_t)uval;
+    }
+    if (fieldValueStr[0] == '@') {
+      result = self->getActionCallback(self, cp + 1, &msgValPart->getFieldValueCallback);
+      checkErrOK(result);
+    }
 self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
@@ -1218,7 +1240,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     case BSS_INFO_CHANNEL:
       compMsgWifiData->key_channel = (uint16_t)uval;
       break;
-    case BSS_INFO_RSSID:
+    case BSS_INFO_RSSI:
       compMsgWifiData->key_rssi = (uint16_t)uval;
       break;
     case BSS_INFO_AUTH_MODE:

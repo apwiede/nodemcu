@@ -132,7 +132,7 @@ ets_printf("§runDeletePasswdC§");
 static uint8_t getMACAddr(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_MACAddr, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_MACAddr, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -141,7 +141,7 @@ static uint8_t getMACAddr(compMsgDispatcher_t *self) {
 static uint8_t getIPAddr(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_IPAddr, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_IPAddr, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -150,7 +150,7 @@ static uint8_t getIPAddr(compMsgDispatcher_t *self) {
 static uint8_t getFirmwareVersion(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_FirmwareVersion, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_FirmwareVersion, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -159,7 +159,7 @@ static uint8_t getFirmwareVersion(compMsgDispatcher_t *self) {
 static uint8_t getSerieNumber(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_SerieNumber, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_SerieNumber, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -168,7 +168,7 @@ static uint8_t getSerieNumber(compMsgDispatcher_t *self) {
 static uint8_t getRSSI(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_RSSI, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_RSSI, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -177,7 +177,7 @@ static uint8_t getRSSI(compMsgDispatcher_t *self) {
 static uint8_t getModuleConnection(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_ModuleConnection, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_ModuleConnection, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -186,7 +186,7 @@ static uint8_t getModuleConnection(compMsgDispatcher_t *self) {
 static uint8_t getDeviceMode(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_DeviceMode, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_DeviceMode, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -195,7 +195,7 @@ static uint8_t getDeviceMode(compMsgDispatcher_t *self) {
 static uint8_t getDeviceSecurity(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_DeviceSecurity, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_DeviceSecurity, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -204,7 +204,7 @@ static uint8_t getDeviceSecurity(compMsgDispatcher_t *self) {
 static uint8_t getErrorMain(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_ErrorMain, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_ErrorMain, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -213,7 +213,7 @@ static uint8_t getErrorMain(compMsgDispatcher_t *self) {
 static uint8_t getErrorSub(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_ErrorSub, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_ErrorSub, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -222,7 +222,7 @@ static uint8_t getErrorSub(compMsgDispatcher_t *self) {
 static uint8_t getDateAndTime(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_DateAndTime, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_DateAndTime, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -231,7 +231,7 @@ static uint8_t getDateAndTime(compMsgDispatcher_t *self) {
 static uint8_t getSSIDs(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_SSIDs, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_SSIDs, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -240,7 +240,7 @@ static uint8_t getSSIDs(compMsgDispatcher_t *self) {
 static uint8_t getReserve1(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_Reserve1, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_Reserve1, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -249,7 +249,7 @@ static uint8_t getReserve1(compMsgDispatcher_t *self) {
 static uint8_t getReserve2(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_Reserve2, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_Reserve2, DATA_VIEW_FIELD_UINT8_VECTOR);
   return COMP_DISP_ERR_OK;
 }
 
@@ -258,7 +258,25 @@ static uint8_t getReserve2(compMsgDispatcher_t *self) {
 static uint8_t getReserve3(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_Reserve3, DATA_VIEW_FIELD_UINT8_VECTOR, &self->numericValue, &self->stringValue);
+  result = self->getModuleValue(self, MODULE_INFO_Reserve3, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getGUID ====================================
+
+static uint8_t getGUID(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_GUID, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getSrcId ====================================
+
+static uint8_t getSrcId(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_srcId, DATA_VIEW_FIELD_UINT16_T);
   return COMP_DISP_ERR_OK;
 }
 
@@ -294,7 +312,6 @@ static uint8_t getWifiKeyValueInfos(compMsgDispatcher_t *self) {
 static uint8_t getWifiKeyValues(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("getWifiKeyValues called: key: %s\n", self->buildMsgInfos.fieldNameStr);
   result = self->getWifiKeyValue(self);
   return result;
 }
@@ -322,6 +339,8 @@ static actionName2Action_t actionName2Actions [] = {
   { "getReserve1",               (action_t)(&getReserve1),               0, 0, 0 },
   { "getReserve2",               (action_t)(&getReserve2),               0, 0, 0 },
   { "getReserve3",               (action_t)(&getReserve3),               0, 0, 0 },
+  { "getGUID",                   (action_t)(&getGUID),                   0, 0, 0 },
+  { "getSrcId",                  (action_t)(&getSrcId),                  0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "getTableValue",             (action_t)(&getTableValue),             0x4141, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "getWifiKeyValueInfos",      (action_t)(&getWifiKeyValueInfos),      0x4141, 0, 8 },

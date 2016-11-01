@@ -68,65 +68,78 @@ static uint8_t getModuleTableFieldValue(compMsgDispatcher_t *self, uint8_t actio
 
 // ================================= getModuleValue ====================================
 
-static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue) {
+static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId) {
   int result;
 
-  *numericValue = 0;
-  *stringValue = NULL;
   switch (which) {
   case MODULE_INFO_MACAddr:
-    *stringValue = compMsgModuleData.MACAddr;
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
     break;
   case MODULE_INFO_IPAddr:
-    *stringValue = compMsgModuleData.IPAddr;
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
     break;
   case MODULE_INFO_FirmwareVersion:
-    *stringValue = compMsgModuleData.FirmwareVersion;
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
     break;
   case MODULE_INFO_SerieNumber:
-    *stringValue = compMsgModuleData.SerieNumber;
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
     break;
   case MODULE_INFO_RSSI:
-    *numericValue = (int)compMsgModuleData.RSSI;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.RSSI;
     break;
   case MODULE_INFO_ModuleConnection:
-    *numericValue = (int)compMsgModuleData.ModuleConnection;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.ModuleConnection;
     break;
   case MODULE_INFO_DeviceMode:
-    *numericValue = (int)compMsgModuleData.DeviceMode;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.DeviceMode;
     break;
   case MODULE_INFO_DeviceSecurity:
-    *numericValue = (int)compMsgModuleData.DeviceSecurity;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
     break;
   case MODULE_INFO_ErrorMain:
-    *numericValue = (int)compMsgModuleData.ErrorMain;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
     break;
   case MODULE_INFO_ErrorSub:
-    *numericValue = (int)compMsgModuleData.ErrorSub;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
     break;
   case MODULE_INFO_DateAndTime:
-    *stringValue = compMsgModuleData.DateAndTime;
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
     break;
   case MODULE_INFO_SSIDs:
-    *numericValue = (int)compMsgModuleData.SSIDs;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.SSIDs;
     break;
   case MODULE_INFO_Reserve1:
-    *numericValue = (int)compMsgModuleData.Reserve1;
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
     break;
   case MODULE_INFO_Reserve2:
-    *stringValue = compMsgModuleData.Reserve2;
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
     break;
   case MODULE_INFO_Reserve3:
-    *stringValue = compMsgModuleData.Reserve3;
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
     break;
-  case WIFI_INFO_PROVISIONING_SSID:
-  case WIFI_INFO_PROVISIONING_PORT:
-  case WIFI_INFO_PROVISIONING_IP_ADDR:
-  case WIFI_INFO_BINARY_CALL_BACK:
-  case WIFI_INFO_TEXT_CALL_BACK:
-    result = self->getWifiValue(self, which, valueTypeId, numericValue, stringValue);
-    checkErrOK(result);
+  case MODULE_INFO_GUID:
+    self->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
     break;
+  case MODULE_INFO_srcId:
+    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->msgValPart->fieldValue = compMsgModuleData.srcId;
+    break;
+//  case WIFI_INFO_PROVISIONING_SSID:
+//  case WIFI_INFO_PROVISIONING_PORT:
+//  case WIFI_INFO_PROVISIONING_IP_ADDR:
+//  case WIFI_INFO_BINARY_CALL_BACK:
+//  case WIFI_INFO_TEXT_CALL_BACK:
+//    result = self->getWifiValue(self, which, valueTypeId, numericValue, stringValue);
+//    checkErrOK(result);
+//    break;
   default:
     return COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH;
     break;
@@ -187,6 +200,23 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.Reserve3[0] = 'X';
   compMsgModuleData.Reserve3[1] = 'Y';
   compMsgModuleData.Reserve3[2] = 'Z';
+  compMsgModuleData.GUID[0] = '1';
+  compMsgModuleData.GUID[1] = '2';
+  compMsgModuleData.GUID[2] = '3';
+  compMsgModuleData.GUID[3] = '4';
+  compMsgModuleData.GUID[4] = '-';
+  compMsgModuleData.GUID[5] = '5';
+  compMsgModuleData.GUID[6] = '6';
+  compMsgModuleData.GUID[7] = '7';
+  compMsgModuleData.GUID[8] = '8';
+  compMsgModuleData.GUID[9] = '-';
+  compMsgModuleData.GUID[10] = '9';
+  compMsgModuleData.GUID[11] = '0';
+  compMsgModuleData.GUID[12] = '1';
+  compMsgModuleData.GUID[13] = '2';
+  compMsgModuleData.GUID[14] = '-';
+  compMsgModuleData.GUID[15] = '1';
+  compMsgModuleData.srcId = 12312;
 
   return COMP_DISP_ERR_OK;
 }

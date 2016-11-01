@@ -160,7 +160,7 @@ typedef uint8_t (* getWifiKeyValueInfo_t)(compMsgDispatcher_t *self);
 // ModuleData stuff
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId);
 typedef uint8_t (* getModuleTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* websocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
@@ -186,15 +186,11 @@ typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *com
 typedef uint8_t (* fixOffsetsForKeyValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t *numTableRows, uint8_t *numTableRowFields, uint8_t type);
-typedef uint8_t (* setMsgKeyValues_t)(compMsgDispatcher_t *self, uint8_t numEntries, uint8_t *entryIdx, uint8_t type, size_t *extraOffset);
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* buildListMsg_t)(compMsgDispatcher_t *self, size_t *totalLgth, uint8_t **totalData);
 typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 
 // Identify stuff
 typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
-typedef uint8_t (* prepareNotEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
-typedef uint8_t (* prepareEncryptedAnswer_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
@@ -221,6 +217,8 @@ typedef struct compMsgDispatcher {
   uint8_t tableRow;
   uint8_t tableCol;
   void *wud;
+  msgDescPart_t *msgDescPart;
+  msgValPart_t *msgValPart;
   
   msgHeaderInfos_t msgHeaderInfos;
 
@@ -258,15 +256,11 @@ typedef struct compMsgDispatcher {
 
   // BuildMsg
   setMsgFieldValue_t setMsgFieldValue;
-  setMsgKeyValues_t setMsgKeyValues;
   fixOffsetsForKeyValues_t fixOffsetsForKeyValues;
   buildMsg_t buildMsg;
-  buildListMsg_t buildListMsg;
   setMsgValues_t setMsgValues;
   prepareAnswerMsg_t prepareAnswerMsg;
   handleReceivedMsg_t handleReceivedMsg;
-  prepareNotEncryptedAnswer_t prepareNotEncryptedAnswer;
-  prepareEncryptedAnswer_t prepareEncryptedAnswer;
 
   // ModuleData
   getModuleValue_t getModuleValue;

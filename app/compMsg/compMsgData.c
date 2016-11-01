@@ -317,7 +317,6 @@ static uint8_t setFieldValue(compMsgData_t *self, const uint8_t *fieldName, int 
   int numEntries;
   int result;
 
-ets_printf("setFieldValue: fieldName: %s numericValue: %d stringValue: %s flags: 0x%08x\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, self->flags & COMP_MSG_IS_INITTED);
   if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
@@ -761,10 +760,10 @@ static uint8_t dumpFieldValue(compMsgData_t *self, compMsgField_t *fieldInfo, co
     break;
   case DATA_VIEW_FIELD_INT8_VECTOR:
     valueIdx = 0;
-    ets_printf("      %svalues:");
+    ets_printf("      values:\n");
     while (valueIdx < fieldInfo->fieldLgth) {
       ch = stringValue[valueIdx];
-      ets_printf("        %sidx: %d value: %c 0x%02x\n", indent2, valueIdx, (char)ch, (uint8_t)(ch & 0xFF));
+      ets_printf("        %sidx: %d value: %c 0x%02x %d\n", indent2, valueIdx, (char)ch, (uint8_t)(ch & 0xFF), (int8_t)ch);
       valueIdx++;
     }
     ets_printf("\n");
@@ -774,7 +773,7 @@ static uint8_t dumpFieldValue(compMsgData_t *self, compMsgField_t *fieldInfo, co
     ets_printf("      values:\n");
     while (valueIdx < fieldInfo->fieldLgth) {
       uch = stringValue[valueIdx];
-      ets_printf("        idx: %d value: %c 0x%02x\n", valueIdx, (char)uch, (uint8_t)(uch & 0xFF));
+      ets_printf("        idx: %d value: %c 0x%02x %d\n", valueIdx, (char)uch, (uint8_t)(uch & 0xFF), (int)uch);
       valueIdx++;
     }
     break;
@@ -997,7 +996,7 @@ static uint8_t dumpMsg(compMsgData_t *self) {
       idx++;
       continue;
     }
-    ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+    ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d key: %.5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset, fieldInfo->fieldKey);
     if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
       ets_printf(" COMP_MSG_FIELD_IS_SET");
     }

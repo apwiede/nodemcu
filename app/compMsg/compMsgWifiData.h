@@ -82,7 +82,7 @@
 #define BSS_INFO_SSID         3
 #define BSS_INFO_SSID_LEN     4
 #define BSS_INFO_CHANNEL      5
-#define BSS_INFO_RSSID        6
+#define BSS_INFO_RSSI         6
 #define BSS_INFO_AUTH_MODE    7
 #define BSS_INFO_IS_HIDDEN    8
 #define BSS_INFO_FREQ_OFFSET  9

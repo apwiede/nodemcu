@@ -106,6 +106,8 @@ enum compMsgEncyptedCode
 // the next value must equal the number of defines above!!
 #define COMP_DISP_MAX_SEQUENCE     13
 
+#define COMP_DISP_DESC_VALUE_IS_NUMBER (1 << 0)
+
 #define GUID_LGTH 16
 
 typedef struct headerPart {
@@ -168,13 +170,19 @@ typedef struct msgDescPart {
   uint8_t *fieldTypeStr;
   uint8_t fieldTypeId;
   uint8_t fieldLgth;
+  uint16_t fieldKey;
+  uint16_t fieldSize;
   getFieldSizeCallback_t getFieldSizeCallback;
 } msgDescPart_t;
 
 typedef struct msgValPart {
   uint8_t *fieldNameStr;
   uint8_t fieldNameId;
-  uint8_t *fieldValueStr;
+  uint8_t *fieldValueStr;    // the value or the callback for getting the value
+  uint8_t *fieldKeyValueStr; // the value for a string
+  uint32_t fieldValue;       // the value for an integer
+  uint8_t fieldFlags;
+  getFieldSizeCallback_t getFieldValueCallback;
 } msgValPart_t;
 
 typedef struct compMsgMsgDesc compMsgMsgDesc_t;

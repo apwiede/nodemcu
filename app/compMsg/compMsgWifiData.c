@@ -60,7 +60,7 @@ static str2id_t bssStr2BssInfoIds [] = {
   { "ssid",        BSS_INFO_SSID },
   { "ssid_len",    BSS_INFO_SSID_LEN },
   { "channel",     BSS_INFO_CHANNEL },
-  { "rssi",        BSS_INFO_RSSID },
+  { "rssi",        BSS_INFO_RSSI },
   { "authmode",    BSS_INFO_AUTH_MODE },
   { "is_hidden",   BSS_INFO_IS_HIDDEN },
   { "freq_offset", BSS_INFO_FREQ_OFFSET },
@@ -167,10 +167,13 @@ ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssSca
     if (bss_link->ssid_len <= sizeof(scanInfo->ssid)) {
       c_memcpy(scanInfo->ssid, bss_link->ssid, bss_link->ssid_len);
       compMsgWifiData.bssScanSizes.ssidSize += bss_link->ssid_len + 1;
+ets_printf("ssid1: %s!%d!%d!\n", scanInfo->ssid, bss_link->ssid_len, compMsgWifiData.bssScanSizes.ssidSize);
     } else {
       c_memcpy(scanInfo->ssid, bss_link->ssid, sizeof(scanInfo->ssid));
       compMsgWifiData.bssScanSizes.ssidSize += sizeof(scanInfo->ssid) + 1;
+ets_printf("ssid2: %s!%d!%d!\n", scanInfo->ssid, sizeof(scanInfo->ssid), compMsgWifiData.bssScanSizes.ssidSize);
     }
+    scanInfo->ssid_len = bss_link->ssid_len;
     c_memset(scanInfo->bssidStr, 0, sizeof(scanInfo->bssidStr));
     c_memcpy(scanInfo->bssid, bss_link->bssid, sizeof(scanInfo->bssid));
     compMsgWifiData.bssScanSizes.bssidSize += sizeof(scanInfo->bssid) + 1;
@@ -192,7 +195,6 @@ ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssSca
   }
   bssScanInfos.compMsgDispatcher->buildMsgInfos.numRows = bssScanInfos.numScanInfos;
   bssScanInfos.scanInfoComplete = true;
-ets_printf("bssScanDoneCb call buildMsg numScanInfos: %d\n", bssScanInfos.compMsgDispatcher->buildMsgInfos.numRows);
   bssScanInfos.compMsgDispatcher->buildMsg(bssScanInfos.compMsgDispatcher);
 }
 
@@ -202,7 +204,7 @@ static uint8_t getBssScanInfo(compMsgDispatcher_t *self) {
   bool result;
   struct scan_config scan_config;
 
-ets_printf("getBssScanInfo1: \n");
+//ets_printf("getBssScanInfo1: \n");
   if (bssScanRunning) {
     // silently ignore 
     return COMP_DISP_ERR_OK;
@@ -292,7 +294,7 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
     break;
   case  BSS_INFO_CHANNEL:
     break;
-  case  BSS_INFO_RSSID:
+  case  BSS_INFO_RSSI:
     self->buildMsgInfos.numericValue = scanInfo->rssi;
     return COMP_DISP_ERR_OK;
     break;
@@ -314,7 +316,7 @@ static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t bssInfoType;
 
-  result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &bssInfoType);
+  result = bssStr2BssInfoId(self->msgDescPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
   checkErrOK(result);
   switch ((int)bssInfoType) {
   case  BSS_INFO_BSSID:
@@ -322,17 +324,17 @@ static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
   case  BSS_INFO_BSSID_STR:
     break;
   case  BSS_INFO_SSID:
-    self->buildMsgInfos.numericValue = compMsgWifiData.key_ssid;
-    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.ssidSize;
+    self->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
+    self->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.ssidSize;
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_SSID_LEN:
     break;
   case  BSS_INFO_CHANNEL:
     break;
-  case  BSS_INFO_RSSID:
-    self->buildMsgInfos.numericValue = compMsgWifiData.key_rssi;
-    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.rssiSize;
+  case  BSS_INFO_RSSI:
+    self->msgDescPart->fieldKey = compMsgWifiData.key_rssi;
+    self->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.rssiSize;
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_AUTH_MODE:
@@ -352,27 +354,70 @@ static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
 static uint8_t getWifiKeyValue(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t bssInfoType;
+  int entryIdx;
+  uint8_t *cp;
+uint8_t *cp2;
+  uint8_t *saveData;
+  size_t saveLgth;
+  bssScanInfo_t *bssScanInfo;
 
-  result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &bssInfoType);
-ets_printf("getWifiKeyValue: %s %d %d\n", self->buildMsgInfos.fieldNameStr, bssInfoType, result);
+  result = bssStr2BssInfoId(self->msgValPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
   checkErrOK(result);
+  saveData = self->compMsgDataView->dataView->data;
+  saveLgth = self->compMsgDataView->dataView->lgth;
   switch ((int)bssInfoType) {
   case  BSS_INFO_BSSID:
     break;
   case  BSS_INFO_BSSID_STR:
     break;
   case  BSS_INFO_SSID:
-    self->buildMsgInfos.numericValue = compMsgWifiData.key_ssid;
-    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.ssidSize;
+ets_printf("getWifiKeyValue: %s\n", self->msgValPart->fieldNameStr + c_strlen("#key_"));
+ets_printf("size: %d: %d %d\n", self->msgDescPart->fieldSize, self->msgDescPart->fieldLgth, self->bssScanInfos->numScanInfos);
+    self->msgValPart->fieldKeyValueStr = os_zalloc(self->msgDescPart->fieldSize);
+    checkAllocOK(self->msgValPart->fieldKeyValueStr);
+    entryIdx = 0;
+    cp = self->msgValPart->fieldKeyValueStr;
+    self->compMsgDataView->dataView->data = cp;
+    self->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t);
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->msgDescPart->fieldKey);
+    checkErrOK(result);
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 2, self->msgDescPart->fieldSize - 2 * sizeof(uint16_t));
+    checkErrOK(result);
+    cp += 2 * sizeof(uint16_t);
+    self->compMsgDataView->dataView->data = saveData;
+    self->compMsgDataView->dataView->lgth = saveLgth;
+    while (entryIdx < self->bssScanInfos->numScanInfos) {
+      bssScanInfo = &self->bssScanInfos->infos[entryIdx];
+      c_memcpy(cp, bssScanInfo->ssid, bssScanInfo->ssid_len);
+      cp += bssScanInfo->ssid_len;
+      *cp++ = '\0';
+      entryIdx++;
+    }
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_SSID_LEN:
     break;
   case  BSS_INFO_CHANNEL:
     break;
-  case  BSS_INFO_RSSID:
-    self->buildMsgInfos.numericValue = compMsgWifiData.key_rssi;
-    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.rssiSize;
+  case  BSS_INFO_RSSI:
+    self->msgValPart->fieldKeyValueStr = os_zalloc(self->msgDescPart->fieldSize);
+    checkAllocOK(self->msgValPart->fieldKeyValueStr);
+    entryIdx = 0;
+    cp = self->msgValPart->fieldKeyValueStr;
+    self->compMsgDataView->dataView->data = cp;
+    self->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t);
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->msgDescPart->fieldKey);
+    checkErrOK(result);
+    cp += 2 * sizeof(uint16_t);
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 2, self->msgDescPart->fieldSize - 2 * sizeof(uint16_t));
+    checkErrOK(result);
+    self->compMsgDataView->dataView->data = saveData;
+    self->compMsgDataView->dataView->lgth = saveLgth;
+    while (entryIdx < self->bssScanInfos->numScanInfos) {
+      bssScanInfo = &self->bssScanInfos->infos[entryIdx];
+      *cp++ = bssScanInfo->rssi;
+      entryIdx++;
+    }
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_AUTH_MODE:
