@@ -658,6 +658,7 @@ static uint8_t createMsgFromLines(compMsgDispatcher_t *self, msgParts_t *parts, 
     idx++;
   }
   if (self->compMsgData->numTableRows > 0) {
+#ifdef NOTDFE
     result = newCompMsgDefMsg(self->compMsgData);
     checkErrOK(result);
     result = self->compMsgData->initDefMsg(self->compMsgData);
@@ -668,6 +669,7 @@ self->compMsgData->dumpDefFields(self->compMsgData);
 // the next 2 lines are too early here the necessary data are not yet provided!!
 //    result = self->compMsgData->initListMsg(self->compMsgData);
 //    checkErrOK(result);
+#endif
   }
   return COMP_DISP_ERR_OK;
 }
