@@ -453,14 +453,11 @@ ets_printf("prepareMsg\n");
         break;
       case COMP_MSG_SPEC_FIELD_HDR_FILLER:
       case COMP_MSG_SPEC_FIELD_FILLER:
-ets_printf("fillers\n");
         result = self->compMsgDataView->setFiller(self->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
-ets_printf("fillers done\n");
         break;
       case COMP_MSG_SPEC_FIELD_CRC:
-ets_printf("crc\n");
         headerLgth = 0;
         lgth = self->cmdLgth-fieldInfo->fieldLgth + self->headerLgth;
         if (self->flags & COMP_MSG_CRC_USE_HEADER_LGTH) {
@@ -470,8 +467,6 @@ ets_printf("crc\n");
         result = self->compMsgDataView->setCrc(self->compMsgDataView, fieldInfo, headerLgth, lgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
-ets_printf("crc done\n");
-        break;
     }
     idx++;
   }

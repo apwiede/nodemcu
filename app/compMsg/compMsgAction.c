@@ -49,8 +49,6 @@
 
 #define COMP_MSG_ACTIONS_FILE_NAME "CompMsgActions.txt"
 
-typedef uint8_t (* action_t)(compMsgDispatcher_t *self);
-
 typedef struct actionName2Action {
   uint8_t *actionName;
   action_t action;
@@ -282,6 +280,15 @@ static uint8_t getTableValue(compMsgDispatcher_t *self) {
   return result;
 }
 
+// ================================= getWifiKeyValueInfos ====================================
+
+static uint8_t getWifiKeyValueInfos(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+  result = self->getWifiKeyValueInfo(self);
+  return result;
+}
+
 // ================================= getWifiKeyValues ====================================
 
 static uint8_t getWifiKeyValues(compMsgDispatcher_t *self) {
@@ -317,6 +324,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "getReserve3",               (action_t)(&getReserve3),               0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "getTableValue",             (action_t)(&getTableValue),             0x4141, 0, MODULE_INFO_AP_LIST_CALL_BACK },
+  { "getWifiKeyValueInfos",      (action_t)(&getWifiKeyValueInfos),      0x4141, 0, 8 },
   { "getWifiKeyValues",          (action_t)(&getWifiKeyValues),          0x4141, 0, 8 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
@@ -334,6 +342,46 @@ static uint8_t getActionMode(compMsgDispatcher_t *self, uint8_t *actionName, uin
     if (c_strcmp(actionEntry->actionName, actionName) == 0) {
       *actionMode = actionEntry->mode;
 ets_printf("actionMode: %d\n", *actionMode);
+      return COMP_DISP_ERR_OK;
+    }
+    idx++;
+    actionEntry = &actionName2Actions[idx];
+  }
+  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+}
+
+// ================================= getActionCallback ====================================
+
+static uint8_t getActionCallback(compMsgDispatcher_t *self, uint8_t *actionName, action_t *callback) {
+  int result;
+  actionName2Action_t *actionEntry;
+  int idx;
+
+  idx = 0;
+  actionEntry = &actionName2Actions[idx];
+  while (actionEntry->actionName != NULL) { 
+    if (c_strcmp(actionEntry->actionName, actionName) == 0) {
+      *callback = actionEntry->action;
+      return COMP_DISP_ERR_OK;
+    }
+    idx++;
+    actionEntry = &actionName2Actions[idx];
+  }
+  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+}
+
+// ================================= getActionCallbackName ====================================
+
+static uint8_t getActionCallbackName(compMsgDispatcher_t *self, action_t callback, uint8_t **actionName) {
+  int result;
+  actionName2Action_t *actionEntry;
+  int idx;
+
+  idx = 0;
+  actionEntry = &actionName2Actions[idx];
+  while (actionEntry->actionName != NULL) { 
+    if (actionEntry->action == callback) {
+      *actionName = actionEntry->actionName;
       return COMP_DISP_ERR_OK;
     }
     idx++;
@@ -461,6 +509,8 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
 
   self->setActionEntry = &setActionEntry;
   self->runAction = &runAction;
+  self->getActionCallback = &getActionCallback;
+  self->getActionCallbackName = &getActionCallbackName;
   self->getActionMode = &getActionMode;
   self->fillMsgValue = &fillMsgValue;
 

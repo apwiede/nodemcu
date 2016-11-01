@@ -140,9 +140,12 @@ typedef struct websocketUserData websocketUserData_t;
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 // Action stuff
+typedef uint8_t (* action_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setActionEntry_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* runAction_t)(compMsgDispatcher_t *self, uint8_t *answerType);
 typedef uint8_t (* getActionMode_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode);
+typedef uint8_t (* getActionCallback_t)(compMsgDispatcher_t *self, uint8_t *actionName, action_t *callback);
+typedef uint8_t (* getActionCallbackName_t)(compMsgDispatcher_t *self, action_t callback, uint8_t **actionName);
 typedef uint8_t (* fillMsgValue_t)(compMsgDispatcher_t *self, uint8_t *callbackName, uint8_t answerType, uint8_t fieldTypeId);
 
 // Wifi stuff
@@ -152,6 +155,7 @@ typedef uint8_t (* getScanInfoTableFieldValue_t)(compMsgDispatcher_t *self, uint
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setWifiValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiKeyValue_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getWifiKeyValueInfo_t)(compMsgDispatcher_t *self);
 
 // ModuleData stuff
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
@@ -181,7 +185,7 @@ typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *com
 // BuildMsg stuff
 typedef uint8_t (* fixOffsetsForKeyValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t *numTableRows, uint8_t *numTableRowFields, bool *nextFieldEntry, uint8_t type);
+typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t *numTableRows, uint8_t *numTableRowFields, uint8_t type);
 typedef uint8_t (* setMsgKeyValues_t)(compMsgDispatcher_t *self, uint8_t numEntries, uint8_t *entryIdx, uint8_t type, size_t *extraOffset);
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* buildListMsg_t)(compMsgDispatcher_t *self, size_t *totalLgth, uint8_t **totalData);
@@ -246,6 +250,8 @@ typedef struct compMsgDispatcher {
   // Action
   setActionEntry_t setActionEntry;
   runAction_t runAction;
+  getActionCallback_t getActionCallback;
+  getActionCallbackName_t getActionCallbackName;
   getActionMode_t getActionMode;
   fillMsgValue_t fillMsgValue;
   getBssScanInfo_t getBssScanInfo;
@@ -291,6 +297,7 @@ typedef struct compMsgDispatcher {
   getScanInfoTableFieldValue_t getScanInfoTableFieldValue;
   getWifiValue_t getWifiValue;
   setWifiValues_t setWifiValues;
+  getWifiKeyValueInfo_t getWifiKeyValueInfo;
   getWifiKeyValue_t getWifiKeyValue;
   websocketRunClientMode_t websocketRunClientMode;
   websocketRunAPMode_t websocketRunAPMode;

@@ -168,6 +168,7 @@ typedef struct msgDescPart {
   uint8_t *fieldTypeStr;
   uint8_t fieldTypeId;
   uint8_t fieldLgth;
+  getFieldSizeCallback_t getFieldSizeCallback;
 } msgDescPart_t;
 
 typedef struct msgValPart {
@@ -194,10 +195,10 @@ typedef uint8_t (* readHeadersAndSetFlags_t)(compMsgDispatcher_t *self, uint8_t 
 typedef uint8_t (* getHeaderFromUniqueFields_t)(compMsgDispatcher_t *self, uint16_t dst, uint16_t src, uint16_t cmdKey, headerPart_t **hdr);
 typedef uint8_t (* getMsgPartsFromHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle);
 typedef uint8_t (* getWifiKeyValueKeys_t)(compMsgDispatcher_t *self, compMsgWifiData_t *compMsgWifiData);
-typedef uint8_t (* dumpMsgDescPart_t)(compMsgMsgDesc_t *compMsgMsgDesc, msgDescPart_t *msgDescPart);
-typedef uint8_t (* dumpMsgValPart_t)(compMsgMsgDesc_t *compMsgMsgDesc, msgValPart_t *msgValPart);
-typedef uint8_t (* resetMsgDescParts_t)(compMsgMsgDesc_t *compMsgMsgDesc);
-typedef uint8_t (* resetMsgValParts_t)(compMsgMsgDesc_t *compMsgMsgDesc);
+typedef uint8_t (* dumpMsgDescPart_t)(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart);
+typedef uint8_t (* dumpMsgValPart_t)(compMsgDispatcher_t *self, msgValPart_t *msgValPart);
+typedef uint8_t (* resetMsgDescParts_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* resetMsgValParts_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgMsgDesc {
   uint8_t id;

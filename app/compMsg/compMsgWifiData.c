@@ -308,6 +308,45 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
   return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 
+// ================================= getWifiKeyValueInfo ====================================
+
+static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
+  uint8_t result;
+  uint8_t bssInfoType;
+
+  result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &bssInfoType);
+  checkErrOK(result);
+  switch ((int)bssInfoType) {
+  case  BSS_INFO_BSSID:
+    break;
+  case  BSS_INFO_BSSID_STR:
+    break;
+  case  BSS_INFO_SSID:
+    self->buildMsgInfos.numericValue = compMsgWifiData.key_ssid;
+    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.ssidSize;
+    return COMP_DISP_ERR_OK;
+    break;
+  case  BSS_INFO_SSID_LEN:
+    break;
+  case  BSS_INFO_CHANNEL:
+    break;
+  case  BSS_INFO_RSSID:
+    self->buildMsgInfos.numericValue = compMsgWifiData.key_rssi;
+    self->buildMsgInfos.sizeValue = compMsgWifiData.bssScanSizes.rssiSize;
+    return COMP_DISP_ERR_OK;
+    break;
+  case  BSS_INFO_AUTH_MODE:
+    break;
+  case  BSS_INFO_IS_HIDDEN:
+    break;
+  case  BSS_INFO_FREQ_OFFSET:
+    break;
+  case  BSS_INFO_FREQ_CAL_VAL:
+    break;
+  }
+  return COMP_DISP_ERR_FIELD_NOT_FOUND;
+}
+
 // ================================= getWifiKeyValue ====================================
 
 static uint8_t getWifiKeyValue(compMsgDispatcher_t *self) {
@@ -411,6 +450,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->getWifiValue = &getWifiValue;
   self->setWifiValues = &setWifiValues;
   self->getWifiKeyValue = &getWifiKeyValue;
+  self->getWifiKeyValueInfo = &getWifiKeyValueInfo;
   self->bssStr2BssInfoId = &bssStr2BssInfoId;
 
   bssScanInfos.compMsgDispatcher = self;
