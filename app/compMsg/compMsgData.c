@@ -433,7 +433,6 @@ static uint8_t prepareMsg(compMsgData_t *self) {
   if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
-ets_printf("prepareMsg\n");
   // create the values which are different for each message!!
   numEntries = self->numFields;
   idx = 0;
@@ -580,7 +579,6 @@ static uint8_t initMsg(compMsgData_t *self) {
     }
     idx++;
   }
-ets_printf("initMsg done\n");
   return COMP_MSG_ERR_OK;
 }
 

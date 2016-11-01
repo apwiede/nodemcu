@@ -984,6 +984,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
+  self->currHdr = hdr;
   os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
@@ -1080,7 +1081,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       result = self->getActionCallback(self, cp + 1, &msgDescPart->getFieldSizeCallback);
       checkErrOK(result);
     }
-self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
+//self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }
@@ -1156,7 +1157,7 @@ self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
       result = self->getActionCallback(self, cp + 1, &msgValPart->getFieldValueCallback);
       checkErrOK(result);
     }
-self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
+//self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }

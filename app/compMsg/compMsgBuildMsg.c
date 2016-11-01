@@ -104,9 +104,9 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
       while (currTableRow < *numTableRows) {
         self->buildMsgInfos.tableRow = currTableRow;
         self->buildMsgInfos.tableCol = currTableCol;
-        result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
+        result = self->fillMsgValue(self, self->msgValPart->fieldValueStr, type, self->msgDescPart->fieldTypeId);
         checkErrOK(result);
-        result = compMsgData->setTableFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, currTableRow, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
+        result = compMsgData->setTableFieldValue(compMsgData, self->msgValPart->fieldNameStr, currTableRow, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
         currTableRow++;
       }
       currTableRow = 0;
@@ -127,10 +127,8 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
       if (self->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
         stringValue = NULL;
         numericValue = self->msgValPart->fieldValue;
-ets_printf("set field n: with %s %s %d\n", fieldNameStr, self->msgValPart->fieldValueStr, numericValue);
       } else {
         stringValue = self->msgValPart->fieldKeyValueStr;
-ets_printf("set field s: with %s %s %s\n", fieldNameStr, self->msgValPart->fieldValueStr, stringValue);
         numericValue = 0;
       }
       result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
@@ -148,7 +146,7 @@ ets_printf("set field s: with %s %s %s\n", fieldNameStr, self->msgValPart->field
       stringValue = self->msgValPart->fieldValueStr;
       numericValue = 0;
     }
-    switch (self->buildMsgInfos.fieldNameId) {
+    switch (self->msgValPart->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_DST:
         result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
         break;
@@ -156,10 +154,8 @@ ets_printf("set field s: with %s %s %s\n", fieldNameStr, self->msgValPart->field
         result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
         break;
       case COMP_MSG_SPEC_FIELD_CMD_KEY:
-        // check for u8CmdKey/u16CmdKey here
-ets_printf("cmdKey: 0x%04x\n", self->received.u16CmdKey);
-        self->buildMsgInfos.numericValue = self->received.u16CmdKey;
-        self->buildMsgInfos.stringValue = NULL;
+        numericValue = self->currHdr->hdrU16CmdKey;
+        stringValue = NULL;
         result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
         break;
       default:
@@ -197,7 +193,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
 
   compMsgData = self->compMsgData;
   handle = self->msgHandle;
-  type = self->buildMsgInfos.type;
+  type = 'A';
   dataView = compMsgData->compMsgDataView;
   // loop over MSG Fields, to check if we eventually have table rows!!
   msgDescPartIdx = 0;
@@ -207,7 +203,6 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   numTableRows = 0;
   numTableRowFields = 0;
   compMsgData = self->compMsgData;
-ets_printf("setMsgValues: numFields:%d scanLgth: %d\n", compMsgData->numFields, self->bssScanInfos->numScanInfos);
   while ((msgDescPartIdx < compMsgData->numFields) && (msgValPartIdx <= self->compMsgMsgDesc->numMsgValParts)) {
     msgDescPart = &self->compMsgMsgDesc->msgDescParts[msgDescPartIdx];
     self->msgDescPart = msgDescPart;
@@ -228,22 +223,15 @@ ets_printf("setMsgValues: numFields:%d scanLgth: %d\n", compMsgData->numFields, 
       break;
     default:
 //ets_printf("default fieldNameId: %d buildMsgInfo fieldNameId: %d\n", fieldInfo->fieldNameId, self->buildMsgInfos.fieldNameId);
-      if (fieldInfo->fieldNameId == self->buildMsgInfos.fieldNameId) {
+      if (fieldInfo->fieldNameId == msgValPart->fieldNameId) {
         result = self->setMsgFieldValue(self, &numTableRows, &numTableRowFields, type);
         checkErrOK(result);
-      } else {
-        if (fieldInfo->fieldNameId == msgValPart->fieldNameId) {
-          result = self->setMsgFieldValue(self, &numTableRows, &numTableRowFields, type);
-          checkErrOK(result);
-          msgValPartIdx++;
-        }
+        msgValPartIdx++;
       }
       break;
     }
   }
-  // FIXME !! should get that value via callback!
-ets_printf("u16cmdKey: 0x%04x\n", self->buildMsgInfos.u16CmdKey);
-  msgCmdKey = (self->buildMsgInfos.u16CmdKey & 0xFF00) | type & 0xFF;
+  msgCmdKey = self->currHdr->hdrU16CmdKey;
   result = compMsgData->setFieldValue(compMsgData, "@cmdKey", msgCmdKey, NULL);
   checkErrOK(result);
 
@@ -283,28 +271,28 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-ets_printf("buildMsg\n");
+//ets_printf("buildMsg\n");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   result = self->compMsgData->initMsg(self->compMsgData);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
   result = setMsgValues(self);
-ets_printf("buildMsg setMsgValues has been called, we finish here temporarely! result: %d\n", result);
   checkErrOK(result);
-return result;
 
-  cryptKey = "a1b2c3d4e5f6g7h8";
-  ivlen = 16;
-  klen = 16;
+  result = self->compMsgData->getMsgData(self->compMsgData, &msgData, &msgLgth);
+  checkErrOK(result);
+  if (self->currHdr->hdrEncryption == 'E') {
+    uint8_t *toCryptPtr;
+    uint8_t *encryptedMsgData;
+    size_t encryptedMsgDataLgth;
+    uint16_t mlen;
+    uint8_t headerLgth;
 
-  if (self->buildMsgInfos.partsFlags & COMP_DISP_IS_ENCRYPTED) {
-      uint8_t *toCryptPtr;
-      uint8_t *encryptedMsgData;
-      size_t encryptedMsgDataLgth;
-      uint16_t mlen;
-      uint8_t headerLgth;
+    cryptKey = "a1b2c3d4e5f6g7h8";
+    ivlen = 16;
+    klen = 16;
 
-ets_printf("need to encrypt message!%s!\n", msgData);
+ets_printf("need to encrypt message!\n");
     headerLgth = self->compMsgData->headerLgth;
     mlen = self->compMsgData->totalLgth - headerLgth;
 ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
@@ -312,62 +300,15 @@ ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, 
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
     checkErrOK(result);
     c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);
-ets_printf("crypted: len: %d!%s!\n", encryptedMsgDataLgth, msgData);
+ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
+  }
     
-    self->buildListMsgInfos.encryptedMsgDataLgth = encryptedMsgDataLgth;
-    self->buildListMsgInfos.encryptedMsgData = encryptedMsgData;
-  }
-
-  if (self->buildMsgInfos.numRows > 0) {
-    // we have a definition and the message
-    result = self->compMsgData->prepareDefMsg(self->compMsgData);
-    checkErrOK(result);
-    result = self->compMsgData->getDefData(self->compMsgData, &defData, &defLgth);
-ets_printf("getDef result: %d defLgth: %d defData: %s!\n", result, defLgth, defData);
-    checkErrOK(result);
-    self->buildListMsgInfos.defHeaderLgth = self->compMsgData->defHeaderLgth;
-    self->buildListMsgInfos.defDataLgth = defLgth;
-    self->buildListMsgInfos.defData = defData;
-
-    if (self->buildMsgInfos.partsFlags & COMP_DISP_IS_ENCRYPTED) {
-ets_printf("need to encrypt message!%s!numRows!%d!\n", msgData, self->buildMsgInfos.numRows);
-      uint8_t *defToCryptPtr;
-      size_t deflen;
-      uint8_t *encryptedDefData;
-      size_t encryptedDefDataLgth;
-      size_t totalLgth;
-      uint8_t *totalData;
-
-      self->buildListMsgInfos.defData = defData;
-      deflen = defLgth - self->compMsgData->headerLgth;
-ets_printf("defLgth!%d!deflen: %d, headerLgth!%d\n", defLgth, deflen, self->compMsgData->headerLgth);
-      defToCryptPtr = defData + self->compMsgData->headerLgth;
-      result = self->encryptMsg(defToCryptPtr, deflen, cryptKey, klen, cryptKey, ivlen, &encryptedDefData, &encryptedDefDataLgth);
-      checkErrOK(result);
-      c_memcpy(defToCryptPtr, encryptedDefData, encryptedDefDataLgth);
-ets_printf("defEncrypted: len: %d!%s!\n", encryptedDefDataLgth, defData);
-        
-      self->buildListMsgInfos.encryptedDefDataLgth = encryptedDefDataLgth;
-      self->buildListMsgInfos.encryptedDefData = encryptedDefData;
-
-//      result = self->buildListMsg(self, &totalLgth, &totalData);
-//      checkErrOK(result);
-      // FIXME!! need compMsgModulData callback function for sending here !!!
-      result = self->websocketSendData(self->wud, totalData, totalLgth, OPCODE_BINARY);
-ets_printf("Msg sent\n");
-//  os_free(totalData);
-    } else {
-      // nested message not encrypted
-      // FIXME !! need code here
-    }
-  } else {
-    // normal message
-    if (self->buildMsgInfos.partsFlags & COMP_DISP_IS_ENCRYPTED) {
-      // FIXME !! need code here
-    } else {
-      // FIXME !! need code here
-    }
-  }
+  // here we need to decide where and how to send the message!!
+  // from currHdr we can see the handle type and - if needed - the @dst
+ets_printf("transferType: %c dst: 0x%04x\n", self->currHdr->hdrHandleType, self->currHdr->hdrToPart);
+  result = self->sendMsg(self, msgData, msgLgth);
+ets_printf("buildMsg sendMsg has been called, we finish here temporarely! result: %d\n", result);
+  checkErrOK(result);
 //  result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
   return result;
 }

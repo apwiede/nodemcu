@@ -85,6 +85,38 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= sendMsg ====================================
+
+static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, uint8_t msgLgth) {
+  uint8_t result;
+
+  switch (self->currHdr->hdrHandleType) {
+  case 'A':
+ets_printf("wub: %p\n", self->wud);
+   if (self->wud == NULL) {
+     return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
+   }
+   break;
+  case 'G':
+   break;
+  case 'S':
+   break;
+  case 'R':
+   break;
+  case 'U':
+   break;
+  case 'W':
+   break;
+  case 'N':
+    // just ignore
+    return COMP_DISP_ERR_OK;
+    break;
+  default:
+    return COMP_DISP_ERR_BAD_HANDLE_TYPE;
+  }
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= compMsgSendReceiveInit ====================================
 
 uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
@@ -92,6 +124,7 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
 
   self->uartReceiveCb = &uartReceiveCb;
   self->typeRSendAnswer = &typeRSendAnswer;
+  self->sendMsg = &sendMsg;
   return COMP_DISP_ERR_OK;
 }
 

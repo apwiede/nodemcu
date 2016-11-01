@@ -480,7 +480,7 @@ ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
       idx = 0;
       actionEntry = &actionName2Actions[idx];
       while (actionEntry->actionName != NULL) { 
-//ets_printf("an2: %s %s am: %d %d\n", actionEntry->actionName, self->buildMsgInfos.actionName, actionMode, actionEntry->mode);
+//ets_printf("an2: %s am: %d %d\n", actionEntry->actionName, actionMode, actionEntry->mode);
         if (self->actionMode == actionEntry->mode) {
 //ets_printf("§runAction2 G!%d!%c!§\n", self->actionMode, *answerType);
 ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);

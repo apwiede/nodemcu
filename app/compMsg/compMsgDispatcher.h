@@ -84,6 +84,7 @@ enum compMsgDispatcherErrorCode
   COMP_DISP_ERR_TOO_FEW_FILE_LINES    = 178,
   COMP_DISP_ERR_ACTION_NAME_NOT_FOUND = 177,
   COMP_DISP_ERR_DUPLICATE_ENTRY       = 176,
+  COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 177,
 };
 
 
@@ -100,24 +101,12 @@ typedef struct msgHeader2MsgPtr {
 } msgHeader2MsgPtr_t;
 
 typedef struct buildMsgInfos {
-  uint8_t numEntries;
-  uint8_t type;
-  msgParts_t *parts;
   uint8_t numRows; 
-  uint8_t u8CmdKey;
-  uint16_t u16CmdKey;
-  uint16_t partsFlags;
-  uint8_t *fieldNameStr;
-  uint8_t *fieldValueStr;
-  uint8_t fieldNameId;
-  uint8_t fieldTypeId;
   uint8_t tableRow;
   uint8_t tableCol;
   int numericValue;
   size_t sizeValue;
   uint8_t *stringValue;
-  uint8_t buf[100];
-  uint8_t key[50];
   uint8_t *actionName;
 } buildMsgInfos_t;
 
@@ -194,7 +183,9 @@ typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *r
 typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
+// SendReceive
 typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
+typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, uint8_t msgLgth);
 
 
 // MsgData stuff
@@ -219,6 +210,7 @@ typedef struct compMsgDispatcher {
   void *wud;
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
+  headerPart_t *currHdr;
   
   msgHeaderInfos_t msgHeaderInfos;
 
@@ -243,7 +235,9 @@ typedef struct compMsgDispatcher {
   getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
 
+  // SendReceive
   typeRSendAnswer_t typeRSendAnswer;
+  sendMsg_t sendMsg;
 
   // Action
   setActionEntry_t setActionEntry;

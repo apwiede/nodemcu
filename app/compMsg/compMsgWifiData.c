@@ -120,7 +120,7 @@ static void bssScanDoneCb(void *arg, STATUS status) {
   uint8_t numEntries;
   bssScanInfo_t *scanInfo;
 
-ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssScanRunning, status);
+//ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssScanRunning, status);
   if (arg == NULL) {
     return;
   }
@@ -167,11 +167,9 @@ ets_printf("bssScanDoneCb bssScanRunning: arg: %p %d status: %d!\n", arg, bssSca
     if (bss_link->ssid_len <= sizeof(scanInfo->ssid)) {
       c_memcpy(scanInfo->ssid, bss_link->ssid, bss_link->ssid_len);
       compMsgWifiData.bssScanSizes.ssidSize += bss_link->ssid_len + 1;
-ets_printf("ssid1: %s!%d!%d!\n", scanInfo->ssid, bss_link->ssid_len, compMsgWifiData.bssScanSizes.ssidSize);
     } else {
       c_memcpy(scanInfo->ssid, bss_link->ssid, sizeof(scanInfo->ssid));
       compMsgWifiData.bssScanSizes.ssidSize += sizeof(scanInfo->ssid) + 1;
-ets_printf("ssid2: %s!%d!%d!\n", scanInfo->ssid, sizeof(scanInfo->ssid), compMsgWifiData.bssScanSizes.ssidSize);
     }
     scanInfo->ssid_len = bss_link->ssid_len;
     c_memset(scanInfo->bssidStr, 0, sizeof(scanInfo->bssidStr));
@@ -193,7 +191,6 @@ ets_printf("ssid2: %s!%d!%d!\n", scanInfo->ssid, sizeof(scanInfo->ssid), compMsg
     bss_link = bss_link->next.stqe_next;
     bssScanInfos.numScanInfos++;
   }
-  bssScanInfos.compMsgDispatcher->buildMsgInfos.numRows = bssScanInfos.numScanInfos;
   bssScanInfos.scanInfoComplete = true;
   bssScanInfos.compMsgDispatcher->buildMsg(bssScanInfos.compMsgDispatcher);
 }
@@ -278,7 +275,7 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
     return COMP_DISP_ERR_BAD_ROW;
   }
   scanInfo = &scanInfos->infos[self->buildMsgInfos.tableRow];
-  result = bssStr2BssInfoId(self->buildMsgInfos.fieldNameStr, &fieldId);
+  result = bssStr2BssInfoId(self->msgDescPart->fieldNameStr, &fieldId);
 //ets_printf("row: %d ssid: %s rssi: %d fieldName: %s fieldId: %d\n", self->buildMsgInfos.tableRow, scanInfo->ssid, scanInfo->rssi, self->buildMsgInfos.fieldNameStr, fieldId);
   checkErrOK(result);
   switch ((int)fieldId) {
@@ -371,8 +368,6 @@ uint8_t *cp2;
   case  BSS_INFO_BSSID_STR:
     break;
   case  BSS_INFO_SSID:
-ets_printf("getWifiKeyValue: %s\n", self->msgValPart->fieldNameStr + c_strlen("#key_"));
-ets_printf("size: %d: %d %d\n", self->msgDescPart->fieldSize, self->msgDescPart->fieldLgth, self->bssScanInfos->numScanInfos);
     self->msgValPart->fieldKeyValueStr = os_zalloc(self->msgDescPart->fieldSize);
     checkAllocOK(self->msgValPart->fieldKeyValueStr);
     entryIdx = 0;

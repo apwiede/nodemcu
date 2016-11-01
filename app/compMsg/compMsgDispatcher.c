@@ -454,23 +454,11 @@ static uint8_t getFieldType(compMsgDispatcher_t *self, compMsgData_t *compMsgDat
 // ================================= resetBuildMsgInfos ====================================
 
 static uint8_t resetBuildMsgInfos(compMsgDispatcher_t *self) {
-  self->buildMsgInfos.numEntries = 0;
-  self->buildMsgInfos.type = 0;
-  self->buildMsgInfos.parts = NULL;
   self->buildMsgInfos.numRows = 0;
-  self->buildMsgInfos.u8CmdKey = 0;
-  self->buildMsgInfos.u16CmdKey = 0;
-  self->buildMsgInfos.partsFlags = 0;
-  self->buildMsgInfos.fieldNameStr = NULL;
-  self->buildMsgInfos.fieldValueStr = NULL;
-  self->buildMsgInfos.fieldNameId = 0;
-  self->buildMsgInfos.fieldTypeId = 0;
   self->buildMsgInfos.tableRow = 0;
   self->buildMsgInfos.tableCol = 0;
   self->buildMsgInfos.numericValue = 0;
   self->buildMsgInfos.stringValue = NULL;
-  self->buildMsgInfos.buf[0] = '\0';
-  self->buildMsgInfos.key[0] = '\0';
   self->buildMsgInfos.actionName = NULL;
   return COMP_DISP_ERR_OK;
 }
@@ -498,8 +486,8 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
 
 ets_printf("heap4: %d\n", system_get_free_heap_size());
   // runAction calls at the end buildMsg
-  self->resetBuildMsgInfos(self);
-  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
+//  self->resetBuildMsgInfos(self);
+//  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
   if (self->compMsgMsgDesc->prepareValuesCbName != NULL) {
     uint8_t actionMode;
     uint8_t type;
