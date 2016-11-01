@@ -31,6 +31,15 @@
 # *
 # ==========================================================================
 
+# compMsgDispatcher dict
+#   prepareValuesCbName
+#   msgDescParts
+#   msgValParts
+
+
+
+
+
 set ::DISP_HANDLE_PREFIX "stmsgdisp_"
 
 set ::COMP_DISP_ERR_OK                    0

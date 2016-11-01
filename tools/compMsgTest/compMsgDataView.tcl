@@ -109,7 +109,10 @@ set ::COMP_MSG_SPEC_FIELD_DEFINITIONS         236
 set ::COMP_MSG_SPEC_FIELD_NUM_LIST_MSGS       234
 set ::COMP_MSG_SPEC_FIELD_LIST_MSG_SIZES      233
 set ::COMP_MSG_SPEC_FIELD_LIST_MSGS           232
-set ::COMP_MSG_SPEC_FIELD_LOW                 231  ; # this must be the last entry!!
+set ::COMP_MSG_SPEC_FIELD_SRC_ID              231
+set ::COMP_MSG_SPEC_FIELD_HDR_FILLER          230
+set ::COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES      229
+set ::COMP_MSG_SPEC_FIELD_LOW                 228  ; # this must be the last entry!!
 
 set ::COMP_MSG_FREE_FIELD_ID 0xFF
 set RAND_MAX 0x7FFFFFFF
@@ -154,6 +157,7 @@ namespace eval ::compMsg {
     dict set specialFieldNames2Ids "@listMsgs"         COMP_MSG_SPEC_FIELD_LIST_MSGS
     dict set specialFieldNames2Ids "@srcId"            COMP_MSG_SPEC_FIELD_SRC_ID
     dict set specialFieldNames2Ids "@hdrFiller"        COMP_MSG_SPEC_FIELD_HDR_FILLER 
+    dict set specialFieldNames2Ids "@numKeyValues"     COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES
 
 
     variable specialFieldId2Names
@@ -183,6 +187,7 @@ namespace eval ::compMsg {
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_LIST_MSGS           "@listMsgs"
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SRC_ID              "@srcId" 
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_HDR_FILLER          "@hdrFiller"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES       "@numKeyValues"
 
     variable specialFieldIds2Ints
     set specialFieldIds2Ints [dict create]
@@ -212,7 +217,8 @@ namespace eval ::compMsg {
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LIST_MSGS           232
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SRC_ID              231
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_HDR_FILLER          230
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LOW                 229  ; # this must be the last entry!!
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES      229
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LOW                 228  ; # this must be the last entry!!
 
     variable specialFieldInts2Ids
     set specialFieldInts2Ids [dict create]
@@ -242,8 +248,10 @@ namespace eval ::compMsg {
     dict set specialFieldInts2Ids 232 COMP_MSG_SPEC_FIELD_LIST_MSGS
     dict set specialFieldInts2Ids 231 COMP_MSG_SPEC_FIELD_SRC_ID
     dict set specialFieldInts2Ids 230 COMP_MSG_SPEC_FIELD_HDR_FILLER
-    dict set specialFieldInts2Ids 229 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
+    dict set specialFieldInts2Ids 229 COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES
+    dict set specialFieldInts2Ids 228 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
 
+    dict set ::compMsg(fieldNameDefinitions) numDefinitions 0
 
     # ================================= getSpecialFieldNameIntFromId ====================================
     
