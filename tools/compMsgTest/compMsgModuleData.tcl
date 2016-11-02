@@ -39,7 +39,7 @@ namespace eval compMsg {
   namespace eval compMsgModuleData {
     namespace ensemble create
       
-    namespace export compMsgModuleDataValuesInit
+    namespace export compMsgModuleDataInit setModuleValues
 
     variable compMsgModuleData
 
@@ -140,7 +140,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       variable compMsgModuleData
     
-      dict set compMsgModuleData RSSI [wifi_station_get_rssi]
+#      dict set compMsgModuleData RSSI [wifi_station_get_rssi]
       return $::COMP_DISP_ERR_OK
     }
     
@@ -173,9 +173,10 @@ if {0} {
       dict set compMsgModuleData SerieNumber[2] = 0x2A
       dict set compMsgModuleData SerieNumber[3] = 0x10
 }
-      dict set compMsgModuleData RSSI [wifi_station_get_rssi]
+#      dict set compMsgModuleData RSSI [wifi_station_get_rssi]
+      dict set compMsgModuleData RSSI -67
       dict set compMsgModuleData ModuleConnection 0x41
-      dict setdict set  compMsgModuleData DeviceMode 0x34
+      dict set compMsgModuleData DeviceMode 0x34
       dict set compMsgModuleData DeviceSecurity 0
       dict set compMsgModuleData ErrorMain 0
       dict set compMsgModuleData ErrorSub 0

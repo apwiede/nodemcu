@@ -404,7 +404,7 @@ if {0} {
       variable compMsgActionEntries
       upvar $compMsgDispatcherVar cmdisp
     
-puts stderr "setActionEntry $actionName $mode $cmdKey!"
+#puts stderr "setActionEntry $actionName $mode $cmdKey!"
 if {0} {
       if {[dict get $compMsgActionEntries numActionEntries] >= [dict get $compMsgActionEntries maxActionEntries]} {
       }

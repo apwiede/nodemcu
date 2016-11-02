@@ -401,10 +401,10 @@ namespace eval compMsg {
 
     # ================================= createMsg ====================================
 
-    proc createMsg {numFields handleVar} {
+    proc createMsg {compMsgDataVar numFields handleVar} {
       upvar $handleVar handle
+      upvar $compMsgDataVar compMsgData
       variable numHandles
-      variable compMsgData
 
       dict set compMsgData fields [list]
       dict set compMsgData tableFields [list]
@@ -433,8 +433,8 @@ namespace eval compMsg {
 
     # ================================= addField ====================================
     
-    proc  addField {fieldName fieldType fieldLgth} {
-      variable compMsgData
+    proc  addField {compMsgDataVar fieldName fieldType fieldLgth} {
+      upvar $compMsgDataVar compMsgData
     
       if {[dict get $compMsgData numFields] >= [dict get $compMsgData maxFields]} {
         return $::COMP_MSG_ERR_TOO_MANY_FIELDS

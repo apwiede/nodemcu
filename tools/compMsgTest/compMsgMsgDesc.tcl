@@ -128,7 +128,7 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export readHeadersAndSetFlags dumpHeaderPart getHeaderFromUniqueFields
-    namespace export createMsgFromHeaderPart getWifiKeyValueKeys readActions
+    namespace export getMsgPartsFromHeaderPart createMsgFromHeaderPart getWifiKeyValueKeys readActions
     namespace export resetMsgDescPart resetMsgValPart dumpMsgDescPart dumpMsgValPart
 
     variable headerInfos [list]
@@ -678,7 +678,109 @@ puts stderr "readActions: $numEntries!"
       dict set compMsgMsgDesc maxMsgValParts 0
       return $::COMP_DISP_ERR_OK
     }
+
+    # ================================= getMsgPartsFromHeaderPart ====================================
     
+    proc getMsgPartsFromHeaderPart {compMsgDispatcherVar hdr handle} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      dict set compMsgDispatcher currHdr $hdr
+      dict set compMsgDispatcher msgDescParts [list]
+      dict set compMsgDispatcher msgValParts [list]
+      set fd [open [format "%s/CompDesc%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]] "r"]
+      gets $fd line
+      set flds [split $line ","]
+      set prepareValuesCbName [list]
+      foreach {dummy numEntries prepareValuesCbName} $flds break
+puts stderr "numDesc!$numEntries!$prepareValuesCbName!"
+      dict set compMsgDispatcher compMsgMsgDesc prepareValuesCbName $prepareValuesCbName
+      dict set compMsgDispatcher compMsgMsgDesc numMsgDescParts $numEntries
+puts stderr "keys1![dict keys $compMsgDispatcher]!"
+      set numRows 0
+      set idx 0
+      while {$idx < $numEntries} {
+        gets $fd line
+        if {$line eq ""} {
+          return $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+        }
+        set flds [split $line ","]
+        set callback [list]
+        foreach {fieldNameStr fieldTypeStr fieldLgthStr callback} $flds break
+        if {$fieldLgthStr eq "@numRows"} {
+          set fieldLgth $numRows
+        } else {
+          set fieldLgth $fieldLgthStr
+        }
+        set msgDescPart [dict create]
+        dict set msgDescPart fieldNameId 0
+        dict set msgDescPart fieldTypeId 0
+        dict set msgDescPart fieldKey ""
+        dict set msgDescPart fieldSize 0
+        dict set msgDescPart getFieldSizeCallback $callback
+        dict set msgDescPart fieldNameStr $fieldNameStr
+        dict set msgDescPart fieldTypeStr $fieldTypeStr
+        dict set msgDescPart fieldLgth $fieldLgth
+        set result [::compMsg dataView getFieldTypeIdFromStr $fieldTypeStr fieldTypeId]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        dict set msgDescPart fieldTypeId $fieldTypeId
+        set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_INCR]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        dict set msgDescPart fieldNameId $fieldNameId
+#dumpMsgDescPart compMsgDispatcher $msgDescPart
+        dict lappend compMsgDispatcher msgDescParts $msgDescPart
+        incr idx
+      }
+      close $fd
+    
+      # and now the value parts
+      set fileName [format "%s/CompVal%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]]
+      set fd [open $fileName "r"]
+      gets $fd line
+      set flds [split $line ","]
+      set callback [list]
+      foreach {dummy numEntries callback} $flds break
+      set numRows 0
+puts stderr "numVal: $numEntries!$callback!"
+      dict set compMsgDispatcher compMsgMsgDesc numMsgValParts $numEntries
+      set idx 0
+      while {$idx < $numEntries} {
+        gets $fd line
+        if {$line eq ""} {
+          return $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+        }
+        set flds [split $line ","]
+        set callback [list]
+        foreach {fieldNameStr fieldValueStr} $flds break
+        # fieldName
+        set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_NO_INCR]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        set callback [list]
+        if {[string range $fieldValueStr 0 0] eq "@"} {
+          set callback [string range $fieldValueStr 1 end]
+        }
+    
+        set msgValPart [dict create]
+        dict set msgValPart fieldNameId $fieldNameId
+        dict set msgValPart fieldFlags [list]
+        dict set msgValPart fieldKeyValueStr [list]
+        dict set msgValPart fieldValue [list]
+        dict set msgValPart getFieldValueCallback $callback
+        dict set msgValPart fieldNameStr $fieldNameStr
+        dict set msgValPart fieldValueStr $fieldValueStr
+        dict lappend compMsgDispatcher msgValParts $msgValPart
+#dumpMsgValPart compMsgDispatcher $msgValPart
+        incr idx
+      }
+      close $fd
+      return $::COMP_MSG_DESC_ERR_OK
+    }
+
     # ================================= createMsgFromHeaderPart ====================================
     
     proc createMsgFromHeaderPart {compMsgDispatcherVar hdr handleVar} {
@@ -697,6 +799,8 @@ puts stderr "fileName!$fileName!"
       set prepareValuesCbName [list]
       foreach {dummy numEntries prepareValuesCbName} $flds break
 puts stderr "numDesc!$numEntries!$prepareValuesCbName!"
+      dict set compMsgDispatcher compMsgMsgDesc numMsgDescParts $numEntries
+puts stderr "keys1![dict keys $compMsgDispatcher]!"
       if {$prepareValuesCbName != [list]} {
         dict set compMsgDispatcher prepareValuesCbName $prepareValuesCbName
       }
@@ -747,6 +851,7 @@ puts stderr "numDesc!$numEntries!$prepareValuesCbName!"
       foreach {dummy numEntries callback} $flds break
       set numRows 0
 puts stderr "numVal: $numEntries!$callback!"
+      dict set compMsgDispatcher compMsgMsgDesc numMsgValParts $numEntries
       set idx 0
       while {$idx < $numEntries} {
         gets $fd line

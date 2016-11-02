@@ -12,6 +12,7 @@ source compMsgAction.tcl
 source compMsgWifiData.tcl  
 source compMsgBuildMsg.tcl  
 source compMsgSendReceive.tcl  
+source compMsgModuleData.tcl  
 
 proc checkErrOK {result} {
   switch $result {

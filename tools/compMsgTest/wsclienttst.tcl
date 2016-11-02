@@ -40,8 +40,6 @@ package require websocket
 package require Tk
 package require tablelist
 
-source structmsgCmd.tcl
-
 ::websocket::loglevel debug
 
 source pdict.tcl
@@ -330,7 +328,14 @@ proc dumpBinay {data} {
 
 proc getAPInfos { sock } {
 #  puts stderr "[::websocket::conninfo $sock type] from [::websocket::conninfo $sock sockname] to [::websocket::conninfo $sock peername]"
-  set result [::structmsg structmsgIdentify sendEncryptedMsg $sock $::received A]
+  set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 AD hdr]
+  checkErrOK $result
+puts stderr "===after getHeaderFromUniqueFields"
+  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart compMsgDispatcher $hdr handle]
+  checkErrOK $result
+
+#  set result [::compMsg compMsgBuildMsg buildMsgFromHeaderPart $hdr]
+#  set result [::compMsg compMsgIdentify sendEncryptedMsg $sock $::received A]
   checkErrOK $result
   $::startBtn configure -text "Quit" -command [list exit 0]
 }
