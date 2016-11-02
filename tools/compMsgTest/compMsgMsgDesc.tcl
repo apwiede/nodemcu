@@ -6,7 +6,7 @@
 # *
 # * Redistribution and use in source and binary forms, with or without
 # * modification, are permitted provided that the following conditions
-# * are met:
+# * are met {
 # *
 # * 1. Redistributions of source code must retain the above copyright
 # * notice, this list of conditions and the following disclaimer.
@@ -23,7 +23,7 @@
 # * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
 # * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# * SUBSTITUTE GOODS OR SERVICES LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 # * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 # * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -87,8 +87,8 @@ set ::HDR_FILLER_LGTH 40
 #   fieldSequence
 
 # msgHeaderInfos dict
-#   headerFlags        ; # these are the flags for the 2nd line in the heads file!!
-#   headerSequence  ; # this is the sequence of the 2nd line in the heads file!!
+#   headerFlags         # these are the flags for the 2nd line in the heads file!!
+#   headerSequence   # this is the sequence of the 2nd line in the heads file!!
 #   headerLgth
 #   lgth
 #   headerParts
@@ -111,9 +111,9 @@ set ::HDR_FILLER_LGTH 40
 # msgValPart dict
 #   fieldNameStr
 #   fieldNameId
-#   fieldValueStr    ; # the value or the callback for getting the value
-#   fieldKeyValueStr ; # the value for a string
-#   fieldValue       ; # the value for an integer
+#   fieldValueStr     # the value or the callback for getting the value
+#   fieldKeyValueStr  # the value for a string
+#   fieldValue        # the value for an integer
 #   fieldFlags
 #   getFieldValueCallback
 
@@ -128,7 +128,7 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export readHeadersAndSetFlags dumpHeaderPart getHeaderFromUniqueFields
-    namespace export createMsgFromHeaderPart
+    namespace export createMsgFromHeaderPart getWifiKeyValueKeys readActions
     namespace export resetMsgDescPart resetMsgValPart dumpMsgDescPart dumpMsgValPart
 
     variable headerInfos [list]
@@ -574,6 +574,30 @@ namespace eval compMsg {
       close $fd
       return $result
     }
+
+    # ================================= readActions ====================================
+
+    proc readActions {compMsgDispatcherVar fileName} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set fd [open [format "%s/$fileName" $::moduleFilesPath] "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+      set idx 0
+puts stderr "readActions: $numEntries!"
+      while {$idx < $numEntries} {
+        gets $fd line
+        set flds [split $line ","]
+        foreach {actionName actionMode cmdKeyType cmdKey} $flds break
+        set result [::compMsg compMsgAction setActionEntry compMsgDispatcher $actionName $actionMode $cmdKey]
+        checkErrOK $result
+        incr idx
+      }
+      close $fd
+      return $::COMP_MSG_DESC_ERR_OK
+    }
+
       
     # ================================= getHeaderFromUniqueFields ====================================
     
@@ -758,6 +782,96 @@ puts stderr "numVal: $numEntries!$callback!"
       return $::COMP_MSG_ERR_OK
     }
 
-  } ; # namespace compMsgMsgDesc
-} ; # namespace compMsg
+    # ================================= getWifiKeyValueKeys ====================================
+    
+    proc getWifiKeyValueKeys {compMsgDispatcherVar compMsgWifiDataVar} {
+#      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $compMsgWifiDataVar wifiData
 
+      set fd [open [format "%s/CompMsgKeyValueKeys.txt" $::moduleFilesPath] "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+      set idx 0
+      while {$idx < $numEntries} {
+        gets $fd line
+        set flds [split $line ","]
+        foreach {fieldNameStr fieldValueStr fieldTypeStr} $flds break
+        set offset [string length "@key_"]
+        set result [::compMsg compMsgWifiData bssStr2BssInfoId [string range $fieldNameStr $offset end] bssInfoType]
+        if {$result != $::COMP_MSG_ERR_OK} {
+          return $result
+        }
+        switch $bssInfoType {
+          BSS_INFO_BSSID {
+            dict set wifiData bssKeys bssid $fieldValueStr
+          }
+          BSS_INFO_SSID {
+            dict set wifiData bssKeys ssid $fieldValueStr
+          }
+          BSS_INFO_SSID_LEN {
+            dict set wifiData bssKeys ssid_len $fieldValueStr
+          }
+          BSS_INFO_CHANNEL {
+            dict set wifiData bssKeys channel $fieldValueStr
+          }
+          BSS_INFO_RSSI {
+            dict set wifiData bssKeys rssi $fieldValueStr
+          }
+          BSS_INFO_AUTH_MODE {
+            dict set wifiData bssKeys authmode $fieldValueStr
+          }
+          BSS_INFO_IS_HIDDEN {
+            dict set wifiData bssKeys freq_offset $fieldValueStr
+          }
+          BSS_INFO_FREQ_OFFSET {
+            dict set wifiData bssKeys freqcal_val $fieldValueStr
+          }
+          BSS_INFO_FREQ_CAL_VAL {
+            dict set wifiData bssKeys is_hidden $fieldValueStr
+          }
+        }
+    
+puts stderr [format "fieldType:%s" $fieldTypeStr]
+        if {$result != $::COMP_DISP_ERR_OK} {
+          return $result
+        }
+        set result [::compMsg dataView getFieldTypeIdFromStr $fieldTypeStr fieldTypeId]
+        if {$result != $::COMP_DISP_ERR_OK} {
+          return $result
+        }
+        switch $bssInfoType {
+          BSS_INFO_BSSID {
+            dict set wifiData bssTypes bssid $fieldTypeId
+          }
+          BSS_INFO_SSID {
+            dict set wifiData bssTypes ssid $fieldTypeId
+          }
+          BSS_INFO_CHANNEL {
+            dict set wifiData bssTypes channel $fieldTypeId
+          }
+          BSS_INFO_RSSI {
+            dict set wifiData bssTypes rssi $fieldTypeId
+          }
+          BSS_INFO_AUTH_MODE {
+            dict set wifiData bssTypes authmode $fieldTypeId
+          }
+          BSS_INFO_IS_HIDDEN {
+            dict set wifiData bssTypes freq_offset $fieldTypeId
+          }
+          BSS_INFO_FREQ_OFFSET {
+            dict set wifiData bssTypes freqcal_val $fieldTypeId
+          }
+          BSS_INFO_FREQ_CAL_VAL {
+            dict set wifiData bssTypes is_hidden $fieldTypeId
+          }
+        }
+        incr idx
+      }
+      close $fd
+puts stderr "getWifiKeyValues done"
+      return $::COMP_MSG_ERR_OK
+    }
+
+  } ; # namespace compMsgMsgDesc
+}  ; # namespace compMsg

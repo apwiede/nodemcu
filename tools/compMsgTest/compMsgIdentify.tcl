@@ -656,24 +656,13 @@ puts stderr "decrypt error"
     
     # ================================= compMsgIdentifyInit ====================================
     
-    proc compMsgIdentifyInit {} {
+    proc compMsgIdentifyInit {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
       initHeadersAndFlags
       set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
       return $result
     }
     
-    # ================================= compMsgIdentify ====================================
-    
-    proc compMsgIdentify {command args} {
-      switch $command {
-        prepareEncryptedAnswer -
-        handleReceivedPart -
-        compMsgIdentifyInit {
-          return [uplevel 0 $command $args]
-        }
-      }
-      return $::COMP_MSG_ERR_OK
-    }
-
   } ; # namespace compMsgIdentify
 } ; # namespace compMsg

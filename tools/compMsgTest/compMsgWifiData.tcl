@@ -93,7 +93,7 @@ namespace eval compMsg {
   namespace eval compMsgWifiData {
     namespace ensemble create
       
-    namespace export getActionCallbackName 
+    namespace export bssStr2BssInfoId
 
     variable bssScanRunning
     variable bssScanInfos
@@ -125,7 +125,7 @@ namespace eval compMsg {
       upvar $fieldIdVar fieldId
     
       if {[dict exists $bssStr2BssInfoIds $fieldName]} {
-        set fieldId [dict get bssStr2BssInfoIds $fieldName]
+        set fieldId [dict get $bssStr2BssInfoIds $fieldName]
         return $::COMP_MSG_ERR_OK
       }
       return $::COMP_MSG_ERR_FIELD_NOT_FOUND
@@ -159,7 +159,7 @@ namespace eval compMsg {
     
     # ================================= bssScanDoneCb ====================================
     
-    pproc bssScanDoneCb {arg status} {
+    proc bssScanDoneCb {arg status} {
       struct bss_info *bss_link
       uint8_t numEntries
       bssScanInfo_t *scanInfo
@@ -514,7 +514,7 @@ namespace eval compMsg {
     
     # ================================= compMsgWifiInit ====================================
     
-    uint8_t compMsgWifiInit {compMsgDispatcherVar} {
+    proc compMsgWifiInit {compMsgDispatcherVar} {
       variable compMsgWifiData
       upvar $compMsgDispatcherVar compMsgDispatcher
     

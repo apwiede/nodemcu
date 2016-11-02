@@ -48,6 +48,8 @@
 #   numActions
 #   maxActions
 
+set ::COMP_MSG_ACTIONS_FILE_NAME "CompMsgActions.txt"
+
 namespace eval compMsg {
   namespace ensemble create
 
@@ -56,7 +58,7 @@ namespace eval compMsg {
   namespace eval compMsgAction {
     namespace ensemble create
       
-    namespace export getActionCallbackName 
+    namespace export getActionCallbackName compMsgActionInit setActionEntry
 
       variable compMsgActionEntries
       variable compMsgActions
@@ -398,32 +400,34 @@ if {0} {
     
     # ================================= setActionEntry ====================================
     
-    proc setActionEntry {compMsgDispatcherVar actionName mode u8CmdKey u16CmdKey} {
+    proc setActionEntry {compMsgDispatcherVar actionName mode cmdKey} {
+      variable compMsgActionEntries
       upvar $compMsgDispatcherVar cmdisp
     
-      if {compMsgActionEntries.numActionEntries >= compMsgActionEntries.maxActionEntries} {
-        compMsgActionEntries.maxActionEntries += 5;
-        compMsgActionEntries.actionEntries = {actionName2Action_t **}os_realloc{compMsgActionEntries.actionEntries, {compMsgActionEntries.maxActionEntries * sizeof{actionName2Action_t *}}};
-        checkAllocOK{compMsgActionEntries.actionEntries};
+puts stderr "setActionEntry $actionName $mode $cmdKey!"
+if {0} {
+      if {[dict get $compMsgActionEntries numActionEntries] >= [dict get $compMsgActionEntries maxActionEntries]} {
       }
-      idx = 0;
-      actionEntry = &actionName2Actions[idx];
-      while {actionEntry->actionName != NULL} { 
+      set idx 0
+      set actionEntry  &actionName2Actions[idx];
+      while {[dict get $actionEntry actionName] != NULL} { 
         if {c_strcmp{actionEntry->actionName, actionName} == 0} {
-          compMsgActionEntries.actionEntries[compMsgActionEntries.numActionEntries] = actionEntry;
+          compMsgActionEntries.actionEntries[compMsgActionEntries.numActionEntries] = actionEntry
           if {actionEntry->mode != 0} {
-            return COMP_DISP_ERR_DUPLICATE_ENTRY;
+            return $::COMP_DISP_ERR_DUPLICATE_ENTRY
           }
-          actionEntry->mode = mode;
-          actionEntry->u8CmdKey = u8CmdKey;
-          actionEntry->u16CmdKey = u16CmdKey;
-          compMsgActionEntries.numActionEntries++;
-          return COMP_DISP_ERR_OK;
+          actionEntry->mode = mode
+          actionEntry->u8CmdKey = u8CmdKey
+          actionEntry->u16CmdKey = u16CmdKey
+          compMsgActionEntries.numActionEntries++
+          return $::COMP_DISP_ERR_OK
         }
-        idx++;
-        actionEntry = &actionName2Actions[idx];
+        incr idx
+        actionEntry = &actionName2Actions[idx]
       }
-      return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      return $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+}
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= runAction ====================================
@@ -502,20 +506,22 @@ if {0} {
     # ================================= compMsgActionInit ====================================
     
     proc compMsgActionInit {compMsgDispatcherVar} {
+      variable compMsgActionEntries
+      variable compMsgActions
       upvar $compMsgDispatcherVar cmdisp
     
-      compMsgActionEntries.numActionEntries = 0;
-      compMsgActionEntries.maxActionEntries = 10;
-      compMsgActionEntries.actionEntries = {actionName2Action_t **}os_zalloc{compMsgActionEntries.maxActionEntries * sizeof{actionName2Action_t *}};
-      checkAllocOK{compMsgActionEntries.actionEntries};
+      set compMsgActionEntries [dict create]
+      dict set compMsgActionEntries numActionEntries 0
+      dict set compMsgActionEntries maxActionEntries 10
+      dict set compMsgActionEntries actionEntries [list]
     
-      compMsgActions.numActions = 0;
-      compMsgActions.maxActions = 10;
-      compMsgActions.actions = {actionName2Action_t **}os_zalloc{compMsgActions.maxActions * sizeof{actionName2Action_t  **}};
-      checkAllocOK{compMsgActions.actions};
+      set compMsgActions [dict create]
+      dict set compMsgActions numActions 0
+      dict set compMsgActions maxActions 10
+      dict set compMsgActions actions [list]
     
-      set result [::compMsg cmdisp compMsgMsgDesc->readActions{cmdisp, COMP_MSG_ACTIONS_FILE_NAME};
-      return result;
+      set result [::compMsg compMsgMsgDesc readActions cmdisp $::COMP_MSG_ACTIONS_FILE_NAME]
+      return $result
     }
 
   } ; # namespace compMsgAction

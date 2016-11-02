@@ -84,9 +84,9 @@ namespace eval compMsg {
   namespace eval compMsgDispatcher {
     namespace ensemble create
       
-    namespace export compMsgDispatcherInit freeCompMsgDataView createMsgFromLines
+    namespace export compMsgDispatcherInit newCompMsgDispatcher createMsgFromLines
     namespace export createMsgFromLines setMsgValuesFromLines createDispatcher setMsgParts
-    namespace export encryptMsg decryptMsg resetMsgInfo
+    namespace export encryptMsg decryptMsg resetMsgInfo initDispatcher
     namespace export dumpMsgParts dumpHeaderParts dumpMsgHeaderInfos
 
     variable compMsgDispatcher [dict create]
@@ -597,23 +597,21 @@ puts stderr "partsVar!$partsVar!"
     
     # ================================= initDispatcher ====================================
     
-    proc initDispatcher {} {
-      variable compMsgDispatcher
+    proc initDispatcher {comMsgDispatcherVar} {
+      upvar $comMsgDispatcherVar compMsgDispatcher
 
-if {0} {
-    ets_printf{"§initDispatcher!%p!§", self};
-      result = compMsgIdentifyInit{self};
-      checkErrOK{result};
-      result = compMsgSendReceiveInit{self};
-      checkErrOK{result};
-      result = compMsgActionInit{self};
-      checkErrOK{result};
-      result = compMsgModuleDataValuesInit{self};
-      checkErrOK{result};
-      result = compMsgWebsocketInit{self};
-      checkErrOK{result};
-}
-      return COMP_DISP_ERR_OK;
+puts stderr "initDispatcher"
+      set result [::compMsg compMsgIdentify compMsgIdentifyInit compMsgDispatcher]
+      checkErrOK $result
+#      set result [::compMsg compMsgsendReceive compMsgSendReceiveInit compMsgDispatcher]
+#      checkErrOK $result
+      set result [::compMsg compMsgAction compMsgActionInit compMsgDispatcher]
+      checkErrOK $result
+#      set result [::compMsg compMsgModuleData compMsgModuleDataValuesInit compMsgDispatcher]
+      checkErrOK $result
+#      set result [::compMsg compMsgWebsocket compMsgWebsocketInit compMsgDispatcher]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= createDispatcher ====================================
@@ -640,56 +638,17 @@ if {0} {
      proc newCompMsgDispatcher {} {
       variable compMsgDispatcher
 
-if {0} {
-      if {compMsgDispatcherSingleton != NULL} {
-        return compMsgDispatcherSingleton;
-      }
-      compMsgDispatcher_t *compMsgDispatcher = os_zalloc{sizeof(compMsgDispatcher_t});
-      if {compMsgDispatcher == NULL} {
-        return NULL;
-      }
-      compMsgDispatcher->compMsgDataView = newCompMsgDataView{};
-      if {compMsgDispatcher->compMsgDataView == NULL} {
-        return NULL;
-      }
+      dict set compMsgDispatcher numMsgHeaders 0
+      dict set compMsgDispatcher maxMsgHeaders 0
+      dict set compMsgDispatcher msgHeader2MsgPtrs [dict create]
     
-      compMsgDispatcherId++;
-      compMsgDispatcher->id = compMsgDispatcherId;
+      dict set compMsgDispatcher msgHeaderInfos headerFlags 0
+      dict set compMsgDispatcher msgHeaderInfos headerParts [list]
+      dict set compMsgDispatcher msgHeaderInfos numHeaderParts 0
+      dict set compMsgDispatcher msgHeaderInfos maxHeaderParts 0
     
-      compMsgDispatcher->numMsgHeaders = 0;
-      compMsgDispatcher->maxMsgHeaders = 0;
-      compMsgDispatcher->msgHeader2MsgPtrs = NULL;
+#      compMsgDispatcher->compMsgDataDescription = newCompMsgDataDescription{};
     
-      compMsgDispatcher->msgHeaderInfos.headerFlags = 0;
-      compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
-      compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
-      compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
-    
-      compMsgDispatcher->compMsgDataDescription = newCompMsgDataDescription{};
-    
-      compMsgDispatcher->createDispatcher = &createDispatcher;
-      compMsgDispatcher->initDispatcher = &initDispatcher;
-    
-      compMsgDispatcher->BMsg = &BMsg;
-      compMsgDispatcher->IMsg = &IMsg;
-      compMsgDispatcher->MMsg = &MMsg;
-      compMsgDispatcher->defaultMsg = &defaultMsg;
-      compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
-      compMsgDispatcher->createMsgFromLines = &createMsgFromLines;
-      compMsgDispatcher->setMsgValuesFromLines = &setMsgValuesFromLines;
-    
-      compMsgDispatcher->openFile = &openFile;
-      compMsgDispatcher->closeFile = &closeFile;
-      compMsgDispatcher->readLine = &readLine;
-      compMsgDispatcher->writeLine = &writeLine;
-    
-      compMsgDispatcher->encryptMsg = &encryptMsg;
-      compMsgDispatcher->decryptMsg = &decryptMsg;
-      compMsgDispatcher->toBase64 = &toBase64;
-      compMsgDispatcher->fromBase64 = &fromBase64;
-    
-      compMsgDispatcherSingleton = compMsgDispatcher;
-}
       return $::COMP_MSG_ERR_OK
     }
     
