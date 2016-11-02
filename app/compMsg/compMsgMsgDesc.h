@@ -170,6 +170,7 @@ typedef struct msgDescPart {
   uint8_t *fieldTypeStr;
   uint8_t fieldTypeId;
   uint8_t fieldLgth;
+  uint8_t fieldType;
   uint16_t fieldKey;
   uint16_t fieldSize;
   getFieldSizeCallback_t getFieldSizeCallback;

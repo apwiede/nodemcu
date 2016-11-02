@@ -75,7 +75,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
       result = msgDescPart->getFieldSizeCallback(self);
       checkErrOK(result);
       fieldInfo->fieldKey = msgDescPart->fieldKey;
-      msgDescPart->fieldSize += 2 * sizeof(uint16_t); // for key and lgth in front of value!!
+      msgDescPart->fieldSize += 2 * sizeof(uint16_t) + sizeof(uint8_t); // for key, type and lgth in front of value!!
       fieldInfo->fieldLgth = msgDescPart->fieldSize;
     }
     msgDescPartIdx++;
@@ -95,6 +95,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
   int numericValue;
   compMsgData_t *compMsgData;
 
+//ets_printf("setMsgFieldValue: %s %s\n", self->msgValPart->fieldNameStr, self->msgValPart->fieldValueStr);
   compMsgData = self->compMsgData;
   if (self->msgValPart->fieldValueStr[0] == '@') {
     // call the callback function for the field!!
@@ -164,6 +165,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
     }
     checkErrOK(result);
   }
+//ets_printf("setMsgFieldValue: done\n");
   return COMP_DISP_ERR_OK;
 }
 
@@ -191,6 +193,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   uint8_t *handle;
   char *endPtr;
 
+//ets_printf("setMsgValues\n");
   compMsgData = self->compMsgData;
   handle = self->msgHandle;
   type = 'A';
@@ -256,6 +259,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   int src;
   int dst;
 
+////ets_printf("buildMsg\n");
   // at this point an eventual callback for getting the values 
   // has been already done using runAction in createMsgFromHeaderPart
   // so now we can fix the offsets if needed for key value list entries

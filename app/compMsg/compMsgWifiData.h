@@ -134,6 +134,18 @@ typedef struct bssScanSizes {
   uint16_t freqcal_valSize;
 } bssScanSizes_t;
 
+typedef struct bssScanTypes {
+  uint8_t bssidType;
+  uint8_t bssidStrType;
+  uint8_t ssidType;
+  uint8_t channelType;
+  uint8_t rssiType;
+  uint8_t authmodeType;
+  uint8_t is_hiddenType;
+  uint8_t freq_offsetType;
+  uint8_t freqcal_valType;
+} bssScanTypes_t;
+
 typedef struct bssScanInfos {
   bssScanInfo_t *infos;
   uint8_t numScanInfos;
@@ -175,6 +187,7 @@ typedef struct compMsgWifiData {
   uint16_t provisioningPort;
   uint8_t provisioningIPAddr[16];
   bssScanSizes_t bssScanSizes;
+  bssScanTypes_t bssScanTypes;
 
   websocketBinaryReceived_t websocketBinaryReceived;
   websocketTextReceived_t websocketTextReceived;

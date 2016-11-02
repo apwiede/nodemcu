@@ -916,6 +916,7 @@ static uint8_t resetMsgDescParts(compMsgDispatcher_t *self) {
   int idx;
   msgDescPart_t *part;
 
+  idx = 0;
   while (idx < self->compMsgMsgDesc->numMsgDescParts) {
     part = &self->compMsgMsgDesc->msgDescParts[idx];
     if (part->fieldNameStr != NULL) {
@@ -939,6 +940,7 @@ static uint8_t resetMsgValParts(compMsgDispatcher_t *self) {
   int idx;
   msgValPart_t *part;
 
+  idx = 0;
   while (idx < self->compMsgMsgDesc->numMsgValParts) {
     part = &self->compMsgMsgDesc->msgValParts[idx];
     if (part->fieldNameStr != NULL) {
@@ -1180,6 +1182,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   uint8_t numEntries;
   uint8_t *fieldNameStr;
   uint8_t *fieldValueStr;
+  uint8_t *fieldTypeStr;
   char *endPtr;
   uint8_t lgth;
   uint8_t fieldLgth;
@@ -1193,6 +1196,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   uint8_t*ep;
   bool isEnd;
   uint8_t bssInfoType;
+  uint8_t fieldTypeId;
 
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, "CompMsgKeyValueKeys.txt", "r");
   checkErrOK(result);
@@ -1257,6 +1261,42 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
       compMsgWifiData->key_is_hidden = (uint16_t)uval;
       break;
     }
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldType
+    fieldTypeStr = cp;
+    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+ets_printf("fieldType:%s result: %d\n", fieldTypeStr, result);
+    checkErrOK(result);
+    result = self->compMsgDataView->dataView->getFieldTypeIdFromStr(self->compMsgDataView->dataView, fieldTypeStr, &fieldTypeId);
+    checkErrOK(result);
+    switch (bssInfoType) {
+    case BSS_INFO_BSSID:
+      compMsgWifiData->bssScanTypes.bssidType = (uint8_t)fieldTypeId;
+      break;
+    case BSS_INFO_SSID:
+      compMsgWifiData->bssScanTypes.ssidType = (uint8_t)fieldTypeId;
+      break;
+    case BSS_INFO_CHANNEL:
+      compMsgWifiData->bssScanTypes.channelType = (uint8_t)fieldTypeId;
+      break;
+    case BSS_INFO_RSSI:
+      compMsgWifiData->bssScanTypes.rssiType = (uint8_t)fieldTypeId;
+      break;
+    case BSS_INFO_AUTH_MODE:
+      compMsgWifiData->bssScanTypes.authmodeType = (uint8_t)fieldTypeId;
+      break;
+    case BSS_INFO_IS_HIDDEN:
+      compMsgWifiData->bssScanTypes.freq_offsetType = (uint8_t)fieldTypeId;
+      break;
+    case BSS_INFO_FREQ_OFFSET:
+      compMsgWifiData->bssScanTypes.freqcal_valType = (uint8_t)fieldTypeId;
+      break;
+    case BSS_INFO_FREQ_CAL_VAL:
+      compMsgWifiData->bssScanTypes.is_hiddenType = (uint8_t)fieldTypeId;
+      break;
+    }
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }
@@ -1268,6 +1308,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   result = self->compMsgMsgDesc->closeFile(self->compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
+ets_printf("getWifiKeyValues done\n");
 }
 
 #undef checkIsEnd
