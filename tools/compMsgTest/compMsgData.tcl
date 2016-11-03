@@ -126,9 +126,10 @@ namespace eval compMsg {
     
     # ===================== dumpMsg =============================
     
-    proc dumpMsg {} {
-      variable compMsgData
+    proc dumpMsg {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
 
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
       puts stderr "dumpMsg handle: [dict get $compMsgData handle]"
       puts stderr [format "  numFields: %d max: %d" [dict get $compMsgData numFields] [dict get $compMsgData maxFields]]
       puts stderr [format "  numTableRows: %d numTableRowFields: %d numRowFields: %d" [dict get $compMsgData numTableRows] [dict get $compMsgData numTableRowFields] [dict get $compMsgData numRowFields]]
@@ -325,11 +326,12 @@ namespace eval compMsg {
     
     # ============================= getMsgData ========================
     
-    proc getMsgData {dataVar lgthVar} {
-      variable compMsgData
+    proc getMsgData {compMsgDispatcherVar dataVar lgthVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $dataVar data
       upvar $lgthVar lgth
 
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
         return $::COMP_MSG_ERR_NOT_YET_INITTED
       }
@@ -586,16 +588,15 @@ pdict $fieldInfo
     
     # ================================= setFieldValue ====================================
     
-    proc setFieldValue {fieldName value} {
-      variable compMsgData
-     
+    proc setFieldValue {compMsgDispatcherVar fieldName value} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
         return $::COMP_MSG_ERR_NOT_YET_INITTED
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       switch $fieldNameId {
         COMP_MSG_SPEC_FIELD_TOTAL_LGTH -
         COMP_MSG_SPEC_FIELD_CMD_LGTH -
@@ -625,6 +626,7 @@ pdict $fieldInfo
         incr idx
       }
     #ets_printf{"idx: %d\n", idx};
+      dict set compMsgDispatcher compMsgData $compMsgData
       return $::DATA_VIEW_ERR_FIELD_NOT_FOUND
     }
     
@@ -696,9 +698,10 @@ pdict $fieldInfo
     
     # ================================= prepareMsg ====================================
     
-    proc prepareMsg {} {
-      variable compMsgData
-    
+    proc prepareMsg {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
         return $::COMP_MSG_ERR_NOT_YET_INITTED
       }
@@ -749,6 +752,7 @@ pdict $fieldInfo
       }
       dict set compMsgData fields $fields
       dict lappend compMsgData flags COMP_MSG_IS_PREPARED
+      dict set compMsgDispatcher compMsgData $compMsgData
       return $::COMP_MSG_ERR_OK
     }
     
@@ -770,9 +774,12 @@ pdict $fieldInfo
 
     # ================================= initMsg ====================================
     
-    proc initMsg {numTableRows numTableRowFields} {
-      variable compMsgData
+    proc initMsg {compMsgDispatcherVar numTableRowsVar numTableRowFieldsVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar numTableRowsVar numTableRows
+      upvar numTableRowFieldsVar numTableRowFields
     
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
       # initialize field offsets for each field
       # initialize totalLgth, headerLgth, cmdLgth
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
@@ -886,6 +893,7 @@ dict set compMsgData numTabRowFields $numTableRowFields
       }
       dict set compMsgData fields $fields
 puts stderr "initMsg done!"
+      dict set compMsgDispatcher compMsgData $compMsgData
       return $::COMP_MSG_ERR_OK
     }
     

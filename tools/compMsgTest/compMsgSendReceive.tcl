@@ -39,7 +39,7 @@ namespace eval compMsg {
   namespace eval compMsgSendReceive {
     namespace ensemble create
       
-    namespace export compMsgSendReceiveInit
+    namespace export compMsgSendReceiveInit sendMsg
 
     variable compMsgActionEntries
 
@@ -79,14 +79,20 @@ namespace eval compMsg {
     proc sendMsg {compMsgDispatcherVar msgData msgLgth} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      switch [dict get $compMsgDispatcher currHdr hdrHandleType] {
+      set handleType [dict get $compMsgDispatcher currHdr hdrHandleType]
+      set encryption [dict get $compMsgDispatcher currHdr hdrEncryption]
+      switch $handleType {
         "A" {
-    ets_printf{"wub %p\n", self->wud}
-          if {self->wud == NULL} {
-            return COMP_DISP_ERR_NO_WEBSOCKET_OPENED
+          # Wifi -> App Provisioning
+puts stderr "sendMsg A: Wifi -> App Provisioning encryption: $encryption!"
+puts stderr [format "wud %s", [dict get $compMsgDispatcher wud]
+          if {[dict get $compMsgDispatcher wud] eq [list]} {
+            return $::COMP_DISP_ERR_NO_WEBSOCKET_OPENED
           }
         }
         "G" {
+          # App -> Wifi Provisioning
+puts stderr "sendMsg G: App -> Wifi Provisioning encryption: $encryption!"
         }
         "S" {
         }
@@ -103,8 +109,8 @@ namespace eval compMsg {
         default {
           return $::COMP_DISP_ERR_BAD_HANDLE_TYPE
         }
-        return $::COMP_DISP_ERR_OK
       }
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= compMsgSendReceiveInit ====================================

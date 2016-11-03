@@ -33,10 +33,29 @@
 
 # compMsgDispatcher dict
 #   prepareValuesCbName
+
+#   currHdr
 #   msgDescParts
 #   msgValParts
-
-
+#   compMsgMsgDesc
+#   compMsgData
+#   msgDescPart
+#     fieldNameId
+#     fieldTypeId
+#     fieldKey
+#     fieldSize
+#     getFieldSizeCallback
+#     fieldNameStr
+#     fieldTypeStr
+#     fieldLgth
+#   msgValPart
+#     fieldNameId
+#     fieldFlags
+#     fieldKeyValueStr
+#     fieldValue
+#     getFieldValueCallback
+#     fieldNameStr
+#     fieldValueStr
 
 
 
