@@ -107,7 +107,7 @@ namespace eval compMsg {
     namespace export createMsgFromLines setMsgValuesFromLines createDispatcher setMsgParts
     namespace export encryptMsg decryptMsg resetMsgInfo initDispatcher
     namespace export dumpMsgParts dumpHeaderParts dumpMsgHeaderInfos
-    namespace export createMsgFromHeaderPart
+    namespace export createMsgFromHeaderPart setSocketForAnswer
 
     variable compMsgDispatcher [dict create]
     variable compMsgDispatcherHandles
@@ -520,8 +520,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $handleVar handle 
     
-puts stderr "===createMsgFromHeaderPart!"
-puts stderr "1"
+puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
       set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
       checkErrOK $result
       set compMsgData [dict create]
@@ -535,7 +534,6 @@ puts stderr "1"
         checkErrOK $result
         incr idx
       }
-puts stderr "6"
       dict set compMsgDispatcher compMsgData $compMsgData
     
       # runAction calls at the end buildMsg
@@ -551,9 +549,10 @@ puts stderr "prepareValuesCb: $prepareValuesCb!"
         $prepareValuesCb compMsgDispatcher
         # runAction starts a call with a callback and returns here before the callback has been running!!
         # when when coming here we are finished and the callback will do the work later on!
-puts stderr "runAction done"
+puts stderr "runAction done![dict keys $compMsgDispatcher]!"
         return $result
       } else {
+puts stderr "8![dict keys $compMsgDispatcher]!"
         set result [::compMsg compMsgBuildMsg buildMsg compMsgDispatcher]
 if {0} {
         result = setMsgValues{self}
@@ -665,9 +664,18 @@ puts stderr "partsVar!$partsVar!"
       if {checkHandle(handle, compMsgDispatcher} != COMP_DISP_ERR_OK) {
         return COMP_DISP_ERR_HANDLE_NOT_FOUND;
       }
-      return COMP_DISP_ERR_OK;
+      return $::COMP_DISP_ERR_OK;
     }
     
+    # ================================= setSocketForAnswer ====================================
+    
+    proc setSocketForAnswer {comMsgDispatcherVar sock} {
+      upvar $comMsgDispatcherVar compMsgDispatcher
+
+      dict set compMsgDispatcher socketForAnswer $sock
+      return $::COMP_DISP_ERR_OK;
+    }
+
     # ================================= initDispatcher ====================================
     
     proc initDispatcher {comMsgDispatcherVar} {

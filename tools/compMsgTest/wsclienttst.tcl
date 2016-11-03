@@ -34,6 +34,7 @@
 # ==========================================================================
 
 package require websocket
+package require aes
 #package require tls
 #tls::init -tls1 1 ;# forcibly activate support for the TLS1 protocol
 
@@ -242,20 +243,20 @@ proc showApList {def handle2 lst} {
   set rowLst [list]
   set row 0
 if {0} {
-  set result [::structmsg get_definitionTableFieldNames $def tableFieldNames]
+  set result [::compMsg get_definitionTableFieldNames $def tableFieldNames]
   checkErrOK $result
-  set result [::structmsg get_definitionNumTableRows $def numTableRows]
+  set result [::compMsg get_definitionNumTableRows $def numTableRows]
   checkErrOK $result
-  set result [::structmsg get_definitionNumTableRowFields $def numTableRowFields]
+  set result [::compMsg get_definitionNumTableRowFields $def numTableRowFields]
   checkErrOK $result
   set row 0
   while {$row < $numTableRows} {
     foreach name $tableFieldNames {
-      structmsg get_definitionTableFieldInfo $def $name 0 fieldInfo
+      compMsg get_definitionTableFieldInfo $def $name 0 fieldInfo
       if {$row == 0} {
         lappend lst 0 $name
       }
-      set result [structmsg get_tableFieldValue $handle2 $name $row value]
+      set result [compMsg get_tableFieldValue $handle2 $name $row value]
       lappend rowLst $value
     }
     lappend valueLst $rowLst
@@ -293,21 +294,23 @@ proc clientHandler { sock type msg } {
 puts stderr "clientHandler: $type $msg!"
   switch -glob -nocase -- $type {
     co* {
-      puts "Connected on $sock"
+      puts "===Connected on $sock"
     }
     te* {
-      puts "RECEIVED: $msg"
+      puts "===RECEIVED: $msg"
     }
     cl* -
     dis* {
     }
     binary {
-::structmsg structmsgData dumpBinary $msg [string length $msg] "MSG"
+      puts "===RECEIVED BINARY: $msg"
+::compMsg compMsgData dumpBinary $msg [string length $msg] "MSG"
 puts stderr "need handler for received MSG!lgth: [string length $msg]!"
 
-      ::structmsg structmsgIdentify structmsgIdentifyReset
-      ::structmsg dataView setData "" 0
-      ::structmsg structmsgIdentify structmsgIdentify handleReceivedPart $msg [string length $msg]
+      ::compMsg compMsgIdentify compMsgIdentifyInit ::compMsgDispatcher
+      ::compMsg compMsgIdentify compMsgIdentifyReset
+      ::compMsg dataView setData "" 0
+      ::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]
 
     }
   }
@@ -327,11 +330,16 @@ proc dumpBinay {data} {
 # ================================ getAPInfos ===============================
 
 proc getAPInfos { sock } {
-#  puts stderr "[::websocket::conninfo $sock type] from [::websocket::conninfo $sock sockname] to [::websocket::conninfo $sock peername]"
+  puts stderr "[::websocket::conninfo $sock type] from [::websocket::conninfo $sock sockname] to [::websocket::conninfo $sock peername]"
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 AD hdr]
   checkErrOK $result
 puts stderr "===after getHeaderFromUniqueFields"
-  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart compMsgDispatcher $hdr handle]
+  set ::compMsgDispatcher [dict create]
+  set result [::compMsg compMsgDispatcher setSocketForAnswer ::compMsgDispatcher $sock]
+puts stderr "===after setSocket"
+pdict $::compMsgDispatcher
+  checkErrOK $result
+  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
   checkErrOK $result
 
 #  set result [::compMsg compMsgBuildMsg buildMsgFromHeaderPart $hdr]
@@ -342,6 +350,7 @@ puts stderr "===after getHeaderFromUniqueFields"
 
 # ================================ main ===============================
 
+puts stderr "ws://${host}:${PORT}${path}"
 set clientSocket [::websocket::open "ws://${host}:${PORT}${path}" ::clientHandler] 
 puts stderr "===clientSocket: $clientSocket"
 

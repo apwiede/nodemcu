@@ -385,7 +385,8 @@ namespace eval compMsg {
       
     # ================================= readHeadersAndSetFlags ====================================
     
-    proc readHeadersAndSetFlags {fileName} {
+    proc readHeadersAndSetFlags {compMsgDispatcherVar fileName} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
       variable headerInfos
       variable dispFlags
     
@@ -572,6 +573,10 @@ namespace eval compMsg {
         incr idx
       }
       close $fd
+puts stderr "HI![dict keys $headerInfos]!"
+puts stderr "DS![dict keys $compMsgDispatcher]!"
+
+dict set compMsgDispatcher headerInfos $headerInfos
       return $result
     }
 
@@ -580,6 +585,7 @@ namespace eval compMsg {
     proc readActions {compMsgDispatcherVar fileName} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
+puts stderr "sfa 04 [dict exists $compMsgDispatcher socketForAnswer]!"
       set fd [open [format "%s/$fileName" $::moduleFilesPath] "r"]
       gets $fd line
       set flds [split $line ","]
@@ -595,6 +601,7 @@ puts stderr "readActions: $numEntries!"
         incr idx
       }
       close $fd
+puts stderr "sfa 05 [dict exists $compMsgDispatcher socketForAnswer]!"
       return $::COMP_MSG_DESC_ERR_OK
     }
 
@@ -682,6 +689,7 @@ puts stderr "readActions: $numEntries!"
     # ================================= getMsgPartsFromHeaderPart ====================================
     
     proc getMsgPartsFromHeaderPart {compMsgDispatcherVar hdr handle} {
+      variable headerInfos
       upvar $compMsgDispatcherVar compMsgDispatcher
     
       dict set compMsgDispatcher currHdr $hdr
@@ -784,9 +792,10 @@ puts stderr "numVal: $numEntries!$callback!"
     # ================================= getWifiKeyValueKeys ====================================
     
     proc getWifiKeyValueKeys {compMsgDispatcherVar compMsgWifiDataVar} {
-#      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $compMsgWifiDataVar wifiData
 
+puts stderr "sfa 01 [dict exists $compMsgDispatcher socketForAnswer]!"
       set fd [open [format "%s/CompMsgKeyValueKeys.txt" $::moduleFilesPath] "r"]
       gets $fd line
       set flds [split $line ","]

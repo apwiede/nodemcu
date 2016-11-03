@@ -93,6 +93,9 @@ puts stderr [format "wud %s", [dict get $compMsgDispatcher wud]
         "G" {
           # App -> Wifi Provisioning
 puts stderr "sendMsg G: App -> Wifi Provisioning encryption: $encryption!"
+puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
+          ::websocket::send [dict get $compMsgDispatcher socketForAnswer] binary $msgData
+          return $::COMP_DISP_ERR_OK
         }
         "S" {
         }

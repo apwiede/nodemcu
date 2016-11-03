@@ -76,7 +76,7 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export compMsgIdentify freeCompMsgDataView sendEncryptedMsg
-    namespace export compMsgIdentifyReset compMsgIdentifyInit
+    namespace export compMsgIdentifyReset compMsgIdentifyInit handleReceivedPart
 
     variable headerInfos [list]
     variable received [list]
@@ -349,7 +349,7 @@ puts stderr "Fitting entry not found!"
       set myHeaderLgth 0
       dict set headerInfos seqIdx 0
       set headerSequence [dict get $headerInfos headerSequence]
-      switch [lindex $headerSequence [dict get $headerInfos seqIdx] {
+      switch [lindex $headerSequence [dict get $headerInfos seqIdx]] {
         COMP_DISP_U16_DST {
           set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
           dict set received toPart $value
@@ -465,6 +465,7 @@ puts stderr "Fitting entry not found!"
       dict set headerInfos seqIdxAfterStart [dict get $headerInfos seqIdx]
       dict set headerInfos currPartIdx 0
       set result [nextFittingEntry 0 0]
+puts stderr "getHeaderIndexFromHeaderFields end"
       return $result
     }
     
@@ -583,19 +584,22 @@ if {0} {
         return $result
       }
 }
-puts stderr "handleReceivedPart end"
+puts stderr "handleReceivedMsg end"
       return $::COMP_MSG_ERR_OK
     }
 
     # ================================= handleReceivedPart ====================================
     
-    proc handleReceivedPart {buffer lgth} {
+    proc handleReceivedPart {compMsgDispatcherVar buffer lgth} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
       variable headerInfos
       variable received
-
       
       set idx 0
-puts stderr "bufferl:[string length $buffer]!$lgth!"
+      set headerInfos [dict get $compMsgDispatcher headerInfos]
+puts stderr "==headerInfos![dict keys [dict get $compMsgDispatcher headerInfos]]!"
+puts stderr "==compMsgDispatcher![dict keys $compMsgDispatcher]!"
+puts stderr "==bufferl:[string length $buffer]!$lgth!"
       while {$idx < $lgth} {
         if {![dict exists $received totalLgth]} {
           dict set received totalLgth -999
@@ -613,7 +617,9 @@ puts stderr "bufferl:[string length $buffer]!$lgth!"
           set hdrIdx [dict get $headerInfos currPartIdx]
           set headerParts [dict get $headerInfos headerParts]
           set hdr [lindex $headerParts $hdrIdx]
-          if {[dict get $hdr encryption] eq "E"} {
+puts stderr "hdrIdx!$hdrIdx!"
+pdict $hdr
+          if {[dict get $hdr hdrEncryption] eq "E"} {
             set myHeaderLgth [dict get $headerInfos headerLgth]
             set myHeader [string range $buffer 0 [expr {$myHeaderLgth - 1}]]
             set mlen [expr {$lgth - $myHeaderLgth}]
@@ -630,7 +636,30 @@ puts stderr "decrypt error"
 ::compMsg compMsgData dumpBinary $buffer $lgth "decrypted"
             dict set received buf $buffer
           }
-          set result [::compMsg compMsgIdentify handleReceivedMsg $received $hdrInfos]
+puts stderr "HDR"
+pdict $hdr
+          set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
+          set compMsgData [dict create]
+          set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts] handle]
+puts stderr "handle: $handle!"
+          checkErrOK $result
+          set idx 0
+          while {$idx < [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]} {
+            set msgDescParts [dict get $compMsgDispatcher msgDescParts]
+            set msgDescPart [lindex $msgDescParts $idx] 
+            set result [::compMsg compMsgData addField compMsgData [dict get $msgDescPart fieldNameStr] [dict get $msgDescPart fieldTypeStr] [dict get $msgDescPart fieldLgth]]
+            checkErrOK $result
+            incr idx
+          }
+          dict set compMsgDispatcher compMsgData $compMsgData
+::compMsg dataView setData [dict get $received buf] $mlen
+::compMsg compMsgData initReceivedMsg compMsgDispatcher numTableRows numTableRowFields
+::compMsg compMsgData dumpMsg compMsgDispatcher
+
+
+set result [::compMsg compMsgData getFieldValue "@dst" value]
+pust stderr "dst!$value!"
+#          set result [::compMsg compMsgIdentify handleReceivedMsg $received $headerInfos]
           return $result
         }
         incr idx
@@ -660,7 +689,7 @@ puts stderr "decrypt error"
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       initHeadersAndFlags
-      set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
+      set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags compMsgDispatcher ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
       return $result
     }
     

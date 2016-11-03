@@ -234,7 +234,7 @@ if {0} {
     
       set result [::compMsg compMsgData prepareMsg compMsgDispatcher]
       checkErrOK $result
-::compMsg compMsgData dumpMsg compMsgDispatcher
+#::compMsg compMsgData dumpMsg compMsgDispatcher
       return $::COMP_DISP_ERR_OK
     }
 
@@ -268,24 +268,22 @@ puts stderr "buildMsg"
       checkErrOK $result
       set result [::compMsg compMsgData getMsgData compMsgDispatcher msgData msgLgth]
       checkErrOK $result
-::compMsg compMsgData dumpBinary $msgData $msgLgth "msgData"
-if {0} {
-      if {self->currHdr->hdrEncryption == 'E'} {
-        cryptKey = "a1b2c3d4e5f6g7h8"
-        ivlen = 16
-        klen = 16
+#::compMsg compMsgData dumpBinary $msgData $msgLgth "msgData"
+      if {[dict get $compMsgDispatcher currHdr hdrEncryption] eq "E"} {
+        set cryptKey "a1b2c3d4e5f6g7h8"
+        set ivlen 16
+        set klen 16
     
-    ets_printf{"need to encrypt message!\n"}
-        headerLgth = self->compMsgData->headerLgth
-        mlen = self->compMsgData->totalLgth - headerLgth
-    ets_printf{"msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth}
-        toCryptPtr = msgData + self->compMsgData->headerLgth
-        result = self->encryptMsg{toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth}
-        checkErrOK{result}
-        c_memcpy{toCryptPtr, encryptedMsgData, encryptedMsgDataLgth}
-    ets_printf{"crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen}
+puts stderr "need to encrypt message!"
+        set headerLgth [dict get $compMsgDispatcher compMsgData headerLgth]
+        set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth}]
+        set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] end]
+        set header [string range $msgData 0 [expr {$headerLgth - 1}]]
+        set result [::compMsg compMsgDispatcher encryptMsg $toCrypt $mlen $cryptKey $klen $cryptKey $ivlen encryptedMsgData encryptedMsgDataLgth]
+        checkErrOK $result
+        set msgData "${header}${encryptedMsgData}"
+puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
-}
         
       # here we need to decide where and how to send the message!!
       # from currHdr we can see the handle type and - if needed - the @dst
