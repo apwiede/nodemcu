@@ -125,7 +125,21 @@ typedef struct buildListMsgInfos {
   uint16_t dst;
 } buildListMsgInfos_t;
 
-typedef struct websocketUserData websocketUserData_t;
+typedef struct websocketUserData {
+  struct espconn *pesp_conn;
+  uint8_t isWebsocket;
+  uint8_t num_urls;
+  uint8_t max_urls;
+  int remote_port;
+  uint8_t remote_ip[4];
+  char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
+  char *curr_url; // that is url which has been provided in the received data
+  compMsgDispatcher_t *compMsgDispatcher;
+  websocketBinaryReceived_t websocketBinaryReceived;
+  websocketTextReceived_t websocketTextReceived;
+} websocketUserData_t;
+
+//typedef struct websocketUserData websocketUserData_t;
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 // Action stuff

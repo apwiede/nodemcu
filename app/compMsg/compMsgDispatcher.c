@@ -511,89 +511,6 @@ ets_printf("runAction done\n");
 #endif
     // FIXME !! here we need a call to send the (eventually encrypted) message!!
   }
-
-
-#ifdef NOTDEF
-
-  result = self->compMsgData->initMsg(self->compMsgData);
-  checkErrOK(result);
-
-    // fieldValue
-    fieldValueStr = cp;
-    result = self->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
-    checkErrOK(result);
-    if (fieldValueStr[0] == '@') {
-      uint8_t type = 'X';
-      if (fieldNameStr[0] == '#') {
-ets_printf("value of keyValue: %s\n", fieldValueStr);
-      } else {
-        // call the callback function vor the field!!
-        result = self->fillMsgValue(self, fieldValueStr, type,  fieldTypeId);
-        checkErrOK(result);
-      }
-    } else {
-      if (fieldNameStr[0] == '#') {
-ets_printf("value of keyValue: %s\n", fieldValueStr);
-      } else {
-        numericValue = 0;
-        switch (fieldNameId) {
-        case COMP_MSG_SPEC_FIELD_DST:
-          numericValue = hdr->hdrFromPart;
-          fieldValueStr = NULL;
-          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-          break;
-        case COMP_MSG_SPEC_FIELD_SRC:
-          fieldValueStr = NULL;
-          numericValue = hdr->hdrToPart;
-          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-          break;
-        case COMP_MSG_SPEC_FIELD_CMD_KEY:
-          // check for u8CmdKey/u16CmdKey here
-          fieldValueStr = NULL;
-          numericValue = hdr->hdrU16CmdKey;
-          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-          break;
-        default:
-          switch (fieldTypeId) {
-          case DATA_VIEW_FIELD_UINT8_T:
-          case DATA_VIEW_FIELD_INT8_T:
-          case DATA_VIEW_FIELD_UINT16_T:
-          case DATA_VIEW_FIELD_INT16_T:
-          case DATA_VIEW_FIELD_UINT32_T:
-          case DATA_VIEW_FIELD_INT32_T:
-            {
-              uval = c_strtoul(fieldValueStr, &endPtr, 10);
-              if (endPtr == (char *)(ep-1)) {
-                numericValue = (int)uval;
-                fieldValueStr = NULL;
-              } else {
-                numericValue = 0;
-              }
-            }
-            break;
-          default:
-            numericValue = 0;
-            break;
-          }
-          result = self->compMsgData->setFieldValue(self->compMsgData, fieldNameStr, numericValue, fieldValueStr);
-          checkErrOK(result);
-          break;
-        }
-      }
-    }
-    if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
-    }
-    idx++;
-  }
-#undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
-  result = self->compMsgData->setFieldValue(self->compMsgData, "@cmdKey", hdr->hdrU16CmdKey, NULL);
-  checkErrOK(result);
-  result = self->compMsgData->prepareMsg(self->compMsgData);
-  checkErrOK(result);
-self->compMsgData->dumpMsg(self->compMsgData);
-#endif
   return COMP_MSG_ERR_OK;
 }
 
@@ -800,11 +717,13 @@ if (self->compMsgData == NULL) {
 result = self->getNewCompMsgDataPtr(self);
 checkErrOK(result);
 }
+#ifdef NOTDEF
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
 checkErrOK(result);
 result = self->createMsgFromHeaderPart(self, hdr, &handle);
 ets_printf("handle: %s result: %d\n", handle, result);
 checkErrOK(result);
+#endif
   return COMP_DISP_ERR_OK;
 }
 

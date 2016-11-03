@@ -105,18 +105,6 @@ enum compMsg_error_code
   WEBSOCKET_ERR_MAX_SOCKET_REACHED = -7,
 };
 
-typedef struct websocketUserData {
-  struct espconn *pesp_conn;
-  uint8_t isWebsocket;
-  uint8_t num_urls;
-  uint8_t max_urls;
-  char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
-  char *curr_url; // that is url which has been provided in the received data
-  compMsgDispatcher_t *compMsgDispatcher;
-  websocketBinaryReceived_t websocketBinaryReceived;
-  websocketTextReceived_t websocketTextReceived;
-} websocketUserData_t;
-
 #define BASE64_INVALID '\xff'
 #define BASE64_PADDING '='
 #define ISBASE64(c) (unbytes64[c] != BASE64_INVALID)
@@ -408,13 +396,18 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   ets_printf("%d",pesp_conn->proto.tcp->remote_port);
   ets_printf(" received.\n");
 
-
   wud = (websocketUserData_t *)pesp_conn->reverse;
+  wud->remote_ip[0] = pesp_conn->proto.tcp->remote_ip[0];
+  wud->remote_ip[1] = pesp_conn->proto.tcp->remote_ip[1];
+  wud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
+  wud->remote_ip[3] = pesp_conn->proto.tcp->remote_ip[3];
+  wud->remote_port = pesp_conn->proto.tcp->remote_port;
   if (strstr(pdata, "GET /") != 0) {
     char *begin = strstr(pdata, "GET /") + 4;
     char *end = strstr(begin, " ");
     os_memcpy(url, begin, end - begin);
     url[end - begin] = 0;
+ets_printf("url: %s\n", url);
   }
   if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
     idx = 0;
@@ -428,7 +421,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
       idx++;
     }
   }
-//ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
+ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
 
   if(wud->isWebsocket == 1) {
     char *data = "";

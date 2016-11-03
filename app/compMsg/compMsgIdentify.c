@@ -149,9 +149,13 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   found = 0;
   while (hdrIdx < hdrInfos->numHeaderParts) {
     hdr = &hdrInfos->headerParts[hdrIdx];
+ets_printf("hdrIdx: %d to: %d %d\n", hdrIdx, hdr->hdrToPart, received->toPart);
     if (hdr->hdrToPart == received->toPart) {
+ets_printf("from: %d %d\n", hdr->hdrFromPart, received->fromPart);
       if (hdr->hdrFromPart == received->fromPart) {
+ets_printf("lgth: %d %d\n", hdr->hdrTotalLgth, received->totalLgth);
         if ((hdr->hdrTotalLgth == received->totalLgth) || (hdr->hdrTotalLgth == 0)) {
+ets_printf("cmdkey: 0x%04x 0x%04x\n", u16CmdKey, received->u16CmdKey);
           if (u16CmdKey != 0) {
             if (u16CmdKey == received->u16CmdKey) {
               found = 1;
@@ -177,7 +181,7 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   // next sequence field is handle type (skip, we have it in hdr fields)
   hdrInfos->seqIdx++;
   received->encryption = hdr->hdrEncryption;
-ets_printf("§nextFitting!found!%d!hdrIdx!%d§\n", found, hdrIdx);
+ets_printf("§nextFitting!found!%d!hdrIdx!%d§cmdKey:0x%04x!\n", found, hdrIdx, hdr->hdrU16CmdKey);
   return COMP_DISP_ERR_OK;
 }
 
@@ -267,6 +271,22 @@ ets_printf("§IndexFromHeaderFields!result!%d!currPartIdx!%d!§\n", result, hdrI
   return result;
 }
 
+// ================================= prepareAnswerMsg ====================================
+    
+static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t **handle) {
+  int result;
+  headerPart_t *hdr;
+  int hdrIdx;
+
+  hdrIdx = hdrInfos->currPartIdx;
+  hdrIdx++; // the Ack message has to be the next entry in headerInfos!!
+  hdr = &hdrInfos->headerParts[hdrIdx];
+  result = self->createMsgFromHeaderPart(self, hdr, handle);
+ets_printf("prepareAnserMsg:hdrIdx: %d cmdKey: 0x%04x handle: %s result: %d\n", hdrIdx, hdr->hdrU16CmdKey, handle, result);
+  checkErrOK(result);
+  return result;
+}
+
 // ================================= handleReceivedMsg ====================================
     
 static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos) {
@@ -280,6 +300,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
   uint8_t u8;
   uint8_t startOffset;
   uint16_t sequenceEntry;
+  uint8_t *handle;
 
   dataView = self->compMsgDataView->dataView;
   hdrIdx = hdrInfos->currPartIdx;
@@ -299,7 +320,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
       received->u16CmdKey = u16;
       received->fieldOffset += 2;
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
-//ets_printf("§u16CmdKey!0x%04x!§\n", received->u16CmdKey);
+ets_printf("§u16CmdKey!0x%04x!§\n", received->u16CmdKey);
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
         hdrInfos->currPartIdx++;
         result = self->nextFittingEntry(self, 0, received->u16CmdKey);
@@ -309,16 +330,16 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
       break;
     case COMP_DISP_U0_CMD_LGTH:
       received->fieldOffset += 2;
-//ets_printf("§u0CmdLgth!0!§\n");
+ets_printf("§u0CmdLgth!0!§\n");
       break;
     case COMP_DISP_U16_CMD_LGTH:
       result = self->compMsgDataView->dataView->getUint16(self->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdLgth = u16;
       received->fieldOffset += 2;
-//puts stderr [format "§u16CmdLgth!%c!§" [dict get $received u16CmdLgth]
+ets_printf("§u16CmdLgth!0x%04x!§\n", received->u16CmdLgth);
       break;
     case COMP_DISP_U0_CRC:
-//ets_printf("§u0Crc!0!§");
+ets_printf("§u0Crc!0!§");
       result = COMP_MSG_ERR_OK;
       break;
     case COMP_DISP_U8_CRC:
@@ -326,18 +347,20 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
       fieldInfo.fieldOffset = received->totalLgth - 1;
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgDataView->getCrc(self->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
-//ets_printf("§u8Crc!res!%d!§", result);
+ets_printf("§u8Crc!res!%d!§", result);
       break;
     case COMP_DISP_U16_CRC:
       fieldInfo.fieldLgth = 2;
       fieldInfo.fieldOffset = received->totalLgth - 2;
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgDataView->getCrc(self->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
-//ets_printf("§u16Crc!res!%d!§", result);
+ets_printf("§u16Crc!res!%d!§", result);
       break;
     }
     hdrInfos->seqIdx++;
   }
+  result = prepareAnswerMsg(self, hdrInfos, &handle);
+  checkErrOK(result);
 #ifdef DOACTIONS
         if (result != COMP_MSG_ERR_OK) {
 // FIXME !! TEMPORARY!!
@@ -412,7 +435,7 @@ cryptKey = "a1b2c3d4e5f6g7h8";
         c_memcpy(cryptedPtr, decrypted, decryptedLgth);
       }
       result = self->handleReceivedMsg(self, received, hdrInfos);
-ets_printf("handleReceivedMsg end idx: %d result: %d\n", idx, result);
+ets_printf("handleReceivedMsg end buffer idx: %d result: %d\n", idx, result);
       return result;
     }
     idx++;
