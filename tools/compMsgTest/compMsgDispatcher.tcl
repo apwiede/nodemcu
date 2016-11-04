@@ -520,7 +520,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $handleVar handle 
     
-puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
+#puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
       set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
       checkErrOK $result
       set compMsgData [dict create]
@@ -540,7 +540,7 @@ puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
     #  self->resetBuildMsgInfos{self}
     #  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey // used in buildMsg -> setMsgValues!!
       set prepareValuesCb [dict get $compMsgDispatcher compMsgMsgDesc prepareValuesCbName]
-puts stderr "prepareValuesCb: $prepareValuesCb!"
+#puts stderr "prepareValuesCb: $prepareValuesCb!"
       if {$prepareValuesCb ne [list]} {
 #        set result [::compMsg getActionMode {self self->compMsgMsgDesc->prepareValuesCbName+1, &actionMode}
 #        self->actionMode = actionMode
@@ -549,10 +549,9 @@ puts stderr "prepareValuesCb: $prepareValuesCb!"
         $prepareValuesCb compMsgDispatcher
         # runAction starts a call with a callback and returns here before the callback has been running!!
         # when when coming here we are finished and the callback will do the work later on!
-puts stderr "runAction done![dict keys $compMsgDispatcher]!"
+#puts stderr "runAction done![dict keys $compMsgDispatcher]!"
         return $result
       } else {
-puts stderr "8![dict keys $compMsgDispatcher]!"
         set result [::compMsg compMsgBuildMsg buildMsg compMsgDispatcher]
 if {0} {
         result = setMsgValues{self}
@@ -616,7 +615,6 @@ if {0} {
     proc resetMsgInfo {partsVar} {
       variable compMsgDispatcher
 
-puts stderr "partsVar!$partsVar!"
       set parts [dict create]
       dict set parts lgth 0
       dict set parts fieldOffset 0

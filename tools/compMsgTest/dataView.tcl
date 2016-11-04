@@ -115,7 +115,7 @@ namespace eval compMsg {
       variable fieldTypeNames2Ids
 
       if {![dict exists $fieldTypeNames2Ids $fieldTypeStr]} {
-        return $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
+        checkErrOK $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
       }
       set fieldTypeId [dict get $fieldTypeNames2Ids $fieldTypeStr]
       return $::DATA_VIEW_ERR_OK
@@ -130,12 +130,12 @@ namespace eval compMsg {
 
       if {[string is integer $fieldTypeId]} {
         if {![dict exists $fieldTypeInts2Ids $fieldTypeId]} {
-          return $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
+          checkErrOK $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
         }
         set fieldTypeId [dict get $fieldTypeInts2Ids $fieldTypeId]
       }
       if {![dict exists $fieldTypeIds2Names $fieldTypeId]} {
-        return $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
+        checkErrOK $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
       }
       set fieldTypeStr [dict get $fieldTypeIds2Names $fieldTypeId]
       return $::DATA_VIEW_ERR_OK
@@ -150,7 +150,7 @@ namespace eval compMsg {
 
       if {$offset > $lgth} {
 puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [string range $data $offset $offset]
       set pch $ch
@@ -173,7 +173,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {$offset > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [string range $data $offset $offset]
       set pch $ch
@@ -191,7 +191,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {$offset > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c $value]
       set data [string replace $data $offset $offset $ch]
@@ -205,7 +205,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {$offset > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c $value]
       set data [string replace $data $offset $offset [expr {$value & 0xFF}]]
@@ -221,7 +221,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + 1}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
       set sh [string range $data $offset [expr {$offset + 1}]]
@@ -238,7 +238,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {offset + 1 > self->lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
       set sh [string range $data $offset [expr {$offset + 1}]]
@@ -253,7 +253,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + 1}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set sh [binary format S $value]
       set data [string replace $data $offset [expr {$offset +1}] $sh]
@@ -268,7 +268,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + 1}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c [expr {($value >> 8) & 0xFF}]]
       set data [string replace $data $offset $offset $ch]
@@ -287,7 +287,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + 3}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
       set ch [string range $data $offset $offset]
@@ -328,7 +328,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + 3}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
       binary scan [string range $data $offset $offset] c ch
@@ -352,7 +352,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + 3}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set data [string replace $data $offset $offset [binary format c [expr {($value >> 24) & 0xFF}]]]
       incr offset
@@ -371,7 +371,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + 3}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [binary format c [expr {($value >> 24) & 0xFF}]]
       set data [string replace $data $offset $offset $ch]
@@ -396,7 +396,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + $size}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value [string range $data $offset [expr {$offset + $size - 1}]]
       return $::DATA_VIEW_ERR_OK
@@ -409,8 +409,8 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
       upvar $valueVar value
 
-      if {[expr {$offset + size}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+      if {[expr {$offset + $size}] > $lgth} {
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value [string range $data $offset [expr {$offset + $size - 1}]]
       return $::DATA_VIEW_ERR_OK
@@ -423,7 +423,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + $size}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set data [string replace $data $offset [expr {$offset + $size - 1}] [string range $value 0 [expr {$size - 1}]]]
       return $::DATA_VIEW_ERR_OK
@@ -436,7 +436,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[exprr {$offset + size}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set data [string replace $data $offset [expr {$offset + $size - 1}] [string range $value 0 [expr {$size - 1}]]]
       return $::DATA_VIEW_ERR_OK
@@ -451,15 +451,13 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + $size * 2} > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set idx 0
       while {$idx < $size} {
         set result [getUint16 $offset val]
         append value $val
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
       return $::DATA_VIEW_ERR_OK
@@ -473,15 +471,13 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + $size}] * 2 > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set idx 0
       while {$idx < $size} {
         set result [getInt16 $offset val]
+        checkErrOK $result
         append value $val
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
         incr idx
       }
       return $::DATA_VIEW_ERR_OK
@@ -494,14 +490,12 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + $size * 2}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set idx 0
       while {$idx < $size} {
         set result [setUint16 $offset [lindex $value $idx]]
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
       return $::DATA_VIEW_ERR_OK
@@ -514,14 +508,12 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + $size * 2}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE;
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE;
       }
       set idx 0
       while {$idx < $size} {
         set result [setInt16 $offset [lindex $value $idx]]
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
       return $::DATA_VIEW_ERR_OK;
@@ -536,15 +528,13 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + $size * 4}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set idx 0
       while {$idx < $size} {
         set result [getUint32 $offset val]
         append value $val
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
       return $::DATA_VIEW_ERR_OK;
@@ -558,15 +548,13 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + $size * 4}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set idx 0
       while {$idx < $size} {
         set result [getInt32 $offset val]
         append value $val
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         icnr idx
       }
       return $::DATA_VIEW_ERR_OK
@@ -579,14 +567,12 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + $size * 4}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set idx 0
       while {$idx < $size} {
         set result [setUint32 $offset [lindex $value $idx]]
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
       return $::DATA_VIEW_ERR_OK
@@ -599,14 +585,12 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       variable data
 
       if {[expr {$offset + $size * 4}] > $lgth} {
-        return $::DATA_VIEW_ERR_OUT_OF_RANGE
+        checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set idx 0
       while {$idx < $size} {
         set result [setInt32 $offset [lindex $value $idx]]
-        if {$result != $::DATA_VIEW_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
       return $::DATA_VIEW_ERR_OK

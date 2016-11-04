@@ -573,10 +573,7 @@ namespace eval compMsg {
         incr idx
       }
       close $fd
-puts stderr "HI![dict keys $headerInfos]!"
-puts stderr "DS![dict keys $compMsgDispatcher]!"
-
-dict set compMsgDispatcher headerInfos $headerInfos
+      dict set compMsgDispatcher headerInfos $headerInfos
       return $result
     }
 
@@ -585,13 +582,11 @@ dict set compMsgDispatcher headerInfos $headerInfos
     proc readActions {compMsgDispatcherVar fileName} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-puts stderr "sfa 04 [dict exists $compMsgDispatcher socketForAnswer]!"
       set fd [open [format "%s/$fileName" $::moduleFilesPath] "r"]
       gets $fd line
       set flds [split $line ","]
       foreach {dummy numEntries} $flds break
       set idx 0
-puts stderr "readActions: $numEntries!"
       while {$idx < $numEntries} {
         gets $fd line
         set flds [split $line ","]
@@ -601,7 +596,6 @@ puts stderr "readActions: $numEntries!"
         incr idx
       }
       close $fd
-puts stderr "sfa 05 [dict exists $compMsgDispatcher socketForAnswer]!"
       return $::COMP_MSG_DESC_ERR_OK
     }
 
@@ -700,10 +694,9 @@ puts stderr "sfa 05 [dict exists $compMsgDispatcher socketForAnswer]!"
       set flds [split $line ","]
       set prepareValuesCbName [list]
       foreach {dummy numEntries prepareValuesCbName} $flds break
-puts stderr "numDesc!$numEntries!$prepareValuesCbName!"
+#puts stderr "numDesc!$numEntries!$prepareValuesCbName!"
       dict set compMsgDispatcher compMsgMsgDesc prepareValuesCbName $prepareValuesCbName
       dict set compMsgDispatcher compMsgMsgDesc numMsgDescParts $numEntries
-puts stderr "keys1![dict keys $compMsgDispatcher]!"
       set numRows 0
       set idx 0
       while {$idx < $numEntries} {
@@ -752,7 +745,7 @@ puts stderr "keys1![dict keys $compMsgDispatcher]!"
       set callback [list]
       foreach {dummy numEntries callback} $flds break
       set numRows 0
-puts stderr "numVal: $numEntries!$callback!"
+#puts stderr "numVal: $numEntries!$callback!"
       dict set compMsgDispatcher compMsgMsgDesc numMsgValParts $numEntries
       set idx 0
       while {$idx < $numEntries} {

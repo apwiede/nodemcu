@@ -285,9 +285,6 @@ puts stderr "call:$fcnName!"
       # and now search in the headers to find the appropriate message
       dict set headerInfos seqIdx [dict get $headerInfos seqIdxAfterStart]
       set found false
-puts stderr "nextFitting!hdrIdx!$hdrIdx!"
-pdict $received
-puts stderr "nextFitting2!"
       while {$hdrIdx < [dict get $headerInfos numHeaderParts]} {
         set hdr [lindex [dict get $headerInfos headerParts] $hdrIdx]
         if {[dict get $hdr hdrToPart] == [dict get $received toPart]} {
@@ -465,7 +462,6 @@ puts stderr "Fitting entry not found!"
       dict set headerInfos seqIdxAfterStart [dict get $headerInfos seqIdx]
       dict set headerInfos currPartIdx 0
       set result [nextFittingEntry 0 0]
-puts stderr "getHeaderIndexFromHeaderFields end"
       return $result
     }
     
@@ -543,31 +539,6 @@ if {0} {
         set answerType A
       }
 
-$::APTableId configure -columns [list 0 ssid 0 rssi]
-
-puts stderr "handleEncryptedPart runAction: $answerType"
-set result [::compMsg compMsgData getFieldValue "@tablerows" numTabRows]
-puts stderr "numTabRows!$numTabRows!result!$result!"
-set result [::compMsg compMsgData getFieldValue "@tablerowfields" numTabFields]
-puts stderr "numTabFields!$numTabFields!result!$result!"
-
-  set row 0
-  while {$row < $numTabRows} {
-    foreach name [list ssid rssi] {
-      set result [::compMsg compMsgData getTableFieldValue $name $row value]
-puts stderr "LL: $name [string length $value]!$value!!"
-      set value [string trimright $value "\0"]
-      lappend rowLst $value
-    }
-    lappend valueLst $rowLst
-    set rowLst [list]
-    incr row
-  }
-#puts stderr "valueLst!$valueLst!"
-
-  foreach rowLst $valueLst {
-    $::APTableId insert end $rowLst
-  }
 }
 if {0} {
       set result [runAction answerType]
@@ -597,9 +568,9 @@ puts stderr "handleReceivedMsg end"
       
       set idx 0
       set headerInfos [dict get $compMsgDispatcher headerInfos]
-puts stderr "==headerInfos![dict keys [dict get $compMsgDispatcher headerInfos]]!"
-puts stderr "==compMsgDispatcher![dict keys $compMsgDispatcher]!"
-puts stderr "==bufferl:[string length $buffer]!$lgth!"
+#puts stderr "==headerInfos![dict keys [dict get $compMsgDispatcher headerInfos]]!"
+#puts stderr "==compMsgDispatcher![dict keys $compMsgDispatcher]!"
+#puts stderr "==bufferl:[string length $buffer]!$lgth!"
       while {$idx < $lgth} {
         if {![dict exists $received totalLgth]} {
           dict set received totalLgth -999
@@ -617,31 +588,29 @@ puts stderr "==bufferl:[string length $buffer]!$lgth!"
           set hdrIdx [dict get $headerInfos currPartIdx]
           set headerParts [dict get $headerInfos headerParts]
           set hdr [lindex $headerParts $hdrIdx]
-puts stderr "hdrIdx!$hdrIdx!"
-pdict $hdr
           if {[dict get $hdr hdrEncryption] eq "E"} {
             set myHeaderLgth [dict get $headerInfos headerLgth]
             set myHeader [string range $buffer 0 [expr {$myHeaderLgth - 1}]]
             set mlen [expr {$lgth - $myHeaderLgth}]
             set crypted [string range $buffer $myHeaderLgth end]
-puts stderr "cryptedLgth: [string length $crypted]!"
+#puts stderr "cryptedLgth: [string length $crypted]!"
             set cryptKey "a1b2c3d4e5f6g7h8"
             set result [::compMsg compMsgDispatcher decryptMsg $crypted $mlen $cryptKey 16 $cryptKey 16 decrypted decryptedLgth]
-puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
+#puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
             if {$result != $::COMP_MSG_ERR_OK} {
-puts stderr "decrypt error"
+#puts stderr "decrypt error"
             }
             set buffer "${myHeader}${decrypted}"
-            set result [::compMsg dataView setData $buffer $mlen]
-::compMsg compMsgData dumpBinary $buffer $lgth "decrypted"
+            if {$lgth != [expr {$myHeaderLgth + $mlen}]} {
+error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen}]!"
+            }
+            set result [::compMsg dataView setData $buffer $lgth]
+#::compMsg compMsgData dumpBinary $buffer $lgth "decrypted"
             dict set received buf $buffer
           }
-puts stderr "HDR"
-pdict $hdr
           set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
           set compMsgData [dict create]
           set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts] handle]
-puts stderr "handle: $handle!"
           checkErrOK $result
           set idx 0
           while {$idx < [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]} {
@@ -652,13 +621,14 @@ puts stderr "handle: $handle!"
             incr idx
           }
           dict set compMsgDispatcher compMsgData $compMsgData
-::compMsg dataView setData [dict get $received buf] $mlen
-::compMsg compMsgData initReceivedMsg compMsgDispatcher numTableRows numTableRowFields
-::compMsg compMsgData dumpMsg compMsgDispatcher
+          set result [::compMsg dataView setData [dict get $received buf] $lgth]
+          checkErrOK $result
+          set result [::compMsg compMsgData initReceivedMsg compMsgDispatcher numTableRows numTableRowFields]
+          checkErrOK $result
+#::compMsg compMsgData dumpMsg compMsgDispatcher
+#puts stderr "===dumpMsg done"
 
 
-set result [::compMsg compMsgData getFieldValue "@dst" value]
-pust stderr "dst!$value!"
 #          set result [::compMsg compMsgIdentify handleReceivedMsg $received $headerInfos]
           return $result
         }

@@ -288,10 +288,43 @@ set PORT 80
 set path /getaplist
 set host "192.168.4.1"
 
+# ================================ fillTable ===============================
+
+proc fillTable {} {
+  set row 0
+  set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "@numKeyValues" numKeyValues]
+  checkErrOK $result
+  set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "#key_ssid"  ssids]
+  checkErrOK $result
+  set offset 5
+  set str [string range $ssids $offset end]
+  set ssidFlds [lrange [split $str "\0"] 0 end-1]
+  set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "#key_rssi"  rssis]
+  checkErrOK $result
+  set str [string range $rssis $offset end]
+  set rssiFlds [split $str ""]
+  set rssis [list]
+  foreach ch $rssiFlds {
+    binary scan $ch c pch
+    lappend rssis $pch
+  }
+  set valueLst [list]
+  set idx 0
+  while {$idx < [llength $rssis]} {
+    set ssid [lindex $ssidFlds $idx]
+    set rssi [lindex $rssis $idx]
+    if {$ssid ne [list]} {
+      set rowLst [list $ssid $rssi]
+      $::APTableId insert end $rowLst
+    }
+    incr idx
+  }
+}
+
 # ================================ clientHandler ===============================
 
 proc clientHandler { sock type msg } {
-puts stderr "clientHandler: $type $msg!"
+#puts stderr "clientHandler: $type $msg!"
   switch -glob -nocase -- $type {
     co* {
       puts "===Connected on $sock"
@@ -303,28 +336,21 @@ puts stderr "clientHandler: $type $msg!"
     dis* {
     }
     binary {
-      puts "===RECEIVED BINARY: $msg"
-::compMsg compMsgData dumpBinary $msg [string length $msg] "MSG"
-puts stderr "need handler for received MSG!lgth: [string length $msg]!"
+#      puts "===RECEIVED BINARY: $msg"
+# ::compMsg compMsgData dumpBinary $msg [string length $msg] "MSG"
+#puts stderr "need handler for received MSG!lgth: [string length $msg]!"
 
-      ::compMsg compMsgIdentify compMsgIdentifyInit ::compMsgDispatcher
-      ::compMsg compMsgIdentify compMsgIdentifyReset
-      ::compMsg dataView setData "" 0
-      ::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]
-
+      set result [::compMsg compMsgIdentify compMsgIdentifyInit ::compMsgDispatcher]
+      checkErrOK $result
+      set result [::compMsg compMsgIdentify compMsgIdentifyReset]
+      checkErrOK $result
+      set result [::compMsg dataView setData "" 0]
+      checkErrOK $result
+      set result [::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]]
+      checkErrOK $result
+fillTable
     }
   }
-}
-
-# ================================ dumpBuinary ===============================
-
-proc dumpBinay {data} {
-  set dbgBuf ""
-  foreach ch [split $data ""] {
-    binary scan $ch c pch
-    append dbgBuf [format " 0x%02x" [expr {$pch & 0xFF}]]
-  }
-  puts stderr "dump data!lgth: [string length $data]!data: $dbgBuf!"
 }
 
 # ================================ getAPInfos ===============================
@@ -333,17 +359,12 @@ proc getAPInfos { sock } {
   puts stderr "[::websocket::conninfo $sock type] from [::websocket::conninfo $sock sockname] to [::websocket::conninfo $sock peername]"
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 AD hdr]
   checkErrOK $result
-puts stderr "===after getHeaderFromUniqueFields"
+#puts stderr "===after getHeaderFromUniqueFields"
   set ::compMsgDispatcher [dict create]
   set result [::compMsg compMsgDispatcher setSocketForAnswer ::compMsgDispatcher $sock]
-puts stderr "===after setSocket"
-pdict $::compMsgDispatcher
+#puts stderr "===after setSocket"
   checkErrOK $result
   set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
-  checkErrOK $result
-
-#  set result [::compMsg compMsgBuildMsg buildMsgFromHeaderPart $hdr]
-#  set result [::compMsg compMsgIdentify sendEncryptedMsg $sock $::received A]
   checkErrOK $result
   $::startBtn configure -text "Quit" -command [list exit 0]
 }

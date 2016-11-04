@@ -259,7 +259,7 @@ if {0} {
       # this could if needed also be an array of uint16_t etc. depending on the key
       # the receiver must know how the value is built depending on the key!!
       
-puts stderr "buildMsg"
+#puts stderr "buildMsg"
       set result [fixOffsetsForKeyValues compMsgDispatcher]
       checkErrOK $result
       set result [::compMsg compMsgData initMsg compMsgDispatcher numTableRows numTableRowFields]
@@ -274,7 +274,7 @@ puts stderr "buildMsg"
         set ivlen 16
         set klen 16
     
-puts stderr "need to encrypt message!"
+#puts stderr "need to encrypt message!"
         set headerLgth [dict get $compMsgDispatcher compMsgData headerLgth]
         set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth}]
         set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] end]
@@ -282,17 +282,17 @@ puts stderr "need to encrypt message!"
         set result [::compMsg compMsgDispatcher encryptMsg $toCrypt $mlen $cryptKey $klen $cryptKey $ivlen encryptedMsgData encryptedMsgDataLgth]
         checkErrOK $result
         set msgData "${header}${encryptedMsgData}"
-puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
+#puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
         
       # here we need to decide where and how to send the message!!
       # from currHdr we can see the handle type and - if needed - the @dst
-set handleType [dict get $compMsgDispatcher currHdr hdrHandleType]
-set encryption [dict get $compMsgDispatcher currHdr hdrEncryption]
-set toPart [dict get $compMsgDispatcher currHdr hdrToPart]
-puts stderr [format "transferType: %s encryption: %s dst: 0x%04x" $handleType $encryption $toPart]
+      # that is now done in sendMsg!
+#set handleType [dict get $compMsgDispatcher currHdr hdrHandleType]
+#set toPart [dict get $compMsgDispatcher currHdr hdrToPart]
+#puts stderr [format "transferType: %s dst: 0x%04x" $handleType $toPart]
       set result [::compMsg compMsgSendReceive sendMsg compMsgDispatcher $msgData $msgLgth]
-puts stderr [format "buildMsg sendMsg has been called, we finish here temporarely! result: %d" $result]
+puts stderr [format "buildMsg sendMsg has been calledresult: %d" $result]
       checkErrOK $result
     #  result = self->resetMsgInfo{self, self->buildMsgInfos.parts}
       return $result
