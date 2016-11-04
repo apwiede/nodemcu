@@ -89,19 +89,17 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
 
 static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, uint8_t msgLgth) {
   uint8_t result;
-  websocketUserData_t *wudp;
 
   switch (self->currHdr->hdrHandleType) {
   case 'A':
 ets_printf("wud: %p\n", self->wud);
-   if (self->wud == NULL) {
-     return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
-   }
-   wudp = (websocketUserData_t *)self->wud;
-ets_printf("remote_ip: %d %d %d %d port: %d\n", wudp->remote_ip[0], wudp->remote_ip[1], wudp->remote_ip[2], wudp->remote_ip[3], wudp->remote_port);
-   result = self->websocketSendData(self->wud, msgData, msgLgth, OPCODE_BINARY);
-   checkErrOK(result);
-   break;
+    if (self->wud == NULL) {
+      return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
+    }
+ets_printf("remote_ip: %d %d %d %d port: %d\n", self->wud->remote_ip[0], self->wud->remote_ip[1], self->wud->remote_ip[2], self->wud->remote_ip[3], self->wud->remote_port);
+    result = self->websocketSendData(self->wud, msgData, msgLgth, OPCODE_BINARY);
+    checkErrOK(result);
+    break;
   case 'G':
    break;
   case 'S':

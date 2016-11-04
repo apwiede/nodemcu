@@ -149,13 +149,13 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   found = 0;
   while (hdrIdx < hdrInfos->numHeaderParts) {
     hdr = &hdrInfos->headerParts[hdrIdx];
-ets_printf("hdrIdx: %d to: %d %d\n", hdrIdx, hdr->hdrToPart, received->toPart);
+//ets_printf("hdrIdx: %d to: %d %d\n", hdrIdx, hdr->hdrToPart, received->toPart);
     if (hdr->hdrToPart == received->toPart) {
-ets_printf("from: %d %d\n", hdr->hdrFromPart, received->fromPart);
+//ets_printf("from: %d %d\n", hdr->hdrFromPart, received->fromPart);
       if (hdr->hdrFromPart == received->fromPart) {
-ets_printf("lgth: %d %d\n", hdr->hdrTotalLgth, received->totalLgth);
+//ets_printf("lgth: %d %d\n", hdr->hdrTotalLgth, received->totalLgth);
         if ((hdr->hdrTotalLgth == received->totalLgth) || (hdr->hdrTotalLgth == 0)) {
-ets_printf("cmdkey: 0x%04x 0x%04x\n", u16CmdKey, received->u16CmdKey);
+//ets_printf("cmdkey: 0x%04x 0x%04x\n", u16CmdKey, received->u16CmdKey);
           if (u16CmdKey != 0) {
             if (u16CmdKey == received->u16CmdKey) {
               found = 1;
@@ -282,7 +282,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hdr
   hdrIdx++; // the Ack message has to be the next entry in headerInfos!!
   hdr = &hdrInfos->headerParts[hdrIdx];
   result = self->createMsgFromHeaderPart(self, hdr, handle);
-ets_printf("prepareAnserMsg:hdrIdx: %d cmdKey: 0x%04x handle: %s result: %d\n", hdrIdx, hdr->hdrU16CmdKey, handle, result);
+//ets_printf("prepareAnswerMsg:hdrIdx: %d cmdKey: 0x%04x handle: %s result: %d\n", hdrIdx, hdr->hdrU16CmdKey, handle, result);
   checkErrOK(result);
   return result;
 }

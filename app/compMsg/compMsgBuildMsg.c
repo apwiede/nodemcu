@@ -211,6 +211,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
     self->msgDescPart = msgDescPart;
     msgValPart = &self->compMsgMsgDesc->msgValParts[msgValPartIdx];
     self->msgValPart = msgValPart;
+//ets_printf("setMsgValues: %s\n", msgDescPart->fieldNameStr);
 //ets_printf("setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData->numFields);
 //ets_printf("fieldIdx: %d entryIdx: %d numtableRows: %d\n", fieldIdx, entryIdx, numTableRows);
     if (numTableRows > 0) {
@@ -311,7 +312,7 @@ ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
   // from currHdr we can see the handle type and - if needed - the @dst
 ets_printf("transferType: %c dst: 0x%04x\n", self->currHdr->hdrHandleType, self->currHdr->hdrToPart);
   result = self->sendMsg(self, msgData, msgLgth);
-ets_printf("buildMsg sendMsg has been called, we finish here temporarely! result: %d\n", result);
+ets_printf("buildMsg sendMsg has been called result: %d\n", result);
   checkErrOK(result);
 //  result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
   return result;

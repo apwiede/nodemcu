@@ -276,7 +276,7 @@ static uint8_t getGUID(compMsgDispatcher_t *self) {
 static uint8_t getSrcId(compMsgDispatcher_t *self) {
   int result;
 
-  result = self->getModuleValue(self, MODULE_INFO_srcId, DATA_VIEW_FIELD_UINT16_T);
+  result = self->getWifiRemotePort(self);
   return COMP_DISP_ERR_OK;
 }
 
@@ -316,6 +316,15 @@ static uint8_t getWifiKeyValues(compMsgDispatcher_t *self) {
   return result;
 }
 
+// ================================= getWifiSrcId ====================================
+
+static uint8_t getWifiSrcId(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+  result = self->getWifiRemotePort(self);
+  return result;
+}
+
 static actionName2Action_t actionName2Actions [] = {
   { "runClientMode",             (action_t)(&runClientMode),             0, 0, 0 },
   { "runAPMode",                 (action_t)(&runAPMode),                 0, 0, 0 },
@@ -345,6 +354,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "getTableValue",             (action_t)(&getTableValue),             0x4141, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "getWifiKeyValueInfos",      (action_t)(&getWifiKeyValueInfos),      0x4141, 0, 8 },
   { "getWifiKeyValues",          (action_t)(&getWifiKeyValues),          0x4141, 0, 8 },
+  { "getWifiSrcId",              (action_t)(&getWifiSrcId),              0x4141, 0, 8 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
 

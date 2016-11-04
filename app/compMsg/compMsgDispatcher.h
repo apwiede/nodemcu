@@ -108,6 +108,7 @@ typedef struct buildMsgInfos {
   size_t sizeValue;
   uint8_t *stringValue;
   uint8_t *actionName;
+  uint16_t srcId;
 } buildMsgInfos_t;
 
 typedef struct buildListMsgInfos {
@@ -159,6 +160,7 @@ typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, ui
 typedef uint8_t (* setWifiValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiKeyValue_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiKeyValueInfo_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
 
 // ModuleData stuff
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
@@ -221,7 +223,7 @@ typedef struct compMsgDispatcher {
   buildListMsgInfos_t buildListMsgInfos;
   uint8_t tableRow;
   uint8_t tableCol;
-  void *wud;
+  websocketUserData_t *wud;
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
   headerPart_t *currHdr;
@@ -301,6 +303,7 @@ typedef struct compMsgDispatcher {
   setWifiValues_t setWifiValues;
   getWifiKeyValueInfo_t getWifiKeyValueInfo;
   getWifiKeyValue_t getWifiKeyValue;
+  getWifiRemotePort_t getWifiRemotePort;
   websocketRunClientMode_t websocketRunClientMode;
   websocketRunAPMode_t websocketRunAPMode;
   websocketSendData_t websocketSendData;

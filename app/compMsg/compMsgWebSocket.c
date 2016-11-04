@@ -116,6 +116,24 @@ static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 
+#define TIMER_MODE_OFF 3
+#define TIMER_MODE_SINGLE 0
+#define TIMER_MODE_SEMI 2
+#define TIMER_MODE_AUTO 1
+#define TIMER_IDLE_FLAG (1<<7) 
+
+typedef struct compMsgTimer {
+  os_timer_t timer;
+  compMsgDispatcher_t *self;
+  uint32_t interval;
+  uint8_t mode;
+} compMsgTimer_t;
+
+static compMsgTimer_t compMsgTimers[NUM_TMR];
+static int isMstimer = 1;
+static os_timer_t apTimer;
+static int cnt = 0;
+
 // ============================ websocketSendData =======================
 
 static uint8_t websocketSendData(websocketUserData_t *wud, const char *payload, int size, int opcode)
@@ -175,7 +193,7 @@ static int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char 
 //ets_printf("parse text\n");
     break;
   case OPCODE_BINARY:
-//ets_printf("parse binary\n");
+ets_printf("parse binary\n");
     break;
   case OPCODE_CLOSE:
     break;
@@ -232,10 +250,11 @@ for (int i = 0; i < size; i++) {
 }
   switch (opcode) {
   case OPCODE_TEXT:
-ets_printf("cb text\n");
+//ets_printf("cb text\n");
     wud->websocketTextReceived(wud->compMsgDispatcher, wud, recv_data, size);
     break;
   case OPCODE_BINARY:
+//ets_printf("cb binary\n");
     wud->websocketBinaryReceived(wud->compMsgDispatcher, wud, recv_data, size);
     break;
   }
@@ -294,7 +313,8 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
   int found;
 
   idx = 0;
-//ets_printf("websocket_recv: %s!%s!\n",string,  wud->curr_url);
+//ets_printf("websocket_recv: %s!remote_port: %d\n", wud->curr_url, wud->remote_port);
+//ets_printf("websocket_recv: %s!%s!remote_port: %d\n",string,  wud->curr_url, wud->remote_port);
   if ((wud->curr_url != NULL) && (strstr(string, wud->curr_url) != NULL)) {
     if (strstr(string, header_key) != NULL) {
       char *begin = strstr(string, header_key) + os_strlen(header_key);
@@ -337,12 +357,12 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
       wud->isWebsocket = 1;
     }
 
-//ets_printf("payload: %d!%s!\n", payloadLen, payload);
+ets_printf("payload: %d!%s!\n", payloadLen, payload);
     int result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
     os_free(key);
 //    checkErrOK(gL, result, "espconn_sent");
   } else if (wud->isWebsocket == 1) {
-//ets_printf("websocket_parse: %d!%s!curr_ulr: %s!\n", os_strlen(string), string, wud->curr_url);
+//ets_printf("websocket_parse: %d!curr_url: %s!\n", os_strlen(string), wud->curr_url);
     websocket_parse(string, os_strlen(string), data, lgth, wud);
   }
   return WEBSOCKET_ERR_OK;
@@ -402,12 +422,13 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   wud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
   wud->remote_ip[3] = pesp_conn->proto.tcp->remote_ip[3];
   wud->remote_port = pesp_conn->proto.tcp->remote_port;
+//ets_printf("==received remote_port: %d\n", wud->remote_port);
   if (strstr(pdata, "GET /") != 0) {
     char *begin = strstr(pdata, "GET /") + 4;
     char *end = strstr(begin, " ");
     os_memcpy(url, begin, end - begin);
     url[end - begin] = 0;
-ets_printf("url: %s\n", url);
+//ets_printf("url: %s\n", url);
   }
   if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
     idx = 0;
@@ -421,7 +442,7 @@ ets_printf("url: %s\n", url);
       idx++;
     }
   }
-ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
+//ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
 
   if(wud->isWebsocket == 1) {
     char *data = "";
@@ -485,44 +506,6 @@ ets_printf("serverConnected: arg: %p\n", arg);
   }
 
 }
-
-#ifdef NOTDEF
-ets_printf("stnum!%d!\n", wifi_softap_get_station_num());
-struct station_info *station_info;
-struct station_info *station_link;
-station_info = wifi_softap_get_station_info();
-ets_printf("station_info: %p!\n", station_info);
-  station_link = (struct station_info *)station_info;
-  while (station_link != NULL) {
-ets_printf("bssid: ");
-ets_printf(MACSTR, MAC2STR(station_info->bssid));
-ets_printf("\n");
-ets_printf("ip: ");
-ets_printf(IPSTR, IP2STR(&station_info->ip));
-ets_printf("\n");
-    station_link =(struct station_info *) (station_info->next.stqe_next);
-  }
-
-wifi_softap_free_station_info();
-#endif
-
-#define TIMER_MODE_OFF 3
-#define TIMER_MODE_SINGLE 0
-#define TIMER_MODE_SEMI 2
-#define TIMER_MODE_AUTO 1
-#define TIMER_IDLE_FLAG (1<<7) 
-
-typedef struct compMsgTimer {
-        os_timer_t timer;
-        compMsgDispatcher_t *self;
-        uint32_t interval;
-        uint8_t mode;
-} compMsgTimer_t;
-
-static compMsgTimer_t compMsgTimers[NUM_TMR];
-static int isMstimer = 1;
-static os_timer_t apTimer;
-static int cnt = 0;
 
 // ================================= alarmTimerAP ====================================
 

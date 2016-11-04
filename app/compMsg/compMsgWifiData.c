@@ -463,6 +463,19 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= getWifiRemotePort ====================================
+
+static uint8_t getWifiRemotePort(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+  if (self->wud == NULL) {
+    return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
+  }
+  self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->msgValPart->fieldValue = self->wud->remote_port;
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= setWifiValues ====================================
 
 static uint8_t setWifiValues(compMsgDispatcher_t *self) {
@@ -497,6 +510,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->setWifiValues = &setWifiValues;
   self->getWifiKeyValue = &getWifiKeyValue;
   self->getWifiKeyValueInfo = &getWifiKeyValueInfo;
+  self->getWifiRemotePort = &getWifiRemotePort;
   self->bssStr2BssInfoId = &bssStr2BssInfoId;
 
   bssScanInfos.compMsgDispatcher = self;
