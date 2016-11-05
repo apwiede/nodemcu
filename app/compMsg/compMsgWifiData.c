@@ -99,8 +99,12 @@ static void websocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned 
 ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->received);
 //  checkErrOK(result);
+  result = self->getNewCompMsgDataPtr(self);
+ets_printf("received compMsgData: %p\n", self->compMsgData);
   self->compMsgData->wud = wud;
-  result = compMsgDispatcher->handleReceivedPart(compMsgDispatcher, (uint8_t *)pdata, (uint8_t)len);
+  self->compMsgData->receivedData = (uint8_t *)pdata;
+  self->compMsgData->receivedLgth = (uint8_t)len;
+  result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, wud, self->compMsgData);
 ets_printf("websocketBinaryReceived end result: %d\n", result);
 }
 

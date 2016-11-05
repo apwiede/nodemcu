@@ -87,9 +87,9 @@ enum compMsgDispatcherErrorCode
   COMP_DISP_ERR_TOO_FEW_FILE_LINES    = 178,
   COMP_DISP_ERR_ACTION_NAME_NOT_FOUND = 177,
   COMP_DISP_ERR_DUPLICATE_ENTRY       = 176,
-  COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 177,
-  COMP_DISP_ERR_TOO_MANY_REQUESTS     = 176,
-  COMP_DISP_ERR_REQUEST_NOT_FOUND     = 175,
+  COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 175,
+  COMP_DISP_ERR_TOO_MANY_REQUESTS     = 174,
+  COMP_DISP_ERR_REQUEST_NOT_FOUND     = 173,
 };
 
 // input source types
@@ -115,8 +115,8 @@ typedef struct msgRequestInfos {
   uint8_t requestTypes[COMP_DISP_MAX_REQUESTS];
   void *requestHandles[COMP_DISP_MAX_REQUESTS];
   compMsgData_t *requestData[COMP_DISP_MAX_REQUESTS];
-  uint8_t currRequestIdx;
-  uint8_t lastRequestIdx;
+  int currRequestIdx;
+  int lastRequestIdx;
 } msgRequestInfos_t;
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
@@ -152,7 +152,7 @@ typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *pa
 // Dispatcher stuff
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
+typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData);
 typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
 

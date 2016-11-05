@@ -542,19 +542,24 @@ static uint8_t startNextRequest(compMsgDispatcher_t *self) {
 
 // ================================= addRequest ====================================
 
-static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle) {
+static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData) {
   uint8_t result;
+  compMsgData_t *compMsgData;
 
   if (self->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
     return COMP_DISP_ERR_TOO_MANY_REQUESTS;
   }
   self->msgRequestInfos.lastRequestIdx++;
+ets_printf("lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
   self->msgRequestInfos.requestTypes[self->msgRequestInfos.lastRequestIdx] = requestType;
   self->msgRequestInfos.requestHandles[self->msgRequestInfos.lastRequestIdx] = requestHandle;
+  self->msgRequestInfos.requestData[self->msgRequestInfos.lastRequestIdx] = requestData;
   if (self->msgRequestInfos.currRequestIdx < 0) {
     self->msgRequestInfos.currRequestIdx++;
-    // start handling the request
-    // FIXME!!! need code here
+    checkErrOK(result);
+    compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
+ets_printf("start handleReceivedPart: lgth: %d\n", compMsgData->receivedLgth);
+    result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
   }
   return COMP_DISP_ERR_OK;
 }
@@ -638,9 +643,12 @@ uint8_t *handle;
   checkErrOK(result);
   result = compMsgWebsocketInit(self);
   checkErrOK(result);
-// FIXME !! temporary
-//  result = websocketRunAPMode(self);
-//  checkErrOK(result);
+
+// FIXME !! temporary starting for testing only !!
+  result = self->websocketRunAPMode(self);
+  checkErrOK(result);
+
+  checkErrOK(result);
 #ifdef NOTDEF
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
 checkErrOK(result);
