@@ -114,6 +114,7 @@ typedef struct msgHeader2MsgPtr {
 typedef struct msgRequestInfos {
   uint8_t requestTypes[COMP_DISP_MAX_REQUESTS];
   void *requestHandles[COMP_DISP_MAX_REQUESTS];
+  compMsgData_t *requestData[COMP_DISP_MAX_REQUESTS];
   uint8_t currRequestIdx;
   uint8_t lastRequestIdx;
 } msgRequestInfos_t;

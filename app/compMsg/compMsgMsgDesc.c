@@ -921,8 +921,8 @@ static uint8_t resetMsgDescParts(compMsgDispatcher_t *self) {
   msgDescPart_t *part;
 
   idx = 0;
-  while (idx < self->compMsgData->compMsgMsgDesc->numMsgDescParts) {
-    part = &self->compMsgData->compMsgMsgDesc->msgDescParts[idx];
+  while (idx < self->compMsgData->numMsgDescParts) {
+    part = &self->compMsgData->msgDescParts[idx];
     if (part->fieldNameStr != NULL) {
       os_free(part->fieldNameStr);
     }
@@ -931,10 +931,10 @@ static uint8_t resetMsgDescParts(compMsgDispatcher_t *self) {
     }
     idx++;
   }
-  os_free(self->compMsgData->compMsgMsgDesc->msgDescParts);
-  self->compMsgData->compMsgMsgDesc->msgDescParts = NULL;
-  self->compMsgData->compMsgMsgDesc->numMsgDescParts = 0;
-  self->compMsgData->compMsgMsgDesc->maxMsgDescParts = 0;
+  os_free(self->compMsgData->msgDescParts);
+  self->compMsgData->msgDescParts = NULL;
+  self->compMsgData->numMsgDescParts = 0;
+  self->compMsgData->maxMsgDescParts = 0;
   return COMP_DISP_ERR_OK;
 }
 
@@ -945,8 +945,8 @@ static uint8_t resetMsgValParts(compMsgDispatcher_t *self) {
   msgValPart_t *part;
 
   idx = 0;
-  while (idx < self->compMsgData->compMsgMsgDesc->numMsgValParts) {
-    part = &self->compMsgData->compMsgMsgDesc->msgValParts[idx];
+  while (idx < self->compMsgData->numMsgValParts) {
+    part = &self->compMsgData->msgValParts[idx];
     if (part->fieldNameStr != NULL) {
       os_free(part->fieldNameStr);
     }
@@ -955,10 +955,10 @@ static uint8_t resetMsgValParts(compMsgDispatcher_t *self) {
     }
     idx++;
   }
-  os_free(self->compMsgData->compMsgMsgDesc->msgValParts);
-  self->compMsgData->compMsgMsgDesc->msgValParts = NULL;
-  self->compMsgData->compMsgMsgDesc->numMsgValParts = 0;
-  self->compMsgData->compMsgMsgDesc->maxMsgValParts = 0;
+  os_free(self->compMsgData->msgValParts);
+  self->compMsgData->msgValParts = NULL;
+  self->compMsgData->numMsgValParts = 0;
+  self->compMsgData->maxMsgValParts = 0;
   return COMP_DISP_ERR_OK;
 }
 
@@ -1015,34 +1015,34 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   checkErrOK(result);
   result = compMsgData->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
   checkErrOK(result);
-  compMsgData->compMsgMsgDesc->maxMsgDescParts = (uint8_t)uval;
+  compMsgData->maxMsgDescParts = (uint8_t)uval;
   cp = ep;
-  if (compMsgData->compMsgMsgDesc->prepareValuesCbName != NULL) {
-    os_free(compMsgData->compMsgMsgDesc->prepareValuesCbName);
-    compMsgData->compMsgMsgDesc->prepareValuesCbName = NULL;
+  if (compMsgData->prepareValuesCbName != NULL) {
+    os_free(compMsgData->prepareValuesCbName);
+    compMsgData->prepareValuesCbName = NULL;
   }
   if (!isEnd) {
     result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    compMsgData->compMsgMsgDesc->prepareValuesCbName = os_zalloc(c_strlen(cp) + 1);
-    checkAllocOK(compMsgData->compMsgMsgDesc->prepareValuesCbName);
-    c_memcpy(compMsgData->compMsgMsgDesc->prepareValuesCbName, cp, c_strlen(cp));
-    compMsgData->compMsgMsgDesc->prepareValuesCbName[c_strlen(cp)] = '\0';
+    compMsgData->prepareValuesCbName = os_zalloc(c_strlen(cp) + 1);
+    checkAllocOK(compMsgData->prepareValuesCbName);
+    c_memcpy(compMsgData->prepareValuesCbName, cp, c_strlen(cp));
+    compMsgData->prepareValuesCbName[c_strlen(cp)] = '\0';
   }
   if (!isEnd) {
     return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
   }
-  compMsgData->compMsgMsgDesc->msgDescParts = os_zalloc(sizeof(msgDescPart_t) * compMsgData->compMsgMsgDesc->maxMsgDescParts);
-  checkAllocOK(compMsgData->compMsgMsgDesc->msgDescParts);
+  compMsgData->msgDescParts = os_zalloc(sizeof(msgDescPart_t) * compMsgData->maxMsgDescParts);
+  checkAllocOK(compMsgData->msgDescParts);
   numRows = 0;
   idx = 0;
-  while(idx < compMsgData->compMsgMsgDesc->maxMsgDescParts) {
+  while(idx < compMsgData->maxMsgDescParts) {
     result = compMsgData->compMsgMsgDesc->readLine(compMsgData->compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
     }
-    msgDescPart = &compMsgData->compMsgMsgDesc->msgDescParts[compMsgData->compMsgMsgDesc->numMsgDescParts++];
+    msgDescPart = &compMsgData->msgDescParts[compMsgData->numMsgDescParts++];
     buffer[lgth] = 0;
     cp = buffer;
     // fieldName
@@ -1120,21 +1120,21 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   checkErrOK(result);
   result = self->compMsgData->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
   checkErrOK(result);
-  self->compMsgData->compMsgMsgDesc->maxMsgValParts = (uint8_t)uval;
+  self->compMsgData->maxMsgValParts = (uint8_t)uval;
   cp = ep;
   if (!isEnd) {
     return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
   }
-  compMsgData->compMsgMsgDesc->msgValParts = os_zalloc(sizeof(msgValPart_t) * compMsgData->compMsgMsgDesc->maxMsgValParts);
-  checkAllocOK(compMsgData->compMsgMsgDesc->msgValParts);
+  compMsgData->msgValParts = os_zalloc(sizeof(msgValPart_t) * compMsgData->maxMsgValParts);
+  checkAllocOK(compMsgData->msgValParts);
   idx = 0;
-  while(idx < compMsgData->compMsgMsgDesc->maxMsgValParts) {
+  while(idx < compMsgData->maxMsgValParts) {
     result = compMsgData->compMsgMsgDesc->readLine(compMsgData->compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
     }
-    msgValPart = &compMsgData->compMsgMsgDesc->msgValParts[compMsgData->compMsgMsgDesc->numMsgValParts++];
+    msgValPart = &compMsgData->msgValParts[compMsgData->numMsgValParts++];
     buffer[lgth] = 0;
     cp = buffer;
     // fieldName

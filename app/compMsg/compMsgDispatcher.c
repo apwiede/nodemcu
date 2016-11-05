@@ -367,11 +367,11 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
 
   result = self->compMsgData->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
-  result = self->compMsgData->createMsg(self->compMsgData, self->compMsgData->compMsgMsgDesc->numMsgDescParts, handle);
+  result = self->compMsgData->createMsg(self->compMsgData, self->compMsgData->numMsgDescParts, handle);
   checkErrOK(result);
   idx = 0;
-  while(idx < self->compMsgData->compMsgMsgDesc->numMsgDescParts) {
-    msgDescPart = &self->compMsgData->compMsgMsgDesc->msgDescParts[idx];
+  while(idx < self->compMsgData->numMsgDescParts) {
+    msgDescPart = &self->compMsgData->msgDescParts[idx];
     result = self->compMsgData->addField(self->compMsgData, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
     checkErrOK(result);
     idx++;
@@ -381,11 +381,11 @@ ets_printf("heap4: %d\n", system_get_free_heap_size());
   // runAction calls at the end buildMsg
 //  self->resetBuildMsgInfos(self);
 //  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
-  if (self->compMsgData->compMsgMsgDesc->prepareValuesCbName != NULL) {
+  if (self->compMsgData->prepareValuesCbName != NULL) {
     uint8_t actionMode;
     uint8_t type;
 
-    result = self->getActionMode(self, self->compMsgData->compMsgMsgDesc->prepareValuesCbName+1, &actionMode);
+    result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
     self->actionMode = actionMode;
     checkErrOK(result);
     result  = self->runAction(self, &type);

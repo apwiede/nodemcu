@@ -65,7 +65,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
   msgDescPartIdx = 0;
   while (fieldIdx < compMsgData->numFields) {
     fieldInfo = &compMsgData->fields[fieldIdx];
-    msgDescPart = &self->compMsgData->compMsgMsgDesc->msgDescParts[msgDescPartIdx];
+    msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;
     if (msgDescPart->getFieldSizeCallback != NULL) {
       // the key name must have the prefix: "#key_"!
@@ -201,15 +201,15 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   // loop over MSG Fields, to check if we eventually have table rows!!
   msgDescPartIdx = 0;
   msgValPartIdx = 0;
-  msgValPart = &self->compMsgData->compMsgMsgDesc->msgValParts[msgValPartIdx];
+  msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
   tableFieldIdx = 0;
   numTableRows = 0;
   numTableRowFields = 0;
   compMsgData = self->compMsgData;
-  while ((msgDescPartIdx < compMsgData->numFields) && (msgValPartIdx <= self->compMsgData->compMsgMsgDesc->numMsgValParts)) {
-    msgDescPart = &self->compMsgData->compMsgMsgDesc->msgDescParts[msgDescPartIdx];
+  while ((msgDescPartIdx < compMsgData->numFields) && (msgValPartIdx <= self->compMsgData->numMsgValParts)) {
+    msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;
-    msgValPart = &self->compMsgData->compMsgMsgDesc->msgValParts[msgValPartIdx];
+    msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
     self->compMsgData->msgValPart = msgValPart;
 //ets_printf("setMsgValues: %s\n", msgDescPart->fieldNameStr);
 //ets_printf("setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData->numFields);

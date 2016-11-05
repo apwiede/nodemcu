@@ -211,14 +211,7 @@ typedef struct compMsgMsgDesc {
   const uint8_t *fileName;
   uint8_t fileId;
   size_t fileSize;
-  msgDescPart_t *msgDescParts;
-  size_t numMsgDescParts;
-  size_t maxMsgDescParts;
-  msgValPart_t *msgValParts;
-  size_t numMsgValParts;
-  size_t maxMsgValParts;
-  uint8_t *prepareValuesCbName;
-  
+
   openFile_t openFile;
   closeFile_t closeFile;
   flushFile_t flushFile;

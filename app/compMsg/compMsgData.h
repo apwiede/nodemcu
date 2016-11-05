@@ -167,6 +167,14 @@ typedef struct compMsgData {
   size_t headerLgth;
   uint8_t *header;
 
+  msgDescPart_t *msgDescParts;
+  size_t numMsgDescParts;
+  size_t maxMsgDescParts;
+  msgValPart_t *msgValParts;
+  size_t numMsgValParts;
+  size_t maxMsgValParts;
+  uint8_t *prepareValuesCbName;
+  
   buildMsgInfos_t buildMsgInfos;
   websocketUserData_t *wud;
   msgDescPart_t *msgDescPart;
