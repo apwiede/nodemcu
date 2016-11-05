@@ -43,7 +43,7 @@
 #include "mem.h"
 #include "c_string.h"
 #include "c_stdlib.h"
-#include "compMsgDataView.h"
+#include "compMsgDispatcher.h"
 
 
 typedef struct fieldName2id {

@@ -42,7 +42,6 @@
 #define	COMP_MSG_DATA_VIEW_H
 
 #include "c_types.h"
-#include "dataView.h"
 
 #ifdef	__cplusplus
 extern "C" {

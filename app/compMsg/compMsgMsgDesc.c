@@ -688,7 +688,6 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
       hdr->hdrFlags |= COMP_DISP_U16_CMD_KEY;
       hdr->hdrU16CmdKey = (cp[0]<<8)|cp[1];
 //ets_printf("§u16CmdKey!0x%04x!§\n", hdr->hdrU16CmdKey);
-      self->dispFlags &= ~COMP_MSG_U8_CMD_KEY;
       break;
     default:
       checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
@@ -986,7 +985,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-  self->currHdr = hdr;
+  self->compMsgData->currHdr = hdr;
   os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
   result = self->compMsgMsgDesc->openFile(self->compMsgMsgDesc, fileName, "r");
   checkErrOK(result);

@@ -90,14 +90,14 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
 static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, uint8_t msgLgth) {
   uint8_t result;
 
-  switch (self->currHdr->hdrHandleType) {
+  switch (self->compMsgData->currHdr->hdrHandleType) {
   case 'A':
-ets_printf("wud: %p\n", self->wud);
-    if (self->wud == NULL) {
+ets_printf("wud: %p\n", self->compMsgData->wud);
+    if (self->compMsgData->wud == NULL) {
       return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
     }
-ets_printf("remote_ip: %d %d %d %d port: %d\n", self->wud->remote_ip[0], self->wud->remote_ip[1], self->wud->remote_ip[2], self->wud->remote_ip[3], self->wud->remote_port);
-    result = self->websocketSendData(self->wud, msgData, msgLgth, OPCODE_BINARY);
+ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_ip[0], self->compMsgData->wud->remote_ip[1], self->compMsgData->wud->remote_ip[2], self->compMsgData->wud->remote_ip[3], self->compMsgData->wud->remote_port);
+    result = self->websocketSendData(self->compMsgData->wud, msgData, msgLgth, OPCODE_BINARY);
     checkErrOK(result);
     break;
   case 'G':

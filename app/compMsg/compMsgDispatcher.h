@@ -45,9 +45,12 @@
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
+#include "dataView.h"
+#include "compMsgDataView.h"
 #include "compMsgModuleData.h"
 #include "compMsgWifiData.h"
 #include "compMsgMsgDesc.h"
+#include "compMsgData.h"
 
 enum compMsgDispatcherErrorCode
 {
@@ -85,8 +88,16 @@ enum compMsgDispatcherErrorCode
   COMP_DISP_ERR_ACTION_NAME_NOT_FOUND = 177,
   COMP_DISP_ERR_DUPLICATE_ENTRY       = 176,
   COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 177,
+  COMP_DISP_ERR_TOO_MANY_REQUESTS     = 176,
+  COMP_DISP_ERR_REQUEST_NOT_FOUND     = 175,
 };
 
+// input source types
+#define COMP_DISP_INPUT_UART       0x01
+#define COMP_DISP_INPUT_SOCKET     0x02
+#define COMP_DISP_INPUT_WEB_SOCKET 0x04
+
+#define COMP_DISP_MAX_REQUESTS     5
 
 // dst + src + totalLgth + (optional) GUID + cmdKey/shCmdKey
 // uint16_t + uint16_t + uint16_t + (optional) uint8_t*(16) + uint16_t/uint8_t
@@ -100,47 +111,13 @@ typedef struct msgHeader2MsgPtr {
   uint8_t header[DISP_MAX_HEADER_LGTH];
 } msgHeader2MsgPtr_t;
 
-typedef struct buildMsgInfos {
-  uint8_t numRows; 
-  uint8_t tableRow;
-  uint8_t tableCol;
-  int numericValue;
-  size_t sizeValue;
-  uint8_t *stringValue;
-  uint8_t *actionName;
-  uint16_t srcId;
-} buildMsgInfos_t;
+typedef struct msgRequestInfos {
+  uint8_t requestTypes[COMP_DISP_MAX_REQUESTS];
+  void *requestHandles[COMP_DISP_MAX_REQUESTS];
+  uint8_t currRequestIdx;
+  uint8_t lastRequestIdx;
+} msgRequestInfos_t;
 
-typedef struct buildListMsgInfos {
-  size_t msgHeaderLgth;
-  size_t msgDataLgth;
-  uint8_t *msgData;
-  size_t defDataLgth;
-  size_t defHeaderLgth;
-  uint8_t *defData;
-  size_t encryptedMsgDataLgth;
-  uint8_t *encryptedMsgData;
-  size_t encryptedDefDataLgth;
-  uint8_t *encryptedDefData;
-  uint16_t src;
-  uint16_t dst;
-} buildListMsgInfos_t;
-
-typedef struct websocketUserData {
-  struct espconn *pesp_conn;
-  uint8_t isWebsocket;
-  uint8_t num_urls;
-  uint8_t max_urls;
-  int remote_port;
-  uint8_t remote_ip[4];
-  char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
-  char *curr_url; // that is url which has been provided in the received data
-  compMsgDispatcher_t *compMsgDispatcher;
-  websocketBinaryReceived_t websocketBinaryReceived;
-  websocketTextReceived_t websocketTextReceived;
-} websocketUserData_t;
-
-//typedef struct websocketUserData websocketUserData_t;
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 // Action stuff
@@ -172,13 +149,15 @@ typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *payload, int size, int opcode);
 
 // Dispatcher stuff
-typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
+typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
+typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
 
 typedef uint8_t (* createDispatcher_t)(compMsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* createMsgFromHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle);
-typedef uint8_t (* createMsgFromLines_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type);
 typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
 typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
 typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
@@ -200,6 +179,7 @@ typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdK
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 // SendReceive
+typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, uint8_t msgLgth);
 
@@ -211,26 +191,23 @@ typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts)
 typedef struct compMsgDispatcher {
   uint8_t id;
   char handle[20];
-  uint8_t *FileName;
-  uint8_t fileId;
-  size_t fileSize;
-  uint16_t dispFlags;
   int numericValue;
   uint8_t *stringValue;
   uint8_t actionMode;
   bssScanInfos_t *bssScanInfos;
-  buildMsgInfos_t buildMsgInfos;
-  buildListMsgInfos_t buildListMsgInfos;
-  uint8_t tableRow;
-  uint8_t tableCol;
-  websocketUserData_t *wud;
-  msgDescPart_t *msgDescPart;
-  msgValPart_t *msgValPart;
-  headerPart_t *currHdr;
+
+//  buildMsgInfos_t buildMsgInfos;
+//  websocketUserData_t *wud;
+//  msgDescPart_t *msgDescPart;
+//  msgValPart_t *msgValPart;
+//  headerPart_t *currHdr;
   
   msgHeaderInfos_t msgHeaderInfos;
 
-  // this is for mapping a msg handle from teaf header to a compMsgPtr
+  // request infos
+  msgRequestInfos_t msgRequestInfos;
+
+  // this is for mapping a msg handle from the header to a compMsgPtr
   uint8_t numMsgHeaders;
   uint8_t maxMsgHeaders;
   msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
@@ -242,11 +219,6 @@ typedef struct compMsgDispatcher {
 
   msgParts_t received;
   msgParts_t toSend;
-
-  uint16_t McuPart;
-  uint16_t WifiPart;
-  uint16_t AppPart;
-  uint16_t CloudPart;
 
   getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
@@ -286,8 +258,11 @@ typedef struct compMsgDispatcher {
   createDispatcher_t createDispatcher;
   initDispatcher_t initDispatcher;
   createMsgFromHeaderPart_t createMsgFromHeaderPart;
-  createMsgFromLines_t createMsgFromLines;
   getNewCompMsgDataPtr_t getNewCompMsgDataPtr;
+  startRequest_t startRequest;
+  startNextRequest_t startNextRequest;
+  addRequest_t addRequest;
+  deleteRequest_t deleteRequest;
 
   // dispatcher
   encryptMsg_t encryptMsg;

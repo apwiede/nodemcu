@@ -78,6 +78,31 @@ extern "C" {
 
 #define checkHandleOK(addr) if(addr == NULL) return COMP_MSG_ERR_BAD_HANDLE
 
+typedef struct buildMsgInfos {
+  uint8_t numRows; 
+  uint8_t tableRow;
+  uint8_t tableCol;
+  int numericValue;
+  size_t sizeValue;
+  uint8_t *stringValue;
+  uint8_t *actionName;
+  uint16_t srcId;
+} buildMsgInfos_t;
+
+typedef struct websocketUserData {
+  struct espconn *pesp_conn;
+  uint8_t isWebsocket;
+  uint8_t num_urls;
+  uint8_t max_urls;
+  int remote_port;
+  uint8_t remote_ip[4];
+  char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
+  char *curr_url; // that is url which has been provided in the received data
+  compMsgDispatcher_t *compMsgDispatcher;
+  websocketBinaryReceived_t websocketBinaryReceived;
+  websocketTextReceived_t websocketTextReceived;
+} websocketUserData_t;
+
 
 typedef uint8_t (* createMsg_t)(compMsgData_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* deleteMsg_t)(compMsgData_t *self);
@@ -142,51 +167,11 @@ typedef struct compMsgData {
   size_t headerLgth;
   uint8_t *header;
 
-  // definitionMsg
-  compMsgDataView_t *compMsgDefMsgDataView;
-  compMsgField_t *defFields;
-  size_t numDefFields;         // for checking how many defFields have been processed
-  size_t defFieldOffset;
-  size_t defTotalLgth;
-  size_t defHeaderLgth;
-  size_t defNumNormFields;
-  size_t defNormNamesSize;
-  size_t defDefsSize;
-
-  initDefMsg_t initDefMsg;
-  prepareDefMsg_t prepareDefMsg;
-  dumpDefFields_t dumpDefFields;
-  addDefField_t addDefField;
-  getDefFieldValue_t getDefFieldValue;
-  setDefFieldValue_t setDefFieldValue;
-  setDefData_t setDefData;
-  getDefData_t getDefData;
-  createMsgFromDef_t createMsgFromDef;
-
-  // listMsg
-  compMsgDataView_t *compMsgListDataView;
-  compMsgField_t *listFields;
-  size_t numListFields;         // for checking how many listMsgs have been processed
-  size_t numListMsgs;
-  size_t listMsgSizesSize;
-  size_t listMsgsSize;
-  size_t listFieldOffset;
-  size_t listTotalLgth;
-  size_t listHeaderLgth;
-  uint16_t listSrc;
-  uint16_t listDst;
-  uint16_t *listMsgSizes;
-  uint8_t *listMsgs;
-
-  dumpListFields_t dumpListFields;
-  setListFieldValue_t setListFieldValue;
-  getListFieldValue_t getListFieldValue;
-  setListData_t setListData;
-  getListData_t getListData;
-  initListMsg_t initListMsg;
-  prepareListMsg_t prepareListMsg;
-  addListMsg_t addListMsg;
-  addListField_t addListField;
+  buildMsgInfos_t buildMsgInfos;
+  websocketUserData_t *wud;
+  msgDescPart_t *msgDescPart;
+  msgValPart_t *msgValPart;
+  headerPart_t *currHdr;
 
   // normalMsg
   createMsg_t createMsg;

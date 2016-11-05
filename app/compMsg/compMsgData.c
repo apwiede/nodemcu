@@ -1085,18 +1085,12 @@ static uint8_t freeCompMsgData(compMsgData_t *self) {
   if (self->compMsgDataView != NULL) {
     freeCompMsgDataView(self->compMsgDataView);
   }
-  if (self->compMsgDefMsgDataView != NULL) {
-    freeCompMsgDataView(self->compMsgDefMsgDataView);
-  }
   
   if (self->fields != NULL) {
     os_free(self->fields);
   }
   if (self->tableFields != NULL) {
     os_free(self->tableFields);
-  }
-  if (self->defFields != NULL) {
-    os_free(self->defFields);
   }
   if (self->header != NULL) {
     os_free(self->header);
@@ -1147,45 +1141,6 @@ compMsgData_t *newCompMsgData(void) {
   compMsgData->totalLgth = 0;
   compMsgData->cmdLgth = 0;
   compMsgData->headerLgth = 0;
-
-  // definitionMsg
-  compMsgData->compMsgDefMsgDataView = NULL;
-  compMsgData->defFields = NULL;
-  compMsgData->numDefFields = 0;
-  compMsgData->defFieldOffset = 0;
-  compMsgData->defTotalLgth = 0;
-  compMsgData->defNumNormFields = 0;
-  compMsgData->defNormNamesSize = 0;
-  compMsgData->defDefsSize = 0;
-  compMsgData->defHeaderLgth = 0;
-
-  compMsgData->initDefMsg = NULL;
-  compMsgData->prepareDefMsg = NULL;
-  compMsgData->addDefField = NULL;
-  compMsgData->dumpDefFields = NULL;
-  compMsgData->setDefFieldValue = NULL;
-  compMsgData->getDefFieldValue = NULL;
-  compMsgData->setDefData = NULL;
-  compMsgData->getDefData = NULL;
-  compMsgData->createMsgFromDef = NULL;
-
-
-  // listMsg
-  compMsgData->numListFields = 0;
-  compMsgData->numListMsgs = 0;
-  compMsgData->listMsgSizesSize = 0;
-  compMsgData->listMsgsSize = 0;
-  compMsgData->compMsgListDataView = NULL;
-  compMsgData->listFields = NULL;
-  compMsgData->listFieldOffset = 0;
-  compMsgData->listTotalLgth = 0;
-  compMsgData->listHeaderLgth = 0;
-  compMsgData->listMsgSizes = NULL;
-  compMsgData->listMsgs = NULL;
-
-  compMsgData->initListMsg = NULL;
-  compMsgData->prepareListMsg = NULL;
-  compMsgData->addListMsg = NULL;
 
   // normalMsg
   compMsgData->createMsg = &createMsg;

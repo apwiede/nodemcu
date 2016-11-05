@@ -73,64 +73,64 @@ static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t
 
   switch (which) {
   case MODULE_INFO_MACAddr:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
     break;
   case MODULE_INFO_IPAddr:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
     break;
   case MODULE_INFO_FirmwareVersion:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
     break;
   case MODULE_INFO_SerieNumber:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
     break;
   case MODULE_INFO_RSSI:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.RSSI;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSI;
     break;
   case MODULE_INFO_ModuleConnection:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.ModuleConnection;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ModuleConnection;
     break;
   case MODULE_INFO_DeviceMode:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.DeviceMode;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceMode;
     break;
   case MODULE_INFO_DeviceSecurity:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
     break;
   case MODULE_INFO_ErrorMain:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
     break;
   case MODULE_INFO_ErrorSub:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
     break;
   case MODULE_INFO_DateAndTime:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
     break;
   case MODULE_INFO_SSIDs:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.SSIDs;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
     break;
   case MODULE_INFO_Reserve1:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
     break;
   case MODULE_INFO_Reserve2:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
     break;
   case MODULE_INFO_Reserve3:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
     break;
   case MODULE_INFO_GUID:
-    self->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
     break;
   case MODULE_INFO_srcId:
-    self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->msgValPart->fieldValue = compMsgModuleData.srcId;
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
     break;
 //  case WIFI_INFO_PROVISIONING_SSID:
 //  case WIFI_INFO_PROVISIONING_PORT:

@@ -43,9 +43,6 @@
 #ifndef COMP_MSG_MSG_DESC_H
 #define	COMP_MSG_MSG_DESC_H
 
-#include "compMsgDataView.h"
-#include "compMsgData.h"
-
 enum compMsgDataErrorCode
 {
   COMP_MSG_DESC_ERR_OK                    = 0,

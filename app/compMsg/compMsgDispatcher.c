@@ -289,113 +289,6 @@ static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
   return COMP_DISP_ERR_OK;
 }
 
-#define checkErrWithResetOK(result) if(result != DATA_VIEW_ERR_OK) { dataView->data = saveData; dataView->lgth= saveLgth; return result; }
-
-// ================================= getMsgPtrFromMsgParts ====================================
-
-static uint8_t getMsgPtrFromMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts, compMsgData_t **compMsgData, int incrRefCnt) {
-  int firstFreeEntryId;
-  int headerIdx;
-  msgHeader2MsgPtr_t *entry;
-  msgHeader2MsgPtr_t *headerEntry;
-  msgHeader2MsgPtr_t *newHeaderEntry;
-  msgHeader2MsgPtr_t *firstFreeEntry;
-  uint8_t header[DISP_MAX_HEADER_LGTH];
-  uint8_t result;
-  dataView_t *dataView;
-  uint8_t *saveData;
-  uint8_t saveLgth;
-  size_t offset;
-
-  // build header from msgParts
-  offset = 0;
-  dataView = self->compMsgDataView->dataView;
-  saveData = dataView->data;
-  saveLgth = dataView->lgth;
-  dataView->data = header;
-  dataView->lgth = DISP_MAX_HEADER_LGTH;
-  result = dataView->setUint16(dataView, offset, msgParts->fromPart);
-  checkErrWithResetOK(result);
-  offset += sizeof(uint16_t);
-  result = dataView->setUint16(dataView, offset, msgParts->toPart);
-  checkErrWithResetOK(result);
-  offset += sizeof(uint16_t);
-  result = dataView->setUint16(dataView, offset, msgParts->totalLgth);
-  checkErrWithResetOK(result);
-  offset += sizeof(uint16_t);
-  result = dataView->setUint16(dataView, offset, msgParts->u16CmdKey);
-  checkErrWithResetOK(result);
-  offset += sizeof(uint16_t);
-  dataView->data = saveData;
-  dataView->lgth= saveLgth;
-  // end build header from msgParts
-  if ((incrRefCnt == COMP_MSG_INCR) && (self->numMsgHeaders >= self->maxMsgHeaders)) {
-    if (self->maxMsgHeaders == 0) {
-      self->maxMsgHeaders = 4;
-      self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_zalloc((self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
-      checkAllocOK(self->msgHeader2MsgPtrs);
-    } else {
-      self->maxMsgHeaders += 2;
-      self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_realloc(self->msgHeader2MsgPtrs, (self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
-      checkAllocOK(self->msgHeader2MsgPtrs);
-    }
-  }
-  firstFreeEntry = NULL;
-  firstFreeEntryId = 0;
-  if (self->numMsgHeaders > 0) {
-    // find header 
-    headerIdx = 0;
-    while (headerIdx < self->numMsgHeaders) {
-      headerEntry = &self->msgHeader2MsgPtrs[headerIdx];
-      if ((headerEntry->compMsgData != NULL) && (ets_memcmp(headerEntry->header, header, offset) == 0)) {
-        if (incrRefCnt < 0) {
-          headerEntry->headerLgth = 0;
-          os_free(headerEntry->compMsgData);
-          headerEntry->compMsgData = NULL;
-          *compMsgData = NULL;
-          return COMP_DISP_ERR_OK;
-        }
-        *compMsgData = headerEntry->compMsgData;
-        (*compMsgData)->flags &= ~COMP_MSG_IS_PREPARED;
-        return COMP_DISP_ERR_OK;
-      }
-      if ((incrRefCnt == COMP_MSG_INCR) && (headerEntry->compMsgData == NULL) && (firstFreeEntry == NULL)) {
-        firstFreeEntry = headerEntry;
-        firstFreeEntry->compMsgData = newCompMsgData();
-        firstFreeEntry->compMsgData->setDispatcher(firstFreeEntry->compMsgData, self);
-        firstFreeEntry->headerLgth = offset;
-        c_memcpy(firstFreeEntry->header, header, offset);
-        *compMsgData = firstFreeEntry->compMsgData;
-      }
-      headerIdx++;
-    }
-  }
-  if (incrRefCnt < 0) {
-    return COMP_DISP_ERR_OK; // just ignore silently
-  } else {
-    if (incrRefCnt == 0) {
-      return COMP_DISP_ERR_HEADER_NOT_FOUND;
-    } else {
-      if (firstFreeEntry != NULL) {
-        *compMsgData = firstFreeEntry->compMsgData;
-        firstFreeEntry->headerLgth = offset;
-        c_memcpy(firstFreeEntry->header, header, offset);
-      } else {
-        newHeaderEntry = &self->msgHeader2MsgPtrs[self->numMsgHeaders];
-        newHeaderEntry->headerLgth = offset;
-        c_memcpy(newHeaderEntry->header, header, offset);
-        newHeaderEntry->compMsgData = newCompMsgData();
-        newHeaderEntry->compMsgData->setDispatcher(newHeaderEntry->compMsgData, self);
-        *compMsgData = newHeaderEntry->compMsgData;
-        self->numMsgHeaders++;
-      }
-    }
-  }
-  return COMP_DISP_ERR_OK;
-}
-
-#undef checkErrWithResetOK
-
 // ================================= getNewCompMsgDataPtr ====================================
 
 static uint8_t getNewCompMsgDataPtr(compMsgDispatcher_t *self) {
@@ -454,12 +347,12 @@ static uint8_t getFieldType(compMsgDispatcher_t *self, compMsgData_t *compMsgDat
 // ================================= resetBuildMsgInfos ====================================
 
 static uint8_t resetBuildMsgInfos(compMsgDispatcher_t *self) {
-  self->buildMsgInfos.numRows = 0;
-  self->buildMsgInfos.tableRow = 0;
-  self->buildMsgInfos.tableCol = 0;
-  self->buildMsgInfos.numericValue = 0;
-  self->buildMsgInfos.stringValue = NULL;
-  self->buildMsgInfos.actionName = NULL;
+  self->compMsgData->buildMsgInfos.numRows = 0;
+  self->compMsgData->buildMsgInfos.tableRow = 0;
+  self->compMsgData->buildMsgInfos.tableCol = 0;
+  self->compMsgData->buildMsgInfos.numericValue = 0;
+  self->compMsgData->buildMsgInfos.stringValue = NULL;
+  self->compMsgData->buildMsgInfos.actionName = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -512,83 +405,6 @@ ets_printf("runAction done\n");
     // FIXME !! here we need a call to send the (eventually encrypted) message!!
   }
   return COMP_MSG_ERR_OK;
-}
-
-// ================================= createMsgFromLines ====================================
-
-static uint8_t createMsgFromLines(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t numEntries, uint8_t numRows, uint8_t type) {
-  int idx;
-  uint8_t*cp;
-  uint8_t *fieldNameStr;
-  uint8_t *fieldTypeStr;
-  uint8_t *fieldLgthStr;
-  char *endPtr;
-  uint8_t fieldLgth;
-  uint8_t *flagStr;
-  uint8_t flag;
-  uint8_t lgth;
-  unsigned long uflag;
-  uint8_t buf[100];
-  uint8_t *buffer = buf;
-  int result;
-
-//ets_printf("§createMsgFromLines:%d!%d! \n§", self->numMsgHeaders, self->maxMsgHeaders);
-  result = getMsgPtrFromMsgParts(self, parts, &self->compMsgData, COMP_MSG_INCR);
-  checkErrOK(result);
-  if (self->compMsgData->flags & COMP_MSG_IS_INITTED) {
-    return COMP_DISP_ERR_OK;
-  }
-  result = self->compMsgData->createMsg(self->compMsgData, numEntries, &self->msgHandle);
-  checkErrOK(result);
-  idx = 0;
-  while(idx < numEntries) {
-    result = self->compMsgMsgDesc->readLine(self->compMsgMsgDesc, &buffer, &lgth);
-    checkErrOK(result);
-    if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
-    }
-    buffer[lgth] = 0;
-    fieldNameStr = buffer;
-    cp = fieldNameStr;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    fieldTypeStr = cp;
-    while (*cp != ',') {
-      cp++;
-    }
-    *cp++ = '\0';
-    fieldLgthStr = cp;
-    while (*cp != '\n') {
-      cp++;
-    }
-    *cp++ = '\0';
-    if (c_strcmp(fieldLgthStr,"@numRows") == 0) {
-      fieldLgth = numRows;
-    } else {
-      lgth = c_strtoul(fieldLgthStr, &endPtr, 10);
-      fieldLgth = (uint8_t)lgth;
-    }
-    result = self->compMsgData->addField(self->compMsgData, fieldNameStr, fieldTypeStr, fieldLgth);
-    checkErrOK(result);
-    idx++;
-  }
-  if (self->compMsgData->numTableRows > 0) {
-#ifdef NOTDFE
-    result = newCompMsgDefMsg(self->compMsgData);
-    checkErrOK(result);
-    result = self->compMsgData->initDefMsg(self->compMsgData);
-    checkErrOK(result);
-self->compMsgData->dumpDefFields(self->compMsgData);
-    result = newCompMsgList(self->compMsgData);
-    checkErrOK(result);
-// the next 2 lines are too early here the necessary data are not yet provided!!
-//    result = self->compMsgData->initListMsg(self->compMsgData);
-//    checkErrOK(result);
-#endif
-  }
-  return COMP_DISP_ERR_OK;
 }
 
 // ================================= resetMsgInfo ====================================
@@ -692,6 +508,109 @@ uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= startRequest ====================================
+
+static uint8_t startRequest(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+ets_printf("should start request: %d\n", self->msgRequestInfos.currRequestIdx);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= startNextRequest ====================================
+
+static uint8_t startNextRequest(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+  if (self->msgRequestInfos.currRequestIdx < 0) {
+    if (self->msgRequestInfos.currRequestIdx < self->msgRequestInfos.lastRequestIdx) {
+      self->msgRequestInfos.currRequestIdx = 0;
+      result = startRequest(self);
+      checkErrOK(result);
+      return COMP_DISP_ERR_OK;
+    }
+  }
+  if (self->msgRequestInfos.currRequestIdx < self->msgRequestInfos.lastRequestIdx) {
+    self->msgRequestInfos.currRequestIdx++;
+    result = startRequest(self);
+    checkErrOK(result);
+  }
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= addRequest ====================================
+
+static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle) {
+  uint8_t result;
+
+  if (self->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
+    return COMP_DISP_ERR_TOO_MANY_REQUESTS;
+  }
+  self->msgRequestInfos.lastRequestIdx++;
+  self->msgRequestInfos.requestTypes[self->msgRequestInfos.lastRequestIdx] = requestType;
+  self->msgRequestInfos.requestHandles[self->msgRequestInfos.lastRequestIdx] = requestHandle;
+  if (self->msgRequestInfos.currRequestIdx < 0) {
+    self->msgRequestInfos.currRequestIdx++;
+    // start handling the request
+    // FIXME!!! need code here
+  }
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= deleteRequest ====================================
+
+static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle) {
+  uint8_t result;
+  int idx;
+  bool found;
+  int idxToStart;
+  int idxDeleted;
+
+  idx = 0;
+  idxToStart = -1;
+  idxDeleted = -1;
+  found = false;
+  while (idx < self->msgRequestInfos.lastRequestIdx) {
+    if (idx >= COMP_DISP_MAX_REQUESTS) {
+      return COMP_DISP_ERR_REQUEST_NOT_FOUND;
+    }
+    if (!found) {
+      if ((self->msgRequestInfos.requestTypes[idx] == requestType) && (self->msgRequestInfos.requestHandles[idx] == requestHandle)) {
+        found = true;
+        idxDeleted = idx;
+        if (idx == self->msgRequestInfos.currRequestIdx) {
+          if (idx < self->msgRequestInfos.lastRequestIdx) {
+            idxToStart = idx;
+          }
+          self->msgRequestInfos.currRequestIdx = -1;
+        }
+      }
+    } else {
+      // move the following entries one idx down
+      if (idx < self->msgRequestInfos.lastRequestIdx) {
+        self->msgRequestInfos.requestTypes[idx] = self->msgRequestInfos.requestTypes[idx + 1];
+        self->msgRequestInfos.requestHandles[idx] = self->msgRequestInfos.requestHandles[idx + 1];
+        if (idx + 1 == self->msgRequestInfos.currRequestIdx) {
+          self->msgRequestInfos.currRequestIdx--;
+        }
+      }
+    }
+    idx++;
+  }
+  if (self->msgRequestInfos.lastRequestIdx >= 0) {
+    self->msgRequestInfos.lastRequestIdx--;
+  }
+  if (self->msgRequestInfos.currRequestIdx < 0) {
+    self->msgRequestInfos.currRequestIdx++;
+    // start handling the request
+    self->startNextRequest(self);
+  } else {
+    // nothing to do the current request is different from the deleted one
+    // so just let the current one continue
+  }
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= initDispatcher ====================================
 
 static uint8_t initDispatcher(compMsgDispatcher_t *self) {
@@ -767,7 +686,10 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->maxMsgHeaders = 0;
   compMsgDispatcher->msgHeader2MsgPtrs = NULL;
 
-//  compMsgDispatcher->msgHeaderInfos.headerFlags = 0;
+  // request handling
+  compMsgDispatcher->msgRequestInfos.currRequestIdx = -1;
+  compMsgDispatcher->msgRequestInfos.lastRequestIdx = -1;
+
   compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
   compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
   compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
@@ -777,9 +699,15 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->createDispatcher = &createDispatcher;
   compMsgDispatcher->initDispatcher = &initDispatcher;
 
+  // request handling
+  compMsgDispatcher->startRequest = &startRequest;
+  compMsgDispatcher->startNextRequest = &startNextRequest;
+  compMsgDispatcher->addRequest = &addRequest;
+  compMsgDispatcher->deleteRequest = &deleteRequest;
+
+
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
   compMsgDispatcher->createMsgFromHeaderPart = &createMsgFromHeaderPart;
-  compMsgDispatcher->createMsgFromLines = &createMsgFromLines;
   compMsgDispatcher->getNewCompMsgDataPtr = &getNewCompMsgDataPtr;
 
   compMsgDispatcher->encryptMsg = &encryptMsg;

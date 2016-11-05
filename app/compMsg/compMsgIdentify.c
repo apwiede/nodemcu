@@ -103,19 +103,6 @@ static uint8_t *getFlagStr(uint32_t flags) {
   }
 }
 
-// ================================= initHeadersAndFlags ====================================
-
-static uint8_t initHeadersAndFlags(compMsgDispatcher_t *self) {
-  int result;
-
-  self->dispFlags = 0;
-  self->McuPart = 0x4D00;
-  self->WifiPart = 0x5700;
-  self->AppPart = 0x4100;
-  self->CloudPart = 0x4300;
-  return COMP_DISP_ERR_OK;
-}
-
 // ================================= resetHeaderInfos ====================================
 
 static uint8_t resetHeaderInfos(compMsgDispatcher_t *self) {
@@ -452,7 +439,6 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   self->handleReceivedPart = &handleReceivedPart;
   self->nextFittingEntry = &nextFittingEntry;
   self->handleReceivedMsg = &handleReceivedMsg;
-  initHeadersAndFlags(self);
   result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;

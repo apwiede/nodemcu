@@ -99,7 +99,7 @@ static void websocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned 
 //ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->received);
 //  checkErrOK(result);
-  self->wud = wud;
+  self->compMsgData->wud = wud;
   result = compMsgDispatcher->handleReceivedPart(compMsgDispatcher, (uint8_t *)pdata, (uint8_t)len);
 ets_printf("websocketBinaryReceived end result: %d\n", result);
 }
@@ -269,13 +269,13 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
   
 //ets_printf("getModuleTableFieldValue: row: %d col: %d actionMode: %d\n", self->buildMsgInfos.tableRow, self->buildMsgInfos.tableCol, actionMode);
   scanInfos = self->bssScanInfos;
-  self->buildMsgInfos.numericValue = 0;
-  self->buildMsgInfos.stringValue = NULL;
-  if (self->buildMsgInfos.tableRow > scanInfos->numScanInfos) {
+  self->compMsgData->buildMsgInfos.numericValue = 0;
+  self->compMsgData->buildMsgInfos.stringValue = NULL;
+  if (self->compMsgData->buildMsgInfos.tableRow > scanInfos->numScanInfos) {
     return COMP_DISP_ERR_BAD_ROW;
   }
-  scanInfo = &scanInfos->infos[self->buildMsgInfos.tableRow];
-  result = bssStr2BssInfoId(self->msgDescPart->fieldNameStr, &fieldId);
+  scanInfo = &scanInfos->infos[self->compMsgData->buildMsgInfos.tableRow];
+  result = bssStr2BssInfoId(self->compMsgData->msgDescPart->fieldNameStr, &fieldId);
 //ets_printf("row: %d ssid: %s rssi: %d fieldName: %s fieldId: %d\n", self->buildMsgInfos.tableRow, scanInfo->ssid, scanInfo->rssi, self->buildMsgInfos.fieldNameStr, fieldId);
   checkErrOK(result);
   switch ((int)fieldId) {
@@ -284,7 +284,7 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
   case  BSS_INFO_BSSID_STR:
     break;
   case  BSS_INFO_SSID:
-    self->buildMsgInfos.stringValue = scanInfo->ssid;
+    self->compMsgData->buildMsgInfos.stringValue = scanInfo->ssid;
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_SSID_LEN:
@@ -292,7 +292,7 @@ static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t act
   case  BSS_INFO_CHANNEL:
     break;
   case  BSS_INFO_RSSI:
-    self->buildMsgInfos.numericValue = scanInfo->rssi;
+    self->compMsgData->buildMsgInfos.numericValue = scanInfo->rssi;
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_AUTH_MODE:
@@ -313,7 +313,7 @@ static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t bssInfoType;
 
-  result = bssStr2BssInfoId(self->msgDescPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
+  result = bssStr2BssInfoId(self->compMsgData->msgDescPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
   checkErrOK(result);
   switch ((int)bssInfoType) {
   case  BSS_INFO_BSSID:
@@ -321,9 +321,9 @@ static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
   case  BSS_INFO_BSSID_STR:
     break;
   case  BSS_INFO_SSID:
-    self->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
-    self->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.ssidSize;
-    self->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.ssidType;
+    self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
+    self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.ssidSize;
+    self->compMsgData->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.ssidType;
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_SSID_LEN:
@@ -331,9 +331,9 @@ static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
   case  BSS_INFO_CHANNEL:
     break;
   case  BSS_INFO_RSSI:
-    self->msgDescPart->fieldKey = compMsgWifiData.key_rssi;
-    self->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.rssiSize;
-    self->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.rssiType;
+    self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_rssi;
+    self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.rssiSize;
+    self->compMsgData->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.rssiType;
     return COMP_DISP_ERR_OK;
     break;
   case  BSS_INFO_AUTH_MODE:
@@ -360,7 +360,7 @@ uint8_t *cp2;
   size_t saveLgth;
   bssScanInfo_t *bssScanInfo;
 
-  result = bssStr2BssInfoId(self->msgValPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
+  result = bssStr2BssInfoId(self->compMsgData->msgValPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
   checkErrOK(result);
   saveData = self->compMsgDataView->dataView->data;
   saveLgth = self->compMsgDataView->dataView->lgth;
@@ -370,17 +370,17 @@ uint8_t *cp2;
   case  BSS_INFO_BSSID_STR:
     break;
   case  BSS_INFO_SSID:
-    self->msgValPart->fieldKeyValueStr = os_zalloc(self->msgDescPart->fieldSize);
-    checkAllocOK(self->msgValPart->fieldKeyValueStr);
+    self->compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(self->compMsgData->msgDescPart->fieldSize);
+    checkAllocOK(self->compMsgData->msgValPart->fieldKeyValueStr);
     entryIdx = 0;
-    cp = self->msgValPart->fieldKeyValueStr;
+    cp = self->compMsgData->msgValPart->fieldKeyValueStr;
     self->compMsgDataView->dataView->data = cp;
     self->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->msgDescPart->fieldKey);
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->compMsgData->msgDescPart->fieldKey);
     checkErrOK(result);
-    result = self->compMsgDataView->dataView->setUint8(self->compMsgDataView->dataView, 2, self->msgDescPart->fieldType);
+    result = self->compMsgDataView->dataView->setUint8(self->compMsgDataView->dataView, 2, self->compMsgData->msgDescPart->fieldType);
     checkErrOK(result);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 3, self->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 3, self->compMsgData->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
     checkErrOK(result);
     cp += 2 * sizeof(uint16_t) + sizeof(uint8_t);
     self->compMsgDataView->dataView->data = saveData;
@@ -399,17 +399,17 @@ uint8_t *cp2;
   case  BSS_INFO_CHANNEL:
     break;
   case  BSS_INFO_RSSI:
-    self->msgValPart->fieldKeyValueStr = os_zalloc(self->msgDescPart->fieldSize);
-    checkAllocOK(self->msgValPart->fieldKeyValueStr);
-    cp = self->msgValPart->fieldKeyValueStr;
+    self->compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(self->compMsgData->msgDescPart->fieldSize);
+    checkAllocOK(self->compMsgData->msgValPart->fieldKeyValueStr);
+    cp = self->compMsgData->msgValPart->fieldKeyValueStr;
     self->compMsgDataView->dataView->data = cp;
     self->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->msgDescPart->fieldKey);
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->compMsgData->msgDescPart->fieldKey);
     checkErrOK(result);
-    result = self->compMsgDataView->dataView->setUint8(self->compMsgDataView->dataView, 2, self->msgDescPart->fieldType);
+    result = self->compMsgDataView->dataView->setUint8(self->compMsgDataView->dataView, 2, self->compMsgData->msgDescPart->fieldType);
     checkErrOK(result);
     cp += 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 3, self->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
+    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 3, self->compMsgData->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
     checkErrOK(result);
     self->compMsgDataView->dataView->data = saveData;
     self->compMsgDataView->dataView->lgth = saveLgth;
@@ -468,11 +468,11 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
 static uint8_t getWifiRemotePort(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  if (self->wud == NULL) {
+  if (self->compMsgData->wud == NULL) {
     return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
   }
-  self->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->msgValPart->fieldValue = self->wud->remote_port;
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = self->compMsgData->wud->remote_port;
   return COMP_DISP_ERR_OK;
 }
 
