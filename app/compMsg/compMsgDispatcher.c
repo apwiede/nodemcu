@@ -365,7 +365,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-  result = self->compMsgData->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
+  result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self->compMsgData, self->compMsgData->numMsgDescParts, handle);
   checkErrOK(result);
@@ -620,10 +620,10 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self) {
 headerPart_t *hdr;
 uint8_t *handle;
 
-  if (self->compMsgData == NULL) {
-    result = self->getNewCompMsgDataPtr(self);
-    checkErrOK(result);
-  }
+//  if (self->compMsgData == NULL) {
+//    result = self->getNewCompMsgDataPtr(self);
+//    checkErrOK(result);
+//  }
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
@@ -638,6 +638,9 @@ uint8_t *handle;
   checkErrOK(result);
   result = compMsgWebsocketInit(self);
   checkErrOK(result);
+// FIXME !! temporary
+//  result = websocketRunAPMode(self);
+//  checkErrOK(result);
 #ifdef NOTDEF
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
 checkErrOK(result);
@@ -676,6 +679,9 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   if (compMsgDispatcher == NULL) {
     return NULL;
   }
+
+  compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
+  compMsgDispatcher->compMsgDataView = newCompMsgDataView(); // only used for readHeadersAndSetFlags !!
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

@@ -196,8 +196,12 @@ typedef struct compMsgDispatcher {
   uint8_t *stringValue;
   uint8_t actionMode;
   bssScanInfos_t *bssScanInfos;
+  compMsgDataView_t *compMsgDataView; // needed only for readeHeadersAndSetFlags!!
 
   msgHeaderInfos_t msgHeaderInfos;
+
+  // compMsgMsgDesc info
+  compMsgMsgDesc_t *compMsgMsgDesc;
 
   // request infos
   msgRequestInfos_t msgRequestInfos;

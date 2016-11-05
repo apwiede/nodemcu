@@ -684,8 +684,5 @@ uint8_t compMsgWebsocketInit(compMsgDispatcher_t *self) {
   self->websocketRunClientMode = &websocketRunClientMode;
   self->websocketRunAPMode = &websocketRunAPMode;
   self->websocketSendData = websocketSendData;
-// FIXME !! temporary
-  result = websocketRunAPMode(self);
-  checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }

@@ -339,11 +339,11 @@ static uint8_t getHeaderFieldsFromLine(compMsgDataView_t *dataView, msgHeaderInf
   uint8_t *cp;
   uint8_t fieldNameId;
 
-ets_printf("numHeaderParts: %d seqidx: %d\n", hdrInfos->numHeaderParts, *seqIdx);
+//ets_printf("numHeaderParts: %d seqidx: %d\n", hdrInfos->numHeaderParts, *seqIdx);
   cp = myStr;
   result = getIntFromLine(cp, &uval, ep, &isEnd);
   checkErrOK(result);
-ets_printf("desc: headerLth: %d\n", uval);
+ets_printf("desc: headerLgth: %d\n", uval);
   hdrInfos->headerLgth = (uint8_t)uval;
   checkIsEnd(isEnd);
   cp = *ep;
@@ -492,8 +492,10 @@ ets_printf("desc: headerLth: %d\n", uval);
   
 #undef checkIsEnd
 #define checkIsEnd(val) { hdr->hdrLgth = ep - myStr; if (val) return result; }
+
 #undef checkErrOK
 #define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+
 // ================================= readHeadersAndSetFlags ====================================
 
 static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileName) {
@@ -523,9 +525,9 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   compMsgMsgDesc_t *compMsgMsgDesc;
   dataView_t *myDataView;
 
-ets_printf("readHeadersAndSetFlags\n");
-  compMsgMsgDesc = self->compMsgData->compMsgMsgDesc;
-  dataView = self->compMsgData->compMsgDataView;
+//ets_printf("readHeadersAndSetFlags\n");
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  dataView = self->compMsgDataView; // only used for this function!!
   hdrInfos = &self->msgHeaderInfos;
   hdrInfos->currPartIdx = 0;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
@@ -780,16 +782,16 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   uint8_t *buffer;
   uint8_t *myStr;
   uint8_t fieldTypeId;
-  compMsgData_t *compMsgData;
+  compMsgMsgDesc_t *compMsgMsgDesc;
 
-  compMsgData = self->compMsgData;
+  compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
-  dataView = compMsgData->compMsgDataView;
-  result = compMsgData->compMsgMsgDesc->openFile(compMsgData->compMsgMsgDesc, fileName, "r");
+  dataView = self->compMsgDataView;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgData->compMsgMsgDesc->closeFile(compMsgData->compMsgMsgDesc); return result; }
-  result = compMsgData->compMsgMsgDesc->readLine(compMsgData->compMsgMsgDesc, &buffer, &lgth);
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
@@ -802,7 +804,7 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   while(idx < numEntries) {
     u8CmdKey = 0;
     u16CmdKey = 0;
-    result = compMsgData->compMsgMsgDesc->readLine(compMsgData->compMsgMsgDesc, &buffer, &lgth);
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -811,20 +813,20 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
     cp = buffer;
     // actionName
     actionName = cp;
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     checkIsEnd(isEnd);
     cp = ep;
 
     // actionMode
-    result = compMsgData->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
     checkErrOK(result);
     actionMode = (uint8_t)uval;
     checkIsEnd(isEnd);
     cp = ep;
 
     // type of cmdKey
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
     checkErrOK(result);
@@ -832,7 +834,7 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
     cp = ep;
 
     // cmdKey
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_UINT8_T:
@@ -853,7 +855,7 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   }
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
-  result = compMsgData->compMsgMsgDesc->closeFile(self->compMsgData->compMsgMsgDesc);
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_DESC_ERR_OK;
 }
@@ -990,19 +992,21 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
   compMsgData_t *compMsgData;
+  compMsgMsgDesc_t *compMsgMsgDesc;
 
   compMsgData = self->compMsgData;
-  compMsgData->currHdr = hdr;
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  self->compMsgData->currHdr = hdr;
   os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
-  result = compMsgData->compMsgMsgDesc->openFile(compMsgData->compMsgMsgDesc, fileName, "r");
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgData->compMsgMsgDesc->closeFile(compMsgData->compMsgMsgDesc); return result; }
-  result = compMsgData->compMsgMsgDesc->readLine(self->compMsgData->compMsgMsgDesc, &buffer, &lgth);
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   cp = buffer;
-  result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+  result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
   checkErrOK(result);
   if (isEnd) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -1011,18 +1015,18 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
   }
   cp = ep;
-  result = compMsgData->compMsgMsgDesc->resetMsgDescParts(self);
+  result = compMsgMsgDesc->resetMsgDescParts(self);
   checkErrOK(result);
-  result = compMsgData->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+  result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
   checkErrOK(result);
   compMsgData->maxMsgDescParts = (uint8_t)uval;
   cp = ep;
-  if (compMsgData->prepareValuesCbName != NULL) {
-    os_free(compMsgData->prepareValuesCbName);
-    compMsgData->prepareValuesCbName = NULL;
+  if (self->compMsgData->prepareValuesCbName != NULL) {
+    os_free(self->compMsgData->prepareValuesCbName);
+    self->compMsgData->prepareValuesCbName = NULL;
   }
   if (!isEnd) {
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     compMsgData->prepareValuesCbName = os_zalloc(c_strlen(cp) + 1);
     checkAllocOK(compMsgData->prepareValuesCbName);
@@ -1037,7 +1041,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   numRows = 0;
   idx = 0;
   while(idx < compMsgData->maxMsgDescParts) {
-    result = compMsgData->compMsgMsgDesc->readLine(compMsgData->compMsgMsgDesc, &buffer, &lgth);
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -1047,7 +1051,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     cp = buffer;
     // fieldName
     fieldNameStr = cp;
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     checkIsEnd(isEnd);
     cp = ep;
@@ -1057,7 +1061,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
 
     // fieldType
     fieldTypeStr = cp;
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     checkIsEnd(isEnd);
     cp = ep;
@@ -1067,7 +1071,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
 
     // fieldLgth
     fieldLgthStr = cp;
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     if (c_strcmp(fieldLgthStr,"@numRows") == 0) {
       fieldLgth = numRows;
@@ -1084,7 +1088,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     // eventually a callback for key value entries
     if (!isEnd) {
       keyValueCallback = cp;
-      result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+      result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
       checkErrOK(result);
       result = self->getActionCallback(self, cp + 1, &msgDescPart->getFieldSizeCallback);
       checkErrOK(result);
@@ -1096,18 +1100,18 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     cp = ep;
     idx++;
   }
-  result = compMsgData->compMsgMsgDesc->closeFile(self->compMsgData->compMsgMsgDesc);
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
 
   // and now the value parts
   os_sprintf(fileName, "CompVal%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
-  result = compMsgData->compMsgMsgDesc->openFile(compMsgData->compMsgMsgDesc, fileName, "r");
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
-  result = compMsgData->compMsgMsgDesc->readLine(compMsgData->compMsgMsgDesc, &buffer, &lgth);
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   cp = buffer;
-  result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+  result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
   checkErrOK(result);
   if (isEnd) {
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
@@ -1116,9 +1120,9 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
   }
   cp = ep;
-  result = compMsgData->compMsgMsgDesc->resetMsgValParts(self);
+  result = compMsgMsgDesc->resetMsgValParts(self);
   checkErrOK(result);
-  result = self->compMsgData->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+  result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
   checkErrOK(result);
   self->compMsgData->maxMsgValParts = (uint8_t)uval;
   cp = ep;
@@ -1129,7 +1133,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   checkAllocOK(compMsgData->msgValParts);
   idx = 0;
   while(idx < compMsgData->maxMsgValParts) {
-    result = compMsgData->compMsgMsgDesc->readLine(compMsgData->compMsgMsgDesc, &buffer, &lgth);
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -1139,7 +1143,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     cp = buffer;
     // fieldName
     fieldNameStr = cp;
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     msgValPart->fieldNameStr = os_zalloc(c_strlen(fieldNameStr)+ 1);
     checkAllocOK(msgValPart->fieldNameStr);
@@ -1151,7 +1155,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
 
     // fieldValue
     fieldValueStr = cp;
-    result = compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     msgValPart->fieldValueStr = os_zalloc(c_strlen(fieldValueStr)+ 1);
     checkAllocOK(msgValPart->fieldValueStr);
@@ -1173,7 +1177,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   }
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
-  result = compMsgData->compMsgMsgDesc->closeFile(self->compMsgData->compMsgMsgDesc);
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
 ets_printf("heap2: %d\n", system_get_free_heap_size());
 
@@ -1203,12 +1207,14 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   bool isEnd;
   uint8_t bssInfoType;
   uint8_t fieldTypeId;
+  compMsgMsgDesc_t *compMsgMsgDesc;
 
-  result = self->compMsgData->compMsgMsgDesc->openFile(self->compMsgData->compMsgMsgDesc, "CompMsgKeyValueKeys.txt", "r");
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, "CompMsgKeyValueKeys.txt", "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { self->compMsgData->compMsgMsgDesc->closeFile(self->compMsgData->compMsgMsgDesc); return result; }
-  result = self->compMsgData->compMsgMsgDesc->readLine(self->compMsgData->compMsgMsgDesc, &buffer, &lgth);
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
@@ -1218,7 +1224,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   numEntries = (uint8_t)uval;
   idx = 0;
   while(idx < numEntries) {
-    result = self->compMsgData->compMsgMsgDesc->readLine(self->compMsgData->compMsgMsgDesc, &buffer, &lgth);
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
@@ -1227,14 +1233,14 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     cp = buffer;
     // fieldName
     fieldNameStr = cp;
-    result = self->compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     checkIsEnd(isEnd);
     cp = ep;
 
     // fieldValue
     fieldValueStr = cp;
-    result = self->compMsgData->compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
     checkErrOK(result);
     result = self->bssStr2BssInfoId(fieldNameStr + c_strlen("@key_"), &bssInfoType);
     checkErrOK(result);
@@ -1272,10 +1278,9 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
 
     // fieldType
     fieldTypeStr = cp;
-    result = self->compMsgData->compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
-ets_printf("fieldType:%s result: %d\n", fieldTypeStr, result);
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    result = self->compMsgData->compMsgDataView->dataView->getFieldTypeIdFromStr(self->compMsgData->compMsgDataView->dataView, fieldTypeStr, &fieldTypeId);
+    result = self->compMsgDataView->dataView->getFieldTypeIdFromStr(self->compMsgDataView->dataView, fieldTypeStr, &fieldTypeId);
     checkErrOK(result);
     switch (bssInfoType) {
     case BSS_INFO_BSSID:
@@ -1311,7 +1316,7 @@ ets_printf("fieldType:%s result: %d\n", fieldTypeStr, result);
   }
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
-  result = self->compMsgData->compMsgMsgDesc->closeFile(self->compMsgData->compMsgMsgDesc);
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 ets_printf("getWifiKeyValues done\n");

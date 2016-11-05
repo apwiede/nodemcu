@@ -181,9 +181,6 @@ typedef struct compMsgData {
   msgValPart_t *msgValPart;
   headerPart_t *currHdr;
 
-  // compMsgMsgDesc info
-  compMsgMsgDesc_t *compMsgMsgDesc;
-
   // normalMsg
   createMsg_t createMsg;
   deleteMsg_t deleteMsg;

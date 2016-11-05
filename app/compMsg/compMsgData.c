@@ -1143,8 +1143,6 @@ ets_printf("call newCompMsgDataView\n");
   compMsgData->cmdLgth = 0;
   compMsgData->headerLgth = 0;
 
-  compMsgData->compMsgMsgDesc = newCompMsgMsgDesc();
-
   // normalMsg
   compMsgData->createMsg = &createMsg;
   compMsgData->deleteMsg = &deleteMsg;
