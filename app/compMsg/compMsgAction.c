@@ -553,7 +553,7 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   compMsgActions.actions = (actionName2Action_t **)os_zalloc(compMsgActions.maxActions * sizeof(actionName2Action_t  **));
   checkAllocOK(compMsgActions.actions);
 
-  result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
+  result = self->compMsgData->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
   return result;
 }
 

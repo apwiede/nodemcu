@@ -196,12 +196,6 @@ typedef struct compMsgDispatcher {
   uint8_t actionMode;
   bssScanInfos_t *bssScanInfos;
 
-//  buildMsgInfos_t buildMsgInfos;
-//  websocketUserData_t *wud;
-//  msgDescPart_t *msgDescPart;
-//  msgValPart_t *msgValPart;
-//  headerPart_t *currHdr;
-  
   msgHeaderInfos_t msgHeaderInfos;
 
   // request infos
@@ -215,7 +209,6 @@ typedef struct compMsgDispatcher {
   compMsgDataView_t *compMsgDataView;
   compMsgData_t *compMsgData;
   uint8_t *msgHandle;
-  compMsgMsgDesc_t *compMsgMsgDesc;
 
   msgParts_t received;
   msgParts_t toSend;

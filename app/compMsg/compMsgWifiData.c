@@ -514,7 +514,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->bssStr2BssInfoId = &bssStr2BssInfoId;
 
   bssScanInfos.compMsgDispatcher = self;
-  self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);
+  self->compMsgData->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);
   result = self->setWifiValues(self);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;

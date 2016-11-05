@@ -365,13 +365,13 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-  result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
+  result = self->compMsgData->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
-  result = self->compMsgData->createMsg(self->compMsgData, self->compMsgMsgDesc->numMsgDescParts, handle);
+  result = self->compMsgData->createMsg(self->compMsgData, self->compMsgData->compMsgMsgDesc->numMsgDescParts, handle);
   checkErrOK(result);
   idx = 0;
-  while(idx < self->compMsgMsgDesc->numMsgDescParts) {
-    msgDescPart = &self->compMsgMsgDesc->msgDescParts[idx];
+  while(idx < self->compMsgData->compMsgMsgDesc->numMsgDescParts) {
+    msgDescPart = &self->compMsgData->compMsgMsgDesc->msgDescParts[idx];
     result = self->compMsgData->addField(self->compMsgData, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
     checkErrOK(result);
     idx++;
@@ -381,11 +381,11 @@ ets_printf("heap4: %d\n", system_get_free_heap_size());
   // runAction calls at the end buildMsg
 //  self->resetBuildMsgInfos(self);
 //  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
-  if (self->compMsgMsgDesc->prepareValuesCbName != NULL) {
+  if (self->compMsgData->compMsgMsgDesc->prepareValuesCbName != NULL) {
     uint8_t actionMode;
     uint8_t type;
 
-    result = self->getActionMode(self, self->compMsgMsgDesc->prepareValuesCbName+1, &actionMode);
+    result = self->getActionMode(self, self->compMsgData->compMsgMsgDesc->prepareValuesCbName+1, &actionMode);
     self->actionMode = actionMode;
     checkErrOK(result);
     result  = self->runAction(self, &type);
@@ -693,8 +693,6 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
   compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
   compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
-
-  compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
 
   compMsgDispatcher->createDispatcher = &createDispatcher;
   compMsgDispatcher->initDispatcher = &initDispatcher;

@@ -439,7 +439,7 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   self->handleReceivedPart = &handleReceivedPart;
   self->nextFittingEntry = &nextFittingEntry;
   self->handleReceivedMsg = &handleReceivedMsg;
-  result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
+  result=self->compMsgData->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }

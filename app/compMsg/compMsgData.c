@@ -1142,6 +1142,8 @@ compMsgData_t *newCompMsgData(void) {
   compMsgData->cmdLgth = 0;
   compMsgData->headerLgth = 0;
 
+  compMsgData->compMsgMsgDesc = newCompMsgMsgDesc();
+
   // normalMsg
   compMsgData->createMsg = &createMsg;
   compMsgData->deleteMsg = &deleteMsg;
