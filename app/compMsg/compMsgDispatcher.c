@@ -197,7 +197,7 @@ static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
     compMsgDispatcherHandles.handles = os_realloc(compMsgDispatcherHandles.handles, sizeof(handle2Dispatcher_t)*(compMsgDispatcherHandles.numHandles+1));
     checkAllocOK(compMsgDispatcherHandles.handles);
     compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].handle = handle;
-    compMsgDispatcherHandles.handles[idx].compMsgDispatcher = compMsgDispatcher;
+    compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].compMsgDispatcher = compMsgDispatcher;
     compMsgDispatcherHandles.numHandles++;
   }
   return COMP_DISP_ERR_OK;
@@ -418,8 +418,10 @@ static uint8_t resetMsgInfo(compMsgDispatcher_t *self, msgParts_t *parts) {
   c_memcpy(parts->GUID, "                ", 16);
   parts->srcId = 0;
   parts->u16CmdKey = 0;
+#ifdef NOTUSED
   self->compMsgDataView->dataView->data = parts->buf;
   self->compMsgDataView->dataView->lgth = 0;
+#endif
   return COMP_DISP_ERR_OK;
 }
 
@@ -618,6 +620,10 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self) {
 headerPart_t *hdr;
 uint8_t *handle;
 
+  if (self->compMsgData == NULL) {
+    result = self->getNewCompMsgDataPtr(self);
+    checkErrOK(result);
+  }
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
@@ -632,10 +638,6 @@ uint8_t *handle;
   checkErrOK(result);
   result = compMsgWebsocketInit(self);
   checkErrOK(result);
-if (self->compMsgData == NULL) {
-result = self->getNewCompMsgDataPtr(self);
-checkErrOK(result);
-}
 #ifdef NOTDEF
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
 checkErrOK(result);
@@ -672,10 +674,6 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   }
   compMsgDispatcher_t *compMsgDispatcher = os_zalloc(sizeof(compMsgDispatcher_t));
   if (compMsgDispatcher == NULL) {
-    return NULL;
-  }
-  compMsgDispatcher->compMsgDataView = newCompMsgDataView();
-  if (compMsgDispatcher->compMsgDataView == NULL) {
     return NULL;
   }
 

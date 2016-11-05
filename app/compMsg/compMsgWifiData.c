@@ -96,7 +96,7 @@ static void websocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned 
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-//ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->received);
 //  checkErrOK(result);
   self->compMsgData->wud = wud;
@@ -359,32 +359,34 @@ uint8_t *cp2;
   uint8_t *saveData;
   size_t saveLgth;
   bssScanInfo_t *bssScanInfo;
+  compMsgData_t *compMsgData;
 
-  result = bssStr2BssInfoId(self->compMsgData->msgValPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
+  compMsgData = self->compMsgData;
+  result = bssStr2BssInfoId(compMsgData->msgValPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
   checkErrOK(result);
-  saveData = self->compMsgDataView->dataView->data;
-  saveLgth = self->compMsgDataView->dataView->lgth;
+  saveData = compMsgData->compMsgDataView->dataView->data;
+  saveLgth = compMsgData->compMsgDataView->dataView->lgth;
   switch ((int)bssInfoType) {
   case  BSS_INFO_BSSID:
     break;
   case  BSS_INFO_BSSID_STR:
     break;
   case  BSS_INFO_SSID:
-    self->compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(self->compMsgData->msgDescPart->fieldSize);
-    checkAllocOK(self->compMsgData->msgValPart->fieldKeyValueStr);
+    compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(compMsgData->msgDescPart->fieldSize);
+    checkAllocOK(compMsgData->msgValPart->fieldKeyValueStr);
     entryIdx = 0;
-    cp = self->compMsgData->msgValPart->fieldKeyValueStr;
-    self->compMsgDataView->dataView->data = cp;
-    self->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->compMsgData->msgDescPart->fieldKey);
+    cp = compMsgData->msgValPart->fieldKeyValueStr;
+    compMsgData->compMsgDataView->dataView->data = cp;
+    compMsgData->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t) + sizeof(uint8_t);
+    result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, 0, compMsgData->msgDescPart->fieldKey);
     checkErrOK(result);
-    result = self->compMsgDataView->dataView->setUint8(self->compMsgDataView->dataView, 2, self->compMsgData->msgDescPart->fieldType);
+    result = compMsgData->compMsgDataView->dataView->setUint8(compMsgData->compMsgDataView->dataView, 2, compMsgData->msgDescPart->fieldType);
     checkErrOK(result);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 3, self->compMsgData->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
+    result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, 3, compMsgData->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
     checkErrOK(result);
     cp += 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    self->compMsgDataView->dataView->data = saveData;
-    self->compMsgDataView->dataView->lgth = saveLgth;
+    compMsgData->compMsgDataView->dataView->data = saveData;
+    compMsgData->compMsgDataView->dataView->lgth = saveLgth;
     while (entryIdx < self->bssScanInfos->numScanInfos) {
       bssScanInfo = &self->bssScanInfos->infos[entryIdx];
       c_memcpy(cp, bssScanInfo->ssid, bssScanInfo->ssid_len);
@@ -399,20 +401,20 @@ uint8_t *cp2;
   case  BSS_INFO_CHANNEL:
     break;
   case  BSS_INFO_RSSI:
-    self->compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(self->compMsgData->msgDescPart->fieldSize);
-    checkAllocOK(self->compMsgData->msgValPart->fieldKeyValueStr);
-    cp = self->compMsgData->msgValPart->fieldKeyValueStr;
-    self->compMsgDataView->dataView->data = cp;
-    self->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 0, self->compMsgData->msgDescPart->fieldKey);
+    compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(compMsgData->msgDescPart->fieldSize);
+    checkAllocOK(compMsgData->msgValPart->fieldKeyValueStr);
+    cp = compMsgData->msgValPart->fieldKeyValueStr;
+    compMsgData->compMsgDataView->dataView->data = cp;
+    compMsgData->compMsgDataView->dataView->lgth = 2 * sizeof(uint16_t) + sizeof(uint8_t);
+    result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, 0, compMsgData->msgDescPart->fieldKey);
     checkErrOK(result);
-    result = self->compMsgDataView->dataView->setUint8(self->compMsgDataView->dataView, 2, self->compMsgData->msgDescPart->fieldType);
+    result = compMsgData->compMsgDataView->dataView->setUint8(compMsgData->compMsgDataView->dataView, 2, compMsgData->msgDescPart->fieldType);
     checkErrOK(result);
     cp += 2 * sizeof(uint16_t) + sizeof(uint8_t);
-    result = self->compMsgDataView->dataView->setUint16(self->compMsgDataView->dataView, 3, self->compMsgData->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
+    result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, 3, compMsgData->msgDescPart->fieldSize - (2 * sizeof(uint16_t) + sizeof(uint8_t)));
     checkErrOK(result);
-    self->compMsgDataView->dataView->data = saveData;
-    self->compMsgDataView->dataView->lgth = saveLgth;
+    compMsgData->compMsgDataView->dataView->data = saveData;
+    compMsgData->compMsgDataView->dataView->lgth = saveLgth;
     entryIdx = 0;
     while (entryIdx < self->bssScanInfos->numScanInfos) {
       bssScanInfo = &self->bssScanInfos->infos[entryIdx];

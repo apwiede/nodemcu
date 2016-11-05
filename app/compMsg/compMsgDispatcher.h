@@ -206,13 +206,15 @@ typedef struct compMsgDispatcher {
   uint8_t maxMsgHeaders;
   msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
 
-  compMsgDataView_t *compMsgDataView;
   compMsgData_t *compMsgData;
   uint8_t *msgHandle;
 
   msgParts_t received;
   msgParts_t toSend;
 
+  // function pointers
+
+  //
   getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
 

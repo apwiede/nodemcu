@@ -462,7 +462,7 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
   dataView_t *dataView;
 
   received = &self->received;
-  dataView = self->compMsgDataView->dataView;
+  dataView = self->compMsgData->compMsgDataView->dataView;
   if (received->u16CmdKey == 0x4244) { // "BD"
     // FIXME need to get the real offset here instead of 7!!
     result = dataView->getUint8(dataView, 7, &actionMode);
@@ -483,7 +483,7 @@ ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
     return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
   } else {
 //ets_printf("§runAction u16!%c%c!%c!§\n", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, *answerType);
-    dataView = self->compMsgDataView->dataView;
+    dataView = self->compMsgData->compMsgDataView->dataView;
     switch (self->actionMode) {
     case 8:
     case MODULE_INFO_AP_LIST_CALL_BACK:

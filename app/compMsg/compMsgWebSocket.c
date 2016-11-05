@@ -193,7 +193,7 @@ static int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char 
 //ets_printf("parse text\n");
     break;
   case OPCODE_BINARY:
-ets_printf("parse binary\n");
+//ets_printf("parse binary\n");
     break;
   case OPCODE_CLOSE:
     break;
@@ -255,6 +255,7 @@ for (int i = 0; i < size; i++) {
     break;
   case OPCODE_BINARY:
 //ets_printf("cb binary\n");
+//ets_printf("parse binary: size: %d\n", size);
     wud->websocketBinaryReceived(wud->compMsgDispatcher, wud, recv_data, size);
     break;
   }
@@ -357,7 +358,7 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
       wud->isWebsocket = 1;
     }
 
-ets_printf("payload: %d!%s!\n", payloadLen, payload);
+//ets_printf("payload: %d!%s!\n", payloadLen, payload);
     int result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
     os_free(key);
 //    checkErrOK(gL, result, "espconn_sent");
@@ -407,6 +408,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   websocketUserData_t *wud;
 
   pesp_conn = (struct espconn *)arg;
+//ets_printf("socketReceived: arg: %p len: %d\n", arg, len);
 //ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
   char temp[20] = {0};
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
@@ -442,7 +444,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
       idx++;
     }
   }
-//ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
+ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
 
   if(wud->isWebsocket == 1) {
     char *data = "";
@@ -682,6 +684,7 @@ uint8_t compMsgWebsocketInit(compMsgDispatcher_t *self) {
   self->websocketRunClientMode = &websocketRunClientMode;
   self->websocketRunAPMode = &websocketRunAPMode;
   self->websocketSendData = websocketSendData;
+// FIXME !! temporary
   result = websocketRunAPMode(self);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;

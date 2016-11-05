@@ -1124,6 +1124,7 @@ compMsgData_t *newCompMsgData(void) {
     return NULL;
   }
   compMsgData->compMsgDataView = newCompMsgDataView();
+ets_printf("call newCompMsgDataView\n");
   if (compMsgData->compMsgDataView == NULL) {
     return NULL;
   }

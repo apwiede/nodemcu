@@ -125,7 +125,7 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   int hdrIdx;
   int found;
 
-  dataView = self->compMsgDataView->dataView;
+  dataView = self->compMsgData->compMsgDataView->dataView;
   received = &self->received;
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
@@ -182,7 +182,7 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
   int found;
   uint8_t myHeaderLgth;
 
-  dataView = self->compMsgDataView->dataView;
+  dataView = self->compMsgData->compMsgDataView->dataView;
   received->fieldOffset = 0;
   myHeaderLgth = 0;
   hdrInfos->seqIdx = 0;
@@ -289,7 +289,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
   uint16_t sequenceEntry;
   uint8_t *handle;
 
-  dataView = self->compMsgDataView->dataView;
+  dataView = self->compMsgData->compMsgDataView->dataView;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
 
@@ -303,7 +303,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
     sequenceEntry = hdr->fieldSequence[hdrInfos->seqIdx];
     switch (sequenceEntry) {
     case COMP_DISP_U16_CMD_KEY:
-      result = self->compMsgDataView->dataView->getUint16(self->compMsgDataView->dataView, received->fieldOffset, &u16);
+      result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdKey = u16;
       received->fieldOffset += 2;
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
@@ -320,7 +320,7 @@ ets_printf("§u16CmdKey!0x%04x!§\n", received->u16CmdKey);
 ets_printf("§u0CmdLgth!0!§\n");
       break;
     case COMP_DISP_U16_CMD_LGTH:
-      result = self->compMsgDataView->dataView->getUint16(self->compMsgDataView->dataView, received->fieldOffset, &u16);
+      result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdLgth = u16;
       received->fieldOffset += 2;
 ets_printf("§u16CmdLgth!0x%04x!§\n", received->u16CmdLgth);
@@ -333,14 +333,14 @@ ets_printf("§u0Crc!0!§");
       fieldInfo.fieldLgth = 1;
       fieldInfo.fieldOffset = received->totalLgth - 1;
       startOffset = hdrInfos->headerLgth;
-      result = self->compMsgDataView->getCrc(self->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
+      result = self->compMsgData->compMsgDataView->getCrc(self->compMsgData->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
 ets_printf("§u8Crc!res!%d!§", result);
       break;
     case COMP_DISP_U16_CRC:
       fieldInfo.fieldLgth = 2;
       fieldInfo.fieldOffset = received->totalLgth - 2;
       startOffset = hdrInfos->headerLgth;
-      result = self->compMsgDataView->getCrc(self->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
+      result = self->compMsgData->compMsgDataView->getCrc(self->compMsgData->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
 ets_printf("§u16Crc!res!%d!§", result);
       break;
     }
@@ -386,15 +386,16 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
 
   hdrInfos = &self->msgHeaderInfos;
   received = &self->received;
-  dataView = self->compMsgDataView->dataView;
+  dataView = self->compMsgData->compMsgDataView->dataView;
   dataView->data = received->buf;
-//ets_printf("§receivedLgth: %d fieldOffset: %d!\n§", received->lgth, received->fieldOffset);
+//ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!\n§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
   idx = 0;
   while (idx < lgth) {
     received->buf[received->lgth++] = buffer[idx];
     received->realLgth++;
     dataView->lgth++;
     if (received->lgth == hdrInfos->headerLgth) {
+//ets_printf("received lgth: %d lgth: %d idx: %d\n", received->lgth, lgth, idx);
       result = getHeaderIndexFromHeaderFields(self, received, hdrInfos);
 //ets_printf("getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
     }
@@ -402,6 +403,7 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
     if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
+//ets_printf("hdrIdx: %d\n", hdrIdx);
       if (hdr->hdrEncryption == 'E') {
         uint8_t *cryptedPtr;
         uint8_t *cryptKey;
