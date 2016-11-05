@@ -66,328 +66,313 @@ namespace eval compMsg {
     # ================================= runClientMode ====================================
     
     proc runClientMode {compMsgDispatcherVar mode} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      cmdisp websocketRunClientMode{cmdisp, mode};
-      return COMP_DISP_ERR_OK;
+      compMsgDispatcher websocketRunClientMode{cmdisp, mode};
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= runAPMode ====================================
     
    proc runAPMode {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      cmdisp websocketRunAPMode{cmdisp};
-      return COMP_DISP_ERR_OK;
+      compMsgDispatcher websocketRunAPMode{cmdisp};
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= runLightSleepWakeupMode ====================================
     
     proc runLightSleepWakeupMode {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
-      return COMP_DISP_ERR_OK;
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= runLightSleepNoWakeupMode ====================================
     
     proc runLightSleepNoWakeupMode {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
-      return COMP_DISP_ERR_OK;
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= runWpsMode ====================================
     
     proc runWpsMode {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
-      return COMP_DISP_ERR_OK;
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= runModulTestMode ====================================
     
     proc runModulTestMode {compMsgDispatcherBVar} {
-      upvar $compMsgDispatcherVar cmdisp
-      return COMP_DISP_ERR_OK;
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= runDeletePasswdCMode ====================================
     
     proc runDeletePasswdCMode {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-    ets_printf{"§runDeletePasswdC§"};
-      return COMP_DISP_ERR_OK;
+puts stderr "§runDeletePasswdC§"
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getMACAddr ====================================
     
     proc getMACAddr {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_MACAddr, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_MACAddr, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getIPAddr ====================================
     
     proc getIPAddr {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_IPAddr, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_IPAddr, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getFirmwareVersion ====================================
     
     proc getFirmwareVersion {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_FirmwareVersion, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_FirmwareVersion, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getSerieNumber ====================================
     
     proc getSerieNumber {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_SerieNumber, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_SerieNumber, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getRSSI ====================================
     
     proc getRSSI {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_RSSI, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_RSSI, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getModuleConnection ====================================
     
     proc getModuleConnection {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_ModuleConnection, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_ModuleConnection, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getDeviceMode ====================================
     
     proc getDeviceMode {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_DeviceMode, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_DeviceMode, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getDeviceSecurity ====================================
     
-    proc getDeviceSecurity{compMsgDispatcher_t *cmdisp} {
-      upvar $compMsgDispatcherVar cmdisp
+    proc getDeviceSecurity{compMsgDispatcher_t *compMsgDispatcher} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_DeviceSecurity, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_DeviceSecurity, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getErrorMain ====================================
     
     proc getErrorMain {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_ErrorMain, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_ErrorMain, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getErrorSub ====================================
     
     proc getErrorSub {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_ErrorSub, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_ErrorSub, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getDateAndTime ====================================
     
     proc getDateAndTime {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_DateAndTime, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_DateAndTime, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getSSIDs ====================================
     
     proc getSSIDs {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_SSIDs, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_SSIDs, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getReserve1 ====================================
     
     proc getReserve1 {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_Reserve1, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_Reserve1, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getReserve2 ====================================
     
     proc getReserve2 {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_Reserve2, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_Reserve2, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getReserve3 ====================================
     
     proc getReserve3 {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_Reserve3, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_Reserve3, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getGUID ====================================
     
     proc getGUID {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_GUID, DATA_VIEW_FIELD_UINT8_VECTOR};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_GUID, DATA_VIEW_FIELD_UINT8_VECTOR};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getSrcId ====================================
     
     proc getSrcId {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleValue{cmdisp, MODULE_INFO_srcId, DATA_VIEW_FIELD_UINT16_T};
-      return COMP_DISP_ERR_OK;
+      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_srcId, DATA_VIEW_FIELD_UINT16_T};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getAPList ====================================
     
     proc getAPList {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getBssScanInfo{cmdisp};
-      return result;
+      set result [::compMsg compMsgDispatcher getBssScanInfo{cmdisp};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getTableValue ====================================
     
     proc getTableValue {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getModuleTableFieldValue{cmdisp, MODULE_INFO_AP_LIST_CALL_BACK};
-      return result;
+      set result [::compMsg compMsgDispatcher getModuleTableFieldValue{cmdisp, MODULE_INFO_AP_LIST_CALL_BACK};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getWifiKeyValueInfos ====================================
     
     proc getWifiKeyValueInfos {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getWifiKeyValueInfo{cmdisp};
-      return result;
+      set result [::compMsg compMsgDispatcher getWifiKeyValueInfo{cmdisp};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= getWifiKeyValues ====================================
     
     proc getWifiKeyValues {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg cmdisp getWifiKeyValue{cmdisp};
-      return result;
+      set result [::compMsg compMsgDispatcher getWifiKeyValue{cmdisp};
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
-    
-    set actionName2Actions [dict create]
-if {0} {
-    dict set actionName2Actions runClientMode             runClientMode
-             0, 0, 0 
-    dict set actionName2Actions runAPMode                 runAPMode
-                 0, 0, 0 
-    dict set actionName2Actions runLightSleepWakeupMode   runLightSleepWakeupMode
-   0, 0, 0 
-    dict set actionName2Actions runLightSleepNoWakeupMode runLightSleepNoWakeupMode
- 0, 0, 0 
-    dict set actionName2Actions runWpsMode                runWpsMode
-                0, 0, 0 
-    dict set actionName2Actions runTestMode               runModulTestMode
-          0, 0, 0 
-    dict set actionName2Actions runDeletePasswdCMode      runDeletePasswdCMode      0, 0, 0 
-    dict set actionName2Actions getMACAddr                getMACAddr                0, 0, 0 
-    dict set actionName2Actions getIPAddr                 getIPAddr                 0, 0, 0 
-    dict set actionName2Actions getFirmwareVersion        getFirmwareVersion        0, 0, 0 
-    dict set actionName2Actions getSerieNumber            getSerieNumber            0, 0, 0 
-    dict set actionName2Actions getRSSI                   getRSSI                   0, 0, 0 
-    dict set actionName2Actions getModuleConnection       getModuleConnection       0, 0, 0 
-    dict set actionName2Actions getDeviceMode             getDeviceMode             0, 0, 0 
-    dict set actionName2Actions getDeviceSecurity         getDeviceSecurity         0, 0, 0 
-    dict set actionName2Actions getErrorMain              getErrorMain              0, 0, 0 
-    dict set actionName2Actions getErrorSub               getErrorSub               0, 0, 0 
-    dict set actionName2Actions getDateAndTime            getDateAndTime            0, 0, 0 
-    dict set actionName2Actions getSSIDs                  getSSIDs                  0, 0, 0 
-    dict set actionName2Actions getReserve1               getReserve1               0, 0, 0 
-    dict set actionName2Actions getReserve2               getReserve2               0, 0, 0 
-    dict set actionName2Actions getReserve3               getReserve3               0, 0, 0 
-    dict set actionName2Actions getGUID                   getGUID                   0, 0, 0 
-    dict set actionName2Actions getSrcId                  getSrcId                  0, 0, 0 
-    dict set actionName2Actions getAPList                 getAPList                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK 
-    dict set actionName2Actions getTableValue             getTableValue             0x4141, 0, MODULE_INFO_AP_LIST_CALL_BACK 
-    dict set actionName2Actions getWifiKeyValueInfos      getWifiKeyValueInfos      0x4141, 0, 8 
-    dict set actionName2Actions getWifiKeyValues          getWifiKeyValues          0x4141, 0, 8 
-}
     
     # ================================= getActionMode ====================================
     
-    proc getActionMode {compMsgDispatcherVar actionNam,actionMode} {
-      upvar $compMsgDispatcherVar cmdisp
-      actionName2Action_t *actionEntry;
-      int idx;
+    proc getActionMode {compMsgDispatcherVar actionName actionMode} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      idx = 0;
-      actionEntry = &actionName2Actions[idx];
+      setidx 0
+      actionEntry = &actionName2Actions[idx]
       while {actionEntry->actionName != NULL} { 
         if {c_strcmp{actionEntry->actionName, actionName} == 0} {
-          *actionMode = actionEntry->mode;
-    ets_printf{"actionMode: %d\n", *actionMode};
-          return COMP_DISP_ERR_OK;
+          *actionMode = actionEntry->mode
+    ets_printf{"actionMode: %d\n", *actionMode}
+          return $::COMP_DISP_ERR_OK
         }
         idx++;
-        actionEntry = &actionName2Actions[idx];
+        actionEntry = &actionName2Actions[idx]
       }
-      return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
     }
     
     # ================================= getActionCallback ====================================
     
     proc getActionCallback {compMsgDispatcherVar actionName callback} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
       idx = 0;
       actionEntry = &actionName2Actions[idx];
       while {actionEntry->actionName != NULL} { 
         if {c_strcmp{actionEntry->actionName, actionName} == 0} {
           *callback = actionEntry->action;
-          return COMP_DISP_ERR_OK;
+          return $::COMP_DISP_ERR_OK;
         }
         idx++;
         actionEntry = &actionName2Actions[idx];
       }
-      return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
     }
     
     # ================================= getActionCallbackName ====================================
     
     proc getActionCallbackName {compMsgDispatcherVar callback actionNameVar} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $actionNameVar actionName
     
       if {[string range $callback 0 0] eq "@"} {
@@ -402,7 +387,7 @@ if {0} {
     
     proc setActionEntry {compMsgDispatcherVar actionName mode cmdKey} {
       variable compMsgActionEntries
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
 #puts stderr "setActionEntry $actionName $mode $cmdKey!"
 if {0} {
@@ -414,7 +399,7 @@ if {0} {
         if {c_strcmp{actionEntry->actionName, actionName} == 0} {
           compMsgActionEntries.actionEntries[compMsgActionEntries.numActionEntries] = actionEntry
           if {actionEntry->mode != 0} {
-            return $::COMP_DISP_ERR_DUPLICATE_ENTRY
+            checkErrOK $::COMP_DISP_ERR_DUPLICATE_ENTRY
           }
           actionEntry->mode = mode
           actionEntry->u8CmdKey = u8CmdKey
@@ -433,59 +418,59 @@ if {0} {
     # ================================= runAction ====================================
     
     proc runAction {compMsgDispatcherVar answerType} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
-      received = &cmdisp received;
-      dataView = cmdisp compMsgDataView->dataView;
+      received = &compMsgDispatcher received;
+      dataView = compMsgDispatcher compMsgDataView->dataView;
       if {received->u16CmdKey == 0x4244} { # "BD"
         # FIXME need to get the real offset here instead of 7!!
         set result [::compMsg dataView->getUint8{dataView, 7, &actionMode};
-        checkErrOK{result};
+        checkErrOK $result
         idx = 0;
         actionEntry = &actionName2Actions[idx];
         while {actionEntry->actionName != NULL} { 
     #ets_printf{"§runActionBu8!%s!%c!%c!%c!§", actionEntry->actionName, {received->u16CmdKey>>8}&0xFF, received->u16CmdKey&0xFF, actionMode};
           if {{actionEntry->u16CmdKey == received->u16CmdKey} && {actionMode == actionEntry->mode}} {
     ets_printf{"§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode};
-            set result [::compMsg actionEntry->action{cmdisp};
+            set result [::compMsg actionEntry->action{compMsgDispatcher};
             checkErrOK{result};
-            return COMP_DISP_ERR_OK;
+            return $::COMP_DISP_ERR_OK
           }
           idx++;
           actionEntry = &actionName2Actions[idx];
         }
-        return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+        checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
       } else {
     #ets_printf{"§runAction u16!%c%c!%c!§\n", {received->u16CmdKey>>8}&0xFF, received->u16CmdKey&0xFF, *answerType};
-        dataView = cmdisp compMsgDataView->dataView;
-        switch {cmdisp actionMode} {
+        dataView = compMsgDispatcher compMsgDataView->dataView;
+        switch {compMsgDispatcher actionMode} {
         case 8:
         case MODULE_INFO_AP_LIST_CALL_BACK:
           idx = 0;
           actionEntry = &actionName2Actions[idx];
           while {actionEntry->actionName != NULL} { 
     #ets_printf{"an2: %s am: %d %d\n", actionEntry->actionName, actionMode, actionEntry->mode};
-            if {cmdisp actionMode == actionEntry->mode} {
-    #ets_printf{"§runAction2 G!%d!%c!§\n", cmdisp actionMode, *answerType};
+            if {compMsgDispatcher actionMode == actionEntry->mode} {
+    #ets_printf{"§runAction2 G!%d!%c!§\n", compMsgDispatcher actionMode, *answerType};
     ets_printf{"§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode};
-              set result [::compMsg actionEntry->action{cmdisp};
+              set result [::compMsg actionEntry->action{compMsgDispatcher};
               checkErrOK{result};
-              return COMP_DISP_ERR_OK;
+              return $::COMP_DISP_ERR_OK
             }
             idx++;
             actionEntry = &actionName2Actions[idx];
           }
-          return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+          checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
           break;
         }
       }
-      return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
     }
     
     # ================================= fillMsgValue ====================================
     
     proc fillMsgValue {compMsgDispatcherVar callbackName answerType fieldTypeId} {
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
       # skip the '@' char!
       callbackName++;
@@ -493,14 +478,14 @@ if {0} {
       actionEntry = &actionName2Actions[idx];
       while {actionEntry->actionName != NULL} { 
         if {c_strcmp{actionEntry->actionName, callbackName} == 0} {
-          set result [::compMsg actionEntry->action{cmdisp};
+          set result [::compMsg actionEntry->action{compMsgDispatcher};
           checkErrOK{result};
-          return COMP_DISP_ERR_OK;
+          return $::COMP_DISP_ERR_OK
         }
         idx++;
         actionEntry = &actionName2Actions[idx];
       }
-      return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
     }
     
     # ================================= compMsgActionInit ====================================
@@ -508,7 +493,7 @@ if {0} {
     proc compMsgActionInit {compMsgDispatcherVar} {
       variable compMsgActionEntries
       variable compMsgActions
-      upvar $compMsgDispatcherVar cmdisp
+      upvar $compMsgDispatcherVar compMsgDispatcher
     
       set compMsgActionEntries [dict create]
       dict set compMsgActionEntries numActionEntries 0
@@ -520,8 +505,9 @@ if {0} {
       dict set compMsgActions maxActions 10
       dict set compMsgActions actions [list]
     
-      set result [::compMsg compMsgMsgDesc readActions cmdisp $::COMP_MSG_ACTIONS_FILE_NAME]
-      return $result
+      set result [::compMsg compMsgMsgDesc readActions compMsgDispatcher $::COMP_MSG_ACTIONS_FILE_NAME]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
     }
 
   } ; # namespace compMsgAction

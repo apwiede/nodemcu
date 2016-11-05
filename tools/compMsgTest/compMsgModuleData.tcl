@@ -51,13 +51,15 @@ namespace eval compMsg {
     #ets_printf{"getModuleTableFieldValue: row: %d col: %d actionMode: %d\n", self->buildMsgInfos.tableRow, self->buildMsgInfos tableCol, actionMode}
       switch %actionMode {
         MODULE_INFO_AP_LIST_CALL_BACK {
-          return [::compMsg compMsgWebsocket getScanInfoTableFieldValue compMsgDispatcher $actionMode]
+          set result [::compMsg compMsgWebsocket getScanInfoTableFieldValue compMsgDispatcher $actionMode]
+          checkErrOK $result
+          return $::COMP_MSG_ERR_OK
         }
         default {
-          return $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+          checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
         }
       }
-      return $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
     }
     
     # ================================= getModuleValue ====================================
@@ -128,7 +130,7 @@ namespace eval compMsg {
           dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData srcId]
         }
       default {
-        return $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
+        checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
         }
       }
       return $::COMP_DISP_ERR_OK

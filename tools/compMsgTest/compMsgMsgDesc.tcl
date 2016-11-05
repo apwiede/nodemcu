@@ -220,12 +220,10 @@ namespace eval compMsg {
       incr fieldIdx
       set fieldName [lindex $flds $fieldIdx]
       if {[string range $fieldName 0 0] ne "@"} {
-        return $::COMP_MSG_ERR_NO_SUCH_FIELD
+        checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       switch $fieldNameId {
         COMP_MSG_SPEC_FIELD_SRC {
           dict lappend headerInfos headerSequence COMP_DISP_U16_SRC
@@ -243,23 +241,21 @@ namespace eval compMsg {
           dict lappend headerInfos headerFlags COMP_DISP_U8_TARGET
         }
         default {
-          return $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
       }
       incr fieldIdx
 
       set fieldName [lindex $flds $fieldIdx]
       if {[string range $fieldName 0 0] ne "@"} {
-        return $::COMP_MSG_ERR_NO_SUCH_FIELD
+        checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       switch $fieldNameId {
         COMP_MSG_SPEC_FIELD_SRC {
           if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U16_SRC] >= 0} {
-            return $::COMP_MSG_ERR_DUPLICATE_FIELD
+            checkErrOK $::COMP_MSG_ERR_DUPLICATE_FIELD
           }
           dict lappend headerInfos headerSequence COMP_DISP_U16_SRC
           incr seqIdx
@@ -267,7 +263,7 @@ namespace eval compMsg {
         }
         COMP_MSG_SPEC_FIELD_DST {
           if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U16_DST] >= 0} {
-            return $::COMP_MSG_ERR_DUPLICATE_FIELD
+            checkErrOK $::COMP_MSG_ERR_DUPLICATE_FIELD
           }
           dict lappend headerInfos headerSequence COMP_DISP_U16_DST
           incr seqIdx
@@ -279,7 +275,7 @@ namespace eval compMsg {
           dict lappend headerInfos headerFlags COMP_DISP_U16_TOTAL_LGTH
         }
         default {
-           return $::COMP_MSG_ERR_NO_SUCH_FIELD
+           checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
       }
       incr fieldIdx
@@ -287,23 +283,21 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_TOTAL_LGTH {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U16_TOTAL_LGTH] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              checkErrOK $::COMP_MSG_ERR_DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U16_TOTAL_LGTH
             incr seqIdx
             dict lappend headerInfos headerFlags COMP_DISP_U16_TOTAL_LGTH
           }
           default {
-            return $::COMP_MSG_ERR_NO_SUCH_FIELD
+            checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
@@ -311,23 +305,21 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_GUID {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U8_VECTOR_GUID] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              checkErrOK $::COMP_MSG_ERR_DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U8_VECTOR_GUID
             incr seqIdx
             dict lappend headerInfos headerFlags COMP_DISP_U8_VECTOR_GUID
           }
           default {
-            return $::COMP_MSG_ERR_NO_SUCH_FIELD
+            checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
@@ -335,23 +327,21 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_SRC_ID {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U16_SRC_ID] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              checkErrOK $::COMP_MSG_ERR_DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U16_SRC_ID
             incr seqIdx
             dict lappend headerInfos headerFlags COMP_DISP_U16_SRC_ID
           }
           default {
-            return $::COMP_MSG_ERR_NO_SUCH_FIELD
+            checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
@@ -359,23 +349,21 @@ namespace eval compMsg {
       if {[llength $flds] > $fieldIdx} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          return $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_HDR_FILLER {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_U8_VECTOR_HDR_FILLER] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              checkErrOK $::COMP_MSG_ERR_DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U8_VECTOR_HDR_FILLER
             incr seqIdx
             dict lappend headerInfos headerFlags COMP_DISP_U8_VECTOR_HDR_FILLER
           }
           default {
-            return $::COMP_MSG_ERR_NO_SUCH_FIELD
+            checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
         }
       }
@@ -409,7 +397,7 @@ namespace eval compMsg {
         dict set headerInfos headerSequence [lrange [dict get $headerInfos headerSequence] 0 [expr {$seqIdx - 1 }]]
         gets $fd line
         if {[string length $line] == 0} {
-          return $::COMP_MSG_ERR_TOO_FEW_FILE_LINES
+          checkErrOK $::COMP_MSG_ERR_TOO_FEW_FILE_LINES
         }
         set hdr [dict create]
         set seqIdx2 0
@@ -438,7 +426,7 @@ namespace eval compMsg {
           set found true
         }
         if {!$found} {
-          return $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         incr seqIdx2
         set myPart [lindex $flds $seqIdx2]
@@ -456,7 +444,7 @@ namespace eval compMsg {
           set found true
         }
         if {!$found} {
-          return $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
         }
         incr seqIdx2
         set myPart [lindex $flds $seqIdx2]
@@ -467,7 +455,7 @@ namespace eval compMsg {
             set found true
           }
           if {!$found} {
-            return $::COMP_MSG_ERR_NO_SUCH_FIELD
+            checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
           }
           incr seqIdx2
         }
@@ -487,9 +475,7 @@ namespace eval compMsg {
         set myPart [lindex $flds $seqIdx3]
         # type of cmdKey
         set result [::compMsg dataView getFieldTypeIdFromStr $myPart fieldTypeId]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr seqIdx3
         set myPart [lindex $flds $seqIdx3]
         # cmdKey
@@ -510,16 +496,14 @@ namespace eval compMsg {
             }
           }
           default {
-           return $::COMP_MSG_ERR_BAD_FIELD_TYPE
+           checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
           }
         }
         incr seqIdx3
         set myPart [lindex $flds $seqIdx3]
         # type of cmdLgth
         set result [::compMsg dataView getFieldTypeIdFromStr $myPart fieldTypeId]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         set isEnd false
         if {$seqIdx2 >= [llength $flds]} {
           set isEnd true
@@ -538,7 +522,7 @@ namespace eval compMsg {
             dict lappend hdr hdrFlags COMP_DISP_U16_CMD_Lgth
           }
           default {
-            return $::COMP_MSG_ERR_BAD_FIELD_TYPE
+            checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
           }
         }
         # type of crc
@@ -547,9 +531,7 @@ namespace eval compMsg {
           set myPart [lindex $flds $seqIdx3]
         }
         set result [::compMsg dataView getFieldTypeIdFromStr $myPart fieldTypeId]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         switch $fieldTypeId {
           DATA_VIEW_FIELD_UINT0_T {
             dict lappend hdr fieldSequence COMP_DISP_U0_CRC
@@ -564,7 +546,7 @@ namespace eval compMsg {
             dict lappend hdr hdrFlags COMP_DISP_U16_CRC
           }
           default {
-            return $::COMP_MSG_ERR_BAD_FIELD_TYPE
+            checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
           }
         }
         dict lappend headerInfos headerParts $hdr
@@ -574,7 +556,7 @@ namespace eval compMsg {
       }
       close $fd
       dict set compMsgDispatcher headerInfos $headerInfos
-      return $result
+      return $::COMP_MSG_ERR_OK
     }
 
     # ================================= readActions ====================================
@@ -619,7 +601,7 @@ namespace eval compMsg {
         }
         incr idx
       }
-      return $::COMP_DISP_ERR_HEADER_NOT_FOUND
+      checkErrOK $::COMP_DISP_ERR_HEADER_NOT_FOUND
     }
 
     # ================================= dumpMsgDescPart ====================================
@@ -630,9 +612,7 @@ namespace eval compMsg {
       set callbackName [list]
       if {[dict get $msgDescPart getFieldSizeCallback] ne [list]} {
         set result [::compMsg compMsgAction getActionCallbackName compMsgDispatcher [dict get $msgDescPart getFieldSizeCallback] callbackName]
-        if {$result != $::COMP_DISP_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
       }
       puts stderr [format "msgDescPart: fieldNameStr: %-15.15s fieldNameId: %-35.35s fieldTypeStr: %-10.10s fieldTypeId: %-30.30s field_lgth: %d callback: %s" [dict get $msgDescPart fieldNameStr] [dict get $msgDescPart fieldNameId] [dict get $msgDescPart fieldTypeStr] [dict get $msgDescPart fieldTypeId] [dict get $msgDescPart fieldLgth] $callbackName]
       return $::COMP_DISP_ERR_OK
@@ -646,9 +626,7 @@ namespace eval compMsg {
       set callbackName [list]
       if {[dict get $msgValPart getFieldValueCallback] ne [list]} {
         set result [::compMsg compMsgAction getActionCallbackName compMsgDispatcher [dict get $msgValPart getFieldValueCallback] callbackName]
-        if {$result != $::COMP_DISP_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
       }
       puts -nonewline stderr [format "msgValPart: fieldNameStr: %-15.15s fieldNameId: %-35.35s fieldValueStr: %-20.20s callback: %s flags: " [dict get $msgValPart fieldNameStr] [dict get $msgValPart fieldNameId] [dict get $msgValPart fieldValueStr] $callbackName]
       if {[lsearch [dict get $msgValPart fieldFlags] COMP_DISP_DESC_VALUE_IS_NUMBER] >= 0} {
@@ -702,7 +680,7 @@ namespace eval compMsg {
       while {$idx < $numEntries} {
         gets $fd line
         if {$line eq ""} {
-          return $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+          checkErrOK $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
         }
         set flds [split $line ","]
         set callback [list]
@@ -722,14 +700,10 @@ namespace eval compMsg {
         dict set msgDescPart fieldTypeStr $fieldTypeStr
         dict set msgDescPart fieldLgth $fieldLgth
         set result [::compMsg dataView getFieldTypeIdFromStr $fieldTypeStr fieldTypeId]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         dict set msgDescPart fieldTypeId $fieldTypeId
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_INCR]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         dict set msgDescPart fieldNameId $fieldNameId
 #dumpMsgDescPart compMsgDispatcher $msgDescPart
         dict lappend compMsgDispatcher msgDescParts $msgDescPart
@@ -751,16 +725,14 @@ namespace eval compMsg {
       while {$idx < $numEntries} {
         gets $fd line
         if {$line eq ""} {
-          return $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+          checkErrOK $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
         }
         set flds [split $line ","]
         set callback [list]
         foreach {fieldNameStr fieldValueStr} $flds break
         # fieldName
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_NO_INCR]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         set callback [list]
         if {[string range $fieldValueStr 0 0] eq "@"} {
           set callback [string range $fieldValueStr 1 end]
@@ -800,9 +772,7 @@ puts stderr "sfa 01 [dict exists $compMsgDispatcher socketForAnswer]!"
         foreach {fieldNameStr fieldValueStr fieldTypeStr} $flds break
         set offset [string length "@key_"]
         set result [::compMsg compMsgWifiData bssStr2BssInfoId [string range $fieldNameStr $offset end] bssInfoType]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         switch $bssInfoType {
           BSS_INFO_BSSID {
             dict set wifiData bssKeys bssid $fieldValueStr
@@ -834,13 +804,9 @@ puts stderr "sfa 01 [dict exists $compMsgDispatcher socketForAnswer]!"
         }
     
 puts stderr [format "fieldType:%s" $fieldTypeStr]
-        if {$result != $::COMP_DISP_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         set result [::compMsg dataView getFieldTypeIdFromStr $fieldTypeStr fieldTypeId]
-        if {$result != $::COMP_DISP_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         switch $bssInfoType {
           BSS_INFO_BSSID {
             dict set wifiData bssTypes bssid $fieldTypeId

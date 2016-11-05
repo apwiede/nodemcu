@@ -130,9 +130,7 @@ namespace eval compMsg {
     #ets_printf{"§@NE1!%d!@§", numEntries}
       set numRows 0
       set result [createMsgFromLines $parts $numEntries $numRows $type compMsgData handle]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOk $result
     #ets_printf{"heap2: %d\n", system_get_free_heap_size(})
       close $fd
       if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
@@ -146,15 +144,11 @@ namespace eval compMsg {
       foreach {dummy numEntries} $flds break
     #ets_printf{"§@NE2!%d!@§", numEntries}
       set result [::compMsg compMsgData setMsgValuesFromLines $numEntries $handle [dict get $parts u8CmdKey]]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       close $fd
     #ets_printf{"§heap3: %d§", system_get_free_heap_size(})
       set result [::compMsg compMsgData getMsgData data msgLgth]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       set result [typeRSendAnswer $data $msgLgth]
       resetMsgInfo parts
       return $::COMP_MSG_ERR_OK
@@ -163,9 +157,6 @@ namespace eval compMsg {
     # ================================= prepareEncryptedAnswer ====================================
     
     proc prepareEncryptedAnswer {parts type} {
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
       if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
         set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
       } else {
@@ -177,9 +168,7 @@ namespace eval compMsg {
       foreach {dummy numEntries} $flds break
       set numRows 0
       set result [::compMsg compMsgDispatcher createMsgFromLines $fd $parts $numEntries $numRows $type handle]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       close $fd
       if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
         set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
@@ -191,14 +180,10 @@ namespace eval compMsg {
       set flds [split $line ","]
       foreach {dummy numEntries} $flds break
       set result [::compMsg compMsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u8CmdKey]]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       close $fd
       set result [::compMsg compMsgData getMsgData data msgLgth]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       set result [typeRSendAnswer $data $msgLgth]
       resetMsgInfo parts
       return $::COMP_MSG_ERR_OK
@@ -221,9 +206,7 @@ namespace eval compMsg {
       foreach {dummy numEntries} $flds break
       set numRows 0
       set result [::compMsg compMsgDispatcher createMsgFromLines $fd $parts $numEntries $numRows $type handle]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       close $fd
       set result [::compMsg compMsgData addFlag COMP_MSG_CRC_USE_HEADER_LGTH]
       if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
@@ -240,14 +223,10 @@ namespace eval compMsg {
       } else {
         set result [::compMsg compMsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u16CmdKey]]
       }
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       close $fd
       set result [::compMsg compMsgData getMsgData data msgLgth]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
 puts stderr "MSG!$msgLgth!$data!"
       set result [getHeaderIndexFromHeaderFields]
       set headerLgth [dict get $headerInfos headerLgth]
@@ -317,7 +296,7 @@ puts stderr "call:$fcnName!"
       }
       if {!$found} {
 puts stderr "Fitting entry not found!"
-        return $::COMP_MSG_ERR_HANDLE_NOT_FOUND
+        checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
       }
       dict set headerInfos currPartIdx $hdrIdx
       # next sequence field is extraLgth {skip, we have it in hdr fields}
@@ -350,25 +329,19 @@ puts stderr "Fitting entry not found!"
         COMP_DISP_U16_DST {
           set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
           dict set received toPart $value
-          if {$result != $::COMP_MSG_ERR_OK} {
-            return $result
-          }
+          checkErrOK $result
           dict incr received fieldOffset 2
         }
         COMP_DISP_U16_SRC {
           set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
           dict set received fromPart $value
-          if {$result != $::COMP_MSG_ERR_OK} {
-            return $result
-          }
+          checkErrOK $result
           dict incr received fieldOffset 2
         }
         COMP_DISP_U8_TARGET {
           set result [::compMsg dataView getUint8 [dict get $received fieldOffset] value]
           dict set received targetPart $value
-          if {$result != $::COMP_MSG_ERR_OK} {
-            return $result
-          }
+          checkErrOK $result
           dict incr received fieldOffset 1
         }
       }
@@ -377,25 +350,19 @@ puts stderr "Fitting entry not found!"
         COMP_DISP_U16_DST {
           set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
           dict set received toPart $value
-          if {$result != $::COMP_MSG_ERR_OK} {
-            return $result
-          }
+          checkErrOK $result
           dict incr received fieldOffset 2
         }
         COMP_DISP_U16_SRC {
           set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
           dict set received fromPart $value
-          if {$result != $::COMP_MSG_ERR_OK} {
-            return $result
-          }
+          checkErrOK $result
           dict incr received fieldOffset 2
         }
         COMP_DISP_U16_TOTAL_LGTH {
           set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
           dict set received totalLgth $value
-          if {$result != $::COMP_MSG_ERR_OK} {
-            return $result
-          }
+          checkErrOK $result
           dict incr received fieldOffset 2
         }
       }
@@ -405,9 +372,7 @@ puts stderr "Fitting entry not found!"
           COMP_DISP_U16_TOTAL_LGTH {
             set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
             dict set received totalLgth $value
-            if {$result != $::COMP_MSG_ERR_OK} {
-              return $result
-            }
+            checkErrOK $result
             dict incr received fieldOffset 2
           }
         }
@@ -420,9 +385,7 @@ puts stderr "Fitting entry not found!"
           COMP_DISP_U8_VECTOR_GUID {
             set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] $::GUID_LGTH value]
             dict set received GUID $value
-            if {$result != $::COMP_MSG_ERR_OK} {
-              return $result
-            }
+            checkErrOK $result
             dict incr received fieldOffset $::GUID_LGTH
           }
         }
@@ -435,9 +398,7 @@ puts stderr "Fitting entry not found!"
           COMP_DISP_U16_SRC_ID {
             set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
             dict set received srcId $value
-            if {$result != $::COMP_MSG_ERR_OK} {
-              return $result
-            }
+            checkErrOK $result
             dict incr received fieldOffset 2
           }
         }
@@ -450,9 +411,7 @@ puts stderr "Fitting entry not found!"
           COMP_DISP_U8_VECTOR_HDR_FILLER {
             set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] $::HDR_FILLER_LGTH  value]
             dict set received hdrFiller $value
-            if {$result != $::COMP_MSG_ERR_OK} {
-              return $result
-            }
+            checkErrOK $result
             dict incr received fieldOffset $::HDR_FILLER_LGTH
           }
         }
@@ -462,7 +421,8 @@ puts stderr "Fitting entry not found!"
       dict set headerInfos seqIdxAfterStart [dict get $headerInfos seqIdx]
       dict set headerInfos currPartIdx 0
       set result [nextFittingEntry 0 0]
-      return $result
+      checkErrOK $result
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= handleReceivedMsg ====================================
@@ -490,9 +450,7 @@ puts stderr "value!$value!"
 puts stderr "u16:[dict get $received u16CmdKey]![dict get $hdr hdrU16CmdKey]!"
               dict incr headerInfos currPartIdx 1
               set result [nextFittingEntry 0 [dict get $received u16CmdKey]]
-              if {$result != $::COMP_MSG_ERR_OK} {
-                return $result
-              }
+              checkErrOK $result
               set hdr [lindex [dict get $headerInfos headerParts] [dict get $headerInfos currPartIdx]]
             }
 puts stderr "found entry: [dict get $headerInfos currPartIdx]!"
@@ -542,18 +500,12 @@ if {0} {
 }
 if {0} {
       set result [runAction answerType]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       set result [prepareAnswer $answerType]
     #ets_printf{"§res NEA!%d!§", result}
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       set result [resetMsgInfo received]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
 }
 puts stderr "handleReceivedMsg end"
       return $::COMP_MSG_ERR_OK
@@ -644,13 +596,14 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen}]!"
       variable headerInfos
 
       set result [::compMsg compMsgDispatcher resetMsgInfo received]
+      checkErrOK $result
 #      set headerInfos [dict create]
       set received [dict create]
       dict set received buf ""
       dict set received lgth 0
       set dispFlags [list]
       resetHeaderInfos
-      return $result
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= compMsgIdentifyInit ====================================
@@ -658,9 +611,11 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen}]!"
     proc compMsgIdentifyInit {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      initHeadersAndFlags
+      set result [initHeadersAndFlags]
+      checkErrOK $result
       set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags compMsgDispatcher ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
-      return $result
+      checkErrOK $result
+      return $::COMP_MSG_ERR_OK
     }
     
   } ; # namespace compMsgIdentify

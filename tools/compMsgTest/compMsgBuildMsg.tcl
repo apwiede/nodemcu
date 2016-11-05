@@ -79,7 +79,7 @@ namespace eval compMsg {
         if {[dict get $msgDescPart getFieldSizeCallback] ne [list]} {
           # the key name must have the prefix: "#key_"!
           if {[string range [dict get $msgDescPart fieldNameStr] 0 0] ne "#"} {
-            return $::COMP_DISP_ERR_FIELD_NOT_FOUND
+            checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
           }
 puts stderr "call: [dict get $msgDescPart getFieldSizeCallback]!"
           set result [[dict get $msgDescPart getFieldSizeCallback] compMsgDispatcher]

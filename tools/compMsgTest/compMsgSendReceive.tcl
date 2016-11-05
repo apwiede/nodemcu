@@ -58,7 +58,7 @@ namespace eval compMsg {
       }
       result =self->handleReceivedPart myBuffer, lgth
       checkErrOK $result
-      return $:COMP_DISP_ERR_OK
+      return $::COMP_DISP_ERR_OK
     }
     
     # ================================= typeRSendAnswer ====================================
@@ -87,7 +87,7 @@ namespace eval compMsg {
 puts stderr "sendMsg A: Wifi -> App Provisioning encryption: $encryption!"
 puts stderr [format "wud %s", [dict get $compMsgDispatcher wud]
           if {[dict get $compMsgDispatcher wud] eq [list]} {
-            return $::COMP_DISP_ERR_NO_WEBSOCKET_OPENED
+            checkErrOK $::COMP_DISP_ERR_NO_WEBSOCKET_OPENED
           }
         }
         "G" {
@@ -110,7 +110,7 @@ puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
           return $::COMP_DISP_ERR_OK
         }
         default {
-          return $::COMP_DISP_ERR_BAD_HANDLE_TYPE
+          checkErrOK $::COMP_DISP_ERR_BAD_HANDLE_TYPE
         }
       }
       return $::COMP_DISP_ERR_OK

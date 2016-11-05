@@ -136,7 +136,7 @@ namespace eval compMsg {
           return $::COMP_MSG_ERR_OK
         }
         default {
-          return $::COMP_MSG_ERR_BAD_VALUE
+          checkErrOK $::COMP_MSG_ERR_BAD_VALUE
         }
       }
     }
@@ -144,15 +144,9 @@ namespace eval compMsg {
     # ============================= toBase64 ========================
     
     proc toBase64 {msg len encoded} {
-      size_t i;
-      size_t n;
-      uint8_t *q;
-      uint8_t *out;
-      uint8_t bytes64[sizeof{b64}];
-    
-      n = *len;
+      n = *len
       if {!n} { # handle empty string case 
-        return COMP_DISP_ERR_OUT_OF_MEMORY;
+        checkErrOK $::COMP_DISP_ERR_OUT_OF_MEMORY
       }
       out = {uint8_t *}os_zalloc((n + 2) / 3 * 4);
       checkAllocOK{out};
@@ -169,29 +163,20 @@ namespace eval compMsg {
       }
       *len = q - out;
       *encoded = out;
-      return COMP_DISP_ERR_OK;
+      return $::COMP_DISP_ERR_OK
     }
     
     # ============================= fromBase64 ========================
     
     proc fromBase64 {encodedMsg len decodedMsg} {
-      int i;
-      int n;
-      int blocks;
-      int pad;
-      const uint8 *p;
-      uint8_t unbytes64[UCHAR_MAX+1];
-      uint8_t *msg;
-      uint8_t *q;
-    
       n = *len;
       blocks = {n>>2};
       pad = 0;
       if {!n} { # handle empty string case 
-        return COMP_DISP_ERR_OUT_OF_MEMORY;
+        checkErrOK $::COMP_DISP_ERR_OUT_OF_MEMORY
       } 
       if {n & 3} {
-        return COMP_DISP_ERR_INVALID_BASE64_STRING;
+        checkErrOK $::COMP_DISP_ERR_INVALID_BASE64_STRING
       } 
       c_memset{unbytes64, BASE64_INVALID, sizeof(unbytes64});
       for {i = 0; i < sizeof(b64}-1; i++) {
@@ -204,7 +189,7 @@ namespace eval compMsg {
     
       for {i = 0; i < n - pad; i++} {
         if {!ISBASE64(encodedMsg[i]}) {
-          return COMP_DISP_ERR_INVALID_BASE64_STRING;
+          checkErrOK $::COMP_DISP_ERR_INVALID_BASE64_STRING
         }
       }
       unbytes64[BASE64_PADDING] = 0;
@@ -228,7 +213,7 @@ namespace eval compMsg {
       }
       *len = q - msg;
       *decodedMsg = msg;
-      return COMP_DISP_ERR_OK;;
+      return $::COMP_DISP_ERR_OK
     }
     
     # ============================= addHandle ========================
@@ -296,29 +281,28 @@ namespace eval compMsg {
         compMsgDispatcherHandles.handles = NULL;
       }
       if {found} {
-          return COMP_DISP_ERR_OK;
+          return $::COMP_DISP_ERR_OK
       }
-      return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+      checkErrOK $::COMP_DISP_ERR_HANDLE_NOT_FOUND
     }
     
     # ============================= checkHandle ========================
     
     proc checkHandle {handle} {
       variable compMsgDispatcher
-      int idx;
     
       if {compMsgDispatcherHandles.handles == NULL} {
-        return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+        checkErrOK $::COMP_DISP_ERR_HANDLE_NOT_FOUND
       }
       idx = 0;
       while {idx < compMsgDispatcherHandles.numHandles} {
         if {(compMsgDispatcherHandles.handles[idx].handle != NULL} && (c_strcmp(compMsgDispatcherHandles.handles[idx].handle, handle) == 0)) {
           *compMsgDispatcher = compMsgDispatcherHandles.handles[idx].compMsgDispatcher;
-          return COMP_DISP_ERR_OK;
+          return $::COMP_DISP_ERR_OK
         }
         idx++;
       }
-      return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+      checkErrOK $::COMP_DISP_ERR_HANDLE_NOT_FOUND
     }
     
     # ================================= dumpMsgParts ====================================
@@ -355,42 +339,28 @@ namespace eval compMsg {
       set lgth [dict get $msgParts totalLgth]
       ::compMsg dataView setData [string repeat " " $lgth] $lgth
       set result [::compMsg dataView setUint16 $offset [dict get $msgParts fromPart]]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       incr offset 2
       set result [::compMsg dataView setUint16 $offset [dict get $msgParts toPart]]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       incr offset 2
       set result [::compMsg dataView setUint16 $offset [dict get $msgParts totalLgth]]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       incr offset 2
       # FIXME dispFlags !!
       if {[lsearch $::compMsg::compMsgIdentify::dispFlags COMP_MSG_U8_CMD_KEY] >= 0} {
         set result [::compMsg dataView setUint8 $offset [dict get $msgParts u8CmdKey]]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr offset 1
       } else {
         set result [::compMsg dataView setUint16 $offset [dict get $msgParts u16CmdKey]]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr offset 2
       }
       set result [::compMsg dataView getData header headerLgth]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       set result [::compMsg dataView setData $saveData $saveLgth]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       # end build header from msgParts
       
       set firstFreeEntry [list]
@@ -426,7 +396,7 @@ namespace eval compMsg {
         return $::COMP_DISP_ERR_OK; # just ignore silently
       } else {
         if {$incrRefCnt == 0} {
-          return $::COMP_DISP_ERR_HEADER_NOT_FOUND;
+          checkErrOK $::COMP_DISP_ERR_HEADER_NOT_FOUND;
         } else {
           if {$firstFreeEntry ne [list]} {
             set compMsgData [dict get $firstFreeEntry compMsgData]
@@ -460,21 +430,15 @@ namespace eval compMsg {
         foreach {fieldNameStr fieldValueStr} $flds break
         # fieldName
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_NO_INCR]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         set result [::compMsg compMsgData getFieldTypeFromFieldNameId $fieldNameId fieldTypeId]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
     
         # fieldValue
         if {[string range $fieldValueStr 0 0] eq "@"} {
           # call the callback function vor the field!!
           set result [fillMsgValue $fieldValueStr value $type $fieldTypeId]
-          if {$result != $::COMP_MSG_ERR_OK} {
-            return $result
-          }
+          checkErrOK $result
         } else {
           set value $fieldValueStr
         }
@@ -500,18 +464,15 @@ namespace eval compMsg {
             set result [::compMsg compMsgData setFieldValue $fieldNameStr $value]
           }
         }
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
 #      set result [::compMsg compMsgData setFieldValue "@cmdKey" $type]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       set result [::compMsg compMsgData prepareMsg]
 #  ::compMsg compMsgData dumpMsg
-      return $result;
+      checkErrOK $result
+      return $::COMP_MSG_ERR_OK
     }
 
     # ================================= createMsgFromHeaderPart ====================================
@@ -577,21 +538,17 @@ if {0} {
     #ets_printf{"§createMsgFromLines:%d!%d! \n§" $numMsgHeaders $maxMsgHeaders};
       dict set compMsgDispatcher received $parts
       set result [getMsgPtrFromMsgParts $parts $::COMP_MSG_INCR]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
         return $::COMP_DISP_ERR_OK
       }
       set result [::compMsg compMsgData createMsg $numEntries handle]
-      if {$result != $::COMP_MSG_ERR_OK} {
-        return $result
-      }
+      checkErrOK $result
       set idx 0
       while {$idx < $numEntries} {
         gets $fd line
         if {$line eq ""} {
-          return $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+          checkErrOK $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
         }
         set flds [split $line ","]
         foreach {fieldNameStr fieldTypeStr fieldLgthStr} $flds break
@@ -601,9 +558,7 @@ if {0} {
           set fieldLgth $fieldLgthStr
         }
         set result [::compMsg compMsgData addField $fieldNameStr $fieldTypeStr $fieldLgth]
-        if {$result != $::COMP_MSG_ERR_OK} {
-          return $result
-        }
+        checkErrOK $result
         incr idx
       }
       ::compMsg compMsgData initMsg 0 0
