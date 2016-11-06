@@ -49,6 +49,8 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
+#define COMP_MSG_WIFI_STATION_FILE_NAME "myConfig.txt"
+
 static bool bssScanRunning = false;
 static bssScanInfos_t bssScanInfos = { NULL, 0, 0};
 static stationConfig_t stationConfig;
@@ -102,10 +104,33 @@ ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDisp
   result = self->getNewCompMsgDataPtr(self);
 ets_printf("received compMsgData: %p\n", self->compMsgData);
   self->compMsgData->wud = wud;
+  self->compMsgData->nud = NULL;
   self->compMsgData->receivedData = (uint8_t *)pdata;
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, wud, self->compMsgData);
 ets_printf("websocketBinaryReceived end result: %d\n", result);
+}
+
+// ================================= netsocketReceived ====================================
+
+static void netsocketReceived(void *arg, void *nud, char *pdata, unsigned short len) {
+  compMsgDispatcher_t *compMsgDispatcher;
+  compMsgDispatcher_t *self;
+  uint8_t result;
+
+  compMsgDispatcher = (compMsgDispatcher_t *)arg;
+  self = compMsgDispatcher;
+ets_printf("netsocketReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+  result = self->resetMsgInfo(self, &self->received);
+//  checkErrOK(result);
+  result = self->getNewCompMsgDataPtr(self);
+ets_printf("received compMsgData: %p remote_port: %d receivedLgth: %d\n", self->compMsgData, ((netsocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
+  self->compMsgData->wud = NULL;
+  self->compMsgData->nud = nud;
+  self->compMsgData->receivedData = (uint8_t *)pdata;
+  self->compMsgData->receivedLgth = (uint8_t)len;
+  result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
+ets_printf("netsocketReceived end result: %d\n", result);
 }
 
 // ================================= websocketTextReceived ====================================
@@ -462,6 +487,21 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_TEXT_CALL_BACK:
     *numericValue = (int)compMsgWifiData.websocketTextReceived;
     break;
+  case WIFI_INFO_NET_CALL_BACK:
+    *numericValue = (int)compMsgWifiData.netsocketReceived;
+    break;
+  case WIFI_INFO_STATION_SSID:
+    *stringValue = compMsgWifiData.stationSsid;
+    break;
+  case WIFI_INFO_STATION_PASSWD:
+    *stringValue = compMsgWifiData.stationPassword;
+    break;
+  case WIFI_INFO_STATION_IP_ADDR:
+    *numericValue = compMsgWifiData.stationIpAddr;
+    break;
+  case WIFI_INFO_STATION_PORT:
+    *numericValue = compMsgWifiData.stationPort;
+    break;
   default:
     return COMP_DISP_ERR_BAD_WIFI_VALUE_WHICH;
     break;
@@ -497,8 +537,29 @@ static uint8_t setWifiValues(compMsgDispatcher_t *self) {
   compMsgWifiData.provisioningPort = 80;
   provisioningIPAddr = "192.168.4.1";
   c_memcpy(compMsgWifiData.provisioningIPAddr, provisioningIPAddr, c_strlen(provisioningIPAddr));
+  compMsgWifiData.stationPort = 80;
   result = getStationConfig(self);
   checkErrOK(result);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= setWifiValue ====================================
+
+static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *name, int numericValue, uint8_t *stringValue) {
+  uint8_t result;
+  if (c_strcmp(name, "ssid") == 0) {
+    c_memcpy(compMsgWifiData.stationSsid, stringValue, c_strlen(stringValue));
+  } else {
+    if (c_strcmp(name, "pwd") == 0) {
+        c_memcpy(compMsgWifiData.stationPassword, stringValue, c_strlen(stringValue));
+    } else {
+      if (c_strcmp(name, "ip") == 0) {
+        compMsgWifiData.stationIpAddr = numericValue;
+      } else {
+        checkErrOK(COMP_DISP_ERR_FIELD_NOT_FOUND);
+      }
+    }
+ } 
   return COMP_DISP_ERR_OK;
 }
 
@@ -509,11 +570,13 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
 
   compMsgWifiData.websocketBinaryReceived = &websocketBinaryReceived;
   compMsgWifiData.websocketTextReceived = &websocketTextReceived;
+  compMsgWifiData.netsocketReceived = &netsocketReceived;
 
   self->getBssScanInfo = &getBssScanInfo;
   self->getScanInfoTableFieldValue = &getScanInfoTableFieldValue;
   self->getWifiValue = &getWifiValue;
   self->setWifiValues = &setWifiValues;
+  self->setWifiValue = &setWifiValue;
   self->getWifiKeyValue = &getWifiKeyValue;
   self->getWifiKeyValueInfo = &getWifiKeyValueInfo;
   self->getWifiRemotePort = &getWifiRemotePort;
@@ -523,6 +586,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);
   result = self->setWifiValues(self);
   checkErrOK(result);
+  result = self->compMsgMsgDesc->readWifiValues(self, COMP_MSG_WIFI_STATION_FILE_NAME);
   return COMP_DISP_ERR_OK;
 }
 

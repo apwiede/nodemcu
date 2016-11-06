@@ -94,7 +94,7 @@ enum compMsgDispatcherErrorCode
 
 // input source types
 #define COMP_DISP_INPUT_UART       0x01
-#define COMP_DISP_INPUT_SOCKET     0x02
+#define COMP_DISP_INPUT_NET_SOCKET 0x02
 #define COMP_DISP_INPUT_WEB_SOCKET 0x04
 
 #define COMP_DISP_MAX_REQUESTS     5
@@ -136,6 +136,7 @@ typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getScanInfoTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setWifiValues_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* getWifiKeyValue_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiKeyValueInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
@@ -150,7 +151,7 @@ typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* websocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *payload, int size, int opcode);
 
-typedef uint8_t (* netsocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
+typedef uint8_t (* netsocketRunClientMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netsocketSendData_t)(netsocketUserData_t *wud, const char *payload, int size);
 
 // Dispatcher stuff
@@ -203,6 +204,9 @@ typedef struct compMsgDispatcher {
   compMsgDataView_t *compMsgDataView; // needed only for readeHeadersAndSetFlags!!
 
   msgHeaderInfos_t msgHeaderInfos;
+
+  // station mode
+  uint32_t station_ip;
 
   // compMsgMsgDesc info
   compMsgMsgDesc_t *compMsgMsgDesc;
@@ -280,6 +284,7 @@ typedef struct compMsgDispatcher {
   getScanInfoTableFieldValue_t getScanInfoTableFieldValue;
   getWifiValue_t getWifiValue;
   setWifiValues_t setWifiValues;
+  setWifiValue_t setWifiValue;
   getWifiKeyValueInfo_t getWifiKeyValueInfo;
   getWifiKeyValue_t getWifiKeyValue;
   getWifiRemotePort_t getWifiRemotePort;

@@ -517,16 +517,18 @@ static  void alarmTimerAP(void *arg) {
   uint8_t timerId;
   char temp[64];
   compMsgTimer_t *tmr;
-  uint8_t mode = SOFTAP_IF;
+  uint8_t mode;
   int numericValue;
   uint8_t *stringValue;
-  struct espconn *pesp_conn = NULL;
+  struct espconn *pesp_conn;
   unsigned port;
   ip_addr_t ipaddr;
   unsigned type;
   int result;
   websocketUserData_t *wud;
 
+  pesp_conn = NULL;
+  mode = SOFTAP_IF;
   timerId = (uint8_t)((uint32_t)arg);
   tmr = &compMsgTimers[timerId];
   self = tmr->self;

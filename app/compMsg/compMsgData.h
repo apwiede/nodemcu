@@ -108,6 +108,7 @@ typedef struct netsocketUserData {
   int remote_port;
   uint8_t remote_ip[4];
   compMsgDispatcher_t *compMsgDispatcher;
+  netsocketReceived_t netsocketReceived;
 } netsocketUserData_t;
 
 typedef uint8_t (* createMsg_t)(compMsgData_t *self, int numFields, uint8_t **handle);

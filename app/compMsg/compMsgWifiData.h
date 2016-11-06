@@ -76,6 +76,11 @@
 #define WIFI_INFO_PROVISIONING_IP_ADDR 23
 #define WIFI_INFO_BINARY_CALL_BACK     24
 #define WIFI_INFO_TEXT_CALL_BACK       25
+#define WIFI_INFO_STATION_SSID         26
+#define WIFI_INFO_STATION_PASSWD       27
+#define WIFI_INFO_STATION_IP_ADDR      28
+#define WIFI_INFO_STATION_PORT         29
+#define WIFI_INFO_NET_CALL_BACK        30
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -170,6 +175,7 @@ typedef struct stationConfig {
 
 typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* netsocketReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 
 typedef struct compMsgWifiData {
   uint16_t key_ssid;
@@ -186,11 +192,16 @@ typedef struct compMsgWifiData {
   uint8_t provisioningSsid[33];
   uint16_t provisioningPort;
   uint8_t provisioningIPAddr[16];
+  uint8_t stationSsid[33];
+  uint8_t stationPassword[65];
+  uint32_t stationIpAddr;
+  uint16_t stationPort;
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
 
   websocketBinaryReceived_t websocketBinaryReceived;
   websocketTextReceived_t websocketTextReceived;
+  netsocketReceived_t netsocketReceived;
 } compMsgWifiData_t;
 
 #endif	/* COMP_MSG_WIFI_DATA_H */

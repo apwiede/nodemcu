@@ -199,21 +199,15 @@ static uint8_t netsocket_recv(char *payload, netsocketUserData_t *nud, char **da
 
   idx = 0;
 ets_printf("netsocket_recv:remote_port: %d\n", nud->remote_port);
-ets_printf("netsocket_recv: %s!remote_port: %d\n",payload, nud->remote_port);
+//ets_printf("netsocket_recv: %s!remote_port: %d\n",payload, nud->remote_port);
 
-ets_printf("payload: %d!%s!\n", c_strlen(payload), payload);
+//ets_printf("payload: %d!%s!\n", c_strlen(payload), payload);
 //ets_printf("netsocket_parse: %d!curr_url: %s!\n", os_strlen(string), nud->curr_url);
 //FIXME need to handle payload!!
+  nud->netsocketReceived(nud->compMsgDispatcher, nud, payload, c_strlen(payload));
 //  netsocket_parse(string, os_strlen(string), data, lgth, nud);
   return NETSOCKET_ERR_OK;
 
-}
-
-// ================================= netSocketRunClientMode ====================================
-
-static uint8_t netsocketRunClientMode(compMsgDispatcher_t *self, uint8_t mode) {
-  int result;
-  return COMP_DISP_ERR_OK;
 }
 
 static uint16_t tcp_server_timeover = 30;
@@ -249,7 +243,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
 
   pesp_conn = (struct espconn *)arg;
 ets_printf("socketReceived: arg: %p len: %d\n", arg, len);
-ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
+//ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
   char temp[20] = {0};
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
   ets_printf("remote ");
@@ -323,29 +317,32 @@ ets_printf("serverConnected: arg: %p\n", arg);
 
 }
 
-// ================================= alarmTimerAP ====================================
+// ================================= alarmTimerClientMode ====================================
 
-static  void alarmTimerAP(void *arg) {
+static  void alarmTimerClientMode(void *arg) {
   compMsgDispatcher_t *self;
-  struct ip_info pTempIp;
   uint8_t timerId;
   char temp[64];
   compMsgTimer_t *tmr;
-  uint8_t mode = SOFTAP_IF;
+  uint8_t mode;
   int numericValue;
   uint8_t *stringValue;
-  struct espconn *pesp_conn = NULL;
+  struct espconn *pesp_conn;
   unsigned port;
+  struct ip_info pTempIp;
   ip_addr_t ipaddr;
   unsigned type;
   int result;
   netsocketUserData_t *nud;
 
+  pesp_conn = NULL;
+  mode = STATION_IF;
   timerId = (uint8_t)((uint32_t)arg);
   tmr = &compMsgTimers[timerId];
   self = tmr->self;
-//ets_printf("alarmTimerAP: timerId: %d self: %p\n", timerId, self);
+ets_printf("alarmTimerClientMode: timerId: %d self: %p\n", timerId, self);
   wifi_get_ip_info(mode, &pTempIp);
+ets_printf("wifi is in mode: %d status: %d hostname: %s!\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
   if(pTempIp.ip.addr==0){
 ets_printf("ip: nil\n");
     return;
@@ -354,18 +351,21 @@ ets_printf("ip: nil\n");
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
 ets_printf("IP: %s\n", temp);
   ets_timer_disarm(&tmr->timer);
+  result = self->setWifiValue(self, "ip", pTempIp.ip.addr, NULL);
+  result = self->getWifiValue(self, WIFI_INFO_STATION_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+ets_printf("ip2: 0x%08x\n", numericValue);
 
-  result = self->getWifiValue(self, WIFI_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
-//ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
-//  checkErrOK(result);
+  result = self->getWifiValue(self, WIFI_INFO_STATION_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
-//  result = self->getWifiValue(self, WIFI_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
-//  checkErrOK(result);
+ets_printf("port: %d result: %d\n", port, result);
 
   nud = (netsocketUserData_t *)os_zalloc(sizeof(netsocketUserData_t));
 //   checkAllocOK(nud);
 //ets_printf("nud0: %p\n", nud);
 //  checkAllocgLOK(nud->urls);
+  result = self->getWifiValue(self, WIFI_INFO_NET_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+ets_printf("netCallback: %p!%d!\n", numericValue, result);
+  nud->netsocketReceived = (netsocketReceived_t)numericValue;
   nud->compMsgDispatcher = self;
 
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
@@ -391,21 +391,81 @@ ets_printf("IP: %s\n", temp);
 ets_printf("port: %d\n", port);
 
 //ets_printf("call regist connectcb\n");
-    result = espconn_regist_connectcb(pesp_conn, serverConnected);
-    if (result != COMP_DISP_ERR_OK) {
-//      return COMP_DISP_ERR_REGIST_CONNECT_CB;
-    }
+  result = espconn_regist_connectcb(pesp_conn, serverConnected);
+  if (result != COMP_DISP_ERR_OK) {
+//    return COMP_DISP_ERR_REGIST_CONNECT_CB;
+  }
 //ets_printf("regist connectcb result: %d\n", result);
-    result = espconn_accept(pesp_conn);    // if it's a server, no need to dns.
-    if (result != COMP_DISP_ERR_OK) {
-//      return COMP_DISP_ERR_TCP_ACCEPT;
-    }
+  result = espconn_accept(pesp_conn);    // if it's a server, no need to dns.
+  if (result != COMP_DISP_ERR_OK) {
+//    return COMP_DISP_ERR_TCP_ACCEPT;
+  }
 //ets_printf("regist_accept result: %d\n", result);
-    result =espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
-    if (result != COMP_DISP_ERR_OK) {
-//      return COMP_DISP_ERR_REGIST_TIME;
-    }
+  result =espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
+  if (result != COMP_DISP_ERR_OK) {
+//    return COMP_DISP_ERR_REGIST_TIME;
+  }
 //ets_printf("regist_time result: %d\n", result);
+}
+
+// ================================= netsocketRunClientMode ====================================
+
+static uint8_t netsocketRunClientMode(compMsgDispatcher_t *self) {
+  int result;
+  bool boolResult;
+  struct station_config station_config;
+  int numericValue;
+  uint8_t *stringValue;
+
+ets_printf("netsocketRunClientMode called\n");
+  
+  boolResult = wifi_station_disconnect();
+  if (!boolResult) {
+    return COMP_DISP_ERR_CANNOT_DISCONNECT;
+  }
+  boolResult = wifi_set_opmode(OPMODE_STATION);
+  if (!boolResult) {
+    return COMP_DISP_ERR_CANNOT_SET_OPMODE;
+  }
+
+  c_memset(station_config.ssid,0,sizeof(station_config.ssid));
+  result = self->getWifiValue(self, WIFI_INFO_STATION_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  checkErrOK(result);
+ets_printf("len ssid: %d\n", c_strlen(stringValue));
+  c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
+
+  c_memset(station_config.password,0,sizeof(station_config.password));
+  result = self->getWifiValue(self, WIFI_INFO_STATION_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  checkErrOK(result);
+ets_printf("len password: %d\n", c_strlen(stringValue));
+  c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
+ets_printf("ssid: %s password: %s!\n", station_config.ssid, station_config.password);
+
+  boolResult = wifi_station_set_config(&station_config);
+  if (!boolResult) {
+    return COMP_DISP_ERR_CANNOT_SET_OPMODE;
+  }
+  wifi_station_set_auto_connect(true);
+  wifi_station_connect();
+
+ets_printf("wifi is in mode: %d status: %d hostname: %s!\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
+
+  int repeat = 1;
+  int interval = 1000;
+  int timerId = 1;
+  int mode = TIMER_MODE_AUTO;
+  compMsgTimer_t *tmr = &compMsgTimers[timerId];
+  if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
+    ets_timer_disarm(&tmr->timer);
+  }
+  // this is only preparing
+  ets_timer_setfn(&tmr->timer, alarmTimerClientMode, (void*)timerId);
+  tmr->mode = mode | TIMER_IDLE_FLAG;
+  // here is the start
+  tmr->interval = interval;
+  tmr->mode &= ~TIMER_IDLE_FLAG;
+  ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
+  return COMP_DISP_ERR_OK;
 }
 
 // ================================= initTimers ====================================

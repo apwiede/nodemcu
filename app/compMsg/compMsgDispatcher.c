@@ -642,11 +642,16 @@ uint8_t *handle;
   result = compMsgNetsocketInit(self);
   checkErrOK(result);
 
+#ifdef WEBSOCKETAP
 // FIXME !! temporary starting for testing only !!
   result = self->websocketRunAPMode(self);
   checkErrOK(result);
+#endif
 
+// FIXME !! temporary starting for testing only !!
+  result = self->netsocketRunClientMode(self);
   checkErrOK(result);
+
 #ifdef NOTDEF
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
 checkErrOK(result);

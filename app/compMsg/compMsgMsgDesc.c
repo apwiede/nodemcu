@@ -756,11 +756,13 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   checkErrOK(result2);
   return result;
 }
+
 #undef checkErrOK
 #define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) return result
 
 #undef checkIsEnd
 #define checkIsEnd(val) { if (val) return result; }
+
 // ================================= readActions ====================================
 
 static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
@@ -851,6 +853,77 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }
+    idx++;
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
+  checkErrOK(result);
+  return COMP_MSG_DESC_ERR_OK;
+}
+
+// ================================= readWifiValues ====================================
+
+static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
+  int result;
+  compMsgDataView_t *dataView;
+  long uval;
+  uint8_t numEntries;
+  uint8_t*cp;
+  uint8_t*ep;
+  char *endPtr;
+  int idx;
+  bool isEnd;
+  uint8_t lgth;
+  uint8_t buf[100];
+  uint8_t *buffer;
+  uint8_t *myStr;
+  uint8_t *wifiFieldName;
+  uint8_t *wifiFieldValue;
+  uint8_t fieldTypeId;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  buffer = buf;
+  dataView = self->compMsgDataView;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
+  checkErrOK(result);
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  return COMP_MSG_DESC_ERR_OK;
+  }
+  uval = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)uval;
+  idx = 0;
+  while(idx < numEntries) {
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    // wifiFieldName
+    wifiFieldName = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // wifiFieldValue
+    wifiFieldValue = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    if (!isEnd) {
+      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    }
+    result = self->setWifiValue(self, wifiFieldName, 0, wifiFieldValue);
+    checkErrOK(result);
     idx++;
   }
 #undef checkErrOK
@@ -1346,6 +1419,7 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->getStrFromLine = &getStrFromLine;
   compMsgMsgDesc->getHeaderFieldsFromLine = &getHeaderFieldsFromLine;
   compMsgMsgDesc->readActions = &readActions;
+  compMsgMsgDesc->readWifiValues = &readWifiValues;
   compMsgMsgDesc->readHeadersAndSetFlags = &readHeadersAndSetFlags;
   compMsgMsgDesc->resetMsgDescParts = &resetMsgDescParts;
   compMsgMsgDesc->resetMsgValParts = &resetMsgValParts;
