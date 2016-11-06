@@ -1,0 +1,67 @@
+/*!
+  \defgroup grpStartCompMsg StartCompMsg
+  @{
+    <h2>Start comp Msg</h2>
+      <ul>
+        <li>compMsg_createDispatcher (Lua -> C)<br>
+          <ul>
+            <li>compMsgDispatcher = \ref newCompMsgDispatcher () (compMsgDispatcher.c)<br>
+              <ul>
+                <li>compMsgMsgDesc = \ref newCompMsgMsgDesc () (compMsgMsgDesc.c)<br>
+                <li>compMsgDataView = \ref newCompMsgDataView () (compMsgDataView.c)<br>
+              </ul>
+            <li> \ref createDispatcher () (compMsgDispatcher.c)<br>
+              <ul>
+                <li> \ref addHandle () (compMsgDispatcher.c) (sets compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles])<br>
+                <li> \ref resetMsgInfo (received) (compMsgDispatcher.c)<br>
+                <li> \ref resetMsgInfo (toSend) (compMsgDispatcher.c)<br>
+              </ul>
+          </ul>
+        <li> \ref compMsg_initDispatcher (Lua -> C) (compMsgDispatcher.c)<br>
+          <ul>
+            <li>\ref compMsgDispatcherGetPtrFromHandle (handle, &amp;compMsgDispatcher) (compMsgDispatcher.c)<br>
+            <li>compMsgDispatcher-&amp; \ref initDispatcher (compMsgDispatcher) (compMsgDispatcher.c)<br>
+              <ul>
+                <li> \ref getNewCompMsgDataPtr (self); (compMsgDispatcher.c)<br>
+                  <ul>
+                    <li>compMsgData =  \ref newCompMsgData (); (compMsgData.c)<br>
+                      <ul>
+                        <li>compMsgdata-&gt;compMsgDataView =  \ref newCompMsgDataView () (compMsgDataView.c)<br>
+                        <li>compMsgData-&gt;compMsgMsgDesc =  \ref newCompMsgMsgDesc () (compMsgMsgDesc.c)<br>
+                      </ul>
+                    <li>\ref setDispatcher (compMsgData, self) (compMsgdata.c)<br>
+                    <li>compMsgData->compMsgDataView = \ref newCompMsgDataView () (compMsgDataView.c)<br>
+                  </ul>
+                <li>\ref compMsgIdentifyInit (self) (compMsgIdentify.c)<br>
+                  <ul>
+                    <li>compMsgMsgDesc-&gt; \ref readHeadersAndSetFlags (self, MSG_HEADS_FILE_NAME) (compMsgMsgDesc.c)<br>
+                  </ul>
+                <li>\ref compMsgBuildMsgInit (self) (compMsgBuildMsg.c)<br>
+                <li>\ref compMsgSendReceiveInit (self) (compMsgSendreceive.c)<br>
+                <li>\ref compMsgActionInit (self) (compMsgAction.c)<br>
+                  <ul>
+                    <li>compMsgMsgDesc-&gt; \ref readActions (self, COMP_MSG_ACTIONS_FILE_NAME) (compMsgMsgDesc.c)<br>
+                  </ul>
+                <li>\ref compMsgWifiInit (self)<br>
+                  <ul>
+                    <li>compMsgMsgDesc-&gt; \ref getWifiKeyValueKeys (self, &amp;compMsgWifiData)
+                    <li>self-&gt; \ref setWifiValues (self)
+                  </ul>
+                <li>\ref compMsgModuleDataInit (self);
+                  <ul>
+                    <li>self-&gt; \ref setModuleValues (self)
+                  </ul>
+                <li>\ref compMsgWebsocketInit (self);
+              <ul>
+          </ul>
+      </ul>
+        <br>
+        <li><a href="classorg_1_1apwtcl_1_1apwfreetypelib_1_1aftbase_1_1FTModules.html">-&gt; class FTModules</a><br>
+      </ul>
+
+    \addtogroup grpCompMsg
+        @{
+        @}
+
+  @}
+*/
