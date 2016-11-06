@@ -145,9 +145,13 @@ typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId);
 typedef uint8_t (* getModuleTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
-typedef uint8_t (* websocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
+
+typedef uint8_t (* websocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *payload, int size, int opcode);
+
+typedef uint8_t (* netsocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
+typedef uint8_t (* netsocketSendData_t)(netsocketUserData_t *wud, const char *payload, int size);
 
 // Dispatcher stuff
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
@@ -279,9 +283,13 @@ typedef struct compMsgDispatcher {
   getWifiKeyValueInfo_t getWifiKeyValueInfo;
   getWifiKeyValue_t getWifiKeyValue;
   getWifiRemotePort_t getWifiRemotePort;
-  websocketRunClientMode_t websocketRunClientMode;
   websocketRunAPMode_t websocketRunAPMode;
+
+  websocketRunClientMode_t websocketRunClientMode;
   websocketSendData_t websocketSendData;
+
+  netsocketRunClientMode_t netsocketRunClientMode;
+  netsocketSendData_t netsocketSendData;
 
   dumpMsgParts_t dumpMsgParts;
 } compMsgDispatcher_t;
@@ -296,5 +304,6 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self);
 uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self);
 uint8_t compMsgWifiInit(compMsgDispatcher_t *self);
 uint8_t compMsgWebsocketInit(compMsgDispatcher_t *self);
+uint8_t compMsgNetsocketInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_DISPATCHER_H */

@@ -103,6 +103,12 @@ typedef struct websocketUserData {
   websocketTextReceived_t websocketTextReceived;
 } websocketUserData_t;
 
+typedef struct netsocketUserData {
+  struct espconn *pesp_conn;
+  int remote_port;
+  uint8_t remote_ip[4];
+  compMsgDispatcher_t *compMsgDispatcher;
+} netsocketUserData_t;
 
 typedef uint8_t (* createMsg_t)(compMsgData_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* deleteMsg_t)(compMsgData_t *self);
@@ -124,6 +130,7 @@ typedef uint8_t (* setMsgData_t)(compMsgData_t *compMsgData, const uint8_t *data
 typedef uint8_t (* setMsgFieldFromList_t)(compMsgData_t *selfconst, const uint8_t **listVector, uint8_t numEntries, uint16_t flags);
 typedef uint8_t ( *setDispatcher_t)(compMsgData_t *self, compMsgDispatcher_t *dispatcher);
 
+#ifdef NOLIST
 // definitionMsg
 typedef uint8_t (* dumpDefFields_t)(compMsgData_t *self);
 typedef uint8_t (* initDefMsg_t)(compMsgData_t *self);
@@ -145,6 +152,7 @@ typedef uint8_t (* setListData_t)(compMsgData_t *self, const  uint8_t *data);
 typedef uint8_t (* getListData_t)(compMsgData_t *self, uint8_t **data, int *lgth);
 typedef uint8_t (* addListMsg_t)(compMsgData_t *self, size_t msgLgth, uint8_t *msgData);
 typedef uint8_t (* addListField_t)(compMsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
+#endif
 
 typedef struct compMsgData {
   compMsgDataView_t *compMsgDataView;
@@ -179,6 +187,7 @@ typedef struct compMsgData {
   
   buildMsgInfos_t buildMsgInfos;
   websocketUserData_t *wud;
+  netsocketUserData_t *nud;
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
   headerPart_t *currHdr;

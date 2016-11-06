@@ -625,10 +625,6 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self) {
 headerPart_t *hdr;
 uint8_t *handle;
 
-//  if (self->compMsgData == NULL) {
-//    result = self->getNewCompMsgDataPtr(self);
-//    checkErrOK(result);
-//  }
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
@@ -642,6 +638,8 @@ uint8_t *handle;
   result = compMsgModuleDataInit(self);
   checkErrOK(result);
   result = compMsgWebsocketInit(self);
+  checkErrOK(result);
+  result = compMsgNetsocketInit(self);
   checkErrOK(result);
 
 // FIXME !! temporary starting for testing only !!
