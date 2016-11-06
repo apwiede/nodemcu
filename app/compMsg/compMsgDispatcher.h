@@ -90,6 +90,7 @@ enum compMsgDispatcherErrorCode
   COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 175,
   COMP_DISP_ERR_TOO_MANY_REQUESTS     = 174,
   COMP_DISP_ERR_REQUEST_NOT_FOUND     = 173,
+  COMP_DISP_ERR_UART_REQUEST_NOT_SET  = 172,
 };
 
 // input source types
@@ -157,6 +158,7 @@ typedef uint8_t (* netsocketSendData_t)(netsocketUserData_t *wud, const char *pa
 // Dispatcher stuff
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* addUartRequestData_t)(compMsgDispatcher_t *self, uint8_t *data, size_t lgth);
 typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData);
 typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
@@ -269,6 +271,7 @@ typedef struct compMsgDispatcher {
   getNewCompMsgDataPtr_t getNewCompMsgDataPtr;
   startRequest_t startRequest;
   startNextRequest_t startNextRequest;
+  addUartRequestData_t addUartRequestData;
   addRequest_t addRequest;
   deleteRequest_t deleteRequest;
 

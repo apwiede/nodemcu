@@ -540,6 +540,22 @@ static uint8_t startNextRequest(compMsgDispatcher_t *self) {
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= addUartRequestData ====================================
+
+static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size_t lgth) {
+  uint8_t result;
+  compMsgData_t *compMsgData;
+
+  // slot 0 is reserved for Uart
+  if (self->msgRequestInfos.requestTypes[0] != COMP_DISP_INPUT_UART) {
+    return COMP_DISP_ERR_UART_REQUEST_NOT_SET;
+  }
+  compMsgData = self->msgRequestInfos.requestData[0];
+  result = self->handleReceivedPart(self, data, lgth);
+  checkErrOK(result);
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= addRequest ====================================
 
 static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData) {
@@ -716,6 +732,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->startRequest = &startRequest;
   compMsgDispatcher->startNextRequest = &startNextRequest;
   compMsgDispatcher->addRequest = &addRequest;
+  compMsgDispatcher->addUartRequestData = &addUartRequestData;
   compMsgDispatcher->deleteRequest = &deleteRequest;
 
 

@@ -66,7 +66,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
     lgth = 1;
     myBuffer = buf;
   }
-  result =self->handleReceivedPart(self, myBuffer, lgth);
+  result =self->addUartRequestData(self, (uint8_t *)myBuffer, lgth);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }
@@ -124,6 +124,14 @@ ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_i
 
 uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   uint8_t result;
+
+  result = self->getNewCompMsgDataPtr(self);
+ets_printf(" compMsgSendReceiveInit: %p\n", self->compMsgData);
+  self->compMsgData->wud = NULL;
+  self->compMsgData->nud = NULL;
+  self->compMsgData->receivedData = NULL;
+  self->compMsgData->receivedLgth = 0;
+  result = self->addRequest(self, COMP_DISP_INPUT_UART, NULL, self->compMsgData);
 
   self->uartReceiveCb = &uartReceiveCb;
   self->typeRSendAnswer = &typeRSendAnswer;
