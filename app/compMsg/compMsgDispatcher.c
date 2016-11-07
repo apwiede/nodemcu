@@ -664,9 +664,12 @@ uint8_t *handle;
   checkErrOK(result);
 #endif
 
+#define NETSOCKET
+#ifdef NETSOCKET
 // FIXME !! temporary starting for testing only !!
   result = self->netsocketRunClientMode(self);
   checkErrOK(result);
+#endif
 
 #ifdef NOTDEF
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
