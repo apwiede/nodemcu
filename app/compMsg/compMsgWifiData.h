@@ -81,6 +81,7 @@
 #define WIFI_INFO_STATION_IP_ADDR      28
 #define WIFI_INFO_STATION_PORT         29
 #define WIFI_INFO_NET_CALL_BACK        30
+#define WIFI_INFO_STATION_SECURE       31
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -196,6 +197,9 @@ typedef struct compMsgWifiData {
   uint8_t stationPassword[65];
   uint32_t stationIpAddr;
   uint16_t stationPort;
+#ifdef CLIENT_SSL_ENABLE
+  uint8_t stationSecure;
+#endif
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
 

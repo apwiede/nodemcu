@@ -502,6 +502,11 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_STATION_PORT:
     *numericValue = compMsgWifiData.stationPort;
     break;
+#ifdef CLIENT_SSL_ENABLE
+  case WIFI_INFO_STATION_SECURE:
+    *numericValue = compMsgWifiData.stationSecure;
+    break;
+#endif
   default:
     return COMP_DISP_ERR_BAD_WIFI_VALUE_WHICH;
     break;
@@ -556,7 +561,15 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *name, int numeri
       if (c_strcmp(name, "ip") == 0) {
         compMsgWifiData.stationIpAddr = numericValue;
       } else {
-        checkErrOK(COMP_DISP_ERR_FIELD_NOT_FOUND);
+#ifdef CLIENT_SSL_ENABLE
+        if (c_strcmp(name, "secure") == 0) {
+          compMsgWifiData.stationSecure = numericValue;
+        } else {
+#endif
+          checkErrOK(COMP_DISP_ERR_FIELD_NOT_FOUND);
+#ifdef CLIENT_SSL_ENABLE
+        }
+#endif
       }
     }
  } 

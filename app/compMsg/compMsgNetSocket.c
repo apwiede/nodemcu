@@ -44,8 +44,8 @@
 #include "flash_fs.h"
 
 #include "lwip/err.h"
-#include "lwip/app/espconn.h"
 #include "lwip/ip_addr.h"
+#include "espconn.h"
 #include "lwip/dns.h"
 
 #include "c_string.h"
@@ -275,26 +275,182 @@ ets_printf("socketSent: arg: %p\n", arg);
 
 }
 
+// ================================= netDelete  ====================================
+
+static void netDelete(void *arg) {
+  struct espconn *pesp_conn;
+  netsocketUserData_t *nud;
+  int result;
+
+ets_printf("netDelete\n");
+  pesp_conn = (struct espconn *)arg;
+  if (pesp_conn == NULL) {
+    return;
+  }
+  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  if(nud == NULL) {
+    return;
+  }
+  if(nud->pesp_conn) {     // for client connected to tcp server, this should set NULL in disconnect cb
+    nud->pesp_conn->reverse = NULL;
+    if (nud->pesp_conn->proto.tcp) {
+      os_free (nud->pesp_conn->proto.tcp);
+      nud->pesp_conn->proto.tcp = NULL;
+    }
+    os_free (nud->pesp_conn);
+    nud->pesp_conn = NULL;
+  }
+}
+
+// ================================= netSocketDisconnected  ====================================
+
+static void netSocketDisconnected(void *arg) {  // tcp only
+  struct espconn *pesp_conn;
+  netsocketUserData_t *nud;
+  int result;
+
+ets_printf("netSocketDisconnected is called.\n");
+  pesp_conn = (struct espconn *)arg;
+  if (pesp_conn == NULL) {
+    return;
+  }
+  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  if(nud == NULL) {
+    return;
+  }
+  if (pesp_conn->proto.tcp) {
+    os_free (pesp_conn->proto.tcp);
+  }
+  pesp_conn->proto.tcp = NULL;
+  if (nud->pesp_conn) {
+    os_free(nud->pesp_conn);
+  }
+  nud->pesp_conn = NULL;  // espconn is already disconnected
+}
+
+static void netSocketReconnected (void *arg, sint8_t err) {
+ets_printf("net_socket_reconnected is called err: %d.\n", err);
+  netSocketDisconnected (arg);
+}
+
+static void netSocketReceived(void *arg, char *pdata, unsigned short len) {
+  struct espconn *pesp_conn;
+  netsocketUserData_t *nud;
+  int result;
+
+ets_printf("netSocketReceived is called.\n");
+  pesp_conn = (struct espconn *)arg;
+  if (pesp_conn == NULL) {
+    return;
+  }
+  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  if(nud == NULL) {
+    return;
+  }
+}
+
+static void netSocketSent(void *arg) {
+  struct espconn *pesp_conn;
+  netsocketUserData_t *nud;
+  int result;
+
+ets_printf("netSocketSent is called.\n");
+  pesp_conn = (struct espconn *)arg;
+  if (pesp_conn == NULL) {
+    return;
+  }
+  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  if(nud == NULL) {
+    return;
+  }
+}
+
+// ================================= netSocketConnected  ====================================
+
+static void netSocketConnected(void *arg) {
+  struct espconn *pesp_conn;
+  netsocketUserData_t *nud;
+  int result;
+
+ets_printf("netSocketConnected\n");
+  pesp_conn = arg;
+  if (pesp_conn == NULL) {
+    return;
+  }
+  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  if(nud == NULL) {
+    return;
+  }
+  // can receive and send data, even if there is no connected callback in lua.
+  espconn_regist_recvcb (pesp_conn, netSocketReceived);
+  espconn_regist_sentcb (pesp_conn, netSocketSent);
+  espconn_regist_disconcb (pesp_conn, netSocketDisconnected);
+}
+
+// ================================= socketConnect  ====================================
+
+static void socketConnect(void *arg) {
+  struct espconn *pesp_conn;
+  netsocketUserData_t *nud;
+  int result;
+
+ets_printf("socketConnect\n");
+  if (pesp_conn == NULL) {
+    return;
+  }
+  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  if(nud == NULL) {
+    return;
+  }
+#ifdef CLIENT_SSL_ENABLE
+  if (nud->secure){
+    espconn_secure_set_size(ESPCONN_CLIENT, 5120); /* set SSL buffer size */
+ets_printf("call espconn_secure_connect\n");
+    int espconn_status = espconn_secure_connect(pesp_conn);
+ets_printf("after call espconn_secure_connect status: %d\n", espconn_status);
+
+  } else
+#endif
+  {
+ets_printf("socketConnect called\n");
+    espconn_connect(pesp_conn);
+  }
+}
+
 // ================================= serverConnected  ====================================
 
 static void serverConnected(void *arg) {
   struct espconn *pesp_conn;
+  netsocketUserData_t *nud;
   int result;
   int i;
 
 ets_printf("serverConnected: arg: %p\n", arg);
   pesp_conn = arg;
+  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  if(nud == NULL) {
+    return;
+  }
   for(i = 0; i < MAX_SOCKET; i++) {
     if (socket[i] == NULL) { // found empty slot
       break;
     }
   }
   if(i>=MAX_SOCKET) {// can't create more socket
-    pesp_conn->reverse = NULL;    // not accept this conn
-    if(pesp_conn->proto.tcp->remote_port || pesp_conn->proto.tcp->local_port) {
-      espconn_disconnect(pesp_conn);
+#ifdef CLIENT_SSL_ENABLE
+    if (nud->secure) {
+      if(pesp_conn->proto.tcp->remote_port || pesp_conn->proto.tcp->local_port) {
+        espconn_secure_disconnect(pesp_conn);
+      }
+    } else
+#endif
+    {
+      if(pesp_conn->proto.tcp->remote_port || pesp_conn->proto.tcp->local_port) {
+        espconn_disconnect(pesp_conn);
+      }
     }
 //    checkErrOK(gL, NETSOCKET_ERR_MAX_SOCKET_REACHED, "netsocket_server_connected");
+    pesp_conn->reverse = NULL;    // not accept this conn
     return;
   }
 //ets_printf("registstart\n");
@@ -363,6 +519,10 @@ ets_printf("port: %d result: %d\n", port, result);
 //   checkAllocOK(nud);
 //ets_printf("nud0: %p\n", nud);
 //  checkAllocgLOK(nud->urls);
+#ifdef CLIENT_SSL_ENABLE
+  result = self->getWifiValue(self, WIFI_INFO_STATION_SECURE, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  nud->secure = numericValue;
+#endif
   result = self->getWifiValue(self, WIFI_INFO_NET_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 ets_printf("netCallback: %p!%d!\n", numericValue, result);
   nud->netsocketReceived = (netsocketReceived_t)numericValue;

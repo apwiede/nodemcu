@@ -107,6 +107,9 @@ typedef struct netsocketUserData {
   struct espconn *pesp_conn;
   int remote_port;
   uint8_t remote_ip[4];
+#ifdef CLIENT_SSL_ENABLE
+  uint8_t secure;
+#endif
   compMsgDispatcher_t *compMsgDispatcher;
   netsocketReceived_t netsocketReceived;
 } netsocketUserData_t;
