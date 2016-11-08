@@ -56,22 +56,25 @@ extern "C" {
 #define COMP_MSG_HAS_TABLE_ROWS       (1 << 4)
 #define COMP_MSG_IS_INITTED           (1 << 5)
 #define COMP_MSG_IS_PREPARED          (1 << 6)
-#define COMP_DEF_IS_INITTED           (1 << 7)
-#define COMP_DEF_IS_PREPARED          (1 << 8)
+//#define COMP_DEF_IS_INITTED           (1 << 7)
+//#define COMP_DEF_IS_PREPARED          (1 << 8)
 #define COMP_MSG_CRC_USE_HEADER_LGTH  (1 << 9)
-#define COMP_LIST_IS_INITTED          (1 << 10)
-#define COMP_LIST_IS_PREPARED         (1 << 11)
+//#define COMP_LIST_IS_INITTED          (1 << 10)
+//#define COMP_LIST_IS_PREPARED         (1 << 11)
 
 #define COMP_MSG_FIELD_IS_SET         (1 << 0)
 #define COMP_MSG_KEY_VALUE_FIELD      (1 << 1)
 
-#define COMP_DEF_NUM_DEF_FIELDS 15
-#define COMP_DEF_CMD_KEY 0x5959
+//#define COMP_DEF_NUM_DEF_FIELDS 15
+//#define COMP_DEF_CMD_KEY 0x5959
 
-#define COMP_DEF_TO_DATA        (1 << 0)
-#define COMP_DEF_FROM_DATA      (1 << 1)
-#define COMP_LIST_TO_DATA       (1 << 2)
-#define COMP_LIST_FROM_DATA     (1 << 3)
+//#define COMP_DEF_TO_DATA        (1 << 0)
+//#define COMP_DEF_FROM_DATA      (1 << 1)
+//#define COMP_LIST_TO_DATA       (1 << 2)
+//#define COMP_LIST_FROM_DATA     (1 << 3)
+
+#define COMP_MSG_TO_SEND_DATA     (1 << 0)
+#define COMP_MSG_RECEIVED_DATA    (1 << 1)
 
 #define COMP_LIST_NUM_LIST_FIELDS 9
 #define COMP_LIST_CMD_KEY 0x5A5A
@@ -112,6 +115,7 @@ typedef struct netsocketUserData {
 #endif
   compMsgDispatcher_t *compMsgDispatcher;
   netsocketReceived_t netsocketReceived;
+  netsocketToSend_t netsocketToSend;
 } netsocketUserData_t;
 
 typedef uint8_t (* createMsg_t)(compMsgData_t *self, int numFields, uint8_t **handle);
@@ -179,7 +183,11 @@ typedef struct compMsgData {
   size_t headerLgth;
   uint8_t *header;
   uint8_t *receivedData;
-  uint8_t receivedLgth;
+  uint16_t receivedLgth;
+  uint8_t *toSendData;
+  uint16_t toSendLgth;
+  uint8_t direction;
+  uint16_t u16CmdKey;
 
   msgDescPart_t *msgDescParts;
   size_t numMsgDescParts;

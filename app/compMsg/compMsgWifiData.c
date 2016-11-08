@@ -105,10 +105,35 @@ ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDisp
 ets_printf("received compMsgData: %p\n", self->compMsgData);
   self->compMsgData->wud = wud;
   self->compMsgData->nud = NULL;
+  self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = (uint8_t *)pdata;
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, wud, self->compMsgData);
 ets_printf("websocketBinaryReceived end result: %d\n", result);
+}
+
+// ================================= netsocketToSend ====================================
+
+static void netsocketToSend(void *arg, void *nud, char *pdata, unsigned short len) {
+  compMsgDispatcher_t *compMsgDispatcher;
+  compMsgDispatcher_t *self;
+  uint8_t result;
+
+  compMsgDispatcher = (compMsgDispatcher_t *)arg;
+  self = compMsgDispatcher;
+ets_printf("netsocketSend: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+  result = self->resetMsgInfo(self, &self->toSend);
+//  checkErrOK(result);
+  result = self->getNewCompMsgDataPtr(self);
+ets_printf("send compMsgData: %p lgth: %d\n", self->compMsgData, len);
+  self->compMsgData->wud = NULL;
+  self->compMsgData->nud = nud;
+  self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
+  self->compMsgData->u16CmdKey = 17220; // FIXME hard wired 'CD'
+  self->compMsgData->toSendData = (uint8_t *)pdata;
+  self->compMsgData->toSendLgth = (uint8_t)len;
+  result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
+ets_printf("netsocketSend end result: %d\n", result);
 }
 
 // ================================= netsocketReceived ====================================
@@ -127,6 +152,7 @@ ets_printf("netsocketReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher
 ets_printf("received compMsgData: %p remote_port: %d receivedLgth: %d\n", self->compMsgData, ((netsocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
   self->compMsgData->wud = NULL;
   self->compMsgData->nud = nud;
+  self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = (uint8_t *)pdata;
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
@@ -487,8 +513,11 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_TEXT_CALL_BACK:
     *numericValue = (int)compMsgWifiData.websocketTextReceived;
     break;
-  case WIFI_INFO_NET_CALL_BACK:
+  case WIFI_INFO_NET_RECEIVED_CALL_BACK:
     *numericValue = (int)compMsgWifiData.netsocketReceived;
+    break;
+  case WIFI_INFO_NET_TO_SEND_CALL_BACK:
+    *numericValue = (int)compMsgWifiData.netsocketToSend;
     break;
   case WIFI_INFO_CLIENT_SSID:
     *stringValue = compMsgWifiData.clientSsid;
@@ -502,11 +531,23 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_CLIENT_PORT:
     *numericValue = compMsgWifiData.clientPort;
     break;
-  case WIFI_INFO_CLOUD_URL_1:
-    *stringValue = compMsgWifiData.cloudUrl1;
+  case WIFI_INFO_CLOUD_DOMAIN:
+    *stringValue = compMsgWifiData.cloudDomain;
     break;
-  case WIFI_INFO_CLOUD_URL_2:
-    *stringValue = compMsgWifiData.cloudUrl2;
+  case WIFI_INFO_CLOUD_PORT:
+    *numericValue = compMsgWifiData.cloudPort;
+    break;
+  case WIFI_INFO_CLOUD_HOST_1:
+    *stringValue = compMsgWifiData.cloudHost1;
+    break;
+  case WIFI_INFO_CLOUD_HOST_2:
+    *stringValue = compMsgWifiData.cloudHost2;
+    break;
+  case WIFI_INFO_CLOUD_SUB_URL:
+    *stringValue = compMsgWifiData.cloudSubUrl;
+    break;
+  case WIFI_INFO_CLOUD_NODE_TOKEN:
+    *stringValue = compMsgWifiData.cloudNodeToken;
     break;
 #ifdef CLIENT_SSL_ENABLE
   case WIFI_INFO_CLOUD_SECURE_CONNECT:
@@ -588,15 +629,33 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
   case COMP_MSG_SPEC_FIELD_CLIENT_PORT:
     compMsgWifiData.clientPort = numericValue;
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_1:
-    compMsgWifiData.cloudUrl1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrl1);
-    c_memcpy(compMsgWifiData.cloudUrl1, stringValue, c_strlen(stringValue));
+  case COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN:
+    compMsgWifiData.cloudDomain = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudDomain);
+    c_memcpy(compMsgWifiData.cloudDomain, stringValue, c_strlen(stringValue));
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_2:
-    compMsgWifiData.cloudUrl2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrl2);
-    c_memcpy(compMsgWifiData.cloudUrl2, stringValue, c_strlen(stringValue));
+  case COMP_MSG_SPEC_FIELD_CLOUD_PORT:
+    compMsgWifiData.cloudPort = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_HOST_1:
+    compMsgWifiData.cloudHost1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudHost1);
+    c_memcpy(compMsgWifiData.cloudHost1, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_HOST_2:
+    compMsgWifiData.cloudHost2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudHost2);
+    c_memcpy(compMsgWifiData.cloudHost2, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL:
+    compMsgWifiData.cloudSubUrl = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudSubUrl);
+    c_memcpy(compMsgWifiData.cloudSubUrl, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN:
+    compMsgWifiData.cloudNodeToken = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudNodeToken);
+    c_memcpy(compMsgWifiData.cloudNodeToken, stringValue, c_strlen(stringValue));
     break;
 #ifdef CLIENT_SSL_ENABLE
   case COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT:
@@ -617,6 +676,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
 
   compMsgWifiData.websocketBinaryReceived = &websocketBinaryReceived;
   compMsgWifiData.websocketTextReceived = &websocketTextReceived;
+  compMsgWifiData.netsocketToSend = &netsocketToSend;
   compMsgWifiData.netsocketReceived = &netsocketReceived;
 
   self->bssScanInfos = &bssScanInfos;

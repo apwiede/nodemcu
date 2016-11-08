@@ -70,20 +70,25 @@
 
 #define WIFI_INFO_WIFI                 (1 << 1)
 
-#define WIFI_INFO_WIFI_OPMODE          20
-#define WIFI_INFO_BINARY_CALL_BACK     21
-#define WIFI_INFO_TEXT_CALL_BACK       22
-#define WIFI_INFO_NET_CALL_BACK        23
-#define WIFI_INFO_PROVISIONING_SSID    24
-#define WIFI_INFO_PROVISIONING_PORT    25
-#define WIFI_INFO_PROVISIONING_IP_ADDR 26
-#define WIFI_INFO_CLIENT_SSID          27
-#define WIFI_INFO_CLIENT_PASSWD        28
-#define WIFI_INFO_CLIENT_IP_ADDR       29
-#define WIFI_INFO_CLIENT_PORT          30
-#define WIFI_INFO_CLOUD_URL_1          31
-#define WIFI_INFO_CLOUD_URL_2          32
-#define WIFI_INFO_CLOUD_SECURE_CONNECT 33
+#define WIFI_INFO_WIFI_OPMODE            20
+#define WIFI_INFO_BINARY_CALL_BACK       21
+#define WIFI_INFO_TEXT_CALL_BACK         22
+#define WIFI_INFO_NET_RECEIVED_CALL_BACK 23
+#define WIFI_INFO_NET_TO_SEND_CALL_BACK  24
+#define WIFI_INFO_PROVISIONING_SSID      25
+#define WIFI_INFO_PROVISIONING_PORT      26
+#define WIFI_INFO_PROVISIONING_IP_ADDR   27
+#define WIFI_INFO_CLIENT_SSID            28
+#define WIFI_INFO_CLIENT_PASSWD          29
+#define WIFI_INFO_CLIENT_IP_ADDR         30
+#define WIFI_INFO_CLIENT_PORT            31
+#define WIFI_INFO_CLOUD_DOMAIN           32
+#define WIFI_INFO_CLOUD_PORT             33
+#define WIFI_INFO_CLOUD_HOST_1           34
+#define WIFI_INFO_CLOUD_HOST_2           35
+#define WIFI_INFO_CLOUD_SECURE_CONNECT   36
+#define WIFI_INFO_CLOUD_SUB_URL          37
+#define WIFI_INFO_CLOUD_NODE_TOKEN       38
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -178,6 +183,7 @@ typedef struct stationConfig {
 
 typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* netsocketToSend_t)(void *arg, void *wud, char *pdata, unsigned short len);
 typedef void (* netsocketReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 
 typedef struct compMsgWifiData {
@@ -202,13 +208,18 @@ typedef struct compMsgWifiData {
 #ifdef CLIENT_SSL_ENABLE
   uint8_t cloudSecureConnect;
 #endif
-  uint8_t *cloudUrl1;
-  uint8_t *cloudUrl2;
+  uint8_t *cloudDomain;
+  uint16_t cloudPort;
+  uint8_t *cloudHost1;
+  uint8_t *cloudHost2;
+  uint8_t *cloudSubUrl;
+  uint8_t *cloudNodeToken;
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
 
   websocketBinaryReceived_t websocketBinaryReceived;
   websocketTextReceived_t websocketTextReceived;
+  netsocketToSend_t netsocketToSend;
   netsocketReceived_t netsocketReceived;
 } compMsgWifiData_t;
 

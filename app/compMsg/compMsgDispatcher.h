@@ -149,9 +149,12 @@ typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, 
 typedef uint8_t (* getModuleTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
 
+// WebSocket stuff
 typedef uint8_t (* websocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *payload, int size, int opcode);
 
+// NetSocket stuff
+typedef uint8_t (* netsocketStartCloudSocket_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netsocketRunClientMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netsocketSendData_t)(netsocketUserData_t *wud, const char *payload, int size);
 
@@ -184,12 +187,14 @@ typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *pa
 // Identify stuff
 typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
+typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 // SendReceive
 typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
-typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, uint8_t msgLgth);
+typedef uint8_t (* sendCloudMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth);
+typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth);
 
 
 // MsgData stuff
@@ -236,6 +241,7 @@ typedef struct compMsgDispatcher {
   // SendReceive
   typeRSendAnswer_t typeRSendAnswer;
   sendMsg_t sendMsg;
+  sendCloudMsg_t sendCloudMsg;
 
   // Action
   setActionEntry_t setActionEntry;
@@ -264,6 +270,7 @@ typedef struct compMsgDispatcher {
   resetHeaderInfos_t resetHeaderInfos;
   nextFittingEntry_t nextFittingEntry;
   handleReceivedPart_t handleReceivedPart;
+  handleToSendPart_t handleToSendPart;
   uartReceiveCb_t uartReceiveCb;
   createDispatcher_t createDispatcher;
   initDispatcher_t initDispatcher;
@@ -296,6 +303,7 @@ typedef struct compMsgDispatcher {
   websocketRunClientMode_t websocketRunClientMode;
   websocketSendData_t websocketSendData;
 
+  netsocketStartCloudSocket_t netsocketStartCloudSocket;
   netsocketRunClientMode_t netsocketRunClientMode;
   netsocketSendData_t netsocketSendData;
 

@@ -85,9 +85,22 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= sendCloudMsg ====================================
+
+static uint8_t sendCloudMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
+  uint8_t result;
+
+  if (self->compMsgData->nud == NULL) {
+    return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
+  }
+ets_printf("sendCloudData: msgLgth: %d\n", msgLgth);
+  result = self->netsocketSendData(self->compMsgData->nud, msgData, msgLgth);
+  checkErrOK(result);
+}
+
 // ================================= sendMsg ====================================
 
-static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, uint8_t msgLgth) {
+static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
   uint8_t result;
 
   switch (self->compMsgData->currHdr->hdrHandleType) {
@@ -126,15 +139,16 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
   result = self->getNewCompMsgDataPtr(self);
-ets_printf(" compMsgSendReceiveInit: %p\n", self->compMsgData);
   self->compMsgData->wud = NULL;
   self->compMsgData->nud = NULL;
   self->compMsgData->receivedData = NULL;
   self->compMsgData->receivedLgth = 0;
+  self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   result = self->addRequest(self, COMP_DISP_INPUT_UART, NULL, self->compMsgData);
 
   self->uartReceiveCb = &uartReceiveCb;
   self->typeRSendAnswer = &typeRSendAnswer;
+  self->sendCloudMsg = &sendCloudMsg;
   self->sendMsg = &sendMsg;
   return COMP_DISP_ERR_OK;
 }

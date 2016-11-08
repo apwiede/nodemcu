@@ -551,6 +551,7 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
     return COMP_DISP_ERR_UART_REQUEST_NOT_SET;
   }
   compMsgData = self->msgRequestInfos.requestData[0];
+  compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   result = self->handleReceivedPart(self, data, lgth);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
@@ -566,16 +567,26 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
     return COMP_DISP_ERR_TOO_MANY_REQUESTS;
   }
   self->msgRequestInfos.lastRequestIdx++;
-ets_printf("lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
+//ets_printf("addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
   self->msgRequestInfos.requestTypes[self->msgRequestInfos.lastRequestIdx] = requestType;
   self->msgRequestInfos.requestHandles[self->msgRequestInfos.lastRequestIdx] = requestHandle;
   self->msgRequestInfos.requestData[self->msgRequestInfos.lastRequestIdx] = requestData;
-  if (self->msgRequestInfos.currRequestIdx < 0) {
+//FIXME TEMPORARY last if clause!!
+  if ((self->msgRequestInfos.currRequestIdx < 0) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->msgRequestInfos.currRequestIdx++;
     checkErrOK(result);
     compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
-ets_printf("start handleReceivedPart: lgth: %d\n", compMsgData->receivedLgth);
-    result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
+    switch (compMsgData->direction) {
+    case COMP_MSG_TO_SEND_DATA:
+      result = self->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
+      break;
+    case COMP_MSG_RECEIVED_DATA:
+      result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
+      break;
+    default:
+ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
+      return COMP_MSG_ERR_BAD_VALUE;
+    }
   }
   return COMP_DISP_ERR_OK;
 }
@@ -664,10 +675,16 @@ uint8_t *handle;
   checkErrOK(result);
 #endif
 
-#define NETSOCKET
 #ifdef NETSOCKET
 // FIXME !! temporary starting for testing only !!
   result = self->netsocketRunClientMode(self);
+  checkErrOK(result);
+#endif
+
+#define CLOUDSOCKET
+#ifdef CLOUDSOCKET
+// FIXME !! temporary starting for testing only !!
+  result = self->netsocketStartCloudSocket(self);
   checkErrOK(result);
 #endif
 

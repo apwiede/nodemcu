@@ -384,6 +384,7 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
   compMsgField_t fieldInfo;
   int result;
 
+ets_printf("handleReceivedPart\n");
   hdrInfos = &self->msgHeaderInfos;
   received = &self->received;
   dataView = self->compMsgData->compMsgDataView->dataView;
@@ -432,6 +433,125 @@ ets_printf("handleReceivedMsg end buffer idx: %d result: %d\n", idx, result);
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= handleToSendPart ====================================
+
+static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth) {
+  int idx;
+  uint8_t buf[100];
+  msgParts_t *toSend;
+  dataView_t *dataView;
+  msgHeaderInfos_t *hdrInfos;
+  headerPart_t *hdr;
+  int startIdx;
+  int hdrIdx;
+  uint8_t u8;
+  compMsgField_t fieldInfo;
+  int result;
+  int numericValue;
+  uint8_t *stringValue;
+
+ets_printf("handleToSendPart lgth: %d buffer: %s\n", lgth, buffer);
+  uint8_t *iv;
+  uint8_t *cryptedPtr;
+  uint8_t *cryptKey;
+  uint8_t *encrypted;;
+  size_t mlen;
+  uint8_t klen;
+  uint8_t ivlen;
+  int encryptedLgth;
+  size_t msgLgth;
+  uint8_t *msg;
+
+  cryptKey = "89D71101$f&7Jlkj";
+  iv = "43700A27DF/&()as";
+  mlen = lgth;
+  ivlen = 16;
+  klen = 16;
+  c_memcpy(buf, buffer, lgth);
+  cryptedPtr = buf;
+  result = self->encryptMsg(cryptedPtr, mlen, cryptKey, klen, iv, ivlen, &encrypted, &encryptedLgth);
+  checkErrOK(result);
+  msgLgth = encryptedLgth;
+//ets_printf("encryptedLgth: %d %d\n", encryptedLgth, result);
+
+  result = self->toBase64(encrypted, &msgLgth, &msg);
+//ets_printf("base64 msg: mlen: %d %s %d\n", mlen, msg, c_strlen(msg));
+  checkErrOK(result);
+  msg[msgLgth] = '\0';
+  char payload[1024];
+  
+  uint8_t *host;
+  uint8_t *subUrl;
+  uint8_t *nodeToken;
+  uint8_t *host_part=" HTTP/1.1\r\nHost: ";
+  uint8_t *alive="\r\nConnection: keep-alive\r\n";
+  uint8_t *con_type="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+  uint8_t *con_lgth="Content-length: ";
+  uint8_t *accept="\r\nAccept: */*\r\n\r\n=";
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  checkErrOK(result);
+  host = stringValue;
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  checkErrOK(result);
+  subUrl = stringValue;
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  checkErrOK(result);
+  nodeToken = stringValue;
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%d%s%s\r\n", subUrl, host_part, host, alive, nodeToken, con_type, con_lgth, msgLgth+1, accept, msg);
+//ets_printf("request: %d %s\n", c_strlen(payload), payload);
+  result = self->sendCloudMsg(self, payload, c_strlen(payload));
+  checkErrOK(result);
+
+#ifdef NOTDEF
+  hdrInfos = &self->msgHeaderInfos;
+  toSend = &self->toSend;
+  dataView = self->compMsgData->compMsgDataView->dataView;
+  dataView->data = toSend->buf;
+ets_printf("§toSendLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!\n§", toSend->lgth, lgth, toSend->fieldOffset, hdrInfos->headerLgth);
+  idx = 0;
+  while (idx < lgth) {
+    received->buf[received->lgth++] = buffer[idx];
+    received->realLgth++;
+    dataView->lgth++;
+    if (received->lgth == hdrInfos->headerLgth) {
+//ets_printf("received lgth: %d lgth: %d idx: %d\n", received->lgth, lgth, idx);
+      result = getHeaderIndexFromHeaderFields(self, received, hdrInfos);
+//ets_printf("getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
+    }
+    // loop until we have full message then decrypt if necessary and then handle the message
+    if (received->lgth == received->totalLgth) {
+      hdrIdx = hdrInfos->currPartIdx;
+      hdr = &hdrInfos->headerParts[hdrIdx];
+//ets_printf("hdrIdx: %d\n", hdrIdx);
+      if (hdr->hdrEncryption == 'E') {
+        uint8_t *cryptedPtr;
+        uint8_t *cryptKey;
+        uint8_t *decrypted;;
+        uint8_t mlen;
+        uint8_t klen;
+        uint8_t ivlen;
+        int decryptedLgth;
+
+        // decrypt encrypted message part (after header)
+cryptKey = "a1b2c3d4e5f6g7h8";
+        mlen = received->totalLgth - hdrInfos->headerLgth;
+        ivlen = 16;
+        klen = 16;
+        cryptedPtr = received->buf + hdrInfos->headerLgth;
+        result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
+        checkErrOK(result);
+        c_memcpy(cryptedPtr, decrypted, decryptedLgth);
+      }
+      result = self->handleToSendMsg(self, received, hdrInfos);
+ets_printf("handleToSendMsg end buffer idx: %d result: %d\n", idx, result);
+      return result;
+    }
+    idx++;
+  }
+#endif
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= compMsgIdentifyInit ====================================
 
 uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
@@ -439,6 +559,7 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
 
   self->resetHeaderInfos = &resetHeaderInfos;
   self->handleReceivedPart = &handleReceivedPart;
+  self->handleToSendPart = &handleToSendPart;
   self->nextFittingEntry = &nextFittingEntry;
   self->handleReceivedMsg = &handleReceivedMsg;
   result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
