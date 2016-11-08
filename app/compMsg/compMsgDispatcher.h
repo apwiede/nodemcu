@@ -136,7 +136,7 @@ typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getScanInfoTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
-typedef uint8_t (* setWifiValues_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* getWifiKeyValue_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiKeyValueInfo_t)(compMsgDispatcher_t *self);
@@ -286,7 +286,7 @@ typedef struct compMsgDispatcher {
   bssStr2BssInfoId_t bssStr2BssInfoId;
   getScanInfoTableFieldValue_t getScanInfoTableFieldValue;
   getWifiValue_t getWifiValue;
-  setWifiValues_t setWifiValues;
+  getWifiConfig_t getWifiConfig;
   setWifiValue_t setWifiValue;
   getWifiKeyValueInfo_t getWifiKeyValueInfo;
   getWifiKeyValue_t getWifiKeyValue;

@@ -878,8 +878,8 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   uint8_t buf[100];
   uint8_t *buffer;
   uint8_t *myStr;
-  uint8_t *wifiFieldName;
-  uint8_t *wifiFieldValue;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldValueStr;
   uint8_t fieldTypeId;
   compMsgMsgDesc_t *compMsgMsgDesc;
 
@@ -909,20 +909,30 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
     buffer[lgth] = 0;
     cp = buffer;
     // wifiFieldName
-    wifiFieldName = cp;
+    fieldNameStr = cp;
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     checkIsEnd(isEnd);
     cp = ep;
 
     // wifiFieldValue
-    wifiFieldValue = cp;
+    fieldValueStr = cp;
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
+    uval = c_strtoul(fieldValueStr, &endPtr, 10);
+    if ((endPtr - (char *)fieldValueStr) == c_strlen(fieldValueStr)) {
+      if (c_strlen(fieldValueStr) > 10) {
+        // seems to be a password key, so use the stringValue
+        result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+      } else {
+        result = self->setWifiValue(self, fieldNameStr, uval, NULL);
+      }
+    } else {
+      result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+    }
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }
-    result = self->setWifiValue(self, wifiFieldName, 0, wifiFieldValue);
     checkErrOK(result);
     idx++;
   }

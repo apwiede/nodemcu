@@ -71,17 +71,19 @@
 #define WIFI_INFO_WIFI                 (1 << 1)
 
 #define WIFI_INFO_WIFI_OPMODE          20
-#define WIFI_INFO_PROVISIONING_SSID    21
-#define WIFI_INFO_PROVISIONING_PORT    22
-#define WIFI_INFO_PROVISIONING_IP_ADDR 23
-#define WIFI_INFO_BINARY_CALL_BACK     24
-#define WIFI_INFO_TEXT_CALL_BACK       25
-#define WIFI_INFO_STATION_SSID         26
-#define WIFI_INFO_STATION_PASSWD       27
-#define WIFI_INFO_STATION_IP_ADDR      28
-#define WIFI_INFO_STATION_PORT         29
-#define WIFI_INFO_NET_CALL_BACK        30
-#define WIFI_INFO_STATION_SECURE       31
+#define WIFI_INFO_BINARY_CALL_BACK     21
+#define WIFI_INFO_TEXT_CALL_BACK       22
+#define WIFI_INFO_NET_CALL_BACK        23
+#define WIFI_INFO_PROVISIONING_SSID    24
+#define WIFI_INFO_PROVISIONING_PORT    25
+#define WIFI_INFO_PROVISIONING_IP_ADDR 26
+#define WIFI_INFO_CLIENT_SSID          27
+#define WIFI_INFO_CLIENT_PASSWD        28
+#define WIFI_INFO_CLIENT_IP_ADDR       29
+#define WIFI_INFO_CLIENT_PORT          30
+#define WIFI_INFO_CLOUD_URL_1          31
+#define WIFI_INFO_CLOUD_URL_2          32
+#define WIFI_INFO_CLOUD_SECURE_CONNECT 33
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -193,13 +195,15 @@ typedef struct compMsgWifiData {
   uint8_t provisioningSsid[33];
   uint16_t provisioningPort;
   uint8_t provisioningIPAddr[16];
-  uint8_t stationSsid[33];
-  uint8_t stationPassword[65];
-  uint32_t stationIpAddr;
-  uint16_t stationPort;
+  uint8_t clientSsid[33];
+  uint8_t clientPasswd[65];
+  uint32_t clientIPAddr;
+  uint16_t clientPort;
 #ifdef CLIENT_SSL_ENABLE
-  uint8_t stationSecure;
+  uint8_t cloudSecureConnect;
 #endif
+  uint8_t *cloudUrl1;
+  uint8_t *cloudUrl2;
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
 

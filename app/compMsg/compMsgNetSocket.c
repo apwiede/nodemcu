@@ -508,10 +508,10 @@ ets_printf("ip: nil\n");
 ets_printf("IP: %s\n", temp);
   ets_timer_disarm(&tmr->timer);
   result = self->setWifiValue(self, "ip", pTempIp.ip.addr, NULL);
-  result = self->getWifiValue(self, WIFI_INFO_STATION_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 ets_printf("ip2: 0x%08x\n", numericValue);
 
-  result = self->getWifiValue(self, WIFI_INFO_STATION_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
 ets_printf("port: %d result: %d\n", port, result);
 
@@ -520,7 +520,7 @@ ets_printf("port: %d result: %d\n", port, result);
 //ets_printf("nud0: %p\n", nud);
 //  checkAllocgLOK(nud->urls);
 #ifdef CLIENT_SSL_ENABLE
-  result = self->getWifiValue(self, WIFI_INFO_STATION_SECURE, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SECURE_CONNECT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   nud->secure = numericValue;
 #endif
   result = self->getWifiValue(self, WIFI_INFO_NET_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
@@ -589,13 +589,13 @@ ets_printf("netsocketRunClientMode called\n");
   }
 
   c_memset(station_config.ssid,0,sizeof(station_config.ssid));
-  result = self->getWifiValue(self, WIFI_INFO_STATION_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->getWifiValue(self, WIFI_INFO_CLIENT_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
   checkErrOK(result);
 ets_printf("len ssid: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
 
   c_memset(station_config.password,0,sizeof(station_config.password));
-  result = self->getWifiValue(self, WIFI_INFO_STATION_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->getWifiValue(self, WIFI_INFO_CLIENT_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
   checkErrOK(result);
 ets_printf("len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));

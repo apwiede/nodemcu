@@ -49,7 +49,7 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
-#define COMP_MSG_WIFI_STATION_FILE_NAME "myConfig.txt"
+#define COMP_MSG_WIFI_VALUES_FILE_NAME "myConfig.txt"
 
 static bool bssScanRunning = false;
 static bssScanInfos_t bssScanInfos = { NULL, 0, 0};
@@ -490,24 +490,31 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_NET_CALL_BACK:
     *numericValue = (int)compMsgWifiData.netsocketReceived;
     break;
-  case WIFI_INFO_STATION_SSID:
-    *stringValue = compMsgWifiData.stationSsid;
+  case WIFI_INFO_CLIENT_SSID:
+    *stringValue = compMsgWifiData.clientSsid;
     break;
-  case WIFI_INFO_STATION_PASSWD:
-    *stringValue = compMsgWifiData.stationPassword;
+  case WIFI_INFO_CLIENT_PASSWD:
+    *stringValue = compMsgWifiData.clientPasswd;
     break;
-  case WIFI_INFO_STATION_IP_ADDR:
-    *numericValue = compMsgWifiData.stationIpAddr;
+  case WIFI_INFO_CLIENT_IP_ADDR:
+    *numericValue = compMsgWifiData.clientIPAddr;
     break;
-  case WIFI_INFO_STATION_PORT:
-    *numericValue = compMsgWifiData.stationPort;
+  case WIFI_INFO_CLIENT_PORT:
+    *numericValue = compMsgWifiData.clientPort;
+    break;
+  case WIFI_INFO_CLOUD_URL_1:
+    *stringValue = compMsgWifiData.cloudUrl1;
+    break;
+  case WIFI_INFO_CLOUD_URL_2:
+    *stringValue = compMsgWifiData.cloudUrl2;
     break;
 #ifdef CLIENT_SSL_ENABLE
-  case WIFI_INFO_STATION_SECURE:
-    *numericValue = compMsgWifiData.stationSecure;
+  case WIFI_INFO_CLOUD_SECURE_CONNECT:
+    *numericValue = compMsgWifiData.cloudSecureConnect;
     break;
 #endif
   default:
+ets_printf("bad which: %d\n", which);
     return COMP_DISP_ERR_BAD_WIFI_VALUE_WHICH;
     break;
   }
@@ -527,22 +534,23 @@ static uint8_t getWifiRemotePort(compMsgDispatcher_t *self) {
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= setWifiValues ====================================
+// ================================= getWifiConfig ====================================
 
-static uint8_t setWifiValues(compMsgDispatcher_t *self) {
+static uint8_t getWifiConfig(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t *provisioningSsid;
   uint8_t provisioningPort;
   uint8_t *provisioningIPAddr;
 
-  self->bssScanInfos = &bssScanInfos;
 
+#ifdef NOTDEF
   provisioningSsid = "testDevice_connect";
   c_memcpy(compMsgWifiData.provisioningSsid, provisioningSsid, c_strlen(provisioningSsid));
   compMsgWifiData.provisioningPort = 80;
   provisioningIPAddr = "192.168.4.1";
   c_memcpy(compMsgWifiData.provisioningIPAddr, provisioningIPAddr, c_strlen(provisioningIPAddr));
   compMsgWifiData.stationPort = 80;
+#endif
   result = getStationConfig(self);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
@@ -550,29 +558,55 @@ static uint8_t setWifiValues(compMsgDispatcher_t *self) {
 
 // ================================= setWifiValue ====================================
 
-static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *name, int numericValue, uint8_t *stringValue) {
+static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue) {
   uint8_t result;
-  if (c_strcmp(name, "ssid") == 0) {
-    c_memcpy(compMsgWifiData.stationSsid, stringValue, c_strlen(stringValue));
-  } else {
-    if (c_strcmp(name, "pwd") == 0) {
-        c_memcpy(compMsgWifiData.stationPassword, stringValue, c_strlen(stringValue));
-    } else {
-      if (c_strcmp(name, "ip") == 0) {
-        compMsgWifiData.stationIpAddr = numericValue;
-      } else {
+  uint8_t fieldNameId;
+  compMsgDataView_t *dataView;
+
+//ets_printf("setWifValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+  dataView = self->compMsgDataView;
+  result = dataView->getFieldNameIdFromStr(dataView, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR); 
+  switch (fieldNameId) {
+  case COMP_MSG_SPEC_FIELD_PROVISIONING_SSID:
+    c_memcpy(compMsgWifiData.provisioningSsid, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_PROVISIONING_PORT:
+    compMsgWifiData.provisioningPort = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR:
+    c_memcpy(compMsgWifiData.provisioningIPAddr, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLIENT_SSID:
+    c_memcpy(compMsgWifiData.clientSsid, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLIENT_PASSWD:
+    c_memcpy(compMsgWifiData.clientPasswd, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR:
+    compMsgWifiData.clientIPAddr = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_CLIENT_PORT:
+    compMsgWifiData.clientPort = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_1:
+    compMsgWifiData.cloudUrl1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrl1);
+    c_memcpy(compMsgWifiData.cloudUrl1, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_2:
+    compMsgWifiData.cloudUrl2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrl2);
+    c_memcpy(compMsgWifiData.cloudUrl2, stringValue, c_strlen(stringValue));
+    break;
 #ifdef CLIENT_SSL_ENABLE
-        if (c_strcmp(name, "secure") == 0) {
-          compMsgWifiData.stationSecure = numericValue;
-        } else {
+  case COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT:
+    compMsgWifiData.cloudSecureConnect = numericValue;
+    break;
 #endif
-          checkErrOK(COMP_DISP_ERR_FIELD_NOT_FOUND);
-#ifdef CLIENT_SSL_ENABLE
-        }
-#endif
-      }
-    }
- } 
+  default:
+//ets_printf("setWifiValue: %s not found\n", fieldNameStr);
+    return COMP_DISP_ERR_FIELD_NOT_FOUND;
+  }
   return COMP_DISP_ERR_OK;
 }
 
@@ -585,10 +619,11 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   compMsgWifiData.websocketTextReceived = &websocketTextReceived;
   compMsgWifiData.netsocketReceived = &netsocketReceived;
 
+  self->bssScanInfos = &bssScanInfos;
   self->getBssScanInfo = &getBssScanInfo;
   self->getScanInfoTableFieldValue = &getScanInfoTableFieldValue;
   self->getWifiValue = &getWifiValue;
-  self->setWifiValues = &setWifiValues;
+  self->getWifiConfig = &getWifiConfig;
   self->setWifiValue = &setWifiValue;
   self->getWifiKeyValue = &getWifiKeyValue;
   self->getWifiKeyValueInfo = &getWifiKeyValueInfo;
@@ -597,9 +632,10 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
 
   bssScanInfos.compMsgDispatcher = self;
   self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);
-  result = self->setWifiValues(self);
+  result = self->compMsgMsgDesc->readWifiValues(self, COMP_MSG_WIFI_VALUES_FILE_NAME);
   checkErrOK(result);
-  result = self->compMsgMsgDesc->readWifiValues(self, COMP_MSG_WIFI_STATION_FILE_NAME);
+  result = self->getWifiConfig(self);
+  checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }
 
