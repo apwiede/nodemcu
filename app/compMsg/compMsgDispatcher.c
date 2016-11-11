@@ -211,6 +211,7 @@ static int deleteHandle(const uint8_t *handle) {
   int found;
 
   if (compMsgDispatcherHandles.handles == NULL) {
+ets_printf("deleteHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   found = 0;
@@ -234,6 +235,7 @@ static int deleteHandle(const uint8_t *handle) {
   if (found) {
       return COMP_DISP_ERR_OK;
   }
+ets_printf("deleteHandle 2 HANLDE_NOT_FOUND\n");
   return COMP_DISP_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -243,6 +245,7 @@ static int checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatch
   int idx;
 
   if (compMsgDispatcherHandles.handles == NULL) {
+ets_printf("checkHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   idx = 0;
@@ -253,6 +256,7 @@ static int checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatch
     }
     idx++;
   }
+ets_printf("checkHandle 2 HANLDE_NOT_FOUND\n");
   return COMP_DISP_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -505,6 +509,7 @@ static uint8_t decryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, s
 uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher) {
 
   if (checkHandle(handle, compMsgDispatcher) != COMP_DISP_ERR_OK) {
+ets_printf("compMsgDispatcherGetPtrFromHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   return COMP_DISP_ERR_OK;
@@ -572,7 +577,7 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   self->msgRequestInfos.requestHandles[self->msgRequestInfos.lastRequestIdx] = requestHandle;
   self->msgRequestInfos.requestData[self->msgRequestInfos.lastRequestIdx] = requestData;
 //FIXME TEMPORARY last if clause!!
-  if ((self->msgRequestInfos.currRequestIdx < 0) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
+  if ((self->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->msgRequestInfos.currRequestIdx++;
     checkErrOK(result);
     compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
@@ -669,21 +674,24 @@ uint8_t *handle;
   result = compMsgNetsocketInit(self);
   checkErrOK(result);
 
+#define WEBSOCKETAP
 #ifdef WEBSOCKETAP
 // FIXME !! temporary starting for testing only !!
+ets_printf("start RunAPMode\n");
   result = self->websocketRunAPMode(self);
   checkErrOK(result);
 #endif
 
 #ifdef NETSOCKET
 // FIXME !! temporary starting for testing only !!
+ets_printf("start RunClientMode\n");
   result = self->netsocketRunClientMode(self);
   checkErrOK(result);
 #endif
 
-#define CLOUDSOCKET
 #ifdef CLOUDSOCKET
 // FIXME !! temporary starting for testing only !!
+ets_printf("start startCloudSocket\n");
   result = self->netsocketStartCloudSocket(self);
   checkErrOK(result);
 #endif

@@ -100,6 +100,7 @@ static int deleteHandle(const uint8_t *handle) {
   int found;
 
   if (compMsgHandles.handles == NULL) {
+ets_printf("deleteHandle 1 HANDLE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   found = 0;
@@ -123,6 +124,7 @@ static int deleteHandle(const uint8_t *handle) {
   if (found) {
       return COMP_MSG_ERR_OK;
   }
+ets_printf("deleteHandle 2 HANDLE_NOT_FOUND\n");
   return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -132,6 +134,7 @@ static int checkHandle(const char *handle, compMsgData_t **compMsgData) {
   int idx;
 
   if (compMsgHandles.handles == NULL) {
+ets_printf("checkHandle 1 HANDLE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   idx = 0;
@@ -142,6 +145,7 @@ static int checkHandle(const char *handle, compMsgData_t **compMsgData) {
     }
     idx++;
   }
+ets_printf("checkHandle 2 HANDLE_NOT_FOUND\n");
   return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -149,6 +153,7 @@ static int checkHandle(const char *handle, compMsgData_t **compMsgData) {
 
 uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgData_t **compMsgData) {
   if (checkHandle(handle, compMsgData) != COMP_MSG_ERR_OK) {
+ets_printf("compMsgGetPtrFromHandle 1 HANDLE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   return COMP_MSG_ERR_OK;
@@ -337,6 +342,7 @@ static uint8_t setFieldValue(compMsgData_t *self, const uint8_t *fieldName, int 
   while (idx < numEntries) {
     fieldInfo = &self->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
+//ets_printf("setFieldValue: %s %d %s\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
       result = self->compMsgDataView->setFieldValue(self->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
@@ -465,6 +471,13 @@ static uint8_t prepareMsg(compMsgData_t *self) {
         result = self->compMsgDataView->setCrc(self->compMsgDataView, fieldInfo, headerLgth, lgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
+        break;
+      case COMP_MSG_SPEC_FIELD_TOTAL_CRC:
+        headerLgth = 0;
+        result = self->compMsgDataView->setTotalCrc(self->compMsgDataView, fieldInfo);
+        checkErrOK(result);
+        fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
+        break;
     }
     idx++;
   }

@@ -46,7 +46,7 @@
 #include "dataView.h"
 
 static str2id_t fieldType2Ids[] = {
-  {"uint0_t",   DATA_VIEW_FIELD_UINT0_T},
+  {"none",      DATA_VIEW_FIELD_NONE},
   {"uint8_t",   DATA_VIEW_FIELD_UINT8_T},
   {"int8_t",    DATA_VIEW_FIELD_INT8_T},
   {"uint16_t",  DATA_VIEW_FIELD_UINT16_T},
@@ -432,6 +432,7 @@ static uint8_t setData(dataView_t *self, size_t lgth) {
   if (self->data != NULL) {
 ets_printf("dataView freeing data in setData %p\n", self->data);
     os_free(self->data);
+ets_printf("dataView freeing data in setData %p done\n", self->data);
   }
   self->data = os_zalloc(lgth);
   if (self->data == NULL) {

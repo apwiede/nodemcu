@@ -143,8 +143,9 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT = 217,
   COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL        = 216,
   COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN     = 215,
+  COMP_MSG_SPEC_FIELD_TOTAL_CRC            = 214,
 
-  COMP_MSG_SPEC_FIELD_LOW                  = 214,         // this must be the last entry!!
+  COMP_MSG_SPEC_FIELD_LOW                  = 213,         // this must be the last entry!!
 };
 
 #define COMP_MSG_NO_INCR 0
@@ -183,6 +184,9 @@ typedef uint8_t (* setFiller_t)(compMsgDataView_t *self, compMsgField_t *fieldIn
 typedef uint8_t (* getCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
 typedef uint8_t (* setCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
 
+typedef uint8_t (* getTotalCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
+typedef uint8_t (* setTotalCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
+
 typedef uint8_t (* dvGetFieldValue_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx);
 typedef uint8_t (* dvSetFieldValue_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx);
 
@@ -204,6 +208,9 @@ typedef struct compMsgDataView {
 
   getCrc_t getCrc;
   setCrc_t setCrc;
+
+  getTotalCrc_t getTotalCrc;
+  setTotalCrc_t setTotalCrc;
 
   dvGetFieldValue_t getFieldValue;
   dvSetFieldValue_t setFieldValue;

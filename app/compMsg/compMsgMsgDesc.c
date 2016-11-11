@@ -135,10 +135,11 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   int idx;
 
   ets_printf("dumpHeaderPart:\n");
-  ets_printf("headerPart1: from: 0x%04x to: 0x%04x totalLgth: %d GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c u16CmdLgth: 0x%04x u16Crc: 0x%04x\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth, hdr->hdrGUID, hdr->hdrSrcId,
- hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF, hdr->hdrU16CmdLgth, hdr->hdrU16Crc);
-  ets_printf("headerPart2: u8CmdLgth: %d u8Crc: 0x%02x offset: %d \n", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrOffset);
-  ets_printf("headerPart3: enc: %c handleType: %c\n", hdr->hdrEncryption, hdr->hdrHandleType);
+  ets_printf("headerPart: from: 0x%04x to: 0x%04x totalLgth: %d\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth);
+  ets_printf("            GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c\n", hdr->hdrGUID, hdr->hdrSrcId, hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
+  ets_printf("            u16CmdLgth: 0x%04x u16Crc: 0x%04x u16TotalCrc: 0x%04x\n", hdr->hdrU16CmdLgth, hdr->hdrU16Crc, hdr->hdrU16TotalCrc);
+  ets_printf("            u8CmdLgth: %d u8Crc: 0x%02x u8TotalCrc: 0x%02x\n", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrU8TotalCrc);
+  ets_printf("            enc: %c handleType: %c offset: %d\n", hdr->hdrEncryption, hdr->hdrHandleType, hdr->hdrOffset);
   ets_printf("hdrFlags: 0x%04x", hdr->hdrFlags);
   if (hdr->hdrFlags & COMP_DISP_U16_CMD_KEY) {
     ets_printf(" COMP_DISP_U16_CMD_KEY");
@@ -161,6 +162,15 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   if (hdr->hdrFlags & COMP_DISP_U16_CRC) {
     ets_printf(" COMP_DISP_U16_CRC");
   }
+  if (hdr->hdrFlags & COMP_DISP_U0_TOTAL_CRC) {
+    ets_printf(" COMP_DISP_U0_TOTAL_CRC");
+  }
+  if (hdr->hdrFlags & COMP_DISP_U8_TOTAL_CRC) {
+    ets_printf(" COMP_DISP_U8_TOTAL_CRC");
+  }
+  if (hdr->hdrFlags & COMP_DISP_U16_TOTAL_CRC) {
+    ets_printf(" COMP_DISP_U16_TOTAL_CRC");
+  }
   ets_printf("\n");
   ets_printf("hdr fieldSequence\n");
   idx = 0;
@@ -169,44 +179,35 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
       break;
     }
     ets_printf(" %d 0x%04x", idx, hdr->fieldSequence[idx]);
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_DST) {
-      ets_printf(" COMP_DISP_U16_DST");
+    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_DST) {
+      ets_printf(" COMP_DISP_HDR_DST");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC) {
-      ets_printf(" COMP_DISP_U16_SRC");
+    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_SRC) {
+      ets_printf(" COMP_DISP_HDR_SRC");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
-      ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
+    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_TOTAL_LGTH) {
+      ets_printf(" COMP_DISP_HDR_TOTAL_LGTH");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
-      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
+    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_GUID) {
+      ets_printf(" COMP_DISP_HDR_GUID");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC_ID) {
-      ets_printf(" COMP_DISP_U16_SRC_ID");
+    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_SRC_ID) {
+      ets_printf(" COMP_DISP_HDR_SRC_ID");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
-      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
+    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_FILLER) {
+      ets_printf(" COMP_DISP_HDR_FILLER");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_KEY) {
-      ets_printf(" COMP_DISP_U16_CMD_KEY");
+    if (hdr->fieldSequence[idx] & COMP_DISP_PAYLOAD_CMD_KEY) {
+      ets_printf(" COMP_DISP_PAYLOAD_CMD_KEY");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U0_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
+    if (hdr->fieldSequence[idx] & COMP_DISP_PAYLOAD_CMD_LGTH) {
+      ets_printf(" COMP_DISP_PAYLOAD_CMD_LGTH");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U8_CMD_LGTH");
+    if (hdr->fieldSequence[idx] & COMP_DISP_PAYLOAD_CRC) {
+      ets_printf(" COMP_DISP_PAYLOAD_CRC");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U16_CMD_LGTH");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U0_CRC) {
-      ets_printf(" COMP_DISP_U0_CRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_CRC) {
-      ets_printf(" COMP_DISP_U8_CRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CRC) {
-      ets_printf(" COMP_DISP_U16_CRC");
+    if (hdr->fieldSequence[idx] & COMP_DISP_TOTAL_CRC) {
+      ets_printf(" COMP_DISP_TOTAL_CRC");
     }
     ets_printf("\n");
     idx++;
@@ -275,6 +276,15 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_CRC) {
       ets_printf(" COMP_DISP_U16_CRC");
     }
+    if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_TOTAL_CRC) {
+      ets_printf(" COMP_DISP_U0_TOTAL_CRC");
+    }
+    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_TOTAL_CRC) {
+      ets_printf(" COMP_DISP_U8_TOTAL_CRC");
+    }
+    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_TOTAL_CRC) {
+      ets_printf(" COMP_DISP_U16_TOTAL_CRC");
+    }
     ets_printf("\n");
     idx++;
   }
@@ -332,13 +342,15 @@ static uint8_t getStrFromLine(uint8_t *myStr, uint8_t **ep, bool *isEnd) {
 
 // ================================= getHeaderFieldsFromLine ====================================
 
-static uint8_t getHeaderFieldsFromLine(compMsgDataView_t *dataView, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx) {
+static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx) {
   int result;
   bool isEnd;
   long uval;
   uint8_t *cp;
   uint8_t fieldNameId;
+  compMsgDataView_t *dataView;
 
+  dataView = self->compMsgDataView;
 //ets_printf("numHeaderParts: %d seqidx: %d\n", hdrInfos->numHeaderParts, *seqIdx);
   cp = myStr;
   result = getIntFromLine(cp, &uval, ep, &isEnd);
@@ -347,141 +359,62 @@ ets_printf("desc: headerLgth: %d\n", uval);
   hdrInfos->headerLgth = (uint8_t)uval;
   checkIsEnd(isEnd);
   cp = *ep;
-  result = getStrFromLine(cp, ep, &isEnd);
-  checkErrOK(result);
-  if (cp[0] != '@') {
-    return COMP_MSG_ERR_NO_SUCH_FIELD;
-  }
-  result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_SRC:
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
-    hdrInfos->headerFlags |= COMP_DISP_U16_SRC;
-    break;
-  case COMP_MSG_SPEC_FIELD_DST:
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
-    hdrInfos->headerFlags |= COMP_DISP_U16_DST;
-    break;
-  default:
-    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
-    break;
-  }
-  checkIsEnd(isEnd);
-  cp = *ep;
-  result = getStrFromLine(cp, ep, &isEnd);
-  checkErrOK(result);
-  if (cp[0] != '@') {
-    return COMP_MSG_ERR_NO_SUCH_FIELD;
-  }
-  result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_SRC:
-    if (hdrInfos->headerFlags & COMP_DISP_U16_SRC) {
-      return COMP_MSG_ERR_DUPLICATE_FIELD;
+  while (!isEnd) {
+    result = getStrFromLine(cp, ep, &isEnd);
+    checkErrOK(result);
+    if (cp[0] != '@') {
+      return COMP_MSG_ERR_NO_SUCH_FIELD;
     }
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
-    hdrInfos->headerFlags |= COMP_DISP_U16_SRC;
-    break;
-  case COMP_MSG_SPEC_FIELD_DST:
-    if (hdrInfos->headerFlags & COMP_DISP_U16_DST) {
-      return COMP_MSG_ERR_DUPLICATE_FIELD;
+    result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
+    checkErrOK(result);
+    switch (fieldNameId) {
+    case COMP_MSG_SPEC_FIELD_SRC:
+      if (hdrInfos->headerFlags & COMP_DISP_HDR_SRC) {
+        return COMP_MSG_ERR_DUPLICATE_FIELD;
+      }
+      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
+      hdrInfos->headerFlags |= COMP_DISP_HDR_SRC;
+      break;
+    case COMP_MSG_SPEC_FIELD_DST:
+      if (hdrInfos->headerFlags & COMP_DISP_HDR_DST) {
+        return COMP_MSG_ERR_DUPLICATE_FIELD;
+      }
+      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
+      hdrInfos->headerFlags |= COMP_DISP_HDR_DST;
+      break;
+    case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
+      if (hdrInfos->headerFlags & COMP_DISP_HDR_TOTAL_LGTH) {
+        return COMP_MSG_ERR_DUPLICATE_FIELD;
+      }
+      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
+      hdrInfos->headerFlags |= COMP_DISP_HDR_TOTAL_LGTH;
+      break;
+    case COMP_MSG_SPEC_FIELD_SRC_ID:
+      if (hdrInfos->headerFlags & COMP_DISP_HDR_SRC_ID) {
+        return COMP_MSG_ERR_DUPLICATE_FIELD;
+      }
+      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC_ID;
+      hdrInfos->headerFlags |= COMP_DISP_HDR_SRC_ID;
+      break;
+    case COMP_MSG_SPEC_FIELD_GUID:
+      if (hdrInfos->headerFlags & COMP_DISP_HDR_GUID) {
+        return COMP_MSG_ERR_DUPLICATE_FIELD;
+      }
+      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_GUID;
+      hdrInfos->headerFlags |= COMP_DISP_HDR_GUID;;
+      break;
+    case COMP_MSG_SPEC_FIELD_HDR_FILLER:
+      if (hdrInfos->headerFlags & COMP_DISP_HDR_FILLER) {
+        return COMP_MSG_ERR_DUPLICATE_FIELD;
+      }
+      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_HDR_FILLER;
+      hdrInfos->headerFlags |= COMP_DISP_HDR_FILLER;
+      break;
+    default:
+      checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
+      break;
     }
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
-    hdrInfos->headerFlags |= COMP_DISP_U16_DST;
-    break;
-  case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
-    hdrInfos->headerFlags |= COMP_DISP_U16_TOTAL_LGTH;
-    break;
-  default:
-    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
-    break;
-  }
-  checkIsEnd(isEnd);
-  cp = *ep;
-  result = getStrFromLine(cp, ep, &isEnd);
-  checkErrOK(result);
-  if (cp[0] != '@') {
-    return COMP_MSG_ERR_NO_SUCH_FIELD;
-  }
-  result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
-    if (hdrInfos->headerFlags & COMP_DISP_U16_TOTAL_LGTH) {
-      return COMP_MSG_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
-    hdrInfos->headerFlags |= COMP_DISP_U16_TOTAL_LGTH;
-    break;
-  default:
-    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
-    break;
-  }
-  checkIsEnd(isEnd);
-  cp = *ep;
-  result = getStrFromLine(cp, ep, &isEnd);
-  checkErrOK(result);
-  if (cp[0] != '@') {
-    return COMP_MSG_ERR_NO_SUCH_FIELD;
-  }
-  result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_GUID:
-    if (hdrInfos->headerFlags & COMP_DISP_U8_VECTOR_GUID) {
-      return COMP_MSG_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_GUID;
-    hdrInfos->headerFlags |= COMP_DISP_U8_VECTOR_GUID;;
-    break;
-  default:
-    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
-    break;
-  }
-  checkIsEnd(isEnd);
-  cp = *ep;
-  result = getStrFromLine(cp, ep, &isEnd);
-  checkErrOK(result);
-  if (cp[0] != '@') {
-    return COMP_MSG_ERR_NO_SUCH_FIELD;
-  }
-  result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_SRC_ID:
-    if (hdrInfos->headerFlags & COMP_DISP_U16_SRC_ID) {
-      return COMP_MSG_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC_ID;
-    hdrInfos->headerFlags |= COMP_DISP_U16_SRC_ID;
-    break;
-  default:
-    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
-    break;
-  }
-  checkIsEnd(isEnd);
-  cp = *ep;
-  result = getStrFromLine(cp, ep, &isEnd);
-  checkErrOK(result);
-  if (cp[0] != '@') {
-    return COMP_MSG_ERR_NO_SUCH_FIELD;
-  }
-  result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
-  checkErrOK(result);
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_HDR_FILLER:
-    if (hdrInfos->headerFlags & COMP_DISP_U8_VECTOR_HDR_FILLER) {
-      return COMP_MSG_ERR_DUPLICATE_FIELD;
-    }
-    hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_HDR_FILLER;
-    hdrInfos->headerFlags |= COMP_DISP_U8_VECTOR_HDR_FILLER;
-    break;
-  default:
-    checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
-    break;
+    cp = *ep;
   }
   hdrInfos->seqIdxAfterHeader = *seqIdx;
   if (!isEnd) {
@@ -519,6 +452,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   uint8_t found;
   uint8_t fieldOffset;
   bool isEnd;
+  bool isJoker;
   headerPart_t *hdr;
   msgHeaderInfos_t *hdrInfos;
   compMsgDataView_t *dataView;
@@ -550,7 +484,8 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   seqIdx = 0;
   buffer[lgth] = 0;
   myStr = buffer;
-  result = compMsgMsgDesc->getHeaderFieldsFromLine(dataView, hdrInfos, myStr, &cp, &seqIdx);
+  result = compMsgMsgDesc->getHeaderFieldsFromLine(self, hdrInfos, myStr, &cp, &seqIdx);
+  checkErrOK(result);
   myDataView = newDataView();
   checkAllocOK(myDataView);
   fieldOffset = 0;
@@ -562,11 +497,6 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
       return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
     }
     hdr = &hdrInfos->headerParts[idx];
-    seqIdx2 = 0;
-    while (seqIdx2 < seqIdx) {
-      hdr->fieldSequence[seqIdx2] = hdrInfos->headerSequence[seqIdx2];
-      seqIdx2++;
-    }
     hdr->hdrFlags = 0;
     myDataView->data = buffer;
     myDataView->lgth = lgth;
@@ -574,88 +504,101 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     myStr = buffer;
     cp = buffer;
     seqIdx2 = 0;
-    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
-    checkErrOK(result);
-    found = 0;
-    if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_SRC) {
-      hdr->hdrFromPart = (uint16_t)uval;
-      hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_SRC;
-      found = 1;
-    }
-    if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_DST) {
-      hdr->hdrToPart = (uint16_t)uval;
-      hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_DST;
-      found = 1;
-    }
-    if (!found) {
-      checkErrOK(COMP_MSG_ERR_FIELD_NOT_FOUND);
-    }
-    seqIdx2++;
-    checkIsEnd(isEnd);
-    cp = ep;
-    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
-    checkErrOK(result);
-    found = 0;
-    if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_SRC) {
-      hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_SRC;
-      hdr->hdrFromPart = (uint16_t)uval;
-      found = 1;
-    }
-    if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_DST) {
-      hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_DST;
-      hdr->hdrToPart = (uint16_t)uval;
-      found = 1;
-    }
-    if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_TOTAL_LGTH) {
-      hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_TOTAL_LGTH;
-      hdr->hdrTotalLgth = (uint16_t)uval;
-      found = 1;
-    }
-    if (!found) {
-      result = COMP_MSG_ERR_FIELD_NOT_FOUND;
-      checkErrOK(result);
-    }
-    seqIdx2++;
-    checkIsEnd(isEnd);
-    cp = ep;
-    found = 0;
-    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
-    checkErrOK(result);
-    if (hdrInfos->headerSequence[seqIdx2] & COMP_DISP_U16_TOTAL_LGTH) {
-      hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_TOTAL_LGTH;
-      hdr->hdrTotalLgth = (uint16_t)uval;
-      found = 1;
-    }
-    if (!found) {
-      result = COMP_MSG_ERR_FIELD_NOT_FOUND;
-      checkErrOK(result);
-    }
-    seqIdx2++;
-    checkIsEnd(isEnd);
-    // skip over GUID, senderId and hdrFiller
-    // we have no info for these fields in ComMsgHeads.txt
     while (seqIdx2 < seqIdx) {
+      hdr->fieldSequence[seqIdx2] = hdrInfos->headerSequence[seqIdx2];
+      if (cp[0] == '*') {
+        isJoker = true;
+        result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+        checkErrOK(result);
+      } else {
+        isJoker = false;
+      }
+      switch (hdr->fieldSequence[seqIdx2]) {
+      case COMP_DISP_U16_SRC:
+        if (isJoker) {
+          hdr->hdrFromPart = 0;
+        } else {
+          result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+          checkErrOK(result);
+          hdr->hdrFromPart = (uint16_t)uval;
+        }
+        break;
+      case COMP_DISP_U16_DST:
+        if (isJoker) {
+          hdr->hdrToPart = 0;
+        } else {
+          result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+          checkErrOK(result);
+          hdr->hdrToPart = (uint16_t)uval;
+        }
+        break;
+      case COMP_DISP_U16_SRC_ID:
+        if (isJoker) {
+          hdr->hdrSrcId = 0;
+        } else {
+          result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+          checkErrOK(result);
+          hdr->hdrSrcId = (uint16_t)uval;
+        }
+        break;
+      case COMP_DISP_U16_TOTAL_LGTH:
+        if (isJoker) {
+          hdr->hdrTotalLgth = 0;
+        } else {
+          result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+          checkErrOK(result);
+          hdr->hdrTotalLgth = (uint16_t)uval;
+        }
+        break;
+      case COMP_DISP_U8_VECTOR_GUID:
+        if (isJoker) {
+          hdr->hdrGUID[0] = '\0';
+        } else {
+          result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+          checkErrOK(result);
+          if (c_strlen(cp) > DISP_GUID_LGTH) {
+            checkErrOK(COMP_MSG_DESC_ERR_FIELD_TOO_LONG);
+          }
+          c_memcpy(hdr->hdrGUID, cp, c_strlen(cp));
+          hdr->hdrGUID[c_strlen(cp)] = '\0';
+        }
+        break;
+      case COMP_DISP_U8_VECTOR_HDR_FILLER:
+        if (isJoker) {
+          hdr->hdrFiller[0] = '\0';
+        } else {
+          result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+          checkErrOK(result);
+          if (c_strlen(cp) > DISP_MAX_HDR_FILLER_LGTH) {
+            checkErrOK(COMP_MSG_DESC_ERR_FIELD_TOO_LONG);
+          }
+          c_memcpy(hdr->hdrFiller, cp, c_strlen(cp));
+          hdr->hdrFiller[c_strlen(cp)] = '\0';
+        }
+        break;
+      default: 
+        checkErrOK(COMP_MSG_ERR_FIELD_NOT_FOUND);
+        break;
+      }
+      if (isEnd) {
+        checkErrOK(COMP_MSG_ERR_FIELD_NOT_FOUND);
+        break;
+      }
+      cp = ep;
       seqIdx2++;
     }
-    cp = ep;
-    // extra field lgth 0/<number>
-    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
-    checkErrOK(result);
-    hdr->hdrExtraLgth = (uint8_t)uval;
-    checkIsEnd(isEnd);
-    cp = ep;
     // encryption E/N
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_ENCRYPTION;
     hdr->hdrEncryption = cp[0];
-    if (cp[0] == 'E') {
+//    if (cp[0] == 'E') {
 //ets_printf("§idx!%d!0x%04x!0x%04x!0x%04x!enc!§", idx, hdr->hdrToPart, hdr->hdrFromPart, hdr->hdrTotalLgth);
-      hdr->hdrFlags |= COMP_DISP_IS_ENCRYPTED;
-    } else {
+//      hdr->hdrFlags |= COMP_DISP_IS_ENCRYPTED;
+//    } else {
 //ets_printf("§idx!%d!0x%04x!0x%04x!0x%04x!noenc!§", idx, hdr->hdrToPart, hdr->hdrFromPart, hdr->hdrTotalLgth);
-      hdr->hdrFlags |= COMP_DISP_IS_NOT_ENCRYPTED;
-    }
+//      hdr->hdrFlags |= COMP_DISP_IS_NOT_ENCRYPTED;
+//    }
     checkIsEnd(isEnd);
     cp = ep;
     // handleType A/G/S/R/U/W/N
@@ -672,6 +615,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     case 'N':
       break;
     default:
+ets_printf("bad value: %s\n", cp);
       checkErrOK(COMP_DISP_ERR_BAD_VALUE);
       break;
     }
@@ -690,7 +634,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_UINT16_T:
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_CMD_KEY;
-      hdr->hdrFlags |= COMP_DISP_U16_CMD_KEY;
+      hdr->hdrFlags |= COMP_DISP_PAYLOAD_CMD_KEY;
       hdr->hdrU16CmdKey = (cp[0]<<8)|cp[1];
 //ets_printf("§u16CmdKey!0x%04x!§\n", hdr->hdrU16CmdKey);
       break;
@@ -706,40 +650,66 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
-    case DATA_VIEW_FIELD_UINT0_T:
+    case DATA_VIEW_FIELD_NONE:
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U0_CMD_LGTH;
-      hdr->hdrFlags |= COMP_DISP_U0_CMD_LGTH;
+      hdr->hdrFlags |= COMP_DISP_PAYLOAD_CMD_LGTH;
       break;
     case DATA_VIEW_FIELD_UINT8_T:
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_CMD_LGTH;
-      hdr->hdrFlags |= COMP_DISP_U8_CMD_LGTH;
+      hdr->hdrFlags |= COMP_DISP_PAYLOAD_CMD_LGTH;
       break;
     case DATA_VIEW_FIELD_UINT16_T:
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_CMD_LGTH;
-      hdr->hdrFlags |= COMP_DISP_U16_CMD_LGTH;
+      hdr->hdrFlags |= COMP_DISP_PAYLOAD_CMD_LGTH;
       break;
     default:
       checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
     }
     checkIsEnd(isEnd);
     cp = ep;
+    seqIdx2++;
     // type of crc
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
     result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
-    case DATA_VIEW_FIELD_UINT0_T:
+    case DATA_VIEW_FIELD_NONE:
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U0_CRC;
-      hdr->hdrFlags |= COMP_DISP_U0_CRC;
+      hdr->hdrFlags |= COMP_DISP_PAYLOAD_CRC;
       break;
     case DATA_VIEW_FIELD_UINT8_T:
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_CRC;
-      hdr->hdrFlags |= COMP_DISP_U8_CRC;
+      hdr->hdrFlags |= COMP_DISP_PAYLOAD_CRC;
       break;
     case DATA_VIEW_FIELD_UINT16_T:
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_CRC;
-      hdr->hdrFlags |= COMP_DISP_U16_CRC;
+      hdr->hdrFlags |= COMP_DISP_PAYLOAD_CRC;
+      break;
+    default:
+      checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
+//ets_printf("§flag idx!%d!%s!§", flagIdx, getFlagStr(hdrInfos->headerSequence[flagIdx]));
+    }
+    checkIsEnd(isEnd);
+    cp = ep;
+    seqIdx2++;
+    // type of totalCrc
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
+    checkErrOK(result);
+    switch (fieldTypeId) {
+    case DATA_VIEW_FIELD_NONE:
+      hdr->fieldSequence[seqIdx2] = COMP_DISP_U0_TOTAL_CRC;
+      hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
+      break;
+    case DATA_VIEW_FIELD_UINT8_T:
+      hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_TOTAL_CRC;
+      hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
+      break;
+    case DATA_VIEW_FIELD_UINT16_T:
+      hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_TOTAL_CRC;
+      hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;
     default:
       checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
@@ -751,6 +721,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     hdrInfos->numHeaderParts++;
     idx++;
   }
+ets_printf("readHeadersAndSetFlags free myDataView: %p\n", myDataView);
   os_free(myDataView);
   result2 = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result2);
@@ -1435,6 +1406,8 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->resetMsgValParts = &resetMsgValParts;
   compMsgMsgDesc->dumpMsgDescPart = &dumpMsgDescPart;
   compMsgMsgDesc->dumpMsgValPart = &dumpMsgValPart;
+  compMsgMsgDesc->dumpHeaderPart = &dumpHeaderPart;
+  compMsgMsgDesc->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
   compMsgMsgDesc->getMsgPartsFromHeaderPart = &getMsgPartsFromHeaderPart;
   compMsgMsgDesc->getHeaderFromUniqueFields = &getHeaderFromUniqueFields;
   compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;

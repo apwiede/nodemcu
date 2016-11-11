@@ -95,7 +95,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
   int numericValue;
   compMsgData_t *compMsgData;
 
-//ets_printf("setMsgFieldValue: %s %s\n", self->msgValPart->fieldNameStr, self->msgValPart->fieldValueStr);
+//ets_printf("setMsgFieldValue: %s %s\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
   compMsgData = self->compMsgData;
   if (self->compMsgData->msgValPart->fieldValueStr[0] == '@') {
     // call the callback function for the field!!
@@ -299,11 +299,14 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
 
 ets_printf("need to encrypt message!\n");
     headerLgth = self->compMsgData->headerLgth;
-    mlen = self->compMsgData->totalLgth - headerLgth;
+    mlen = self->compMsgData->totalLgth - headerLgth - 1; // -1 for totalCrc !!
 ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
     toCryptPtr = msgData + self->compMsgData->headerLgth;
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
     checkErrOK(result);
+    if (encryptedMsgDataLgth != mlen) {
+ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n", mlen, encryptedMsgDataLgth);
+    }
     c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);
 ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
   }

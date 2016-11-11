@@ -89,12 +89,54 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
 
 static uint8_t sendCloudMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
   uint8_t result;
+  uint8_t *b64Msg;
+  uint8_t *host;
+  uint8_t *subUrl;
+  uint8_t *nodeToken;
+  uint8_t *hostPart;
+  uint8_t *alive;
+  uint8_t *contentType;
+  uint8_t *contentLgth;
+  uint8_t *accept;
+  int numericValue;
+  size_t payloadLgth;
 
   if (self->compMsgData->nud == NULL) {
     return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
   }
 ets_printf("sendCloudData: msgLgth: %d\n", msgLgth);
-  result = self->netsocketSendData(self->compMsgData->nud, msgData, msgLgth);
+  payloadLgth = c_strlen("POST ");
+  hostPart=" HTTP/1.1\r\nHost: ";
+  payloadLgth += c_strlen(hostPart);
+  alive="\r\nConnection: keep-alive\r\n";
+  payloadLgth += c_strlen(alive);
+  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+  payloadLgth += c_strlen(contentType);
+  contentLgth="Content-length: ";
+  payloadLgth += c_strlen(contentLgth);
+  payloadLgth += 5; // for contentLgth value
+  accept="\r\nAccept: */*\r\n\r\n=";
+  payloadLgth += c_strlen(accept);
+  payloadLgth += msgLgth + 3;  // \r\n\0
+
+  result = self->toBase64(msgData, &msgLgth, &b64Msg);
+//ets_printf("base64 msg: mlen: %d %s %d\n", mlen, b64Msg, c_strlen(b64Msg));
+  checkErrOK(result);
+  b64Msg[msgLgth] = '\0';
+  
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
+  checkErrOK(result);
+  payloadLgth += c_strlen(host);
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
+  checkErrOK(result);
+  payloadLgth += c_strlen(subUrl);
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
+  checkErrOK(result);
+  payloadLgth += c_strlen(nodeToken);
+  char payload[payloadLgth];
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%d%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, msgLgth+1, accept, b64Msg);
+ets_printf("request: %d %s\n", c_strlen(payload), payload);
+  result = self->netsocketSendData(self->compMsgData->nud, payload, c_strlen(payload));
   checkErrOK(result);
 }
 

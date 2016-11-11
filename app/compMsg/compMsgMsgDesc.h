@@ -63,6 +63,7 @@ enum compMsgDataErrorCode
   COMP_MSG_DESC_ERR_FLUSH_FILE            = 187,
   COMP_MSG_DESC_ERR_WRITE_FILE            = 186,
   COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS    = 185,
+  COMP_MSG_DESC_ERR_FIELD_TOO_LONG        = 184,
 };
 
 #define DISP_BUF_LGTH 1024
@@ -86,6 +87,17 @@ enum compMsgEncyptedCode
   COMP_DISP_U8_HANDLE_TYPE    = 4,
 };
 
+#define COMP_DISP_HDR_DST              0x01
+#define COMP_DISP_HDR_SRC              0x02
+#define COMP_DISP_HDR_TOTAL_LGTH       0x04
+#define COMP_DISP_HDR_GUID             0x08
+#define COMP_DISP_HDR_SRC_ID           0x10
+#define COMP_DISP_HDR_FILLER           0x20
+#define COMP_DISP_PAYLOAD_CMD_KEY      0x40
+#define COMP_DISP_PAYLOAD_CMD_LGTH     0x80
+#define COMP_DISP_PAYLOAD_CRC          0x100
+#define COMP_DISP_TOTAL_CRC            0x200
+
 #define COMP_DISP_U16_DST              0x01
 #define COMP_DISP_U16_SRC              0x02
 #define COMP_DISP_U16_TOTAL_LGTH       0x04
@@ -99,31 +111,36 @@ enum compMsgEncyptedCode
 #define COMP_DISP_U0_CRC               0x400
 #define COMP_DISP_U8_CRC               0x800
 #define COMP_DISP_U16_CRC              0x1000
+#define COMP_DISP_U0_TOTAL_CRC         0x2000
+#define COMP_DISP_U8_TOTAL_CRC         0x4000
+#define COMP_DISP_U16_TOTAL_CRC        0x8000
 
 // the next value must equal the number of defines above!!
-#define COMP_DISP_MAX_SEQUENCE     13
+#define COMP_DISP_MAX_SEQUENCE     16
 
 #define COMP_DISP_DESC_VALUE_IS_NUMBER (1 << 0)
 
-#define GUID_LGTH 16
+#define DISP_GUID_LGTH 16
+#define DISP_MAX_HDR_FILLER_LGTH 40
 
 typedef struct headerPart {
   uint16_t hdrFromPart;
   uint16_t hdrToPart;
   uint16_t hdrTotalLgth;
-  uint8_t hdrGUID[GUID_LGTH];
+  uint8_t hdrGUID[DISP_GUID_LGTH+1];
   uint16_t hdrSrcId;
-  uint8_t hdrfiller[38];
+  uint8_t hdrFiller[DISP_MAX_HDR_FILLER_LGTH+1];
   uint16_t hdrU16CmdKey;
   uint16_t hdrU16CmdLgth;
   uint16_t hdrU16Crc;
+  uint16_t hdrU16TotalCrc;
   uint8_t hdrTargetPart;
   uint8_t hdrU8CmdKey;
   uint8_t hdrU8CmdLgth;
   uint8_t hdrU8Crc;
+  uint8_t hdrU8TotalCrc;
   uint8_t hdrOffset;
   uint8_t hdrEncryption;
-  uint8_t hdrExtraLgth;
   uint8_t hdrHandleType;
   uint8_t hdrLgth;
   uint32_t hdrFlags;
@@ -147,9 +164,9 @@ typedef struct msgParts {
   uint16_t fromPart;
   uint16_t toPart;
   uint16_t totalLgth;
-  uint8_t GUID[GUID_LGTH];
+  uint8_t GUID[DISP_GUID_LGTH];
   uint16_t srcId;
-  uint8_t hdrFiller[38];
+  uint8_t hdrFiller[DISP_MAX_HDR_FILLER_LGTH];
   uint16_t partsFlags;
   uint16_t u16CmdKey;
   uint8_t u8CmdLgth;
@@ -195,7 +212,7 @@ typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hd
 typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getStrFromLine_t)(uint8_t *myStr, uint8_t **ep, bool *isEnd);
-typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDataView_t *dataView, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
+typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
 typedef uint8_t (*readActions_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (*readWifiValues_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* readHeadersAndSetFlags_t)(compMsgDispatcher_t *self, uint8_t *fileName);

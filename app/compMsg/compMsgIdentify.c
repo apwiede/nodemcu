@@ -130,7 +130,7 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("§HEAD:!0x%04x!0x%04x!0x%04x!nH!%d!seqIdx!%d!§", received->toPart, received->fromPart, received->totalLgth, hdrInfos->numHeaderParts, hdrInfos->seqIdx);
+//ets_printf("§HEAD:!to:0x%04x!from:0x%04x!totalLgth:0x%04x!seqIdx!%d!§", received->toPart, received->fromPart, received->totalLgth, hdrInfos->seqIdx);
   // and now search in the headers to find the appropriate message
   hdrInfos->seqIdx = hdrInfos->seqIdxAfterHeader;
   found = 0;
@@ -138,9 +138,9 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
     hdr = &hdrInfos->headerParts[hdrIdx];
 //ets_printf("hdrIdx: %d to: %d %d\n", hdrIdx, hdr->hdrToPart, received->toPart);
     if (hdr->hdrToPart == received->toPart) {
-//ets_printf("from: %d %d\n", hdr->hdrFromPart, received->fromPart);
+//ets_printf("to: %d from: %d %d\n", hdr->hdrToPart, hdr->hdrFromPart, received->fromPart);
       if (hdr->hdrFromPart == received->fromPart) {
-//ets_printf("lgth: %d %d\n", hdr->hdrTotalLgth, received->totalLgth);
+//ets_printf("lgth: hdr: %d received: %d\n", hdr->hdrTotalLgth, received->totalLgth);
         if ((hdr->hdrTotalLgth == received->totalLgth) || (hdr->hdrTotalLgth == 0)) {
 //ets_printf("cmdkey: 0x%04x 0x%04x\n", u16CmdKey, received->u16CmdKey);
           if (u16CmdKey != 0) {
@@ -158,6 +158,7 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
     hdrIdx++;
   }
   if (!found) {
+ets_printf("nextFitting HANLDE_NOT_FOUND\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   hdrInfos->currPartIdx = hdrIdx;
@@ -181,54 +182,35 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
   int hdrIdx;
   int found;
   uint8_t myHeaderLgth;
+  uint16_t seqVal;
 
   dataView = self->compMsgData->compMsgDataView->dataView;
   received->fieldOffset = 0;
   myHeaderLgth = 0;
   hdrInfos->seqIdx = 0;
-  switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
-  case COMP_DISP_U16_DST:
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
-    checkErrOK(result);
-    received->fieldOffset += sizeof(uint16_t);
-    break;
-  case COMP_DISP_U16_SRC:
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
-    checkErrOK(result);
-    received->fieldOffset += sizeof(uint16_t);
-    break;
-  }
-  hdrInfos->seqIdx++;
-  switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
-  case COMP_DISP_U16_DST:
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
-    checkErrOK(result);
-    received->fieldOffset += sizeof(uint16_t);
-    break;
-  case COMP_DISP_U16_SRC:
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
-    checkErrOK(result);
-    received->fieldOffset += sizeof(uint16_t);
-    break;
-  case COMP_DISP_U16_TOTAL_LGTH:
-    result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
-    checkErrOK(result);
-    received->fieldOffset += sizeof(uint16_t);
-    break;
-  }
-  if (received->fieldOffset < hdrInfos->headerLgth) {
-    hdrInfos->seqIdx++;
-    switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
+  seqVal = hdrInfos->headerSequence[hdrInfos->seqIdx];
+  while (seqVal != 0) {
+    switch(seqVal) {
+    case COMP_DISP_U16_DST:
+      result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
+      checkErrOK(result);
+      received->fieldOffset += sizeof(uint16_t);
+      break;
+    case COMP_DISP_U16_SRC:
+      result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
+      checkErrOK(result);
+      received->fieldOffset += sizeof(uint16_t);
+      break;
     case COMP_DISP_U16_TOTAL_LGTH:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
       checkErrOK(result);
       received->fieldOffset += sizeof(uint16_t);
       break;
-    }
-  }
-  if (received->fieldOffset < hdrInfos->headerLgth) {
-    hdrInfos->seqIdx++;
-    switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
+    case COMP_DISP_U16_SRC_ID:
+      result = dataView->getUint16(dataView, received->fieldOffset, &received->srcId);
+      checkErrOK(result);
+      received->fieldOffset += sizeof(uint16_t);
+      break;
     case COMP_DISP_U8_VECTOR_GUID:
     {
       uint8_t *cp;
@@ -238,19 +220,19 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
       received->fieldOffset += sizeof(received->GUID);
       break;
     }
-    }
-  }
-  if (received->fieldOffset < hdrInfos->headerLgth) {
-    hdrInfos->seqIdx++;
-    switch(hdrInfos->headerSequence[hdrInfos->seqIdx]) {
-    case COMP_DISP_U16_SRC_ID:
-      result = dataView->getUint16(dataView, received->fieldOffset, &received->srcId);
+    case COMP_DISP_U8_VECTOR_HDR_FILLER:
+    {
+      uint8_t *cp;
+      cp = received->hdrFiller;
+      result = dataView->getUint8Vector(dataView, received->fieldOffset, &cp, sizeof(received->hdrFiller));
       checkErrOK(result);
-      received->fieldOffset += sizeof(uint16_t);
+      received->fieldOffset += sizeof(received->hdrFiller);
       break;
     }
+    }
+    hdrInfos->seqIdx++;
+    seqVal = hdrInfos->headerSequence[hdrInfos->seqIdx];
   }
-  hdrInfos->seqIdx++;
   hdrInfos->seqIdxAfterHeader = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
@@ -335,6 +317,9 @@ ets_printf("§u0Crc!0!§");
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgData->compMsgDataView->getCrc(self->compMsgData->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
 ets_printf("§u8Crc!res!%d!§", result);
+      checkErrOK(result);
+      result = self->compMsgData->compMsgDataView->getTotalCrc(self->compMsgData->compMsgDataView, &fieldInfo);
+ets_printf("§u8totalCrc!res!%d!§", result);
       break;
     case COMP_DISP_U16_CRC:
       fieldInfo.fieldLgth = 2;
@@ -342,8 +327,12 @@ ets_printf("§u8Crc!res!%d!§", result);
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgData->compMsgDataView->getCrc(self->compMsgData->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
 ets_printf("§u16Crc!res!%d!§", result);
+      checkErrOK(result);
+      result = self->compMsgData->compMsgDataView->getTotalCrc(self->compMsgData->compMsgDataView, &fieldInfo);
+ets_printf("§u16TotalCrc!res!%d!§", result);
       break;
     }
+    checkErrOK(result);
     hdrInfos->seqIdx++;
   }
   result = prepareAnswerMsg(self, hdrInfos, &handle);
@@ -397,6 +386,8 @@ ets_printf("handleReceivedPart\n");
     dataView->lgth++;
     if (received->lgth == hdrInfos->headerLgth) {
 //ets_printf("received lgth: %d lgth: %d idx: %d\n", received->lgth, lgth, idx);
+ets_printf("receveived->lgth: %d\n", received->lgth);
+dataView->dumpBinary(received->buf, received->lgth, "rec msg header");
       result = getHeaderIndexFromHeaderFields(self, received, hdrInfos);
 //ets_printf("getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
     }
@@ -405,6 +396,8 @@ ets_printf("handleReceivedPart\n");
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
 //ets_printf("hdrIdx: %d\n", hdrIdx);
+ets_printf("receveived->totalLgth: %d\n", received->totalLgth);
+dataView->dumpBinary(received->buf, received->lgth, "rec msg");
       if (hdr->hdrEncryption == 'E') {
         uint8_t *cryptedPtr;
         uint8_t *cryptKey;
@@ -474,33 +467,9 @@ ets_printf("handleToSendPart lgth: %d buffer: %s\n", lgth, buffer);
   msgLgth = encryptedLgth;
 //ets_printf("encryptedLgth: %d %d\n", encryptedLgth, result);
 
-  result = self->toBase64(encrypted, &msgLgth, &msg);
-//ets_printf("base64 msg: mlen: %d %s %d\n", mlen, msg, c_strlen(msg));
+  result = self->sendCloudMsg(self, encrypted, encryptedLgth);
   checkErrOK(result);
-  msg[msgLgth] = '\0';
-  char payload[1024];
-  
-  uint8_t *host;
-  uint8_t *subUrl;
-  uint8_t *nodeToken;
-  uint8_t *host_part=" HTTP/1.1\r\nHost: ";
-  uint8_t *alive="\r\nConnection: keep-alive\r\n";
-  uint8_t *con_type="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
-  uint8_t *con_lgth="Content-length: ";
-  uint8_t *accept="\r\nAccept: */*\r\n\r\n=";
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
-  checkErrOK(result);
-  host = stringValue;
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
-  checkErrOK(result);
-  subUrl = stringValue;
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
-  checkErrOK(result);
-  nodeToken = stringValue;
-  os_sprintf(payload, "POST %s%s%s%s%s%s%s%d%s%s\r\n", subUrl, host_part, host, alive, nodeToken, con_type, con_lgth, msgLgth+1, accept, msg);
-//ets_printf("request: %d %s\n", c_strlen(payload), payload);
-  result = self->sendCloudMsg(self, payload, c_strlen(payload));
-  checkErrOK(result);
+
 
 #ifdef NOTDEF
   hdrInfos = &self->msgHeaderInfos;

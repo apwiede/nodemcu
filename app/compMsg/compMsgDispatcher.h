@@ -73,24 +73,22 @@ enum compMsgDispatcherErrorCode
   // must correspond to the values in compMsgDataView.h !!!
   // with the names like COMP_MSG_ERR_*
 
-  COMP_DISP_ERR_OPEN_FILE             = 189,
-  COMP_DISP_FILE_NOT_OPENED           = 188,
-  COMP_DISP_ERR_FLUSH_FILE            = 187,
-  COMP_DISP_ERR_WRITE_FILE            = 186,
-  COMP_DISP_ERR_BAD_RECEIVED_LGTH     = 185,
-  COMP_DISP_ERR_BAD_FILE_CONTENTS     = 184,
-  COMP_DISP_ERR_HEADER_NOT_FOUND      = 183,
-  COMP_DISP_ERR_DUPLICATE_FIELD       = 182,
-  COMP_DISP_ERR_BAD_FIELD_NAME        = 181,
-  COMP_DISP_ERR_BAD_HANDLE_TYPE       = 180,
-  COMP_DISP_ERR_INVALID_BASE64_STRING = 179,
-  COMP_DISP_ERR_TOO_FEW_FILE_LINES    = 178,
-  COMP_DISP_ERR_ACTION_NAME_NOT_FOUND = 177,
-  COMP_DISP_ERR_DUPLICATE_ENTRY       = 176,
-  COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 175,
-  COMP_DISP_ERR_TOO_MANY_REQUESTS     = 174,
-  COMP_DISP_ERR_REQUEST_NOT_FOUND     = 173,
-  COMP_DISP_ERR_UART_REQUEST_NOT_SET  = 172,
+  // 189 - 180 are used for COMP_MSG_DESC_ERR_* !!
+
+  COMP_DISP_ERR_BAD_RECEIVED_LGTH     = 179,
+  COMP_DISP_ERR_BAD_FILE_CONTENTS     = 178,
+  COMP_DISP_ERR_HEADER_NOT_FOUND      = 177,
+  COMP_DISP_ERR_DUPLICATE_FIELD       = 176,
+  COMP_DISP_ERR_BAD_FIELD_NAME        = 175,
+  COMP_DISP_ERR_BAD_HANDLE_TYPE       = 174,
+  COMP_DISP_ERR_INVALID_BASE64_STRING = 173,
+  COMP_DISP_ERR_TOO_FEW_FILE_LINES    = 172,
+  COMP_DISP_ERR_ACTION_NAME_NOT_FOUND = 171,
+  COMP_DISP_ERR_DUPLICATE_ENTRY       = 170,
+  COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 169,
+  COMP_DISP_ERR_TOO_MANY_REQUESTS     = 168,
+  COMP_DISP_ERR_REQUEST_NOT_FOUND     = 167,
+  COMP_DISP_ERR_UART_REQUEST_NOT_SET  = 166,
 };
 
 // input source types
@@ -165,6 +163,8 @@ typedef uint8_t (* addUartRequestData_t)(compMsgDispatcher_t *self, uint8_t *dat
 typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData);
 typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
+typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
+typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
 
 typedef uint8_t (* createDispatcher_t)(compMsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self);

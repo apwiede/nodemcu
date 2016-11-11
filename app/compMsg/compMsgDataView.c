@@ -103,6 +103,7 @@ static str2id_t specialFieldNames[] = {
   {"@cloudSecureConnect", COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT},
   {"@cloudSubUrl",        COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL},
   {"@cloudNodeToken",     COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN},
+  {"@totalCrc",           COMP_MSG_SPEC_FIELD_TOTAL_CRC},
 
   {NULL, -1},
 };
@@ -185,6 +186,7 @@ static uint8_t getFieldNameIdFromStr(compMsgDataView_t *self, const uint8_t *fie
       return COMP_MSG_ERR_OK; // just ignore silently
     } else {
       if (incrRefCnt == 0) {
+ets_printf("DataView FIELD_NOT_FOUND 1\n");
         return COMP_MSG_ERR_FIELD_NOT_FOUND;
       } else {
         if (firstFreeEntry != NULL) {
@@ -237,6 +239,7 @@ static uint8_t getFieldNameStrFromId(compMsgDataView_t *self, uint8_t fieldNameI
     fieldNameEntry++;
     idx++;
   }
+ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
@@ -381,6 +384,68 @@ static uint8_t setCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
   return DATA_VIEW_ERR_OK;
 }
 
+// ================================= getTotalCrc ====================================
+
+static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+  uint16_t crcVal;
+  uint16_t crc;
+  uint8_t uint8_crc;
+  int crcLgth;
+  int idx;
+  int result;
+
+  crcLgth = fieldInfo->fieldLgth;
+  crcVal = 0;
+  idx = 0;
+  while (idx < fieldInfo->fieldOffset) {
+//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx, self->dataView->data[idx], crcVal);
+    crcVal += self->dataView->data[idx++];
+  }
+//ets_printf("§crcVal00: 0x%04x§\n", crcVal);
+  crcVal = ~(crcVal);
+  if (crcLgth == 1) {
+//ets_printf("§crcVal10: 0x%04x§\n", crcVal);
+    crcVal = crcVal & 0xFF;
+    result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
+    checkErrOK(result);
+ets_printf("§crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
+    if (crcVal != uint8_crc) {
+      return COMP_MSG_ERR_BAD_CRC_VALUE;
+    }
+  } else {
+    result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
+    checkErrOK(result);
+ets_printf("§crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
+    if (crcVal != crc) {
+      return COMP_MSG_ERR_BAD_CRC_VALUE;
+    }
+  }
+  return DATA_VIEW_ERR_OK;
+}
+
+// ================================= setTotalCrc ====================================
+
+static uint8_t setTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+  int idx;
+  uint16_t crc;
+
+  crc = 0;
+  idx = 0;
+//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx, self->dataView->data[idx], crc);
+  while (idx < fieldInfo->fieldOffset) {
+//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx, self->dataView->data[idx], crc);
+    crc += self->dataView->data[idx++];
+  }
+  crc = ~(crc);
+  if (fieldInfo->fieldLgth == 1) {
+//ets_printf("§crc8: 0x%04x 0x%02x\n§", crc, (uint8_t)(crc & 0xFF));
+    self->dataView->setUint8(self->dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
+  } else {
+    self->dataView->setUint16(self->dataView,fieldInfo->fieldOffset,crc);
+  }
+//ets_printf("crc: 0x%04x\n", crc);
+  return DATA_VIEW_ERR_OK;
+}
 
 // ================================= getFieldValue ====================================
 
@@ -660,6 +725,8 @@ compMsgDataView_t *newCompMsgDataView(void) {
 
   compMsgDataView->getCrc = &getCrc;
   compMsgDataView->setCrc = &setCrc;
+  compMsgDataView->getTotalCrc = &getTotalCrc;
+  compMsgDataView->setTotalCrc = &setTotalCrc;
 
   compMsgDataView->getFieldValue = &getFieldValue;
   compMsgDataView->setFieldValue = &setFieldValue;
@@ -671,6 +738,7 @@ compMsgDataView_t *newCompMsgDataView(void) {
 
 void freeCompMsgDataView(compMsgDataView_t *dataView) {
   if (dataView->dataView != NULL) {
+ets_printf("freeCompMsgDataView1: %p\n", dataView->dataView);
     freeDataView(dataView->dataView);
     dataView->dataView = NULL;
     os_free(dataView);

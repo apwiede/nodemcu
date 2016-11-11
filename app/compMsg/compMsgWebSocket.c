@@ -142,6 +142,7 @@ static uint8_t websocketSendData(websocketUserData_t *wud, const char *payload, 
   int hdrLgth;
   int fsize;
   uint8_t*buff;
+  uint8_t result;
   int i;
 
 ets_printf("websocketSendData: size: %d\n", size);
@@ -170,8 +171,10 @@ ets_printf("websocketSendData: size: %d\n", size);
   }
 
   os_memcpy(&buff[hdrLgth], (uint8_t *)payload, size);
-  espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
+  result = espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
+ets_printf("espconn_sent: result: %d\n", result);
   os_free(buff);
+ets_printf("espconn_sent: done\n");
   return WEBSOCKET_ERR_OK;
 }
 
