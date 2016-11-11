@@ -218,8 +218,8 @@ if {0} {
             set numTableRowFields [dict get $compMsgData numTableRowFields]
           }
           default {
-    #ets_printf{"default fieldNameId: %d buildMsgInfo fieldNameId: %d\n", fieldInfo->fieldNameId, self->buildMsgInfos.fieldNameId}
             if {($msgValPart ne [list]) && ([dict get $fieldInfo fieldNameId] eq [dict get $msgValPart fieldNameId])} {
+#puts stderr [format "default fieldNameId: %s buildMsgInfo fieldNameId: %s" [dict get $fieldInfo fieldNameId] [dict get $msgValPart fieldNameId]]
               set result [setMsgFieldValue compMsgDispatcher numTableRows numTableRowFields $type]
               checkErrOK $result
               incr msgValPartIdx
@@ -230,10 +230,11 @@ if {0} {
       set msgCmdKey [dict get $compMsgDispatcher currHdr hdrU16CmdKey]
       set result [::compMsg compMsgData setFieldValue compMsgDispatcher "@cmdKey" $msgCmdKey]
       checkErrOK $result
-      dict set compMsgDispatcher compMsgData $compMsgData
+#      dict set compMsgDispatcher compMsgData $compMsgData
     
       set result [::compMsg compMsgData prepareMsg compMsgDispatcher]
       checkErrOK $result
+#puts stderr "setMsgValues end"
 #::compMsg compMsgData dumpMsg compMsgDispatcher
       return $::COMP_DISP_ERR_OK
     }
@@ -268,21 +269,24 @@ if {0} {
       checkErrOK $result
       set result [::compMsg compMsgData getMsgData compMsgDispatcher msgData msgLgth]
       checkErrOK $result
-#::compMsg compMsgData dumpBinary $msgData $msgLgth "msgData"
+::compMsg compMsgData dumpMsg compMsgDispatcher
+::compMsg compMsgData dumpBinary $msgData $msgLgth "msgData"
       if {[dict get $compMsgDispatcher currHdr hdrEncryption] eq "E"} {
         set cryptKey "a1b2c3d4e5f6g7h8"
         set ivlen 16
         set klen 16
     
-#puts stderr "need to encrypt message!"
+puts stderr "need to encrypt message!"
         set headerLgth [dict get $compMsgDispatcher compMsgData headerLgth]
-        set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth}]
-        set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] end]
+        set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth} - 1] ; # - 1 for totalCrc!!
+puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
+        set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] end-1]
         set header [string range $msgData 0 [expr {$headerLgth - 1}]]
         set result [::compMsg compMsgDispatcher encryptMsg $toCrypt $mlen $cryptKey $klen $cryptKey $ivlen encryptedMsgData encryptedMsgDataLgth]
         checkErrOK $result
-        set msgData "${header}${encryptedMsgData}"
-#puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
+puts stderr [format "totalCrc: %s" [string range $msgData end end]]
+        set msgData "${header}${encryptedMsgData}[string range $msgData end end]"
+puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
         
       # here we need to decide where and how to send the message!!
@@ -292,7 +296,11 @@ if {0} {
 #set toPart [dict get $compMsgDispatcher currHdr hdrToPart]
 #puts stderr [format "transferType: %s dst: 0x%04x" $handleType $toPart]
       set result [::compMsg compMsgSendReceive sendMsg compMsgDispatcher $msgData $msgLgth]
-puts stderr [format "buildMsg sendMsg has been calledresult: %d" $result]
+set fd [open "ADRequest.txt" w]
+puts $fd $msgData
+flush $fd
+close $fd
+puts stderr [format "buildMsg sendMsg has been called result: %d" $result]
       checkErrOK $result
     #  result = self->resetMsgInfo{self, self->buildMsgInfos.parts}
       return $result

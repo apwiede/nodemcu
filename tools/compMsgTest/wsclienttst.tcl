@@ -338,7 +338,7 @@ proc clientHandler { sock type msg } {
     binary {
 #      puts "===RECEIVED BINARY: $msg"
 # ::compMsg compMsgData dumpBinary $msg [string length $msg] "MSG"
-#puts stderr "need handler for received MSG!lgth: [string length $msg]!"
+puts stderr "need handler for received MSG!lgth: [string length $msg]!"
 
       set result [::compMsg compMsgIdentify compMsgIdentifyInit ::compMsgDispatcher]
       checkErrOK $result
@@ -346,6 +346,10 @@ proc clientHandler { sock type msg } {
       checkErrOK $result
       set result [::compMsg dataView setData "" 0]
       checkErrOK $result
+set fd [open "AAAnswer.txt" w]
+puts $fd $msg
+flush $fd
+close $fd
       set result [::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]]
       checkErrOK $result
 fillTable

@@ -611,6 +611,8 @@ puts stderr "tableFields!$tableFields!"
           dict lappend  fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           set fields [lreplace $fields $idx $idx $fieldInfo]
           dict set compMsgData fields $fields
+          dict set compMsgDispatcher compMsgData $compMsgData
+dumpMsg compMsgDispatcher
           return $::DATA_VIEW_ERR_OK
         }
         incr idx
@@ -697,8 +699,10 @@ puts stderr "tableFields!$tableFields!"
       set numEntries [dict get $compMsgData numFields]
       set idx 0
       set fields [dict get $compMsgData fields]
+puts stderr "prepareMsg!"
       while {$idx < $numEntries} {
         set fieldInfo [lindex $fields $idx]
+puts stderr "idx!$idx!fieldNameId![dict get $fieldInfo fieldNameId]!"
         switch [dict get $fieldInfo fieldNameId] {
           COMP_MSG_SPEC_FIELD_RANDOM_NUM {
             set result [::compMsg compMsgDataView setRandomNum $fieldInfo]
@@ -723,6 +727,11 @@ puts stderr "tableFields!$tableFields!"
             }
             set lgth [dict get $compMsgData totalLgth]
             set result [::compMsg compMsgDataView setCrc $fieldInfo $startOffset $lgth]
+            checkErrOK $result
+            dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+          COMP_MSG_SPEC_FIELD_TOTAL_CRC {
+            set result [::compMsg compMsgDataView setTotalCrc $fieldInfo]
             checkErrOK $result
             dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }

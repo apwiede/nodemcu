@@ -325,99 +325,54 @@ puts stderr "Fitting entry not found!"
       set myHeaderLgth 0
       dict set headerInfos seqIdx 0
       set headerSequence [dict get $headerInfos headerSequence]
-      switch [lindex $headerSequence [dict get $headerInfos seqIdx]] {
-        COMP_DISP_U16_DST {
-          set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
-          dict set received toPart $value
-          checkErrOK $result
-          dict incr received fieldOffset 2
-        }
-        COMP_DISP_U16_SRC {
-          set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
-          dict set received fromPart $value
-          checkErrOK $result
-          dict incr received fieldOffset 2
-        }
-        COMP_DISP_U8_TARGET {
-          set result [::compMsg dataView getUint8 [dict get $received fieldOffset] value]
-          dict set received targetPart $value
-          checkErrOK $result
-          dict incr received fieldOffset 1
-        }
-      }
-      dict incr headerInfos seqIdx 1
-      switch [lindex $headerSequence [dict get $headerInfos seqIdx]] {
-        COMP_DISP_U16_DST {
-          set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
-          dict set received toPart $value
-          checkErrOK $result
-          dict incr received fieldOffset 2
-        }
-        COMP_DISP_U16_SRC {
-          set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
-          dict set received fromPart $value
-          checkErrOK $result
-          dict incr received fieldOffset 2
-        }
-        COMP_DISP_U16_TOTAL_LGTH {
-          set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
-          dict set received totalLgth $value
-          checkErrOK $result
-          dict incr received fieldOffset 2
-        }
-      }
-      if {[dict get $received fieldOffset] < [dict get $headerInfos headerLgth]} {
-        dict incr headerInfos seqIdx 1
-        switch [lindex $headerSequence [dict get $headerInfos seqIdx]] {
-          COMP_DISP_U16_TOTAL_LGTH {
+      set seqIdx 0
+      set seqVal [lindex $headerSequence $seqIdx]
+      while {$seqIdx < [llength $headerSequence]} {
+        switch $seqVal {
+          COMP_DISP_U16_DST {
             set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
-            dict set received totalLgth $value
+            dict set received toPart $value
             checkErrOK $result
             dict incr received fieldOffset 2
           }
-        }
-      }
-      dict incr headerInfos seqIdx 1
-
-      if {[dict get $received fieldOffset] < [dict get $headerInfos headerLgth]} {
-        dict incr headerInfos seqIdx 1
-        switch [lindex $headerSequence [dict get $headerInfos seqIdx]] {
-          COMP_DISP_U8_VECTOR_GUID {
-            set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] $::GUID_LGTH value]
-            dict set received GUID $value
+          COMP_DISP_U16_SRC {
+            set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
+            dict set received fromPart $value
             checkErrOK $result
-            dict incr received fieldOffset $::GUID_LGTH
+            dict incr received fieldOffset 2
           }
-        }
-      }
-      dict incr headerInfos seqIdx 1
-
-      if {[dict get $received fieldOffset] < [dict get $headerInfos headerLgth]} {
-        dict incr headerInfos seqIdx 1
-        switch [lindex $headerSequence [dict get $headerInfos seqIdx]] {
           COMP_DISP_U16_SRC_ID {
             set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
             dict set received srcId $value
             checkErrOK $result
             dict incr received fieldOffset 2
           }
-        }
-      }
-      dict incr headerInfos seqIdx 1
-
-      if {[dict get $received fieldOffset] < [dict get $headerInfos headerLgth]} {
-        dict incr headerInfos seqIdx 1
-        switch [lindex $headerSequence [dict get $headerInfos seqIdx]] {
+          COMP_DISP_U16_TOTAL_LGTH {
+            set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
+            dict set received totalLgth $value
+            checkErrOK $result
+            dict incr received fieldOffset 2
+          }
+          COMP_DISP_U8_VECTOR_GUID {
+            set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] value $::GUID_LGTH]
+            dict set received GUID $value
+            checkErrOK $result
+            dict incr received fieldOffset $::GUID_LGTH
+          }
           COMP_DISP_U8_VECTOR_HDR_FILLER {
-            set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] $::HDR_FILLER_LGTH  value]
+            set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] value $::HDR_FILLER_LGTH]
             dict set received hdrFiller $value
             checkErrOK $result
             dict incr received fieldOffset $::HDR_FILLER_LGTH
           }
+          default {
+            error "funny seqVal: $seqVal!"
+          }
         }
+        dict incr headerInfos seqIdx 1
+        incr seqIdx
+        set seqVal [lindex $headerSequence $seqIdx]
       }
-      dict incr headerInfos seqIdx 1
-
       dict set headerInfos seqIdxAfterStart [dict get $headerInfos seqIdx]
       dict set headerInfos currPartIdx 0
       set result [nextFittingEntry 0 0]
@@ -479,6 +434,8 @@ puts stderr "found entry: [dict get $headerInfos currPartIdx]!"
             dict set fieldInfo fieldLgth 1
             dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 1}]
             set result [::compMsg compMsgDataView getCrc $fieldInfo crc 0 [dict get $fieldInfo fieldOffset]]
+            checkErrOK $result
+            set result [::compMsg compMsgDataView getTotalCrc $fieldInfo]
     #ets_printf{"§u8Crc!res!%d!§", result}
           } 
           COMP_DISP_U16_CRC {
@@ -486,8 +443,11 @@ puts stderr "found entry: [dict get $headerInfos currPartIdx]!"
             dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 2}]
             set result [::compMsg compMsgDataView getCrc $fieldInfo crc 0 [dict get $fieldInfo fieldOffset]]
     #ets_printf{"§u16Crc!res!%d!§", result}
+            checkErrOK $result
+            set result [::compMsg compMsgDataView getTotalCrc $fieldInfo]
           } 
         } 
+        checkErrOK $result
         dict incr headerInfos seqIdx 1
       }
 if {0} {
@@ -523,6 +483,7 @@ puts stderr "handleReceivedMsg end"
 #puts stderr "==headerInfos![dict keys [dict get $compMsgDispatcher headerInfos]]!"
 #puts stderr "==compMsgDispatcher![dict keys $compMsgDispatcher]!"
 #puts stderr "==bufferl:[string length $buffer]!$lgth!"
+#puts stderr "received!$received!"
       while {$idx < $lgth} {
         if {![dict exists $received totalLgth]} {
           dict set received totalLgth -999

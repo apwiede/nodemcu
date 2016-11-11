@@ -62,7 +62,7 @@ namespace eval compMsg {
     variable data ""
     variable fieldTypeNames2Ids
     set fieldTypeNames2Ids [dict create]
-    dict set fieldTypeNames2Ids uint0_t   DATA_VIEW_FIELD_UINT0_T
+    dict set fieldTypeNames2Ids none      DATA_VIEW_FIELD_NONE
     dict set fieldTypeNames2Ids uint8_t   DATA_VIEW_FIELD_UINT8_T
     dict set fieldTypeNames2Ids int8_t    DATA_VIEW_FIELD_INT8_T
     dict set fieldTypeNames2Ids uint16_t  DATA_VIEW_FIELD_UINT16_T
@@ -78,7 +78,7 @@ namespace eval compMsg {
 
     variable fieldTypeIds2Names
     set fieldTypeIds2Names [dict create]
-    dict set fieldTypeIds2Names DATA_VIEW_FIELD_UINT0_T uint0_t   
+    dict set fieldTypeIds2Names DATA_VIEW_FIELD_NONE none   
     dict set fieldTypeIds2Names DATA_VIEW_FIELD_UINT8_T uint8_t   
     dict set fieldTypeIds2Names DATA_VIEW_FIELD_INT8_T int8_t    
     dict set fieldTypeIds2Names DATA_VIEW_FIELD_UINT16_T uint16_t  
@@ -94,7 +94,7 @@ namespace eval compMsg {
 
     variable fieldTypeInts2Ids
     set fieldTypeInts2Ids [dict create]
-    dict set fieldTypeInts2Ids 0 DATA_VIEW_FIELD_UINT0_T
+    dict set fieldTypeInts2Ids 0 DATA_VIEW_FIELD_NONE
     dict set fieldTypeInts2Ids 1 DATA_VIEW_FIELD_UINT8_T
     dict set fieldTypeInts2Ids 2 DATA_VIEW_FIELD_INT8_T
     dict set fieldTypeInts2Ids 3 DATA_VIEW_FIELD_UINT16_T
