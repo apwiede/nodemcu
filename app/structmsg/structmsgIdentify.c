@@ -499,7 +499,7 @@ static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
     result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, myStr, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
-    case DATA_VIEW_FIELD_UINT0_T:
+    case DATA_VIEW_FIELD_NONE:
       hdr->fieldSequence[seqIdx2] = STRUCT_DISP_U0_CMD_LGTH;
       hdrInfos->headerSequence[seqIdx2++] = STRUCT_DISP_U0_CMD_LGTH;
       hdr->hdrFlags |= STRUCT_DISP_U0_CMD_LGTH;
@@ -528,7 +528,7 @@ static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
     result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, myStr, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
-    case DATA_VIEW_FIELD_UINT0_T:
+    case DATA_VIEW_FIELD_NONE:
       hdr->fieldSequence[seqIdx2] = STRUCT_DISP_U0_CRC;
       hdrInfos->headerSequence[seqIdx2++] = STRUCT_DISP_U0_CRC;
       hdr->hdrFlags |= STRUCT_DISP_U0_CRC;
