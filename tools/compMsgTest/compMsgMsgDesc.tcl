@@ -296,6 +296,7 @@ namespace eval compMsg {
       variable headerInfos
       variable dispFlags
     
+puts stderr "readHeadersAndSetFlags!"
       set fd [open $fileName r]
       gets $fd line
       set flds [split $line ,]
@@ -493,6 +494,7 @@ namespace eval compMsg {
       }
       close $fd
       dict set compMsgDispatcher headerInfos $headerInfos
+puts stderr "readHeadersAndSetFlags done!"
       return $::COMP_MSG_ERR_OK
     }
 
@@ -606,7 +608,7 @@ namespace eval compMsg {
       dict set compMsgDispatcher compMsgData msgDescParts [list]
       set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
       dict set compMsgDispatcher compMsgData msgValParts [list]
-      set msgValParts [dict get $compMsgDispatcher compMsgData msgDescParts]
+      set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
       set fd [open [format "%s/CompDesc%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]] "r"]
       gets $fd line
       set flds [split $line ","]

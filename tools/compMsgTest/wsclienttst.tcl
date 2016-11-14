@@ -272,22 +272,6 @@ if {0} {
   pack $tableFr
 }
 
-# ================================ InitCompMsg ===============================
-
-set compMsgDispatcher [dict create]
-set compMsgWifiData [dict create]
-set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
-checkErrOK $result
-set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
-checkErrOK $result
-puts stderr "dispatcherHandle!$dispatcherHandle!"
-set result [::compMsg compMsgDispatcher initDispatcher compMsgDispatcher]
-checkErrOK $result
-
-set PORT 80
-set path /getaplist
-set host "192.168.4.1"
-
 # ================================ fillTable ===============================
 
 proc fillTable {} {
@@ -374,6 +358,22 @@ proc getAPInfos { sock } {
 }
 
 # ================================ main ===============================
+
+# ================================ InitCompMsg ===============================
+
+set compMsgDispatcher [dict create]
+set compMsgWifiData [dict create]
+set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
+checkErrOK $result
+set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
+checkErrOK $result
+puts stderr "dispatcherHandle!$dispatcherHandle!"
+set result [::compMsg compMsgDispatcher initDispatcher compMsgDispatcher]
+checkErrOK $result
+
+set PORT 80
+set path /getaplist
+set host "192.168.4.1"
 
 puts stderr "ws://${host}:${PORT}${path}"
 set clientSocket [::websocket::open "ws://${host}:${PORT}${path}" ::clientHandler] 

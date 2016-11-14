@@ -906,8 +906,8 @@ dict set compMsgData numTabRowFields $numTableRowFields
       }
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
       dict set compMsgDispatcher compMsgData $compMsgData
-      set msgDescParts [dict get $compMsgDispatcher msgDescParts]
-      set msgValParts [dict get $compMsgDispatcher msgValParts]
+      set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
+      set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
       set msgDescPartIdx 0
       set msgValPartIdx 0
       dict set compMsgData fieldOffset 0

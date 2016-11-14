@@ -522,12 +522,13 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen}]!"
             dict set received buf $buffer
           }
           set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
-          set compMsgData [dict create]
+          set compMsgData [dict get $compMsgDispatcher compMsgData]
           set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts] handle]
           checkErrOK $result
+          dict set compMsgDispatcher compMsgData $compMsgData
           set idx 0
           while {$idx < [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]} {
-            set msgDescParts [dict get $compMsgDispatcher msgDescParts]
+            set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
             set msgDescPart [lindex $msgDescParts $idx] 
             set result [::compMsg compMsgData addField compMsgData [dict get $msgDescPart fieldNameStr] [dict get $msgDescPart fieldTypeStr] [dict get $msgDescPart fieldLgth]]
             checkErrOK $result
