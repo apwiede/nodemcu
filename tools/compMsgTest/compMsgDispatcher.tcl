@@ -44,7 +44,7 @@
 #     fieldTypeId
 #     fieldKey
 #     fieldSize
-#     getFieldSizeCallback
+#     fieldSizeCallback
 #     fieldNameStr
 #     fieldTypeStr
 #     fieldLgth
@@ -53,7 +53,7 @@
 #     fieldFlags
 #     fieldKeyValueStr
 #     fieldValue
-#     getFieldValueCallback
+#     fieldValueCallback
 #     fieldNameStr
 #     fieldValueStr
 
@@ -481,16 +481,17 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $handleVar handle 
     
-#puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
+puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
       set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
       checkErrOK $result
-      set compMsgData [dict create]
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
       set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts] handle]
       checkErrOK $result
       set idx 0
       while {$idx < [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]} {
-        set msgDescParts [dict get $compMsgDispatcher msgDescParts]
+        set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
         set msgDescPart [lindex $msgDescParts $idx]
+#puts stderr "idx: $idx!$msgDescPart!"
         set result [::compMsg compMsgData addField compMsgData [dict get $msgDescPart fieldNameStr] [dict get $msgDescPart fieldTypeStr] [dict get $msgDescPart fieldLgth]]
         checkErrOK $result
         incr idx
@@ -498,29 +499,16 @@ namespace eval compMsg {
       dict set compMsgDispatcher compMsgData $compMsgData
     
       # runAction calls at the end buildMsg
-    #  self->resetBuildMsgInfos{self}
-    #  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey // used in buildMsg -> setMsgValues!!
       set prepareValuesCb [dict get $compMsgDispatcher compMsgMsgDesc prepareValuesCbName]
 #puts stderr "prepareValuesCb: $prepareValuesCb!"
       if {$prepareValuesCb ne [list]} {
-#        set result [::compMsg getActionMode {self self->compMsgMsgDesc->prepareValuesCbName+1, &actionMode}
-#        self->actionMode = actionMode
-#        checkErrOK{result}
-#        result  = self->runAction{self, &type}
         $prepareValuesCb compMsgDispatcher
         # runAction starts a call with a callback and returns here before the callback has been running!!
-        # when when coming here we are finished and the callback will do the work later on!
+        # when coming here we are finished and the callback will do the work later on!
 #puts stderr "runAction done![dict keys $compMsgDispatcher]!"
         return $result
       } else {
         set result [::compMsg compMsgBuildMsg buildMsg compMsgDispatcher]
-if {0} {
-        result = setMsgValues{self}
-        checkErrOK $result
-    #ets_printf{"§heap3: %d§", system_get_free_heap_size{}}
-        result = self->compMsgData->getMsgData{self->compMsgData, &data, &msgLgth}
-        checkErrOK $result
-}
         # FIXME !! here we need a call to send the (eventually encrypted) message!!
       }
       return $::COMP_MSG_ERR_OK

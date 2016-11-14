@@ -79,8 +79,10 @@ namespace eval compMsg {
     proc sendMsg {compMsgDispatcherVar msgData msgLgth} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
+puts stderr "currHdr: [dict get $compMsgDispatcher currHdr]!"
       set handleType [dict get $compMsgDispatcher currHdr hdrHandleType]
       set encryption [dict get $compMsgDispatcher currHdr hdrEncryption]
+puts stderr "sendMsg!handleType!$handleType!"
       switch $handleType {
         "A" {
           # Wifi -> App Provisioning
@@ -102,6 +104,9 @@ puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
         "R" {
         }
         "U" {
+          # temporary for simulating Mcu
+          puts -nonewline stdout $msgData
+puts stderr "\nhandleType U (Mcu Simulation) done!"
         }
         "W" {
         }

@@ -70,32 +70,40 @@ namespace eval compMsg {
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set fieldIdx 0
       set msgDescPartIdx 0
-      set fields [dict get $compMsgData fields]
-      set msgDescParts [dict get $compMsgDispatcher msgDescParts]
       while {$fieldIdx < [dict get $compMsgData numFields]} {
+        set fields [dict get $compMsgData fields]
         set fieldInfo [lindex $fields $fieldIdx]
+        set msgDescParts [dict get $compMsgData msgDescParts]
         set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
-        dict set compmMsgDispatcher msgDescPart $msgDescPart
-        if {[dict get $msgDescPart getFieldSizeCallback] ne [list]} {
+#puts stderr "msgDescPart: $fieldIdx!"
+        dict set compMsgDispatcher msgDescPart $msgDescPart
+        if {[dict get $msgDescPart fieldSizeCallback] ne [list]} {
           # the key name must have the prefix: "#key_"!
           if {[string range [dict get $msgDescPart fieldNameStr] 0 0] ne "#"} {
             checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
           }
-puts stderr "call: [dict get $msgDescPart getFieldSizeCallback]!"
-          set result [[dict get $msgDescPart getFieldSizeCallback] compMsgDispatcher]
+          set callback [dict get $msgDescPart fieldSizeCallback]
+          set callback [string range $callback 1 end] ; # strip off '@' character
+          set result [$callback compMsgDispatcher]
           checkErrOK $result
+          set compMsgData [dict get $compMsgDispatcher compMsgData]
+          set fields [dict get $compMsgData fields]
+          set fieldInfo [lindex $fields $fieldIdx]
+          set msgDescPart [dict get $compMsgDispatcher msgDescPart]
           dict set fieldInfo fieldKey [dict get $msgDescPart fieldKey]
-          dict incr msgDescPart fieldSize 2 * 2 + 1 ; # for key, type and lgth in front of value!!
+          dict incr msgDescPart fieldSize [expr {2 * 2 + 1}] ; # for key, type and lgth in front of value!!
           dict set fieldInfo fieldLgth [dict get $msgDescPart fieldSize]
           set fields [lreplace $fields $fieldIdx $fieldIdx $fieldInfo]
-          set msgParts [lreplace $msgParts $msgPartIdx $msgPartIdx $msgPart]
+          set msgDescParts [dict get $compMsgData msgDescParts]
+          set msgDescParts [lreplace $msgDescParts $msgDescPartIdx $msgDescPartIdx $msgDescPart]
+          dict set compMsgData fields $fields
+          dict set compMsgData msgDescParts $msgDescParts
+          dict set compMsgDispatcher compMsgData $compMsgData
         }
+        set compMsgData [dict get $compMsgDispatcher compMsgData]
         incr msgDescPartIdx
         incr fieldIdx
       }
-      dict set compMsgData fields $fields
-      dict set compMsgDispatcher compMsgMsgDesc msgDescParts $msgDescParts
-      dict set compMsgDispatcher compMsgData $compMsgData
       return $::COMP_DISP_ERR_OK
     }
     
@@ -115,13 +123,6 @@ puts stderr "call: [dict get $msgDescPart getFieldSizeCallback]!"
           set currTableRow 0
           set currTableCol 0
           while {$currTableRow < $numTableRows} {
-if {0} {
-            self->buildMsgInfos.tableRow = currTableRow
-            self->buildMsgInfos.tableCol = currTableCol
-            result = self->fillMsgValue{self, self->msgValPart->fieldValueStr, type, self->msgDescPart->fieldTypeId}
-            checkErrOK{result}
-            result = compMsgData->setTableFieldValue{compMsgData, self->msgValPart->fieldNameStr, currTableRow, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue}
-}
             incr currTableRow
           }
           set currTableRow 0
@@ -134,20 +135,12 @@ if {0} {
             set currTableCol 0
           }
         } else {
-          if {[dict get $compMsgDispatcher msgValPart getFieldValueCallback] ne [list]} {
-            set result [dict get $compMsgDispatcher msgValPart getFieldValueCallback] compMsgDispatcher
+          if {[dict get $compMsgDispatcher msgValPart fieldValueCallback] ne [list]} {
+            set result [[dict get $compMsgDispatcher msgValPart fieldValueCallback] compMsgDispatcher]
             checkErrOK $result
           }
-          if {[lsearch [dict get $compMsgDispatcher msgValPart fieldFlags] COMP_DISP_DESC_VALUE_IS_NUMBER] >= 0} {
-            set value [dict get $compMsgDispatcher msgValPart fieldValue]
-          } else {
-            set value [dict get $compMsgDispatcher msgValPart fieldKeyValueStr]
-          }
-          set result [:.compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr value]
-    #      result = self->fillMsgValue{self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId}
-    #      checkErrOK{result}
-    #      result = compMsgData->setFieldValue{compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue}
-    #      currTableRow++
+          set value [dict get $compMsgDispatcher msgValPart fieldValue]
+          set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
         }
       } else {
         set msgValPart [dict get $compMsgDispatcher msgValPart]
@@ -165,7 +158,7 @@ if {0} {
           }
           COMP_MSG_SPEC_FIELD_CMD_KEY {
             set numericValue [dict get $compMsgDispatcher currHdr hdrU16CmdKey]
-            set result [:.compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
+            set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
           }
           default {
             set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
@@ -189,8 +182,8 @@ if {0} {
       # loop over MSG Fields, to check if we eventually have table rows!!
       set msgDescPartIdx 0
       set msgValPartIdx 0
-      set msgDescParts [dict get $compMsgDispatcher msgDescParts]
-      set msgValParts [dict get $compMsgDispatcher msgValParts]
+      set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
+      set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
       set msgValPart [lindex $msgValParts $msgValPartIdx]
       set tableFieldIdx 0
       set numTableRows 0
@@ -200,7 +193,7 @@ if {0} {
         dict set compMsgDispatcher msgDescPart $msgDescPart
         set msgValPart [lindex $msgValParts $msgValPartIdx]
         dict set compMsgDispatcher msgValPart $msgValPart
-    #ets_printf{"setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData->numFields}
+    #ets_printf{"setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData numFields}
     #ets_printf{"fieldIdx: %d entryIdx: %d numtableRows: %d\n", fieldIdx, entryIdx, numTableRows}
         if {$numTableRows > 0} {
           set tableFields [dict get $compMsgData tableFields]
@@ -211,7 +204,7 @@ if {0} {
           set fieldInfo [lindex $fields $msgDescPartIdx]
           incr msgDescPartIdx
         }
-    #ets_printf{"fieldNameId: %d numtabrows: %d\n", fieldInfo->fieldNameId, numTableRows}
+    #ets_printf{"fieldNameId: %d numtabrows: %d\n", fieldInfo fieldNameId, numTableRows}
         switch [dict get $fieldInfo fieldNameId] {
           COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
             set numTableRows [dict get $compMsgData numTableRows]
@@ -222,6 +215,10 @@ if {0} {
 #puts stderr [format "default fieldNameId: %s buildMsgInfo fieldNameId: %s" [dict get $fieldInfo fieldNameId] [dict get $msgValPart fieldNameId]]
               set result [setMsgFieldValue compMsgDispatcher numTableRows numTableRowFields $type]
               checkErrOK $result
+              set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
+              set msgValPart [dict get $compMsgDispatcher msgValPart]
+              set msgValParts [lreplace $msgValParts $msgValPartIdx $msgValPartIdx $msgValPart]
+              dict set compMsgDispatcher compMsgData msgValParts $msgValParts
               incr msgValPartIdx
             }
           }
@@ -249,7 +246,7 @@ if {0} {
       # has been already done using runAction in createMsgFromHeaderPart
       # so now we can fix the offsets if needed for key value list entries
       # we can do that in looking for a special key entry @numKeyValues in msgDescParts
-      # could be also done in looking in compMsgData->fields
+      # could be also done in looking in compMsgData fields
       # to get the desired keys we look in msgValParts for fieldNames starting with '#'
       # the fieldValueStr ther is a callBackFunction for building the key value entries
       # the entry @numKeyValues in msgValParts tells us how many different keys follow
@@ -260,7 +257,6 @@ if {0} {
       # this could if needed also be an array of uint16_t etc. depending on the key
       # the receiver must know how the value is built depending on the key!!
       
-#puts stderr "buildMsg"
       set result [fixOffsetsForKeyValues compMsgDispatcher]
       checkErrOK $result
       set result [::compMsg compMsgData initMsg compMsgDispatcher numTableRows numTableRowFields]
@@ -302,7 +298,6 @@ flush $fd
 close $fd
 puts stderr [format "buildMsg sendMsg has been called result: %d" $result]
       checkErrOK $result
-    #  result = self->resetMsgInfo{self, self->buildMsgInfos.parts}
       return $result
     }
 

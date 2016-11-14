@@ -106,7 +106,7 @@ set ::HDR_FILLER_LGTH 40
 #   fieldLgth
 #   fieldKey
 #   fieldSize
-#   getFieldSizeCallback
+#   fieldSizeCallback
 
 # msgValPart dict
 #   fieldNameStr
@@ -115,7 +115,7 @@ set ::HDR_FILLER_LGTH 40
 #   fieldKeyValueStr  # the value for a string
 #   fieldValue        # the value for an integer
 #   fieldFlags
-#   getFieldValueCallback
+#   fieldValueCallback
 
 set ::moduleFilesPath $::env(HOME)/bene-nodemcu-firmware/module_image_files
 
@@ -547,8 +547,8 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set callbackName [list]
-      if {[dict get $msgDescPart getFieldSizeCallback] ne [list]} {
-        set result [::compMsg compMsgAction getActionCallbackName compMsgDispatcher [dict get $msgDescPart getFieldSizeCallback] callbackName]
+      if {[dict get $msgDescPart fieldSizeCallback] ne [list]} {
+        set result [::compMsg compMsgAction getActionCallbackName compMsgDispatcher [dict get $msgDescPart fieldSizeCallback] callbackName]
         checkErrOK $result
       }
       puts stderr [format "msgDescPart: fieldNameStr: %-15.15s fieldNameId: %-35.35s fieldTypeStr: %-10.10s fieldTypeId: %-30.30s field_lgth: %d callback: %s" [dict get $msgDescPart fieldNameStr] [dict get $msgDescPart fieldNameId] [dict get $msgDescPart fieldTypeStr] [dict get $msgDescPart fieldTypeId] [dict get $msgDescPart fieldLgth] $callbackName]
@@ -561,8 +561,8 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set callbackName [list]
-      if {[dict get $msgValPart getFieldValueCallback] ne [list]} {
-        set result [::compMsg compMsgAction getActionCallbackName compMsgDispatcher [dict get $msgValPart getFieldValueCallback] callbackName]
+      if {[dict get $msgValPart fieldValueCallback] ne [list]} {
+        set result [::compMsg compMsgAction getActionCallbackName compMsgDispatcher [dict get $msgValPart fieldValueCallback] callbackName]
         checkErrOK $result
       }
       puts -nonewline stderr [format "msgValPart: fieldNameStr: %-15.15s fieldNameId: %-35.35s fieldValueStr: %-20.20s callback: %s flags: " [dict get $msgValPart fieldNameStr] [dict get $msgValPart fieldNameId] [dict get $msgValPart fieldValueStr] $callbackName]
@@ -602,8 +602,11 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
       dict set compMsgDispatcher currHdr $hdr
-      dict set compMsgDispatcher msgDescParts [list]
-      dict set compMsgDispatcher msgValParts [list]
+      dict set compMsgDispatcher compMsgData [list]
+      dict set compMsgDispatcher compMsgData msgDescParts [list]
+      set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
+      dict set compMsgDispatcher compMsgData msgValParts [list]
+      set msgValParts [dict get $compMsgDispatcher compMsgData msgDescParts]
       set fd [open [format "%s/CompDesc%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]] "r"]
       gets $fd line
       set flds [split $line ","]
@@ -632,7 +635,7 @@ namespace eval compMsg {
         dict set msgDescPart fieldTypeId 0
         dict set msgDescPart fieldKey ""
         dict set msgDescPart fieldSize 0
-        dict set msgDescPart getFieldSizeCallback $callback
+        dict set msgDescPart fieldSizeCallback $callback
         dict set msgDescPart fieldNameStr $fieldNameStr
         dict set msgDescPart fieldTypeStr $fieldTypeStr
         dict set msgDescPart fieldLgth $fieldLgth
@@ -643,11 +646,12 @@ namespace eval compMsg {
         checkErrOK $result
         dict set msgDescPart fieldNameId $fieldNameId
 #dumpMsgDescPart compMsgDispatcher $msgDescPart
-        dict lappend compMsgDispatcher msgDescParts $msgDescPart
+        lappend msgDescParts $msgDescPart
         incr idx
       }
       close $fd
-    
+      dict set compMsgDispatcher compMsgData msgDescParts $msgDescParts
+
       # and now the value parts
       set fileName [format "%s/CompVal%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]]
       set fd [open $fileName "r"]
@@ -680,14 +684,15 @@ namespace eval compMsg {
         dict set msgValPart fieldFlags [list]
         dict set msgValPart fieldKeyValueStr [list]
         dict set msgValPart fieldValue [list]
-        dict set msgValPart getFieldValueCallback $callback
+        dict set msgValPart fieldValueCallback $callback
         dict set msgValPart fieldNameStr $fieldNameStr
         dict set msgValPart fieldValueStr $fieldValueStr
-        dict lappend compMsgDispatcher msgValParts $msgValPart
+        lappend msgValParts $msgValPart
 #dumpMsgValPart compMsgDispatcher $msgValPart
         incr idx
       }
       close $fd
+      dict set compMsgDispatcher compMsgData msgValParts $msgValParts
       return $::COMP_MSG_DESC_ERR_OK
     }
 
@@ -697,7 +702,6 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $compMsgWifiDataVar wifiData
 
-puts stderr "sfa 01 [dict exists $compMsgDispatcher socketForAnswer]!"
       set fd [open [format "%s/CompMsgKeyValueKeys.txt" $::moduleFilesPath] "r"]
       gets $fd line
       set flds [split $line ","]
@@ -740,7 +744,6 @@ puts stderr "sfa 01 [dict exists $compMsgDispatcher socketForAnswer]!"
           }
         }
     
-puts stderr [format "fieldType:%s" $fieldTypeStr]
         checkErrOK $result
         set result [::compMsg dataView getFieldTypeIdFromStr $fieldTypeStr fieldTypeId]
         checkErrOK $result

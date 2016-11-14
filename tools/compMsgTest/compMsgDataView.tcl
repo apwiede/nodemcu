@@ -538,7 +538,7 @@ set cnt 0
         }
         set pch [expr {$pch & 0xFF}]
 if {$::crcDebug} {
-puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
+puts stderr "getCrc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
 }
         set crcVal [expr {$crcVal + [format "%d" $pch]}]
 incr cnt
@@ -595,7 +595,7 @@ set cnt 0
         }
         set pch [expr {$pch & 0xFF}]
 if {$::crcDebug} {
-puts stderr "setrCrc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
+puts stderr "setCrc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
 }
         set crc [expr {$crc + [format "%d" $pch]}]
 incr cnt
@@ -636,7 +636,7 @@ set cnt 0
         }
         set pch [expr {$pch & 0xFF}]
 if {$::crcDebug} {
-puts stderr "decode crc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
+puts stderr "getTotalCrc: $cnt ch: [format 0x%02x $pch]![format 0x%04x $crcVal]!"
 }
         set crcVal [expr {$crcVal + [format "%d" $pch]}]
 incr cnt
@@ -693,7 +693,7 @@ set cnt 0
         }
         set pch [expr {$pch & 0xFF}]
 if {$::crcDebug} {
-puts stderr "setrCrc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
+puts stderr "setTotalCrc: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
 }
         set crc [expr {$crc + [format "%d" $pch]}]
 incr cnt
@@ -776,14 +776,14 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
     proc setFieldValue {fieldInfo value fieldIdx} {
       switch [dict get $fieldInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
-          if {($alue > -128) && ($value < 128)} {
+          if {($value > -128) && ($value < 128)} {
             set result [::compMsg dataView setInt8 [dict get $fieldInfo fieldOffset] $value]
           } else {
             checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_UINT8_T {
-          if {($alue >= 0) && ($value <= 256)} {
+          if {($value >= 0) && ($value <= 256)} {
             set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
           } else {
             checkErrOK $::COMP_MSG_ERR_BAD_VALUE
