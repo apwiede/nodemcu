@@ -938,12 +938,12 @@ static uint8_t  getHeaderFromUniqueFields (compMsgDispatcher_t *self, uint16_t d
 
 static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart) {
   uint8_t result;
-  getFieldSizeCallback_t callback;
+  fieldSizeCallback_t callback;
   uint8_t *callbackName;
 
   callbackName = "nil";
-  if (msgDescPart->getFieldSizeCallback != NULL) {
-    result = self->getActionCallbackName(self, msgDescPart->getFieldSizeCallback, &callbackName);
+  if (msgDescPart->fieldSizeCallback != NULL) {
+    result = self->getActionCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName);
     checkErrOK(result);
   }
   ets_printf("msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
@@ -954,12 +954,12 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
 
 static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPart) {
   uint8_t result;
-  getFieldSizeCallback_t callback;
+  fieldValueCallback_t callback;
   uint8_t *callbackName;
 
   callbackName = "nil";
-  if (msgValPart->getFieldValueCallback != NULL) {
-    result = self->getActionCallbackName(self, msgValPart->getFieldValueCallback, &callbackName);
+  if (msgValPart->fieldValueCallback != NULL) {
+    result = self->getActionCallbackName(self, msgValPart->fieldValueCallback, &callbackName);
     checkErrOK(result);
   }
   ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
@@ -1144,7 +1144,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       keyValueCallback = cp;
       result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
       checkErrOK(result);
-      result = self->getActionCallback(self, cp + 1, &msgDescPart->getFieldSizeCallback);
+      result = self->getActionCallback(self, cp + 1, &msgDescPart->fieldSizeCallback);
       checkErrOK(result);
     }
 //self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
@@ -1220,7 +1220,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       msgValPart->fieldValue = (uint32_t)uval;
     }
     if (fieldValueStr[0] == '@') {
-      result = self->getActionCallback(self, cp + 1, &msgValPart->getFieldValueCallback);
+      result = self->getActionCallback(self, cp + 1, &msgValPart->fieldValueCallback);
       checkErrOK(result);
     }
 //self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
@@ -1373,7 +1373,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
-ets_printf("getWifiKeyValues done\n");
+ets_printf("getWifiKeyValueKeys done\n");
 }
 
 #undef checkIsEnd

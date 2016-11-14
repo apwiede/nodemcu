@@ -187,7 +187,7 @@ typedef struct msgDescPart {
   uint8_t fieldType;
   uint16_t fieldKey;
   uint16_t fieldSize;
-  getFieldSizeCallback_t getFieldSizeCallback;
+  fieldSizeCallback_t fieldSizeCallback;
 } msgDescPart_t;
 
 typedef struct msgValPart {
@@ -197,7 +197,7 @@ typedef struct msgValPart {
   uint8_t *fieldKeyValueStr; // the value for a string
   uint32_t fieldValue;       // the value for an integer
   uint8_t fieldFlags;
-  getFieldSizeCallback_t getFieldValueCallback;
+  fieldValueCallback_t fieldValueCallback;
 } msgValPart_t;
 
 typedef struct compMsgMsgDesc compMsgMsgDesc_t;

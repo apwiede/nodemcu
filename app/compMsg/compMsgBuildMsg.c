@@ -67,12 +67,12 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
     fieldInfo = &compMsgData->fields[fieldIdx];
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;
-    if (msgDescPart->getFieldSizeCallback != NULL) {
+    if (msgDescPart->fieldSizeCallback != NULL) {
       // the key name must have the prefix: "#key_"!
       if (msgDescPart->fieldNameStr[0] != '#') {
         return COMP_DISP_ERR_FIELD_NOT_FOUND;
       }
-      result = msgDescPart->getFieldSizeCallback(self);
+      result = msgDescPart->fieldSizeCallback(self);
       checkErrOK(result);
       fieldInfo->fieldKey = msgDescPart->fieldKey;
       msgDescPart->fieldSize += 2 * sizeof(uint16_t) + sizeof(uint8_t); // for key, type and lgth in front of value!!
@@ -120,8 +120,8 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
         currTableCol = 0;
       }
     } else {
-      if (self->compMsgData->msgValPart->getFieldValueCallback != NULL) {
-        result = self->compMsgData->msgValPart->getFieldValueCallback(self);
+      if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
+        result = self->compMsgData->msgValPart->fieldValueCallback(self);
         checkErrOK(result);
       }
       fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;

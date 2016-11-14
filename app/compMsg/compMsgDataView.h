@@ -155,7 +155,8 @@ enum compMsgSpecialFieldNames
 #define COMP_MSG_FREE_FIELD_ID 0xFF
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
-typedef uint8_t (* getFieldSizeCallback_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* fieldSizeCallback_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* fieldValueCallback_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgField {
   uint8_t fieldNameId;
@@ -164,7 +165,7 @@ typedef struct compMsgField {
   uint16_t fieldLgth;
   uint16_t fieldKey;
   size_t fieldOffset;
-  getFieldSizeCallback_t getFieldSizeCallback;
+  fieldSizeCallback_t fieldSizeCallback;
 } compMsgField_t;
 
 typedef struct compMsgDataView compMsgDataView_t;
