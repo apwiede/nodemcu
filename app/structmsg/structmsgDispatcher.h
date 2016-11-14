@@ -267,6 +267,7 @@ typedef uint8_t (* resetMsgInfo_t)(structmsgDispatcher_t *self, msgParts_t *part
 
 typedef uint8_t (* typeRSendAnswer_t)(structmsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 
+typedef uint8_t (* resetHeaderInfos_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* readHeadersAndSetFlags_t)(structmsgDispatcher_t *self);
 typedef uint8_t (* nextFittingEntry_t)(structmsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleReceivedPart_t)(structmsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
@@ -342,6 +343,7 @@ typedef struct structmsgDispatcher {
   readLineDesc_t readLine;
 
   readHeadersAndSetFlags_t readHeadersAndSetFlags;
+  resetHeaderInfos_t resetHeaderInfos;
   nextFittingEntry_t nextFittingEntry;
   handleReceivedPart_t handleReceivedPart;
   uartReceiveCb_t uartReceiveCb;
