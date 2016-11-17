@@ -430,8 +430,8 @@ static uint8_t setInt32Vector(dataView_t *self, int offset, int32_t *value, size
 
 static uint8_t setData(dataView_t *self, size_t lgth) {
   if (self->data != NULL) {
-ets_printf("dataView freeing data in setData %p\n", self->data);
-    os_free(self->data);
+//ets_printf("dataView freeing data in setData %p\n", self->data);
+//    os_free(self->data);
   }
   self->data = os_zalloc(lgth);
   if (self->data == NULL) {
