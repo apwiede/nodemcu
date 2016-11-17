@@ -132,6 +132,9 @@ static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t
     self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
     self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
     break;
+  case MODULE_INFO_PASSWDC:
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
+    break;
 //  case WIFI_INFO_PROVISIONING_SSID:
 //  case WIFI_INFO_PROVISIONING_PORT:
 //  case WIFI_INFO_PROVISIONING_IP_ADDR:
@@ -217,6 +220,7 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.GUID[14] = '-';
   compMsgModuleData.GUID[15] = '1';
   compMsgModuleData.srcId = 12312;
+  c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2", 16);
 
   return COMP_DISP_ERR_OK;
 }

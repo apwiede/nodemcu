@@ -95,7 +95,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
   int numericValue;
   compMsgData_t *compMsgData;
 
-//ets_printf("setMsgFieldValue: %s %s\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
+ets_printf("§setMsgFieldValue: %s %s§", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
   compMsgData = self->compMsgData;
   if (self->compMsgData->msgValPart->fieldValueStr[0] == '@') {
     // call the callback function for the field!!
@@ -120,10 +120,13 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
         currTableCol = 0;
       }
     } else {
+ets_printf("§setMsgFieldValue:cb %p§", self->compMsgData->msgValPart->fieldValueCallback);
       if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
         result = self->compMsgData->msgValPart->fieldValueCallback(self);
+ets_printf("§setMsgFieldValue:cb res: %d§", result);
         checkErrOK(result);
       }
+ets_printf("§setMsgFieldValue2§");
       fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
       if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
         stringValue = NULL;
@@ -132,11 +135,13 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
         stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
         numericValue = 0;
       }
+ets_printf("§setMsgFieldValue3§");
       result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
 //      result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
 //      checkErrOK(result);
 //      result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
 //      currTableRow++;
+ets_printf("§setMsgFieldValue4§");
     }
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
@@ -147,6 +152,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
       stringValue = self->compMsgData->msgValPart->fieldValueStr;
       numericValue = 0;
     }
+ets_printf("§setMsgFieldValue5: %s§", fieldNameStr);
     switch (self->compMsgData->msgValPart->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_DST:
         result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
@@ -163,9 +169,10 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
         result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
         break;
     }
+ets_printf("§setMsgFieldValue6 res: %d§", result);
     checkErrOK(result);
   }
-//ets_printf("setMsgFieldValue: done\n");
+ets_printf("§setMsgFieldValue: done§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -193,7 +200,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   uint8_t *handle;
   char *endPtr;
 
-//ets_printf("setMsgValues\n");
+ets_printf("§setMsgValues§");
   compMsgData = self->compMsgData;
   handle = self->msgHandle;
   type = 'A';
@@ -211,7 +218,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
     self->compMsgData->msgDescPart = msgDescPart;
     msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
     self->compMsgData->msgValPart = msgValPart;
-//ets_printf("setMsgValues: %s\n", msgDescPart->fieldNameStr);
+ets_printf("§setMsgValues: %s§", msgDescPart->fieldNameStr);
 //ets_printf("setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData->numFields);
 //ets_printf("fieldIdx: %d entryIdx: %d numtableRows: %d\n", fieldIdx, entryIdx, numTableRows);
     if (numTableRows > 0) {
@@ -239,9 +246,12 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   result = compMsgData->setFieldValue(compMsgData, "@cmdKey", msgCmdKey, NULL);
   checkErrOK(result);
 
+ets_printf("§setMsgvalues done§");
   compMsgData->prepareMsg(compMsgData);
   checkErrOK(result);
+ets_printf("§");
 compMsgData->dumpMsg(compMsgData);
+ets_printf("§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -276,15 +286,19 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-//ets_printf("buildMsg\n");
+ets_printf("§buildMsg§");
   result = self->fixOffsetsForKeyValues(self);
+ets_printf("§fixOffsets res: %d§", result);
   checkErrOK(result);
   result = self->compMsgData->initMsg(self->compMsgData);
+ets_printf("§initMsg res: %d§", result);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
   result = setMsgValues(self);
+ets_printf("§setMsgValues res: %d§", result);
   checkErrOK(result);
 
   result = self->compMsgData->getMsgData(self->compMsgData, &msgData, &msgLgth);
+ets_printf("§getMsgData res: %d§", result);
   checkErrOK(result);
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {
     uint8_t *toCryptPtr;
@@ -297,7 +311,8 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
     ivlen = 16;
     klen = 16;
 
-ets_printf("need to encrypt message!\n");
+//self->compMsgData->compMsgDataView->dataView->dumpBinary(self->compMsgData->compMsgDataView->dataView->data, self->compMsgData->compMsgDataView->dataView->lgth, "MSG_AA");
+//ets_printf("need to encrypt message!\n");
     headerLgth = self->compMsgData->headerLgth;
     mlen = self->compMsgData->totalLgth - headerLgth - 1; // -1 for totalCrc !!
 ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
@@ -313,9 +328,9 @@ ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
     
   // here we need to decide where and how to send the message!!
   // from currHdr we can see the handle type and - if needed - the @dst
-ets_printf("transferType: %c dst: 0x%04x\n", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart);
+ets_printf("§transferType: %c dst: 0x%04x§", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart);
   result = self->sendMsg(self, msgData, msgLgth);
-ets_printf("buildMsg sendMsg has been called result: %d\n", result);
+ets_printf("§buildMsg sendMsg has been called result: %d§", result);
   checkErrOK(result);
 //  result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
   return result;

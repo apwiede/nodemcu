@@ -56,22 +56,10 @@ extern "C" {
 #define COMP_MSG_HAS_TABLE_ROWS       (1 << 4)
 #define COMP_MSG_IS_INITTED           (1 << 5)
 #define COMP_MSG_IS_PREPARED          (1 << 6)
-//#define COMP_DEF_IS_INITTED           (1 << 7)
-//#define COMP_DEF_IS_PREPARED          (1 << 8)
-#define COMP_MSG_CRC_USE_HEADER_LGTH  (1 << 9)
-//#define COMP_LIST_IS_INITTED          (1 << 10)
-//#define COMP_LIST_IS_PREPARED         (1 << 11)
+#define COMP_MSG_CRC_USE_HEADER_LGTH  (1 << 7)
 
 #define COMP_MSG_FIELD_IS_SET         (1 << 0)
 #define COMP_MSG_KEY_VALUE_FIELD      (1 << 1)
-
-//#define COMP_DEF_NUM_DEF_FIELDS 15
-//#define COMP_DEF_CMD_KEY 0x5959
-
-//#define COMP_DEF_TO_DATA        (1 << 0)
-//#define COMP_DEF_FROM_DATA      (1 << 1)
-//#define COMP_LIST_TO_DATA       (1 << 2)
-//#define COMP_LIST_FROM_DATA     (1 << 3)
 
 #define COMP_MSG_TO_SEND_DATA     (1 << 0)
 #define COMP_MSG_RECEIVED_DATA    (1 << 1)
@@ -137,30 +125,6 @@ typedef uint8_t (* getMsgData_t)(compMsgData_t *compMsgData, uint8_t **data, int
 typedef uint8_t (* setMsgData_t)(compMsgData_t *compMsgData, const uint8_t *data);
 typedef uint8_t (* setMsgFieldFromList_t)(compMsgData_t *selfconst, const uint8_t **listVector, uint8_t numEntries, uint16_t flags);
 typedef uint8_t ( *setDispatcher_t)(compMsgData_t *self, compMsgDispatcher_t *dispatcher);
-
-#ifdef NOLIST
-// definitionMsg
-typedef uint8_t (* dumpDefFields_t)(compMsgData_t *self);
-typedef uint8_t (* initDefMsg_t)(compMsgData_t *self);
-typedef uint8_t (* prepareDefMsg_t)(compMsgData_t *self);
-typedef uint8_t (* addDefField_t)(compMsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
-typedef uint8_t (* getDefFieldValue_t)(compMsgData_t *self, const uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int idx);
-typedef uint8_t (* setDefFieldValue_t)(compMsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int idx);
-typedef uint8_t (* setDefData_t)(compMsgData_t *self, const uint8_t *data);
-typedef uint8_t (* getDefData_t)(compMsgData_t *self, uint8_t **data, int *lgth);
-typedef uint8_t (* createMsgFromDef_t)(compMsgData_t *self);
-
-// listMsg
-typedef uint8_t (* dumpListFields_t)(compMsgData_t *self);
-typedef uint8_t (* getListFieldValue_t)(compMsgData_t *self, uint8_t fieldNameId, int *numericValue, uint8_t **stringValue, int fieldIdx);
-typedef uint8_t (* setListFieldValue_t)(compMsgData_t *self, uint8_t fieldNameId, int numericValue, const uint8_t *stringValue, int fieldIdx);
-typedef uint8_t (* initListMsg_t)(compMsgData_t *self);
-typedef uint8_t (* prepareListMsg_t)(compMsgData_t *self);
-typedef uint8_t (* setListData_t)(compMsgData_t *self, const  uint8_t *data);
-typedef uint8_t (* getListData_t)(compMsgData_t *self, uint8_t **data, int *lgth);
-typedef uint8_t (* addListMsg_t)(compMsgData_t *self, size_t msgLgth, uint8_t *msgData);
-typedef uint8_t (* addListField_t)(compMsgData_t *self, uint8_t fieldNameId, uint8_t fieldTypeId, uint8_t fieldLgth);
-#endif
 
 typedef struct compMsgData {
   compMsgDataView_t *compMsgDataView;

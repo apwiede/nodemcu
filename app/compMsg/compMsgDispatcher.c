@@ -48,6 +48,7 @@
 #include "c_stdio.h"
 #include "c_limits.h"
 #include "platform.h"
+#include "driver/uart.h"
 #include "compMsgDispatcher.h"
 #include "../crypto/mech.h"
 
@@ -369,19 +370,23 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
+ets_printf("§createMsgFromHeaderPart1§");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
+ets_printf("§createMsgFromHeaderPart2§");
   result = self->compMsgData->createMsg(self->compMsgData, self->compMsgData->numMsgDescParts, handle);
   checkErrOK(result);
+ets_printf("§createMsgFromHeaderPart3§");
   idx = 0;
   while(idx < self->compMsgData->numMsgDescParts) {
+ets_printf("§createMsgFromHeaderPart idx: %d§", idx);
     msgDescPart = &self->compMsgData->msgDescParts[idx];
     result = self->compMsgData->addField(self->compMsgData, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
     checkErrOK(result);
     idx++;
   }
 
-ets_printf("heap4: %d\n", system_get_free_heap_size());
+ets_printf("§heap4: %d§", system_get_free_heap_size());
   // runAction calls at the end buildMsg
 //  self->resetBuildMsgInfos(self);
 //  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
@@ -389,15 +394,19 @@ ets_printf("heap4: %d\n", system_get_free_heap_size());
     uint8_t actionMode;
     uint8_t type;
 
+ets_printf("§call getActionMode %s§", self->compMsgData->prepareValuesCbName);
     result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
     self->actionMode = actionMode;
+ets_printf("§getActionMode res: %d§", result);
     checkErrOK(result);
     result  = self->runAction(self, &type);
+ets_printf("§runAction res: %d§", result);
     // runAction starts a call with a callback and returns here before the callback has been running!!
     // when when coming here we are finished and the callback will do the work later on!
-ets_printf("runAction done\n");
+ets_printf("§runAction done§");
     return result;
   } else {
+ets_printf("§call buildMsg§");
     result = self->buildMsg(self);
 #ifdef NOTDEF
     result = setMsgValues(self);
@@ -557,6 +566,7 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
   }
   compMsgData = self->msgRequestInfos.requestData[0];
   compMsgData->direction = COMP_MSG_RECEIVED_DATA;
+//ets_printf("§call handleReceivePart: lgth: %d§", lgth);
   result = self->handleReceivedPart(self, data, lgth);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
@@ -656,6 +666,11 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self) {
   uint8_t result;
 headerPart_t *hdr;
 uint8_t *handle;
+  int id;
+  int stopbits;
+  int parity;
+  int databits;
+  uint32_t baud;
 
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
@@ -674,7 +689,7 @@ uint8_t *handle;
   result = compMsgNetsocketInit(self);
   checkErrOK(result);
 
-#define WEBSOCKETAP
+//#define WEBSOCKETAP
 #ifdef WEBSOCKETAP
 // FIXME !! temporary starting for testing only !!
 ets_printf("start RunAPMode\n");
@@ -696,12 +711,23 @@ ets_printf("start startCloudSocket\n");
   checkErrOK(result);
 #endif
 
-#ifdef NOTDEF
+#ifdef COMP_DESC_AA
 result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
 checkErrOK(result);
 result = self->createMsgFromHeaderPart(self, hdr, &handle);
 ets_printf("handle: %s result: %d\n", handle, result);
 checkErrOK(result);
+#endif
+// if nothing of the above is defined the uart input callback is used
+//#define UART_INPUT
+#ifdef UART_INPUT
+  id = 0;
+  stopbits = PLATFORM_UART_STOPBITS_1;
+  parity = PLATFORM_UART_PARITY_NONE;
+  databits = 8;
+  baud = BIT_RATE_115200;
+  result = self->uartSetup(self, id, baud, databits, parity, stopbits);
+  checkErrOK(result);
 #endif
   return COMP_DISP_ERR_OK;
 }

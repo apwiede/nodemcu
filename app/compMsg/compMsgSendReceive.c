@@ -49,6 +49,17 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
+// ================================= uartSetup ====================================
+
+static uint8_t uartSetup(compMsgDispatcher_t *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits) {
+  int result;
+
+  result = platform_uart_setup(id, baud, databits, parity, stopbits);
+ets_printf("§uartSetup:id: %d baud: %d§", id, baud);
+  checkErrOK(result);
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= uartReceiveCb ====================================
 
 static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
@@ -59,7 +70,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
   const uint8_t *myBuffer;
 
   received = &self->received;
-//ets_printf("§%c§", buffer[0]&0xFF);
+ets_printf("§uartReceiveCb: %c rlen: %d§", buffer[0]&0xFF, received->lgth);
   myBuffer = buffer;
   if (lgth == 0) {
     // simulate a '0' char!!
@@ -67,6 +78,9 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
     myBuffer = buf;
   }
   result =self->addUartRequestData(self, (uint8_t *)myBuffer, lgth);
+if (result != COMP_DISP_ERR_OK) {
+ets_printf("§uartReceiveCb end result: %d§", result);
+}
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }
@@ -158,6 +172,8 @@ ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_i
   case 'G':
    break;
   case 'S':
+   result = typeRSendAnswer(self, msgData, msgLgth);
+    checkErrOK(result);
    break;
   case 'R':
    break;
@@ -188,6 +204,7 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   result = self->addRequest(self, COMP_DISP_INPUT_UART, NULL, self->compMsgData);
 
+  self->uartSetup = &uartSetup;
   self->uartReceiveCb = &uartReceiveCb;
   self->typeRSendAnswer = &typeRSendAnswer;
   self->sendCloudMsg = &sendCloudMsg;

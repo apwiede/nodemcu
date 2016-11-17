@@ -355,7 +355,7 @@ static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos
   cp = myStr;
   result = getIntFromLine(cp, &uval, ep, &isEnd);
   checkErrOK(result);
-ets_printf("desc: headerLgth: %d\n", uval);
+//ets_printf("desc: headerLgth: %d\n", uval);
   hdrInfos->headerLgth = (uint8_t)uval;
   checkIsEnd(isEnd);
   cp = *ep;
@@ -721,7 +721,7 @@ ets_printf("bad value: %s\n", cp);
     hdrInfos->numHeaderParts++;
     idx++;
   }
-ets_printf("readHeadersAndSetFlags free myDataView: %p\n", myDataView);
+//ets_printf("readHeadersAndSetFlags free myDataView: %p\n", myDataView);
   os_free(myDataView);
   result2 = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result2);
@@ -1048,10 +1048,12 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   compMsgData_t *compMsgData;
   compMsgMsgDesc_t *compMsgMsgDesc;
 
+ets_printf("§getMsgPartsFromHeaderPart1§");
   compMsgData = self->compMsgData;
   compMsgMsgDesc = self->compMsgMsgDesc;
   self->compMsgData->currHdr = hdr;
   os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
+ets_printf("§file: %s§", fileName);
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
@@ -1232,8 +1234,9 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
+ets_printf("§getMsgPartsFromHeaderPart9 res: %d§", result);
   checkErrOK(result);
-ets_printf("heap2: %d\n", system_get_free_heap_size());
+ets_printf("§heap2: %d§", system_get_free_heap_size());
 
   return COMP_MSG_DESC_ERR_OK;
 }

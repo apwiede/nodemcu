@@ -74,6 +74,7 @@
 #define MODULE_INFO_AP_LIST_CALL_BACK    16
 #define MODULE_INFO_GUID                 17
 #define MODULE_INFO_srcId                18
+#define MODULE_INFO_PASSWDC              19
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -100,6 +101,7 @@ typedef struct compMsgModuleData {
   uint8_t Reserve3[3];
   uint8_t GUID[16];
   uint16_t srcId;
+  uint8_t passwdC[16];
 } compMsgModuleData_t;
 
 #endif	/* COMP_MSG_MODULE_DATA_H */

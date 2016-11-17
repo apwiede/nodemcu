@@ -500,6 +500,7 @@ static uint8_t initMsg(compMsgData_t *self) {
   compMsgField_t *fieldInfo;
   compMsgField_t *fieldInfo2;
 
+ets_printf("§initMsg1§");
   // initialize field offsets for each field
   // initialize totalLgth, headerLgth, cmdLgth
   if ((self->flags & COMP_MSG_IS_INITTED) != 0) {
@@ -512,6 +513,7 @@ static uint8_t initMsg(compMsgData_t *self) {
   while (idx < numEntries) {
     fieldInfo = &self->fields[idx];
     fieldInfo->fieldOffset = self->fieldOffset;
+ets_printf("§initMsg2 idx: %d§", idx);
     switch (fieldInfo->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_SRC:
       case COMP_MSG_SPEC_FIELD_DST:
@@ -555,28 +557,38 @@ static uint8_t initMsg(compMsgData_t *self) {
         fieldInfo->fieldLgth = fillerLgth;
         self->totalLgth = self->fieldOffset + fillerLgth + crcLgth;
         self->cmdLgth = self->totalLgth - self->headerLgth;
+ets_printf("§initMsg2a idx: %d§", idx);
         break;
       default:
         self->totalLgth = self->fieldOffset + fieldInfo->fieldLgth;
         self->cmdLgth = self->totalLgth - self->headerLgth;
+ets_printf("§initMsg2b idx: %d§", idx);
         break;
     }
     self->fieldOffset += fieldInfo->fieldLgth;
     idx++;
   }
+ets_printf("§initMsg2c§");
   if (self->compMsgDataView->dataView->data != NULL) {
-    os_free(self->compMsgDataView->dataView->data);
+ets_printf("§initMsg2d %p§", self->compMsgDataView->dataView->data);
+//    os_free(self->compMsgDataView->dataView->data);
+ets_printf("§initMsg2e§");
   }
+ets_printf("§initMsg2f§");
   if (self->totalLgth == 0) {
+ets_printf("§initMsg3a§");
     return COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING;
   }
+ets_printf("§initMsg3b§");
   result = self->compMsgDataView->dataView->setData(self->compMsgDataView->dataView, self->totalLgth);
+ets_printf("§initMsg3 res: %d§", result);
   checkErrOK(result);
   self->flags |= COMP_MSG_IS_INITTED;
   // set the appropriate field values for the lgth entries
   idx = 0;
   numEntries = self->numFields;
   while (idx < numEntries) {
+ets_printf("§initMsg4 idx: %d§", idx);
     fieldInfo = &self->fields[idx];
     switch (fieldInfo->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
@@ -592,6 +604,7 @@ static uint8_t initMsg(compMsgData_t *self) {
     }
     idx++;
   }
+ets_printf("§initMsg5§");
   return COMP_MSG_ERR_OK;
 }
 

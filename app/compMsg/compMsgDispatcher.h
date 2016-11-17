@@ -191,6 +191,7 @@ typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t 
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 // SendReceive
+typedef uint8_t (* uartSetup_t)(compMsgDispatcher_t *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits);
 typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 typedef uint8_t (* sendCloudMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth);
@@ -239,6 +240,8 @@ typedef struct compMsgDispatcher {
   resetMsgInfo_t resetMsgInfo;
 
   // SendReceive
+  uartSetup_t uartSetup;
+  uartReceiveCb_t uartReceiveCb;
   typeRSendAnswer_t typeRSendAnswer;
   sendMsg_t sendMsg;
   sendCloudMsg_t sendCloudMsg;
@@ -271,7 +274,6 @@ typedef struct compMsgDispatcher {
   nextFittingEntry_t nextFittingEntry;
   handleReceivedPart_t handleReceivedPart;
   handleToSendPart_t handleToSendPart;
-  uartReceiveCb_t uartReceiveCb;
   createDispatcher_t createDispatcher;
   initDispatcher_t initDispatcher;
   createMsgFromHeaderPart_t createMsgFromHeaderPart;

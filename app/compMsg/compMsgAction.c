@@ -271,6 +271,15 @@ static uint8_t getGUID(compMsgDispatcher_t *self) {
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= getPasswdC ====================================
+
+static uint8_t getPasswdC(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_PASSWDC, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= getSrcId ====================================
 
 static uint8_t getSrcId(compMsgDispatcher_t *self) {
@@ -355,6 +364,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "getWifiKeyValueInfos",      (action_t)(&getWifiKeyValueInfos),      0x4141, 0, 8 },
   { "getWifiKeyValues",          (action_t)(&getWifiKeyValues),          0x4141, 0, 8 },
   { "getWifiSrcId",              (action_t)(&getWifiSrcId),              0x4141, 0, 8 },
+  { "getPasswdC",                (action_t)(&getPasswdC),                0, 0, 0 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
 

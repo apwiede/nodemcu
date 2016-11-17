@@ -169,7 +169,7 @@ ets_printf("nextFitting HANLDE_NOT_FOUND\n");
   // next sequence field is handle type (skip, we have it in hdr fields)
   hdrInfos->seqIdx++;
   received->encryption = hdr->hdrEncryption;
-ets_printf("§nextFitting!found!%d!hdrIdx!%d§cmdKey:0x%04x!\n", found, hdrIdx, hdr->hdrU16CmdKey);
+ets_printf("§nextFitting!found!%d!hdrIdx!%d!cmdKey:0x%04x!§", found, hdrIdx, hdr->hdrU16CmdKey);
   return COMP_DISP_ERR_OK;
 }
 
@@ -185,6 +185,7 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
   uint16_t seqVal;
 
   dataView = self->compMsgData->compMsgDataView->dataView;
+ets_printf("§reclgth: %d dataView Lgth: %d§", received->lgth, dataView->lgth);
   received->fieldOffset = 0;
   myHeaderLgth = 0;
   hdrInfos->seqIdx = 0;
@@ -223,10 +224,13 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgPart
     case COMP_DISP_U8_VECTOR_HDR_FILLER:
     {
       uint8_t *cp;
+      uint8_t lgth;
+
       cp = received->hdrFiller;
-      result = dataView->getUint8Vector(dataView, received->fieldOffset, &cp, sizeof(received->hdrFiller));
+      lgth = hdrInfos->headerLgth - received->fieldOffset;
+      result = dataView->getUint8Vector(dataView, received->fieldOffset, &cp, lgth);
       checkErrOK(result);
-      received->fieldOffset += sizeof(received->hdrFiller);
+      received->fieldOffset += lgth;
       break;
     }
     }
@@ -247,6 +251,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hdr
   headerPart_t *hdr;
   int hdrIdx;
 
+ets_printf("§prepareAnswerMsg§");
   hdrIdx = hdrInfos->currPartIdx;
   hdrIdx++; // the Ack message has to be the next entry in headerInfos!!
   hdr = &hdrInfos->headerParts[hdrIdx];
@@ -271,6 +276,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
   uint16_t sequenceEntry;
   uint8_t *handle;
 
+ets_printf("§handleReceivedMsg§");
   dataView = self->compMsgData->compMsgDataView->dataView;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
@@ -289,7 +295,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received
       received->u16CmdKey = u16;
       received->fieldOffset += 2;
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
-ets_printf("§u16CmdKey!0x%04x!§\n", received->u16CmdKey);
+ets_printf("§u16CmdKey!0x%04x!§", received->u16CmdKey);
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
         hdrInfos->currPartIdx++;
         result = self->nextFittingEntry(self, 0, received->u16CmdKey);
@@ -299,13 +305,13 @@ ets_printf("§u16CmdKey!0x%04x!§\n", received->u16CmdKey);
       break;
     case COMP_DISP_U0_CMD_LGTH:
       received->fieldOffset += 2;
-ets_printf("§u0CmdLgth!0!§\n");
+ets_printf("§u0CmdLgth!0!§");
       break;
     case COMP_DISP_U16_CMD_LGTH:
       result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdLgth = u16;
       received->fieldOffset += 2;
-ets_printf("§u16CmdLgth!0x%04x!§\n", received->u16CmdLgth);
+ets_printf("§u16CmdLgth!0x%04x!§", received->u16CmdLgth);
       break;
     case COMP_DISP_U0_CRC:
 ets_printf("§u0Crc!0!§");
@@ -356,6 +362,7 @@ ets_printf("§u16TotalCrc!res!%d!§", result);
 #endif
   result = -self->resetMsgInfo(self, received);
   checkErrOK(result);
+ets_printf("§handleReceivedMsg done§");
   return COMP_MSG_ERR_OK;
 }
 
@@ -373,31 +380,37 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
   compMsgField_t fieldInfo;
   int result;
 
-ets_printf("handleReceivedPart\n");
+//ets_printf("§handleReceivedPart: %c 0x%02x§", buffer[0], buffer[0]);
+if (buffer == NULL) {
+ets_printf("§handleReceivedPart: buffer == NULL lgth: %d§", lgth);
+} else {
+ets_printf("§handleReceivedPart: 0x%02x§", buffer[0]);
+}
   hdrInfos = &self->msgHeaderInfos;
   received = &self->received;
   dataView = self->compMsgData->compMsgDataView->dataView;
   dataView->data = received->buf;
-//ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!\n§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
+//ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
   idx = 0;
   while (idx < lgth) {
     received->buf[received->lgth++] = buffer[idx];
     received->realLgth++;
     dataView->lgth++;
     if (received->lgth == hdrInfos->headerLgth) {
-//ets_printf("received lgth: %d lgth: %d idx: %d\n", received->lgth, lgth, idx);
-ets_printf("receveived->lgth: %d\n", received->lgth);
-dataView->dumpBinary(received->buf, received->lgth, "rec msg header");
+//ets_printf("§received lgth: %d lgth: %d idx: %d§", received->lgth, lgth, idx);
+//ets_printf("receveived->lgth: %d\n", received->lgth);
+//dataView->dumpBinary(received->buf, received->lgth, "§rec msg header");
+//ets_printf("§");
       result = getHeaderIndexFromHeaderFields(self, received, hdrInfos);
-//ets_printf("getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
+ets_printf("§getHeaderIndexFromHeaderFields result: %d currPartIdx: %d§", result, hdrInfos->currPartIdx);
     }
     // loop until we have full message then decrypt if necessary and then handle the message
     if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
 //ets_printf("hdrIdx: %d\n", hdrIdx);
-ets_printf("receveived->totalLgth: %d\n", received->totalLgth);
-dataView->dumpBinary(received->buf, received->lgth, "rec msg");
+ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
+//dataView->dumpBinary(received->buf, received->lgth, "rec msg");
       if (hdr->hdrEncryption == 'E') {
         uint8_t *cryptedPtr;
         uint8_t *cryptKey;
@@ -418,7 +431,7 @@ cryptKey = "a1b2c3d4e5f6g7h8";
         c_memcpy(cryptedPtr, decrypted, decryptedLgth);
       }
       result = self->handleReceivedMsg(self, received, hdrInfos);
-ets_printf("handleReceivedMsg end buffer idx: %d result: %d\n", idx, result);
+ets_printf("§handleReceivedMsg end buffer idx: %d result: %d§", idx, result);
       return result;
     }
     idx++;
