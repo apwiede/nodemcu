@@ -180,6 +180,20 @@ proc getCasingDataValues {compMsgDispatcherVar} {
   return $::COMP_MSG_ERR_OK
 }
 
+# ================================ readByte1 ===============================
+
+proc readByte1 {fd bufVar lgthVar} {
+  upvar $bufVar buf
+  upvar $lgthVar lgth
+
+  set ch [read $fd 1]
+  binary scan $ch c pch
+puts stderr "ch: $ch!$pch!lgth: $lgth"
+  append buf $ch
+  incr lgth
+
+}
+
 # ================================ main ===============================
 
 # ================================ InitCompMsg ===============================

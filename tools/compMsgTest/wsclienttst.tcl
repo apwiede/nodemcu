@@ -56,6 +56,10 @@ source compMsgWifiData.tcl
 source compMsgBuildMsg.tcl
 source compMsgModuleData.tcl
 
+set ::PORT 80
+set ::path /getaplist
+set ::host "192.168.4.1"
+
 # ================================ checkErrOK ===============================
 
 proc checkErrOK {result} {
@@ -334,6 +338,7 @@ set fd [open "AAAnswer.txt" w]
 puts $fd $msg
 flush $fd
 close $fd
+::compMsg compMsgData dumpBinary $msg [string length $msg] "MSG_dump crypted"
       set result [::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]]
       checkErrOK $result
 fillTable
@@ -357,23 +362,22 @@ proc getAPInfos { sock } {
   $::startBtn configure -text "Quit" -command [list exit 0]
 }
 
-# ================================ main ===============================
-
 # ================================ InitCompMsg ===============================
 
-set compMsgDispatcher [dict create]
-set compMsgWifiData [dict create]
-set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
-checkErrOK $result
-set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
-checkErrOK $result
+proc InitCompMsg {} {
+  set ::compMsgDispatcher [dict create]
+  set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
+  checkErrOK $result
+  set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
+  checkErrOK $result
 puts stderr "dispatcherHandle!$dispatcherHandle!"
-set result [::compMsg compMsgDispatcher initDispatcher compMsgDispatcher]
-checkErrOK $result
+  set result [::compMsg compMsgDispatcher initDispatcher compMsgDispatcher]
+  checkErrOK $result
+}
 
-set PORT 80
-set path /getaplist
-set host "192.168.4.1"
+# ================================ main ===============================
+
+InitCompMsg
 
 puts stderr "ws://${host}:${PORT}${path}"
 set clientSocket [::websocket::open "ws://${host}:${PORT}${path}" ::clientHandler] 

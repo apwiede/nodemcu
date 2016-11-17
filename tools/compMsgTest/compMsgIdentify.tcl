@@ -328,6 +328,7 @@ puts stderr "Fitting entry not found!"
       set seqIdx 0
       set seqVal [lindex $headerSequence $seqIdx]
       while {$seqIdx < [llength $headerSequence]} {
+puts stderr "seqVal: $seqVal!"
         switch $seqVal {
           COMP_DISP_U16_DST {
             set result [::compMsg dataView getUint16 [dict get $received fieldOffset] value]
@@ -360,10 +361,11 @@ puts stderr "Fitting entry not found!"
             dict incr received fieldOffset $::GUID_LGTH
           }
           COMP_DISP_U8_VECTOR_HDR_FILLER {
-            set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] value $::HDR_FILLER_LGTH]
+            set lgth [expr {[dict get $headerInfos headerLgth] - [dict get $received fieldOffset]}]
+            set result [::compMsg dataView getUint8Vector [dict get $received fieldOffset] value $lgth]
             dict set received hdrFiller $value
             checkErrOK $result
-            dict incr received fieldOffset $::HDR_FILLER_LGTH
+            dict incr received fieldOffset $lgth
           }
           default {
             error "funny seqVal: $seqVal!"
@@ -493,6 +495,7 @@ puts stderr "handleReceivedMsg end"
         dict incr received lgth 1
         dict incr received realLgth 1
         ::compMsg dataView appendData $ch 1
+#puts stderr "rec l: [dict get $received lgth]!hdr l: [dict get $headerInfos headerLgth]!"
         if {[dict get $received lgth] == [dict get $headerInfos headerLgth]} {
           set result [getHeaderIndexFromHeaderFields]
         }
@@ -506,12 +509,12 @@ puts stderr "handleReceivedMsg end"
             set myHeader [string range $buffer 0 [expr {$myHeaderLgth - 1}]]
             set mlen [expr {$lgth - $myHeaderLgth}]
             set crypted [string range $buffer $myHeaderLgth end]
-#puts stderr "cryptedLgth: [string length $crypted]!"
+puts stderr "cryptedLgth: [string length $crypted]!"
             set cryptKey "a1b2c3d4e5f6g7h8"
             set result [::compMsg compMsgDispatcher decryptMsg $crypted $mlen $cryptKey 16 $cryptKey 16 decrypted decryptedLgth]
-#puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
+puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
             if {$result != $::COMP_MSG_ERR_OK} {
-#puts stderr "decrypt error"
+puts stderr "decrypt error"
             }
             set buffer "${myHeader}${decrypted}"
             if {$lgth != [expr {$myHeaderLgth + $mlen}]} {
@@ -539,8 +542,8 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen}]!"
           checkErrOK $result
           set result [::compMsg compMsgData initReceivedMsg compMsgDispatcher numTableRows numTableRowFields]
           checkErrOK $result
-#::compMsg compMsgData dumpMsg compMsgDispatcher
-#puts stderr "===dumpMsg done"
+::compMsg compMsgData dumpMsg compMsgDispatcher
+puts stderr "===dumpMsg done"
 
 
 #          set result [::compMsg compMsgIdentify handleReceivedMsg $received $headerInfos]

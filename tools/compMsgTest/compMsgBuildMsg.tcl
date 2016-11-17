@@ -205,7 +205,10 @@ namespace eval compMsg {
           incr msgDescPartIdx
         }
     #ets_printf{"fieldNameId: %d numtabrows: %d\n", fieldInfo fieldNameId, numTableRows}
-        switch [dict get $fieldInfo fieldNameId] {
+        set fieldNameId [dict get $fieldInfo fieldNameId]
+        set fieldNameStr [dict get $msgDescPart fieldNameStr]
+puts stderr "setField: $fieldNameStr!$fieldNameId!"
+        switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
             set numTableRows [dict get $compMsgData numTableRows]
             set numTableRowFields [dict get $compMsgData numTableRowFields]
@@ -265,8 +268,8 @@ namespace eval compMsg {
       checkErrOK $result
       set result [::compMsg compMsgData getMsgData compMsgDispatcher msgData msgLgth]
       checkErrOK $result
-::compMsg compMsgData dumpMsg compMsgDispatcher
-::compMsg compMsgData dumpBinary $msgData $msgLgth "msgData"
+#::compMsg compMsgData dumpMsg compMsgDispatcher
+#::compMsg compMsgData dumpBinary $msgData $msgLgth "msgData"
       if {[dict get $compMsgDispatcher currHdr hdrEncryption] eq "E"} {
         set cryptKey "a1b2c3d4e5f6g7h8"
         set ivlen 16
@@ -292,10 +295,10 @@ puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDa
 #set toPart [dict get $compMsgDispatcher currHdr hdrToPart]
 #puts stderr [format "transferType: %s dst: 0x%04x" $handleType $toPart]
       set result [::compMsg compMsgSendReceive sendMsg compMsgDispatcher $msgData $msgLgth]
-set fd [open "ADRequest.txt" w]
-puts $fd $msgData
-flush $fd
-close $fd
+#set fd [open "ADRequest.txt" w]
+#puts $fd $msgData
+#flush $fd
+#close $fd
 puts stderr [format "buildMsg sendMsg has been called result: %d" $result]
       checkErrOK $result
       return $result
