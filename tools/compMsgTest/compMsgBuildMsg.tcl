@@ -135,8 +135,9 @@ namespace eval compMsg {
             set currTableCol 0
           }
         } else {
-          if {[dict get $compMsgDispatcher msgValPart fieldValueCallback] ne [list]} {
-            set result [[dict get $compMsgDispatcher msgValPart fieldValueCallback] compMsgDispatcher]
+          set callback [dict get $compMsgDispatcher msgValPart fieldValueCallback]
+          if {$callback ne [list]} {
+            set result [$callback compMsgDispatcher]
             checkErrOK $result
           }
           set value [dict get $compMsgDispatcher msgValPart fieldValue]
@@ -207,7 +208,6 @@ namespace eval compMsg {
     #ets_printf{"fieldNameId: %d numtabrows: %d\n", fieldInfo fieldNameId, numTableRows}
         set fieldNameId [dict get $fieldInfo fieldNameId]
         set fieldNameStr [dict get $msgDescPart fieldNameStr]
-puts stderr "setField: $fieldNameStr!$fieldNameId!"
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
             set numTableRows [dict get $compMsgData numTableRows]

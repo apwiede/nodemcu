@@ -335,6 +335,7 @@ puts stderr "need handler for received MSG!lgth: [string length $msg]!"
       set result [::compMsg dataView setData "" 0]
       checkErrOK $result
 set fd [open "AAAnswer.txt" w]
+fconfigure $fd -translation binary
 puts $fd $msg
 flush $fd
 close $fd

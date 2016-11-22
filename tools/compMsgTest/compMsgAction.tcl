@@ -127,7 +127,7 @@ puts stderr "§runDeletePasswdC§"
     proc getMACAddr {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_MACAddr, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_MACAddr DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -137,7 +137,7 @@ puts stderr "§runDeletePasswdC§"
     proc getIPAddr {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_IPAddr, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_IPAddr DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -147,7 +147,7 @@ puts stderr "§runDeletePasswdC§"
     proc getFirmwareVersion {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_FirmwareVersion, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_FirmwareVersion DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -157,7 +157,7 @@ puts stderr "§runDeletePasswdC§"
     proc getSerieNumber {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_SerieNumber, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_SerieNumber DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -167,7 +167,7 @@ puts stderr "§runDeletePasswdC§"
     proc getRSSI {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_RSSI, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_RSSI DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -177,7 +177,7 @@ puts stderr "§runDeletePasswdC§"
     proc getModuleConnection {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_ModuleConnection, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_ModuleConnection DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -187,7 +187,7 @@ puts stderr "§runDeletePasswdC§"
     proc getDeviceMode {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_DeviceMode, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_DeviceMode DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -197,7 +197,7 @@ puts stderr "§runDeletePasswdC§"
     proc getDeviceSecurity{compMsgDispatcher_t *compMsgDispatcher} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_DeviceSecurity, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_DeviceSecurity DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -207,7 +207,7 @@ puts stderr "§runDeletePasswdC§"
     proc getErrorMain {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_ErrorMain, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_ErrorMain DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -217,7 +217,7 @@ puts stderr "§runDeletePasswdC§"
     proc getErrorSub {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_ErrorSub, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_ErrorSub DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -227,7 +227,7 @@ puts stderr "§runDeletePasswdC§"
     proc getDateAndTime {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_DateAndTime, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgDispatcher getModuleValue compMsgDispatcher MODULE_INFO_DateAndTime DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -237,7 +237,7 @@ puts stderr "§runDeletePasswdC§"
     proc getSSIDs {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_SSIDs, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_SSIDs DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -247,7 +247,7 @@ puts stderr "§runDeletePasswdC§"
     proc getReserve1 {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_Reserve1, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve1 DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -257,7 +257,7 @@ puts stderr "§runDeletePasswdC§"
     proc getReserve2 {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_Reserve2, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve2 DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -267,7 +267,57 @@ puts stderr "§runDeletePasswdC§"
     proc getReserve3 {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_Reserve3, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve3 DATA_VIEW_FIELD_UINT8_VECTOR]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve4 ====================================
+    
+    proc ::getReserve4 {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve4 DATA_VIEW_FIELD_UINT8_VECTOR]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve5 ====================================
+    
+    proc getReserve5 {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve5 DATA_VIEW_FIELD_UINT8_VECTOR]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve6 ====================================
+    
+    proc getReserve6 {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve6 DATA_VIEW_FIELD_UINT8_VECTOR]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve7 ====================================
+    
+    proc getReserve7 {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve7 DATA_VIEW_FIELD_UINT8_VECTOR]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve8 ====================================
+    
+    proc getReserve8 {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_Reserve8 DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -277,7 +327,7 @@ puts stderr "§runDeletePasswdC§"
     proc getGUID {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_GUID, DATA_VIEW_FIELD_UINT8_VECTOR};
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_GUID DATA_VIEW_FIELD_UINT8_VECTOR]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
@@ -287,7 +337,37 @@ puts stderr "§runDeletePasswdC§"
     proc getSrcId {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set result [::compMsg compMsgDispatcher getModuleValue{cmdisp, MODULE_INFO_srcId, DATA_VIEW_FIELD_UINT16_T};
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_srcId DATA_VIEW_FIELD_UINT16_T]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getPasswdC ====================================
+    
+    proc getPasswdC {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_passwdC DATA_VIEW_FIELD_UINT8_VECTOR]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getOperatingMode ====================================
+    
+    proc ::getOperatingMode {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData getModuleValue compMsgDispatcher MODULE_INFO_operatingMode DATA_VIEW_FIELD_UINT8_VECTOR]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= setOperatingMode ====================================
+    
+    proc setOperatingMode {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData setModuleValue compMsgDispatcher MODULE_INFO_operatingMode MODULE_OPERATING_MODE_AP]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }

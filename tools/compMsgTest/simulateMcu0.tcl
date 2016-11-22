@@ -56,11 +56,11 @@ set ::debugTxt ""
 set ::startBuf ""
 set ::startTxt ""
 set ::startCommunication false
+set ::isStart true
 
 set ::inDebug false
 set ::lastCh ""
 set ::totalLgth 999
-set ::handleStateInterval 1000
 
 # ================================ checkErrOK ===============================
 
@@ -85,6 +85,8 @@ proc init0 {} {
   set ::fd0 [open $::dev0 w+]
   fconfigure $::fd0 -blocking 0 -translation binary
   fconfigure $::fd0 -mode 115200,n,8,1
+#  puts $::fd0 {dofile("startCompMsgUart.lua")}
+#  flush $::fd0
   fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
 }
 
@@ -105,10 +107,9 @@ puts stderr "=== I after getHeaderFromUniqueFields"
       set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
 puts stderr " I createMsgFromHeaderPart: result!$result!"
       checkErrOK $result
-      set ::inDebug false
-      set buf ""
-      set lgth 0
-#      set ::currState MODULE_INFO
+      set ::currState MODULE_INFO
+      set ::totalLgth 999
+      fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
     }
     MODULE_INFO {
       set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 MD hdr]
@@ -118,10 +119,10 @@ puts stderr "=== M after getHeaderFromUniqueFields"
       set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
 puts stderr " M createMsgFromHeaderPart: result!$result!"
       checkErrOK $result
-      set ::inDebug false
-      set buf ""
-      set lgth 0
+puts stderr " M should send MDMsg"
       set ::currState OPERATION_MODE
+      set ::totalLgth 999
+      fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
     }
     OPERATION_MODE {
       set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 BD hdr]
@@ -131,60 +132,16 @@ puts stderr "===after getHeaderFromUniqueFields"
       set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
 puts stderr "createMsgFromHeaderPart: result!$result!"
       checkErrOK $result
+puts stderr "should send BDMsg"
       set ::currState OPERATION_MODE
+      set ::totalLgth 999
+      fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
     }
     default {
 puts stderr "funny state: $myState!"
     }
   }
-}
-
-# ================================ handleAnswer ===============================
-
-proc handleAnswer {bufVar lgthVar} {
-  upvar $bufVar buf
-  upvar $lgthVar lgth
-
-  set myState $::currState
-puts stderr "handleAnswer: $myState!!"
-  set received [dict create]
-  dict set received buf $buf
-  dict set received lgth $lgth
-  dict incr received realLgth $lgth
-  dict incr received totalLgth $lgth
-  ::compMsg dataView setData $buf $lgth
-  set result [::compMsg compMsgIdentify getHeaderIndexFromHeaderFields ::compMsgDispatcher received]
-  checkErrOK $result
-  set result [::compMsg compMsgIdentify handleReceivedMsg ::compMsgDispatcher received]
-  checkErrOK $result
-  set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher @cmdKey value]
-puts stderr "cmdKey: $value!result: $result!"
-  checkErrOK $result
-
-  switch $myState {
-    INIT {
-puts stderr "handleAnswer lgth: $lgth!"
-      binary scan \x49\x41 S cmdKey ; # IA
-      if {$value == $cmdKey} {
-        set ::currState MODULE_INFO
-      }
-    }
-    MODULE_INFO {
-      binary scan \x4d\x41 S cmdKey ; # MA
-      if {$value == $cmdKey} {
-        set ::currState OPERATION_MODE
-      }
-    }
-    OPERATION_MODE {
-      # nothing to do
-    }
-    default {
-puts stderr "funny state: $myState!"
-    }
-  }
-  set result [handleState buf lgth]
-  checkErrOK $result
-  return $result
+  return $::COMP_MSG_ERR_OK
 }
 
 # ================================ handleInput0 ===============================
@@ -195,50 +152,56 @@ proc handleInput0 {ch bufVar lgthVar} {
 
   set pch 0
   binary scan $ch c pch
-#puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
-  if {!$::inDebug &&($ch eq ">")} {
-puts stderr "got '>'"
-#    return -code return
-    set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
+#puts stderr "handleInput0 1: ch: $ch isStart: $::isStart!lastCh: $::lastCh!"
+  if {$::isStart} {
+#puts stderr "  ==handleInput0: isStart rch: $ch![format 0x%02x [expr {$pch & 0xFF}]]!"
+    if {$ch eq "\n"} {
+      puts stderr "  ==in START!$::startTxt!"
+      set ::startBuf ""
+      set ::startTxt ""
+    }
+    if {$ch eq ">"} {
+puts stderr "reset ::isStart"
+      set ::isStart false
+#      return -code return
+      set ::lastCh $ch
+      return $::COMP_MSG_ERR_OK
+    }
+    append ::startTxt $ch
+    if {$ch eq "§"} {
+puts stderr "  ==handleInput0 2: got §!startTxt: $::startTxt!"
+      set ::startBuf ""
+      set ::startTxt ""
+#      set ::isStart false
+#      set ::startCommunication true
+#      fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
+    } else {
+      set ::lastCh $ch
+      return -code return
+    }
   }
   if {[format 0x%02x [expr {$pch & 0xff}]] eq "0xc2"} {
 #puts stderr "ch: $ch!pch: $pch!"
     set ::lastCh $ch
     return -code return
   }
+#puts stderr "  ==handleInput0 3!"
   if {$ch eq "§"} {
-#puts stderr "  ==handleInput0 2: got §!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
+#puts stderr "  ==handleInput0: inDebug rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
     if {$::inDebug} {
       set ::inDebug false
 # puts stderr "  ==handleInput0: DBG: $::debugBuf!"
       append ::debugTxt $ch
-puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
+puts stderr "  ==handleInput0: DBT: $::debugTxt!"
       set ::debugBuf ""
       set ::debugTxt ""
     } else {
       set ::inDebug true
       set ::debugBuf ""
-      set ::debugTxt ""
+      set ::debugTxt "$ch"
     }
+    set ::lastCh $ch
     return -code return
-  } else {
-    if {$::inDebug} {
-#      append ::debugBuf $ch
-      append ::debugTxt "$ch"
-      set ::lastCh $ch
-      return -code return
-    } else {
-#puts stderr "  ==handleInput0 3a no debug: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
-      if {($lgth <= 2) && (($ch eq "\r") || ($ch eq "\n"))} {
-        # ignore debug line end!!
-      } else {
-        append buf $ch
-        incr lgth
-      }
-      set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
-    }
   }
 #puts stderr "  ==handleInput0 4 inDebug!$::inDebug!"
   if {$::inDebug} {
@@ -266,7 +229,7 @@ puts stderr "received '> '"
       return $::COMP_MSG_ERR_OK
     }
   }
-puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
+#puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
   append buf $ch
   incr lgth
   set ::lastCh $ch
@@ -295,16 +258,25 @@ proc readByte0 {fd bufVar lgthVar} {
   upvar $lgthVar lgth
 
 #puts stderr "=readByte0: read!"
-#  set ::afterId [after 500 [list startMsg $fd buf lgth]]
+  set ::afterId [after 500 [list startMsg $fd buf lgth]]
 #puts stderr "afterId: $::afterId!"
   set ch [read $fd 1]
-#  after cancel $::afterId
+  after cancel $::afterId
 #puts stderr "cancelled: $::afterId!ch: $ch!"
   set result [handleInput0 $ch buf lgth]
-#puts stderr "=readByte0: result: $result!"
+puts stderr "=readByte0: result: $result!"
   checkErrOK $result
   
 
+puts stderr "startCommunication: $::startCommunication!"
+  if {$::startCommunication} {
+    set ::startCommunication false
+    fileevent $::fd0 readable [list]
+    set buf ""
+    set lgth 0
+    set ::currState INIT
+    return [handleState buf lgth]
+  }
   if {$lgth == $::headerLgth} {
 puts stderr "lgth: $lgth!headerLgth!$::headerLgth!"
 puts stderr "buf: $buf!"
@@ -321,10 +293,10 @@ puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
     }
 #    puts stderr "1: got telegram: for cmdKey: $::cmdKey: $myBuf"
     puts stderr "1: got telegram: for $myBuf"
-    return [handleAnswer buf lgth]
-#    return $::COMP_MSG_ERR_OK
+    return [handleState buf lgth]
   }
 }
+
 
 # ================================ InitCompMsg ===============================
 
@@ -337,7 +309,6 @@ proc InitCompMsg {} {
 puts stderr "dispatcherHandle!$dispatcherHandle!"
   set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
   checkErrOK $result
-  set ::headerInfos [dict get $::compMsgDispatcher headerInfos]
   set ::headerLgth [dict get $::compMsgDispatcher headerInfos headerLgth]
 puts stderr "headerLgth: $::headerLgth!"
 }
@@ -367,7 +338,6 @@ proc getGUID {compMsgDispatcherVar} {
 # ================================ main ===============================
 
 InitCompMsg
-set ::afterHandleStateId [after $::handleStateInterval [list handleState ::dev0Buf ::dev0Lgth]]
 init0
 
 vwait forever

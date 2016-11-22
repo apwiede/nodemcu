@@ -39,7 +39,7 @@ namespace eval compMsg {
   namespace eval compMsgModuleData {
     namespace ensemble create
       
-    namespace export compMsgModuleDataInit setModuleValues
+    namespace export compMsgModuleDataInit setModuleValues getModuleValue setModuleValue
 
     variable compMsgModuleData
 
@@ -49,7 +49,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       
     #ets_printf{"getModuleTableFieldValue: row: %d col: %d actionMode: %d\n", self->buildMsgInfos.tableRow, self->buildMsgInfos tableCol, actionMode}
-      switch %actionMode {
+      switch $actionMode {
         MODULE_INFO_AP_LIST_CALL_BACK {
           set result [::compMsg compMsgWebsocket getScanInfoTableFieldValue compMsgDispatcher $actionMode]
           checkErrOK $result
@@ -117,20 +117,72 @@ namespace eval compMsg {
           dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve1]
         }
         MODULE_INFO_Reserve2 {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData Reserve2]
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve2]
         }
         MODULE_INFO_Reserve3 {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData Reserve3]
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve3]
+        }
+        MODULE_INFO_Reserve4 {
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve4]
+        }
+        MODULE_INFO_Reserve5 {
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve5]
+        }
+        MODULE_INFO_Reserve6 {
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve6]
+        }
+        MODULE_INFO_Reserve7 {
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve7]
+        }
+        MODULE_INFO_Reserve8 {
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve8]
         }
         MODULE_INFO_GUID {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData GUID]
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData GUID]
         }
         MODULE_INFO_srcId {
           dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
           dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData srcId]
         }
-      default {
-        checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
+        MODULE_INFO_passwdC {
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData passwdC]
+        }
+        MODULE_INFO_srcId {
+          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData operatingMode]
+        }
+        MODULE_INFO_operatingMode {
+          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+          switch [dict get $compMsgModuleData operatingMode] {
+           MODULE_OPERATING_MODE_CLIENT {
+             set value 1
+           }
+           MODULE_OPERATING_MODE_AP {
+             set value 2
+           }
+           MODULE_OPERATING_MODE_LIGHT_SLEEP_WAKEUP {
+             set value 3
+           }
+           MODULE_OPERATING_MODE_LIGHT_SLEEP {
+             set value 4
+           }
+           MODULE_OPERATING_MODE_WPS {
+             set value 5
+           }
+           MODULE_OPERATING_MODE_MODULE_TEST {
+             set value \xD0
+           }
+           MODULE_OPERATING_MODE_CELAR_PASSWDC {
+             set value \xE0
+           }
+           default {
+             checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
+           }
+          }
+          dict set compMsgDispatcher msgValPart fieldValue $value
+        }
+        default {
+          checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
         }
       }
       return $::COMP_DISP_ERR_OK
@@ -146,6 +198,16 @@ namespace eval compMsg {
       return $::COMP_DISP_ERR_OK
     }
     
+    # ================================= setModuleValue ====================================
+    
+    proc setModuleValue {compMsgDispatcherVar fieldNameStr value} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      variable compMsgModuleData
+    
+      dict set compMsgModuleData $fieldNameStr $value
+      return $::COMP_DISP_ERR_OK
+    }
+
     # ================================= setModuleValues ====================================
     
     proc setModuleValues {compMsgDispatcherVar} {
@@ -187,8 +249,15 @@ if {0} {
       dict set compMsgModuleData Reserve1 "X"
       dict set compMsgModuleData Reserve2 "XY"
       dict set compMsgModuleData Reserve3 "XYZ"
+      dict set compMsgModuleData Reserve4 "ABCD"
+      dict set compMsgModuleData Reserve5 "ABCDE"
+      dict set compMsgModuleData Reserve6 "ABCDEF"
+      dict set compMsgModuleData Reserve7 "ABCDEFG"
+      dict set compMsgModuleData Reserve8 "ABCDEFGH"
       dict set compMsgModuleData GUID "1234-5678-9012-1"
       dict set compMsgModuleData srcId 12312
+      dict set compMsgModuleData passwdC "apwiede1apwiede2"
+      dict set compMsgModuleData operatingMode MODULE_OPERATING_MODE_AP
 
       return $::COMP_DISP_ERR_OK
     }

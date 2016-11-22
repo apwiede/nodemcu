@@ -102,11 +102,11 @@ puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
         }
         "R" {
 puts stderr "sendMsg R: Mcu -> Wifi encryption: $encryption!"
-puts stderr "keys: [dict keys $::compMsgDispatcher]![dict keys $compMsgDispatcher]!"
           set fd [dict get $compMsgDispatcher WifiFd]
-puts stderr "Mcu Simulation fd: $fd!"
+puts stderr "Mcu Simulation fd: $fd!lgth: [string length $msgData]!msgData!$msgData!"
           puts $fd $msgData
           flush $fd
+puts stderr "sendMsg R: Mcu -> Wifi done!"
           return $::COMP_DISP_ERR_OK
         }
         "U" {

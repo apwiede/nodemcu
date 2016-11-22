@@ -683,6 +683,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
       set size [dict get $fieldInfo fieldOffset]
 #set ::crcDebug true
 set cnt 0
+#puts stderr "setTotalCrc: $::compMsg::dataView::lgth!$::compMsg::dataView::data!"
       set crc  0
       set offset 0
       while {$offset < $size} {
