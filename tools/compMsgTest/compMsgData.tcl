@@ -1021,11 +1021,10 @@ dict set compMsgData numTabRowFields $numTableRowFields
       dict set compMsgData fields $fields
 #puts stderr "initMsg done!"
       dict set compMsgDispatcher compMsgData $compMsgData
-puts stderr "dumpMsg"
-::compMsg compMsgData dumpMsg compMsgDispatcher
-puts stderr "hexDump"
-::compMsg compMsgData dumpBinary $::compMsg::dataView::data $::compMsg::dataView::lgth "MSG_AA"
-
+#puts stderr "dumpMsg"
+#::compMsg compMsgData dumpMsg compMsgDispatcher
+#puts stderr "hexDump"
+#::compMsg compMsgData dumpBinary $::compMsg::dataView::data $::compMsg::dataView::lgth "MSG_AA"
       return $::COMP_MSG_ERR_OK
     }
     

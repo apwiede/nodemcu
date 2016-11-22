@@ -425,16 +425,16 @@ puts stderr "readHeadersAndSetFlags!"
         }
         switch $fieldTypeId {
           DATA_VIEW_FIELD_NONE {
-            dict lappend hdr fieldSequence COMP_DISP_U0_CMD_Lgth
-            dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CMD_Lgth
+            dict lappend hdr fieldSequence COMP_DISP_U0_CMD_LGTH
+            dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CMD_LGTH
           }
           DATA_VIEW_FIELD_UINT8_T {
-            dict lappend hdr fieldSequence COMP_DISP_U8_CMD_Lgth
-            dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CMD_Lgth
+            dict lappend hdr fieldSequence COMP_DISP_U8_CMD_LGTH
+            dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CMD_LGTH
           }
           DATA_VIEW_FIELD_UINT16_T {
-            dict lappend hdr fieldSequence COMP_DISP_U16_CMD_Lgth
-            dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CMD_Lgth
+            dict lappend hdr fieldSequence COMP_DISP_U16_CMD_LGTH
+            dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CMD_LGTH
           }
           default {
             checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE

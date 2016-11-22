@@ -257,7 +257,7 @@ if {0} {
       dict set compMsgModuleData GUID "1234-5678-9012-1"
       dict set compMsgModuleData srcId 12312
       dict set compMsgModuleData passwdC "apwiede1apwiede2"
-      dict set compMsgModuleData operatingMode MODULE_OPERATING_MODE_AP
+      dict set compMsgModuleData operatingMode MODULE_OPERATING_MODE_CELAR_PASSWDC
 
       return $::COMP_DISP_ERR_OK
     }

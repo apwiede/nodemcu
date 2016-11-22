@@ -481,7 +481,8 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $handleVar handle 
     
-puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
+#puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
+#::compMsg compMsgMsgDesc dumpHeaderPart $hdr
       set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
       checkErrOK $result
       set compMsgData [dict get $compMsgDispatcher compMsgData]

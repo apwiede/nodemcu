@@ -61,6 +61,9 @@ set ::inDebug false
 set ::lastCh ""
 set ::totalLgth 999
 set ::handleStateInterval 1000
+set ::receivedHeader false
+set ::receivedMsg false
+set ::afterId ""
 
 # ================================ checkErrOK ===============================
 
@@ -137,6 +140,7 @@ puts stderr "createMsgFromHeaderPart: result!$result!"
 puts stderr "funny state: $myState!"
     }
   }
+  return $::COMP_MSG_ERR_OK
 }
 
 # ================================ handleAnswer ===============================
@@ -145,6 +149,15 @@ proc handleAnswer {bufVar lgthVar} {
   upvar $bufVar buf
   upvar $lgthVar lgth
 
+puts stderr "handleAnswer receivedHeader: $::receivedHeader!receivedMsg: $::receivedMsg!"
+  if {!$::receivedHeader || !$::receivedMsg} {
+puts stderr "handleAnswer no message"
+    return $::COMP_MSG_ERR_OK
+  }
+  set buf $::msg
+  set lgth $::msgLgth
+  set ::receivedHeader false
+  set ::receivedMsg false
   set myState $::currState
 puts stderr "handleAnswer: $myState!!"
   set received [dict create]
@@ -157,25 +170,28 @@ puts stderr "handleAnswer: $myState!!"
   checkErrOK $result
   set result [::compMsg compMsgIdentify handleReceivedMsg ::compMsgDispatcher received]
   checkErrOK $result
+#::compMsg compMsgData dumpMsg ::compMsgDispatcher
   set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher @cmdKey value]
 puts stderr "cmdKey: $value!result: $result!"
   checkErrOK $result
 
   switch $myState {
     INIT {
-puts stderr "handleAnswer lgth: $lgth!"
+puts stderr "INIT handleAnswer lgth: $lgth!"
       binary scan \x49\x41 S cmdKey ; # IA
       if {$value == $cmdKey} {
         set ::currState MODULE_INFO
       }
     }
     MODULE_INFO {
+puts stderr "MODULE_INFO handleAnswer lgth: $lgth!"
       binary scan \x4d\x41 S cmdKey ; # MA
       if {$value == $cmdKey} {
         set ::currState OPERATION_MODE
       }
     }
     OPERATION_MODE {
+puts stderr "OPERATION_MODE handleAnswer lgth: $lgth!"
       # nothing to do
     }
     default {
@@ -183,7 +199,9 @@ puts stderr "funny state: $myState!"
     }
   }
   set result [handleState buf lgth]
+puts stderr "handleState: result: $result!"
   checkErrOK $result
+#  fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
   return $result
 }
 
@@ -214,6 +232,8 @@ puts stderr "got '>'"
 # puts stderr "  ==handleInput0: DBG: $::debugBuf!"
       append ::debugTxt $ch
 puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
+      set lgth 0
+      set buf ""
       set ::debugBuf ""
       set ::debugTxt ""
     } else {
@@ -273,21 +293,6 @@ puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]
   return $::COMP_MSG_ERR_OK
 }
 
-# ================================ startMsg ===============================
-
-proc startMsg {fd bufVar lgthVar} {
-  upvar $bufVar buf
-  upvar $lgthVar lgth
-
-puts stderr "startMsg called!"
-    set ::startCommunication false
-    fileevent $::fd0 readable [list]
-    set buf ""
-    set lgth 0
-    set ::currState INIT
-    return [handleState buf lgth]
-}
-
 # ================================ readByte0 ===============================
 
 proc readByte0 {fd bufVar lgthVar} {
@@ -295,17 +300,25 @@ proc readByte0 {fd bufVar lgthVar} {
   upvar $lgthVar lgth
 
 #puts stderr "=readByte0: read!"
-#  set ::afterId [after 500 [list startMsg $fd buf lgth]]
-#puts stderr "afterId: $::afterId!"
+  if {$::afterId ne ""} {
+    after cancel $::afterId
+  }
   set ch [read $fd 1]
-#  after cancel $::afterId
-#puts stderr "cancelled: $::afterId!ch: $ch!"
+  set ::afterId [after 500 [list handleAnswer ::dev0Buf ::dev0Lgth]]
+  set pch 0
+  binary scan $ch c pch
+if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
+puts stderr "=readByte0: read: $ch!lgth: $lgth!inDebug: $::inDebug!"
+}
   set result [handleInput0 $ch buf lgth]
 #puts stderr "=readByte0: result: $result!"
   checkErrOK $result
   
 
   if {$lgth == $::headerLgth} {
+    set ::receivedHeader true
+    set ::msgHeader $buf
+    set ::msgHeaderLgth $lgth
 puts stderr "lgth: $lgth!headerLgth!$::headerLgth!"
 puts stderr "buf: $buf!"
     binary scan $buf SSSS ::dst ::src ::srcId ::totalLgth
@@ -313,7 +326,10 @@ puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $:
   }
   if {$lgth >= $::totalLgth} {
 puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
-    fileevent $::fd0 readable [list]
+    set ::receivedMsg true
+    set ::msg $buf
+    set ::msgLgth $lgth
+#    fileevent $::fd0 readable [list]
     set myBuf ""
     foreach ch [split $buf ""] {
       binary scan $ch c pch
@@ -321,8 +337,10 @@ puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
     }
 #    puts stderr "1: got telegram: for cmdKey: $::cmdKey: $myBuf"
     puts stderr "1: got telegram: for $myBuf"
-    return [handleAnswer buf lgth]
-#    return $::COMP_MSG_ERR_OK
+set ::totalLgth 999
+#    after 1000 [list handleAnswer ::dev0Buf ::dev0Lgth]
+puts stderr "readByte0: scheduled handleAnswer"
+    return $::COMP_MSG_ERR_OK
   }
 }
 

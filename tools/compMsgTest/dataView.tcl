@@ -153,10 +153,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [string range $data $offset $offset]
-      set pch $ch
-      if {![string is integer $ch]} {
-        binary scan $ch c pch
-      }
+      binary scan $ch c pch
       if {[string is integer $pch]} {
         set value [expr {$pch & 0xFF}]
       } else {
@@ -176,10 +173,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [string range $data $offset $offset]
-      set pch $ch
-      if {![string is integer $ch]} {
-        binary scan $ch c pch
-      }
+      binary scan $ch c pch
       set value $pch
       return $::DATA_VIEW_ERR_OK
     }

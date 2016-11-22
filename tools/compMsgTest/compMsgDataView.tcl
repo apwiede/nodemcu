@@ -784,6 +784,9 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           }
         }
         DATA_VIEW_FIELD_UINT8_T {
+          binary scan $value c pch
+          set pch [expr {$pch & 0xFF}]
+          set value $pch
           if {($value >= 0) && ($value <= 256)} {
             set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
           } else {
