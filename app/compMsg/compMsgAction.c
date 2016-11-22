@@ -262,6 +262,51 @@ static uint8_t getReserve3(compMsgDispatcher_t *self) {
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= getReserve4 ====================================
+
+static uint8_t getReserve4(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_Reserve4, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve5 ====================================
+
+static uint8_t getReserve5(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_Reserve5, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve6 ====================================
+
+static uint8_t getReserve6(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_Reserve6, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve7 ====================================
+
+static uint8_t getReserve7(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_Reserve7, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve8 ====================================
+
+static uint8_t getReserve8(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_Reserve8, DATA_VIEW_FIELD_UINT8_VECTOR);
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= getGUID ====================================
 
 static uint8_t getGUID(compMsgDispatcher_t *self) {
@@ -286,6 +331,24 @@ static uint8_t getSrcId(compMsgDispatcher_t *self) {
   int result;
 
   result = self->getWifiRemotePort(self);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getOperatingMode ====================================
+
+static uint8_t getOperatingMode(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->getModuleValue(self, MODULE_INFO_operatingMode, DATA_VIEW_FIELD_UINT8_T);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= setOperatingMode ====================================
+
+static uint8_t setOperatingMode(compMsgDispatcher_t *self) {
+  int result;
+
+  result = self->setModuleValue(self, "operatingMode", self->operatingMode, NULL);
   return COMP_DISP_ERR_OK;
 }
 
@@ -357,6 +420,11 @@ static actionName2Action_t actionName2Actions [] = {
   { "getReserve1",               (action_t)(&getReserve1),               0, 0, 0 },
   { "getReserve2",               (action_t)(&getReserve2),               0, 0, 0 },
   { "getReserve3",               (action_t)(&getReserve3),               0, 0, 0 },
+  { "getReserve4",               (action_t)(&getReserve4),               0, 0, 0 },
+  { "getReserve5",               (action_t)(&getReserve5),               0, 0, 0 },
+  { "getReserve6",               (action_t)(&getReserve6),               0, 0, 0 },
+  { "getReserve7",               (action_t)(&getReserve7),               0, 0, 0 },
+  { "getReserve8",               (action_t)(&getReserve8),               0, 0, 0 },
   { "getGUID",                   (action_t)(&getGUID),                   0, 0, 0 },
   { "getSrcId",                  (action_t)(&getSrcId),                  0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
@@ -365,6 +433,8 @@ static actionName2Action_t actionName2Actions [] = {
   { "getWifiKeyValues",          (action_t)(&getWifiKeyValues),          0x4141, 0, 8 },
   { "getWifiSrcId",              (action_t)(&getWifiSrcId),              0x4141, 0, 8 },
   { "getPasswdC",                (action_t)(&getPasswdC),                0, 0, 0 },
+  { "setOperatingMode",          (action_t)(&setOperatingMode),          0, 0, 0 },
+  { "getOperatingMode",          (action_t)(&getOperatingMode),          0, 0, 0 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
 

@@ -51,6 +51,36 @@
 
 static compMsgModuleData_t compMsgModuleData;
 
+#define MODULE_INFO_PASSWDC              24
+
+static str2id_t modeluFieldName2Ids[] = {
+  { "MACAddr",                MODULE_INFO_MACAddr },
+  { "IPAddr",                 MODULE_INFO_IPAddr },
+  { "FirmwareVersion",        MODULE_INFO_FirmwareVersion },
+  { "SerieNumber",            MODULE_INFO_SerieNumber },
+  { "RSSI",                   MODULE_INFO_RSSI },
+  { "ModuleConnection",       MODULE_INFO_ModuleConnection },
+  { "DeviceMode",             MODULE_INFO_DeviceMode },
+  { "DeviceSecurity",         MODULE_INFO_DeviceSecurity },
+  { "ErrorMain",              MODULE_INFO_ErrorMain },
+  { "ErrorSub",               MODULE_INFO_ErrorSub },
+  { "DateAndTime",            MODULE_INFO_DateAndTime },
+  { "SSIDs",                  MODULE_INFO_SSIDs },
+  { "Reserve1",               MODULE_INFO_Reserve1 },
+  { "Reserve2",               MODULE_INFO_Reserve2 },
+  { "Reserve3",               MODULE_INFO_Reserve3 },
+  { "Reserve4",               MODULE_INFO_Reserve4 },
+  { "Reserve5",               MODULE_INFO_Reserve5 },
+  { "Reserve6",               MODULE_INFO_Reserve6 },
+  { "Reserve7",               MODULE_INFO_Reserve7 },
+  { "Reserve8",               MODULE_INFO_Reserve8 },
+  { "GUID",                   MODULE_INFO_GUID },
+  { "srcId",                  MODULE_INFO_srcId },
+  { "passwdC",                MODULE_INFO_PASSWDC },
+  { "operatingMode",          MODULE_INFO_operatingMode },
+  {NULL, -1},
+};
+  
 // ================================= getModuleTableFieldValue ====================================
 
 static uint8_t getModuleTableFieldValue(compMsgDispatcher_t *self, uint8_t actionMode) {
@@ -125,6 +155,21 @@ static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t
   case MODULE_INFO_Reserve3:
     self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
     break;
+  case MODULE_INFO_Reserve4:
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve4;
+    break;
+  case MODULE_INFO_Reserve5:
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve5;
+    break;
+  case MODULE_INFO_Reserve6:
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve6;
+    break;
+  case MODULE_INFO_Reserve7:
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve7;
+    break;
+  case MODULE_INFO_Reserve8:
+    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve8;
+    break;
   case MODULE_INFO_GUID:
     self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
     break;
@@ -135,14 +180,106 @@ static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t
   case MODULE_INFO_PASSWDC:
     self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
     break;
-//  case WIFI_INFO_PROVISIONING_SSID:
-//  case WIFI_INFO_PROVISIONING_PORT:
-//  case WIFI_INFO_PROVISIONING_IP_ADDR:
-//  case WIFI_INFO_BINARY_CALL_BACK:
-//  case WIFI_INFO_TEXT_CALL_BACK:
-//    result = self->getWifiValue(self, which, valueTypeId, numericValue, stringValue);
-//    checkErrOK(result);
-//    break;
+  case MODULE_INFO_operatingMode:
+    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.operatingMode;
+    break;
+  default:
+    return COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH;
+    break;
+  }
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= moduleFieldName2Id ====================================
+
+static uint8_t moduleFieldName2Id(compMsgDispatcher_t *self, uint8_t *fieldNameStr, uint8_t *id) {
+  int result;
+
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= setModuleValue ====================================
+
+static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue) {
+  int result;
+  uint8_t id;
+
+  result = moduleFieldName2Id(self, fieldNameStr, &id);
+  checkErrOK(result);
+  switch (id) {
+  case MODULE_INFO_MACAddr:
+    c_memcpy(compMsgModuleData.MACAddr, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_IPAddr:
+    c_memcpy(compMsgModuleData.IPAddr, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_FirmwareVersion:
+    c_memcpy(compMsgModuleData.FirmwareVersion, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_SerieNumber:
+    c_memcpy(compMsgModuleData.SerieNumber, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_RSSI:
+    compMsgModuleData.RSSI = numericValue;
+    break;
+  case MODULE_INFO_ModuleConnection:
+    compMsgModuleData.ModuleConnection = numericValue;
+    break;
+  case MODULE_INFO_DeviceMode:
+    compMsgModuleData.DeviceMode = numericValue;
+    break;
+  case MODULE_INFO_DeviceSecurity:
+    compMsgModuleData.DeviceSecurity = numericValue;
+    break;
+  case MODULE_INFO_ErrorMain:
+    compMsgModuleData.ErrorMain = numericValue;
+    break;
+  case MODULE_INFO_ErrorSub:
+    compMsgModuleData.ErrorSub = numericValue;
+    break;
+  case MODULE_INFO_DateAndTime:
+    c_memcpy(compMsgModuleData.DateAndTime, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_SSIDs:
+    compMsgModuleData.SSIDs = numericValue;
+    break;
+  case MODULE_INFO_Reserve1:
+    compMsgModuleData.Reserve1 = numericValue;
+    break;
+  case MODULE_INFO_Reserve2:
+    c_memcpy(compMsgModuleData.Reserve2, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_Reserve3:
+    c_memcpy(compMsgModuleData.Reserve3, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_Reserve4:
+    c_memcpy(compMsgModuleData.Reserve4, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_Reserve5:
+    c_memcpy(compMsgModuleData.Reserve5, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_Reserve6:
+    c_memcpy(compMsgModuleData.Reserve6, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_Reserve7:
+    c_memcpy(compMsgModuleData.Reserve7, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_Reserve8:
+    c_memcpy(compMsgModuleData.Reserve8, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_GUID:
+    c_memcpy(compMsgModuleData.GUID, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_srcId:
+    compMsgModuleData.srcId = numericValue;
+    break;
+  case MODULE_INFO_PASSWDC:
+    c_memcpy(compMsgModuleData.passwdC, stringValue, c_strlen(stringValue));
+    break;
+  case MODULE_INFO_operatingMode:
+    compMsgModuleData.operatingMode = numericValue;
+    break;
   default:
     return COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH;
     break;
@@ -198,29 +335,17 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.DateAndTime[5] = 0x00;
   compMsgModuleData.SSIDs = 2;
   compMsgModuleData.Reserve1 = 'X';
-  compMsgModuleData.Reserve2[0] = 'X';
-  compMsgModuleData.Reserve2[1] = 'Y';
-  compMsgModuleData.Reserve3[0] = 'X';
-  compMsgModuleData.Reserve3[1] = 'Y';
-  compMsgModuleData.Reserve3[2] = 'Z';
-  compMsgModuleData.GUID[0] = '1';
-  compMsgModuleData.GUID[1] = '2';
-  compMsgModuleData.GUID[2] = '3';
-  compMsgModuleData.GUID[3] = '4';
-  compMsgModuleData.GUID[4] = '-';
-  compMsgModuleData.GUID[5] = '5';
-  compMsgModuleData.GUID[6] = '6';
-  compMsgModuleData.GUID[7] = '7';
-  compMsgModuleData.GUID[8] = '8';
-  compMsgModuleData.GUID[9] = '-';
-  compMsgModuleData.GUID[10] = '9';
-  compMsgModuleData.GUID[11] = '0';
-  compMsgModuleData.GUID[12] = '1';
-  compMsgModuleData.GUID[13] = '2';
-  compMsgModuleData.GUID[14] = '-';
-  compMsgModuleData.GUID[15] = '1';
+  c_memcpy(compMsgModuleData.Reserve2, "XY", 2);
+  c_memcpy(compMsgModuleData.Reserve3, "XYZ", 3);
+  c_memcpy(compMsgModuleData.Reserve4, "ABCD", 4);
+  c_memcpy(compMsgModuleData.Reserve5, "ABCDE", 5);
+  c_memcpy(compMsgModuleData.Reserve6, "ABCDEF", 6);
+  c_memcpy(compMsgModuleData.Reserve7, "ABCDEFG", 7);
+  c_memcpy(compMsgModuleData.Reserve8, "ABCDEFGH", 8);
+  c_memcpy(compMsgModuleData.GUID, "1234-5678-9012-1", 16);
   compMsgModuleData.srcId = 12312;
   c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2", 16);
+  compMsgModuleData.operatingMode = 2;
 
   return COMP_DISP_ERR_OK;
 }
@@ -230,9 +355,10 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
 uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
+  self->getModuleValue = &getModuleValue;
+  self->setModuleValue = &setModuleValue;
   self->setModuleValues = &setModuleValues;
   self->updateModuleValues = &updateModuleValues;
-  self->getModuleValue = &getModuleValue;
   self->getModuleTableFieldValue = &getModuleTableFieldValue;
 
   self->setModuleValues(self);

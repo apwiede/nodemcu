@@ -55,7 +55,7 @@ static uint8_t uartSetup(compMsgDispatcher_t *self, unsigned id, uint32_t baud, 
   int result;
 
   result = platform_uart_setup(id, baud, databits, parity, stopbits);
-ets_printf("§uartSetup:id: %d baud: %d§", id, baud);
+//ets_printf("§uartSetup:id: %d baud: %d§", id, baud);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }
@@ -70,7 +70,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
   const uint8_t *myBuffer;
 
   received = &self->received;
-ets_printf("§uartReceiveCb: %c rlen: %d§", buffer[0]&0xFF, received->lgth);
+//ets_printf("§uartReceiveCb: %c rlen: %d§", buffer[0]&0xFF, received->lgth);
   myBuffer = buffer;
   if (lgth == 0) {
     // simulate a '0' char!!
@@ -91,11 +91,13 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
   int result;
   int idx;
 
+ets_printf("§typeRSendAnswer start§");
   idx = 0;
   while (idx < msgLgth) {
     platform_uart_send(0, data[idx]);
     idx++;
   }
+ets_printf("§typeRSendAnswer done§");
   return COMP_DISP_ERR_OK;
 }
 

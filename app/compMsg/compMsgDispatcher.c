@@ -373,13 +373,10 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
 ets_printf("§createMsgFromHeaderPart1§");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
-ets_printf("§createMsgFromHeaderPart2§");
   result = self->compMsgData->createMsg(self->compMsgData, self->compMsgData->numMsgDescParts, handle);
   checkErrOK(result);
-ets_printf("§createMsgFromHeaderPart3§");
   idx = 0;
   while(idx < self->compMsgData->numMsgDescParts) {
-ets_printf("§createMsgFromHeaderPart idx: %d§", idx);
     msgDescPart = &self->compMsgData->msgDescParts[idx];
     result = self->compMsgData->addField(self->compMsgData, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
     checkErrOK(result);
@@ -394,19 +391,14 @@ ets_printf("§heap4: %d§", system_get_free_heap_size());
     uint8_t actionMode;
     uint8_t type;
 
-ets_printf("§call getActionMode %s§", self->compMsgData->prepareValuesCbName);
     result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
     self->actionMode = actionMode;
-ets_printf("§getActionMode res: %d§", result);
     checkErrOK(result);
     result  = self->runAction(self, &type);
-ets_printf("§runAction res: %d§", result);
     // runAction starts a call with a callback and returns here before the callback has been running!!
     // when when coming here we are finished and the callback will do the work later on!
-ets_printf("§runAction done§");
     return result;
   } else {
-ets_printf("§call buildMsg§");
     result = self->buildMsg(self);
 #ifdef NOTDEF
     result = setMsgValues(self);
@@ -719,7 +711,7 @@ ets_printf("handle: %s result: %d\n", handle, result);
 checkErrOK(result);
 #endif
 // if nothing of the above is defined the uart input callback is used
-//#define UART_INPUT
+#define UART_INPUT
 #ifdef UART_INPUT
   id = 0;
   stopbits = PLATFORM_UART_STOPBITS_1;
@@ -778,6 +770,8 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
   compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
   compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
+
+  compMsgDispatcher->operatingMode = MODULE_OPERATING_MODE_AP;
 
   compMsgDispatcher->createDispatcher = &createDispatcher;
   compMsgDispatcher->initDispatcher = &initDispatcher;

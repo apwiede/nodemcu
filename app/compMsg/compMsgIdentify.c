@@ -289,6 +289,7 @@ ets_printf("§handleReceivedMsg§");
   received->fieldOffset = hdrInfos->headerLgth;
   while (hdr->fieldSequence[hdrInfos->seqIdx] != 0) {
     sequenceEntry = hdr->fieldSequence[hdrInfos->seqIdx];
+ets_printf("§sequenceEntry: %d seqIdx:%d§", sequenceEntry, hdrInfos->seqIdx);
     switch (sequenceEntry) {
     case COMP_DISP_U16_CMD_KEY:
       result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, received->fieldOffset, &u16);
@@ -382,9 +383,9 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
 
 //ets_printf("§handleReceivedPart: %c 0x%02x§", buffer[0], buffer[0]);
 if (buffer == NULL) {
-ets_printf("§handleReceivedPart: buffer == NULL lgth: %d§", lgth);
+//ets_printf("§++++handleReceivedPart: buffer == NULL lgth: %d§", lgth);
 } else {
-ets_printf("§handleReceivedPart: 0x%02x§", buffer[0]);
+//ets_printf("§++++handleReceivedPart: 0x%02x§", buffer[0]);
 }
   hdrInfos = &self->msgHeaderInfos;
   received = &self->received;

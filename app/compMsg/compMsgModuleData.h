@@ -71,10 +71,24 @@
 #define MODULE_INFO_Reserve1             13
 #define MODULE_INFO_Reserve2             14
 #define MODULE_INFO_Reserve3             15
-#define MODULE_INFO_AP_LIST_CALL_BACK    16
-#define MODULE_INFO_GUID                 17
-#define MODULE_INFO_srcId                18
-#define MODULE_INFO_PASSWDC              19
+#define MODULE_INFO_Reserve4             16
+#define MODULE_INFO_Reserve5             17
+#define MODULE_INFO_Reserve6             18
+#define MODULE_INFO_Reserve7             19
+#define MODULE_INFO_Reserve8             20
+#define MODULE_INFO_AP_LIST_CALL_BACK    21
+#define MODULE_INFO_GUID                 22
+#define MODULE_INFO_srcId                23
+#define MODULE_INFO_PASSWDC              24
+#define MODULE_INFO_operatingMode        25
+
+#define MODULE_OPERATING_MODE_CLIENT             1
+#define MODULE_OPERATING_MODE_AP                 2
+#define MODULE_OPERATING_MODE_LIGHT_SLEEP_WAKEUP 3
+#define MODULE_OPERATING_MODE_LIGHT_SLEEP        4
+#define MODULE_OPERATING_MODE_WPS                5
+#define MODULE_OPERATING_MODE_MODULE_TEST        0xD0
+#define MODULE_OPERATING_MODE_CLEAR_PASSWDC      0xE0
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -99,9 +113,15 @@ typedef struct compMsgModuleData {
   uint8_t Reserve1;
   uint8_t Reserve2[2];
   uint8_t Reserve3[3];
+  uint8_t Reserve4[4];
+  uint8_t Reserve5[5];
+  uint8_t Reserve6[6];
+  uint8_t Reserve7[7];
+  uint8_t Reserve8[8];
   uint8_t GUID[16];
   uint16_t srcId;
   uint8_t passwdC[16];
+  uint8_t operatingMode;
 } compMsgModuleData_t;
 
 #endif	/* COMP_MSG_MODULE_DATA_H */

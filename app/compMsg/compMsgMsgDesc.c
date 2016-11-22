@@ -914,6 +914,87 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   return COMP_MSG_DESC_ERR_OK;
 }
 
+// ================================= readModuleValues ====================================
+
+static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
+  int result;
+  compMsgDataView_t *dataView;
+  long uval;
+  uint8_t numEntries;
+  uint8_t*cp;
+  uint8_t*ep;
+  char *endPtr;
+  int idx;
+  bool isEnd;
+  uint8_t lgth;
+  uint8_t buf[100];
+  uint8_t *buffer;
+  uint8_t *myStr;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldValueStr;
+  uint8_t fieldTypeId;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  buffer = buf;
+  dataView = self->compMsgDataView;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
+  checkErrOK(result);
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  return COMP_MSG_DESC_ERR_OK;
+  }
+  uval = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)uval;
+  idx = 0;
+  while(idx < numEntries) {
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    // wifiFieldName
+    fieldNameStr = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // wifiFieldValue
+    fieldValueStr = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    uval = c_strtoul(fieldValueStr, &endPtr, 10);
+    if ((endPtr - (char *)fieldValueStr) == c_strlen(fieldValueStr)) {
+      if (c_strlen(fieldValueStr) > 10) {
+        // seems to be a password key, so use the stringValue
+        result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+      } else {
+        result = self->setWifiValue(self, fieldNameStr, uval, NULL);
+      }
+    } else {
+      result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+    }
+    if (!isEnd) {
+      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    }
+    checkErrOK(result);
+    idx++;
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
+  checkErrOK(result);
+  return COMP_MSG_DESC_ERR_OK;
+}
+
 // ================================= getHeaderFromUniqueFields ====================================
 
 static uint8_t  getHeaderFromUniqueFields (compMsgDispatcher_t *self, uint16_t dst, uint16_t src, uint16_t cmdKey, headerPart_t **hdr) {
@@ -1403,6 +1484,7 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->getStrFromLine = &getStrFromLine;
   compMsgMsgDesc->getHeaderFieldsFromLine = &getHeaderFieldsFromLine;
   compMsgMsgDesc->readActions = &readActions;
+  compMsgMsgDesc->readModuleValues = &readModuleValues;
   compMsgMsgDesc->readWifiValues = &readWifiValues;
   compMsgMsgDesc->readHeadersAndSetFlags = &readHeadersAndSetFlags;
   compMsgMsgDesc->resetMsgDescParts = &resetMsgDescParts;

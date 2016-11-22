@@ -95,7 +95,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t *numTableRows
   int numericValue;
   compMsgData_t *compMsgData;
 
-ets_printf("§setMsgFieldValue: %s %s§", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
+//ets_printf("§setMsgFieldValue: %s %s§", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
   compMsgData = self->compMsgData;
   if (self->compMsgData->msgValPart->fieldValueStr[0] == '@') {
     // call the callback function for the field!!
@@ -120,13 +120,11 @@ ets_printf("§setMsgFieldValue: %s %s§", self->compMsgData->msgValPart->fieldNa
         currTableCol = 0;
       }
     } else {
-ets_printf("§setMsgFieldValue:cb %p§", self->compMsgData->msgValPart->fieldValueCallback);
+//ets_printf("§setMsgFieldValue:cb %p§", self->compMsgData->msgValPart->fieldValueCallback);
       if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
         result = self->compMsgData->msgValPart->fieldValueCallback(self);
-ets_printf("§setMsgFieldValue:cb res: %d§", result);
         checkErrOK(result);
       }
-ets_printf("§setMsgFieldValue2§");
       fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
       if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
         stringValue = NULL;
@@ -135,13 +133,11 @@ ets_printf("§setMsgFieldValue2§");
         stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
         numericValue = 0;
       }
-ets_printf("§setMsgFieldValue3§");
       result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
 //      result = self->fillMsgValue(self, self->buildMsgInfos.fieldValueStr, type, self->buildMsgInfos.fieldTypeId);
 //      checkErrOK(result);
 //      result = compMsgData->setFieldValue(compMsgData, self->buildMsgInfos.fieldNameStr, self->buildMsgInfos.numericValue, self->buildMsgInfos.stringValue);
 //      currTableRow++;
-ets_printf("§setMsgFieldValue4§");
     }
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
@@ -152,7 +148,6 @@ ets_printf("§setMsgFieldValue4§");
       stringValue = self->compMsgData->msgValPart->fieldValueStr;
       numericValue = 0;
     }
-ets_printf("§setMsgFieldValue5: %s§", fieldNameStr);
     switch (self->compMsgData->msgValPart->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_DST:
         result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
@@ -169,10 +164,9 @@ ets_printf("§setMsgFieldValue5: %s§", fieldNameStr);
         result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
         break;
     }
-ets_printf("§setMsgFieldValue6 res: %d§", result);
     checkErrOK(result);
   }
-ets_printf("§setMsgFieldValue: done§");
+//ets_printf("§setMsgFieldValue: done§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -218,7 +212,7 @@ ets_printf("§setMsgValues§");
     self->compMsgData->msgDescPart = msgDescPart;
     msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
     self->compMsgData->msgValPart = msgValPart;
-ets_printf("§setMsgValues: %s§", msgDescPart->fieldNameStr);
+//ets_printf("§setMsgValues: %s§", msgDescPart->fieldNameStr);
 //ets_printf("setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData->numFields);
 //ets_printf("fieldIdx: %d entryIdx: %d numtableRows: %d\n", fieldIdx, entryIdx, numTableRows);
     if (numTableRows > 0) {
@@ -249,9 +243,9 @@ ets_printf("§setMsgValues: %s§", msgDescPart->fieldNameStr);
 ets_printf("§setMsgvalues done§");
   compMsgData->prepareMsg(compMsgData);
   checkErrOK(result);
-ets_printf("§");
-compMsgData->dumpMsg(compMsgData);
-ets_printf("§");
+//ets_printf("§");
+//compMsgData->dumpMsg(compMsgData);
+//ets_printf("§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -288,13 +282,10 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   
 ets_printf("§buildMsg§");
   result = self->fixOffsetsForKeyValues(self);
-ets_printf("§fixOffsets res: %d§", result);
   checkErrOK(result);
   result = self->compMsgData->initMsg(self->compMsgData);
-ets_printf("§initMsg res: %d§", result);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
   result = setMsgValues(self);
-ets_printf("§setMsgValues res: %d§", result);
   checkErrOK(result);
 
   result = self->compMsgData->getMsgData(self->compMsgData, &msgData, &msgLgth);

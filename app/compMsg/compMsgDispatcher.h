@@ -141,9 +141,10 @@ typedef uint8_t (* getWifiKeyValueInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
 
 // ModuleData stuff
+typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId);
+typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId);
 typedef uint8_t (* getModuleTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
 
@@ -208,6 +209,7 @@ typedef struct compMsgDispatcher {
   int numericValue;
   uint8_t *stringValue;
   uint8_t actionMode;
+  uint8_t operatingMode;
   bssScanInfos_t *bssScanInfos;
   compMsgDataView_t *compMsgDataView; // needed only for readeHeadersAndSetFlags!!
 
@@ -265,6 +267,7 @@ typedef struct compMsgDispatcher {
 
   // ModuleData
   getModuleValue_t getModuleValue;
+  setModuleValue_t setModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;
   getModuleTableFieldValue_t getModuleTableFieldValue;

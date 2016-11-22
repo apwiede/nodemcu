@@ -214,6 +214,7 @@ typedef uint8_t (* getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep, 
 typedef uint8_t (* getStrFromLine_t)(uint8_t *myStr, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
 typedef uint8_t (*readActions_t)(compMsgDispatcher_t *self, uint8_t *fileName);
+typedef uint8_t (*readModuleValues_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (*readWifiValues_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* readHeadersAndSetFlags_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* getHeaderFromUniqueFields_t)(compMsgDispatcher_t *self, uint16_t dst, uint16_t src, uint16_t cmdKey, headerPart_t **hdr);
@@ -242,6 +243,7 @@ typedef struct compMsgMsgDesc {
   getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
   readHeadersAndSetFlags_t readHeadersAndSetFlags;
   readActions_t readActions;
+  readModuleValues_t readModuleValues;
   readWifiValues_t readWifiValues;
   getHeaderFromUniqueFields_t getHeaderFromUniqueFields;
   dumpMsgDescPart_t dumpMsgDescPart;
