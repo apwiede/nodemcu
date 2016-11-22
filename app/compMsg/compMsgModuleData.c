@@ -345,7 +345,7 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   c_memcpy(compMsgModuleData.GUID, "1234-5678-9012-1", 16);
   compMsgModuleData.srcId = 12312;
   c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2", 16);
-  compMsgModuleData.operatingMode = 2;
+  compMsgModuleData.operatingMode = 0xE0;
 
   return COMP_DISP_ERR_OK;
 }

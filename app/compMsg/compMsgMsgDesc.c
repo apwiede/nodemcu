@@ -134,85 +134,103 @@ static uint8_t writeLine(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t 
 static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   int idx;
 
-  ets_printf("dumpHeaderPart:\n");
-  ets_printf("headerPart: from: 0x%04x to: 0x%04x totalLgth: %d\n", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth);
-  ets_printf("            GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c\n", hdr->hdrGUID, hdr->hdrSrcId, hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
-  ets_printf("            u16CmdLgth: 0x%04x u16Crc: 0x%04x u16TotalCrc: 0x%04x\n", hdr->hdrU16CmdLgth, hdr->hdrU16Crc, hdr->hdrU16TotalCrc);
-  ets_printf("            u8CmdLgth: %d u8Crc: 0x%02x u8TotalCrc: 0x%02x\n", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrU8TotalCrc);
-  ets_printf("            enc: %c handleType: %c offset: %d\n", hdr->hdrEncryption, hdr->hdrHandleType, hdr->hdrOffset);
-  ets_printf("hdrFlags: 0x%04x", hdr->hdrFlags);
-  if (hdr->hdrFlags & COMP_DISP_U16_CMD_KEY) {
-    ets_printf(" COMP_DISP_U16_CMD_KEY");
+  ets_printf("§dumpHeaderPart:§");
+  ets_printf("§headerPart: from: 0x%04x to: 0x%04x totalLgth: %d§", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth);
+  ets_printf("§            GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c§", hdr->hdrGUID, hdr->hdrSrcId, hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
+  ets_printf("§            u16CmdLgth: 0x%04x u16Crc: 0x%04x u16TotalCrc: 0x%04x§", hdr->hdrU16CmdLgth, hdr->hdrU16Crc, hdr->hdrU16TotalCrc);
+  ets_printf("§            u8CmdLgth: %d u8Crc: 0x%02x u8TotalCrc: 0x%02x§", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrU8TotalCrc);
+  ets_printf("§            enc: %c handleType: %c offset: %d§", hdr->hdrEncryption, hdr->hdrHandleType, hdr->hdrOffset);
+  ets_printf("§hdrFlags: 0x%04x", hdr->hdrFlags);
+  if (hdr->hdrFlags & COMP_DISP_HDR_DST) {
+    ets_printf(" COMP_DISP_HDR_DST");
   }
-  if (hdr->hdrFlags & COMP_DISP_U0_CMD_LGTH) {
-    ets_printf(" COMP_DISP_U0_CMD_LGTH");
+  if (hdr->hdrFlags & COMP_DISP_HDR_SRC) {
+    ets_printf(" COMP_DISP_HDR_SRC");
   }
-  if (hdr->hdrFlags & COMP_DISP_U8_CMD_LGTH) {
-    ets_printf(" COMP_DISP_U8_CMD_LGTH");
+  if (hdr->hdrFlags & COMP_DISP_HDR_TOTAL_LGTH) {
+    ets_printf(" COMP_DISP_HDR_TOTAL_LGTH");
   }
-  if (hdr->hdrFlags & COMP_DISP_U16_CMD_LGTH) {
-    ets_printf(" COMP_DISP_U16_CMD_LGTH");
+  if (hdr->hdrFlags & COMP_DISP_HDR_GUID) {
+    ets_printf(" COMP_DISP_HDR_GUID");
   }
-  if (hdr->hdrFlags & COMP_DISP_U0_CRC) {
-    ets_printf(" COMP_DISP_U0_CRC");
+  if (hdr->hdrFlags & COMP_DISP_HDR_SRC_ID) {
+    ets_printf(" COMP_DISP_HDR_SRC_ID");
   }
-  if (hdr->hdrFlags & COMP_DISP_U8_CRC) {
-    ets_printf(" COMP_DISP_U8_CRC");
+  if (hdr->hdrFlags & COMP_DISP_HDR_FILLER) {
+    ets_printf(" COMP_DISP_HDR_FILLER");
   }
-  if (hdr->hdrFlags & COMP_DISP_U16_CRC) {
-    ets_printf(" COMP_DISP_U16_CRC");
+  if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CMD_KEY) {
+    ets_printf(" COMP_DISP_PAYLOAD_CMD_KEY");
   }
-  if (hdr->hdrFlags & COMP_DISP_U0_TOTAL_CRC) {
-    ets_printf(" COMP_DISP_U0_TOTAL_CRC");
+  if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CMD_LGTH) {
+    ets_printf(" COMP_DISP_PAYLOAD_CMD_LGTH");
   }
-  if (hdr->hdrFlags & COMP_DISP_U8_TOTAL_CRC) {
-    ets_printf(" COMP_DISP_U8_TOTAL_CRC");
+  if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CRC) {
+    ets_printf(" COMP_DISP_PAYLOAD_CRC");
   }
-  if (hdr->hdrFlags & COMP_DISP_U16_TOTAL_CRC) {
-    ets_printf(" COMP_DISP_U16_TOTAL_CRC");
+  if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+    ets_printf(" COMP_DISP_TOTAL_CRC");
   }
-  ets_printf("\n");
-  ets_printf("hdr fieldSequence\n");
+  ets_printf("§");
+  ets_printf("§hdr fieldSequence§");
   idx = 0;
   while (idx < COMP_DISP_MAX_SEQUENCE) {
     if (hdr->fieldSequence[idx] == 0) {
       break;
     }
-    ets_printf(" %d 0x%04x", idx, hdr->fieldSequence[idx]);
-    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_DST) {
-      ets_printf(" COMP_DISP_HDR_DST");
+    ets_printf("§ %d 0x%04x", idx, hdr->fieldSequence[idx]);
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_DST) {
+      ets_printf(" COMP_DISP_U16_DST");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_SRC) {
-      ets_printf(" COMP_DISP_HDR_SRC");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC) {
+      ets_printf(" COMP_DISP_U16_SRC");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_TOTAL_LGTH) {
-      ets_printf(" COMP_DISP_HDR_TOTAL_LGTH");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
+      ets_printf(" COMP_DISP_HDR_U16_LGTH");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_GUID) {
-      ets_printf(" COMP_DISP_HDR_GUID");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
+      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_SRC_ID) {
-      ets_printf(" COMP_DISP_HDR_SRC_ID");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC_ID) {
+      ets_printf(" COMP_DISP_U16_SRC_ID");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_HDR_FILLER) {
-      ets_printf(" COMP_DISP_HDR_FILLER");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
+      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_PAYLOAD_CMD_KEY) {
-      ets_printf(" COMP_DISP_PAYLOAD_CMD_KEY");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_KEY) {
+      ets_printf(" COMP_DISP_U16_CMD_KEY");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_PAYLOAD_CMD_LGTH) {
-      ets_printf(" COMP_DISP_PAYLOAD_CMD_LGTH");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U0_CMD_LGTH) {
+      ets_printf(" COMP_DISP_U0_CMD_LGTH");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_PAYLOAD_CRC) {
-      ets_printf(" COMP_DISP_PAYLOAD_CRC");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U8_CMD_LGTH) {
+      ets_printf(" COMP_DISP_U0_CMD_LGTH");
     }
-    if (hdr->fieldSequence[idx] & COMP_DISP_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_TOTAL_CRC");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_LGTH) {
+      ets_printf(" COMP_DISP_U0_CMD_LGTH");
     }
-    ets_printf("\n");
+    if (hdr->fieldSequence[idx] & COMP_DISP_U0_CRC) {
+      ets_printf(" COMP_DISP_U0_CRC");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U8_CRC) {
+      ets_printf(" COMP_DISP_U8_CRC");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CRC) {
+      ets_printf(" COMP_DISP_U16_CRC");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U0_TOTAL_CRC) {
+      ets_printf(" COMP_DISP_U0_TOTAL_CRC");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U8_TOTAL_CRC) {
+      ets_printf(" COMP_DISP_U8_TOTAL_CRC");
+    }
+    if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_CRC) {
+      ets_printf(" COMP_DISP_U16_TOTAL_CRC");
+    }
+    ets_printf("§");
     idx++;
   }
-  ets_printf("\n");
+//  ets_printf("§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -590,15 +608,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     // encryption E/N
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_ENCRYPTION;
     hdr->hdrEncryption = cp[0];
-//    if (cp[0] == 'E') {
-//ets_printf("§idx!%d!0x%04x!0x%04x!0x%04x!enc!§", idx, hdr->hdrToPart, hdr->hdrFromPart, hdr->hdrTotalLgth);
-//      hdr->hdrFlags |= COMP_DISP_IS_ENCRYPTED;
-//    } else {
-//ets_printf("§idx!%d!0x%04x!0x%04x!0x%04x!noenc!§", idx, hdr->hdrToPart, hdr->hdrFromPart, hdr->hdrTotalLgth);
-//      hdr->hdrFlags |= COMP_DISP_IS_NOT_ENCRYPTED;
-//    }
     checkIsEnd(isEnd);
     cp = ep;
     // handleType A/G/S/R/U/W/N
@@ -695,19 +705,23 @@ ets_printf("bad value: %s\n", cp);
     seqIdx2++;
     // type of totalCrc
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+ets_printf("§totalCrc: %s!%d!§", cp, seqIdx2);
     checkErrOK(result);
     result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_NONE:
+ets_printf("§none§");
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U0_TOTAL_CRC;
       hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;
     case DATA_VIEW_FIELD_UINT8_T:
+ets_printf("§u8§");
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_TOTAL_CRC;
       hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;
     case DATA_VIEW_FIELD_UINT16_T:
+ets_printf("§u16§");
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_TOTAL_CRC;
       hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;

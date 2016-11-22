@@ -397,25 +397,26 @@ static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
   crcLgth = fieldInfo->fieldLgth;
   crcVal = 0;
   idx = 0;
+//ets_printf("§getTotalCrc§");
   while (idx < fieldInfo->fieldOffset) {
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx, self->dataView->data[idx], crcVal);
+//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x§", idx, self->dataView->data[idx], crcVal);
     crcVal += self->dataView->data[idx++];
   }
-//ets_printf("§crcVal00: 0x%04x§\n", crcVal);
+//ets_printf("§crcVal00: 0x%04x§", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
-//ets_printf("§crcVal10: 0x%04x§\n", crcVal);
+//ets_printf("§crcVal10: 0x%04x§", crcVal);
     crcVal = crcVal & 0xFF;
     result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-ets_printf("§crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
+ets_printf("§crcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
     result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-ets_printf("§crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
+ets_printf("§crcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
     if (crcVal != crc) {
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
@@ -596,6 +597,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_UINT16_T:
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 65535)) {
+ets_printf("§dataView setFieldValue: id: %d!offset: %d!numeric: %d!§", fieldInfo->fieldNameId, fieldInfo->fieldOffset, numericValue);
           result= self->dataView->setUint16(self->dataView, fieldInfo->fieldOffset, (uint16_t)numericValue);
           checkErrOK(result);
         } else {
