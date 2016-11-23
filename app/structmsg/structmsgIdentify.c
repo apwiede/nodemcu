@@ -312,7 +312,7 @@ static uint8_t readHeadersAndSetFlags(structmsgDispatcher_t *self) {
   buffer[lgth] = 0;
   myStr = buffer;
   result = getStartFieldsFromLine(dataView, hdrInfos, myStr, &cp, &seqIdx);
-  myDataView = newDataView();
+  myDataView = newDataViewHandle();
   checkAllocOK(myDataView);
   fieldOffset = 0;
   idx = 0;

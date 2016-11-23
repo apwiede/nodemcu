@@ -164,8 +164,8 @@ typedef struct dataView {
   dumpBinary_t dumpBinary;
 } dataView_t;
 
-dataView_t *newDataView();
-void freeDataView(dataView_t *dataView);
+dataView_t *newDataViewHandle();
+void freeDataViewHandle(dataView_t *dataView);
 
 #ifdef	__cplusplus
 }

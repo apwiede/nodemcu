@@ -454,9 +454,9 @@ static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) 
   }
 }
 
-// ================================= newDataView ====================================
+// ================================= newDataViewHandle ====================================
 
-dataView_t *newDataView(void) {
+dataView_t *newDataViewHandle(void) {
   dataView_t *dataView = os_zalloc(sizeof(dataView_t));
   if (dataView == NULL) {
     return NULL;
@@ -504,9 +504,9 @@ dataView_t *newDataView(void) {
   return dataView;
 }
 
-// ================================= freeDataView ====================================
+// ================================= freeDataViewHandle ====================================
 
-void freeDataView(dataView_t *dataView) {
+void freeDataViewHandle(dataView_t *dataView) {
   if (dataView->data != NULL) {
     os_free(dataView->data);
     dataView->data = NULL;

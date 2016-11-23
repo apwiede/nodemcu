@@ -622,7 +622,7 @@ structmsgDataView_t *newStructmsgDataView(void) {
   if (structmsgDataView == NULL) {
     return NULL;
   }
-  structmsgDataView->dataView = newDataView();
+  structmsgDataView->dataView = newDataViewHandle();
   if (structmsgDataView->dataView == NULL) {
     return NULL;
   }
@@ -654,7 +654,7 @@ structmsgDataView_t *newStructmsgDataView(void) {
 
 void freeStructmsgDataView(structmsgDataView_t *dataView) {
   if (dataView->dataView != NULL) {
-    freeDataView(dataView->dataView);
+    freeDataViewHandle(dataView->dataView);
     dataView->dataView = NULL;
     os_free(dataView);
   }
