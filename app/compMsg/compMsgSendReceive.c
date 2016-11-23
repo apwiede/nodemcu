@@ -70,7 +70,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
   const uint8_t *myBuffer;
 
   received = &self->received;
-ets_printf("§Rec: 0x%02x lgth: %d§", buffer[0] & 0xFF, received->lgth);
+//ets_printf("§Rec: 0x%02x lgth: %d§", buffer[0] & 0xFF, received->lgth);
 //ets_printf("§uartReceiveCb: %c rlen: %d§", buffer[0]&0xFF, received->lgth);
   myBuffer = buffer;
   if (lgth == 0) {
@@ -92,7 +92,7 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
   int result;
   int idx;
 
-ets_printf("§typeRSendAnswer start§");
+ets_printf("§typeRSendAnswer start: lgth: %d!§", msgLgth);
   idx = 0;
   while (idx < msgLgth) {
     platform_uart_send(0, data[idx]);

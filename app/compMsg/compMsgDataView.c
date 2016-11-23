@@ -597,7 +597,6 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_UINT16_T:
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 65535)) {
-ets_printf("§dataView setFieldValue: id: %d!offset: %d!numeric: %d!§", fieldInfo->fieldNameId, fieldInfo->fieldOffset, numericValue);
           result= self->dataView->setUint16(self->dataView, fieldInfo->fieldOffset, (uint16_t)numericValue);
           checkErrOK(result);
         } else {

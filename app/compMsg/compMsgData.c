@@ -342,7 +342,7 @@ static uint8_t setFieldValue(compMsgData_t *self, const uint8_t *fieldName, int 
   while (idx < numEntries) {
     fieldInfo = &self->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-ets_printf("§compMsgData setFieldValue: name: %s!numeric: %d!string: %s!id: %d!§", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId);
+//ets_printf("§compMsgData setFieldValue: name: %s!numeric: %d!string: %s!id: %d!§", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId);
       result = self->compMsgDataView->setFieldValue(self->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;

@@ -162,7 +162,7 @@ ets_printf("§nextFitting HANDLE_NOT_FOUND§");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   hdrInfos->currPartIdx = hdrIdx;
-ets_printf("§encryption: %c handleType: %c§", hdr->hdrEncryption, hdr->hdrHandleType);
+//ets_printf("§encryption: %c handleType: %c§", hdr->hdrEncryption, hdr->hdrHandleType);
   received->encryption = hdr->hdrEncryption;
 ets_printf("§nextFitting!found!%d!hdrIdx!%d!hdr->cmdKey:0x%04x!received->cmdKey: 0x%04x§", found, hdrIdx, hdr->hdrU16CmdKey, received->u16CmdKey);
   return COMP_DISP_ERR_OK;
@@ -235,7 +235,7 @@ ets_printf("§reclgth: %d dataView Lgth: %d§", received->lgth, dataView->lgth);
   hdrInfos->seqIdxAfterHeader = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
-ets_printf("§IndexFromHeaderFields!result!%d!currPartIdx!%d!§\n", result, hdrInfos->currPartIdx);
+ets_printf("§getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!§", result, hdrInfos->currPartIdx);
   return result;
 }
 
@@ -281,10 +281,10 @@ ets_printf("§handleReceivedMsg§");
   // we loop over the fieldSequence entries and handle them as needed
   // attention not all entries of the message are handled here, only some special entries!
  
-self->compMsgMsgDesc->dumpHeaderPart(self, hdr);
+//self->compMsgMsgDesc->dumpHeaderPart(self, hdr);
   while (hdr->fieldSequence[hdrInfos->seqIdx] != 0) {
     sequenceEntry = hdr->fieldSequence[hdrInfos->seqIdx];
-ets_printf("§sequenceEntry: 0x%04x seqIdx:%d§", sequenceEntry, hdrInfos->seqIdx);
+//ets_printf("§sequenceEntry: 0x%04x seqIdx:%d§", sequenceEntry, hdrInfos->seqIdx);
     received->fieldOffset = hdrInfos->headerLgth;
     switch (sequenceEntry) {
     case COMP_DISP_U16_CMD_KEY:
@@ -292,28 +292,28 @@ ets_printf("§sequenceEntry: 0x%04x seqIdx:%d§", sequenceEntry, hdrInfos->seqId
       received->u16CmdKey = u16;
       received->fieldOffset += 2;
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
-ets_printf("§1 u16CmdKey: 0x%04x!hdr: 0x%04x§", received->u16CmdKey, hdr->hdrU16CmdKey);
+//ets_printf("§1 u16CmdKey: 0x%04x!hdr: 0x%04x§", received->u16CmdKey, hdr->hdrU16CmdKey);
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
         hdrInfos->currPartIdx++;
         result = self->nextFittingEntry(self, 0, received->u16CmdKey);
         checkErrOK(result);
         hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
-ets_printf("§2 u16CmdKey: 0x%04x!hdr: 0x%04x§", received->u16CmdKey, hdr->hdrU16CmdKey);
+//ets_printf("§2 u16CmdKey: 0x%04x!hdr: 0x%04x§", received->u16CmdKey, hdr->hdrU16CmdKey);
       }
-ets_printf("§found: currPartIdx: %d§", hdrInfos->currPartIdx);
+//ets_printf("§found: currPartIdx: %d§", hdrInfos->currPartIdx);
       break;
     case COMP_DISP_U0_CMD_LGTH:
       received->fieldOffset += 2;
-ets_printf("§u0CmdLgth!0!§");
+//ets_printf("§u0CmdLgth!0!§");
       break;
     case COMP_DISP_U16_CMD_LGTH:
       result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdLgth = u16;
       received->fieldOffset += 2;
-ets_printf("§u16CmdLgth!0x%04x!§", received->u16CmdLgth);
+//ets_printf("§u16CmdLgth!0x%04x!§", received->u16CmdLgth);
       break;
     case COMP_DISP_U0_CRC:
-ets_printf("§u0Crc!0!§");
+//ets_printf("§u0Crc!0!§");
       result = COMP_MSG_ERR_OK;
       break;
     case COMP_DISP_U8_CRC:
@@ -321,33 +321,33 @@ ets_printf("§u0Crc!0!§");
       fieldInfo.fieldOffset = received->totalLgth - 1;
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgData->compMsgDataView->getCrc(self->compMsgData->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
-ets_printf("§u8Crc!res!%d!§", result);
+//ets_printf("§u8Crc!res!%d!§", result);
       break;
     case COMP_DISP_U16_CRC:
       fieldInfo.fieldLgth = 2;
       fieldInfo.fieldOffset = received->totalLgth - 2;
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgData->compMsgDataView->getCrc(self->compMsgData->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
-ets_printf("§u16Crc!res!%d!§", result);
+//ets_printf("§u16Crc!res!%d!§", result);
       break;
     case COMP_DISP_U0_TOTAL_CRC:
-ets_printf("§u0TotalCrc!0!§");
+//ets_printf("§u0TotalCrc!0!§");
       result = COMP_MSG_ERR_OK;
       break;
     case COMP_DISP_U8_TOTAL_CRC:
-ets_printf("§u8TotalCrc!0!§");
+//ets_printf("§u8TotalCrc!0!§");
       fieldInfo.fieldLgth = 1;
       fieldInfo.fieldOffset = received->totalLgth - 1;
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgData->compMsgDataView->getTotalCrc(self->compMsgData->compMsgDataView, &fieldInfo);
-ets_printf("§u8totalCrc!res!%d!§", result);
+//ets_printf("§u8totalCrc!res!%d!§", result);
       break;
     case COMP_DISP_U16_TOTAL_CRC:
       fieldInfo.fieldLgth = 2;
       fieldInfo.fieldOffset = received->totalLgth - 2;
       startOffset = hdrInfos->headerLgth;
       result = self->compMsgData->compMsgDataView->getTotalCrc(self->compMsgData->compMsgDataView, &fieldInfo);
-ets_printf("§u16TotalCrc!res!%d!§", result);
+//ets_printf("§u16TotalCrc!res!%d!§", result);
       break;
     }
     checkErrOK(result);
