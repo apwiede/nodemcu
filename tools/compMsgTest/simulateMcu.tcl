@@ -61,9 +61,11 @@ set ::inDebug false
 set ::lastCh ""
 set ::totalLgth 999
 set ::handleStateInterval 1000
-set ::receivedHeader false
 set ::receivedMsg false
+set ::msg ""
+set ::msgLgth 0
 set ::afterId ""
+set ::inReceiveMsg false
 
 # ================================ checkErrOK ===============================
 
@@ -149,8 +151,8 @@ proc handleAnswer {bufVar lgthVar} {
   upvar $bufVar buf
   upvar $lgthVar lgth
 
-puts stderr "handleAnswer receivedHeader: $::receivedHeader!receivedMsg: $::receivedMsg!"
-  if {!$::receivedHeader || !$::receivedMsg} {
+puts stderr "handleAnswer receivedMsg: $::receivedMsg!"
+  if {!$::receivedMsg} {
 puts stderr "handleAnswer no message"
     return $::COMP_MSG_ERR_OK
   }
@@ -214,9 +216,33 @@ proc handleInput0 {ch bufVar lgthVar} {
   set pch 0
   binary scan $ch c pch
 #puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
-  if {!$::inDebug &&($ch eq ">")} {
+  if {$::inReceiveMsg && ($pch == 0)} {
+    if {$::lastCh eq "M"} {
+puts stderr "found MSG START"
+      append buf $ch
+      incr lgth
+      set ::lastCh $ch
+      return $::COMP_MSG_ERR_OK
+    } else {
+      set ::inReceiveMsg true
+    }
+  }
+  if {$::inReceiveMsg} {
+    append buf $ch
+    incr lgth
+    set ::lastCh $ch
+    return $::COMP_MSG_ERR_OK
+  }
+  if {!$::inDebug && ($ch eq "M")} {
+puts stderr "got 'M'"
+    set ::inReceiveMsg true
+    append buf $ch
+    incr lgth
+    set ::lastCh $ch
+    return $::COMP_MSG_ERR_OK
+  }
+  if {!$::inDebug && ($ch eq ">")} {
 puts stderr "got '>'"
-#    return -code return
     set ::lastCh $ch
     return $::COMP_MSG_ERR_OK
   }
@@ -308,38 +334,31 @@ proc readByte0 {fd bufVar lgthVar} {
   set pch 0
   binary scan $ch c pch
 if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
-puts stderr "=readByte0: read: $ch!lgth: $lgth!inDebug: $::inDebug!"
+#puts stderr "=readByte0: read: $ch!lgth: $lgth!inDebug: $::inDebug!"
 }
   set result [handleInput0 $ch buf lgth]
-#puts stderr "=readByte0: result: $result!"
   checkErrOK $result
   
 
   if {$lgth == $::headerLgth} {
-    set ::receivedHeader true
-    set ::msgHeader $buf
-    set ::msgHeaderLgth $lgth
-puts stderr "lgth: $lgth!headerLgth!$::headerLgth!"
-puts stderr "buf: $buf!"
+    # next line needed to set ::totalLgth!!
     binary scan $buf SSSS ::dst ::src ::srcId ::totalLgth
-puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst $::src $::srcId $::totalLgth]
+#puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst $::src $::srcId $::totalLgth]
   }
   if {$lgth >= $::totalLgth} {
 puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
+    set ::inReceiveMsg false
     set ::receivedMsg true
     set ::msg $buf
     set ::msgLgth $lgth
-#    fileevent $::fd0 readable [list]
     set myBuf ""
     foreach ch [split $buf ""] {
       binary scan $ch c pch
       append myBuf " [format 0x%02x [expr {$pch & 0xFF}]]"
     }
-#    puts stderr "1: got telegram: for cmdKey: $::cmdKey: $myBuf"
-    puts stderr "1: got telegram: for $myBuf"
+    puts stderr "1: got message: for $myBuf"
 set ::totalLgth 999
-#    after 1000 [list handleAnswer ::dev0Buf ::dev0Lgth]
-puts stderr "readByte0: scheduled handleAnswer"
+puts stderr "readByte0: end"
     return $::COMP_MSG_ERR_OK
   }
 }
