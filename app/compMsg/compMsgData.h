@@ -107,23 +107,20 @@ typedef struct netsocketUserData {
 } netsocketUserData_t;
 
 typedef uint8_t (* createMsg_t)(compMsgData_t *self, int numFields, uint8_t **handle);
-typedef uint8_t (* deleteMsg_t)(compMsgData_t *self);
 typedef uint8_t (* addField_t)(compMsgData_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
 typedef uint8_t (* getFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 
-typedef uint8_t (* getTableFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int row, int *numericValue, uint8_t **stringValue);
-typedef uint8_t (* setTableFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int row, int numericValue, const uint8_t *stringValue);
 typedef uint8_t (* dumpFieldValue_t)(compMsgData_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2);
-typedef uint8_t (* dumpTableRowFields_t)(compMsgData_t *self);
 typedef uint8_t (* dumpKeyValueFields_t)(compMsgData_t *self, size_t offset);
 typedef uint8_t (* dumpFieldInfo_t)(compMsgData_t *self, compMsgField_t *fieldInfo);
 typedef uint8_t (* dumpMsg_t)(compMsgData_t *self);
 typedef uint8_t (* initMsg_t)(compMsgData_t *self);
 typedef uint8_t (* prepareMsg_t)(compMsgData_t *self);
 typedef uint8_t (* getMsgData_t)(compMsgData_t *compMsgData, uint8_t **data, int *lgth);
-typedef uint8_t (* setMsgData_t)(compMsgData_t *compMsgData, const uint8_t *data);
-typedef uint8_t (* setMsgFieldFromList_t)(compMsgData_t *selfconst, const uint8_t **listVector, uint8_t numEntries, uint16_t flags);
+typedef uint8_t (* deleteMsgDescParts_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* deleteMsgValParts_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* deleteMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t ( *setDispatcher_t)(compMsgData_t *self, compMsgDispatcher_t *dispatcher);
 
 typedef struct compMsgData {
@@ -131,14 +128,10 @@ typedef struct compMsgData {
   compMsgDispatcher_t *compMsgDispatcher;
   char handle[16];
   compMsgField_t *fields;
-  compMsgField_t *tableFields;
   compMsgField_t *keyValueFields;
   uint16_t flags;
   size_t numFields;
   size_t maxFields;
-  size_t numTableRows;         // number of list rows
-  size_t numTableRowFields;    // number of fields within a table row
-  size_t numRowFields;         // for checking how many tableRowFields have been processed
   size_t numKeyValueFields;    // number of key value fields
   size_t numValueFields;       // for checking how many keyValueFields have been processed
   size_t fieldOffset;
@@ -174,18 +167,15 @@ typedef struct compMsgData {
   addField_t addField;
   getFieldValue_t getFieldValue;
   setFieldValue_t setFieldValue;
-  getTableFieldValue_t getTableFieldValue;
-  setTableFieldValue_t setTableFieldValue;
   dumpFieldValue_t dumpFieldValue;
-  dumpTableRowFields_t dumpTableRowFields;
   dumpKeyValueFields_t dumpKeyValueFields;
   dumpFieldInfo_t dumpFieldInfo;
   dumpMsg_t dumpMsg;
   initMsg_t initMsg;
   prepareMsg_t prepareMsg;
   getMsgData_t getMsgData;
-  setMsgData_t setMsgData;
-  setMsgFieldFromList_t setMsgFieldsFromList;
+  deleteMsgDescParts_t deleteMsgDescParts;
+  deleteMsgValParts_t deleteMsgValParts;
 
   setDispatcher_t setDispatcher;
 
@@ -194,9 +184,6 @@ typedef struct compMsgData {
 
 compMsgData_t *newCompMsgData(void);
 uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgData_t **compMsgData);
-uint8_t newCompMsgDataFromList(const uint8_t **listVector, uint8_t numEntries, uint8_t numRows, uint16_t flags, uint8_t **handle);
-uint8_t newCompMsgDefMsg(compMsgData_t *compMsgData);
-uint8_t newCompMsgList(compMsgData_t *compMsgData);
  
 #ifdef	__cplusplus
 }

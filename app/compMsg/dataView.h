@@ -119,13 +119,15 @@ typedef uint8_t (* getInt32Vector_t)(dataView_t *self, int offset, int32_t **val
 typedef uint8_t (* setUint32Vector_t)(dataView_t *self, int offset, uint32_t *value, size_t lgth);
 typedef uint8_t (* setInt32Vector_t)(dataView_t *self, int offset, int32_t *value, size_t lgth);
 
-typedef uint8_t (* setData_t)(dataView_t *self, size_t lgth);
+typedef uint8_t (* setDataViewData_t)(dataView_t *self, uint8_t *where, uint8_t *data, size_t lgth);
+typedef uint8_t (* getDataViewData_t)(dataView_t *self, uint8_t **where, uint8_t **data, size_t *lgth);
 typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
 
 typedef struct dataView {
-  uint8_t *data;
-  uint8_t id;
+  uint8_t *dataPtr;
+  uint8_t *where;
   size_t lgth;
+  uint8_t id;
   
   getFieldTypeIdFromStr_t getFieldTypeIdFromStr;
   getFieldTypeStrFromId_t getFieldTypeStrFromId;
@@ -160,7 +162,8 @@ typedef struct dataView {
   setUint32Vector_t setUint32Vector;
   setInt32Vector_t setInt32Vector;
 
-  setData_t setData;
+  setDataViewData_t setDataViewData;
+  getDataViewData_t getDataViewData;
   dumpBinary_t dumpBinary;
 } dataView_t;
 

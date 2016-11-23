@@ -447,6 +447,8 @@ static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos
 #undef checkErrOK
 #define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
 
+extern void *descDataView;
+extern char *dataViewWhere[4];
 // ================================= readHeadersAndSetFlags ====================================
 
 static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileName) {
@@ -457,7 +459,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   uint8_t fieldTypeId;
   char *endPtr;
   uint8_t lgth;
-  uint8_t buf[100];
+  uint8_t buf[150];
   uint8_t *buffer = buf;
   long uval;
   uint8_t *myStr;
@@ -484,6 +486,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   hdrInfos->currPartIdx = 0;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
+// FIXME should check for lgth against buffer length here !!!
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
@@ -504,11 +507,27 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   myStr = buffer;
   result = compMsgMsgDesc->getHeaderFieldsFromLine(self, hdrInfos, myStr, &cp, &seqIdx);
   checkErrOK(result);
+ets_printf("§readHeadersAndSetFlags: newDataView§");
   myDataView = newDataView();
+descDataView = myDataView;
+  if (dataViewWhere[0] == NULL) {
+    dataViewWhere[0] = "readHeadersAndSetFlags";
+  } else {
+    if (dataViewWhere[1] == NULL) {
+      dataViewWhere[1] = "readHeadersAndSetFlags";
+    } else {
+      if (dataViewWhere[2] == NULL) {
+        dataViewWhere[2] = "readHeadersAndSetFlags";
+      } else {
+        dataViewWhere[3] = "readHeadersAndSetFlags";
+      }
+    }
+  }
   checkAllocOK(myDataView);
   fieldOffset = 0;
   idx = 0;
   while(idx < numEntries) {
+// FIXME should check for lgth against buffer length here !!!
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
@@ -516,8 +535,8 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     }
     hdr = &hdrInfos->headerParts[idx];
     hdr->hdrFlags = 0;
-    myDataView->data = buffer;
-    myDataView->lgth = lgth;
+    result = myDataView->setDataViewData(myDataView, "readHeadersAndSetFlags", buffer, lgth);
+    checkErrOK(result);
     buffer[lgth] = 0;
     myStr = buffer;
     cp = buffer;
@@ -736,8 +755,9 @@ ets_printf("§u16§");
     idx++;
   }
 //ets_printf("readHeadersAndSetFlags free myDataView: %p\n", myDataView);
-  os_free(myDataView);
   result2 = compMsgMsgDesc->closeFile(compMsgMsgDesc);
+ets_printf("§readHeadersAndSetFlags: freeDataView§");
+  os_free(myDataView);
   checkErrOK(result2);
   return result;
 }
@@ -851,7 +871,6 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
 
 static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   int result;
-  compMsgDataView_t *dataView;
   long uval;
   uint8_t numEntries;
   uint8_t*cp;
@@ -870,7 +889,6 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
 
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
-  dataView = self->compMsgDataView;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
@@ -932,7 +950,6 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
 
 static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   int result;
-  compMsgDataView_t *dataView;
   long uval;
   uint8_t numEntries;
   uint8_t*cp;
@@ -951,7 +968,6 @@ static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
 
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
-  dataView = self->compMsgDataView;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
@@ -1065,54 +1081,6 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= resetMsgDescParts ====================================
-
-static uint8_t resetMsgDescParts(compMsgDispatcher_t *self) {
-  int idx;
-  msgDescPart_t *part;
-
-  idx = 0;
-  while (idx < self->compMsgData->numMsgDescParts) {
-    part = &self->compMsgData->msgDescParts[idx];
-    if (part->fieldNameStr != NULL) {
-      os_free(part->fieldNameStr);
-    }
-    if (part->fieldTypeStr != NULL) {
-      os_free(part->fieldTypeStr);
-    }
-    idx++;
-  }
-  os_free(self->compMsgData->msgDescParts);
-  self->compMsgData->msgDescParts = NULL;
-  self->compMsgData->numMsgDescParts = 0;
-  self->compMsgData->maxMsgDescParts = 0;
-  return COMP_DISP_ERR_OK;
-}
-
-// ================================= resetMsgValParts ====================================
-
-static uint8_t resetMsgValParts(compMsgDispatcher_t *self) {
-  int idx;
-  msgValPart_t *part;
-
-  idx = 0;
-  while (idx < self->compMsgData->numMsgValParts) {
-    part = &self->compMsgData->msgValParts[idx];
-    if (part->fieldNameStr != NULL) {
-      os_free(part->fieldNameStr);
-    }
-    if (part->fieldValueStr != NULL) {
-      os_free(part->fieldValueStr);
-    }
-    idx++;
-  }
-  os_free(self->compMsgData->msgValParts);
-  self->compMsgData->msgValParts = NULL;
-  self->compMsgData->numMsgValParts = 0;
-  self->compMsgData->maxMsgValParts = 0;
-  return COMP_DISP_ERR_OK;
-}
-
 // ================================= getMsgPartsFromHeaderPart ====================================
 
 static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
@@ -1166,7 +1134,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
   }
   cp = ep;
-  result = compMsgMsgDesc->resetMsgDescParts(self);
+  result = compMsgData->deleteMsgDescParts(self);
   checkErrOK(result);
   result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
   checkErrOK(result);
@@ -1271,7 +1239,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
   }
   cp = ep;
-  result = compMsgMsgDesc->resetMsgValParts(self);
+  result = compMsgData->deleteMsgValParts(self);
   checkErrOK(result);
   result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
   checkErrOK(result);
@@ -1501,8 +1469,6 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->readModuleValues = &readModuleValues;
   compMsgMsgDesc->readWifiValues = &readWifiValues;
   compMsgMsgDesc->readHeadersAndSetFlags = &readHeadersAndSetFlags;
-  compMsgMsgDesc->resetMsgDescParts = &resetMsgDescParts;
-  compMsgMsgDesc->resetMsgValParts = &resetMsgValParts;
   compMsgMsgDesc->dumpMsgDescPart = &dumpMsgDescPart;
   compMsgMsgDesc->dumpMsgValPart = &dumpMsgValPart;
   compMsgMsgDesc->dumpHeaderPart = &dumpHeaderPart;

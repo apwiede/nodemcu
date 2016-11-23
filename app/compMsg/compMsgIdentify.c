@@ -120,12 +120,12 @@ static uint8_t resetHeaderInfos(compMsgDispatcher_t *self) {
 static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey) {
   msgParts_t *received;
   msgHeaderInfos_t *hdrInfos;
-  dataView_t *dataView;
+//  dataView_t *dataView;
   headerPart_t *hdr;
   int hdrIdx;
   int found;
 
-  dataView = self->compMsgData->compMsgDataView->dataView;
+//  dataView = self->compMsgData->compMsgDataView->dataView;
   received = &self->received;
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
@@ -384,7 +384,9 @@ if (buffer == NULL) {
   hdrInfos = &self->msgHeaderInfos;
   received = &self->received;
   dataView = self->compMsgData->compMsgDataView->dataView;
-  dataView->data = received->buf;
+ets_printf("§handleReceivedPart: compMsgDataView->dataView: %p!data: %p!received->bu: %p!§", dataView, dataView->dataPtr, received->buf);
+  result = dataView->setDataViewData(dataView, "handleReceivedPart", received->buf, received->lgth);
+  checkErrOK(result);
 //ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
   idx = 0;
   while (idx < lgth) {
@@ -477,55 +479,6 @@ ets_printf("handleToSendPart lgth: %d buffer: %s\n", lgth, buffer);
 
   result = self->sendCloudMsg(self, encrypted, encryptedLgth);
   checkErrOK(result);
-
-
-#ifdef NOTDEF
-  hdrInfos = &self->msgHeaderInfos;
-  toSend = &self->toSend;
-  dataView = self->compMsgData->compMsgDataView->dataView;
-  dataView->data = toSend->buf;
-ets_printf("§toSendLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!\n§", toSend->lgth, lgth, toSend->fieldOffset, hdrInfos->headerLgth);
-  idx = 0;
-  while (idx < lgth) {
-    received->buf[received->lgth++] = buffer[idx];
-    received->realLgth++;
-    dataView->lgth++;
-    if (received->lgth == hdrInfos->headerLgth) {
-//ets_printf("received lgth: %d lgth: %d idx: %d\n", received->lgth, lgth, idx);
-      result = getHeaderIndexFromHeaderFields(self, received, hdrInfos);
-//ets_printf("getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
-    }
-    // loop until we have full message then decrypt if necessary and then handle the message
-    if (received->lgth == received->totalLgth) {
-      hdrIdx = hdrInfos->currPartIdx;
-      hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("hdrIdx: %d\n", hdrIdx);
-      if (hdr->hdrEncryption == 'E') {
-        uint8_t *cryptedPtr;
-        uint8_t *cryptKey;
-        uint8_t *decrypted;;
-        uint8_t mlen;
-        uint8_t klen;
-        uint8_t ivlen;
-        int decryptedLgth;
-
-        // decrypt encrypted message part (after header)
-cryptKey = "a1b2c3d4e5f6g7h8";
-        mlen = received->totalLgth - hdrInfos->headerLgth;
-        ivlen = 16;
-        klen = 16;
-        cryptedPtr = received->buf + hdrInfos->headerLgth;
-        result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
-        checkErrOK(result);
-        c_memcpy(cryptedPtr, decrypted, decryptedLgth);
-      }
-      result = self->handleToSendMsg(self, received, hdrInfos);
-ets_printf("handleToSendMsg end buffer idx: %d result: %d\n", idx, result);
-      return result;
-    }
-    idx++;
-  }
-#endif
   return COMP_DISP_ERR_OK;
 }
 

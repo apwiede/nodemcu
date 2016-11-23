@@ -173,17 +173,19 @@ ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_i
     checkErrOK(result);
     break;
   case 'G':
-   break;
+    break;
   case 'S':
-   result = typeRSendAnswer(self, msgData, msgLgth);
+    result = typeRSendAnswer(self, msgData, msgLgth);
     checkErrOK(result);
-   break;
+    result = self->compMsgData->deleteMsg(self);
+    checkErrOK(result);
+    break;
   case 'R':
-   break;
+    break;
   case 'U':
-   break;
+    break;
   case 'W':
-   break;
+    break;
   case 'N':
     // just ignore
     return COMP_DISP_ERR_OK;

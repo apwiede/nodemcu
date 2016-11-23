@@ -168,6 +168,19 @@ typedef struct compMsgField {
   fieldSizeCallback_t fieldSizeCallback;
 } compMsgField_t;
 
+typedef struct fieldName2id {
+  uint8_t *fieldName;
+  uint8_t fieldNameId;
+  uint8_t refCnt;
+} fieldName2id_t;
+
+typedef struct fieldNames
+{
+  size_t numNames;
+  size_t maxNames; 
+  fieldName2id_t *names;
+} fieldNames_t;
+
 typedef struct compMsgDataView compMsgDataView_t;
 
 typedef uint8_t (* getFieldNameIdFromStr_t)(compMsgDataView_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt);
@@ -193,6 +206,7 @@ typedef uint8_t (* dvSetFieldValue_t)(compMsgDataView_t *self, compMsgField_t *f
 
 typedef struct compMsgDataView {
   dataView_t *dataView;
+  fieldNames_t fieldNames;
   uint8_t id;
 
   getFieldNameIdFromStr_t getFieldNameIdFromStr;

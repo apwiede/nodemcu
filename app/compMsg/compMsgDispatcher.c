@@ -313,7 +313,6 @@ static uint8_t getNewCompMsgDataPtr(compMsgDispatcher_t *self) {
     }
   }
   newHeaderEntry = &self->msgHeader2MsgPtrs[self->numMsgHeaders];
-  newHeaderEntry->headerLgth = 0;
   newHeaderEntry->compMsgData = newCompMsgData();
   newHeaderEntry->compMsgData->setDispatcher(newHeaderEntry->compMsgData, self);
   self->compMsgData = newHeaderEntry->compMsgData;
@@ -330,16 +329,6 @@ static uint8_t getFieldType(compMsgDispatcher_t *self, compMsgData_t *compMsgDat
   idx = 0;
   while (idx < compMsgData->numFields) {
     fieldInfo = &compMsgData->fields[idx];
-    if (fieldInfo->fieldNameId == fieldNameId) {
-      *fieldTypeId = fieldInfo->fieldTypeId;
-      return COMP_DISP_ERR_OK;
-    }
-    idx++;
-  }
-  // and now check the table fields
-  idx = 0;
-  while (idx < compMsgData->numTableRowFields) {
-    fieldInfo = &compMsgData->tableFields[idx];
     if (fieldInfo->fieldNameId == fieldNameId) {
       *fieldTypeId = fieldInfo->fieldTypeId;
       return COMP_DISP_ERR_OK;
@@ -423,10 +412,6 @@ static uint8_t resetMsgInfo(compMsgDispatcher_t *self, msgParts_t *parts) {
   c_memcpy(parts->GUID, "                ", 16);
   parts->srcId = 0;
   parts->u16CmdKey = 0;
-#ifdef NOTUSED
-  self->compMsgDataView->dataView->data = parts->buf;
-  self->compMsgDataView->dataView->lgth = 0;
-#endif
   return COMP_DISP_ERR_OK;
 }
 
@@ -742,6 +727,9 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
   return COMP_DISP_ERR_OK;
 }
 
+extern char *dataViewWhere[4];
+static char *str2 = "newCompMsgDispatcher";
+
 // ================================= newCompMsgDispatcher ====================================
 
 compMsgDispatcher_t *newCompMsgDispatcher() {
@@ -754,7 +742,20 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   }
 
   compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
-  compMsgDispatcher->compMsgDataView = newCompMsgDataView(); // only used for readHeadersAndSetFlags !!
+  compMsgDispatcher->compMsgDataView = newCompMsgDataView(); // only used for compMsgMsgDesc functions !!
+  if (dataViewWhere[0] == NULL) {
+    dataViewWhere[0] = str2;
+  } else {
+    if (dataViewWhere[1] == NULL) {
+      dataViewWhere[1] = str2;
+    } else {
+      if (dataViewWhere[2] == NULL) {
+        dataViewWhere[2] = str2;
+      } else {
+        dataViewWhere[3] = str2;
+      }
+    }
+  }
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

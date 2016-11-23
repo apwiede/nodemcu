@@ -45,20 +45,6 @@
 #include "c_stdlib.h"
 #include "compMsgDispatcher.h"
 
-
-typedef struct fieldName2id {
-  uint8_t *fieldName;
-  uint8_t fieldNameId;
-  uint8_t refCnt;
-} fieldName2id_t;
-
-typedef struct fieldNames
-{
-  size_t numNames;
-  size_t maxNames;
-  fieldName2id_t *names;
-} fieldNames_t;
-
 static uint8_t compMsgDataViewId;
 static fieldNames_t fieldNames = {0, 0, NULL};
 
@@ -281,7 +267,7 @@ static uint8_t getFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo, uin
   if (fieldInfo->fieldOffset + lgth > self->dataView->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  c_memcpy(*value,self->dataView->data+fieldInfo->fieldOffset,lgth);
+  c_memcpy(*value, self->dataView->dataPtr + fieldInfo->fieldOffset,lgth);
 }
 
 // ================================= setFiller ====================================
@@ -336,7 +322,7 @@ static uint8_t getCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
   idx = startOffset;
   while (idx < lgth) {
 //ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crcVal);
-    crcVal += self->dataView->data[idx++];
+    crcVal += self->dataView->dataPtr[idx++];
   }
 //ets_printf("§crcVal00: 0x%04x§\n", crcVal);
   crcVal = ~(crcVal);
@@ -371,7 +357,7 @@ static uint8_t setCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
 //ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx-startOffset, self->dataView->data[idx], crc);
   while (idx < lgth) {
 //ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx-startOffset, self->dataView->data[idx], crc);
-    crc += self->dataView->data[idx++];
+    crc += self->dataView->dataPtr[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
@@ -400,7 +386,7 @@ static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
 //ets_printf("§getTotalCrc§");
   while (idx < fieldInfo->fieldOffset) {
 //ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x§", idx, self->dataView->data[idx], crcVal);
-    crcVal += self->dataView->data[idx++];
+    crcVal += self->dataView->dataPtr[idx++];
   }
 //ets_printf("§crcVal00: 0x%04x§", crcVal);
   crcVal = ~(crcVal);
@@ -435,7 +421,7 @@ static uint8_t setTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
 //ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx, self->dataView->data[idx], crc);
   while (idx < fieldInfo->fieldOffset) {
 //ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx, self->dataView->data[idx], crc);
-    crc += self->dataView->data[idx++];
+    crc += self->dataView->dataPtr[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
@@ -499,18 +485,18 @@ static uint8_t getFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
       *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
       checkAllocOK(stringValue);
       (*stringValue)[fieldInfo->fieldLgth] = 0;
-      os_memcpy(*stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      os_memcpy(*stringValue, self->dataView->dataPtr + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
     case DATA_VIEW_FIELD_UINT8_VECTOR:
       *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
       checkAllocOK(stringValue);
       (*stringValue)[fieldInfo->fieldLgth] = 0;
-      os_memcpy(*stringValue, self->dataView->data+fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      os_memcpy(*stringValue, self->dataView->dataPtr + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
     case DATA_VIEW_FIELD_INT16_VECTOR:
       if (*stringValue == NULL) {
         // check for length needed!!
-        result = self->dataView->getInt16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(int16_t), &i16);
+        result = self->dataView->getInt16(self->dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(int16_t), &i16);
         checkErrOK(result);
         *numericValue = (int)i16;
       } else {
@@ -520,7 +506,7 @@ static uint8_t getFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_UINT16_VECTOR:
       if (*stringValue == NULL) {
         // check for length needed!!
-        result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), &ui16);
+        result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(uint16_t), &ui16);
         checkErrOK(result);
         *numericValue = (int)ui16;
       } else {
@@ -637,7 +623,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
         if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
         }
-        os_memcpy(self->dataView->data+fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
+        os_memcpy(self->dataView->dataPtr + fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
       }
@@ -648,7 +634,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
         if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
         }
-        os_memcpy(self->dataView->data+fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
+        os_memcpy(self->dataView->dataPtr + fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
       }
@@ -697,6 +683,7 @@ ets_printf("bad type in setFieldValue. %d\n", fieldInfo->fieldTypeId);
   return DATA_VIEW_ERR_OK;
 }
 
+extern void *compMsgDataViewData[4];
 
 // ================================= newCompMsgDataView ====================================
 
@@ -705,12 +692,30 @@ compMsgDataView_t *newCompMsgDataView(void) {
   if (compMsgDataView == NULL) {
     return NULL;
   }
+ets_printf("§newCompMsgDataView: newDataView: %p!§", compMsgDataView);
   compMsgDataView->dataView = newDataView();
   if (compMsgDataView->dataView == NULL) {
     return NULL;
   }
+  if (compMsgDataViewData[0] == NULL) {
+    compMsgDataViewData[0] = compMsgDataView->dataView;
+  } else {
+    if (compMsgDataViewData[1] == NULL) {
+      compMsgDataViewData[1] = compMsgDataView->dataView;
+    } else {
+      if (compMsgDataViewData[2] == NULL) {
+        compMsgDataViewData[2] = compMsgDataView->dataView;
+      } else {
+        compMsgDataViewData[3] = compMsgDataView->dataView;
+      }
+    }
+  }
   compMsgDataViewId++;
   compMsgDataView->id = compMsgDataViewId;
+
+  compMsgDataView->fieldNames.numNames = 0;
+  compMsgDataView->fieldNames.maxNames = 0;
+  compMsgDataView->fieldNames.names = NULL;
 
   compMsgDataView->getFieldNameIdFromStr = &getFieldNameIdFromStr;
   compMsgDataView->getFieldNameStrFromId = &getFieldNameStrFromId;
@@ -737,12 +742,28 @@ compMsgDataView_t *newCompMsgDataView(void) {
 
 // ================================= freeCompMsgDataView ====================================
 
-void freeCompMsgDataView(compMsgDataView_t *dataView) {
-  if (dataView->dataView != NULL) {
-ets_printf("freeCompMsgDataView1: %p\n", dataView->dataView);
-    freeDataView(dataView->dataView);
-    dataView->dataView = NULL;
-    os_free(dataView);
+void freeCompMsgDataView(compMsgDataView_t *compMsgDataView) {
+  int idx;
+  fieldName2id_t *entry;
+
+  if (compMsgDataView->dataView != NULL) {
+ets_printf("§freeCompMsgDataView: %p§", compMsgDataView->dataView);
+    freeDataView(compMsgDataView->dataView);
+//    compMsgDataView->dataView = NULL;
+  }
+  if (compMsgDataView->fieldNames.numNames != 0) {
+    idx = 0;
+    while (idx < compMsgDataView->fieldNames.numNames) {
+      entry = &compMsgDataView->fieldNames.names[idx];
+      if (entry->fieldName != NULL) {
+        os_free(entry->fieldName);
+        entry->fieldName = NULL;
+      }
+      idx++;
+    }
+    compMsgDataView->fieldNames.numNames = 0;
+    compMsgDataView->fieldNames.maxNames = 0;
+    compMsgDataView->fieldNames.names = NULL;
   }
 }
 

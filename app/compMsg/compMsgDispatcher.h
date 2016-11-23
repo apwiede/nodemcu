@@ -106,8 +106,6 @@ typedef struct compMsgData compMsgData_t;
 
 typedef struct msgHeader2MsgPtr {
   compMsgData_t *compMsgData;
-  uint8_t headerLgth;
-  uint8_t header[DISP_MAX_HEADER_LGTH];
 } msgHeader2MsgPtr_t;
 
 typedef struct msgRequestInfos {
@@ -181,7 +179,7 @@ typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *com
 // BuildMsg stuff
 typedef uint8_t (* fixOffsetsForKeyValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t *numTableRows, uint8_t *numTableRowFields, uint8_t type);
+typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t type);
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 
@@ -211,7 +209,7 @@ typedef struct compMsgDispatcher {
   uint8_t actionMode;
   uint8_t operatingMode;
   bssScanInfos_t *bssScanInfos;
-  compMsgDataView_t *compMsgDataView; // needed only for readeHeadersAndSetFlags!!
+  compMsgDataView_t *compMsgDataView; // needed only for compMsgMsgDesc functions!!
 
   msgHeaderInfos_t msgHeaderInfos;
 
