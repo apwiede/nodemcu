@@ -105,10 +105,10 @@ puts stderr "handleState: $myState!"
     INIT {
       set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 ID hdr]
       checkErrOK $result
-puts stderr "=== I after getHeaderFromUniqueFields"
+#puts stderr "=== I after getHeaderFromUniqueFields"
       dict set ::compMsgDispatcher WifiFd $::fd0
       set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
-puts stderr " I createMsgFromHeaderPart: result!$result!"
+#puts stderr " I createMsgFromHeaderPart: result!$result!"
       checkErrOK $result
       set ::inDebug false
       set buf ""
@@ -118,10 +118,10 @@ puts stderr " I createMsgFromHeaderPart: result!$result!"
     MODULE_INFO {
       set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 MD hdr]
       checkErrOK $result
-puts stderr "=== M after getHeaderFromUniqueFields"
+#puts stderr "=== M after getHeaderFromUniqueFields"
       dict set ::compMsgDispatcher WifiFd $::fd0
       set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
-puts stderr " M createMsgFromHeaderPart: result!$result!"
+#puts stderr " M createMsgFromHeaderPart: result!$result!"
       checkErrOK $result
       set ::inDebug false
       set buf ""
@@ -131,10 +131,10 @@ puts stderr " M createMsgFromHeaderPart: result!$result!"
     OPERATION_MODE {
       set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 BD hdr]
       checkErrOK $result
-puts stderr "===after getHeaderFromUniqueFields"
+#puts stderr "===after getHeaderFromUniqueFields"
       dict set ::compMsgDispatcher WifiFd $::fd0
       set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
-puts stderr "createMsgFromHeaderPart: result!$result!"
+#puts stderr "createMsgFromHeaderPart: result!$result!"
       checkErrOK $result
       set ::currState OPERATION_MODE
     }
@@ -151,9 +151,9 @@ proc handleAnswer {bufVar lgthVar} {
   upvar $bufVar buf
   upvar $lgthVar lgth
 
-puts stderr "handleAnswer receivedMsg: $::receivedMsg!"
+#puts stderr "handleAnswer receivedMsg: $::receivedMsg!"
   if {!$::receivedMsg} {
-puts stderr "handleAnswer no message"
+#puts stderr "handleAnswer no message"
     return $::COMP_MSG_ERR_OK
   }
   set buf $::msg
@@ -161,7 +161,7 @@ puts stderr "handleAnswer no message"
   set ::receivedHeader false
   set ::receivedMsg false
   set myState $::currState
-puts stderr "handleAnswer: $myState!!"
+#puts stderr "handleAnswer: $myState!!"
   set received [dict create]
   dict set received buf $buf
   dict set received lgth $lgth
@@ -174,26 +174,26 @@ puts stderr "handleAnswer: $myState!!"
   checkErrOK $result
 #::compMsg compMsgData dumpMsg ::compMsgDispatcher
   set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher @cmdKey value]
-puts stderr "cmdKey: $value!result: $result!"
+#puts stderr "cmdKey: $value!result: $result!"
   checkErrOK $result
 
   switch $myState {
     INIT {
-puts stderr "INIT handleAnswer lgth: $lgth!"
+#puts stderr "INIT handleAnswer lgth: $lgth!"
       binary scan \x49\x41 S cmdKey ; # IA
       if {$value == $cmdKey} {
         set ::currState MODULE_INFO
       }
     }
     MODULE_INFO {
-puts stderr "MODULE_INFO handleAnswer lgth: $lgth!"
+#puts stderr "MODULE_INFO handleAnswer lgth: $lgth!"
       binary scan \x4d\x41 S cmdKey ; # MA
       if {$value == $cmdKey} {
         set ::currState OPERATION_MODE
       }
     }
     OPERATION_MODE {
-puts stderr "OPERATION_MODE handleAnswer lgth: $lgth!"
+#puts stderr "OPERATION_MODE handleAnswer lgth: $lgth!"
       # nothing to do
     }
     default {
@@ -201,7 +201,7 @@ puts stderr "funny state: $myState!"
     }
   }
   set result [handleState buf lgth]
-puts stderr "handleState: result: $result!"
+#puts stderr "handleState: result: $result!"
   checkErrOK $result
 #  fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
   return $result
@@ -218,7 +218,7 @@ proc handleInput0 {ch bufVar lgthVar} {
 #puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
   if {$::inReceiveMsg && ($pch == 0)} {
     if {$::lastCh eq "M"} {
-puts stderr "found MSG START"
+#puts stderr "found MSG START"
       append buf $ch
       incr lgth
       set ::lastCh $ch
@@ -234,7 +234,7 @@ puts stderr "found MSG START"
     return $::COMP_MSG_ERR_OK
   }
   if {!$::inDebug && ($ch eq "M")} {
-puts stderr "got 'M'"
+#puts stderr "got 'M'"
     set ::inReceiveMsg true
     append buf $ch
     incr lgth
@@ -346,7 +346,7 @@ if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0x
 #puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst $::src $::srcId $::totalLgth]
   }
   if {$lgth >= $::totalLgth} {
-puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
+#puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
     set ::inReceiveMsg false
     set ::receivedMsg true
     set ::msg $buf
@@ -356,9 +356,9 @@ puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
       binary scan $ch c pch
       append myBuf " [format 0x%02x [expr {$pch & 0xFF}]]"
     }
-    puts stderr "1: got message: for $myBuf"
+#    puts stderr "1: got message: for $myBuf"
 set ::totalLgth 999
-puts stderr "readByte0: end"
+#puts stderr "readByte0: end"
     return $::COMP_MSG_ERR_OK
   }
 }

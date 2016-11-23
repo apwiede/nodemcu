@@ -391,7 +391,7 @@ puts stderr "Fitting entry not found!"
       upvar $receivedVar received
      
       set headerInfos [dict get $compMsgDispatcher headerInfos]
-puts stderr "buf len: [string length [dict get $received buf]]!len: [dict get $received lgth]!"
+#puts stderr "buf len: [string length [dict get $received buf]]!len: [dict get $received lgth]!"
       set result [::compMsg dataView setData [dict get $received buf] [dict get $received lgth]]
       checkErrOK $result
       set hdrIdx [dict get $headerInfos currPartIdx]
@@ -399,9 +399,9 @@ puts stderr "buf len: [string length [dict get $received buf]]!len: [dict get $r
       set hdr [lindex $headerParts $hdrIdx]
       set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
       set compMsgData [dict get $compMsgDispatcher compMsgData]
-puts stderr "numMsgDescParts: [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]!"
+#puts stderr "numMsgDescParts: [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]!"
       set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts] handle]
-puts stderr "Msg handle: $handle!result: $result!"
+#puts stderr "Msg handle: $handle!result: $result!"
       checkErrOK $result
       dict set compMsgDispatcher compMsgData $compMsgData
       set idx 0
@@ -415,7 +415,7 @@ puts stderr "Msg handle: $handle!result: $result!"
       dict set compMsgDispatcher compMsgData $compMsgData
       set result [::compMsg compMsgData initReceivedMsg compMsgDispatcher numTableRows numTableRowFields]
       checkErrOK $result
-puts stderr "handleReceivedMsg done"
+#puts stderr "handleReceivedMsg done"
       return $::COMP_MSG_ERR_OK
     }
 

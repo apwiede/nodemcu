@@ -299,7 +299,7 @@ puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDa
 #puts $fd $msgData
 #flush $fd
 #close $fd
-puts stderr [format "buildMsg sendMsg has been called result: %d" $result]
+#puts stderr [format "buildMsg sendMsg has been called result: %d" $result]
       checkErrOK $result
       return $result
     }

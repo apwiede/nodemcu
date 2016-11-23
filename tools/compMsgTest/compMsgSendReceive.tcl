@@ -81,7 +81,7 @@ namespace eval compMsg {
     
       set handleType [dict get $compMsgDispatcher currHdr hdrHandleType]
       set encryption [dict get $compMsgDispatcher currHdr hdrEncryption]
-puts stderr "sendMsg!handleType!$handleType!"
+#puts stderr "sendMsg!handleType!$handleType!"
       switch $handleType {
         "A" {
           # Wifi -> App Provisioning
@@ -101,12 +101,12 @@ puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
         "S" {
         }
         "R" {
-puts stderr "sendMsg R: Mcu -> Wifi encryption: $encryption!"
+#puts stderr "sendMsg R: Mcu -> Wifi encryption: $encryption!"
           set fd [dict get $compMsgDispatcher WifiFd]
-puts stderr "Mcu Simulation fd: $fd!lgth: [string length $msgData]!msgData!$msgData!"
+#puts stderr "Mcu Simulation fd: $fd!lgth: [string length $msgData]!msgData!$msgData!"
           puts -nonewline $fd $msgData
           flush $fd
-puts stderr "sendMsg R: Mcu -> Wifi done!"
+#puts stderr "sendMsg R: Mcu -> Wifi done!"
           return $::COMP_DISP_ERR_OK
         }
         "U" {
