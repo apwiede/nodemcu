@@ -409,14 +409,14 @@ static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
     crcVal = crcVal & 0xFF;
     result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-ets_printf("§crcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
+//ets_printf("§crcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
     result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-ets_printf("§crcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
+//ets_printf("§crcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
     if (crcVal != crc) {
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }

@@ -92,13 +92,13 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
   int result;
   int idx;
 
-ets_printf("§typeRSendAnswer start: lgth: %d!§", msgLgth);
+//ets_printf("§typeRSendAnswer start: lgth: %d!§", msgLgth);
   idx = 0;
   while (idx < msgLgth) {
     platform_uart_send(0, data[idx]);
     idx++;
   }
-ets_printf("§typeRSendAnswer done§");
+//ets_printf("§typeRSendAnswer done§");
   return COMP_DISP_ERR_OK;
 }
 

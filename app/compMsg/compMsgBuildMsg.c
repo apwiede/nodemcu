@@ -197,7 +197,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t *stringValue;
 
-ets_printf("§setMsgValues§");
+//ets_printf("§setMsgValues§");
   compMsgData = self->compMsgData;
   handle = self->msgHandle;
   type = 'A';
@@ -245,7 +245,7 @@ ets_printf("§setMsgValues§");
   result = compMsgData->setFieldValue(compMsgData, "@cmdKey", numericValue, stringValue);
 //ets_printf("§cmdKey result: %d§", result);
   checkErrOK(result);
-ets_printf("§setMsgvalues done§");
+//ets_printf("§setMsgvalues done§");
   compMsgData->prepareMsg(compMsgData);
   checkErrOK(result);
 //ets_printf("§");
@@ -285,7 +285,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-ets_printf("§buildMsg§");
+//ets_printf("§buildMsg§");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   result = self->compMsgData->initMsg(self->compMsgData);
@@ -294,7 +294,7 @@ ets_printf("§buildMsg§");
   checkErrOK(result);
 
   result = self->compMsgData->getMsgData(self->compMsgData, &msgData, &msgLgth);
-ets_printf("§getMsgData res: %d§", result);
+//ets_printf("§getMsgData res: %d§", result);
   checkErrOK(result);
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {
     uint8_t *toCryptPtr;
@@ -326,7 +326,7 @@ ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
   // from currHdr we can see the handle type and - if needed - the @dst
 //ets_printf("§transferType: %c dst: 0x%04x§", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart);
   result = self->sendMsg(self, msgData, msgLgth);
-ets_printf("§buildMsg sendMsg has been called result: %d§", result);
+//ets_printf("§buildMsg sendMsg has been called result: %d§", result);
   checkErrOK(result);
 //  result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
   return result;

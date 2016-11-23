@@ -1143,12 +1143,12 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   compMsgData_t *compMsgData;
   compMsgMsgDesc_t *compMsgMsgDesc;
 
-ets_printf("§getMsgPartsFromHeaderPart1§");
+//ets_printf("§getMsgPartsFromHeaderPart1§");
   compMsgData = self->compMsgData;
   compMsgMsgDesc = self->compMsgMsgDesc;
   self->compMsgData->currHdr = hdr;
   os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
-ets_printf("§file: %s§", fileName);
+//ets_printf("§file: %s§", fileName);
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
@@ -1329,9 +1329,9 @@ ets_printf("§file: %s§", fileName);
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
-ets_printf("§getMsgPartsFromHeaderPart9 res: %d§", result);
+//ets_printf("§getMsgPartsFromHeaderPart9 res: %d§", result);
   checkErrOK(result);
-ets_printf("§heap2: %d§", system_get_free_heap_size());
+//ets_printf("§heap2: %d§", system_get_free_heap_size());
 
   return COMP_MSG_DESC_ERR_OK;
 }
