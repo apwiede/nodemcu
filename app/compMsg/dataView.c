@@ -45,56 +45,7 @@
 
 #include "dataView.h"
 
-static str2id_t fieldType2Ids[] = {
-  {"none",      DATA_VIEW_FIELD_NONE},
-  {"uint8_t",   DATA_VIEW_FIELD_UINT8_T},
-  {"int8_t",    DATA_VIEW_FIELD_INT8_T},
-  {"uint16_t",  DATA_VIEW_FIELD_UINT16_T},
-  {"int16_t",   DATA_VIEW_FIELD_INT16_T},
-  {"uint32_t",  DATA_VIEW_FIELD_UINT32_T},
-  {"int32_t",   DATA_VIEW_FIELD_INT32_T},
-  {"uint8_t*",  DATA_VIEW_FIELD_UINT8_VECTOR},
-  {"int8_t*",   DATA_VIEW_FIELD_INT8_VECTOR},
-  {"uint16_t*", DATA_VIEW_FIELD_UINT16_VECTOR},
-  {"int16_t*",  DATA_VIEW_FIELD_INT16_VECTOR},
-  {"uint32_t*", DATA_VIEW_FIELD_UINT32_VECTOR},
-  {"int32_t*",  DATA_VIEW_FIELD_INT32_VECTOR},
-  {NULL, -1},
-};
-
 static uint8_t dataViewId;
-
-// ================================= getFieldTypeIdFromStr ====================================
-
-static uint8_t getFieldTypeIdFromStr(dataView_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId) {
-  str2id_t *entry;
-
-  entry = &fieldType2Ids[0];
-  while (entry->str != NULL) {
-    if (c_strcmp(fieldTypeStr, entry->str) == 0) {
-      *fieldTypeId = entry->id;
-      return DATA_VIEW_ERR_OK;
-    }
-    entry++;
-  }
-  return DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND;
-}
-
-// ================================= getFieldTypeStrFromId ====================================
-
-static uint8_t getFieldTypeStrFromId(dataView_t *self, uint8_t fieldTypeId, uint8_t **fieldTypeStr) {
-  str2id_t *entry;
-
-  entry = &fieldType2Ids[0];
-  while (entry->str != NULL) {
-    if (fieldTypeId == entry->id) {
-      *fieldTypeStr = entry->str;
-      return DATA_VIEW_ERR_OK;
-    }
-    entry++;
-  }
-  return DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND;
-}
 
 // ================================= getUint8 ====================================
 
@@ -102,7 +53,7 @@ static uint8_t getUint8(dataView_t *self, int offset, uint8_t *value) {
   if (offset > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  *value = self->dataPtr[offset];
+  *value = self->data[offset];
   return DATA_VIEW_ERR_OK;
 }
 
@@ -112,7 +63,7 @@ static uint8_t getInt8(dataView_t *self, int offset, int8_t *value) {
   if (offset > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  *value = (int8_t)self->dataPtr[offset];
+  *value = (int8_t)self->data[offset];
   return DATA_VIEW_ERR_OK;
 }
 
@@ -122,7 +73,7 @@ static uint8_t setUint8(dataView_t *self, int offset, uint8_t value) {
   if (offset > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  self->dataPtr[offset] = value;
+  self->data[offset] = value;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -132,7 +83,7 @@ static uint8_t setInt8(dataView_t *self, int offset, int8_t value) {
   if (offset > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  self->dataPtr[offset] = value & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -144,8 +95,8 @@ static uint8_t getUint16(dataView_t *self, int offset, uint16_t *value) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
   *value = 0;
-  *value += (self->dataPtr[offset++] & 0xFF) << 8;
-  *value += (self->dataPtr[offset] & 0xFF) << 0;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -156,8 +107,8 @@ static uint8_t getInt16(dataView_t *self, int offset, int16_t *value) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
   *value = 0;
-  *value += (self->dataPtr[offset++] & 0xFF) << 8;
-  *value += (self->dataPtr[offset] & 0xFF) << 0;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -167,8 +118,8 @@ static uint8_t setUint16(dataView_t *self, int offset, uint16_t value) {
   if (offset + 1 > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  self->dataPtr[offset++] = (value >> 8) & 0xFF;
-  self->dataPtr[offset] = value & 0xFF;
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -178,8 +129,8 @@ static uint8_t setInt16(dataView_t *self, int offset, int16_t value) {
   if (offset + 1 > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  self->dataPtr[offset++] = (value >> 8) & 0xFF;
-  self->dataPtr[offset] = value & 0xFF;
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -191,10 +142,10 @@ static uint8_t getUint32(dataView_t *self, int offset, uint32_t *value) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
   *value = 0;
-  *value += (self->dataPtr[offset++] & 0xFF) << 24;
-  *value += (self->dataPtr[offset++] & 0xFF) << 16;
-  *value += (self->dataPtr[offset++] & 0xFF) << 8;
-  *value += (self->dataPtr[offset] & 0xFF) << 0;
+  *value += (self->data[offset++] & 0xFF) << 24;
+  *value += (self->data[offset++] & 0xFF) << 16;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -205,10 +156,10 @@ static uint8_t getInt32(dataView_t *self, int offset, int32_t *value) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
   *value = 0;
-  *value += (self->dataPtr[offset++] & 0xFF) << 24;
-  *value += (self->dataPtr[offset++] & 0xFF) << 16;
-  *value += (self->dataPtr[offset++] & 0xFF) << 8;
-  *value += (self->dataPtr[offset] & 0xFF) << 0;
+  *value += (self->data[offset++] & 0xFF) << 24;
+  *value += (self->data[offset++] & 0xFF) << 16;
+  *value += (self->data[offset++] & 0xFF) << 8;
+  *value += (self->data[offset] & 0xFF) << 0;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -218,10 +169,10 @@ static uint8_t setUint32(dataView_t *self, int offset, uint32_t value) {
   if (offset + 3 > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  self->dataPtr[offset++] = (value >> 24) & 0xFF;
-  self->dataPtr[offset++] = (value >> 16) & 0xFF;
-  self->dataPtr[offset++] = (value >> 8) & 0xFF;
-  self->dataPtr[offset] = value & 0xFF;
+  self->data[offset++] = (value >> 24) & 0xFF;
+  self->data[offset++] = (value >> 16) & 0xFF;
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -231,10 +182,10 @@ static uint8_t setInt32(dataView_t *self, int offset, int32_t value) {
   if (offset + 3 > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  self->dataPtr[offset++] = (value >> 24) & 0xFF;
-  self->dataPtr[offset++] = (value >> 16) & 0xFF;
-  self->dataPtr[offset++] = (value >> 8) & 0xFF;
-  self->dataPtr[offset] = value & 0xFF;
+  self->data[offset++] = (value >> 24) & 0xFF;
+  self->data[offset++] = (value >> 16) & 0xFF;
+  self->data[offset++] = (value >> 8) & 0xFF;
+  self->data[offset] = value & 0xFF;
   return DATA_VIEW_ERR_OK;
 }
 
@@ -245,7 +196,7 @@ static uint8_t getUint8Vector(dataView_t *self, int offset, uint8_t **value, siz
   if (offset + lgth > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  c_memcpy(*value,self->dataPtr + offset,lgth);
+  c_memcpy(*value,self->data + offset,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -255,7 +206,7 @@ static uint8_t getInt8Vector(dataView_t *self, int offset, int8_t **value, size_
   if (offset + lgth > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  c_memcpy(*value,self->dataPtr + offset,lgth);
+  c_memcpy(*value,self->data + offset,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -265,7 +216,7 @@ static uint8_t setUint8Vector(dataView_t *self, int offset, uint8_t *value, size
   if (offset + lgth > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  c_memcpy(self->dataPtr + offset,value,lgth);
+  c_memcpy(self->data + offset,value,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -275,7 +226,7 @@ static uint8_t setInt8Vector(dataView_t *self, int offset, int8_t *value, size_t
   if (offset + lgth > self->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  c_memcpy(self->dataPtr + offset,value,lgth);
+  c_memcpy(self->data + offset,value,lgth);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -433,7 +384,7 @@ void *compMsgDataViewData[4] = {NULL, NULL, NULL, NULL};
 // ================================= setDataViewData ====================================
 
 static uint8_t setDataViewData(dataView_t *self, uint8_t *where, uint8_t *data, size_t lgth) {
-  self->dataPtr = data;
+  self->data = data;
   self->where = where;
   self->lgth = lgth;
   return DATA_VIEW_ERR_OK;
@@ -442,7 +393,7 @@ static uint8_t setDataViewData(dataView_t *self, uint8_t *where, uint8_t *data, 
 // ================================= getDataViewData ====================================
 
 static uint8_t getDataViewData(dataView_t *self, uint8_t **where, uint8_t **data, size_t *lgth) {
-  *data = self->dataPtr;
+  *data = self->data;
   *where = self->where;
   *lgth = self->lgth;
   return DATA_VIEW_ERR_OK;
@@ -463,33 +414,17 @@ static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) 
 
 // ================================= newDataView ====================================
 
-dataView_t *newDataView(void) {
+dataView_t *newDataView(uint8_t *data, size_t lgth) {
   dataView_t *dataView = os_zalloc(sizeof(dataView_t));
-ets_printf("§newDataView: %p§", dataView);
+ets_printf("§newDataView: %p!lgth: %d!§", dataView, lgth);
   if (dataView == NULL) {
     return NULL;
   }
-  if (dataViewData[0] == NULL) {
-    dataViewData[0] = dataView;
-  } else {
-    if (dataViewData[1] == NULL) {
-      dataViewData[1] = dataView;
-    } else {
-      if (dataViewData[2] == NULL) {
-        dataViewData[2] = dataView;
-      } else {
-        dataViewData[3] = dataView;
-      }
-    }
-  }
-  dataView->dataPtr = NULL;
+  dataView->data = data;
   dataView->where = NULL;
-  dataView->lgth = 0;
+  dataView->lgth = lgth;
   dataViewId++;
   dataView->id = dataViewId;
-
-  dataView->getFieldTypeIdFromStr = &getFieldTypeIdFromStr;
-  dataView->getFieldTypeStrFromId = &getFieldTypeStrFromId;
 
   dataView->getUint8 = &getUint8;
   dataView->getInt8 = &getInt8;
@@ -522,22 +457,7 @@ ets_printf("§newDataView: %p§", dataView);
   dataView->setInt32Vector = &setInt32Vector;
 
   dataView->setDataViewData = &setDataViewData;
-  dataView->getDataViewData = getDataViewData;
+  dataView->getDataViewData = &getDataViewData;
   dataView->dumpBinary = &dumpBinary;
   return dataView;
-}
-
-// ================================= freeDataView ====================================
-
-void freeDataView(dataView_t *dataView) {
-ets_printf("§free dataView: %p dataView->data: %p dataViewData[0]: %p dataViewData[1]: %p dataViewData[2]: %p dataViewData[3]: %p§", dataView, dataView->dataPtr, dataViewData[0], dataViewData[1], dataViewData[2], dataViewData[3]);
-ets_printf("§free dataViewWhere[0]: %s dataViewWhere[1]: %s dataViewWhere[2]: %s dataViewWhere[3]: %s§",
- dataViewWhere[0] == NULL ? "nil" : dataViewWhere[0],
- dataViewWhere[1] == NULL ? "nil" : dataViewWhere[1],
- dataViewWhere[2] == NULL ? "nil" : dataViewWhere[2],
- dataViewWhere[3] == NULL ? "nil" : dataViewWhere[3]);
-  if (dataView->dataPtr != NULL) {
-//    os_free(dataView->dataPtr);
-//    dataView->dataPtr = NULL;
-  }
 }

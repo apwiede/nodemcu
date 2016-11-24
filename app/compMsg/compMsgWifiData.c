@@ -603,11 +603,9 @@ static uint8_t getWifiConfig(compMsgDispatcher_t *self) {
 static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue) {
   uint8_t result;
   uint8_t fieldNameId;
-  compMsgDataView_t *dataView;
 
 //ets_printf("setWifValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
-  dataView = self->compMsgDataView;
-  result = dataView->getFieldNameIdFromStr(dataView, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR); 
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR); 
   switch (fieldNameId) {
   case COMP_MSG_SPEC_FIELD_PROVISIONING_SSID:
     c_memcpy(compMsgWifiData.provisioningSsid, stringValue, c_strlen(stringValue));

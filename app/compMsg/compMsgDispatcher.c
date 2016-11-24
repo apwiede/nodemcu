@@ -362,12 +362,12 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
 //ets_printf("§createMsgFromHeaderPart1§");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
-  result = self->compMsgData->createMsg(self->compMsgData, self->compMsgData->numMsgDescParts, handle);
+  result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);
   checkErrOK(result);
   idx = 0;
   while(idx < self->compMsgData->numMsgDescParts) {
     msgDescPart = &self->compMsgData->msgDescParts[idx];
-    result = self->compMsgData->addField(self->compMsgData, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
+    result = self->compMsgData->addField(self, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
     checkErrOK(result);
     idx++;
   }
@@ -727,9 +727,6 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
   return COMP_DISP_ERR_OK;
 }
 
-extern char *dataViewWhere[4];
-static char *str2 = "newCompMsgDispatcher";
-
 // ================================= newCompMsgDispatcher ====================================
 
 compMsgDispatcher_t *newCompMsgDispatcher() {
@@ -741,21 +738,9 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
     return NULL;
   }
 
+  compMsgDispatcher->compMsgTypesAndNames = newCompMsgTypesAndNames();
+
   compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
-  compMsgDispatcher->compMsgDataView = newCompMsgDataView(); // only used for compMsgMsgDesc functions !!
-  if (dataViewWhere[0] == NULL) {
-    dataViewWhere[0] = str2;
-  } else {
-    if (dataViewWhere[1] == NULL) {
-      dataViewWhere[1] = str2;
-    } else {
-      if (dataViewWhere[2] == NULL) {
-        dataViewWhere[2] = str2;
-      } else {
-        dataViewWhere[3] = str2;
-      }
-    }
-  }
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

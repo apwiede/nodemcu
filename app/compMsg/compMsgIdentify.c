@@ -384,7 +384,7 @@ if (buffer == NULL) {
   hdrInfos = &self->msgHeaderInfos;
   received = &self->received;
   dataView = self->compMsgData->compMsgDataView->dataView;
-ets_printf("§handleReceivedPart: compMsgDataView->dataView: %p!data: %p!received->bu: %p!§", dataView, dataView->dataPtr, received->buf);
+ets_printf("§handleReceivedPart: compMsgDataView->dataView: %p!received->buf: %p!§", dataView, received->buf);
   result = dataView->setDataViewData(dataView, "handleReceivedPart", received->buf, received->lgth);
   checkErrOK(result);
 //ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);

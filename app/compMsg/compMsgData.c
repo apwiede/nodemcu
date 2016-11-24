@@ -58,7 +58,7 @@ static compMsgHandles_t compMsgHandles = { NULL, 0};
 
 // ============================= addHandle ========================
 
-static int addHandle(uint8_t *handle, compMsgData_t *compMsgData, uint8_t **headerPtr) {
+static int addHandle(compMsgDispatcher_t *self, uint8_t *handle, uint8_t **headerPtr) {
   int idx;
 
   *headerPtr = NULL;
@@ -68,8 +68,7 @@ static int addHandle(uint8_t *handle, compMsgData_t *compMsgData, uint8_t **head
       return COMP_MSG_ERR_OUT_OF_MEMORY;
     } else {
       compMsgHandles.handles[compMsgHandles.numHandles].handle = handle;
-      compMsgHandles.handles[compMsgHandles.numHandles].compMsgData = compMsgData;
-//      *headerPtr = compMsgHandles.handles[compMsgHandles.numHandles].header;
+      compMsgHandles.handles[compMsgHandles.numHandles].compMsgData = self->compMsgData;
       compMsgHandles.numHandles++;
       return COMP_MSG_ERR_OK;
     }
@@ -79,8 +78,7 @@ static int addHandle(uint8_t *handle, compMsgData_t *compMsgData, uint8_t **head
     while (idx < compMsgHandles.numHandles) {
       if (compMsgHandles.handles[idx].handle == NULL) {
         compMsgHandles.handles[idx].handle = handle;
-        compMsgHandles.handles[idx].compMsgData = compMsgData;
-//        *headerPtr = compMsgHandles.handles[idx].header;
+        compMsgHandles.handles[idx].compMsgData = self->compMsgData;
         return COMP_MSG_ERR_OK;
       }
       idx++;
@@ -88,8 +86,7 @@ static int addHandle(uint8_t *handle, compMsgData_t *compMsgData, uint8_t **head
     compMsgHandles.handles = os_realloc(compMsgHandles.handles, sizeof(handle2Header_t)*(compMsgHandles.numHandles+1));
     checkAllocOK(compMsgHandles.handles);
     compMsgHandles.handles[compMsgHandles.numHandles].handle = handle;
-    compMsgHandles.handles[idx].compMsgData = compMsgData;
-//    *headerPtr = compMsgHandles.handles[compMsgHandles.numHandles].header;
+    compMsgHandles.handles[idx].compMsgData = self->compMsgData;
     compMsgHandles.numHandles++;
   }
   return COMP_MSG_ERR_OK;
@@ -97,7 +94,7 @@ static int addHandle(uint8_t *handle, compMsgData_t *compMsgData, uint8_t **head
 
 // ============================= deleteHandle ========================
 
-static int deleteHandle(const uint8_t *handle) {
+static int deleteHandle(compMsgDispatcher_t *self, const uint8_t *handle) {
   int idx;
   int numUsed;
   int found;
@@ -133,7 +130,7 @@ ets_printf("deleteHandle 2 HANDLE_NOT_FOUND\n");
 
 // ============================= checkHandle ========================
 
-static int checkHandle(const char *handle, compMsgData_t **compMsgData) {
+static int checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher) {
   int idx;
 
   if (compMsgHandles.handles == NULL) {
@@ -143,7 +140,7 @@ ets_printf("checkHandle 1 HANDLE_NOT_FOUND\n");
   idx = 0;
   while (idx < compMsgHandles.numHandles) {
     if ((compMsgHandles.handles[idx].handle != NULL) && (c_strcmp(compMsgHandles.handles[idx].handle, handle) == 0)) {
-      *compMsgData = compMsgHandles.handles[idx].compMsgData;
+      (*compMsgDispatcher)->compMsgData = compMsgHandles.handles[idx].compMsgData;
       return COMP_MSG_ERR_OK;
     }
     idx++;
@@ -154,8 +151,8 @@ ets_printf("checkHandle 2 HANDLE_NOT_FOUND\n");
 
 // ============================= compMsgGetPtrFromHandle ========================
 
-uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgData_t **compMsgData) {
-  if (checkHandle(handle, compMsgData) != COMP_MSG_ERR_OK) {
+uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher) {
+  if (checkHandle(handle, compMsgDispatcher) != COMP_MSG_ERR_OK) {
 ets_printf("compMsgGetPtrFromHandle 1 HANDLE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
@@ -164,35 +161,38 @@ ets_printf("compMsgGetPtrFromHandle 1 HANDLE_NOT_FOUND\n");
 
 // ================================= createMsg ====================================
 
-static uint8_t createMsg(compMsgData_t *self, int numFields, uint8_t **handle) {
+static uint8_t createMsg(compMsgDispatcher_t *self, int numFields, uint8_t **handle) {
   uint8_t result;
-  self->fields = os_zalloc(sizeof(compMsgField_t) * numFields);
-  if (self->fields == NULL) {
+  compMsgData_t *compMsgData;
+
+  compMsgData = self->compMsgData;
+  compMsgData->fields = os_zalloc(sizeof(compMsgField_t) * numFields);
+  if (compMsgData->fields == NULL) {
     return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
-  self->flags = 0;
-  self->numFields = 0;
-  self->maxFields = numFields;
-  self->fieldOffset = 0;
-  self->totalLgth = 0;
-  self->cmdLgth = 0;
-  self->headerLgth = 0;
-  self->header = NULL;
-  os_sprintf(self->handle, "%s%p", HANDLE_PREFIX, self);
-  result = addHandle(self->handle, self, &self->header);
+  compMsgData->flags = 0;
+  compMsgData->numFields = 0;
+  compMsgData->maxFields = numFields;
+  compMsgData->fieldOffset = 0;
+  compMsgData->totalLgth = 0;
+  compMsgData->cmdLgth = 0;
+  compMsgData->headerLgth = 0;
+  compMsgData->header = NULL;
+  os_sprintf(compMsgData->handle, "%s%p", HANDLE_PREFIX, self);
+  result = addHandle(self, self->handle, &compMsgData->header);
   if (result != COMP_MSG_ERR_OK) {
-    os_free(self->fields);
-    deleteHandle(self->handle);
-    os_free(self);
+    os_free(compMsgData->fields);
+    deleteHandle(self, compMsgData->handle);
+    os_free(compMsgData);
     return result;
   }
-  *handle = self->handle;
+  *handle = compMsgData->handle;
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= addField ====================================
 
-static uint8_t addField(compMsgData_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth) {
+static uint8_t addField(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth) {
   uint8_t numTableFields;
   uint8_t numTableRowFields;
   uint8_t numTableRows;
@@ -202,60 +202,64 @@ static uint8_t addField(compMsgData_t *self, const uint8_t *fieldName, const uin
   int cellIdx;
   int result = COMP_MSG_ERR_OK;
   compMsgField_t *fieldInfo;
+  compMsgData_t *compMsgData;
 
+  compMsgData = self->compMsgData;
 //ets_printf("addfield: %s fieldType: %s fieldLgth: %d\n", fieldName, fieldType, fieldLgth);
-  if (self->numFields >= self->maxFields) {
+  if (compMsgData->numFields >= compMsgData->maxFields) {
     return COMP_MSG_ERR_TOO_MANY_FIELDS;
   }
-  result = self->compMsgDataView->dataView->getFieldTypeIdFromStr(self->compMsgDataView->dataView, fieldType, &fieldTypeId);
+  result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, fieldType, &fieldTypeId);
   checkErrOK(result);
-  result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldName, &fieldNameId, COMP_MSG_INCR);
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_INCR);
   checkErrOK(result);
-  fieldInfo = &self->fields[self->numFields];
+  fieldInfo = &compMsgData->fields[compMsgData->numFields];
   // need to check for duplicate here !!
   if (c_strcmp(fieldName, "@filler") == 0) {
-    self->flags |= COMP_MSG_HAS_FILLER;
+    compMsgData->flags |= COMP_MSG_HAS_FILLER;
     fieldLgth = 0;
     fieldInfo->fieldNameId = fieldNameId;
     fieldInfo->fieldTypeId = fieldTypeId;
     fieldInfo->fieldLgth = fieldLgth;
-    self->numFields++;
+    compMsgData->numFields++;
     return COMP_MSG_ERR_OK;
   }
   if (c_strcmp(fieldName, "@crc") == 0) {
-    self->flags |= COMP_MSG_HAS_CRC;
+    compMsgData->flags |= COMP_MSG_HAS_CRC;
     if (c_strcmp(fieldType, "uint8_t") == 0) {
-      self->flags |= COMP_MSG_UINT8_CRC;
+      compMsgData->flags |= COMP_MSG_UINT8_CRC;
     }
 //ets_printf("flags: 0x%02x HAS_CRC: 0x%02x HAS_FILLER: 0x%02x UINT8_CRC: 0x%02x\n", compMsg->flags, COMP_MSG_HAS_CRC, COMP_MSG_HAS_FILLER, COMP_MSG_UINT8_CRC);
   }
   fieldInfo->fieldNameId = fieldNameId;
   fieldInfo->fieldTypeId = fieldTypeId;
   fieldInfo->fieldLgth = fieldLgth;
-  self->numFields++;  
+  compMsgData->numFields++;  
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= getFieldValue ====================================
 
-static uint8_t getFieldValue(compMsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
+static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
   compMsgField_t *fieldInfo;
   uint8_t fieldNameId;
   int idx;
   int numEntries;
   int result;
+  compMsgData_t *compMsgData;
 
-  if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
+  compMsgData = self->compMsgData;
+  if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
-  result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   idx = 0;
-  numEntries = self->numFields;
+  numEntries = compMsgData->numFields;
   while (idx < numEntries) {
-    fieldInfo = &self->fields[idx];
+    fieldInfo = &compMsgData->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-      result = self->compMsgDataView->getFieldValue(self->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
+      result = compMsgData->compMsgDataView->getFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       break;
     }
@@ -266,17 +270,19 @@ static uint8_t getFieldValue(compMsgData_t *self, const uint8_t *fieldName, int 
 
 // ================================= setFieldValue ====================================
 
-static uint8_t setFieldValue(compMsgData_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
+static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
   compMsgField_t *fieldInfo;
   uint8_t fieldNameId;
   int idx;
   int numEntries;
   int result;
+  compMsgData_t *compMsgData;
 
-  if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
+  compMsgData = self->compMsgData;
+  if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
-  result = self->compMsgDataView->getFieldNameIdFromStr(self->compMsgDataView, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   switch (fieldNameId) {
     case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
@@ -288,13 +294,13 @@ static uint8_t setFieldValue(compMsgData_t *self, const uint8_t *fieldName, int 
       return COMP_MSG_ERR_FIELD_CANNOT_BE_SET;
   }
   idx = 0;
-  numEntries = self->numFields;
+  numEntries = compMsgData->numFields;
 //ets_printf("numEntries: %d\n", numEntries);
   while (idx < numEntries) {
-    fieldInfo = &self->fields[idx];
+    fieldInfo = &compMsgData->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
 //ets_printf("§compMsgData setFieldValue: name: %s!numeric: %d!string: %s!id: %d!§", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId);
-      result = self->compMsgDataView->setFieldValue(self->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
+      result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
       break;
@@ -307,66 +313,68 @@ static uint8_t setFieldValue(compMsgData_t *self, const uint8_t *fieldName, int 
 
 // ================================= prepareMsg ====================================
 
-static uint8_t prepareMsg(compMsgData_t *self) {
+static uint8_t prepareMsg(compMsgDispatcher_t *self) {
   int numEntries;
   int idx;
   int result;
   uint8_t headerLgth;
   uint8_t lgth;
   compMsgField_t *fieldInfo;
+  compMsgData_t *compMsgData;
 
-  if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
+  compMsgData = self->compMsgData;
+  if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
   // create the values which are different for each message!!
-  numEntries = self->numFields;
+  numEntries = compMsgData->numFields;
   idx = 0;
   while (idx < numEntries) {
-    fieldInfo = &self->fields[idx];
+    fieldInfo = &compMsgData->fields[idx];
     switch (fieldInfo->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_RANDOM_NUM:
-        result = self->compMsgDataView->setRandomNum(self->compMsgDataView, fieldInfo);
+        result = compMsgData->compMsgDataView->setRandomNum(compMsgData->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_SEQUENCE_NUM:
-        result = self->compMsgDataView->setSequenceNum(self->compMsgDataView, fieldInfo);
+        result = compMsgData->compMsgDataView->setSequenceNum(compMsgData->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_HDR_FILLER:
       case COMP_MSG_SPEC_FIELD_FILLER:
-        result = self->compMsgDataView->setFiller(self->compMsgDataView, fieldInfo);
+        result = compMsgData->compMsgDataView->setFiller(compMsgData->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_CRC:
         headerLgth = 0;
-        lgth = self->cmdLgth-fieldInfo->fieldLgth + self->headerLgth;
-        if (self->flags & COMP_MSG_CRC_USE_HEADER_LGTH) {
-            headerLgth = self->headerLgth;
+        lgth = compMsgData->cmdLgth-fieldInfo->fieldLgth + compMsgData->headerLgth;
+        if (compMsgData->flags & COMP_MSG_CRC_USE_HEADER_LGTH) {
+            headerLgth = compMsgData->headerLgth;
             lgth -= headerLgth;
         }
-        result = self->compMsgDataView->setCrc(self->compMsgDataView, fieldInfo, headerLgth, lgth);
+        result = compMsgData->compMsgDataView->setCrc(compMsgData->compMsgDataView, fieldInfo, headerLgth, lgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_TOTAL_CRC:
         headerLgth = 0;
-        result = self->compMsgDataView->setTotalCrc(self->compMsgDataView, fieldInfo);
+        result = compMsgData->compMsgDataView->setTotalCrc(compMsgData->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
     }
     idx++;
   }
-  self->flags |= COMP_MSG_IS_PREPARED;
+  compMsgData->flags |= COMP_MSG_IS_PREPARED;
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= initMsg ====================================
 
-static uint8_t initMsg(compMsgData_t *self) {
+static uint8_t initMsg(compMsgDispatcher_t *self) {
   int numEntries;
   int idx;
   int row;
@@ -381,19 +389,21 @@ static uint8_t initMsg(compMsgData_t *self) {
   size_t crcLgth;
   compMsgField_t *fieldInfo;
   compMsgField_t *fieldInfo2;
+  compMsgData_t *compMsgData;
 
+  compMsgData = self->compMsgData;
   // initialize field offsets for each field
   // initialize totalLgth, headerLgth, cmdLgth
-  if ((self->flags & COMP_MSG_IS_INITTED) != 0) {
+  if ((compMsgData->flags & COMP_MSG_IS_INITTED) != 0) {
     return COMP_MSG_ERR_ALREADY_INITTED;
   }
-  self->fieldOffset = 0;
-  numEntries = self->numFields;
+  compMsgData->fieldOffset = 0;
+  numEntries = compMsgData->numFields;
   idx = 0;
-  self->headerLgth = 0;
+  compMsgData->headerLgth = 0;
   while (idx < numEntries) {
-    fieldInfo = &self->fields[idx];
-    fieldInfo->fieldOffset = self->fieldOffset;
+    fieldInfo = &compMsgData->fields[idx];
+    fieldInfo->fieldOffset = compMsgData->fieldOffset;
 //ets_printf("§initMsg2 idx: %d§", idx);
     switch (fieldInfo->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_SRC:
@@ -402,65 +412,65 @@ static uint8_t initMsg(compMsgData_t *self) {
       case COMP_MSG_SPEC_FIELD_GUID:
       case COMP_MSG_SPEC_FIELD_SRC_ID:
       case COMP_MSG_SPEC_FIELD_HDR_FILLER:
-        self->headerLgth += fieldInfo->fieldLgth;
-        self->totalLgth = self->fieldOffset + fieldInfo->fieldLgth;
+        compMsgData->headerLgth += fieldInfo->fieldLgth;
+        compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
         break;
       case COMP_MSG_SPEC_FIELD_FILLER:
         fillerLgth = 0;
         crcLgth = 0;
-        if (self->flags & COMP_MSG_HAS_CRC) {
-          if (self->flags & COMP_MSG_UINT8_CRC) {
+        if (compMsgData->flags & COMP_MSG_HAS_CRC) {
+          if (compMsgData->flags & COMP_MSG_UINT8_CRC) {
             crcLgth = 1;
           } else {
             crcLgth = 2;
           }
         }
-        myLgth = self->fieldOffset + crcLgth - self->headerLgth;
+        myLgth = compMsgData->fieldOffset + crcLgth - compMsgData->headerLgth;
         while ((myLgth % 16) != 0) {
           myLgth++;
           fillerLgth++;
         }
         fieldInfo->fieldLgth = fillerLgth;
-        self->totalLgth = self->fieldOffset + fillerLgth + crcLgth;
-        self->cmdLgth = self->totalLgth - self->headerLgth;
+        compMsgData->totalLgth = compMsgData->fieldOffset + fillerLgth + crcLgth;
+        compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
 //ets_printf("§initMsg2a idx: %d§", idx);
         break;
       default:
-        self->totalLgth = self->fieldOffset + fieldInfo->fieldLgth;
-        self->cmdLgth = self->totalLgth - self->headerLgth;
+        compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
+        compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
 //ets_printf("§initMsg2b idx: %d§", idx);
         break;
     }
-    self->fieldOffset += fieldInfo->fieldLgth;
+    compMsgData->fieldOffset += fieldInfo->fieldLgth;
     idx++;
   }
 //ets_printf("§initMsg2c§");
 //ets_printf("§initMsg2f§");
-  if (self->totalLgth == 0) {
+  if (compMsgData->totalLgth == 0) {
 //ets_printf("§initMsg3a§");
     return COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING;
   }
 //ets_printf("§initMsg3b§");
-  result = self->compMsgDataView->dataView->getDataViewData(self->compMsgDataView->dataView, &where, &data, &lgth);
+  result = compMsgData->compMsgDataView->dataView->getDataViewData(compMsgData->compMsgDataView->dataView, &where, &data, &lgth);
   checkErrOK(result);
-  result = self->compMsgDataView->dataView->setDataViewData(self->compMsgDataView->dataView, "initMsg", data, self->totalLgth);
+  result = compMsgData->compMsgDataView->dataView->setDataViewData(compMsgData->compMsgDataView->dataView, "initMsg", data, compMsgData->totalLgth);
 //ets_printf("§initMsg3 res: %d§", result);
   checkErrOK(result);
-  self->flags |= COMP_MSG_IS_INITTED;
+  compMsgData->flags |= COMP_MSG_IS_INITTED;
   // set the appropriate field values for the lgth entries
   idx = 0;
-  numEntries = self->numFields;
+  numEntries = compMsgData->numFields;
   while (idx < numEntries) {
 //ets_printf("§initMsg4 idx: %d§", idx);
-    fieldInfo = &self->fields[idx];
+    fieldInfo = &compMsgData->fields[idx];
     switch (fieldInfo->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
-        result = self->compMsgDataView->setFieldValue(self->compMsgDataView, fieldInfo, (int)self->totalLgth, NULL, 0);
+        result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, (int)compMsgData->totalLgth, NULL, 0);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_CMD_LGTH:
-        result = self->compMsgDataView->setFieldValue(self->compMsgDataView, fieldInfo, (int)self->cmdLgth, NULL, 0);
+        result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, (int)compMsgData->cmdLgth, NULL, 0);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
@@ -472,7 +482,7 @@ static uint8_t initMsg(compMsgData_t *self) {
 
 // ================================= dumpFieldValue ====================================
 
-static uint8_t dumpFieldValue(compMsgData_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2) {
+static uint8_t dumpFieldValue(compMsgDispatcher_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2) {
   int result;
   int valueIdx;
   uint8_t uch;
@@ -483,8 +493,10 @@ static uint8_t dumpFieldValue(compMsgData_t *self, compMsgField_t *fieldInfo, co
   int32_t val;
   uint8_t *stringValue;
   int numericValue = 0;
+  compMsgData_t *compMsgData;
 
-  result = self->compMsgDataView->getFieldValue(self->compMsgDataView, fieldInfo, &numericValue, &stringValue, 0);
+  compMsgData = self->compMsgData;
+  result = compMsgData->compMsgDataView->getFieldValue(compMsgData->compMsgDataView, fieldInfo, &numericValue, &stringValue, 0);
   checkErrOK(result);
   switch (fieldInfo->fieldTypeId) {
   case DATA_VIEW_FIELD_INT8_T:
@@ -528,7 +540,7 @@ static uint8_t dumpFieldValue(compMsgData_t *self, compMsgField_t *fieldInfo, co
     valueIdx = 0;
     ets_printf("      values:");
     while (valueIdx < fieldInfo->fieldLgth) {
-      result = self->compMsgDataView->dataView->getInt16(self->compMsgDataView->dataView, fieldInfo->fieldOffset+valueIdx*sizeof(int16_t), &sh);
+      result = compMsgData->compMsgDataView->dataView->getInt16(compMsgData->compMsgDataView->dataView, fieldInfo->fieldOffset+valueIdx*sizeof(int16_t), &sh);
       ets_printf("        idx: %d value: 0x%04x\n", indent2, valueIdx, sh);
       valueIdx++;
     }
@@ -570,7 +582,7 @@ static uint8_t dumpFieldValue(compMsgData_t *self, compMsgField_t *fieldInfo, co
 
 // ============================= dumpKeyValueFields ========================
 
-static uint8_t dumpKeyValueFields(compMsgData_t *self, size_t offset) {
+static uint8_t dumpKeyValueFields(compMsgDispatcher_t *self, size_t offset) {
   int numEntries;
   int idx;
   int result;
@@ -580,22 +592,24 @@ static uint8_t dumpKeyValueFields(compMsgData_t *self, size_t offset) {
   uint8_t *fieldNameStr;
   compMsgField_t *fieldInfo;
 
-  numEntries = self->numValueFields;
+  numEntries = self->compMsgData->numValueFields;
   ets_printf("      numKeyValues: %d offset: %d\r\n", numEntries, offset);
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= dumpFieldInfo ====================================
 
-static uint8_t dumpFieldInfo(compMsgData_t *self, compMsgField_t *fieldInfo) {
+static uint8_t dumpFieldInfo(compMsgDispatcher_t *self, compMsgField_t *fieldInfo) {
   int idx;
   int result;
   uint8_t *fieldTypeStr;
   uint8_t *fieldNameStr;
+  compMsgData_t *compMsgData;
 
-  result = self->compMsgDataView->dataView->getFieldTypeStrFromId(self->compMsgDataView->dataView, fieldInfo->fieldTypeId, &fieldTypeStr);
+  compMsgData = self->compMsgData;
+  result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldTypeId, &fieldTypeStr);
   checkErrOK(result);
-  result = self->compMsgDataView->getFieldNameStrFromId(self->compMsgDataView, fieldInfo->fieldNameId, &fieldNameStr);
+  result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
   checkErrOK(result);
   ets_printf(" fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d flags: ", fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
   if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
@@ -611,7 +625,7 @@ static uint8_t dumpFieldInfo(compMsgData_t *self, compMsgField_t *fieldInfo) {
 
 // ================================= dumpMsg ====================================
 
-static uint8_t dumpMsg(compMsgData_t *self) {
+static uint8_t dumpMsg(compMsgDispatcher_t *self) {
   int numEntries;
   int idx;
   int valueIdx;
@@ -619,40 +633,42 @@ static uint8_t dumpMsg(compMsgData_t *self) {
   uint8_t *fieldTypeStr;
   uint8_t *fieldNameStr;
   compMsgField_t *fieldInfo;
+  compMsgData_t *compMsgData;
 
-  ets_printf("handle: %s\r\n", self->handle);
-  numEntries = self->numFields;
-  ets_printf("  numFields: %d maxFields: %d\r\n", numEntries, (int)self->maxFields);
-  ets_printf("  headerLgth: %d cmdLgth: %d totalLgth: %d\r\n", self->headerLgth, self->cmdLgth, self->totalLgth);
+  compMsgData = self->compMsgData;
+  ets_printf("handle: %s\r\n", compMsgData->handle);
+  numEntries = compMsgData->numFields;
+  ets_printf("  numFields: %d maxFields: %d\r\n", numEntries, (int)compMsgData->maxFields);
+  ets_printf("  headerLgth: %d cmdLgth: %d totalLgth: %d\r\n", compMsgData->headerLgth, compMsgData->cmdLgth, compMsgData->totalLgth);
   ets_printf("  flags:");
-  if ((self->flags & COMP_MSG_HAS_CRC) != 0) {
+  if ((compMsgData->flags & COMP_MSG_HAS_CRC) != 0) {
     ets_printf(" COMP_MSG_HAS_CRC");
   }
-  if ((self->flags & COMP_MSG_UINT8_CRC) != 0) {
+  if ((compMsgData->flags & COMP_MSG_UINT8_CRC) != 0) {
     ets_printf(" COMP_MSG_UNIT8_CRC");
   }
-  if ((self->flags & COMP_MSG_HAS_FILLER) != 0) {
+  if ((compMsgData->flags & COMP_MSG_HAS_FILLER) != 0) {
     ets_printf(" COMP_MSG_HAS_FILLER");
   }
-  if ((self->flags & COMP_MSG_U8_CMD_KEY) != 0) {
+  if ((compMsgData->flags & COMP_MSG_U8_CMD_KEY) != 0) {
     ets_printf(" COMP_MSG_U8_CMD_KEY");
   }
-  if ((self->flags & COMP_MSG_HAS_TABLE_ROWS) != 0) {
+  if ((compMsgData->flags & COMP_MSG_HAS_TABLE_ROWS) != 0) {
     ets_printf(" COMP_MSG_HAS_TABLE_ROWS");
   }
-  if ((self->flags & COMP_MSG_IS_INITTED) != 0) {
+  if ((compMsgData->flags & COMP_MSG_IS_INITTED) != 0) {
     ets_printf(" COMP_MSG_IS_INITTED");
   }
-  if ((self->flags & COMP_MSG_IS_PREPARED) != 0) {
+  if ((compMsgData->flags & COMP_MSG_IS_PREPARED) != 0) {
     ets_printf(" COMP_MSG_IS_PREPARED");
   }
   ets_printf("\r\n");
   idx = 0;
   while (idx < numEntries) {
-    fieldInfo = &self->fields[idx];
-    result = self->compMsgDataView->dataView->getFieldTypeStrFromId(self->compMsgDataView->dataView, fieldInfo->fieldTypeId, &fieldTypeStr);
+    fieldInfo = &compMsgData->fields[idx];
+    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldTypeId, &fieldTypeStr);
     checkErrOK(result);
-    result = self->compMsgDataView->getFieldNameStrFromId(self->compMsgDataView, fieldInfo->fieldNameId, &fieldNameStr);
+    result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
     checkErrOK(result);
     if (c_strcmp(fieldNameStr, "@numKeyValues") == 0) {
       ets_printf("    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %.5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
@@ -691,17 +707,19 @@ static uint8_t dumpMsg(compMsgData_t *self) {
 
 // ============================= getMsgData ========================
 
-static uint8_t getMsgData(compMsgData_t *self, uint8_t **data, int *lgth) {
+static uint8_t getMsgData(compMsgDispatcher_t *self, uint8_t **data, int *lgth) {
   uint8_t result;
   uint8_t *where;
+  compMsgData_t *compMsgData;
 
-  if ((self->flags & COMP_MSG_IS_INITTED) == 0) {
+  compMsgData = self->compMsgData;
+  if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
-  if ((self->flags & COMP_MSG_IS_PREPARED) == 0) {
+  if ((compMsgData->flags & COMP_MSG_IS_PREPARED) == 0) {
     return COMP_MSG_ERR_NOT_YET_PREPARED;
   }
-  result = self->compMsgDataView->dataView->getDataViewData(self->compMsgDataView->dataView, &where, data, lgth);
+  result = compMsgData->compMsgDataView->dataView->getDataViewData(compMsgData->compMsgDataView->dataView, &where, data, lgth);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
@@ -711,11 +729,13 @@ static uint8_t getMsgData(compMsgData_t *self, uint8_t **data, int *lgth) {
 static uint8_t deleteMsgDescParts(compMsgDispatcher_t *self) {
   int idx;
   msgDescPart_t *part;
+  compMsgData_t *compMsgData;
 
-  if (self->compMsgData->numMsgDescParts > 0) {
+  compMsgData = self->compMsgData;
+  if (compMsgData->numMsgDescParts > 0) {
     idx = 0;
-    while (idx < self->compMsgData->numMsgDescParts) {
-      part = &self->compMsgData->msgDescParts[idx];
+    while (idx < compMsgData->numMsgDescParts) {
+      part = &compMsgData->msgDescParts[idx];
       if (part->fieldNameStr != NULL) {
         os_free(part->fieldNameStr);
       }
@@ -724,12 +744,12 @@ static uint8_t deleteMsgDescParts(compMsgDispatcher_t *self) {
       }
       idx++;
     }
-    os_free(self->compMsgData->msgDescParts);
-    self->compMsgData->msgDescParts = NULL;
-    self->compMsgData->numMsgDescParts = 0;
-    self->compMsgData->maxMsgDescParts = 0;
+    os_free(compMsgData->msgDescParts);
+    compMsgData->msgDescParts = NULL;
+    compMsgData->numMsgDescParts = 0;
+    compMsgData->maxMsgDescParts = 0;
   } else {
-    if (self->compMsgData->msgDescParts != NULL) {
+    if (compMsgData->msgDescParts != NULL) {
 ets_printf("§self->compMsgData->msgDescParts != NULL and numMsgDescParts == 0§");
     }
   }
@@ -741,11 +761,13 @@ ets_printf("§self->compMsgData->msgDescParts != NULL and numMsgDescParts == 0§
 static uint8_t deleteMsgValParts(compMsgDispatcher_t *self) {
   int idx;
   msgValPart_t *part;
+  compMsgData_t *compMsgData;
 
-  if (self->compMsgData->numMsgValParts > 0) {
+  compMsgData = self->compMsgData;
+  if (compMsgData->numMsgValParts > 0) {
     idx = 0;
-    while (idx < self->compMsgData->numMsgValParts) {
-    part = &self->compMsgData->msgValParts[idx];
+    while (idx < compMsgData->numMsgValParts) {
+    part = &compMsgData->msgValParts[idx];
       if (part->fieldNameStr != NULL) {
         os_free(part->fieldNameStr);
       }
@@ -754,12 +776,12 @@ static uint8_t deleteMsgValParts(compMsgDispatcher_t *self) {
       }
       idx++;
     }
-    os_free(self->compMsgData->msgValParts);
-    self->compMsgData->msgValParts = NULL;
-    self->compMsgData->numMsgValParts = 0;
-    self->compMsgData->maxMsgValParts = 0;
+    os_free(compMsgData->msgValParts);
+    compMsgData->msgValParts = NULL;
+    compMsgData->numMsgValParts = 0;
+    compMsgData->maxMsgValParts = 0;
   } else {
-    if (self->compMsgData->msgValParts != NULL) {
+    if (compMsgData->msgValParts != NULL) {
 ets_printf("§self->compMsgData->msgValParts != NULL and numMsgValParts == 0§");
     }
   }
@@ -769,37 +791,37 @@ ets_printf("§self->compMsgData->msgValParts != NULL and numMsgValParts == 0§")
 // ================================= freeCompMsgData ====================================
 
 static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
-  if (self->compMsgData->compMsgDataView != NULL) {
-    freeCompMsgDataView(self->compMsgData->compMsgDataView);
-//    os_free(self->compMsgData->compMsgDataView);
-//    self->compMsgData->compMsgDataView = NULL;
+  uint8_t result;
+  compMsgData_t *compMsgData;
+
+  compMsgData = self->compMsgData;
+  result = self->compMsgTypesAndNames->freeCompMsgTypesAndNames(self->compMsgTypesAndNames);
+  checkErrOK(result);
+  if (compMsgData->fields != NULL) {
+    os_free(compMsgData->fields);
+    compMsgData->fields = NULL;
   }
-  
-  if (self->compMsgData->fields != NULL) {
-    os_free(self->compMsgData->fields);
-    self->compMsgData->fields = NULL;
+  if (compMsgData->keyValueFields != NULL) {
+    os_free(compMsgData->keyValueFields);
+    compMsgData->keyValueFields = NULL;
   }
-  if (self->compMsgData->keyValueFields != NULL) {
-    os_free(self->compMsgData->keyValueFields);
-    self->compMsgData->keyValueFields = NULL;
-  }
-  if (self->compMsgData->header != NULL) {
-    os_free(self->compMsgData->header);
-    self->compMsgData->header = NULL;
+  if (compMsgData->header != NULL) {
+    os_free(compMsgData->header);
+    compMsgData->header = NULL;
   }
 // receivedData
 // toSendData
 
-  self->compMsgData->deleteMsgDescParts(self);
-  self->compMsgData->numMsgDescParts = 0;
-  self->compMsgData->maxMsgDescParts = 0;
-  self->compMsgData->deleteMsgValParts(self);
-  self->compMsgData->numMsgValParts = 0;
-  self->compMsgData->maxMsgValParts = 0;
+  compMsgData->deleteMsgDescParts(self);
+  compMsgData->numMsgDescParts = 0;
+  compMsgData->maxMsgDescParts = 0;
+  compMsgData->deleteMsgValParts(self);
+  compMsgData->numMsgValParts = 0;
+  compMsgData->maxMsgValParts = 0;
 
-  if (self->compMsgData->prepareValuesCbName != NULL) {
-    os_free(self->compMsgData->prepareValuesCbName);
-    self->compMsgData->prepareValuesCbName = NULL;
+  if (compMsgData->prepareValuesCbName != NULL) {
+    os_free(compMsgData->prepareValuesCbName);
+    compMsgData->prepareValuesCbName = NULL;
   }
     
 //  websocketUserData_t *wud;
@@ -837,7 +859,7 @@ compMsgData_t *newCompMsgData(void) {
   if (compMsgData == NULL) {
     return NULL;
   }
-  compMsgData->compMsgDataView = newCompMsgDataView();
+  compMsgData->compMsgDataView = newCompMsgDataView("",0);
   if (compMsgData->compMsgDataView == NULL) {
     return NULL;
   }

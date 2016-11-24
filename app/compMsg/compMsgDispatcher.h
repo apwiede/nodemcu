@@ -46,6 +46,7 @@
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 #include "dataView.h"
+#include "compMsgTypesAndNames.h"
 #include "compMsgDataView.h"
 #include "compMsgModuleData.h"
 #include "compMsgWifiData.h"
@@ -209,9 +210,10 @@ typedef struct compMsgDispatcher {
   uint8_t actionMode;
   uint8_t operatingMode;
   bssScanInfos_t *bssScanInfos;
-  compMsgDataView_t *compMsgDataView; // needed only for compMsgMsgDesc functions!!
 
   msgHeaderInfos_t msgHeaderInfos;
+
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
 
   // station mode
   uint32_t station_ip;

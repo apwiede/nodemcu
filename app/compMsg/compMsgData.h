@@ -106,18 +106,18 @@ typedef struct netsocketUserData {
   netsocketToSend_t netsocketToSend;
 } netsocketUserData_t;
 
-typedef uint8_t (* createMsg_t)(compMsgData_t *self, int numFields, uint8_t **handle);
-typedef uint8_t (* addField_t)(compMsgData_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
-typedef uint8_t (* getFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
-typedef uint8_t (* setFieldValue_t)(compMsgData_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
+typedef uint8_t (* createMsg_t)(compMsgDispatcher_t *self, int numFields, uint8_t **handle);
+typedef uint8_t (* addField_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
+typedef uint8_t (* getFieldValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* setFieldValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 
-typedef uint8_t (* dumpFieldValue_t)(compMsgData_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2);
-typedef uint8_t (* dumpKeyValueFields_t)(compMsgData_t *self, size_t offset);
-typedef uint8_t (* dumpFieldInfo_t)(compMsgData_t *self, compMsgField_t *fieldInfo);
-typedef uint8_t (* dumpMsg_t)(compMsgData_t *self);
-typedef uint8_t (* initMsg_t)(compMsgData_t *self);
-typedef uint8_t (* prepareMsg_t)(compMsgData_t *self);
-typedef uint8_t (* getMsgData_t)(compMsgData_t *compMsgData, uint8_t **data, int *lgth);
+typedef uint8_t (* dumpFieldValue_t)(compMsgDispatcher_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2);
+typedef uint8_t (* dumpKeyValueFields_t)(compMsgDispatcher_t *self, size_t offset);
+typedef uint8_t (* dumpFieldInfo_t)(compMsgDispatcher_t *self, compMsgField_t *fieldInfo);
+typedef uint8_t (* dumpMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* initMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* prepareMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getMsgData_t)(compMsgDispatcher_t *compMsgData, uint8_t **data, int *lgth);
 typedef uint8_t (* deleteMsgDescParts_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* deleteMsgValParts_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* deleteMsg_t)(compMsgDispatcher_t *self);
@@ -181,9 +181,8 @@ typedef struct compMsgData {
 
 } compMsgData_t;
 
-
 compMsgData_t *newCompMsgData(void);
-uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgData_t **compMsgData);
+uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher);
  
 #ifdef	__cplusplus
 }

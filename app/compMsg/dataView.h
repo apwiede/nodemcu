@@ -46,23 +46,6 @@
 extern "C" {
 #endif
 
-enum DataViewFieldType
-{
-  DATA_VIEW_FIELD_NONE          = 0,
-  DATA_VIEW_FIELD_UINT8_T       = 1,
-  DATA_VIEW_FIELD_INT8_T        = 2,
-  DATA_VIEW_FIELD_UINT16_T      = 3,
-  DATA_VIEW_FIELD_INT16_T       = 4,
-  DATA_VIEW_FIELD_UINT32_T      = 5,
-  DATA_VIEW_FIELD_INT32_T       = 6,
-  DATA_VIEW_FIELD_UINT8_VECTOR  = 7,
-  DATA_VIEW_FIELD_INT8_VECTOR   = 8,
-  DATA_VIEW_FIELD_UINT16_VECTOR = 9,
-  DATA_VIEW_FIELD_INT16_VECTOR  = 10,
-  DATA_VIEW_FIELD_UINT32_VECTOR = 11,
-  DATA_VIEW_FIELD_INT32_VECTOR  = 12,
-};
-
 enum DataViewErrorCode
 {
   DATA_VIEW_ERR_OK                    = 0,
@@ -79,15 +62,7 @@ enum DataViewErrorCode
 #define checkAllocOK(addr) if(addr == NULL) return DATA_VIEW_ERR_OUT_OF_MEMORY
 #define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) return result
 
-typedef struct str2id {
-  uint8_t *str;
-  uint8_t id;
-} str2id_t ;
-
 typedef struct dataView dataView_t;
-
-typedef uint8_t (* getFieldTypeIdFromStr_t)(dataView_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId);
-typedef uint8_t (* getFieldTypeStrFromId_t)(dataView_t *self, uint8_t fieldTypeId, uint8_t **fieldTypeStr);
 
 typedef uint8_t (* getUint8_t)(dataView_t *self, int offset, uint8_t *value);
 typedef uint8_t (* getInt8_t)(dataView_t *self, int offset, int8_t *value);
@@ -124,14 +99,11 @@ typedef uint8_t (* getDataViewData_t)(dataView_t *self, uint8_t **where, uint8_t
 typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
 
 typedef struct dataView {
-  uint8_t *dataPtr;
+  uint8_t *data;
   uint8_t *where;
   size_t lgth;
   uint8_t id;
   
-  getFieldTypeIdFromStr_t getFieldTypeIdFromStr;
-  getFieldTypeStrFromId_t getFieldTypeStrFromId;
-
   getUint8_t getUint8;
   getInt8_t getInt8;
   setUint8_t setUint8;
@@ -167,8 +139,7 @@ typedef struct dataView {
   dumpBinary_t dumpBinary;
 } dataView_t;
 
-dataView_t *newDataView();
-void freeDataView(dataView_t *dataView);
+dataView_t *newDataView(uint8_t *data, size_t lgth);
 
 #ifdef	__cplusplus
 }

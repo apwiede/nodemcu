@@ -111,7 +111,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
       numericValue = 0;
     }
 //ets_printf("§cb field: %s!value: 0x%04x %s!§", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
-    result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+    result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
 //ets_printf("§fieldName: %s!id: %d!§", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
@@ -124,20 +124,20 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
     }
     switch (self->compMsgData->msgValPart->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_DST:
-        result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
       case COMP_MSG_SPEC_FIELD_SRC:
-        result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
       case COMP_MSG_SPEC_FIELD_CMD_KEY:
         numericValue = self->compMsgData->currHdr->hdrU16CmdKey;
         stringValue = NULL;
 //ets_printf("§cmdKey value: 0x%04x§", numericValue);
-        result = compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
       default:
 //ets_printf("§fieldName: %s!value: 0x%04x %s§", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
-        result = self->compMsgData->setFieldValue(compMsgData, fieldNameStr, numericValue, stringValue);
+        result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
     }
     checkErrOK(result);
@@ -203,14 +203,14 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   numericValue = compMsgData->currHdr->hdrU16CmdKey;
   stringValue = NULL;
 //ets_printf("§cmdKey value: 0x%04x§", numericValue);
-  result = compMsgData->setFieldValue(compMsgData, "@cmdKey", numericValue, stringValue);
+  result = compMsgData->setFieldValue(self, "@cmdKey", numericValue, stringValue);
 //ets_printf("§cmdKey result: %d§", result);
   checkErrOK(result);
 //ets_printf("§setMsgvalues done§");
-  compMsgData->prepareMsg(compMsgData);
+  compMsgData->prepareMsg(self);
   checkErrOK(result);
 //ets_printf("§");
-//compMsgData->dumpMsg(compMsgData);
+//compMsgData->dumpMsg(self);
 //ets_printf("§");
   return COMP_DISP_ERR_OK;
 }
@@ -249,12 +249,12 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
 //ets_printf("§buildMsg§");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
-  result = self->compMsgData->initMsg(self->compMsgData);
+  result = self->compMsgData->initMsg(self);
 //ets_printf("heap2: %d\n", system_get_free_heap_size());
   result = setMsgValues(self);
   checkErrOK(result);
 
-  result = self->compMsgData->getMsgData(self->compMsgData, &msgData, &msgLgth);
+  result = self->compMsgData->getMsgData(self, &msgData, &msgLgth);
 //ets_printf("§getMsgData res: %d§", result);
   checkErrOK(result);
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {

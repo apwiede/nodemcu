@@ -366,9 +366,7 @@ static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos
   long uval;
   uint8_t *cp;
   uint8_t fieldNameId;
-  compMsgDataView_t *dataView;
 
-  dataView = self->compMsgDataView;
 //ets_printf("numHeaderParts: %d seqidx: %d\n", hdrInfos->numHeaderParts, *seqIdx);
   cp = myStr;
   result = getIntFromLine(cp, &uval, ep, &isEnd);
@@ -383,7 +381,7 @@ static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos
     if (cp[0] != '@') {
       return COMP_MSG_ERR_NO_SUCH_FIELD;
     }
-    result = dataView->getFieldNameIdFromStr(dataView, cp, &fieldNameId, COMP_MSG_NO_INCR);
+    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, cp, &fieldNameId, COMP_MSG_NO_INCR);
     checkErrOK(result);
     switch (fieldNameId) {
     case COMP_MSG_SPEC_FIELD_SRC:
@@ -475,13 +473,11 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   bool isJoker;
   headerPart_t *hdr;
   msgHeaderInfos_t *hdrInfos;
-  compMsgDataView_t *dataView;
   compMsgMsgDesc_t *compMsgMsgDesc;
-  dataView_t *myDataView;
+  dataView_t *dataView;
 
 //ets_printf("readHeadersAndSetFlags\n");
   compMsgMsgDesc = self->compMsgMsgDesc;
-  dataView = self->compMsgDataView; // only used for this function!!
   hdrInfos = &self->msgHeaderInfos;
   hdrInfos->currPartIdx = 0;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
@@ -508,8 +504,8 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   result = compMsgMsgDesc->getHeaderFieldsFromLine(self, hdrInfos, myStr, &cp, &seqIdx);
   checkErrOK(result);
 ets_printf("§readHeadersAndSetFlags: newDataView§");
-  myDataView = newDataView();
-descDataView = myDataView;
+  dataView = newDataView("",0);
+descDataView = dataView;
   if (dataViewWhere[0] == NULL) {
     dataViewWhere[0] = "readHeadersAndSetFlags";
   } else {
@@ -523,7 +519,7 @@ descDataView = myDataView;
       }
     }
   }
-  checkAllocOK(myDataView);
+  checkAllocOK(dataView);
   fieldOffset = 0;
   idx = 0;
   while(idx < numEntries) {
@@ -535,7 +531,7 @@ descDataView = myDataView;
     }
     hdr = &hdrInfos->headerParts[idx];
     hdr->hdrFlags = 0;
-    result = myDataView->setDataViewData(myDataView, "readHeadersAndSetFlags", buffer, lgth);
+    result = dataView->setDataViewData(dataView, "readHeadersAndSetFlags", buffer, lgth);
     checkErrOK(result);
     buffer[lgth] = 0;
     myStr = buffer;
@@ -653,7 +649,7 @@ ets_printf("bad value: %s\n", cp);
     // type of cmdKey
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, cp, &fieldTypeId);
     checkErrOK(result);
     checkIsEnd(isEnd);
     cp = ep;
@@ -676,7 +672,7 @@ ets_printf("bad value: %s\n", cp);
     // type of cmdLgth
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, cp, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_NONE:
@@ -700,7 +696,7 @@ ets_printf("bad value: %s\n", cp);
     // type of crc
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, cp, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_NONE:
@@ -726,7 +722,7 @@ ets_printf("bad value: %s\n", cp);
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
 ets_printf("§totalCrc: %s!%d!§", cp, seqIdx2);
     checkErrOK(result);
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, cp, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_NONE:
@@ -757,7 +753,6 @@ ets_printf("§u16§");
 //ets_printf("readHeadersAndSetFlags free myDataView: %p\n", myDataView);
   result2 = compMsgMsgDesc->closeFile(compMsgMsgDesc);
 ets_printf("§readHeadersAndSetFlags: freeDataView§");
-  os_free(myDataView);
   checkErrOK(result2);
   return result;
 }
@@ -776,7 +771,6 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   uint16_t u16CmdKey;
   uint8_t *actionName;
   uint8_t actionMode;
-  compMsgDataView_t *dataView;
   long uval;
   uint8_t numEntries;
   uint8_t*cp;
@@ -793,7 +787,6 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
 
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
-  dataView = self->compMsgDataView;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
@@ -835,7 +828,7 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
     // type of cmdKey
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    result = dataView->dataView->getFieldTypeIdFromStr(dataView->dataView, cp, &fieldTypeId);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, cp, &fieldTypeId);
     checkErrOK(result);
     checkIsEnd(isEnd);
     cp = ep;
@@ -1199,9 +1192,9 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       fieldLgth = (uint8_t)lgth;
     }
     msgDescPart->fieldLgth = fieldLgth;
-    result = compMsgData->compMsgDataView->dataView->getFieldTypeIdFromStr(compMsgData->compMsgDataView->dataView, fieldTypeStr, &msgDescPart->fieldTypeId);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, fieldTypeStr, &msgDescPart->fieldTypeId);
     checkErrOK(result);
-    result = compMsgData->compMsgDataView->getFieldNameIdFromStr(compMsgData->compMsgDataView, fieldNameStr, &msgDescPart->fieldNameId, COMP_MSG_INCR);
+    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &msgDescPart->fieldNameId, COMP_MSG_INCR);
     checkErrOK(result);
     cp = ep;
     // eventually a callback for key value entries
@@ -1268,7 +1261,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     checkAllocOK(msgValPart->fieldNameStr);
     c_memcpy(msgValPart->fieldNameStr, fieldNameStr, c_strlen(fieldNameStr));
     checkIsEnd(isEnd);
-    result = compMsgData->compMsgDataView->getFieldNameIdFromStr(compMsgData->compMsgDataView, fieldNameStr, &msgValPart->fieldNameId, COMP_MSG_INCR);
+    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &msgValPart->fieldNameId, COMP_MSG_INCR);
     checkErrOK(result);
     cp = ep;
 
@@ -1400,7 +1393,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     fieldTypeStr = cp;
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-    result = self->compMsgDataView->dataView->getFieldTypeIdFromStr(self->compMsgDataView->dataView, fieldTypeStr, &fieldTypeId);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, fieldTypeStr, &fieldTypeId);
     checkErrOK(result);
     switch (bssInfoType) {
     case BSS_INFO_BSSID:
