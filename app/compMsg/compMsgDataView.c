@@ -150,15 +150,17 @@ static uint8_t getCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
     crcVal = crcVal & 0xFF;
     result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-ets_printf("§crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
+//ets_printf("§crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
+ets_printf("§bad crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
     result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-ets_printf("§crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
+//ets_printf("§crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
     if (crcVal != crc) {
+ets_printf("§bad crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   }
@@ -502,8 +504,6 @@ ets_printf("bad type in setFieldValue. %d\n", fieldInfo->fieldTypeId);
   return DATA_VIEW_ERR_OK;
 }
 
-extern void *compMsgDataViewData[4];
-
 // ================================= newCompMsgDataView ====================================
 
 compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
@@ -511,23 +511,10 @@ compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
   if (compMsgDataView == NULL) {
     return NULL;
   }
-ets_printf("§newCompMsgDataView: newDataView: %p!§", compMsgDataView);
+//ets_printf("§newCompMsgDataView: newDataView: %p!§", compMsgDataView);
   compMsgDataView->dataView = newDataView(data, lgth);
   if (compMsgDataView->dataView == NULL) {
     return NULL;
-  }
-  if (compMsgDataViewData[0] == NULL) {
-    compMsgDataViewData[0] = compMsgDataView->dataView;
-  } else {
-    if (compMsgDataViewData[1] == NULL) {
-      compMsgDataViewData[1] = compMsgDataView->dataView;
-    } else {
-      if (compMsgDataViewData[2] == NULL) {
-        compMsgDataViewData[2] = compMsgDataView->dataView;
-      } else {
-        compMsgDataViewData[3] = compMsgDataView->dataView;
-      }
-    }
   }
   compMsgDataViewId++;
   compMsgDataView->id = compMsgDataViewId;

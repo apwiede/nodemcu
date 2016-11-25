@@ -376,25 +376,10 @@ static uint8_t setInt32Vector(dataView_t *self, int offset, int32_t *value, size
   return DATA_VIEW_ERR_OK;
 }
 
-
-void *descDataView = NULL;
-char *dataViewWhere[4] = {NULL, NULL, NULL, NULL};
-void *dataViewData[4] = {NULL, NULL, NULL, NULL};
-void *compMsgDataViewData[4] = {NULL, NULL, NULL, NULL};
-// ================================= setDataViewData ====================================
-
-static uint8_t setDataViewData(dataView_t *self, uint8_t *where, uint8_t *data, size_t lgth) {
-  self->data = data;
-  self->where = where;
-  self->lgth = lgth;
-  return DATA_VIEW_ERR_OK;
-}
-
 // ================================= getDataViewData ====================================
 
-static uint8_t getDataViewData(dataView_t *self, uint8_t **where, uint8_t **data, size_t *lgth) {
+static uint8_t getDataViewData(dataView_t *self, uint8_t **data, size_t *lgth) {
   *data = self->data;
-  *where = self->where;
   *lgth = self->lgth;
   return DATA_VIEW_ERR_OK;
 }
@@ -416,7 +401,7 @@ static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) 
 
 dataView_t *newDataView(uint8_t *data, size_t lgth) {
   dataView_t *dataView = os_zalloc(sizeof(dataView_t));
-ets_printf("§newDataView: %p!lgth: %d!§", dataView, lgth);
+//ets_printf("§newDataView: %p!lgth: %d!§", dataView, lgth);
   if (dataView == NULL) {
     return NULL;
   }
@@ -456,7 +441,6 @@ ets_printf("§newDataView: %p!lgth: %d!§", dataView, lgth);
   dataView->setUint32Vector = &setUint32Vector;
   dataView->setInt32Vector = &setInt32Vector;
 
-  dataView->setDataViewData = &setDataViewData;
   dataView->getDataViewData = &getDataViewData;
   dataView->dumpBinary = &dumpBinary;
   return dataView;

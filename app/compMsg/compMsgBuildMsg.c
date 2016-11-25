@@ -63,10 +63,12 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
   compMsgData = self->compMsgData;
   fieldIdx = 0;
   msgDescPartIdx = 0;
+//ets_printf("§fix: numFields: %d!§", compMsgData->numFields);
   while (fieldIdx < compMsgData->numFields) {
     fieldInfo = &compMsgData->fields[fieldIdx];
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;
+//ets_printf("§fix: idx: %d!%p!%s!§", fieldIdx, msgDescPart->fieldSizeCallback, msgDescPart->fieldNameStr);
     if (msgDescPart->fieldSizeCallback != NULL) {
       // the key name must have the prefix: "#key_"!
       if (msgDescPart->fieldNameStr[0] != '#') {
@@ -81,6 +83,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
     msgDescPartIdx++;
     fieldIdx++;
   }
+//ets_printf("§fix: done!§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -230,7 +233,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   int src;
   int dst;
 
-////ets_printf("buildMsg\n");
+//ets_printf("§buildMsg§");
   // at this point an eventual callback for getting the values 
   // has been already done using runAction in createMsgFromHeaderPart
   // so now we can fix the offsets if needed for key value list entries
@@ -249,14 +252,18 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
 //ets_printf("§buildMsg§");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
+  self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
   result = self->compMsgData->initMsg(self);
-//ets_printf("heap2: %d\n", system_get_free_heap_size());
+//ets_printf("§heap2: %d§", system_get_free_heap_size());
   result = setMsgValues(self);
   checkErrOK(result);
 
   result = self->compMsgData->getMsgData(self, &msgData, &msgLgth);
-//ets_printf("§getMsgData res: %d§", result);
+//ets_printf("§getMsgData res: %d!msgLgth: %d!§", result, msgLgth);
   checkErrOK(result);
+//ets_printf("§");
+//self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dumpMsg");
+//ets_printf("§");
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {
     uint8_t *toCryptPtr;
     uint8_t *encryptedMsgData;
@@ -272,7 +279,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
 //ets_printf("need to encrypt message!\n");
     headerLgth = self->compMsgData->headerLgth;
     mlen = self->compMsgData->totalLgth - headerLgth - 1; // -1 for totalCrc !!
-ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
+//ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
     toCryptPtr = msgData + self->compMsgData->headerLgth;
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
     checkErrOK(result);

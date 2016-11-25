@@ -138,13 +138,14 @@ typedef struct compMsgData {
   size_t totalLgth;
   size_t cmdLgth;
   size_t headerLgth;
-  uint8_t *header;
   uint8_t *receivedData;
   uint16_t receivedLgth;
   uint8_t *toSendData;
   uint16_t toSendLgth;
   uint8_t direction;
   uint16_t u16CmdKey;
+  msgParts_t received;
+  msgParts_t toSend;
 
   msgDescPart_t *msgDescParts;
   size_t numMsgDescParts;

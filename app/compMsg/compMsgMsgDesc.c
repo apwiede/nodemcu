@@ -329,7 +329,7 @@ static uint8_t getIntFromLine(uint8_t *myStr, long *uval, uint8_t **ep, bool *is
   *cp++ = '\0';
   *uval = c_strtoul(myStr, &endPtr, 10);
   if (cp-1 != (uint8_t *)endPtr) {
-ets_printf("getIntFromLine: %s %d %p %p\n", myStr, *uval, cp, endPtr);
+//ets_printf("getIntFromLine: %s %d %p %p\n", myStr, *uval, cp, endPtr);
      return COMP_MSG_DESC_ERR_BAD_VALUE;
   }
   *ep = cp;
@@ -445,8 +445,6 @@ static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos
 #undef checkErrOK
 #define checkErrOK(result) if(result != DATA_VIEW_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
 
-extern void *descDataView;
-extern char *dataViewWhere[4];
 // ================================= readHeadersAndSetFlags ====================================
 
 static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileName) {
@@ -457,7 +455,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   uint8_t fieldTypeId;
   char *endPtr;
   uint8_t lgth;
-  uint8_t buf[150];
+  uint8_t buf[BUFSIZ];
   uint8_t *buffer = buf;
   long uval;
   uint8_t *myStr;
@@ -474,7 +472,6 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   headerPart_t *hdr;
   msgHeaderInfos_t *hdrInfos;
   compMsgMsgDesc_t *compMsgMsgDesc;
-  dataView_t *dataView;
 
 //ets_printf("readHeadersAndSetFlags\n");
   compMsgMsgDesc = self->compMsgMsgDesc;
@@ -482,7 +479,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   hdrInfos->currPartIdx = 0;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
-// FIXME should check for lgth against buffer length here !!!
+  // check for lgth is done in readLine!
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
@@ -503,23 +500,6 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   myStr = buffer;
   result = compMsgMsgDesc->getHeaderFieldsFromLine(self, hdrInfos, myStr, &cp, &seqIdx);
   checkErrOK(result);
-ets_printf("§readHeadersAndSetFlags: newDataView§");
-  dataView = newDataView("",0);
-descDataView = dataView;
-  if (dataViewWhere[0] == NULL) {
-    dataViewWhere[0] = "readHeadersAndSetFlags";
-  } else {
-    if (dataViewWhere[1] == NULL) {
-      dataViewWhere[1] = "readHeadersAndSetFlags";
-    } else {
-      if (dataViewWhere[2] == NULL) {
-        dataViewWhere[2] = "readHeadersAndSetFlags";
-      } else {
-        dataViewWhere[3] = "readHeadersAndSetFlags";
-      }
-    }
-  }
-  checkAllocOK(dataView);
   fieldOffset = 0;
   idx = 0;
   while(idx < numEntries) {
@@ -531,8 +511,6 @@ descDataView = dataView;
     }
     hdr = &hdrInfos->headerParts[idx];
     hdr->hdrFlags = 0;
-    result = dataView->setDataViewData(dataView, "readHeadersAndSetFlags", buffer, lgth);
-    checkErrOK(result);
     buffer[lgth] = 0;
     myStr = buffer;
     cp = buffer;
@@ -720,23 +698,23 @@ ets_printf("bad value: %s\n", cp);
     seqIdx2++;
     // type of totalCrc
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
-ets_printf("§totalCrc: %s!%d!§", cp, seqIdx2);
+//ets_printf("§totalCrc: %s!%d!§", cp, seqIdx2);
     checkErrOK(result);
     result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, cp, &fieldTypeId);
     checkErrOK(result);
     switch (fieldTypeId) {
     case DATA_VIEW_FIELD_NONE:
-ets_printf("§none§");
+//ets_printf("§none§");
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U0_TOTAL_CRC;
       hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;
     case DATA_VIEW_FIELD_UINT8_T:
-ets_printf("§u8§");
+//ets_printf("§u8§");
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U8_TOTAL_CRC;
       hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;
     case DATA_VIEW_FIELD_UINT16_T:
-ets_printf("§u16§");
+//ets_printf("§u16§");
       hdr->fieldSequence[seqIdx2] = COMP_DISP_U16_TOTAL_CRC;
       hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;
@@ -750,9 +728,7 @@ ets_printf("§u16§");
     hdrInfos->numHeaderParts++;
     idx++;
   }
-//ets_printf("readHeadersAndSetFlags free myDataView: %p\n", myDataView);
   result2 = compMsgMsgDesc->closeFile(compMsgMsgDesc);
-ets_printf("§readHeadersAndSetFlags: freeDataView§");
   checkErrOK(result2);
   return result;
 }
@@ -1432,7 +1408,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
-ets_printf("getWifiKeyValueKeys done\n");
+//ets_printf("getWifiKeyValueKeys done\n");
 }
 
 #undef checkIsEnd

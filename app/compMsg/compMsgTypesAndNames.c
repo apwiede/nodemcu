@@ -46,6 +46,8 @@
 #include "dataView.h"
 #include "compMsgTypesAndNames.h"
 
+static uint8_t compMsgTypesAndNamesId;
+
 static str2id_t fieldType2Ids[] = {
   {"none",      DATA_VIEW_FIELD_NONE},
   {"uint8_t",   DATA_VIEW_FIELD_UINT8_T},
@@ -62,10 +64,6 @@ static str2id_t fieldType2Ids[] = {
   {"int32_t*",  DATA_VIEW_FIELD_INT32_VECTOR},
   {NULL, -1},
 };
-
-static uint8_t compMsgTypesAndNamesId;
-
-static fieldNames_t fieldNames = {0, 0, NULL};
 
 static str2id_t specialFieldNames[] = {
   {"@src",                COMP_MSG_SPEC_FIELD_SRC},
@@ -109,142 +107,8 @@ static str2id_t specialFieldNames[] = {
   {"@cloudSubUrl",        COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL},
   {"@cloudNodeToken",     COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN},
   {"@totalCrc",           COMP_MSG_SPEC_FIELD_TOTAL_CRC},
-
   {NULL, -1},
 };
-
-// ================================= getFieldNameIdFromStr ====================================
-
-static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt) {
-  int firstFreeEntryId;
-  int nameIdx;
-  fieldName2id_t fieldNameEntry;
-  str2id_t *entry;
-  fieldName2id_t *newFieldNameEntry;
-  fieldName2id_t *nameEntry;
-  fieldName2id_t *firstFreeEntry;
-
-//ets_printf("getFieldNameIdFromStr: %p\n", fieldName);
-  if (fieldName[0] == '@') {
-    // find special field name
-    entry = &specialFieldNames[0];
-    while (entry->str != NULL) {
-      if (entry->str == NULL) {
-        break;
-      }
-      if (c_strcmp(entry->str, fieldName) == 0) {
-        *fieldNameId = entry->id;
-        return COMP_MSG_ERR_OK;
-      }
-      entry++;
-    }
-    return COMP_MSG_ERR_BAD_SPECIAL_FIELD;
-  } else {
-    if ((incrRefCnt == COMP_MSG_INCR) && (fieldNames.numNames >= fieldNames.maxNames)) {
-      if (fieldNames.maxNames == 0) {
-        fieldNames.maxNames = 4;
-        fieldNames.names = (fieldName2id_t *)os_zalloc((fieldNames.maxNames * sizeof(fieldName2id_t)));
-        checkAllocOK(fieldNames.names);
-      } else {
-        fieldNames.maxNames += 2;
-        fieldNames.names = (fieldName2id_t *)os_realloc((fieldNames.names), (fieldNames.maxNames * sizeof(fieldName2id_t)));
-        checkAllocOK(fieldNames.names);
-      }
-    }
-    firstFreeEntry = NULL;
-    firstFreeEntryId = 0;
-    if (fieldNames.numNames > 0) {
-      // find field name
-      nameIdx = 0;
-      while (nameIdx < fieldNames.numNames) {
-        nameEntry = &fieldNames.names[nameIdx];
-        if ((nameEntry->fieldName != NULL) && (c_strcmp(nameEntry->fieldName, fieldName) == 0)) {
-          if (incrRefCnt < 0) {
-            if (nameEntry->refCnt > 0) {
-              nameEntry->refCnt--;
-            }
-            if (nameEntry->refCnt == 0) {
-              nameEntry->fieldNameId = COMP_MSG_FREE_FIELD_ID;
-              os_free(nameEntry->fieldName);
-              nameEntry->fieldName = NULL;
-            }
-          } else {
-            if (incrRefCnt > 0) {
-              nameEntry->refCnt++;
-            } else {
-              // just get the entry, do not modify
-            }
-          }
-          *fieldNameId = nameEntry->fieldNameId;
-          return COMP_MSG_ERR_OK;
-        }
-        if ((incrRefCnt == COMP_MSG_INCR) && (nameEntry->fieldNameId == COMP_MSG_FREE_FIELD_ID) && (firstFreeEntry == NULL)) {
-          firstFreeEntry = nameEntry;
-          firstFreeEntry->fieldNameId = nameIdx + 1;
-        }
-        nameIdx++;
-      }
-    }
-    if (incrRefCnt < 0) {
-      return COMP_MSG_ERR_OK; // just ignore silently
-    } else {
-      if (incrRefCnt == 0) {
-ets_printf("DataView FIELD_NOT_FOUND 1\n");
-        return COMP_MSG_ERR_FIELD_NOT_FOUND;
-      } else {
-        if (firstFreeEntry != NULL) {
-          *fieldNameId = firstFreeEntry->fieldNameId;
-          firstFreeEntry->refCnt = 1;
-          firstFreeEntry->fieldName = os_malloc(c_strlen(fieldName) + 1);
-          firstFreeEntry->fieldName[c_strlen(fieldName)] = '\0';
-          c_memcpy(firstFreeEntry->fieldName, fieldName, c_strlen(fieldName));
-        } else {
-          newFieldNameEntry = &fieldNames.names[fieldNames.numNames];
-          newFieldNameEntry->refCnt = 1;
-          newFieldNameEntry->fieldNameId = fieldNames.numNames + 1;
-          newFieldNameEntry->fieldName = os_zalloc(c_strlen(fieldName) + 1);
-          newFieldNameEntry->fieldName[c_strlen(fieldName)] = '\0';
-          c_memcpy(newFieldNameEntry->fieldName, fieldName, c_strlen(fieldName));
-          fieldNames.numNames++;
-          *fieldNameId = newFieldNameEntry->fieldNameId;
-        }
-      }
-    }
-  }
-  return DATA_VIEW_ERR_OK;
-}
-
-// ================================= getFieldNameStrFromId ====================================
-
-static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName) {
-  str2id_t *entry;
-  fieldName2id_t *fieldNameEntry;
-
-  *fieldName = NULL;
-  // first try to find special field name
-  entry = &specialFieldNames[0];
-  while (entry->str != NULL) {
-    if (entry->id == fieldNameId) {
-      *fieldName = entry->str;
-      return COMP_MSG_ERR_OK;
-    }
-    entry++;
-  }
-  // find field name
-  int idx = 0;
-
-  while (idx < fieldNames.numNames) {
-    fieldNameEntry = &fieldNames.names[idx];
-    if (fieldNameEntry->fieldNameId == fieldNameId) {
-      *fieldName = fieldNameEntry->fieldName;
-      return COMP_MSG_ERR_OK;
-    }
-    fieldNameEntry++;
-    idx++;
-  }
-ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
-  return COMP_MSG_ERR_FIELD_NOT_FOUND;
-}
 
 // ================================= getFieldTypeIdFromStr ====================================
 
@@ -278,6 +142,139 @@ static uint8_t getFieldTypeStrFromId(compMsgTypesAndNames_t *self, uint8_t field
   return DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND;
 }
 
+// ================================= getFieldNameIdFromStr ====================================
+
+static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt) {
+  int firstFreeEntryId;
+  int nameIdx;
+  fieldName2id_t fieldNameEntry;
+  str2id_t *entry;
+  fieldName2id_t *newFieldNameEntry;
+  fieldName2id_t *nameEntry;
+  fieldName2id_t *firstFreeEntry;
+
+//ets_printf("getFieldNameIdFromStr: %p\n", fieldName);
+  if (fieldName[0] == '@') {
+    // find special field name
+    entry = &specialFieldNames[0];
+    while (entry->str != NULL) {
+      if (entry->str == NULL) {
+        break;
+      }
+      if (c_strcmp(entry->str, fieldName) == 0) {
+        *fieldNameId = entry->id;
+        return COMP_MSG_ERR_OK;
+      }
+      entry++;
+    }
+    return COMP_MSG_ERR_BAD_SPECIAL_FIELD;
+  } else {
+    if ((incrRefCnt == COMP_MSG_INCR) && (self->fieldNames.numNames >= self->fieldNames.maxNames)) {
+      if (self->fieldNames.maxNames == 0) {
+        self->fieldNames.maxNames = 4;
+        self->fieldNames.names = (fieldName2id_t *)os_zalloc((self->fieldNames.maxNames * sizeof(fieldName2id_t)));
+        checkAllocOK(self->fieldNames.names);
+      } else {
+        self->fieldNames.maxNames += 2;
+        self->fieldNames.names = (fieldName2id_t *)os_realloc((self->fieldNames.names), (self->fieldNames.maxNames * sizeof(fieldName2id_t)));
+        checkAllocOK(self->fieldNames.names);
+      }
+    }
+    firstFreeEntry = NULL;
+    firstFreeEntryId = 0;
+    if (self->fieldNames.numNames > 0) {
+      // find field name
+      nameIdx = 0;
+      while (nameIdx < self->fieldNames.numNames) {
+        nameEntry = &self->fieldNames.names[nameIdx];
+        if ((nameEntry->fieldName != NULL) && (c_strcmp(nameEntry->fieldName, fieldName) == 0)) {
+          if (incrRefCnt < 0) {
+            if (nameEntry->refCnt > 0) {
+              nameEntry->refCnt--;
+            }
+            if (nameEntry->refCnt == 0) {
+              nameEntry->fieldNameId = COMP_MSG_FREE_FIELD_ID;
+              os_free(nameEntry->fieldName);
+              nameEntry->fieldName = NULL;
+            }
+          } else {
+            if (incrRefCnt > 0) {
+              nameEntry->refCnt++;
+            } else {
+              // just get the entry, do not modify
+            }
+          }
+          *fieldNameId = nameEntry->fieldNameId;
+          return COMP_MSG_ERR_OK;
+        }
+        if ((incrRefCnt == COMP_MSG_INCR) && (nameEntry->fieldNameId == COMP_MSG_FREE_FIELD_ID) && (firstFreeEntry == NULL)) {
+          firstFreeEntry = nameEntry;
+          firstFreeEntry->fieldNameId = nameIdx + 1;
+        }
+        nameIdx++;
+      }
+    }
+    if (incrRefCnt < 0) {
+      return COMP_MSG_ERR_OK; // just ignore silently
+    } else {
+      if (incrRefCnt == 0) {
+//ets_printf("DataView FIELD_NOT_FOUND 1\n");
+        return COMP_MSG_ERR_FIELD_NOT_FOUND;
+      } else {
+        if (firstFreeEntry != NULL) {
+          *fieldNameId = firstFreeEntry->fieldNameId;
+          firstFreeEntry->refCnt = 1;
+          firstFreeEntry->fieldName = os_zalloc(c_strlen(fieldName) + 1);
+          firstFreeEntry->fieldName[c_strlen(fieldName)] = '\0';
+          c_memcpy(firstFreeEntry->fieldName, fieldName, c_strlen(fieldName));
+        } else {
+          newFieldNameEntry = &self->fieldNames.names[self->fieldNames.numNames];
+          newFieldNameEntry->refCnt = 1;
+          newFieldNameEntry->fieldNameId = self->fieldNames.numNames + 1;
+          newFieldNameEntry->fieldName = os_zalloc(c_strlen(fieldName) + 1);
+          newFieldNameEntry->fieldName[c_strlen(fieldName)] = '\0';
+          c_memcpy(newFieldNameEntry->fieldName, fieldName, c_strlen(fieldName));
+          self->fieldNames.numNames++;
+          *fieldNameId = newFieldNameEntry->fieldNameId;
+        }
+      }
+    }
+  }
+  return DATA_VIEW_ERR_OK;
+}
+
+// ================================= getFieldNameStrFromId ====================================
+
+static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName) {
+  str2id_t *entry;
+  fieldName2id_t *fieldNameEntry;
+
+  *fieldName = NULL;
+  // first try to find special field name
+  entry = &specialFieldNames[0];
+  while (entry->str != NULL) {
+    if (entry->id == fieldNameId) {
+      *fieldName = entry->str;
+      return COMP_MSG_ERR_OK;
+    }
+    entry++;
+  }
+  // find field name
+  int idx = 0;
+
+  while (idx < self->fieldNames.numNames) {
+    fieldNameEntry = &self->fieldNames.names[idx];
+    if (fieldNameEntry->fieldNameId == fieldNameId) {
+      *fieldName = fieldNameEntry->fieldName;
+      return COMP_MSG_ERR_OK;
+    }
+    fieldNameEntry++;
+    idx++;
+  }
+//ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
+  return COMP_MSG_ERR_FIELD_NOT_FOUND;
+}
+
 // ================================= freeCompMsgTypesAndNames ====================================
 
 static uint8_t freeCompMsgTypesAndNames(compMsgTypesAndNames_t *compMsgTypesAndNames) {
@@ -296,6 +293,7 @@ static uint8_t freeCompMsgTypesAndNames(compMsgTypesAndNames_t *compMsgTypesAndN
     }
     compMsgTypesAndNames->fieldNames.numNames = 0;
     compMsgTypesAndNames->fieldNames.maxNames = 0;
+    os_free(compMsgTypesAndNames->fieldNames.names);
     compMsgTypesAndNames->fieldNames.names = NULL;
   }
   return DATA_VIEW_ERR_OK;
@@ -305,7 +303,7 @@ static uint8_t freeCompMsgTypesAndNames(compMsgTypesAndNames_t *compMsgTypesAndN
 
 compMsgTypesAndNames_t *newCompMsgTypesAndNames() {
   compMsgTypesAndNames_t *compMsgTypesAndNames = os_zalloc(sizeof(compMsgTypesAndNames_t));
-ets_printf("§newCompMsgTypesAndNames: %p!§", compMsgTypesAndNames);
+//ets_printf("§newCompMsgTypesAndNames: %p!§", compMsgTypesAndNames);
   if (compMsgTypesAndNames == NULL) {
     return NULL;
   }

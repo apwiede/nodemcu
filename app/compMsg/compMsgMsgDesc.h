@@ -176,6 +176,7 @@ typedef struct msgParts {
   uint8_t realLgth;
   size_t fieldOffset;
   uint8_t buf[DISP_BUF_LGTH];
+  compMsgDataView_t *compMsgDataView;
 } msgParts_t;
 
 typedef struct msgDescPart {

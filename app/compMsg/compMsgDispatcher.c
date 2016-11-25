@@ -174,6 +174,7 @@ static uint8_t fromBase64(const uint8_t *encodedMsg, size_t *len, uint8_t **deco
 static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
   int idx;
 
+//ets_printf("§dispatcher addHandle: %s!§", handle);
   if (compMsgDispatcherHandles.handles == NULL) {
     compMsgDispatcherHandles.handles = os_zalloc(sizeof(handle2Dispatcher_t));
     if (compMsgDispatcherHandles.handles == NULL) {
@@ -389,14 +390,6 @@ ets_printf("§heap4: %d§", system_get_free_heap_size());
     return result;
   } else {
     result = self->buildMsg(self);
-#ifdef NOTDEF
-    result = setMsgValues(self);
-    checkErrOK(result);
-//ets_printf("§heap3: %d§", system_get_free_heap_size());
-    result = self->compMsgData->getMsgData(self->compMsgData, &data, &msgLgth);
-    checkErrOK(result);
-#endif
-    // FIXME !! here we need a call to send the (eventually encrypted) message!!
   }
   return COMP_MSG_ERR_OK;
 }
@@ -544,6 +537,7 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
   compMsgData = self->msgRequestInfos.requestData[0];
   compMsgData->direction = COMP_MSG_RECEIVED_DATA;
 //ets_printf("§call handleReceivePart: lgth: %d§", lgth);
+  self->compMsgData = compMsgData;
   result = self->handleReceivedPart(self, data, lgth);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
@@ -715,14 +709,15 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
   uint8_t result;
 
   os_sprintf(self->handle, "%s%p", DISP_HANDLE_PREFIX, self);
+//ets_printf("§os createDispatcher: %s!§", self->handle);
   result = addHandle(self->handle, self);
   if (result != COMP_DISP_ERR_OK) {
     deleteHandle(self->handle);
     os_free(self);
     return result;
   }
-  resetMsgInfo(self, &self->received);
-  resetMsgInfo(self, &self->toSend);
+//  resetMsgInfo(self, &self->received);
+//  resetMsgInfo(self, &self->toSend);
   *handle = self->handle;
   return COMP_DISP_ERR_OK;
 }

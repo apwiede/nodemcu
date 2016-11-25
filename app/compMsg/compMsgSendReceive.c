@@ -69,7 +69,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
   const uint8_t buf[1] = { 0};
   const uint8_t *myBuffer;
 
-  received = &self->received;
+  received = &self->compMsgData->received;
 //ets_printf("§Rec: 0x%02x lgth: %d§", buffer[0] & 0xFF, received->lgth);
 //ets_printf("§uartReceiveCb: %c rlen: %d§", buffer[0]&0xFF, received->lgth);
   myBuffer = buffer;

@@ -185,9 +185,9 @@ typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
 
 // Identify stuff
-typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
+typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 // SendReceive
@@ -232,14 +232,7 @@ typedef struct compMsgDispatcher {
   compMsgData_t *compMsgData;
   uint8_t *msgHandle;
 
-  msgParts_t received;
-  msgParts_t toSend;
-
   // function pointers
-
-  //
-  getFieldType_t getFieldType;
-  resetMsgInfo_t resetMsgInfo;
 
   // SendReceive
   uartSetup_t uartSetup;
@@ -273,10 +266,9 @@ typedef struct compMsgDispatcher {
   getModuleTableFieldValue_t getModuleTableFieldValue;
 
   // Dispatcher
+  getFieldType_t getFieldType;
+  resetMsgInfo_t resetMsgInfo;
   resetHeaderInfos_t resetHeaderInfos;
-  nextFittingEntry_t nextFittingEntry;
-  handleReceivedPart_t handleReceivedPart;
-  handleToSendPart_t handleToSendPart;
   createDispatcher_t createDispatcher;
   initDispatcher_t initDispatcher;
   createMsgFromHeaderPart_t createMsgFromHeaderPart;
@@ -286,13 +278,16 @@ typedef struct compMsgDispatcher {
   addUartRequestData_t addUartRequestData;
   addRequest_t addRequest;
   deleteRequest_t deleteRequest;
-
-  // dispatcher
   encryptMsg_t encryptMsg;
   decryptMsg_t decryptMsg;
   toBase64_t toBase64;
   fromBase64_t fromBase64;
   resetBuildMsgInfos_t resetBuildMsgInfos;
+
+  // identify
+  nextFittingEntry_t nextFittingEntry;
+  handleReceivedPart_t handleReceivedPart;
+  handleToSendPart_t handleToSendPart;
 
   // wifi
   bssStr2BssInfoId_t bssStr2BssInfoId;

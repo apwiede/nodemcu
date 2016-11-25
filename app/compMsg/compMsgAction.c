@@ -541,7 +541,7 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
   uint8_t actionMode;
   dataView_t *dataView;
 
-  received = &self->received;
+  received = &self->compMsgData->received;
   dataView = self->compMsgData->compMsgDataView->dataView;
   if (received->u16CmdKey == 0x4244) { // "BD"
     // FIXME need to get the real offset here instead of 7!!
