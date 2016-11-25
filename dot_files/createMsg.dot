@@ -1,0 +1,9 @@
+digraph G22 {
+  createMsg -> addField;
+  addField -> createMsg;
+  createMsg -> prepareValuesCb;
+  prepareValuesCb -> getActionMode;
+  getActionMode-> runAction;
+  runAction -> buildMsg;
+  createMsg -> buildMsg;
+}

@@ -1,0 +1,9 @@
+digraph G3 {
+  handleReceivedPart -> getHeaderIndexFromHeaderFields;
+  getHeaderIndexFromHeaderFields -> totalLgth;
+  totalLgth -> decryptMsg;
+  decryptMsg -> handleReceivedMsg;
+  handleReceivedMsg -> prepareAnswerMsg;
+  prepareAnswerMsg[label=<<u>prepareAnswerMsg</u>> URL="\ref prepareAnswerMsg" color="blue"];
+}  
+

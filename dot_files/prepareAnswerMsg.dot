@@ -1,0 +1,13 @@
+digraph G2 {
+  prepareAnswerMsg -> createMsgFromHeaderPart;
+  createMsgFromHeaderPart -> getMsgPartsFromHeaderPart;
+  getMsgPartsFromHeaderPart -> createMsg;
+  createMsg[label=<<u>createMsg</u>> URL="\ref createMsg" color="blue"];
+  createMsg -> buildMsg;
+  buildMsg[label=<<u>buildMsg</u>> URL="\ref buildAnswerMsg" color="blue"];
+  buildMsg -> getMsgData;
+  getMsgData -> encryptMsg;
+  sendMsg [shape=record, label="<f0> A|<f1> G|<f2> S|<f3> R|<f4> U|<f5> W|<f6> N"];
+  encryptMsg -> sendMsg:f2;
+  getMsgData -> sendMsg:f2;
+}
