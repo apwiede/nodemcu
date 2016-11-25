@@ -296,7 +296,7 @@ namespace eval compMsg {
       variable headerInfos
       variable dispFlags
     
-puts stderr "readHeadersAndSetFlags!"
+#puts stderr "readHeadersAndSetFlags!"
       set fd [open $fileName r]
       gets $fd line
       set flds [split $line ,]
@@ -494,7 +494,7 @@ puts stderr "readHeadersAndSetFlags!"
       }
       close $fd
       dict set compMsgDispatcher headerInfos $headerInfos
-puts stderr "readHeadersAndSetFlags done!"
+#puts stderr "readHeadersAndSetFlags done!"
       return $::COMP_MSG_ERR_OK
     }
 

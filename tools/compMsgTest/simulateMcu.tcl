@@ -100,7 +100,7 @@ proc handleState {bufVar lgthVar} {
   upvar $lgthVar lgth
 
   set myState $::currState
-puts stderr "handleState: $myState!"
+puts stderr "  ==handleInput0: 3 DBT: os handleState: $myState!"
   switch $myState {
     INIT {
       set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 ID hdr]
@@ -203,7 +203,6 @@ puts stderr "funny state: $myState!"
   set result [handleState buf lgth]
 #puts stderr "handleState: result: $result!"
   checkErrOK $result
-#  fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
   return $result
 }
 
@@ -371,12 +370,12 @@ proc InitCompMsg {} {
   checkErrOK $result
   set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
   checkErrOK $result
-puts stderr "dispatcherHandle!$dispatcherHandle!"
+#puts stderr "dispatcherHandle!$dispatcherHandle!"
   set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
   checkErrOK $result
   set ::headerInfos [dict get $::compMsgDispatcher headerInfos]
   set ::headerLgth [dict get $::compMsgDispatcher headerInfos headerLgth]
-puts stderr "headerLgth: $::headerLgth!"
+#puts stderr "headerLgth: $::headerLgth!"
 }
 
 # ================================ getSrcId ===============================
