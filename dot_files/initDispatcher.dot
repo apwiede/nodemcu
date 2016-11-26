@@ -1,0 +1,19 @@
+digraph G24 {
+  initDispatcher[style="filled", color="green"];
+  initDispatcher -> compMsgIdentifyInit;
+  compMsgIdentifyInit[label=<<u>compMsgIdentifyInit</u>>, style="filled", color="green", URL="\ref compMsgIdentifyInit"];
+  compMsgIdentifyInit -> compMsgBuildMsgInit;
+  compMsgBuildMsgInit[style="filled", color="green"];
+  compMsgBuildMsgInit -> compMsgSendReceiveInit;
+  compMsgSendReceiveInit[style="filled", color="green"];
+  compMsgSendReceiveInit -> compMsgActionInit;
+  compMsgActionInit[label=<compMsgActionInit <u>compMsgAction.c</u>>, style="filled", color="green" URL="\ref compMsgAction.c"];
+  compMsgActionInit -> compMsgWifiInit;
+  compMsgWifiInit[label=<<u>compMsgWifiInit</u>>, style="filled", color="green" URL="\ref compMsgWifiInit"];
+  compMsgWifiInit -> compMsgModuleDataInit;
+  compMsgModuleDataInit[style="filled", color="green"];
+  compMsgModuleDataInit -> compMsgWebsocketInit;
+  compMsgWebsocketInit[style="filled", color="green"];
+  compMsgWebsocketInit -> compMsgNetsocketInit;
+  compMsgNetsocketInit[style="filled", color="green"];
+}

@@ -1,0 +1,14 @@
+digraph G25 {
+  readHeadersAndSetFlags[label=<<u>readHeadersAndSetFlags</u>>, style="filled", color="green", URL="\ref readHeadersAndSetFlags"];
+  openFile[label=<openFile CompMsgHeades.txt>, style="filled", color="green"];
+  readHeadersAndSetFlags -> openFile;
+  readNumEntries[label=<readNumEntries #,12>, style="filled", color="green"];
+  openFile -> readNumEntries;
+  readHeader[label=<readHeader 8,@src,@dst,@totalLgth,@srcId,>, style="filled", color="green"];
+  readNumEntries -> readHeader;
+  readEntry[label=<readEntry 123,456,26,*,E,A,uint16_t,A1,uint16_t,uint16_t,uint16_t>, style="filled", color="green"];
+  readHeader -> readEntry;
+  readEntry -> readEntry;
+  closeFile[style="filled", color="green"];
+  readEntry -> closeFile
+}
