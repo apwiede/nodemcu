@@ -1,9 +1,15 @@
 digraph G22 {
+  createMsg[style="filled", color="green"];
   createMsg -> addField;
+  addField[style="filled", color="green"];
   addField -> createMsg;
   createMsg -> prepareValuesCb;
+  prepareValuesCb[style="filled", color="green"];
   prepareValuesCb -> getActionMode;
-  getActionMode-> runAction;
+  getActionMode[style="filled", color="green"];
+  getActionMode -> runAction;
+  runAction[style="filled", color="green"];
   runAction -> buildMsg;
+  buildMsg[style="filled", color="green"];
   createMsg -> buildMsg;
 }

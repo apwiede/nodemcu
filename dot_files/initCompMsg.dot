@@ -1,8 +1,13 @@
 digraph G0 {
+  WifiModuleStart[style="filled", color="green"];
   WifiModuleStart -> compmsg_createDispatcher;
+  compmsg_createDispatcher[style="filled", color="green"];
   compmsg_createDispatcher -> compmsg_initDispatcher;
+  compmsg_initDispatcher[style="filled", color="green" label=<<u>initDispatcher</u>> URL="\ref initDispatcher"];
   compmsg_initDispatcher -> uart_setup;
+  uart_setup[style="filled", color="green"];
   uart_setup -> uart_on;
-  compmsg_uartReceiveCb[label=<<u>compmsg_uartReceiveCb</u>> URL="\ref handleMsg" color="blue"];
+  uart_on[style="filled", color="green"];
+  compmsg_uartReceiveCb[style="filled", color="green", label=<<u>compmsg_uartReceiveCb</u>> URL="\ref handleMsg"];
   uart_on -> compmsg_uartReceiveCb;
 }

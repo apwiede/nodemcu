@@ -1,6 +1,11 @@
 digraph G23 {
+  buildMsg[style="filled", color="green"];
   buildMsg -> fixOffsetsForKeyValues;
+  fixOffsetsForKeyValues[style="filled", color="green"];
   fixOffsetsForKeyValues -> initMsg;
+  initMsg[style="filled", color="green"];
   initMsg -> setMsgValues;
+  setMsgValues[style="filled", color="green"];
   setMsgValues -> getMsgData;
+  getMsgData[style="filled", color="green"];
 }

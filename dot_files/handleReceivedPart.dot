@@ -1,9 +1,14 @@
 digraph G3 {
+  handleReceivedPart[style="filled", color="green"];
+  getHeaderIndexFromHeaderFields[style="filled", color="green"];
   handleReceivedPart -> getHeaderIndexFromHeaderFields;
-  getHeaderIndexFromHeaderFields -> totalLgth;
-  totalLgth -> decryptMsg;
+  getHeaderIndexFromHeaderFields -> checkForTotalLgth;
+  checkForTotalLgth[style="filled", color="green"];
+  checkForTotalLgth -> decryptMsg;
+  decryptMsg[style="filled", color="green"];
   decryptMsg -> handleReceivedMsg;
+  handleReceivedMsg[style="filled", color="green"];
   handleReceivedMsg -> prepareAnswerMsg;
-  prepareAnswerMsg[label=<<u>prepareAnswerMsg</u>> URL="\ref prepareAnswerMsg" color="blue"];
+  prepareAnswerMsg[style="filled", color="green", label=<<u>prepareAnswerMsg</u>> URL="\ref prepareAnswerMsg"];
 }  
 
