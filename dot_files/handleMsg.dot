@@ -39,16 +39,18 @@ digraph G1 {
   Queue:f4 -> handleReceivedPart;
   handleReceivedPart[style="filled", color="green", label=<<u>handleReceivedPart</u>> URL="\ref handleReceivedPart"];
   prepareAnswerMsg[style="filled", color="green", label=<<u>prepareAnswerMsg</u>> URL="\ref prepareAnswerMsg"];
-  handleReceivedPart -> prepareAnswerMsg;
-  sendMsg [style="filled", color="green", shape=record, label="<f0> N|<f1> G|<f2> S|<f3> R|<f4> U|<f5> W|<f6> A"];
-  prepareAnswerMsg -> sendMsg:f1;
-  sendMsg:f1 -> sendMsg:f6;
-  prepareAnswerMsg -> sendMsg:f5;
-  prepareAnswerMsg -> sendMsg:f3;
-  prepareAnswerMsg -> sendMsg:f4;
-  sendMsg:f3 -> sendMsg:f2;
-  sendMsg:f6 -> webSocketSendData;
-  sendMsg:f4 -> httpSocketSendData;
+  sendMsg [style="filled", color="green", shape=record, label="<f0> A|<f1> S|<f2> U|<f3> W"];
+  handleReceivedPart -> sendMsg:f0;
+  handleReceivedPart -> sendMsg:f1;
+  handleReceivedPart -> sendMsg:f2;
+  handleReceivedPart -> sendMsg:f3;
+  sendMsg:f0 -> prepareAnswerMsg;
+  prepareAnswerMsg -> webSocketSendData;
+  sendMsg:f1 -> prepareAnswerMsg;
+  prepareAnswerMsg -> typeRSendAnswer;
+  sendMsg:f2 -> webSocketSendData;
+  sendMsg:f2 -> httpSocketSendData;
+  sendMsg:f3 -> typeWForwardMsg;
   httpSocketSendData[style="filled", color="green"];
   webSocketSendData[style="filled", color="green"];
   webSocketSendData -> Queue:f1;
@@ -59,15 +61,13 @@ digraph G1 {
   httpSocketSendData -> Queue:f2;
   httpSocketSendData -> Queue:f3;
   httpSocketSendData -> Queue:f4;
-  {rank=same; "typeRSendAnswer"; "typeWSendAnswer"; "webSocketSendData"; "httpSocketSendData";}
-  sendMsg:f5 -> typeWSendAnswer;
-  sendMsg:f2 -> typeRSendAnswer;
+  {rank=same; "typeRSendAnswer"; "typeWForwardMsg"; "webSocketSendData"; "httpSocketSendData";}
   typeRSendAnswer[style="filled", color="green"];
-  typeWSendAnswer[style="filled", color="red"];
+  typeWForwardMsg[style="filled", color="red"];
   typeRSendAnswer -> Queue:f0;
-  typeWSendAnswer -> Queue:f0;
+  typeWForwardMsg -> Queue:f0;
   typeRSendAnswer -> deleteMsg;
-  typeWSendAnswer -> deleteMsg;
+  typeWForwardMsg -> deleteMsg;
   deleteMsg[style="filled", color="green"];
   httpSocketSendData -> deleteMsg;
   webSocketSendData -> deleteMsg;
