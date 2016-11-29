@@ -1,5 +1,5 @@
 digraph G3 {
-  handleReceivedPart[style="filled", color="green"];
+  handleReceivedPart[style="filled", color="green", label=<<u>handleReceivedPart</u>> URL="\ref handleReceivedPart"];
   getHeaderIndexFromHeaderFields[style="filled", color="green"];
   handleReceivedPart -> getHeaderIndexFromHeaderFields;
   getHeaderIndexFromHeaderFields -> checkForTotalLgth;

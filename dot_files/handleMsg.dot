@@ -37,8 +37,8 @@ digraph G1 {
   Queue:f2 -> handleReceivedPart;
   Queue:f3 -> handleReceivedPart;
   Queue:f4 -> handleReceivedPart;
-  handleReceivedPart[style="filled", color="green", label=<<u>handleReceivedPart</u>> URL="\ref handleReceivedPart"];
-  prepareAnswerMsg[style="filled", color="green", label=<<u>prepareAnswerMsg</u>> URL="\ref prepareAnswerMsg"];
+  handleReceivedPart[style="filled", color="green", label=<<u>handleReceivedPart</u>> URL="\ref grp_handleReceivedPart"];
+  prepareAnswerMsg[style="filled", color="green", label=<<u>prepareAnswerMsg</u>> URL="\ref grp_prepareAnswerMsg"];
   sendMsg [style="filled", color="green", shape=record, label="<f0> A|<f1> S|<f2> U|<f3> W"];
   handleReceivedPart -> sendMsg:f0;
   handleReceivedPart -> sendMsg:f1;

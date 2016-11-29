@@ -5,9 +5,9 @@ digraph G2 {
   createMsgFromHeaderPart -> getMsgPartsFromHeaderPart;
   getMsgPartsFromHeaderPart[style="filled", color="green"];
   getMsgPartsFromHeaderPart -> createMsg;
-  createMsg[style="filled", color="green", label=<<u>createMsg</u>> URL="\ref createMsg"];
+  createMsg[style="filled", color="green", label=<<u>createMsg</u>> URL="\ref grp_createMsg"];
   createMsg -> buildMsg;
-  buildMsg[style="filled", color="green", label=<<u>buildMsg</u>> URL="\ref buildAnswerMsg"];
+  buildMsg[style="filled", color="green", label=<<u>buildMsg</u>> URL="\ref grp_buildAnswerMsg"];
   buildMsg -> getMsgData;
   getMsgData[style="filled", color="green"];
   getMsgData -> encryptMsg;
