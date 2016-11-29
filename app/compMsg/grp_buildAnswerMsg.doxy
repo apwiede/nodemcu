@@ -1,6 +1,6 @@
 /*!
-  \defgroup buildAnswerMsg "buildAnswerMsg"
-  \dotfile buildAnswerMsg.dot "buildAnswerMsg"
+  \defgroup grp_buildAnswerMsg "buildAnswerMsg"
+  \dotfile grp_buildAnswerMsg.dot "buildAnswerMsg"
   @{
         @{
         @}

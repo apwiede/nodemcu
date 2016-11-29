@@ -1,5 +1,5 @@
 /*!
-  \defgroup grpuartReceiveCb uartReceiveCb
+  \defgroup grp_uartReceiveCb uartReceiveCb
   @{
     <h2>uartReceivecb \ref CompMsgSendReceivce -- Input from uart</h2>
       <ul>

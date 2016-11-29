@@ -1,6 +1,6 @@
 /*!
-  \defgroup handleReceivedPart "handleReceivedPart"
-  \dotfile handleReceivedPart.dot "handleReceivedPart"
+  \defgroup grp_handleReceivedPart "handleReceivedPart"
+  \dotfile grp_handleReceivedPart.dot "handleReceivedPart"
   @{
         @{
         @}

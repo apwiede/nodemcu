@@ -1,6 +1,6 @@
 /*!
-  \defgroup createMsg "createMsg"
-  \dotfile createMsg.dot "createMsg"
+  \defgroup grp_createMsg "createMsg"
+  \dotfile grp_createMsg.dot "createMsg"
   @{
         @{
         @}
