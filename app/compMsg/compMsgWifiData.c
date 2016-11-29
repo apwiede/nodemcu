@@ -493,6 +493,16 @@ static uint8_t getWifiKeyValue(compMsgDispatcher_t *self) {
 
 // ================================= getWifiValue ====================================
 
+/**
+ * \brief get a Wifi module value
+ * \param self The dispatcher struct
+ * \param which Which of the values
+ * \param valueTypeId The values type
+ * \param numericValue The value if it is a numeric one
+ * \param stringValue The value if it is a character string
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue) {
   uint8_t result;
 

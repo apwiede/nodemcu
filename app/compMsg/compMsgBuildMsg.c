@@ -51,6 +51,12 @@
 
 // ================================= fixOffsetsForKeyValues ====================================
 
+/**
+ * \brief fix the field offsets of all if we have key/value fields after calling the callbacks for these fields.
+ * \param self The dispatcher struct
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t msgDescPartIdx;
@@ -89,6 +95,13 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
 
 // ================================= setMsgFieldValue ====================================
 
+/**
+ * \brief the value of a message field
+ * \param self The dispatcher struct
+ * \param type The type of the answer
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
   uint8_t result;
   uint8_t *fieldNameStr;
@@ -151,6 +164,12 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
 
 // ================================= setMsgValues ====================================
 
+/**
+ * \brief set the field values of a message
+ * \param self The dispatcher struct
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   uint8_t startEntryIdx;
   int tableFieldIdx;
@@ -220,6 +239,13 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
 
 // ================================= buildMsg ====================================
 
+/**
+ * \brief Build a message for sending to Uart or socket
+ * 
+ * \param self The dispatcher struct
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t buildMsg(compMsgDispatcher_t *self) {
   uint8_t result;
   size_t msgLgth;

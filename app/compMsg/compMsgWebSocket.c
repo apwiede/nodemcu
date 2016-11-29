@@ -136,6 +136,15 @@ static int cnt = 0;
 
 // ============================ websocketSendData =======================
 
+/**
+ * \brief send message data to a web scoket
+ * \param wud The websocket user data
+ * \param payload The message data
+ * \param size The number of characters of the message
+ * \param opcode The type for sending the data (text/binary/...)
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t websocketSendData(websocketUserData_t *wud, const char *payload, int size, int opcode)
 {
   uint8_t hdrBytes[4]; // we have either 2 or 4 bytes depending on length of message
@@ -274,6 +283,13 @@ for (int i = 0; i < size; i++) {
 
 // ============================ toBase64 =========================================
 
+/**
+ * \brief encode message with base64
+ * \param msg The message
+ * \param len The length of the message
+ * \return The encoded message
+ *
+ */
 static uint8_t *toBase64 ( const uint8_t *msg, size_t *len){
   size_t i;
   size_t n;

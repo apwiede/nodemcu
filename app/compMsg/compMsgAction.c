@@ -440,6 +440,14 @@ static actionName2Action_t actionName2Actions [] = {
 
 // ================================= getActionMode ====================================
 
+/**
+ * \brief get the action mode for an action
+ * 
+ * \param self The dispatcher struct
+ * \param actionName The field actionName
+ * \param actionMode The out value for the actionName
+ *
+ */
 static uint8_t getActionMode(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode) {
   int result;
   actionName2Action_t *actionEntry;
@@ -533,6 +541,12 @@ static uint8_t setActionEntry(compMsgDispatcher_t *self, uint8_t *actionName, ui
 
 // ================================= runAction ====================================
 
+/**
+ * \brief Run an action forced by a received message
+ * 
+ * \param self The dispatcher struct
+ * \param answerType The type for the answer
+ */
 static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
   int result;
   msgParts_t *received;

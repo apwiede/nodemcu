@@ -451,6 +451,7 @@ static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos
  * \brief Read the CompMsgHeads.txt file and store the header fields in some structures.
  * \param self The dispatcher struct
  * \param fileName The file name to read normally CompMsgHeads.txt
+ * \return Error code or ErrorOK
  *
  */
 

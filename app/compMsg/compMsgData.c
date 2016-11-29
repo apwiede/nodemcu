@@ -384,6 +384,15 @@ ets_printf("compMsgGetPtrFromHandle 1 HANDLE_NOT_FOUND\n");
 
 // ================================= createMsg ====================================
 
+/**
+ * \brief create the internal representation of a message
+ * 
+ * \param self The dispatcher struct
+ * \param numFields The number of fields
+ * \param handle The out param for the handle of this message
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t createMsg(compMsgDispatcher_t *self, int numFields, uint8_t **handle) {
   uint8_t result;
   compMsgData_t *compMsgData;
@@ -415,6 +424,16 @@ static uint8_t createMsg(compMsgDispatcher_t *self, int numFields, uint8_t **han
 
 // ================================= addField ====================================
 
+/**
+ * \brief add a field to the internal representation of a message
+ * 
+ * \param self The dispatcher struct
+ * \param fieldName The field name
+ * \param fieldType The field type name
+ * \param fieldLgth The field lgth in bytes
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t addField(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth) {
   uint8_t numTableFields;
   uint8_t numTableRowFields;
@@ -597,6 +616,12 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
 
 // ================================= initMsg ====================================
 
+/**
+ * \brief initialize the basic message info
+ * \param self The dispatcher struct
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t initMsg(compMsgDispatcher_t *self) {
   int numEntries;
   int idx;
@@ -721,6 +746,14 @@ static uint8_t initMsg(compMsgDispatcher_t *self) {
 
 // ============================= getMsgData ========================
 
+/**
+ * \brief get the data and lgth of a prepared message
+ * \param self The dispatcher struct
+ * \param data The out parameter data
+ * \param lgth The out parameter lgth
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t getMsgData(compMsgDispatcher_t *self, uint8_t **data, int *lgth) {
   uint8_t result;
   compMsgData_t *compMsgData;

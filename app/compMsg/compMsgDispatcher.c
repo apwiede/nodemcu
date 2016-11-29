@@ -81,6 +81,14 @@ static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 // ============================= toBase64 ========================
 
+/**
+ * \brief encode message with base64
+ * \param msg The message
+ * \param len The length of the message
+ * \param encoded The out param encoded message
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
   size_t i;
   size_t n;

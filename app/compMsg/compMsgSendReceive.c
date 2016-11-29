@@ -88,6 +88,14 @@ ets_printf("§uartReceiveCb end result: %d§", result);
 
 // ================================= typeRSendAnswer ====================================
 
+/**
+ * \brief send a message via Uart to Mcu
+ * \param self The dispatcher struct
+ * \param data The message data
+ * \param msgLgth The number of characters in the message
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth) {
   int result;
   int idx;
@@ -104,6 +112,14 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
 
 // ================================= sendCloudMsg ====================================
 
+/**
+ * \brief send a message via http socket to Cloud
+ * \param self The dispatcher struct
+ * \param msgData The message data
+ * \param msgLgth The number of characters in the message
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t sendCloudMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
   uint8_t result;
   uint8_t *b64Msg;

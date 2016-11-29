@@ -113,6 +113,14 @@ static int dns_reconn_count = 0;
 
 // ============================ netsocketSendData =======================
 
+/**
+ * \brief send message data to a http scoket
+ * \param nud The net (http) socket user data
+ * \param payload The message data
+ * \param size The number of characters of the message
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t netsocketSendData(netsocketUserData_t *nud, const char *payload, int size)
 {
   uint8_t result;
