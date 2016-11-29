@@ -1,14 +1,12 @@
 /*!
   \defgroup grpCompMsgSendReceive CompMsgSendReceive
   @{
-    <h2>uartReceivecb</h2>
+    <h2>uartReceiveCb</h2>
       <ul>
         <li>uartReceiveCb<br>
         <li>sendMsg<br>
       </ul>
-        <br>
-        <li><a href="classorg_1_1apwtcl_1_1apwfreetypelib_1_1aftbase_1_1FTModules.html">-&gt; class FTModules</a><br>
-      </ul>
+      <br>
 
     \addtogroup grpuartReceiveCb
         @{
