@@ -1,6 +1,6 @@
 digraph G3 {
   handleReceivedPart[style="filled", color="green", label=<<u>handleReceivedPart</u>> URL="\ref handleReceivedPart"];
-  getHeaderIndexFromHeaderFields[style="filled", color="green"];
+  getHeaderIndexFromHeaderFields[style="filled", color="green", label=<<u>getHeaderIndexFromHeaderFields</u>> URL="\ref getHeaderIndexFromHeaderFields"];
   handleReceivedPart -> getHeaderIndexFromHeaderFields;
   getHeaderIndexFromHeaderFields -> checkForTotalLgth;
   checkForTotalLgth[style="filled", color="green"];
@@ -11,20 +11,14 @@ digraph G3 {
   selectPath [style="filled", color="green", shape=record, label="<f0> G|<f1> R|<f2> U|<f3> W"];
   selectPath:f0 -> decryptMsg;
   selectPath:f1 -> handleReceivedMsg;
-  encodeBase64[style="filled", color="red"];
-  selectPath:f2 -> encodeBase64;
-  decodeBase64[style="filled", color="red"];
-  selectPath:f3 -> decodeBase64;
-  httpSocketSendData[style="filled", color="green"];
-  webSocketSendData[style="filled", color="green"];
-  encodeBase64 -> httpSocketSendData;
-  encodeBase64 -> webSocketSendData;
-  typeWForwardMsg[style="filled", color="red"];
-  decodeBase64 -> typeWForwardMsg;
-  decryptMsg[style="filled", color="green"];
+  selectPath:f2 -> sendMsg;
+  selectPath:f3 -> sendMsg;
+  decryptMsg[style="filled", color="green", label=<<u>decryptMsg</u>> URL="\ref decryptMsg"];
   decryptMsg -> handleReceivedMsg;
-  handleReceivedMsg[style="filled", color="green"];
+  handleReceivedMsg[style="filled", color="green", label=<<u>handleReceivedMsg</u>> URL="\ref handleReceivedMsg"];
   handleReceivedMsg -> prepareAnswerMsg;
   prepareAnswerMsg[style="filled", color="green", label=<<u>prepareAnswerMsg</u>> URL="\ref prepareAnswerMsg"];
+  prepareAnswerMsg -> sendMsg
+  sendMsg[style="filled", color="green", label=<<u>sendMsg</u>> URL="\ref sendMsg"];
 }  
 
