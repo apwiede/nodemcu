@@ -380,6 +380,13 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
 
 // ================================= handleReceivedPart ====================================
 
+/**
+ * \brief handle input characters from uart or sockets
+ * \param self The dispatcher struct
+ * \param buffer The input charcters
+ * \param lgth The number of characters in the input
+ *
+ */
 static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth) {
   int idx;
   msgHeaderInfos_t *hdrInfos;
