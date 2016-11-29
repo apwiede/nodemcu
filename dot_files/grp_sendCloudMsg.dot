@@ -1,0 +1,10 @@
+digraph G26 {
+  sendCloudMsg[style="filled", color="green", label=<<u>sendCloudMsg</u>> URL="\ref sendCloudMsg"];
+  toBase64[style="filled", color="green", label=<<u>toBase64</u>> URL="\ref toBase64"];
+  sendCloudMsg -> toBase64;
+  getWifiValue[style="filled", color="green", label=<<u>getWifiValue</u>> URL="\ref getWifiValue"];
+  toBase64 -> getWifiValue;
+  getWifiValue -> getWifiValue;
+  netsocketSendData[style="filled", color="green", label=<<u>netsocketSendData</u>> URL="\ref netsocketSendData"];
+  getWifiValue -> netsocketSendData;
+}
