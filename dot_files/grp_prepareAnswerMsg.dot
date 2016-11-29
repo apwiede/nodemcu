@@ -1,5 +1,5 @@
 digraph G2 {
-  prepareAnswerMsg[style="filled", color="green"];
+  prepareAnswerMsg[style="filled", color="green", label=<<u>prepareAnswerMsg</u>> URL="\ref prepareAnswerMsg"];
   prepareAnswerMsg -> createMsgFromHeaderPart;
   createMsgFromHeaderPart[style="filled", color="green"];
   createMsgFromHeaderPart -> getMsgPartsFromHeaderPart;
@@ -12,10 +12,13 @@ digraph G2 {
   getMsgData[style="filled", color="green"];
   getMsgData -> encryptMsg;
   encryptMsg[style="filled", color="green"];
-  sendMsg [shape=record, label="<f0> A|<f1> G|<f2> S|<f3> R|<f4> U|<f5> W|<f6> N"];
-  encryptMsg -> sendMsg:f1;
-  encryptMsg -> sendMsg:f4;
-  getMsgData -> sendMsg:f5;
+  sendMsgSwitch [style="filled", color="green",shape=record, label="<f0> A|<f1> G|<f2> S|<f3> R|<f4> U|<f5> W|<f6> N"];
+  encryptMsg -> sendMsg;
+  getMsgData -> sendMsg;
+  sendMsg -> sendMsgSwitch:f1;
+  sendMsg -> sendMsgSwitch:f4;
+  sendMsg -> sendMsgSwitch:f5;
   sendMsg[style="filled", color="green"];
-  getMsgData -> sendMsg:f2;
+  sendMsg -> sendMsgSwitch:f2;
+  
 }

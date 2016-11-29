@@ -1,15 +1,15 @@
 digraph G22 {
-  createMsg[style="filled", color="green"];
+  createMsg[style="filled", color="green", label=<<u>createMsg</u>> URL="\ref createMsg"];
   createMsg -> addField;
-  addField[style="filled", color="green"];
+  addField[style="filled", color="green", label=<<u>addField</u>> URL="\ref addField"];
   addField -> createMsg;
   createMsg -> prepareValuesCb;
   prepareValuesCb[style="filled", color="green"];
   prepareValuesCb -> getActionMode;
-  getActionMode[style="filled", color="green"];
+  getActionMode[style="filled", color="green", label=<<u>getActionMode</u>> URL="\ref getActionMode"];
   getActionMode -> runAction;
-  runAction[style="filled", color="green"];
+  runAction[style="filled", color="green", label=<<u>runAction</u>> URL="\ref runAction"];
   runAction -> buildMsg;
-  buildMsg[style="filled", color="green"];
+  buildMsg[style="filled", color="green", label=<<u>buildMsg</u>> URL="\ref buildMsg"];
   createMsg -> buildMsg;
 }

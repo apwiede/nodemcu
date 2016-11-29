@@ -39,36 +39,46 @@ digraph G1 {
   Queue:f4 -> handleReceivedPart;
   handleReceivedPart[style="filled", color="green", label=<<u>handleReceivedPart</u>> URL="\ref grp_handleReceivedPart"];
   prepareAnswerMsg[style="filled", color="green", label=<<u>prepareAnswerMsg</u>> URL="\ref grp_prepareAnswerMsg"];
-  sendMsg [style="filled", color="green", shape=record, label="<f0> A|<f1> S|<f2> U|<f3> W"];
-  handleReceivedPart -> sendMsg:f0;
-  handleReceivedPart -> sendMsg:f1;
-  handleReceivedPart -> sendMsg:f2;
-  handleReceivedPart -> sendMsg:f3;
-  sendMsg:f0 -> prepareAnswerMsg;
-  prepareAnswerMsg -> webSocketSendData;
-  sendMsg:f1 -> prepareAnswerMsg;
-  prepareAnswerMsg -> typeRSendAnswer;
-  sendMsg:f2 -> webSocketSendData;
-  sendMsg:f2 -> httpSocketSendData;
-  sendMsg:f3 -> typeWForwardMsg;
-  httpSocketSendData[style="filled", color="green"];
-  webSocketSendData[style="filled", color="green"];
+  receiveMsgSwitch [style="filled", color="green", shape=record, label="<f0> G|<f1> R|<f2> U|<f3> W"];
+  handleReceivedPart -> receiveMsgSwitch:f0;
+  handleReceivedPart -> receiveMsgSwitch:f1;
+  handleReceivedPart -> receiveMsgSwitch:f2;
+  handleReceivedPart -> receiveMsgSwitch:f3;
+  receiveMsgSwitch:f0 -> prepareAnswerMsg;
+  receiveMsgSwitch:f1 -> prepareAnswerMsg;
+  prepareAnswerMsg -> sendMsg;
+  prepareAnswerMsg -> sendMsg;
+  receiveMsgSwitch:f2 -> sendMsg
+  receiveMsgSwitch:f3 -> sendMsg
+  sendMsg[style="filled", color="green", label=<<u>sendMsg</u>> URL="\ref sendMsg"];
+  sendMsg -> sendMsgSwitch:f0;
+  sendMsg -> sendMsgSwitch:f1;
+  sendMsg -> sendMsgSwitch:f2
+  sendMsg -> sendMsgSwitch:f3
+  sendMsgSwitch [style="filled", color="green",shape=record, label="<f0> S|<f1> A|<f2> W|<f3> U"];
+  sendMsgSwitch:f1 -> webSocketSendData;
+  sendMsgSwitch:f0 -> typeRSendAnswer;
+  sendMsgSwitch:f3 -> webSocketSendData;
+  sendMsgSwitch:f3 -> sendCloudMsg;
+  sendMsgSwitch:f2 -> typeWForwardMsg;
+  typeRSendAnswer[style="filled", color="green", label=<<u>typeRSendAnswer</u>> URL="\ref typeRSendAnswer"];
+  sendCloudMsg[style="filled", color="green", label=<<u>sendCloudMsg</u>> URL="\ref grp_sendCloudMsg"];
+  webSocketSendData[style="filled", color="green", label=<<u>webSocketSendData</u>> URL="\ref websocketSendData"];
   webSocketSendData -> Queue:f1;
   webSocketSendData -> Queue:f2;
   webSocketSendData -> Queue:f3;
   webSocketSendData -> Queue:f4;
-  httpSocketSendData -> Queue:f1;
-  httpSocketSendData -> Queue:f2;
-  httpSocketSendData -> Queue:f3;
-  httpSocketSendData -> Queue:f4;
-  {rank=same; "typeRSendAnswer"; "typeWForwardMsg"; "webSocketSendData"; "httpSocketSendData";}
-  typeRSendAnswer[style="filled", color="green"];
+  sendCloudMsg -> Queue:f1;
+  sendCloudMsg -> Queue:f2;
+  sendCloudMsg -> Queue:f3;
+  sendCloudMsg -> Queue:f4;
+  {rank=same; "typeRSendAnswer"; "typeWForwardMsg"; "webSocketSendData"; "sendCloudMsg";}
   typeWForwardMsg[style="filled", color="red"];
   typeRSendAnswer -> Queue:f0;
   typeWForwardMsg -> Queue:f0;
   typeRSendAnswer -> deleteMsg;
   typeWForwardMsg -> deleteMsg;
   deleteMsg[style="filled", color="green"];
-  httpSocketSendData -> deleteMsg;
+  sendCloudMsg -> deleteMsg;
   webSocketSendData -> deleteMsg;
 }
