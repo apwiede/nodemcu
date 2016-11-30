@@ -57,6 +57,8 @@ extern "C" {
 #define COMP_MSG_IS_INITTED           (1 << 5)
 #define COMP_MSG_IS_PREPARED          (1 << 6)
 #define COMP_MSG_CRC_USE_HEADER_LGTH  (1 << 7)
+#define COMP_MSG_HAS_TOTAL_CRC        (1 << 8)
+#define COMP_MSG_UINT8_TOTAL_CRC      (1 << 9)
 
 #define COMP_MSG_FIELD_IS_SET         (1 << 0)
 #define COMP_MSG_KEY_VALUE_FIELD      (1 << 1)

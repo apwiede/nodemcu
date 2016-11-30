@@ -458,7 +458,7 @@ static uint8_t getActionMode(compMsgDispatcher_t *self, uint8_t *actionName, uin
   while (actionEntry->actionName != NULL) { 
     if (c_strcmp(actionEntry->actionName, actionName) == 0) {
       *actionMode = actionEntry->mode;
-ets_printf("actionMode: %d\n", *actionMode);
+//ets_printf("actionMode: %d\n", *actionMode);
       return COMP_DISP_ERR_OK;
     }
     idx++;
@@ -556,6 +556,10 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
   dataView_t *dataView;
 
   received = &self->compMsgData->received;
+  if (self->compMsgData->compMsgDataView == NULL) {
+    self->compMsgData->compMsgDataView = newCompMsgDataView(self->compMsgData->received.buf, self->compMsgData->receivedLgth);
+    checkAllocOK(self->compMsgData->compMsgDataView);
+  }
   dataView = self->compMsgData->compMsgDataView->dataView;
   if (received->u16CmdKey == 0x4244) { // "BD"
     // FIXME need to get the real offset here instead of 7!!
@@ -566,18 +570,23 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
     while (actionEntry->actionName != NULL) { 
 //ets_printf("§runActionBu8!%s!%c!%c!%c!§", actionEntry->actionName, (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, actionMode);
       if ((actionEntry->u16CmdKey == received->u16CmdKey) && (actionMode == actionEntry->mode)) {
-ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
+//ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
         result = actionEntry->action(self);
         checkErrOK(result);
+        os_free(self->compMsgData->compMsgDataView->dataView);
+        os_free(self->compMsgData->compMsgDataView);
+        self->compMsgData->compMsgDataView = NULL;
         return COMP_DISP_ERR_OK;
       }
       idx++;
       actionEntry = &actionName2Actions[idx];
     }
+    os_free(self->compMsgData->compMsgDataView->dataView);
+    os_free(self->compMsgData->compMsgDataView);
+    self->compMsgData->compMsgDataView = NULL;
     return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
   } else {
 //ets_printf("§runAction u16!%c%c!%c!§\n", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, *answerType);
-    dataView = self->compMsgData->compMsgDataView->dataView;
     switch (self->actionMode) {
     case 8:
     case MODULE_INFO_AP_LIST_CALL_BACK:
@@ -587,18 +596,27 @@ ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
 //ets_printf("an2: %s am: %d %d\n", actionEntry->actionName, actionMode, actionEntry->mode);
         if (self->actionMode == actionEntry->mode) {
 //ets_printf("§runAction2 G!%d!%c!§\n", self->actionMode, *answerType);
-ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
+//ets_printf("§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode);
           result = actionEntry->action(self);
           checkErrOK(result);
+          os_free(self->compMsgData->compMsgDataView->dataView);
+          os_free(self->compMsgData->compMsgDataView);
+          self->compMsgData->compMsgDataView = NULL;
           return COMP_DISP_ERR_OK;
         }
         idx++;
         actionEntry = &actionName2Actions[idx];
       }
+      os_free(self->compMsgData->compMsgDataView->dataView);
+      os_free(self->compMsgData->compMsgDataView);
+      self->compMsgData->compMsgDataView = NULL;
       return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
       break;
     }
   }
+  os_free(self->compMsgData->compMsgDataView->dataView);
+  os_free(self->compMsgData->compMsgDataView);
+  self->compMsgData->compMsgDataView = NULL;
   return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 

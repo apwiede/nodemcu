@@ -209,6 +209,7 @@ typedef struct compMsgDispatcher {
   uint8_t *stringValue;
   uint8_t actionMode;
   uint8_t operatingMode;
+  uint8_t websocketError;
   bssScanInfos_t *bssScanInfos;
 
   msgHeaderInfos_t msgHeaderInfos;

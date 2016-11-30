@@ -284,7 +284,7 @@ static uint8_t dumpMsg(compMsgDispatcher_t *self) {
 static int addHandle(compMsgDispatcher_t *self, uint8_t *handle) {
   int idx;
 
-//ets_printf("§addHandle: handles: %p numHandles: %d!handle: %s!§", compMsgHandles.handles, compMsgHandles.numHandles, handle);
+//ets_printf("\n§compMsgData addHandle: handles: %p numHandles: %d!handle: %s!§\n", compMsgHandles.handles, compMsgHandles.numHandles, handle);
   if (compMsgHandles.handles == NULL) {
     compMsgHandles.handles = os_zalloc(sizeof(handle2Header_t));
     if (compMsgHandles.handles == NULL) {
@@ -322,6 +322,7 @@ static int deleteHandle(compMsgDispatcher_t *self, const uint8_t *handle) {
   int numUsed;
   int found;
 
+//ets_printf("compMsgData deleteHandle: %s!\n", handle);
   if (compMsgHandles.handles == NULL) {
 ets_printf("deleteHandle 1 HANDLE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
@@ -473,6 +474,13 @@ static uint8_t addField(compMsgDispatcher_t *self, const uint8_t *fieldName, con
     }
 //ets_printf("flags: 0x%02x HAS_CRC: 0x%02x HAS_FILLER: 0x%02x UINT8_CRC: 0x%02x\n", compMsg->flags, COMP_MSG_HAS_CRC, COMP_MSG_HAS_FILLER, COMP_MSG_UINT8_CRC);
   }
+  if (c_strcmp(fieldName, "@totalCrc") == 0) {
+    compMsgData->flags |= COMP_MSG_HAS_TOTAL_CRC;
+    if (c_strcmp(fieldType, "uint8_t") == 0) {
+      compMsgData->flags |= COMP_MSG_UINT8_TOTAL_CRC;
+    }
+//ets_printf("flags: 0x%02x HAS_CRC: 0x%02x HAS_FILLER: 0x%02x UINT8_CRC: 0x%02x\n", compMsg->flags, COMP_MSG_HAS_CRC, COMP_MSG_HAS_FILLER, COMP_MSG_UINT8_CRC);
+  }
   fieldInfo->fieldNameId = fieldNameId;
   fieldInfo->fieldTypeId = fieldTypeId;
   fieldInfo->fieldLgth = fieldLgth;
@@ -597,6 +605,13 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
             headerLgth = compMsgData->headerLgth;
             lgth -= headerLgth;
         }
+        if (compMsgData->flags & COMP_MSG_HAS_TOTAL_CRC) {
+          if (compMsgData->flags & COMP_MSG_UINT8_TOTAL_CRC) {
+            lgth -= 1;
+          } else {
+            lgth -= 2;
+          }
+        }
         result = compMsgData->compMsgDataView->setCrc(compMsgData->compMsgDataView, fieldInfo, headerLgth, lgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
@@ -711,7 +726,7 @@ static uint8_t initMsg(compMsgDispatcher_t *self) {
     compMsgData->compMsgDataView = newCompMsgDataView(compMsgData->toSendData, compMsgData->totalLgth);
   } else {
     compMsgData->receivedData = os_zalloc(compMsgData->totalLgth);
-//ets_printf("§receivedData: %p§", compMsgData->receivedData);
+//ets_printf("§+++receivedData: %p§\n", compMsgData->receivedData);
     checkAllocOK(compMsgData->receivedData);
 //ets_printf("§initMsg received newCompMsgDataView§");
     compMsgData->compMsgDataView = newCompMsgDataView(compMsgData->receivedData, compMsgData->totalLgth);
@@ -887,7 +902,9 @@ static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
     compMsgData->prepareValuesCbName = NULL;
   }
     
-  deleteHandle(self, compMsgData->handle);
+  if (c_strlen(compMsgData->handle) > 0) {
+    deleteHandle(self, compMsgData->handle);
+  }
 //  websocketUserData_t *wud;
 //  netsocketUserData_t *nud;
 
@@ -940,6 +957,7 @@ compMsgData_t *newCompMsgData(void) {
   compMsgData->msgValParts = NULL;
   compMsgData->numMsgValParts = 0;
   compMsgData->maxMsgValParts = 0;
+  compMsgData->handle[0] = '\0';
 
   // normalMsg
   compMsgData->createMsg = &createMsg;

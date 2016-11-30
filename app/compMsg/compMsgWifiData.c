@@ -106,7 +106,12 @@ ets_printf("received compMsgData: %p\n", self->compMsgData);
   self->compMsgData->wud = wud;
   self->compMsgData->nud = NULL;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
-  self->compMsgData->receivedData = (uint8_t *)pdata;
+  self->compMsgData->receivedData = os_zalloc(len);
+  if (self->compMsgData->receivedData == NULL) {
+    compMsgDispatcher->websocketError = COMP_DISP_ERR_OUT_OF_MEMORY;
+    return;
+  }
+  c_memcpy(self->compMsgData->receivedData, pdata, len);
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, wud, self->compMsgData);
 ets_printf("websocketBinaryReceived end result: %d\n", result);

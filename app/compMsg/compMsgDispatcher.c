@@ -182,7 +182,7 @@ static uint8_t fromBase64(const uint8_t *encodedMsg, size_t *len, uint8_t **deco
 static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
   int idx;
 
-//ets_printf("§dispatcher addHandle: %s!§", handle);
+//ets_printf("§dispatcher addHandle: %s!§\n", handle);
   if (compMsgDispatcherHandles.handles == NULL) {
     compMsgDispatcherHandles.handles = os_zalloc(sizeof(handle2Dispatcher_t));
     if (compMsgDispatcherHandles.handles == NULL) {
@@ -220,8 +220,9 @@ static int deleteHandle(const uint8_t *handle) {
   int numUsed;
   int found;
 
+//ets_printf("§dispatcher deleteHandle: %s!§\n", handle);
   if (compMsgDispatcherHandles.handles == NULL) {
-ets_printf("deleteHandle 1 HANLDE_NOT_FOUND\n");
+ets_printf("dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   found = 0;
@@ -448,7 +449,7 @@ static uint8_t encryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, s
     OP_ENCRYPT
   }; 
   if (!mech->run (&op)) { 
-    os_free (*buf);
+    os_free (crypted);
     return COMP_MSG_ERR_CRYPTO_INIT_FAILED;
   } 
   return COMP_MSG_ERR_OK;
@@ -485,7 +486,7 @@ static uint8_t decryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, s
     OP_DECRYPT
   }; 
   if (!mech->run (&op)) { 
-    os_free (*buf);
+    os_free (crypted);
     return COMP_MSG_ERR_CRYPTO_INIT_FAILED;
   }
   return COMP_MSG_ERR_OK;
@@ -575,6 +576,7 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
       result = self->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
       break;
     case COMP_MSG_RECEIVED_DATA:
+//ets_printf("addRequest: receivedData: %p\n", compMsgData->receivedData);
       result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
       break;
     default:
@@ -668,7 +670,7 @@ uint8_t *handle;
   result = compMsgNetsocketInit(self);
   checkErrOK(result);
 
-//#define WEBSOCKETAP
+#define WEBSOCKETAP
 #ifdef WEBSOCKETAP
 // FIXME !! temporary starting for testing only !!
 ets_printf("start RunAPMode\n");
@@ -698,7 +700,7 @@ ets_printf("handle: %s result: %d\n", handle, result);
 checkErrOK(result);
 #endif
 // if nothing of the above is defined the uart input callback is used
-#define UART_INPUT
+//#define UART_INPUT
 #ifdef UART_INPUT
   id = 0;
   stopbits = PLATFORM_UART_STOPBITS_1;

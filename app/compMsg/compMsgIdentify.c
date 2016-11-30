@@ -280,10 +280,15 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
   uint16_t sequenceEntry;
   uint8_t *handle;
   msgParts_t *received;
+  bool u8TotalCrc;
+  bool u16TotalCrc;
+  size_t idx;
 
 //ets_printf("§handleReceivedMsg§");
   received = &self->compMsgData->received;
 //ets_printf("§handleReceivedMsg newCompMsgDataView§");
+  u8TotalCrc = false;
+  u16TotalCrc = false;
   received->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
   checkAllocOK(received->compMsgDataView);
   hdrIdx = hdrInfos->currPartIdx;
@@ -295,6 +300,17 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
   // attention not all entries of the message are handled here, only some special entries!
  
 //self->compMsgMsgDesc->dumpHeaderPart(self, hdr);
+  // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
+  idx = 0;
+  while (hdr->fieldSequence[idx] != 0) {
+    if (hdr->fieldSequence[idx] == COMP_DISP_U8_TOTAL_CRC) {
+      u8TotalCrc = true;
+    }
+    if (hdr->fieldSequence[idx] == COMP_DISP_U16_TOTAL_CRC) {
+      u16TotalCrc = true;
+    }
+    idx++;
+  }
   while (hdr->fieldSequence[hdrInfos->seqIdx] != 0) {
     sequenceEntry = hdr->fieldSequence[hdrInfos->seqIdx];
 //ets_printf("§sequenceEntry: 0x%04x seqIdx:%d§", sequenceEntry, hdrInfos->seqIdx);
@@ -332,6 +348,13 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
     case COMP_DISP_U8_CRC:
       fieldInfo.fieldLgth = 1;
       fieldInfo.fieldOffset = received->totalLgth - 1;
+      if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+        if (u8TotalCrc) {
+          fieldInfo.fieldOffset -= 1;
+        } else {
+          fieldInfo.fieldOffset -= 2;
+        }
+      }
       startOffset = hdrInfos->headerLgth;
       result = received->compMsgDataView->getCrc(received->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
 //ets_printf("§u8Crc!res!%d!§", result);
@@ -339,6 +362,13 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
     case COMP_DISP_U16_CRC:
       fieldInfo.fieldLgth = 2;
       fieldInfo.fieldOffset = received->totalLgth - 2;
+      if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+        if (u8TotalCrc) {
+          fieldInfo.fieldOffset -= 1;
+        } else {
+          fieldInfo.fieldOffset -= 2;
+        }
+      }
       startOffset = hdrInfos->headerLgth;
       result = received->compMsgDataView->getCrc(received->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
 //ets_printf("§u16Crc!res!%d!§", result);
@@ -348,9 +378,9 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
       result = COMP_MSG_ERR_OK;
       break;
     case COMP_DISP_U8_TOTAL_CRC:
-//ets_printf("§u8TotalCrc!0!§");
       fieldInfo.fieldLgth = 1;
       fieldInfo.fieldOffset = received->totalLgth - 1;
+//ets_printf("§u8TotalCrc!fieldOffset: %d§", fieldInfo.fieldOffset);
       startOffset = hdrInfos->headerLgth;
       result = received->compMsgDataView->getTotalCrc(received->compMsgDataView, &fieldInfo);
 //ets_printf("§u8totalCrc!res!%d!§", result);
@@ -367,12 +397,13 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
     hdrInfos->seqIdx++;
   }
   // free all space of received message
+//ets_printf("call deleteMsg\n");
   self->compMsgData->deleteMsg(self);
 //ets_printf("§received msg deleted§");
 //ets_printf("§call prepareAnswerMsg§");
   result = prepareAnswerMsg(self, hdrInfos, &handle);
   checkErrOK(result);
-  result = -self->resetMsgInfo(self, received);
+  result = self->resetMsgInfo(self, received);
   checkErrOK(result);
 //ets_printf("§handleReceivedMsg done§");
   return COMP_MSG_ERR_OK;
@@ -383,7 +414,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
 /**
  * \brief handle input characters from uart or sockets
  * \param self The dispatcher struct
- * \param buffer The input charcters
+ * \param buffer The input characters
  * \param lgth The number of characters in the input
  * \return Error code or ErrorOK
  *
@@ -399,6 +430,9 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
   compMsgData_t *compMsgData;
   msgParts_t *received;
   int result;
+  bool u8TotalCrc;
+  bool u16TotalCrc;
+  size_t seqIdx;
 
 //ets_printf("§handleReceivedPart: %c 0x%02x§", buffer[0], buffer[0]);
 if (buffer == NULL) {
@@ -429,6 +463,19 @@ if (buffer == NULL) {
       hdr = &hdrInfos->headerParts[hdrIdx];
 //ets_printf("hdrIdx: %d\n", hdrIdx);
 //ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
+      // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
+      seqIdx = 0;
+      u8TotalCrc = false;
+      u16TotalCrc = false;
+      while (hdr->fieldSequence[seqIdx] != 0) {
+        if (hdr->fieldSequence[seqIdx] == COMP_DISP_U8_TOTAL_CRC) {
+          u8TotalCrc = true;
+        }
+        if (hdr->fieldSequence[seqIdx] == COMP_DISP_U16_TOTAL_CRC) {
+          u16TotalCrc = true;
+        }
+        seqIdx++;
+      }
       if (hdr->hdrEncryption == 'E') {
         uint8_t *cryptedPtr;
         uint8_t *cryptKey;
@@ -441,11 +488,19 @@ if (buffer == NULL) {
         // decrypt encrypted message part (after header)
 cryptKey = "a1b2c3d4e5f6g7h8";
         mlen = received->totalLgth - hdrInfos->headerLgth;
+        if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+          if (u8TotalCrc) {
+            mlen -= 1;
+          } else {
+            mlen -= 2;
+          }
+        }
         ivlen = 16;
         klen = 16;
         cryptedPtr = received->buf + hdrInfos->headerLgth;
         result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
         checkErrOK(result);
+//ets_printf("mlen: %d decryptedLgth: %d\n", mlen, decryptedLgth);
         c_memcpy(cryptedPtr, decrypted, decryptedLgth);
       }
       result = self->handleReceivedMsg(self, hdrInfos);

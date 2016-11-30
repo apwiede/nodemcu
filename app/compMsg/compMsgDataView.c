@@ -136,6 +136,7 @@ static uint8_t getCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
   int idx;
   int result;
 
+//ets_printf("getCrc: startOffset: %d lgth: %d\n", startOffset, lgth);
   crcLgth = fieldInfo->fieldLgth;
   crcVal = 0;
   idx = startOffset;
@@ -143,6 +144,7 @@ static uint8_t getCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
 //ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crcVal);
     crcVal += self->dataView->data[idx++];
   }
+//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crcVal);
 //ets_printf("§crcVal00: 0x%04x§\n", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
@@ -216,15 +218,17 @@ static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
     crcVal = crcVal & 0xFF;
     result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-//ets_printf("§crcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
+//ets_printf("§totalCrcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
+ets_printf("§totalCrcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
     result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-//ets_printf("§crcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
+//ets_printf("§totalCrcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
     if (crcVal != crc) {
+ets_printf("§totalCrcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   }
