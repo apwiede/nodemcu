@@ -181,70 +181,6 @@ namespace eval compMsg {
       return $::COMP_MSG_ERR_OK
     }
     
-    # ================================= sendEncryptedMsg ====================================
-    
-    proc sendEncryptedMsgx {sock parts type} {
-      variable headerInfos
-      variable received
-
-      if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
-        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
-      } else {
-        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
-      }
-      set fd [open $fileName "r"]
-      gets $fd line
-      set flds [split $line ","]
-      foreach {dummy numEntries} $flds break
-      set numRows 0
-      set result [::compMsg compMsgDispatcher createMsgFromLines $fd $parts $numEntries $numRows $type handle]
-      checkErrOK $result
-      close $fd
-      set result [::compMsg compMsgData addFlag COMP_MSG_CRC_USE_HEADER_LGTH]
-      if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
-        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
-      } else {
-        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
-      }
-      set fd [open $fileName "r"]
-      gets $fd line
-      set flds [split $line ","]
-      foreach {dummy numEntries} $flds break
-      if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
-        set result [::compMsg compMsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u8CmdKey]]
-      } else {
-        set result [::compMsg compMsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u16CmdKey]]
-      }
-      checkErrOK $result
-      close $fd
-      set result [::compMsg compMsgData getMsgData data msgLgth]
-      checkErrOK $result
-puts stderr "MSG!$msgLgth!$data!"
-      set result [getHeaderIndexFromHeaderFields]
-      set headerLgth [dict get $headerInfos headerLgth]
-      set hdr [lindex [dict get $headerInfos headerParts] [dict get $headerInfos currPartIdx]]
-      set extraLgth [dict get $hdr hdrExtraLgth]
-      set encryption [dict get $hdr hdrEncryption]
-      if {$encryption eq "E"} {
-        set encryptionType Encrypted
-        set header [string range $data 0 [expr {$headerLgth -1}]]
-        set toCrypt [string range $data $headerLgth end]
-        set result [::compMsg compMsgDispatcher encryptMsg $toCrypt [string length $toCrypt] $::cryptKey [string length $::cryptKey] $::cryptKey [string length $::cryptKey] encrypted encryptedLgth]
-        set data "${header}${encrypted}"
-puts stderr "toCrypt![string length $toCrypt]!$toCrypt!"
-puts stderr "encrypted![string length $encrypted]!$encrypted!"
-        set msgLgth [string length $data]
-      } else {
-        set encryptionType NotEncrypted
-      }
-      set handleType [dict get $hdr hdrHandleType]
-      set fcnName type${handleType}${encryptionType}SendMsg
-puts stderr "call:$fcnName!"
-      set result [::compMsg compMsgSendReceive $fcnName $sock $data $msgLgth]
-      set result [::compMsg compMsgDispatcher resetMsgInfo received]
-      return $::COMP_MSG_ERR_OK
-    }
-    
     # ================================= nextFittingEntry ====================================
     
     proc nextFittingEntry {compMsgDispatcherVar receivedVar u8CmdKey u16CmdKey} {
@@ -443,7 +379,7 @@ puts stderr "Fitting entry not found!"
         ::compMsg dataView appendData $ch 1
 #puts stderr "rec l: [dict get $received lgth]!hdr l: [dict get $headerInfos headerLgth]!"
         if {[dict get $received lgth] == [dict get $headerInfos headerLgth]} {
-          set result [getHeaderIndexFromHeaderFields compMsgDispatcher]
+          set result [getHeaderIndexFromHeaderFields compMsgDispatcher received]
         }
         # loop until we have full message then decrypt if necessary and then handle the message
         if {[dict get $received lgth] == [dict get $received totalLgth]} {
@@ -454,17 +390,34 @@ puts stderr "Fitting entry not found!"
             set myHeaderLgth [dict get $headerInfos headerLgth]
             set myHeader [string range $buffer 0 [expr {$myHeaderLgth - 1}]]
             set mlen [expr {$lgth - $myHeaderLgth}]
-            set crypted [string range $buffer $myHeaderLgth end]
-puts stderr "cryptedLgth: [string length $crypted]!"
+            set totalCrcOffset 0
+            set totalCrc ""
+            if {[lsearch [dict get $hdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+              if {[lsearch [dict get $hdr fieldSequence] COMP_DISP_U8_TOTAL_CRC] >= 0} {
+                set totalCrcOffset 1
+                incr mlen -1
+                set totalCrc [string range $buffer end end]
+              } else {
+                set totalCrc [string range $buffer end-1 end]
+                incr totalCrcOffset 2
+                incr mlen -2
+              }
+            }
+            set endIdx [expr {$lgth - $totalCrcOffset - 1}]
+#puts stderr "lgth: $lgth endIdx: $endIdx!totalCrcOffset: $totalCrcOffset!myHeaderLgth: $myHeaderLgth!"
+            set crypted [string range $buffer $myHeaderLgth $endIdx]
+#puts stderr "cryptedLgth: [string length $crypted]!mlen: $mlen!"
+#::compMsg compMsgData dumpBinary $crypted $mlen "crypted msg"
             set cryptKey "a1b2c3d4e5f6g7h8"
             set result [::compMsg compMsgDispatcher decryptMsg $crypted $mlen $cryptKey 16 $cryptKey 16 decrypted decryptedLgth]
-puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
+#puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
             if {$result != $::COMP_MSG_ERR_OK} {
 puts stderr "decrypt error"
             }
-            set buffer "${myHeader}${decrypted}"
-            if {$lgth != [expr {$myHeaderLgth + $mlen}]} {
-error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen}]!"
+            set buffer "${myHeader}${decrypted}${totalCrc}"
+#puts stderr "buffer ll: [string length $buffer]!lgth: $lgth!myh: [string length $myHeader]!decr: [string length $decrypted]!totalcrc: [string length $totalCrc]!"
+            if {$lgth != [expr {$myHeaderLgth + $mlen + $totalCrcOffset}]} {
+error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen + $totalCrcOffset}]!"
             }
             dict set received buf $buffer
           }

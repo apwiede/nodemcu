@@ -336,10 +336,9 @@ puts stderr "need handler for received MSG!lgth: [string length $msg]!"
       checkErrOK $result
 set fd [open "AAAnswer.txt" w]
 fconfigure $fd -translation binary
-puts $fd $msg
+puts -nonewline $fd $msg
 flush $fd
 close $fd
-::compMsg compMsgData dumpBinary $msg [string length $msg] "MSG_dump crypted"
       set result [::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]]
       checkErrOK $result
 fillTable

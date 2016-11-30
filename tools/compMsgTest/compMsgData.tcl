@@ -89,6 +89,7 @@ namespace eval compMsg {
     proc dumpBinary {data lgth what} {
       variable compMsgData
 
+      puts stderr $what
       set idx 0
       foreach ch [split $data ""] {
         set pch $ch
@@ -726,6 +727,7 @@ puts stderr "tableFields!$tableFields!"
                 set startOffset [dict get $compMsgData headerLgth]
             }
             if {[lsearch [dict get $compMsgDispatcher currHdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+              set startOffset [dict get $compMsgData headerLgth]
               # lgth is needed without totalCrc
               set fieldSequence [dict get $compMsgDispatcher currHdr fieldSequence]
               switch [lindex $fieldSequence end] {

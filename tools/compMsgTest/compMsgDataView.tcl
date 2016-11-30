@@ -582,6 +582,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
     
     proc setCrc {fieldInfo startOffset size} {
       set crcLgth [dict get $fieldInfo fieldLgth]
+#puts stderr "setCrc: startOffset: $startOffset size: $size!"
       set size [expr {$size - $crcLgth}]
 #set ::crcDebug true
 set cnt 0
@@ -602,13 +603,17 @@ incr cnt
         incr offset
       }
 if {$::crcDebug} {
+puts stderr "setCrc end: $cnt $ch![format 0x%02x $pch]![format 0x%04x $crc]!"
+}
+if {$::crcDebug} {
 puts stderr "crc1: $crc![format 0x%04x $crc]!"
 }
       set crc [expr {~$crc & 0xFFFF}]
 if {$::crcDebug} {
-puts stderr "crc11: $crc![format 0x%04x $crc]!"
+puts stderr "crc11: $crc![format 0x%04x $crc]![format 0x%02x [expr {$crc & 0xFF}]]"
 }
       if {$crcLgth == 1} {
+#puts stderr "offset: [dict get $fieldInfo fieldOffset] val: [expr {$crc & 0xFF}]!"
         set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] [expr {$crc & 0xFF}]]
       } else {
         set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]
@@ -682,7 +687,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
       set crcLgth [dict get $fieldInfo fieldLgth]
       set size [dict get $fieldInfo fieldOffset]
 #set ::crcDebug true
-set cnt 0
+#set cnt 0
 #puts stderr "setTotalCrc: $::compMsg::dataView::lgth!$::compMsg::dataView::data!"
       set crc  0
       set offset 0
@@ -708,6 +713,7 @@ if {$::crcDebug} {
 puts stderr "crc11: $crc![format 0x%04x $crc]!"
 }
       if {$crcLgth == 1} {
+#puts stderr "offset: [dict get $fieldInfo fieldOffset] val: [format 0x%02x [expr {$crc & 0xFF}]]!"
         set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] [expr {$crc & 0xFF}]]
       } else {
         set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]

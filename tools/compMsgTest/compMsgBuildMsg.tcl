@@ -281,11 +281,11 @@ puts stderr "need to encrypt message!"
 puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
         set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] end-1]
         set header [string range $msgData 0 [expr {$headerLgth - 1}]]
+        set totalCrc [string range $msgData end end]
         set result [::compMsg compMsgDispatcher encryptMsg $toCrypt $mlen $cryptKey $klen $cryptKey $ivlen encryptedMsgData encryptedMsgDataLgth]
         checkErrOK $result
-puts stderr [format "totalCrc: %s" [string range $msgData end end]]
-        set msgData "${header}${encryptedMsgData}[string range $msgData end end]"
-puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
+        set msgData "${header}${encryptedMsgData}${totalCrc}"
+#puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
         
       # here we need to decide where and how to send the message!!

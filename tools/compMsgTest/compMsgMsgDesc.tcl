@@ -493,6 +493,7 @@ namespace eval compMsg {
         incr idx
       }
       close $fd
+      dict set headerInfos currPartIdx 0
       dict set compMsgDispatcher headerInfos $headerInfos
 #puts stderr "readHeadersAndSetFlags done!"
       return $::COMP_MSG_ERR_OK
