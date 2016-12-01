@@ -699,6 +699,76 @@ namespace eval compMsg {
       return $::COMP_MSG_DESC_ERR_OK
     }
 
+    # ================================= setWifiKeyData ====================================
+    
+    proc setWifiData {compMsgDispatcherVar compMsgWifiDataVar key fieldTypeStr fieldValueStr} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $compMsgWifiDataVar wifiData
+
+      set result [::compMsg compMsgWifiData bssStr2BssInfoId $key bssInfoType]
+      checkErrOK $result
+      switch $bssInfoType {
+        BSS_INFO_BSSID {
+          dict set wifiData bssKeys bssid $fieldValueStr
+        }
+        BSS_INFO_SSID {
+          dict set wifiData bssKeys ssid $fieldValueStr
+        }
+        BSS_INFO_SSID_LEN {
+          dict set wifiData bssKeys ssid_len $fieldValueStr
+        }
+        BSS_INFO_CHANNEL {
+          dict set wifiData bssKeys channel $fieldValueStr
+        }
+        BSS_INFO_RSSI {
+          dict set wifiData bssKeys rssi $fieldValueStr
+        }
+        BSS_INFO_AUTH_MODE {
+          dict set wifiData bssKeys authmode $fieldValueStr
+        }
+        BSS_INFO_IS_HIDDEN {
+          dict set wifiData bssKeys freq_offset $fieldValueStr
+        }
+        BSS_INFO_FREQ_OFFSET {
+          dict set wifiData bssKeys freqcal_val $fieldValueStr
+        }
+        BSS_INFO_FREQ_CAL_VAL {
+          dict set wifiData bssKeys is_hidden $fieldValueStr
+        }
+      }
+    
+      checkErrOK $result
+      set result [::compMsg dataView getFieldTypeIdFromStr $fieldTypeStr fieldTypeId]
+      checkErrOK $result
+      switch $bssInfoType {
+        BSS_INFO_BSSID {
+          dict set wifiData bssTypes bssid $fieldTypeId
+        }
+        BSS_INFO_SSID {
+          dict set wifiData bssTypes ssid $fieldTypeId
+        }
+        BSS_INFO_CHANNEL {
+          dict set wifiData bssTypes channel $fieldTypeId
+        }
+        BSS_INFO_RSSI {
+          dict set wifiData bssTypes rssi $fieldTypeId
+        }
+        BSS_INFO_AUTH_MODE {
+          dict set wifiData bssTypes authmode $fieldTypeId
+        }
+        BSS_INFO_IS_HIDDEN {
+          dict set wifiData bssTypes freq_offset $fieldTypeId
+        }
+        BSS_INFO_FREQ_OFFSET {
+          dict set wifiData bssTypes freqcal_val $fieldTypeId
+        }
+        BSS_INFO_FREQ_CAL_VAL {
+          dict set wifiData bssTypes is_hidden $fieldTypeId
+        }
+      }
+      return $::COMP_MSG_ERR_OK
+    }
+
     # ================================= getWifiKeyValueKeys ====================================
     
     proc getWifiKeyValueKeys {compMsgDispatcherVar compMsgWifiDataVar} {
@@ -713,67 +783,22 @@ namespace eval compMsg {
       while {$idx < $numEntries} {
         gets $fd line
         set flds [split $line ","]
-        foreach {fieldNameStr fieldValueStr fieldTypeStr} $flds break
+        foreach {fieldNameStr fieldValueStr fieldTypeStr fieldLgth} $flds break
         set offset [string length "@key_"]
-        set result [::compMsg compMsgWifiData bssStr2BssInfoId [string range $fieldNameStr $offset end] bssInfoType]
-        checkErrOK $result
-        switch $bssInfoType {
-          BSS_INFO_BSSID {
-            dict set wifiData bssKeys bssid $fieldValueStr
+        set key [string range $fieldNameStr $offset end]
+        switch $key {
+          bssid -
+          ssid -
+          rssi -
+          channel -
+          auth_mode -
+          is_hidden -
+          freq_offset -
+          freq_cal_val {
+            set result [setWifiData compMsgDispatcher wifiData $key $fieldTypeStr $fieldValueStr]
           }
-          BSS_INFO_SSID {
-            dict set wifiData bssKeys ssid $fieldValueStr
-          }
-          BSS_INFO_SSID_LEN {
-            dict set wifiData bssKeys ssid_len $fieldValueStr
-          }
-          BSS_INFO_CHANNEL {
-            dict set wifiData bssKeys channel $fieldValueStr
-          }
-          BSS_INFO_RSSI {
-            dict set wifiData bssKeys rssi $fieldValueStr
-          }
-          BSS_INFO_AUTH_MODE {
-            dict set wifiData bssKeys authmode $fieldValueStr
-          }
-          BSS_INFO_IS_HIDDEN {
-            dict set wifiData bssKeys freq_offset $fieldValueStr
-          }
-          BSS_INFO_FREQ_OFFSET {
-            dict set wifiData bssKeys freqcal_val $fieldValueStr
-          }
-          BSS_INFO_FREQ_CAL_VAL {
-            dict set wifiData bssKeys is_hidden $fieldValueStr
-          }
-        }
-    
-        checkErrOK $result
-        set result [::compMsg dataView getFieldTypeIdFromStr $fieldTypeStr fieldTypeId]
-        checkErrOK $result
-        switch $bssInfoType {
-          BSS_INFO_BSSID {
-            dict set wifiData bssTypes bssid $fieldTypeId
-          }
-          BSS_INFO_SSID {
-            dict set wifiData bssTypes ssid $fieldTypeId
-          }
-          BSS_INFO_CHANNEL {
-            dict set wifiData bssTypes channel $fieldTypeId
-          }
-          BSS_INFO_RSSI {
-            dict set wifiData bssTypes rssi $fieldTypeId
-          }
-          BSS_INFO_AUTH_MODE {
-            dict set wifiData bssTypes authmode $fieldTypeId
-          }
-          BSS_INFO_IS_HIDDEN {
-            dict set wifiData bssTypes freq_offset $fieldTypeId
-          }
-          BSS_INFO_FREQ_OFFSET {
-            dict set wifiData bssTypes freqcal_val $fieldTypeId
-          }
-          BSS_INFO_FREQ_CAL_VAL {
-            dict set wifiData bssTypes is_hidden $fieldTypeId
+          default {
+puts stderr "should handle key: $key $fieldTypeStr $fieldValueStr $fieldLgthStr!"
           }
         }
         incr idx
