@@ -90,6 +90,7 @@ enum compMsgDispatcherErrorCode
   COMP_DISP_ERR_TOO_MANY_REQUESTS     = 168,
   COMP_DISP_ERR_REQUEST_NOT_FOUND     = 167,
   COMP_DISP_ERR_UART_REQUEST_NOT_SET  = 166,
+  COMP_DISP_ERR_FUNNY_HANDLE_TYPE     = 165,
 };
 
 // input source types
@@ -173,7 +174,6 @@ typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t 
 typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
 typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
 typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
-typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* resetBuildMsgInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
 
@@ -182,12 +182,15 @@ typedef uint8_t (* fixOffsetsForKeyValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t type);
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, msgParts_t *parts, uint8_t type);
+typedef uint8_t (* forwardMsg_t)(compMsgDispatcher_t *self);
 
 // Identify stuff
+typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
-typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
+typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, uint8_t **handle);
+typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 // SendReceive
@@ -256,8 +259,7 @@ typedef struct compMsgDispatcher {
   fixOffsetsForKeyValues_t fixOffsetsForKeyValues;
   buildMsg_t buildMsg;
   setMsgValues_t setMsgValues;
-  prepareAnswerMsg_t prepareAnswerMsg;
-  handleReceivedMsg_t handleReceivedMsg;
+  forwardMsg_t forwardMsg;
 
   // ModuleData
   getModuleValue_t getModuleValue;
@@ -269,7 +271,6 @@ typedef struct compMsgDispatcher {
   // Dispatcher
   getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
-  resetHeaderInfos_t resetHeaderInfos;
   createDispatcher_t createDispatcher;
   initDispatcher_t initDispatcher;
   createMsgFromHeaderPart_t createMsgFromHeaderPart;
@@ -286,9 +287,13 @@ typedef struct compMsgDispatcher {
   resetBuildMsgInfos_t resetBuildMsgInfos;
 
   // identify
+  resetHeaderInfos_t resetHeaderInfos;
   nextFittingEntry_t nextFittingEntry;
+  prepareAnswerMsg_t prepareAnswerMsg;
   handleReceivedPart_t handleReceivedPart;
   handleToSendPart_t handleToSendPart;
+  handleReceivedHeader_t handleReceivedHeader;
+  handleReceivedMsg_t handleReceivedMsg;
 
   // wifi
   bssStr2BssInfoId_t bssStr2BssInfoId;

@@ -133,6 +133,7 @@ static compMsgTimer_t compMsgTimers[NUM_TMR];
 static int isMstimer = 1;
 static os_timer_t apTimer;
 static int cnt = 0;
+static uint16_t tcp_server_timeover = 30;
 
 // ============================ websocketSendData =======================
 
@@ -154,7 +155,7 @@ static uint8_t websocketSendData(websocketUserData_t *wud, const char *payload, 
   uint8_t result;
   int i;
 
-ets_printf("websocketSendData: size: %d\n", size);
+//ets_printf("websocketSendData: size: %d\n", size);
   hdrLgth = 2;
   hdrBytes[0] = 0x80; //set first bit
   hdrBytes[0] |= opcode; //frame->opcode; //set op code
@@ -181,9 +182,9 @@ ets_printf("websocketSendData: size: %d\n", size);
 
   os_memcpy(&buff[hdrLgth], (uint8_t *)payload, size);
   result = espconn_sent(wud->pesp_conn, (unsigned char *)buff, fsize);
-ets_printf("espconn_sent: result: %d\n", result);
+//ets_printf("espconn_sent: result: %d\n", result);
   os_free(buff);
-ets_printf("espconn_sent: done\n");
+//ets_printf("espconn_sent: done\n");
   return WEBSOCKET_ERR_OK;
 }
 
@@ -196,7 +197,7 @@ static int ICACHE_FLASH_ATTR websocket_parse(char * data, size_t dataLenb, char 
 
   if ((opcode > 0x03 && opcode < 0x08) || opcode > 0x0B) {
     ets_sprintf(err_opcode, "%d", opcode);
-//    checkErrOK(gL, WEBSOCKET_ERR_INVALID_FRAME_OPCODE, err_opcode);
+    checkErrOK(WEBSOCKET_ERR_INVALID_FRAME_OPCODE);
   }
 
   //   opcodes: {1 text 2 binary 8 close 9 ping 10 pong}
@@ -281,56 +282,13 @@ for (int i = 0; i < size; i++) {
   return WEBSOCKET_ERR_OK;
 }
 
-// ============================ toBase64 =========================================
-
-/**
- * \brief encode message with base64
- * \param msg The message
- * \param len The length of the message
- * \return The encoded message
- *
- */
-static uint8_t *toBase64 ( const uint8_t *msg, size_t *len){
-  size_t i;
-  size_t n;
-  size_t lgth;
-  uint8_t * q;
-  uint8_t *out;
-
-  n = *len;
-  if (!n)  // handle empty string case 
-    return NULL;
-
-  lgth = (n + 2) / 3 * 4;
-  out = (uint8_t *)os_malloc(lgth + 1);
-  out[lgth] = '\0';
-  if (out == NULL) {
-    return NULL;
-  }
-  uint8 bytes64[sizeof(b64)];
-  c_memcpy(bytes64, b64, sizeof(b64));   //Avoid lots of flash unaligned fetches
-
-  for (i = 0, q = out; i < n; i += 3) {
-    int a = msg[i];
-    int b = (i + 1 < n) ? msg[i + 1] : 0;
-    int c = (i + 2 < n) ? msg[i + 2] : 0;
-    *q++ = bytes64[a >> 2];
-    *q++ = bytes64[((a & 3) << 4) | (b >> 4)];
-    *q++ = (i + 1 < n) ? bytes64[((b & 15) << 2) | (c >> 6)] : BASE64_PADDING;
-    *q++ = (i + 2 < n) ? bytes64[(c & 63)] : BASE64_PADDING;
-  }
-  *q = '\0';
-  *len = q - out;
-  return out;
-}
-
-
 // ================================= websocket_recv ====================================
 
 static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **data, int *lgth) {
   char * key = NULL;
   int idx;
   int found;
+  uint8_t result;
 
   idx = 0;
 //ets_printf("websocket_recv: %s!remote_port: %d\n", wud->curr_url, wud->remote_port);
@@ -340,7 +298,7 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
       char *begin = strstr(string, header_key) + os_strlen(header_key);
       char *end = strstr(begin, "\r");
       key = os_malloc((end - begin) + 1);
-//      checkAllocgLOK(key);
+      checkAllocOK(key);
       os_memcpy(key, begin, end - begin);
       key[end - begin] = 0;
     }
@@ -362,11 +320,12 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
     SHA1Update(&ctx, ws_uuid, os_strlen(ws_uuid));
     SHA1Final(digest, &ctx);
 
-    base64Digest = toBase64(digest, &digestLen);
-//    checkAllocgLOK(base64Digest);
+    result = wud->compMsgDispatcher->toBase64(digest, &digestLen, &base64Digest);
+    checkErrOK(result);
+    checkAllocOK(base64Digest);
     payloadLen = os_strlen(HEADER_WEBSOCKET_START) + os_strlen(HEADER_WEBSOCKET_URL) +os_strlen(HEADER_WEBSOCKET_END) + digestLen + trailerLen;
     payload = os_malloc(payloadLen);
-//    checkAllocgLOK(payload);
+    checkAllocOK(payload);
     os_sprintf(payload, "%s%s%s%s%s\0", HEADER_WEBSOCKET_START, HEADER_WEBSOCKET_URL, HEADER_WEBSOCKET_END, base64Digest, trailer);
     os_free(base64Digest);
     struct espconn *pesp_conn = NULL;
@@ -378,9 +337,9 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
     }
 
 //ets_printf("payload: %d!%s!\n", payloadLen, payload);
-    int result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
+    result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
     os_free(key);
-//    checkErrOK(gL, result, "espconn_sent");
+    checkErrOK(result);
   } else if (wud->isWebsocket == 1) {
 //ets_printf("websocket_parse: %d!curr_url: %s!\n", os_strlen(string), wud->curr_url);
     websocket_parse(string, os_strlen(string), data, lgth, wud);
@@ -396,15 +355,13 @@ static uint8_t websocketRunClientMode(compMsgDispatcher_t *self, uint8_t mode) {
   return COMP_DISP_ERR_OK;
 }
 
-static uint16_t tcp_server_timeover = 30;
-
 // ================================= serverDisconnected  ====================================
 
 static void serverDisconnected(void *arg) {
   struct espconn *pesp_conn;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("serverDisconnected: arg: %p\n", arg);
+//ets_printf("serverDisconnected: arg: %p\n", arg);
 
 }
 
@@ -414,7 +371,7 @@ static void serverReconnected(void *arg, int8_t err) {
   struct espconn *pesp_conn;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("serverReconnected: arg: %p\n", arg);
+//ets_printf("serverReconnected: arg: %p\n", arg);
 
 }
 
@@ -463,7 +420,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
       idx++;
     }
   }
-ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
+//ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
 
   if(wud->isWebsocket == 1) {
     char *data = "";
@@ -493,7 +450,7 @@ static void serverConnected(void *arg) {
   int result;
   int i;
 
-ets_printf("serverConnected: arg: %p\n", arg);
+//ets_printf("serverConnected: arg: %p\n", arg);
   pesp_conn = arg;
   for(i = 0; i < MAX_SOCKET; i++) {
     if (socket[i] == NULL) { // found empty slot
@@ -610,7 +567,7 @@ wud->num_urls = 2;
 //    checkErrOK(COMP_DISP_ERR_OUT_OF_MEMORY);
   }
   pesp_conn->proto.tcp->local_port = port;
-ets_printf("port: %d\n", port);
+//ets_printf("port: %d\n", port);
 
 //ets_printf("call regist connectcb\n");
     result = espconn_regist_connectcb(pesp_conn, serverConnected);

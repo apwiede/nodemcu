@@ -326,6 +326,27 @@ ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
   return result;
 }
 
+// ================================= forwardMsg ====================================
+
+static uint8_t forwardMsg(compMsgDispatcher_t *self) {
+  uint8_t result;
+  headerPart_t *hdr;
+  int hdrIdx;
+  msgParts_t *received;
+  msgHeaderInfos_t *hdrInfos;
+
+ets_printf("forwardMsg called\n");
+  result = self->handleReceivedHeader(self);
+  checkErrOK(result);
+  hdrInfos = &self->msgHeaderInfos;
+  received = &self->compMsgData->received;
+  hdrIdx = hdrInfos->currPartIdx;
+  hdr = &hdrInfos->headerParts[hdrIdx];
+ets_printf("handleType: %c msgLgth: %d\n", hdr->hdrHandleType, received->lgth);
+
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= compMsgBuildMsgInit ====================================
 
 uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
@@ -333,5 +354,6 @@ uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
   self->setMsgFieldValue = &setMsgFieldValue;
   self->buildMsg = &buildMsg;
   self->setMsgValues = &setMsgValues;
+  self->forwardMsg = &forwardMsg;
   return COMP_DISP_ERR_OK;
 }

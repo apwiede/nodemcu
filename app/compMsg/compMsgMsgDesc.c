@@ -1340,7 +1340,12 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
     checkErrOK(result);
     result = self->bssStr2BssInfoId(fieldNameStr + c_strlen("@key_"), &bssInfoType);
-    checkErrOK(result);
+    if (result != COMP_MSG_ERR_OK) {
+      // not a key the Wifi is handling (normally cloud keys)
+      idx++;
+      continue;
+    }
+//    checkErrOK(result);
     switch (bssInfoType) {
     case BSS_INFO_BSSID:
       compMsgWifiData->key_bssid = (uint16_t)uval;
@@ -1405,6 +1410,13 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
       compMsgWifiData->bssScanTypes.is_hiddenType = (uint8_t)fieldTypeId;
       break;
     }
+    cp = ep;
+
+    // fieldLength not needed for Wifi module
+    fieldTypeStr = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+ets_printf("field: %s length: %s\n", fieldNameStr, cp);
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }

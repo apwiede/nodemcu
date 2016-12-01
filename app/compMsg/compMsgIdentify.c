@@ -251,12 +251,14 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
 
 // ================================= prepareAnswerMsg ====================================
     
-static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t **handle) {
+static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t **handle) {
   int result;
   headerPart_t *hdr;
+  msgHeaderInfos_t *hdrInfos;
   int hdrIdx;
 
 //ets_printf("§prepareAnswerMsg§");
+  hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdrIdx++; // the Ack message has to be the next entry in headerInfos!!
   hdr = &hdrInfos->headerParts[hdrIdx];
@@ -266,27 +268,27 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hdr
   return result;
 }
 
-// ================================= handleReceivedMsg ====================================
+// ================================= handleReceivedHeader ====================================
     
-static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos) {
+static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
   int result;
   headerPart_t *hdr;
   int hdrIdx;
-  uint8_t answerType;
+  msgParts_t *received;
+  msgHeaderInfos_t *hdrInfos;
   compMsgField_t fieldInfo;
   uint16_t u16;
   uint8_t u8;
-  uint8_t startOffset;
   uint16_t sequenceEntry;
-  uint8_t *handle;
-  msgParts_t *received;
   bool u8TotalCrc;
   bool u16TotalCrc;
+  size_t startOffset;
   size_t idx;
 
-//ets_printf("§handleReceivedMsg§");
+//ets_printf("§handleReceivedHeader§");
+  hdrInfos = &self->msgHeaderInfos;
   received = &self->compMsgData->received;
-//ets_printf("§handleReceivedMsg newCompMsgDataView§");
+//ets_printf("§handleReceivedHeader newCompMsgDataView§");
   u8TotalCrc = false;
   u16TotalCrc = false;
   received->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
@@ -381,14 +383,12 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
       fieldInfo.fieldLgth = 1;
       fieldInfo.fieldOffset = received->totalLgth - 1;
 //ets_printf("§u8TotalCrc!fieldOffset: %d§", fieldInfo.fieldOffset);
-      startOffset = hdrInfos->headerLgth;
       result = received->compMsgDataView->getTotalCrc(received->compMsgDataView, &fieldInfo);
 //ets_printf("§u8totalCrc!res!%d!§", result);
       break;
     case COMP_DISP_U16_TOTAL_CRC:
       fieldInfo.fieldLgth = 2;
       fieldInfo.fieldOffset = received->totalLgth - 2;
-      startOffset = hdrInfos->headerLgth;
       result = received->compMsgDataView->getTotalCrc(received->compMsgDataView, &fieldInfo);
 //ets_printf("§u16TotalCrc!res!%d!§", result);
       break;
@@ -400,8 +400,22 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgHeaderInfos_t *hd
 //ets_printf("call deleteMsg\n");
   self->compMsgData->deleteMsg(self);
 //ets_printf("§received msg deleted§");
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= handleReceivedMsg ====================================
+    
+static uint8_t handleReceivedMsg(compMsgDispatcher_t *self) {
+  int result;
+  msgParts_t *received;
+  uint8_t answerType;
+  uint8_t *handle;
+
+//ets_printf("§handleReceivedMsg§");
+  received = &self->compMsgData->received;
+  result = self->handleReceivedHeader(self);
 //ets_printf("§call prepareAnswerMsg§");
-  result = prepareAnswerMsg(self, hdrInfos, &handle);
+  result = self->prepareAnswerMsg(self, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
   checkErrOK(result);
@@ -476,36 +490,47 @@ if (buffer == NULL) {
         }
         seqIdx++;
       }
-      if (hdr->hdrEncryption == 'E') {
-        uint8_t *cryptedPtr;
-        uint8_t *cryptKey;
-        uint8_t *decrypted;;
-        uint8_t mlen;
-        uint8_t klen;
-        uint8_t ivlen;
-        int decryptedLgth;
+      switch (hdr->hdrHandleType) {
+      case 'G':
+      case 'R':
+        if (hdr->hdrEncryption == 'E') {
+          uint8_t *cryptedPtr;
+          uint8_t *cryptKey;
+          uint8_t *decrypted;;
+          uint8_t mlen;
+          uint8_t klen;
+          uint8_t ivlen;
+          int decryptedLgth;
 
-        // decrypt encrypted message part (after header)
+          // decrypt encrypted message part (after header)
 cryptKey = "a1b2c3d4e5f6g7h8";
-        mlen = received->totalLgth - hdrInfos->headerLgth;
-        if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
-          if (u8TotalCrc) {
-            mlen -= 1;
-          } else {
-            mlen -= 2;
+          mlen = received->totalLgth - hdrInfos->headerLgth;
+          if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+            if (u8TotalCrc) {
+              mlen -= 1;
+            } else {
+              mlen -= 2;
+            }
           }
-        }
-        ivlen = 16;
-        klen = 16;
-        cryptedPtr = received->buf + hdrInfos->headerLgth;
-        result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
-        checkErrOK(result);
+          ivlen = 16;
+          klen = 16;
+          cryptedPtr = received->buf + hdrInfos->headerLgth;
+          result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
+          checkErrOK(result);
 //ets_printf("mlen: %d decryptedLgth: %d\n", mlen, decryptedLgth);
-        c_memcpy(cryptedPtr, decrypted, decryptedLgth);
-      }
-      result = self->handleReceivedMsg(self, hdrInfos);
+          c_memcpy(cryptedPtr, decrypted, decryptedLgth);
+        }
+        result = self->handleReceivedMsg(self);
 //ets_printf("§handleReceivedMsg end buffer idx: %d result: %d§", idx, result);
-      return result;
+        return result;
+      case 'U':
+      case 'W':
+        result = self->forwardMsg(self);
+        return result;
+      default:
+ets_printf("handleReceivedPart: funny handleType: %c 0x%02x\n", hdr->hdrHandleType, hdr->hdrHandleType);
+        return COMP_DISP_ERR_FUNNY_HANDLE_TYPE;
+      }
     }
     idx++;
   }
@@ -567,6 +592,8 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   self->handleReceivedPart = &handleReceivedPart;
   self->handleToSendPart = &handleToSendPart;
   self->nextFittingEntry = &nextFittingEntry;
+  self->prepareAnswerMsg = &prepareAnswerMsg;
+  self->handleReceivedHeader = &handleReceivedHeader;
   self->handleReceivedMsg = &handleReceivedMsg;
   result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
   checkErrOK(result);
