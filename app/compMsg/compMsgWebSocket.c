@@ -291,7 +291,7 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
   uint8_t result;
 
   idx = 0;
-//ets_printf("websocket_recv: %s!remote_port: %d\n", wud->curr_url, wud->remote_port);
+ets_printf("websocket_recv: %s!remote_port: %d\n", wud->curr_url, wud->remote_port);
 //ets_printf("websocket_recv: %s!%s!remote_port: %d\n",string,  wud->curr_url, wud->remote_port);
   if ((wud->curr_url != NULL) && (strstr(string, wud->curr_url) != NULL)) {
     if (strstr(string, header_key) != NULL) {
@@ -302,7 +302,7 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
       os_memcpy(key, begin, end - begin);
       key[end - begin] = 0;
     }
-//ets_printf("websocket_recv2: key: %s\n", key);
+ets_printf("websocket_recv2: key: %s\n", key);
     const char *trailer;
     trailer = "\r\n\r\n";
     int trailerLen;
@@ -336,12 +336,13 @@ static uint8_t websocket_recv(char *string, websocketUserData_t *wud, char **dat
       wud->isWebsocket = 1;
     }
 
-//ets_printf("payload: %d!%s!\n", payloadLen, payload);
+ets_printf("payload: %d!%s!\n", payloadLen, payload);
     result = espconn_sent(wud->pesp_conn, (unsigned char *)payload, payloadLen);
     os_free(key);
+ets_printf("espconn_sent: result: %d\n", result);
     checkErrOK(result);
   } else if (wud->isWebsocket == 1) {
-//ets_printf("websocket_parse: %d!curr_url: %s!\n", os_strlen(string), wud->curr_url);
+ets_printf("websocket_parse: %d!curr_url: %s!\n", os_strlen(string), wud->curr_url);
     websocket_parse(string, os_strlen(string), data, lgth, wud);
   }
   return WEBSOCKET_ERR_OK;
@@ -384,7 +385,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   websocketUserData_t *wud;
 
   pesp_conn = (struct espconn *)arg;
-//ets_printf("socketReceived: arg: %p len: %d\n", arg, len);
+ets_printf("socketReceived: arg: %p len: %d\n", arg, len);
 //ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
   char temp[20] = {0};
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
@@ -400,13 +401,13 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   wud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
   wud->remote_ip[3] = pesp_conn->proto.tcp->remote_ip[3];
   wud->remote_port = pesp_conn->proto.tcp->remote_port;
-//ets_printf("==received remote_port: %d\n", wud->remote_port);
+ets_printf("==received remote_port: %d\n", wud->remote_port);
   if (strstr(pdata, "GET /") != 0) {
     char *begin = strstr(pdata, "GET /") + 4;
     char *end = strstr(begin, " ");
     os_memcpy(url, begin, end - begin);
     url[end - begin] = 0;
-//ets_printf("url: %s\n", url);
+ets_printf("url: %s\n", url);
   }
   if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
     idx = 0;
@@ -420,7 +421,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
       idx++;
     }
   }
-//ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
+ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
 
   if(wud->isWebsocket == 1) {
     char *data = "";
@@ -428,7 +429,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
     int result;
 
     result = websocket_recv(pdata, wud, &data, &lgth);
-//    checkErrOK(gL,result,"websocket_recv");
+//    checkErrOK(result);
   }
 }
 

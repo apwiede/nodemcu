@@ -526,6 +526,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
   int idx;
   int numEntries;
   int result;
+  size_t offset;
   compMsgData_t *compMsgData;
 
   compMsgData = self->compMsgData;
@@ -549,8 +550,25 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
   while (idx < numEntries) {
     fieldInfo = &compMsgData->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-//ets_printf("§compMsgData setFieldValue: name: %s!numeric: %d!string: %s!id: %d!§", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId);
-      result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
+      if (fieldName[0] == '#') {
+//ets_printf("§compMsgData setFieldValue: name: %s!numeric: %d!string: %s!fieldNameId: %d!fieldKey: %d!fieldSize: %d!fieldType: %d!§\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId, fieldInfo->fieldKey, compMsgData->msgDescPart->fieldSize, compMsgData->msgDescPart->fieldType);
+        // key value field !!
+        // FIXME for values other than uint8_t*!!!
+//ets_printf("fieldInfo->fieldLgth: %d offset: %d\n", fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+        offset = fieldInfo->fieldOffset;
+        result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldKey);
+        checkErrOK(result);
+        offset += 2;
+        result = compMsgData->compMsgDataView->dataView->setUint8(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldType);
+        checkErrOK(result);
+        offset += 1;
+        result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldSize);
+        checkErrOK(result);
+        result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
+        
+      } else {
+        result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
+      }
       checkErrOK(result);
       fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
       break;

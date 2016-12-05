@@ -61,35 +61,69 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t msgDescPartIdx;
   uint8_t fieldIdx;
+  uint8_t keyValueIdx;
   uint8_t type;
+  uint8_t *stringValue;
+  int numericValue;
   compMsgField_t *fieldInfo;
   msgDescPart_t *msgDescPart;
   compMsgData_t *compMsgData;
+  msgKeyValueDescPart_t *msgKeyValueDescPart;
+  bool found;
 
   compMsgData = self->compMsgData;
   fieldIdx = 0;
   msgDescPartIdx = 0;
-//ets_printf("§fix: numFields: %d!§", compMsgData->numFields);
+//ets_printf("§fixOffsetsForKeyValues: numFields: %d!§", compMsgData->numFields);
   while (fieldIdx < compMsgData->numFields) {
     fieldInfo = &compMsgData->fields[fieldIdx];
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;
-//ets_printf("§fix: idx: %d!%p!%s!§", fieldIdx, msgDescPart->fieldSizeCallback, msgDescPart->fieldNameStr);
+    msgKeyValueDescPart = NULL;
+    if (msgDescPart->fieldNameStr[0] == '#') {
+      // get the corresponding msgKeyValueDescPart
+      found = false;
+      keyValueIdx = 0;
+      while (keyValueIdx < self->numMsgKeyValueDescParts) {
+        msgKeyValueDescPart = &self->msgKeyValueDescParts[keyValueIdx];
+        if (c_strcmp(msgKeyValueDescPart->keyNameStr, msgDescPart->fieldNameStr) == 0) {
+          found = true;
+          break;
+        }
+        keyValueIdx++;
+      }
+      if (!found) {
+        msgKeyValueDescPart = NULL;
+      }
+    }
+//ets_printf("§fixOffsetsForKeyValues: idx: %d!%p!%s!§", fieldIdx, msgDescPart->fieldSizeCallback, msgDescPart->fieldNameStr);
     if (msgDescPart->fieldSizeCallback != NULL) {
       // the key name must have the prefix: "#key_"!
       if (msgDescPart->fieldNameStr[0] != '#') {
         return COMP_DISP_ERR_FIELD_NOT_FOUND;
       }
-      result = msgDescPart->fieldSizeCallback(self);
+      result = msgDescPart->fieldSizeCallback(self, &numericValue, &stringValue);
+//ets_printf("fieldSizeCallback for: %s %d %p\n", msgDescPart->fieldNameStr, numericValue, stringValue);
       checkErrOK(result);
-      fieldInfo->fieldKey = msgDescPart->fieldKey;
-      msgDescPart->fieldSize += 2 * sizeof(uint16_t) + sizeof(uint8_t); // for key, type and lgth in front of value!!
-      fieldInfo->fieldLgth = msgDescPart->fieldSize;
+      if (msgKeyValueDescPart != NULL) {
+        fieldInfo->fieldKey = msgKeyValueDescPart->keyId;
+//ets_printf("fieldKey: %d\n", msgKeyValueDescPart->keyId);
+      } else {
+        fieldInfo->fieldKey = msgDescPart->fieldKey;
+      }
+      fieldInfo->fieldLgth = msgDescPart->fieldSize + 2 * sizeof(uint16_t) + sizeof(uint8_t); // for key, type and lgth in front of value!!
+//ets_printf("fixOffsetsForKeyValues: %s size: %d lgth: %d\n", msgDescPart->fieldNameStr, msgDescPart->fieldSize, fieldInfo->fieldLgth);
+    } else {
+      if (msgKeyValueDescPart != NULL) {
+        fieldInfo->fieldKey = msgKeyValueDescPart->keyId;
+        msgDescPart->fieldSize = msgKeyValueDescPart->keyLgth;
+        fieldInfo->fieldLgth = msgDescPart->fieldSize + 2 * sizeof(uint16_t) + sizeof(uint8_t); // for key, type and lgth in front of value!!
+      }
     }
     msgDescPartIdx++;
     fieldIdx++;
   }
-//ets_printf("§fix: done!§");
+//ets_printf("§fixOffsetsForKeyValues: done!§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -113,9 +147,9 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
   compMsgData = self->compMsgData;
   if (self->compMsgData->msgValPart->fieldValueStr[0] == '@') {
     // call the callback function for the field!!
-//ets_printf("§setMsgFieldValue:cb %p§", self->compMsgData->msgValPart->fieldValueCallback);
+//ets_printf("§setMsgFieldValue:cb %s!%p!size: %d§\n", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
     if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
-      result = self->compMsgData->msgValPart->fieldValueCallback(self);
+      result = self->compMsgData->msgValPart->fieldValueCallback(self, &numericValue, &stringValue);
       checkErrOK(result);
     }
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
@@ -126,11 +160,11 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
       stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
       numericValue = 0;
     }
-//ets_printf("§cb field: %s!value: 0x%04x %s!§", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+//ets_printf("§cb field: %s!value: 0x%04x %s!§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
     result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
-//ets_printf("§fieldName: %s!id: %d!§", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
+//ets_printf("§fieldName: %s!id: %d!§\n", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
     if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
       stringValue = NULL;
       numericValue = self->compMsgData->msgValPart->fieldValue;
@@ -256,6 +290,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   uint8_t klen;
   uint8_t ivlen;
   uint8_t *stringValue;
+  compMsgField_t *fieldInfo;
   int src;
   int dst;
 
@@ -287,8 +322,9 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   result = self->compMsgData->getMsgData(self, &msgData, &msgLgth);
 //ets_printf("§getMsgData res: %d!msgLgth: %d!§", result, msgLgth);
   checkErrOK(result);
+self->compMsgData->dumpMsg(self);
 //ets_printf("§");
-//self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dumpMsg");
+self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dumpMsg");
 //ets_printf("§");
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {
     uint8_t *toCryptPtr;
@@ -296,6 +332,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
     size_t encryptedMsgDataLgth;
     uint16_t mlen;
     uint8_t headerLgth;
+    size_t totalCrcOffset;
 
     cryptKey = "a1b2c3d4e5f6g7h8";
     ivlen = 16;
@@ -304,7 +341,15 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
 //self->compMsgData->compMsgDataView->dataView->dumpBinary(self->compMsgData->compMsgDataView->dataView->data, self->compMsgData->compMsgDataView->dataView->lgth, "MSG_AA");
 //ets_printf("need to encrypt message!\n");
     headerLgth = self->compMsgData->headerLgth;
-    mlen = self->compMsgData->totalLgth - headerLgth - 1; // -1 for totalCrc !!
+    totalCrcOffset = 0;
+    mlen = self->compMsgData->totalLgth - headerLgth;
+    if (self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+      totalCrcOffset = 1;
+      mlen -= 1;
+    } else {
+      totalCrcOffset = 2;
+      mlen -= 2;
+    }
 //ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
     toCryptPtr = msgData + self->compMsgData->headerLgth;
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
@@ -315,7 +360,13 @@ ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually tot
     c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);
 ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
   }
-    
+  // if we have a @totalCrc we need to set it here
+  if (self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+    fieldInfo = &self->compMsgData->fields[self->compMsgData->numFields - 1];
+    result = self->compMsgData->compMsgDataView->setTotalCrc(self->compMsgData->compMsgDataView, fieldInfo);
+ets_printf("setTotalCrc: result: %d fieldOffset: %d\n", result, fieldInfo->fieldOffset);
+    checkErrOK(result);
+  }
   // here we need to decide where and how to send the message!!
   // from currHdr we can see the handle type and - if needed - the @dst
 //ets_printf("§transferType: %c dst: 0x%04x§", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart);

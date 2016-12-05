@@ -250,7 +250,7 @@ static uint8_t setTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
-//ets_printf("§crc8: 0x%04x 0x%02x\n§", crc, (uint8_t)(crc & 0xFF));
+ets_printf("§crc8: 0x%04x 0x%02x§\n", crc, (uint8_t)(crc & 0xFF));
     self->dataView->setUint8(self->dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
   } else {
     self->dataView->setUint16(self->dataView,fieldInfo->fieldOffset,crc);
@@ -448,7 +448,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
         if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
         }
-        os_memcpy(self->dataView->data + fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
+        os_memcpy(self->dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
       }
@@ -459,7 +459,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
         if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
         }
-        os_memcpy(self->dataView->data + fieldInfo->fieldOffset, stringValue, fieldInfo->fieldLgth);
+        os_memcpy(self->dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
       }

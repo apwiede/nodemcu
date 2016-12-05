@@ -390,6 +390,7 @@ ets_printf("§heap4: %d§", system_get_free_heap_size());
     uint8_t actionMode;
     uint8_t type;
 
+ets_printf("§prepareValuesCbName: %s!§", self->compMsgData->prepareValuesCbName);
     result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
     self->actionMode = actionMode;
     checkErrOK(result);
@@ -501,6 +502,98 @@ ets_printf("compMsgDispatcherGetPtrFromHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   return COMP_DISP_ERR_OK;
+}
+
+// ============================= setFieldValueCallback ========================
+
+static uint8_t setFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t callback, uint8_t callbackType) {
+  uint8_t result;
+  fieldValueCallbackInfos_t *fieldValueCallbackInfo;
+  int idx;
+
+  idx = 0;
+  while (idx < self->numFieldValueCallbackInfos) {
+    fieldValueCallbackInfo = &self->fieldValueCallbackInfos[idx];
+    if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
+      fieldValueCallbackInfo->callback = callback;
+      fieldValueCallbackInfo->callbackType = callbackType;
+      return COMP_DISP_ERR_OK;
+    }
+    idx++;
+  }
+  return COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
+}
+
+// ============================= addFieldValueCallbackName ========================
+
+static uint8_t addFieldValueCallbackName(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t callback, uint8_t callbackType) {
+  uint8_t result;
+  fieldValueCallbackInfos_t *fieldValueCallbackInfo;
+
+  if (self->numFieldValueCallbackInfos >= self->maxFieldValueCallbackInfos) {
+    if (self->fieldValueCallbackInfos == NULL) {
+      self->maxFieldValueCallbackInfos = 30;
+      self->fieldValueCallbackInfos = os_zalloc(self->maxFieldValueCallbackInfos * sizeof(fieldValueCallbackInfos_t));
+      checkAllocOK(self->fieldValueCallbackInfos);
+    } else {
+      self->maxFieldValueCallbackInfos += 20;
+      self->fieldValueCallbackInfos = os_realloc(self->fieldValueCallbackInfos, (self->maxFieldValueCallbackInfos * sizeof(fieldValueCallbackInfos_t)));
+    }
+  }
+  fieldValueCallbackInfo = &self->fieldValueCallbackInfos[self->numFieldValueCallbackInfos];
+  fieldValueCallbackInfo->callbackName = os_zalloc(c_strlen(callbackName) + 1);
+  c_memcpy(fieldValueCallbackInfo->callbackName, callbackName, c_strlen(callbackName));
+  fieldValueCallbackInfo->callback = callback;
+  fieldValueCallbackInfo->callbackType = callbackType;
+  self->numFieldValueCallbackInfos++;
+  return COMP_DISP_ERR_OK;
+}
+
+// ============================= getFieldValueCallback ========================
+
+static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t *callback, uint8_t callbackType) {
+  uint8_t result;
+  fieldValueCallbackInfos_t *fieldValueCallbackInfo;
+  int idx;
+
+//ets_printf("§getFieldValueCallback: %s 0x%02x§\n", callbackName, callbackType);
+  idx = 0;
+  while (idx < self->numFieldValueCallbackInfos) {
+    fieldValueCallbackInfo = &self->fieldValueCallbackInfos[idx];
+//ets_printf("§getFieldValueCallback: %s %s§", fieldValueCallbackInfo->callbackName, callbackName);
+    if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
+      if ((callbackType == 0) || (fieldValueCallbackInfo->callbackType == callbackType)) {
+        *callback = fieldValueCallbackInfo->callback;
+//ets_printf("§getFieldValueCallback found: %s 0x%02x§\n", callbackName, callbackType);
+        return COMP_DISP_ERR_OK;
+      }
+    }
+    idx++;
+  }
+ets_printf("§getFieldValueCallback NOT found: %s 0x%02x§\n", callbackName, callbackType);
+  return COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
+}
+
+// ============================= getFieldValueCallbackName ========================
+
+static uint8_t getFieldValueCallbackName(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t **callbackName, uint8_t callbackType) {
+  uint8_t result;
+  fieldValueCallbackInfos_t *fieldValueCallbackInfo;
+  int idx;
+
+  idx = 0;
+  while (idx < self->numFieldValueCallbackInfos) {
+    fieldValueCallbackInfo = &self->fieldValueCallbackInfos[idx];
+    if (fieldValueCallbackInfo->callback == callback) {
+      if ((callbackType == 0) || (fieldValueCallbackInfo->callbackType == callbackType)) {
+        *callbackName = fieldValueCallbackInfo->callbackName;
+        return COMP_DISP_ERR_OK;
+      }
+    }
+    idx++;
+  }
+ets_printf("§getFieldValueCallbackName NOT found: 0x%02x§\n", callbackType);
+  return COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
 // ================================= startRequest ====================================
@@ -669,6 +762,8 @@ uint8_t *handle;
   checkErrOK(result);
   result = compMsgNetsocketInit(self);
   checkErrOK(result);
+#define KEY_VALUE_DESC_PARTS_FILE "CompMsgKeyValueKeys.txt"
+  result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
 #define WEBSOCKETAP
 #ifdef WEBSOCKETAP
@@ -754,6 +849,10 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->maxMsgHeaders = 0;
   compMsgDispatcher->msgHeader2MsgPtrs = NULL;
 
+  compMsgDispatcher->numMsgKeyValueDescParts = 0;
+  compMsgDispatcher->maxMsgKeyValueDescParts = 0;
+  compMsgDispatcher->msgKeyValueDescParts = NULL;
+
   // request handling
   compMsgDispatcher->msgRequestInfos.currRequestIdx = -1;
   compMsgDispatcher->msgRequestInfos.lastRequestIdx = -1;
@@ -761,6 +860,10 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
   compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
   compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
+
+  compMsgDispatcher->numFieldValueCallbackInfos = 0;
+  compMsgDispatcher->maxFieldValueCallbackInfos = 0;
+  compMsgDispatcher->fieldValueCallbackInfos = NULL;
 
   compMsgDispatcher->operatingMode = MODULE_OPERATING_MODE_AP;
 
@@ -784,6 +887,10 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->toBase64 = &toBase64;
   compMsgDispatcher->fromBase64 = &fromBase64;
   compMsgDispatcher->resetBuildMsgInfos =&resetBuildMsgInfos;
+  compMsgDispatcher->setFieldValueCallback = &setFieldValueCallback;
+  compMsgDispatcher->addFieldValueCallbackName = &addFieldValueCallbackName;
+  compMsgDispatcher->getFieldValueCallback = &getFieldValueCallback;
+  compMsgDispatcher->getFieldValueCallbackName = &getFieldValueCallbackName;
 
   compMsgDispatcher->dumpMsgParts = &dumpMsgParts;
 

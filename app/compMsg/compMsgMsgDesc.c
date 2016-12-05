@@ -1031,7 +1031,7 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
 
   callbackName = "nil";
   if (msgDescPart->fieldSizeCallback != NULL) {
-    result = self->getActionCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName);
+    result = self->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
     checkErrOK(result);
   }
   ets_printf("msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
@@ -1047,7 +1047,7 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
 
   callbackName = "nil";
   if (msgValPart->fieldValueCallback != NULL) {
-    result = self->getActionCallbackName(self, msgValPart->fieldValueCallback, &callbackName);
+    result = self->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName, msgValPart->fieldValueCallbackType);
     checkErrOK(result);
   }
   ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
@@ -1088,7 +1088,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   compMsgData_t *compMsgData;
   compMsgMsgDesc_t *compMsgMsgDesc;
 
-//ets_printf("§getMsgPartsFromHeaderPart1§");
+ets_printf("§getMsgPartsFromHeaderPart1§\n");
   compMsgData = self->compMsgData;
   compMsgMsgDesc = self->compMsgMsgDesc;
   self->compMsgData->currHdr = hdr;
@@ -1186,7 +1186,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       keyValueCallback = cp;
       result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
       checkErrOK(result);
-      result = self->getActionCallback(self, cp + 1, &msgDescPart->fieldSizeCallback);
+      result = self->getFieldValueCallback(self, cp, &msgDescPart->fieldSizeCallback, 0);
       checkErrOK(result);
     }
 //self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
@@ -1262,7 +1262,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       msgValPart->fieldValue = (uint32_t)uval;
     }
     if (fieldValueStr[0] == '@') {
-      result = self->getActionCallback(self, cp + 1, &msgValPart->fieldValueCallback);
+      result = self->getFieldValueCallback(self, fieldValueStr, &msgValPart->fieldValueCallback, msgValPart->fieldValueCallbackType);
       checkErrOK(result);
     }
 //self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
@@ -1279,6 +1279,106 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
 //ets_printf("§heap2: %d§", system_get_free_heap_size());
 
   return COMP_MSG_DESC_ERR_OK;
+}
+
+// ================================= getMsgKeyValueDescParts ====================================
+
+static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *fileName) {
+  uint8_t result;
+  uint8_t numEntries;
+  uint8_t *fieldNameStr;
+  uint8_t *fieldValueStr;
+  uint8_t *fieldTypeStr;
+  char *endPtr;
+  uint8_t lgth;
+  uint8_t fieldLgth;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  long uval;
+  uint8_t *myStr;
+  int idx;
+  int numericValue;
+  uint8_t*cp;
+  uint8_t*ep;
+  bool isEnd;
+  uint8_t bssInfoType;
+  uint8_t fieldTypeId;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+  msgKeyValueDescPart_t *msgKeyValueDescPart;
+
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
+  checkErrOK(result);
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  uval = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)uval;
+  self->numMsgKeyValueDescParts = 0;
+  self->maxMsgKeyValueDescParts = numEntries;
+  self->msgKeyValueDescParts = os_zalloc(numEntries * sizeof(msgKeyValueDescPart_t));
+  checkAllocOK(self->msgKeyValueDescParts);
+  idx = 0;
+  while(idx < numEntries) {
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    msgKeyValueDescPart = &self->msgKeyValueDescParts[self->numMsgKeyValueDescParts];
+    // fieldName
+    fieldNameStr = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    msgKeyValueDescPart->keyNameStr = os_zalloc(c_strlen(fieldNameStr) + 1);
+    checkAllocOK(msgKeyValueDescPart->keyNameStr);
+    c_memcpy(msgKeyValueDescPart->keyNameStr, fieldNameStr, c_strlen(fieldNameStr) + 1);
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldValue
+    fieldValueStr = cp;
+    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+    checkErrOK(result);
+    msgKeyValueDescPart->keyId = (uint16_t)uval;
+    checkIsEnd(isEnd);
+    cp = ep;
+
+    // fieldType
+    fieldTypeStr = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+    checkErrOK(result);
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, fieldTypeStr, &fieldTypeId);
+    checkErrOK(result);
+    msgKeyValueDescPart->keyType = fieldTypeId;
+    cp = ep;
+
+    // fieldLength 
+    fieldTypeStr = cp;
+    result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
+    checkErrOK(result);
+    msgKeyValueDescPart->keyLgth = (uint16_t)uval;
+//ets_printf("field: %s Id: %d type: %d length: %d\n", msgKeyValueDescPart->keyNameStr, msgKeyValueDescPart->keyId, msgKeyValueDescPart->keyType, msgKeyValueDescPart->keyLgth);
+    if (!isEnd) {
+      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    }
+    cp = ep;
+    self->numMsgKeyValueDescParts++;
+    idx++;
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
+  checkErrOK(result);
+  return COMP_MSG_ERR_OK;
+//ets_printf("getWifiKeyValueKeys done\n");
 }
 
 // ================================= getWifiKeyValueKeys ====================================
@@ -1433,7 +1533,6 @@ ets_printf("field: %s length: %s\n", fieldNameStr, cp);
 
 #undef checkIsEnd
 
-
 // ================================= newCompMsgMsgDesc ====================================
 
 compMsgMsgDesc_t *newCompMsgMsgDesc() {
@@ -1464,6 +1563,7 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
   compMsgMsgDesc->getMsgPartsFromHeaderPart = &getMsgPartsFromHeaderPart;
   compMsgMsgDesc->getHeaderFromUniqueFields = &getHeaderFromUniqueFields;
+  compMsgMsgDesc->getMsgKeyValueDescParts = &getMsgKeyValueDescParts;
   compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;
 
   return compMsgMsgDesc;

@@ -81,113 +81,192 @@ static str2id_t modeluFieldName2Ids[] = {
   {NULL, -1},
 };
   
-// ================================= getModuleTableFieldValue ====================================
+// ================================= getMACAddr ====================================
 
-static uint8_t getModuleTableFieldValue(compMsgDispatcher_t *self, uint8_t actionMode) {
-  uint8_t result;
-  
-//ets_printf("getModuleTableFieldValue: row: %d col: %d actionMode: %d\n", self->buildMsgInfos.tableRow, self->buildMsgInfos.tableCol, actionMode);
-  switch (actionMode) {
-  case MODULE_INFO_AP_LIST_CALL_BACK:
-    return self->getScanInfoTableFieldValue(self, actionMode);
-  default:
-    return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
-  }
-  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
-}
-
-// ================================= getModuleValue ====================================
-
-static uint8_t getModuleValue(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId) {
+static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   int result;
 
-  switch (which) {
-  case MODULE_INFO_MACAddr:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
-    break;
-  case MODULE_INFO_IPAddr:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
-    break;
-  case MODULE_INFO_FirmwareVersion:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
-    break;
-  case MODULE_INFO_SerieNumber:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
-    break;
-  case MODULE_INFO_RSSI:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSI;
-    break;
-  case MODULE_INFO_ModuleConnection:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ModuleConnection;
-    break;
-  case MODULE_INFO_DeviceMode:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceMode;
-    break;
-  case MODULE_INFO_DeviceSecurity:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
-    break;
-  case MODULE_INFO_ErrorMain:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
-    break;
-  case MODULE_INFO_ErrorSub:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
-    break;
-  case MODULE_INFO_DateAndTime:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
-    break;
-  case MODULE_INFO_SSIDs:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
-    break;
-  case MODULE_INFO_Reserve1:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
-    break;
-  case MODULE_INFO_Reserve2:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
-    break;
-  case MODULE_INFO_Reserve3:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
-    break;
-  case MODULE_INFO_Reserve4:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve4;
-    break;
-  case MODULE_INFO_Reserve5:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve5;
-    break;
-  case MODULE_INFO_Reserve6:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve6;
-    break;
-  case MODULE_INFO_Reserve7:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve7;
-    break;
-  case MODULE_INFO_Reserve8:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve8;
-    break;
-  case MODULE_INFO_GUID:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
-    break;
-  case MODULE_INFO_srcId:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
-    break;
-  case MODULE_INFO_PASSWDC:
-    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
-    break;
-  case MODULE_INFO_operatingMode:
-    self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-    self->compMsgData->msgValPart->fieldValue = compMsgModuleData.operatingMode;
-    break;
-  default:
-    return COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH;
-    break;
-  }
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getIPAddr ====================================
+
+static uint8_t getIPAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getFirmwareVersion ====================================
+
+static uint8_t getFirmwareVersion(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getSerieNumber ====================================
+
+static uint8_t getSerieNumber(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getRSSI ====================================
+
+static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSI;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getModuleConnection ====================================
+
+static uint8_t getModuleConnection(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ModuleConnection;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getDeviceMode ====================================
+
+static uint8_t getDeviceMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceMode;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getDeviceSecurity ====================================
+
+static uint8_t getDeviceSecurity(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getErrorMain ====================================
+
+static uint8_t getErrorMain(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getErrorSub ====================================
+
+static uint8_t getErrorSub(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getDateAndTime ====================================
+
+static uint8_t getDateAndTime(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getSSIDs ====================================
+
+static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve1 ====================================
+
+static uint8_t getReserve1(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve2 ====================================
+
+static uint8_t getReserve2(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve3 ====================================
+
+static uint8_t getReserve3(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve4 ====================================
+
+static uint8_t getReserve4(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve4;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve5 ====================================
+
+static uint8_t getReserve5(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve5;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve6 ====================================
+
+static uint8_t getReserve6(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve6;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve7 ====================================
+
+static uint8_t getReserve7(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve7;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getReserve8 ====================================
+
+static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve8;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getGUID ====================================
+
+static uint8_t getGUID(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getPasswdC ====================================
+
+static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getSrcId ====================================
+
+static uint8_t getSrcId(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getOperatingMode ====================================
+
+static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.operatingMode;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= setOperatingMode ====================================
+
+static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  int result;
+
+  result = self->setModuleValue(self, "operatingMode", self->operatingMode, NULL);
   return COMP_DISP_ERR_OK;
 }
 
@@ -355,12 +434,35 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
 uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->getModuleValue = &getModuleValue;
   self->setModuleValue = &setModuleValue;
   self->setModuleValues = &setModuleValues;
   self->updateModuleValues = &updateModuleValues;
-  self->getModuleTableFieldValue = &getModuleTableFieldValue;
 
+  self->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getFirmwareVersion", &getFirmwareVersion, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getSerieNumber", &getSerieNumber, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getRSSI", &getRSSI, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getModuleConnection", &getModuleConnection, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getDeviceMode", &getDeviceMode, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getDeviceSecurity", &getDeviceSecurity, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getErrorMain", &getErrorMain, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getErrorSub", &getErrorSub, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getDateAndTime", &getDateAndTime, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getSSIDs", &getSSIDs, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve1", &getReserve1, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve2", &getReserve2, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve3", &getReserve3, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve4", &getReserve4, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve5", &getReserve5, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve6", &getReserve6, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve7", &getReserve7, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getReserve8", &getReserve8, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getGUID", &getGUID, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getSrcId", &getSrcId, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getPasswdC", &getPasswdC, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@setOperatingMode", &setOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getOperatingMode", &getOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->setModuleValues(self);
   return COMP_DISP_ERR_OK;
 }

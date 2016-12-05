@@ -91,12 +91,18 @@ enum compMsgDispatcherErrorCode
   COMP_DISP_ERR_REQUEST_NOT_FOUND     = 167,
   COMP_DISP_ERR_UART_REQUEST_NOT_SET  = 166,
   COMP_DISP_ERR_FUNNY_HANDLE_TYPE     = 165,
+  COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND = 164,
 };
 
 // input source types
 #define COMP_DISP_INPUT_UART       0x01
 #define COMP_DISP_INPUT_NET_SOCKET 0x02
 #define COMP_DISP_INPUT_WEB_SOCKET 0x04
+
+#define COMP_DISP_CALLBACK_TYPE_WIFI               0x01
+#define COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE  0x02
+#define COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE 0x04
+#define COMP_DISP_CALLBACK_TYPE_MODULE             0x08
 
 #define COMP_DISP_MAX_REQUESTS     5
 
@@ -118,6 +124,11 @@ typedef struct msgRequestInfos {
   int lastRequestIdx;
 } msgRequestInfos_t;
 
+typedef struct fieldValueCallbackInfos {
+  uint8_t *callbackName;
+  fieldValueCallback_t callback;
+  uint8_t callbackType;
+} fieldValueCallbackInfos_t;
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 // Action stuff
@@ -127,25 +138,19 @@ typedef uint8_t (* runAction_t)(compMsgDispatcher_t *self, uint8_t *answerType);
 typedef uint8_t (* getActionMode_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode);
 typedef uint8_t (* getActionCallback_t)(compMsgDispatcher_t *self, uint8_t *actionName, action_t *callback);
 typedef uint8_t (* getActionCallbackName_t)(compMsgDispatcher_t *self, action_t callback, uint8_t **actionName);
-typedef uint8_t (* fillMsgValue_t)(compMsgDispatcher_t *self, uint8_t *callbackName, uint8_t answerType, uint8_t fieldTypeId);
 
 // Wifi stuff
 typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* getScanInfoTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* getWifiKeyValue_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* getWifiKeyValueInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
 
 // ModuleData stuff
-typedef uint8_t (* getModuleValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId);
 typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* getModuleTableFieldValue_t)(compMsgDispatcher_t *self, uint8_t actionMode);
 typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
 
 // WebSocket stuff
@@ -176,6 +181,10 @@ typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encode
 typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
 typedef uint8_t (* resetBuildMsgInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
+typedef uint8_t (* setFieldValueCallback_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t callback, uint8_t callbackType);
+typedef uint8_t (* addFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t callback, uint8_t callbackType);
+typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t *callback, uint8_t callbackType);
+typedef uint8_t (* getFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDispatcher, fieldValueCallback_t callback, uint8_t **callbackName, uint8_t callbackType);
 
 // BuildMsg stuff
 typedef uint8_t (* fixOffsetsForKeyValues_t)(compMsgDispatcher_t *self);
@@ -214,6 +223,9 @@ typedef struct compMsgDispatcher {
   uint8_t operatingMode;
   uint8_t websocketError;
   bssScanInfos_t *bssScanInfos;
+  msgKeyValueDescPart_t *msgKeyValueDescParts;
+  size_t numMsgKeyValueDescParts;
+  size_t maxMsgKeyValueDescParts;
 
   msgHeaderInfos_t msgHeaderInfos;
 
@@ -233,6 +245,10 @@ typedef struct compMsgDispatcher {
   uint8_t maxMsgHeaders;
   msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
 
+  uint8_t numFieldValueCallbackInfos;
+  uint8_t maxFieldValueCallbackInfos;
+  fieldValueCallbackInfos_t *fieldValueCallbackInfos;
+
   compMsgData_t *compMsgData;
   uint8_t *msgHandle;
 
@@ -251,7 +267,6 @@ typedef struct compMsgDispatcher {
   getActionCallback_t getActionCallback;
   getActionCallbackName_t getActionCallbackName;
   getActionMode_t getActionMode;
-  fillMsgValue_t fillMsgValue;
   getBssScanInfo_t getBssScanInfo;
 
   // BuildMsg
@@ -262,11 +277,9 @@ typedef struct compMsgDispatcher {
   forwardMsg_t forwardMsg;
 
   // ModuleData
-  getModuleValue_t getModuleValue;
   setModuleValue_t setModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;
-  getModuleTableFieldValue_t getModuleTableFieldValue;
 
   // Dispatcher
   getFieldType_t getFieldType;
@@ -285,6 +298,10 @@ typedef struct compMsgDispatcher {
   toBase64_t toBase64;
   fromBase64_t fromBase64;
   resetBuildMsgInfos_t resetBuildMsgInfos;
+  setFieldValueCallback_t setFieldValueCallback;
+  addFieldValueCallbackName_t addFieldValueCallbackName;
+  getFieldValueCallback_t getFieldValueCallback;
+  getFieldValueCallbackName_t getFieldValueCallbackName;
 
   // identify
   resetHeaderInfos_t resetHeaderInfos;
@@ -297,12 +314,9 @@ typedef struct compMsgDispatcher {
 
   // wifi
   bssStr2BssInfoId_t bssStr2BssInfoId;
-  getScanInfoTableFieldValue_t getScanInfoTableFieldValue;
   getWifiValue_t getWifiValue;
   getWifiConfig_t getWifiConfig;
   setWifiValue_t setWifiValue;
-  getWifiKeyValueInfo_t getWifiKeyValueInfo;
-  getWifiKeyValue_t getWifiKeyValue;
   getWifiRemotePort_t getWifiRemotePort;
   websocketRunAPMode_t websocketRunAPMode;
 

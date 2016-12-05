@@ -49,7 +49,7 @@ extern "C" {
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 typedef uint8_t (* fieldSizeCallback_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* fieldValueCallback_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* fieldValueCallback_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 
 typedef struct compMsgField {
   uint8_t fieldNameId;

@@ -319,98 +319,180 @@ static uint8_t getStationConfig(compMsgDispatcher_t *self) {
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= geScanInfoTableFieldValue ====================================
+// ================================= getWifiAPBssidSize ====================================
 
-static uint8_t getScanInfoTableFieldValue(compMsgDispatcher_t *self, uint8_t actionMode) {
-  uint8_t result;
-  bssScanInfos_t *scanInfos;
-  bssScanInfo_t *scanInfo;
-  uint8_t fieldId;
-  
-//ets_printf("getModuleTableFieldValue: row: %d col: %d actionMode: %d\n", self->buildMsgInfos.tableRow, self->buildMsgInfos.tableCol, actionMode);
-  scanInfos = self->bssScanInfos;
-  self->compMsgData->buildMsgInfos.numericValue = 0;
-  self->compMsgData->buildMsgInfos.stringValue = NULL;
-  if (self->compMsgData->buildMsgInfos.tableRow > scanInfos->numScanInfos) {
-    return COMP_DISP_ERR_BAD_ROW;
-  }
-  scanInfo = &scanInfos->infos[self->compMsgData->buildMsgInfos.tableRow];
-  result = bssStr2BssInfoId(self->compMsgData->msgDescPart->fieldNameStr, &fieldId);
-//ets_printf("row: %d ssid: %s rssi: %d fieldName: %s fieldId: %d\n", self->buildMsgInfos.tableRow, scanInfo->ssid, scanInfo->rssi, self->buildMsgInfos.fieldNameStr, fieldId);
-  checkErrOK(result);
-  switch ((int)fieldId) {
-  case  BSS_INFO_BSSID:
-    break;
-  case  BSS_INFO_BSSID_STR:
-    break;
-  case  BSS_INFO_SSID:
-    self->compMsgData->buildMsgInfos.stringValue = scanInfo->ssid;
-    return COMP_DISP_ERR_OK;
-    break;
-  case  BSS_INFO_SSID_LEN:
-    break;
-  case  BSS_INFO_CHANNEL:
-    break;
-  case  BSS_INFO_RSSI:
-    self->compMsgData->buildMsgInfos.numericValue = scanInfo->rssi;
-    return COMP_DISP_ERR_OK;
-    break;
-  case  BSS_INFO_AUTH_MODE:
-    break;
-  case  BSS_INFO_IS_HIDDEN:
-    break;
-  case  BSS_INFO_FREQ_OFFSET:
-    break;
-  case  BSS_INFO_FREQ_CAL_VAL:
-    break;
-  }
-  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+static uint8_t getWifiAPBssidSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
 }
 
-// ================================= getWifiKeyValueInfo ====================================
+// ================================= getWifiAPBssidStrSize ====================================
 
-static uint8_t getWifiKeyValueInfo(compMsgDispatcher_t *self) {
-  uint8_t result;
-  uint8_t bssInfoType;
+static uint8_t getWifiAPBssidStrSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
 
-  result = bssStr2BssInfoId(self->compMsgData->msgDescPart->fieldNameStr + c_strlen("#key_"), &bssInfoType);
-  checkErrOK(result);
-  switch ((int)bssInfoType) {
-  case  BSS_INFO_BSSID:
-    break;
-  case  BSS_INFO_BSSID_STR:
-    break;
-  case  BSS_INFO_SSID:
-    self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
-    self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.ssidSize;
-    self->compMsgData->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.ssidType;
-    return COMP_DISP_ERR_OK;
-    break;
-  case  BSS_INFO_SSID_LEN:
-    break;
-  case  BSS_INFO_CHANNEL:
-    break;
-  case  BSS_INFO_RSSI:
-    self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_rssi;
-    self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.rssiSize;
-    self->compMsgData->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.rssiType;
-    return COMP_DISP_ERR_OK;
-    break;
-  case  BSS_INFO_AUTH_MODE:
-    break;
-  case  BSS_INFO_IS_HIDDEN:
-    break;
-  case  BSS_INFO_FREQ_OFFSET:
-    break;
-  case  BSS_INFO_FREQ_CAL_VAL:
-    break;
+// ================================= getWifiAPSsidSize ====================================
+
+static uint8_t getWifiAPSsidSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
+  self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.ssidSize;
+//ets_printf("ssidSize: %d\n", compMsgWifiData.bssScanSizes.ssidSize);
+  *numericValue = compMsgWifiData.bssScanSizes.ssidSize;
+  *stringValue = NULL;
+  self->compMsgData->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.ssidType;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPSsid_lenSize ====================================
+
+static uint8_t getWifiAPSsid_lenSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPChannelSize ====================================
+
+static uint8_t getWifiAPChannelSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPRssiSize ====================================
+
+static uint8_t getWifiAPRssiSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_rssi;
+  self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.rssiSize;
+//ets_printf("rssiSize: %d\n", compMsgWifiData.bssScanSizes.rssiSize);
+  *numericValue = compMsgWifiData.bssScanSizes.rssiSize;
+  *stringValue = NULL;
+  self->compMsgData->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.rssiType;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPAuthmodeSize ====================================
+
+static uint8_t getWifiAPAuthmodeSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPIs_hiddenSize ====================================
+
+static uint8_t getWifiAPIs_hiddenSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getFreq_offsetSize ====================================
+
+static uint8_t getWifiAPFreq_offsetSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPFreqcal_valSize ====================================
+
+static uint8_t getWifiAPFreqcal_valSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPBssids ====================================
+
+static uint8_t getWifiAPBssids(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPBssidStrs ====================================
+
+static uint8_t getWifiAPBssidStrs(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPSsids ====================================
+
+static uint8_t getWifiAPSsids(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  compMsgData_t *compMsgData;
+  bssScanInfo_t *bssScanInfo;
+  uint8_t *cp;
+  int entryIdx;
+
+  compMsgData = self->compMsgData;
+  compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(compMsgData->msgDescPart->fieldSize);
+  checkAllocOK(compMsgData->msgValPart->fieldKeyValueStr);
+  entryIdx = 0;
+  cp = compMsgData->msgValPart->fieldKeyValueStr;
+  while (entryIdx < self->bssScanInfos->numScanInfos) {
+    bssScanInfo = &self->bssScanInfos->infos[entryIdx];
+//ets_printf("ssid: entryIdx: %d %s!%d!\n", entryIdx, bssScanInfo->ssid, bssScanInfo->ssid_len);
+    c_memcpy(cp, bssScanInfo->ssid, bssScanInfo->ssid_len);
+    cp += bssScanInfo->ssid_len;
+    *cp++ = '\0';
+    entryIdx++;
   }
-  return COMP_DISP_ERR_FIELD_NOT_FOUND;
+  *numericValue = 0;
+  *stringValue = compMsgData->msgValPart->fieldKeyValueStr;
+//ets_printf("getWifiAPSsids: lgth: %d\n", cp-compMsgData->msgValPart->fieldKeyValueStr);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPSsid_lens ====================================
+
+static uint8_t getWifiAPSsid_lens(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPChannels ====================================
+
+static uint8_t getWifiAPChannels(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPRssis ====================================
+
+static uint8_t getWifiAPRssis(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  compMsgData_t *compMsgData;
+  bssScanInfo_t *bssScanInfo;
+  uint8_t *cp;
+  int entryIdx;
+
+  compMsgData = self->compMsgData;
+  compMsgData->msgValPart->fieldKeyValueStr = os_zalloc(compMsgData->msgDescPart->fieldSize);
+  checkAllocOK(compMsgData->msgValPart->fieldKeyValueStr);
+  entryIdx = 0;
+  cp = compMsgData->msgValPart->fieldKeyValueStr;
+  while (entryIdx < self->bssScanInfos->numScanInfos) {
+    bssScanInfo = &self->bssScanInfos->infos[entryIdx];
+    *cp++ = bssScanInfo->rssi;
+    entryIdx++;
+  }
+  *numericValue = 0;
+  *stringValue = compMsgData->msgValPart->fieldKeyValueStr;
+//ets_printf("getWifiAPRssis: lgth: %d\n", cp-compMsgData->msgValPart->fieldKeyValueStr);
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPAuthmodes ====================================
+
+static uint8_t getWifiAPAuthmodes(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPIs_hiddens ====================================
+
+static uint8_t getWifiAPIs_hiddens(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getFreq_offsets ====================================
+
+static uint8_t getWifiAPFreq_offsets(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getWifiAPFreqcal_vals ====================================
+
+static uint8_t getWifiAPFreqcal_vals(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
 }
 
 // ================================= getWifiKeyValue ====================================
 
-static uint8_t getWifiKeyValue(compMsgDispatcher_t *self) {
+static uint8_t xgetWifiKeyValue(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t bssInfoType;
   int entryIdx;
@@ -693,14 +775,33 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   compMsgWifiData.netsocketToSend = &netsocketToSend;
   compMsgWifiData.netsocketReceived = &netsocketReceived;
 
+  self->addFieldValueCallbackName(self, "@getWifiAPBssidSize",       &getWifiAPBssidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPBssidStrSize",    &getWifiAPBssidStrSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPSsidSize",        &getWifiAPSsidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPSsid_lenSize",    &getWifiAPSsid_lenSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPChannelSize",     &getWifiAPChannelSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPRssiSize",        &getWifiAPRssiSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPAuthmodeSize",    &getWifiAPAuthmodeSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPIs_hiddenSize",   &getWifiAPIs_hiddenSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPFreq_offsetSize", &getWifiAPFreq_offsetSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->addFieldValueCallbackName(self, "@getWifiAPFreqcal_valSize", &getWifiAPFreqcal_valSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+
+  self->addFieldValueCallbackName(self, "@getWifiAPBssids",       &getWifiAPBssids, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPBssidStrs",    &getWifiAPBssidStrs, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPSsids",        &getWifiAPSsids, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPSsid_lens",    &getWifiAPSsid_lens, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPChannels",     &getWifiAPChannels, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPRssis",        &getWifiAPRssis, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPAuthmodes",    &getWifiAPAuthmodes, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPIs_hiddens",   &getWifiAPIs_hiddens, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPFreq_offsets", &getWifiAPFreq_offsets, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getWifiAPFreqcal_vals", &getWifiAPFreqcal_vals, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+
   self->bssScanInfos = &bssScanInfos;
   self->getBssScanInfo = &getBssScanInfo;
-  self->getScanInfoTableFieldValue = &getScanInfoTableFieldValue;
   self->getWifiValue = &getWifiValue;
   self->getWifiConfig = &getWifiConfig;
   self->setWifiValue = &setWifiValue;
-  self->getWifiKeyValue = &getWifiKeyValue;
-  self->getWifiKeyValueInfo = &getWifiKeyValueInfo;
   self->getWifiRemotePort = &getWifiRemotePort;
   self->bssStr2BssInfoId = &bssStr2BssInfoId;
 
