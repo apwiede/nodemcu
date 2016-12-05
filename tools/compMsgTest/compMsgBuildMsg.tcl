@@ -77,6 +77,23 @@ namespace eval compMsg {
         set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
 #puts stderr "msgDescPart: $fieldIdx!"
         dict set compMsgDispatcher msgDescPart $msgDescPart
+        set msgKeyValueDescPart [list]
+        if {[string range [dict get $msgDescPart fieldNameStr] 0 0] eq "#"} {
+          # get the corresponding msgKeyValueDescPart
+          set found false
+          set keyValueIdx 0
+          while {$keyValueIdx < [dict get $compMsgDispatcher numMsgKeyValueDescParts]} {
+            set msgKeyValueDescPart [lindex [dict get $compMsgDispatcher msgKeyValueDescParts] $keyValueIdx]
+            if {[dict get $msgKeyValueDescPart keyNameStr] eq [dict get $msgDescPart fieldNameStr]} {
+              set found true
+              break
+            }
+            incr keyValueIdx
+          }
+          if {!$found} {
+            set msgKeyValueDescPart [list]
+          }
+        }
         if {[dict get $msgDescPart fieldSizeCallback] ne [list]} {
           # the key name must have the prefix: "#key_"!
           if {[string range [dict get $msgDescPart fieldNameStr] 0 0] ne "#"} {
@@ -84,13 +101,17 @@ namespace eval compMsg {
           }
           set callback [dict get $msgDescPart fieldSizeCallback]
           set callback [string range $callback 1 end] ; # strip off '@' character
-          set result [$callback compMsgDispatcher]
+          set result [::$callback compMsgDispatcher]
           checkErrOK $result
           set compMsgData [dict get $compMsgDispatcher compMsgData]
           set fields [dict get $compMsgData fields]
           set fieldInfo [lindex $fields $fieldIdx]
           set msgDescPart [dict get $compMsgDispatcher msgDescPart]
-          dict set fieldInfo fieldKey [dict get $msgDescPart fieldKey]
+          if {$msgKeyValueDescPart ne [list]} {
+            dict set fieldInfo fieldKey [dict get $msgKeyValueDescPart keyId]
+          } else {
+            dict set fieldInfo fieldKey [dict get $msgDescPart fieldKey]
+          }
           dict incr msgDescPart fieldSize [expr {2 * 2 + 1}] ; # for key, type and lgth in front of value!!
           dict set fieldInfo fieldLgth [dict get $msgDescPart fieldSize]
           set fields [lreplace $fields $fieldIdx $fieldIdx $fieldInfo]
@@ -99,6 +120,21 @@ namespace eval compMsg {
           dict set compMsgData fields $fields
           dict set compMsgData msgDescParts $msgDescParts
           dict set compMsgDispatcher compMsgData $compMsgData
+        } else {
+          if {$msgKeyValueDescPart ne [list]} {
+            set fields [dict get $compMsgData fields]
+            set fieldInfo [lindex $fields $fieldIdx]
+            set msgDescPart [dict get $compMsgDispatcher msgDescPart]
+            dict set fieldInfo fieldKey [dict get $msgKeyValueDescPart keyId]
+            dict set msgDescPart fieldSize [dict get $msgKeyValueDescPart keyLgth]
+            dict incr msgDescPart fieldSize [expr {2 +1 + 2}] ; # for key, type and lgth in front of value!!
+            set fields [lreplace $fields $fieldIdx $fieldIdx $fieldInfo]
+            set msgDescParts [dict get $compMsgData msgDescParts]
+            set msgDescParts [lreplace $msgDescParts $msgDescPartIdx $msgDescPartIdx $msgDescPart]
+            dict set compMsgData fields $fields
+            dict set compMsgData msgDescParts $msgDescParts
+            dict set compMsgDispatcher compMsgData $compMsgData
+          }
         }
         set compMsgData [dict get $compMsgDispatcher compMsgData]
         incr msgDescPartIdx
@@ -277,11 +313,25 @@ namespace eval compMsg {
     
 puts stderr "need to encrypt message!"
         set headerLgth [dict get $compMsgDispatcher compMsgData headerLgth]
-        set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth} - 1] ; # - 1 for totalCrc!!
+        set totalCrcOffset 0
+        set totalCrc ""
+        set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth}]
+        set hdr [dict get $compMsgDispatcher currHdr]
+        if {[lsearch [dict get $hdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+          if {[lsearch [dict get $hdr fieldSequence] COMP_DISP_U8_TOTAL_CRC] >= 0} {
+            set totalCrcOffset 1
+            incr mlen -1
+            set totalCrc [string range $msgData end end]
+          } else {
+            set totalCrc [string range $msgData end-1 end]
+            incr totalCrcOffset 2
+            incr mlen -2
+          }
+        }
+        set endIdx [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $totalCrcOffset - 1}]
 puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
-        set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] end-1]
+        set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] $endIdx]
         set header [string range $msgData 0 [expr {$headerLgth - 1}]]
-        set totalCrc [string range $msgData end end]
         set result [::compMsg compMsgDispatcher encryptMsg $toCrypt $mlen $cryptKey $klen $cryptKey $ivlen encryptedMsgData encryptedMsgDataLgth]
         checkErrOK $result
         set msgData "${header}${encryptedMsgData}${totalCrc}"

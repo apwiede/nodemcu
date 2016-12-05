@@ -45,6 +45,9 @@ source compMsgAction.tcl
 source compMsgWifiData.tcl
 source compMsgBuildMsg.tcl
 source compMsgModuleData.tcl
+if {[file exist ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl]} {
+  source ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl
+}
 
 set ::crcDebug false
 

@@ -245,19 +245,19 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
     #ets_printf{"getBssScanInfo1: \n"}
-      if {bssScanRunning} {
+      if {$bssScanRunning} {
         # silently ignore 
         return $::COMP_DISP_ERR_OK
       }
-      bssScanRunning = true
-      scan_config.ssid = NULL
-      scan_config.bssid = NULL
-      scan_config.channel = 0
-      scan_config.show_hidden = 1
-      self->bssScanInfos->scanInfoComplete = false
-      result = wifi_station_scan{&scan_config, bssScanDoneCb}
+      set bssScanRunning true
+      dict set scan_config ssid ""
+      dict set scan_config bssid ""
+      dict set scan_config channel 0
+      dict set scan_config show_hidden 1
+      dict set compMsgDispatcher bssScanInfos scanInfoComplete false
+      set result [wifi_station_scan scan_config bssScanDoneCb]
     #ets_printf{"getBssScanInfo2: result: %d\n", result}
-      if {result != true} {
+      if {$result != true} {
         checkErrOK $::COMP_DISP_ERR_STATION_SCAN
       }
     #ets_printf{"getBssScanInfo3:\n"}
@@ -516,8 +516,8 @@ namespace eval compMsg {
       variable compMsgWifiData
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      getWifiKeyValueKeys {compMsgDispatcher compMsgWifiData}
-      set result [setWifiValues {compMsgDispatcher}
+      getWifiKeyValueKeys compMsgDispatcher compMsgWifiData
+      set result [setWifiValues compMsgDispatcher]
       checkErrOK $result
       return $::COMP_DISP_ERR_OK;
     }

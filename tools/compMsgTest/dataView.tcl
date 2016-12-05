@@ -170,6 +170,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {$offset > $lgth} {
+puts stderr "getInt8 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [string range $data $offset $offset]
@@ -215,6 +216,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + 1}] > $lgth} {
+puts stderr "getUint16 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
@@ -232,6 +234,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {offset + 1 > self->lgth} {
+puts stderr "getInt16 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
@@ -281,6 +284,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + 3}] > $lgth} {
+puts stderr "getUint32 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
@@ -322,6 +326,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + 3}] > $lgth} {
+puts stderr "getInt32 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value 0
@@ -390,6 +395,7 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
       upvar $valueVar value
 
       if {[expr {$offset + $size}] > $lgth} {
+puts stderr "getUint8Vector OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set value [string range $data $offset [expr {$offset + $size - 1}]]

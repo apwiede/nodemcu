@@ -130,6 +130,7 @@ namespace eval compMsg {
     namespace export readHeadersAndSetFlags dumpHeaderPart getHeaderFromUniqueFields
     namespace export getMsgPartsFromHeaderPart getWifiKeyValueKeys readActions
     namespace export resetMsgDescPart resetMsgValPart dumpMsgDescPart dumpMsgValPart
+    namespace export getMsgKeyValueDescParts
 
     variable headerInfos [list]
     variable received [list]
@@ -766,6 +767,37 @@ namespace eval compMsg {
           dict set wifiData bssTypes is_hidden $fieldTypeId
         }
       }
+      return $::COMP_MSG_ERR_OK
+    }
+
+    # ================================= getMsgKeyValueDescParts ====================================
+    
+    proc getMsgKeyValueDescParts {compMsgDispatcherVar fileName} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set fd [open [format "%s/%s" $::moduleFilesPath $fileName] "r"]
+      gets $fd line
+      set flds [split $line ","]
+      foreach {dummy numEntries} $flds break
+      set idx 0
+      dict set compMsgDispatcher msgKeyValueDescParts [list]
+      dict set compMsgDispatcher numMsgKeyValueDescParts 0
+      dict set compMsgDispatcher maxMsgKeyValueDescParts $numEntries
+      while {$idx < $numEntries} {
+        gets $fd line
+        set flds [split $line ","]
+        foreach {fieldNameStr fieldValueStr fieldTypeStr fieldLgth} $flds break
+        set msgKeyValueDescPart [dict create]
+        dict set msgKeyValueDescPart keyNameStr $fieldNameStr
+        dict set msgKeyValueDescPart keyId $fieldValueStr
+        dict set msgKeyValueDescPart keyType $fieldTypeStr
+        dict set msgKeyValueDescPart keyLgth $fieldLgth
+        dict lappend compMsgDispatcher msgKeyValueDescParts $msgKeyValueDescPart
+        dict incr compMsgDispatcher numMsgKeyValueDescParts
+        incr idx
+      }
+      close $fd
+#puts stderr "getMsgKeyValueDescParts done"
       return $::COMP_MSG_ERR_OK
     }
 

@@ -624,6 +624,8 @@ namespace eval compMsg {
       upvar $comMsgDispatcherVar compMsgDispatcher
 
 #puts stderr "initDispatcher"
+      set result [::compMsg compMsgMsgDesc getMsgKeyValueDescParts compMsgDispatcher "CompMsgKeyValueKeys.txt"]
+      checkErrOK $result
       set result [::compMsg compMsgIdentify compMsgIdentifyInit compMsgDispatcher]
       checkErrOK $result
       set result [::compMsg compMsgSendReceive compMsgSendReceiveInit compMsgDispatcher]

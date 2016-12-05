@@ -352,6 +352,7 @@ puts stderr "Fitting entry not found!"
       set result [::compMsg compMsgData initReceivedMsg compMsgDispatcher numTableRows numTableRowFields]
       checkErrOK $result
 #puts stderr "handleReceivedMsg done"
+::compMsg compMsgData dumpMsg compMsgDispatcher
       return $::COMP_MSG_ERR_OK
     }
 
