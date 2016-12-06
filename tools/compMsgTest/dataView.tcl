@@ -51,6 +51,7 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export dataView freeDataView setData getFieldTypeIdFromStr getFieldTypeStrFromId appendData getData
+    namespace export getFieldTypeIntFromId
     namespace export getUint8 getInt8 setUint8 setInt8
     namespace export getUint16 getInt16 setUint16 setInt16
     namespace export getUint32 getInt32 setUint32 setInt32
@@ -108,6 +109,22 @@ namespace eval compMsg {
     dict set fieldTypeInts2Ids 11 DATA_VIEW_FIELD_UINT32_VECTOR
     dict set fieldTypeInts2Ids 12 DATA_VIEW_FIELD_INT32_VECTOR
 
+    variable fieldTypeIds2Ints
+    set fieldTypeInts2Ids [dict create]
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_NONE 0
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT8_T 1
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT8_T 2
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT16_T 3
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT16_T 4
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT32_T 5
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT32_T 6
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT8_VECTOR 7
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT8_VECTOR 8
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT16_VECTOR 9
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT16_VECTOR 10
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT32_VECTOR 11
+    dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT32_VECTOR 12
+
     # ================================= getFieldTypeIdFromStr ====================================
 
     proc getFieldTypeIdFromStr {fieldTypeStr fieldTypeIdVar} {
@@ -138,6 +155,19 @@ namespace eval compMsg {
         checkErrOK $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
       }
       set fieldTypeStr [dict get $fieldTypeIds2Names $fieldTypeId]
+      return $::DATA_VIEW_ERR_OK
+    }
+
+    # ================================= getFieldTypeIntFromId ====================================
+
+    proc getFieldTypeIntFromId {fieldTypeId fieldTypeIntVar} {
+      upvar $fieldTypeIntVar fieldTypeInt
+      variable fieldTypeIds2Ints
+
+      if {![dict exists $fieldTypeIds2Ints $fieldTypeId]} {
+        checkErrOK $::DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND
+      }
+      set fieldTypeInt [dict get $fieldTypeIds2Ints $fieldTypeId]
       return $::DATA_VIEW_ERR_OK
     }
 

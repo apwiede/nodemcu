@@ -227,6 +227,7 @@ namespace eval compMsg {
       set msgDescPartIdx 0
       set msgValPartIdx 0
       set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
+      set msgKeyValueDescParts [dict get $compMsgDispatcher msgKeyValueDescParts]
       set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
       set msgValPart [lindex $msgValParts $msgValPartIdx]
       set tableFieldIdx 0
@@ -235,6 +236,23 @@ namespace eval compMsg {
       while {($msgDescPartIdx < [dict get $compMsgData numFields]) && ($msgValPartIdx <= [dict get $compMsgDispatcher compMsgMsgDesc numMsgValParts])} {
         set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
         dict set compMsgDispatcher msgDescPart $msgDescPart
+        set idx 0
+        set found false
+        if {[string range [dict get $msgDescPart fieldNameStr] 0 0] eq "#"} {
+          while {$idx < [llength $msgKeyValueDescParts]} {
+            set msgKeyValueDescPart [lindex $msgKeyValueDescParts $idx]
+            if {[dict get $msgKeyValueDescPart keyNameStr] eq [dict get $msgDescPart fieldNameStr]} {
+              set found true
+              break
+            }
+            incr idx
+          }
+        }
+        if {$found} {
+          dict set compMsgDispatcher msgKeyValueDescPart $msgKeyValueDescPart
+        } else {
+          dict set compMsgDispatcher msgKeyValueDescPart [list]
+        }
         set msgValPart [lindex $msgValParts $msgValPartIdx]
         dict set compMsgDispatcher msgValPart $msgValPart
     #ets_printf{"setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData numFields}
@@ -345,6 +363,7 @@ puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
 #puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
         
+::compMsg compMsgData dumpBinary $msgData [string length $msgData] "msgData"
       # here we need to decide where and how to send the message!!
       # from currHdr we can see the handle type and - if needed - the @dst
       # that is now done in sendMsg!

@@ -111,20 +111,13 @@ puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
         }
         "U" {
           # temporary for simulating Mcu
-          set data [binary encode base64 $msgData]
-if {0} {
-          set ::dev1Buf ""
-          set ::dev1Lgth 0
-          set usbFd [open /dev/ttyUSB0 w+]
-          fconfigure $usbFd -blocking 0 -translation binary
-          fconfigure $usbFd -mode 115200,n,8,1
-          fileevent $usbFd readable [list ::readByte1 $usbFd ::dev1Buf ::dev1Lgth]
-          puts -nonewline $usbFd $msgData
-          flush $usbFd
-}
-#          puts stdout ""
+          foreach ch [split $msgData ""] {
+            puts -nonewline $::fd0 $ch
+            flush $::fd0
+          }
           set fd [open CDTelegram.txt w]
-          puts $fd $data
+          fconfigure $fd -translation binary
+          puts -nonewline $fd $msgData
           flush $fd
           close $fd
 puts stderr "\nhandleType U (Mcu Simulation) done!"

@@ -609,7 +609,25 @@ puts stderr "tableFields!$tableFields!"
         set fields [dict get $compMsgData fields]
         set fieldInfo [lindex $fields $idx]
         if {$fieldNameId == [dict get $fieldInfo fieldNameId]} {
-          set result [::compMsg compMsgDataView setFieldValue $fieldInfo $value 0]
+          if {[string range $fieldName 0 0] eq "#"} {
+            set msgDescPart [dict get $compMsgDispatcher msgDescPart]
+            set msgKeyValueDescPart [dict get $compMsgDispatcher msgKeyValueDescPart]
+            set offset [dict get $fieldInfo fieldOffset]
+            set result [::compMsg dataView setUint16 $offset [dict get $msgKeyValueDescPart keyId]]
+            checkErrOK $result
+            incr offset 2
+            set result [::compMsg dataView getFieldTypeIntFromId [dict get $msgDescPart fieldTypeId] fieldTypeInt]
+            checkErrOK $result
+            set result [::compMsg dataView setUint8 $offset $fieldTypeInt]
+            checkErrOK $result
+            incr offset 1
+            set result [::compMsg dataView setUint16 $offset [expr {[dict get $msgDescPart fieldSize] - (2 + 1 + 2)}]]
+            checkErrOK $result
+            incr offset 2
+            set result [::compMsg dataView setUint8Vector $offset $value [string length $value]]
+          } else {
+            set result [::compMsg compMsgDataView setFieldValue $fieldInfo $value 0]
+          }
           checkErrOK $result
           dict lappend  fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           set fields [lreplace $fields $idx $idx $fieldInfo]
