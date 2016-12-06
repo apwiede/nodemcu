@@ -786,6 +786,7 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           if {($value > -128) && ($value < 128)} {
             set result [::compMsg dataView setInt8 [dict get $fieldInfo fieldOffset] $value]
           } else {
+puts stderr "compMsgDataView setFieldValue int8 value too big"
             checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
           }
         }
@@ -796,6 +797,7 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           if {($value >= 0) && ($value <= 256)} {
             set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
           } else {
+puts stderr "compMsgDataView setFieldValue uint8 value too big"
             checkErrOK $::COMP_MSG_ERR_BAD_VALUE
           }
         }
@@ -803,6 +805,7 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           if {($value > -32767) && ($value < 32767)} {
             set result [::compMsg dataView setInt16 [dict get $fieldInfo fieldOffset] $value]
           } else {
+puts stderr "compMsgDataView setFieldValue int16 value too big"
             checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
           }
         }
@@ -814,6 +817,7 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           if {($value >= 0) && ($value <= 65535)} {
             set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $value]
           } else {
+puts stderr "compMsgDataView setFieldValue uint16 value too big"
             checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
           }
         }
@@ -821,14 +825,16 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
           if {($value > -0x7FFFFFFF) && ($value <= 0x7FFFFFFF)} {
             set result [::compMsg dataView setInt32 [dict get $fieldInfo fieldOffset] $value]
           } else {
+puts stderr "compMsgDataView setFieldValue int32 value too big"
             checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_UINT32_T {
           # we have to do the signed check as numericValue is a signed integer!!
-          if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
+          if {($value > -0x7FFFFFFF) && ($value <= 0x7FFFFFFF)} {
             set result [::compMsg dataView setUint32 [dict get $fieldInfo fieldOffset] $value]
           } else {
+puts stderr "compMsgDataView setFieldValue uint32 value too big !$value!"
             checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
           }
         }

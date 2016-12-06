@@ -40,6 +40,7 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export compMsgModuleDataInit setModuleValues getModuleValue setModuleValue
+    namespace export getReserve4
 
     variable compMsgModuleData
 
@@ -62,125 +63,347 @@ namespace eval compMsg {
       checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
     }
     
-    # ================================= getModuleValue ====================================
+    # ================================= getMACAddr ====================================
     
-    proc getModuleValue {compMsgDispatcherVar which valueTypeId} {
+    proc getMACAddr {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData MACAddr]
+      dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData MACAddr]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getIPAddr ====================================
+    
+    proc getIPAddr {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData IPAddr]
+      dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData IPAddr]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getFirmwareVersion ====================================
+    
+    proc getFirmwareVersion {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData FirmwareVersion]
+      dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData FirmwareVersion]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getSerieNumber ====================================
+    
+    proc getSerieNumber {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData SerieNumber]
+      dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData SerieNumber]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getRSSI ====================================
+    
+    proc getRSSI {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData RSSI]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData RSSI]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getModuleConnection ====================================
+    
+    proc getModuleConnection {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData ModuleConnection]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ModuleConnection]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getDeviceMode ====================================
+    
+    proc getDeviceMode {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData DeviceMode]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData DeviceMode]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getDeviceSecurity ====================================
+    
+    proc getDeviceSecurity {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData DeviceSecurity]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData DeviceSecurity]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getErrorMain ====================================
+    
+    proc getErrorMain {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData ErrorMain]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ErrorMain]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getErrorSub ====================================
+    
+    proc getErrorSub {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData ErrorSub]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ErrorSub]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getDateAndTime ====================================
+    
+    proc getDateAndTime {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData DateAndTime]
+      dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData DateAndTime]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getSSIDs ====================================
+    
+    proc getSSIDs {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData SSIDs]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData SSIDs]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve1 ====================================
+    
+    proc getReserve1 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve1]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve1]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve2 ====================================
+    
+    proc getReserve2 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve2]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve2]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve3 ====================================
+    
+    proc getReserve3 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve3]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve3]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve4 ====================================
+    
+    proc getReserve4 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve4]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve4]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve5 ====================================
+    
+    proc getReserve5 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve5]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve5]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve6 ====================================
+    
+    proc getReserve6 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve6]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve6]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve7 ====================================
+    
+    proc getReserve7 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve7]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve7]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getReserve8 ====================================
+    
+    proc getReserve8 {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Reserve8]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve8]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getGUID ====================================
+    
+    proc getGUID {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData GUID]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData GUID]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getSrcId ====================================
+    
+    proc getSrcId {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData srcId]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData srcId]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getPasswdC ====================================
+    
+    proc getPasswdC {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData passwdC]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData passwdC]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getOperatingMode ====================================
+    
+    proc ::getOperatingMode {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      switch [dict get $compMsgModuleData operatingMode] {
+       MODULE_OPERATING_MODE_CLIENT {
+         set value 1
+       }
+       MODULE_OPERATING_MODE_AP {
+         set value 2
+       }
+       MODULE_OPERATING_MODE_LIGHT_SLEEP_WAKEUP {
+         set value 3
+       }
+       MODULE_OPERATING_MODE_LIGHT_SLEEP {
+         set value 4
+       }
+       MODULE_OPERATING_MODE_WPS {
+         set value 5
+       }
+       MODULE_OPERATING_MODE_MODULE_TEST {
+         set value \xD0
+       }
+       MODULE_OPERATING_MODE_CELAR_PASSWDC {
+         set value \xE0
+       }
+       default {
+         checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
+       }
+      }
+      dict set compMsgDispatcher msgValPart fieldValue $value
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= setOperatingMode ====================================
+    
+    proc setOperatingMode {compMsgDispatcherVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+      set result [::compMsg compMsgModuleData setModuleValue compMsgDispatcher MODULE_INFO_operatingMode MODULE_OPERATING_MODE_AP]
+      checkErrOK $result
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= xgetModuleValue ====================================
+    
+    proc xgetModuleValue {compMsgDispatcherVar which valueTypeId} {
       upvar $compMsgDispatcherVar compMsgDispatcher
       variable compMsgModuleData
     
       switch $which {
-        MODULE_INFO_MACAddr {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData MACAddr]
-        }
-        MODULE_INFO_IPAddr {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData IPAddr]
-        }
-        MODULE_INFO_FirmwareVersion {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData FirmwareVersion]
-        }
-        MODULE_INFO_SerieNumber {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData SerieNumber]
-        }
-        MODULE_INFO_RSSI {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData RSSI]
-        }
-        MODULE_INFO_ModuleConnection {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue = [dict get $compMsgModuleData ModuleConnection]
-        }
-        MODULE_INFO_DeviceMode {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData DeviceMode]
-        }
-        MODULE_INFO_DeviceSecurity {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData DeviceSecurity]
-        }
-        MODULE_INFO_ErrorMain {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ErrorMain]
-        }
-        MODULE_INFO_ErrorSub {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ErrorSub]
-        }
-        MODULE_INFO_DateAndTime {
-          dict set compMsgDispatcher msgValPart fieldKeyValueStr [dict get $compMsgModuleData DateAndTime]
-        }
-        MODULE_INFO_SSIDs {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData SSIDs]
-        }
-        MODULE_INFO_Reserve1 {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve1]
-        }
-        MODULE_INFO_Reserve2 {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve2]
-        }
-        MODULE_INFO_Reserve3 {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve3]
-        }
-        MODULE_INFO_Reserve4 {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve4]
-        }
-        MODULE_INFO_Reserve5 {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve5]
-        }
-        MODULE_INFO_Reserve6 {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve6]
-        }
-        MODULE_INFO_Reserve7 {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve7]
-        }
-        MODULE_INFO_Reserve8 {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Reserve8]
-        }
-        MODULE_INFO_GUID {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData GUID]
-        }
-        MODULE_INFO_srcId {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData srcId]
-        }
-        MODULE_INFO_passwdC {
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData passwdC]
-        }
-        MODULE_INFO_srcId {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData operatingMode]
-        }
-        MODULE_INFO_operatingMode {
-          dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-          switch [dict get $compMsgModuleData operatingMode] {
-           MODULE_OPERATING_MODE_CLIENT {
-             set value 1
-           }
-           MODULE_OPERATING_MODE_AP {
-             set value 2
-           }
-           MODULE_OPERATING_MODE_LIGHT_SLEEP_WAKEUP {
-             set value 3
-           }
-           MODULE_OPERATING_MODE_LIGHT_SLEEP {
-             set value 4
-           }
-           MODULE_OPERATING_MODE_WPS {
-             set value 5
-           }
-           MODULE_OPERATING_MODE_MODULE_TEST {
-             set value \xD0
-           }
-           MODULE_OPERATING_MODE_CELAR_PASSWDC {
-             set value \xE0
-           }
-           default {
-             checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
-           }
-          }
-          dict set compMsgDispatcher msgValPart fieldValue $value
-        }
         default {
           checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
         }
@@ -214,29 +437,11 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       variable compMsgModuleData
     
-#FIXME!!!
-if {0} {
-      dict set compMsgModuleData MACAddr[0] = 0xAB
-      dict set compMsgModuleData MACAddr[1] = 0xCD
-      dict set compMsgModuleData MACAddr[2] = 0xEF
-      dict set compMsgModuleData MACAddr[3] = 0x12
-      dict set compMsgModuleData MACAddr[4] = 0x34
-      dict set compMsgModuleData MACAddr[5] = 0x56
-      dict set compMsgModuleData IPAddr[0] = 0xD4
-      dict set compMsgModuleData IPAddr[1] = 0xC3
-      dict set compMsgModuleData IPAddr[2] = 0x12
-      dict set compMsgModuleData IPAddr[3] = 0x34
-      dict set compMsgModuleData FirmwareVersion[0] = 0x12
-      dict set compMsgModuleData FirmwareVersion[1] = 0x34
-      dict set compMsgModuleData FirmwareVersion[2] = 0x56
-      dict set compMsgModuleData FirmwareVersion[3] = 0xAB
-      dict set compMsgModuleData FirmwareVersion[4] = 0xCD
-      dict set compMsgModuleData FirmwareVersion[5] = 0xEF
-      dict set compMsgModuleData SerieNumber[0] = 0x02
-      dict set compMsgModuleData SerieNumber[1] = 0x13
-      dict set compMsgModuleData SerieNumber[2] = 0x2A
-      dict set compMsgModuleData SerieNumber[3] = 0x10
-}
+      set compMsgModuleData [dict create]
+      dict set compMsgModuleData MACAddr \xAB\xCD\xEF\x12\x34\x56
+      dict set compMsgModuleData IPAddr \xD4\xC3\x12\x34
+      dict set compMsgModuleData FirmwareVersion \x12\x34\x56\xAB\xCD\xEF
+      dict set compMsgModuleData SerieNumber \x02\x13\x2A\x10
 #      dict set compMsgModuleData RSSI [wifi_station_get_rssi]
       dict set compMsgModuleData RSSI -67
       dict set compMsgModuleData ModuleConnection 0x41

@@ -153,6 +153,7 @@ namespace eval compMsg {
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set fieldValueStr [dict get $compMsgDispatcher msgValPart fieldValueStr]
       set fieldNameStr [dict get $compMsgDispatcher msgValPart fieldNameStr]
+#puts stderr "setMsgFieldValue: $fieldNameStr!$fieldValueStr!"
       if {[string range $fieldValueStr 0 0] eq "@"} {
         # call the callback function for the field!!
         if {$numTableRows > 0} {
@@ -173,7 +174,13 @@ namespace eval compMsg {
         } else {
           set callback [dict get $compMsgDispatcher msgValPart fieldValueCallback]
           if {$callback ne [list]} {
-            set result [$callback compMsgDispatcher]
+            if {[info procs ::compMsg::compMsgModuleData::$callback] ne [list]} {
+              set result [::compMsg::compMsgModuleData::$callback compMsgDispatcher value]
+              dict set compMsgDispatcher msgValPart fieldValue $value
+            } else {
+              set result [$callback compMsgDispatcher value]
+              dict set compMsgDispatcher msgValPart fieldValue $value
+            }
             checkErrOK $result
           }
           set value [dict get $compMsgDispatcher msgValPart fieldValue]

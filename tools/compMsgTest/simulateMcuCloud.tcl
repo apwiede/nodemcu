@@ -33,6 +33,8 @@
 # *
 # ==========================================================================
 
+package require aes
+
 source pdict.tcl
 source dataView.tcl
 source compMsgDataView.tcl
@@ -402,22 +404,26 @@ proc InitCompMsg {} {
 
 # ================================ getSrcId ===============================
 
-proc getSrcId {compMsgDispatcherVar} {
+proc getSrcId {compMsgDispatcherVar valueVar} {
   upvar $compMsgDispatcherVar compMsgDispatcher
+  upvar $valueVar value
 
   set msgValPart [dict get $compMsgDispatcher msgValPart]
-  dict set msgValPart fieldValue 12345
+  set value 12345
+  dict set msgValPart fieldValue $value
   dict set compMsgDispatcher msgValPart $msgValPart
   return $::COMP_MSG_ERR_OK
 }
 
 # ================================ getGUID ===============================
 
-proc getGUID {compMsgDispatcherVar} {
+proc getGUID {compMsgDispatcherVar valueVar} {
   upvar $compMsgDispatcherVar compMsgDispatcher
+  upvar $valueVar value
 
   set msgValPart [dict get $compMsgDispatcher msgValPart]
-  dict set msgValPart fieldValue "1234-5678-9012-1"
+  set value "1234-5678-9012-1"
+  dict set msgValPart fieldValue $value
   dict set compMsgDispatcher msgValPart $msgValPart
   return $::COMP_MSG_ERR_OK
 }
