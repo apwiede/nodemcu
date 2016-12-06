@@ -388,15 +388,10 @@ static uint8_t forwardMsg(compMsgDispatcher_t *self) {
   msgParts_t *received;
   msgHeaderInfos_t *hdrInfos;
 
-ets_printf("forwardMsg called\n");
-  result = self->handleReceivedHeader(self);
-  checkErrOK(result);
-  hdrInfos = &self->msgHeaderInfos;
+ets_printf("§forwardMsg called handleType: %c!§", self->compMsgData->currHdr->hdrHandleType);
   received = &self->compMsgData->received;
-  hdrIdx = hdrInfos->currPartIdx;
-  hdr = &hdrInfos->headerParts[hdrIdx];
-ets_printf("handleType: %c msgLgth: %d\n", hdr->hdrHandleType, received->lgth);
-
+ets_printf("§handleType: %c msgLgth: %d§", self->compMsgData->currHdr->hdrHandleType, received->lgth);
+  self->sendMsg(self, received->buf, received->totalLgth);
   return COMP_MSG_ERR_OK;
 }
 

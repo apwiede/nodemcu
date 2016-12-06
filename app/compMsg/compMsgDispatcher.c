@@ -877,6 +877,9 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->addUartRequestData = &addUartRequestData;
   compMsgDispatcher->deleteRequest = &deleteRequest;
 
+  compMsgDispatcher->sendCloudMsg = NULL;
+  compMsgDispatcher->cloudMsgData = NULL;
+  compMsgDispatcher->cloudMsgDataLgth = 0;
 
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
   compMsgDispatcher->createMsgFromHeaderPart = &createMsgFromHeaderPart;

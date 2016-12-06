@@ -293,7 +293,11 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
   u16TotalCrc = false;
   received->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
   checkAllocOK(received->compMsgDataView);
+//ets_printf("§");
+//received->compMsgDataView->dataView->dumpBinary(received->buf+30, 10, "Received->buf");
+//ets_printf("§");
   hdrIdx = hdrInfos->currPartIdx;
+ets_printf("§handleReceivedHeader: currPartIdx: %d totalLgth: %d§", hdrInfos->currPartIdx, received->totalLgth);
   hdr = &hdrInfos->headerParts[hdrIdx];
 
   // set received->lgth to end of the header
@@ -321,9 +325,9 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
     case COMP_DISP_U16_CMD_KEY:
       result = received->compMsgDataView->dataView->getUint16(received->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdKey = u16;
+//ets_printf("§1 u16CmdKey: 0x%04x!hdr: 0x%04x!offset: %d§", received->u16CmdKey, hdr->hdrU16CmdKey, received->fieldOffset);
       received->fieldOffset += 2;
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
-//ets_printf("§1 u16CmdKey: 0x%04x!hdr: 0x%04x§", received->u16CmdKey, hdr->hdrU16CmdKey);
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
         hdrInfos->currPartIdx++;
         result = self->nextFittingEntry(self, 0, received->u16CmdKey);
@@ -467,7 +471,7 @@ if (buffer == NULL) {
     if (received->lgth == hdrInfos->headerLgth) {
 //ets_printf("§received lgth: %d lgth: %d idx: %d§", received->lgth, lgth, idx);
 //ets_printf("§receveived->lgth: %d§", received->lgth);
-      result = getHeaderIndexFromHeaderFields(self, hdrInfos);
+	    result = getHeaderIndexFromHeaderFields(self, hdrInfos);
 //ets_printf("§getHeaderIndexFromHeaderFields result: %d currPartIdx: %d§", result, hdrInfos->currPartIdx);
     }
     // loop until we have full message then decrypt if necessary and then handle the message
@@ -525,7 +529,9 @@ cryptKey = "a1b2c3d4e5f6g7h8";
         return result;
       case 'U':
       case 'W':
+        self->compMsgData->currHdr = hdr;
         result = self->forwardMsg(self);
+ets_printf("§forwardMsg result: %d§", result);
         return result;
       default:
 ets_printf("handleReceivedPart: funny handleType: %c 0x%02x\n", hdr->hdrHandleType, hdr->hdrHandleType);
@@ -578,7 +584,9 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
   msgLgth = encryptedLgth;
 //ets_printf("encryptedLgth: %d %d\n", encryptedLgth, result);
 
-  result = self->sendCloudMsg(self, encrypted, encryptedLgth);
+  self->cloudMsgData = encrypted;
+  self->cloudMsgDataLgth = encryptedLgth;
+  result = self->sendCloudMsg(self);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }

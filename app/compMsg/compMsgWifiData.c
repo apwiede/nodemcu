@@ -126,11 +126,11 @@ static void netsocketToSend(void *arg, void *nud, char *pdata, unsigned short le
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-ets_printf("netsocketSend: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+ets_printf("§netsocketSend: len: %d dispatcher: %p§", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->toSend);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
-ets_printf("send compMsgData: %p lgth: %d\n", self->compMsgData, len);
+ets_printf("§send compMsgData: %p lgth: %d§", self->compMsgData, len);
   self->compMsgData->wud = NULL;
   self->compMsgData->nud = nud;
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
@@ -138,7 +138,7 @@ ets_printf("send compMsgData: %p lgth: %d\n", self->compMsgData, len);
   self->compMsgData->toSendData = (uint8_t *)pdata;
   self->compMsgData->toSendLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
-ets_printf("netsocketSend end result: %d\n", result);
+ets_printf("§netsocketSend end result: %d§", result);
 }
 
 // ================================= netsocketReceived ====================================
@@ -150,18 +150,18 @@ static void netsocketReceived(void *arg, void *nud, char *pdata, unsigned short 
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-ets_printf("netsocketReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+ets_printf("§netsocketReceived: len: %d dispatcher: %p§", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->received);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
-ets_printf("received compMsgData: %p remote_port: %d receivedLgth: %d\n", self->compMsgData, ((netsocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
+ets_printf("§received compMsgData: %p remote_port: %d receivedLgth: %d§", self->compMsgData, ((netsocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
   self->compMsgData->wud = NULL;
   self->compMsgData->nud = nud;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = (uint8_t *)pdata;
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
-ets_printf("netsocketReceived end result: %d\n", result);
+ets_printf("§netsocketReceived end result: %d§", result);
 }
 
 // ================================= websocketTextReceived ====================================

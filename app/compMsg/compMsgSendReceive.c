@@ -120,7 +120,7 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
  * \return Error code or ErrorOK
  *
  */
-static uint8_t sendCloudMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
+static uint8_t sendCloudMsg(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t *b64Msg;
   uint8_t *host;
@@ -133,11 +133,16 @@ static uint8_t sendCloudMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t 
   uint8_t *accept;
   int numericValue;
   size_t payloadLgth;
+  uint8_t *msgData;
+  size_t msgLgth;
 
   if (self->compMsgData->nud == NULL) {
+ets_printf("§COMP_DISP_ERR_NO_WEBSOCKET_OPENED§");
     return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
   }
-ets_printf("sendCloudData: msgLgth: %d\n", msgLgth);
+  msgData = self->cloudMsgData;
+  msgLgth = self->cloudMsgDataLgth;
+ets_printf("§sendCloudData: msgLgth: %d§", msgLgth);
   payloadLgth = c_strlen("POST ");
   hostPart=" HTTP/1.1\r\nHost: ";
   payloadLgth += c_strlen(hostPart);
@@ -166,11 +171,19 @@ ets_printf("sendCloudData: msgLgth: %d\n", msgLgth);
   result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
-  char payload[payloadLgth];
+#ifdef NOTDEF
+//  char payload[payloadLgth];
+  char *payload = os_zalloc(payloadLgth);
   os_sprintf(payload, "POST %s%s%s%s%s%s%s%d%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, msgLgth+1, accept, b64Msg);
-ets_printf("request: %d %s\n", c_strlen(payload), payload);
+ets_printf("§request: %d %s§", c_strlen(payload), payload);
   result = self->netsocketSendData(self->compMsgData->nud, payload, c_strlen(payload));
   checkErrOK(result);
+#endif
+ets_printf("§sendCloudMsg: done result: %d§", result);
+//  self->cloudMsgData = NULL;
+//  self->cloudMsgDataLgth = 0;
+//  self->sendCloudMsg = NULL;
+  return COMP_DISP_ERR_OK;
 }
 
 // ================================= sendMsg ====================================
@@ -178,6 +191,7 @@ ets_printf("request: %d %s\n", c_strlen(payload), payload);
 static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
   uint8_t result;
 
+ets_printf("§sendMsg: %c§", self->compMsgData->currHdr->hdrHandleType);
   switch (self->compMsgData->currHdr->hdrHandleType) {
   case 'A':
 ets_printf("wud: %p\n", self->compMsgData->wud);
@@ -199,6 +213,13 @@ ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_i
   case 'R':
     break;
   case 'U':
+ets_printf("§type U msg send to cloud§");
+    self->cloudMsgData = msgData;
+    self->cloudMsgDataLgth = msgLgth;
+    self->sendCloudMsg = sendCloudMsg;
+    result = self->netsocketStartCloudSocket(self);
+ets_printf("§netsocketStartCloudSocket: result: %d§", result);
+    checkErrOK(result);
     break;
   case 'W':
     break;
@@ -209,6 +230,7 @@ ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_i
   default:
     return COMP_DISP_ERR_BAD_HANDLE_TYPE;
   }
+ets_printf("§sendMsg: done§");
   return COMP_DISP_ERR_OK;
 }
 
