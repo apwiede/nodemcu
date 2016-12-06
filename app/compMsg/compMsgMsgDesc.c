@@ -1088,7 +1088,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   compMsgData_t *compMsgData;
   compMsgMsgDesc_t *compMsgMsgDesc;
 
-ets_printf("§getMsgPartsFromHeaderPart1§\n");
+//ets_printf("§getMsgPartsFromHeaderPart1§\n");
   compMsgData = self->compMsgData;
   compMsgMsgDesc = self->compMsgMsgDesc;
   self->compMsgData->currHdr = hdr;
@@ -1516,7 +1516,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     fieldTypeStr = cp;
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
     checkErrOK(result);
-ets_printf("field: %s length: %s\n", fieldNameStr, cp);
+//ets_printf("field: %s length: %s\n", fieldNameStr, cp);
     if (!isEnd) {
       return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
     }

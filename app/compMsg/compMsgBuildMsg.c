@@ -322,10 +322,11 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   result = self->compMsgData->getMsgData(self, &msgData, &msgLgth);
 //ets_printf("§getMsgData res: %d!msgLgth: %d!§", result, msgLgth);
   checkErrOK(result);
-self->compMsgData->dumpMsg(self);
+//self->compMsgData->dumpMsg(self);
 //ets_printf("§");
-self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dumpMsg");
+//self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dumpMsg");
 //ets_printf("§");
+//ets_printf("§encryption: %c§", self->compMsgData->currHdr->hdrEncryption);
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {
     uint8_t *toCryptPtr;
     uint8_t *encryptedMsgData;
@@ -358,13 +359,14 @@ self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dump
 ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n", mlen, encryptedMsgDataLgth);
     }
     c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);
-ets_printf("crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
+ets_printf("§crypted: len: %d!mlen: %d!§", encryptedMsgDataLgth, mlen);
   }
   // if we have a @totalCrc we need to set it here
+//ets_printf("§totalCrc: %d§", self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC);
   if (self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
     fieldInfo = &self->compMsgData->fields[self->compMsgData->numFields - 1];
     result = self->compMsgData->compMsgDataView->setTotalCrc(self->compMsgData->compMsgDataView, fieldInfo);
-ets_printf("setTotalCrc: result: %d fieldOffset: %d\n", result, fieldInfo->fieldOffset);
+//ets_printf("§setTotalCrc: result: %d fieldOffset: %d§", result, fieldInfo->fieldOffset);
     checkErrOK(result);
   }
   // here we need to decide where and how to send the message!!

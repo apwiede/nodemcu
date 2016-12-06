@@ -765,7 +765,7 @@ uint8_t *handle;
 #define KEY_VALUE_DESC_PARTS_FILE "CompMsgKeyValueKeys.txt"
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
-#define WEBSOCKETAP
+//#define WEBSOCKETAP
 #ifdef WEBSOCKETAP
 // FIXME !! temporary starting for testing only !!
 ets_printf("start RunAPMode\n");
@@ -795,7 +795,7 @@ ets_printf("handle: %s result: %d\n", handle, result);
 checkErrOK(result);
 #endif
 // if nothing of the above is defined the uart input callback is used
-//#define UART_INPUT
+#define UART_INPUT
 #ifdef UART_INPUT
   id = 0;
   stopbits = PLATFORM_UART_STOPBITS_1;
