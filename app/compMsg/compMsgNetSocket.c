@@ -207,7 +207,7 @@ ets_printf("netsocket_recv:remote_port: %d\n", nud->remote_port);
 
 }
 
-static uint16_t tcp_server_timeover = 30;
+static uint16_t tcp_server_timeover = 10;
 
 // ================================= serverDisconnected  ====================================
 
@@ -375,7 +375,7 @@ static void netSocketConnected(void *arg) {
   netsocketUserData_t *nud;
   int result;
 
-ets_printf("§netSocketConnected§");
+//ets_printf("§netSocketConnected§");
   pesp_conn = arg;
   if (pesp_conn == NULL) {
     return;
@@ -386,22 +386,17 @@ ets_printf("§netSocketConnected§");
   }
   // can receive and send data
   result = espconn_regist_recvcb (pesp_conn, netSocketReceived);
-ets_printf("§espconn_regist_recvcb: result: %d§", result);
+//ets_printf("§espconn_regist_recvcb: result: %d§", result);
   result = espconn_regist_sentcb (pesp_conn, netSocketSent);
-ets_printf("§espconn_regist_sentcb: result: %d§", result);
+//ets_printf("§espconn_regist_sentcb: result: %d§", result);
   result = espconn_regist_disconcb (pesp_conn, netSocketDisconnected);
-ets_printf("§espconn_regist_disconcb: result: %d§", result);
+//ets_printf("§espconn_regist_disconcb: result: %d§", result);
   nud->compMsgDispatcher->compMsgData->nud = nud;
   if (nud->compMsgDispatcher->sendCloudMsg != NULL) {
     result = nud->compMsgDispatcher->sendCloudMsg(nud->compMsgDispatcher);
-ets_printf("§cloudMsgSend: result: %d§", result);
   } else {
 ets_printf("§nud->compMsgDispatcher->cloudMsgSend is NULL§");
   }
-#endif
-// FIXME TEMORARY
-//  char *str = "Hello World";
-//  nud->netsocketToSend(nud->compMsgDispatcher, nud, str, c_strlen(str));
 }
 
 // ================================= socketConnect  ====================================
@@ -411,7 +406,7 @@ static void socketConnect(void *arg) {
   netsocketUserData_t *nud;
   int result;
 
-ets_printf("§socketConnect§");
+//ets_printf("§socketConnect§");
   pesp_conn = arg;
   if (pesp_conn == NULL) {
     return;
@@ -423,16 +418,16 @@ ets_printf("§socketConnect§");
 #ifdef CLIENT_SSL_ENABLE
   if (nud->secure){
     espconn_secure_set_size(ESPCONN_CLIENT, 5120); /* set SSL buffer size */
-ets_printf("§call espconn_secure_connect§");
+//ets_printf("§call espconn_secure_connect§");
     int espconn_status = espconn_secure_connect(pesp_conn);
-ets_printf("§after call espconn_secure_connect status: %d§", espconn_status);
+//ets_printf("§after call espconn_secure_connect status: %d§", espconn_status);
 
   } else
 #endif
   {
-ets_printf("§socketConnect called§");
+//ets_printf("§socketConnect called§");
     result = espconn_connect(pesp_conn);
-ets_printf("§espconn_connect: result: %d§", result);
+//ets_printf("§espconn_connect: result: %d§", result);
   }
 }
 
@@ -444,7 +439,7 @@ static void serverConnected(void *arg) {
   int result;
   int i;
 
-ets_printf("§serverConnected: arg: %p§", arg);
+//ets_printf("§serverConnected: arg: %p§", arg);
   pesp_conn = arg;
   nud = (netsocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
@@ -489,7 +484,6 @@ ets_printf("§regist serverDisconnected err: %d§", result);
   if (result != COMP_DISP_ERR_OK) {
 ets_printf("§regist serverReconnected err: %d§", result);
   }
-
 }
 
 // ================================= netSocketStart ====================================
@@ -513,7 +507,7 @@ ets_printf("§netSocketStart§");
 // ================================= socketDnsFound ====================================
 
 static void socketDnsFound(const char *name, ip_addr_t *ipaddr, void *arg) {
-ets_printf("§socket_dns_found is called§");
+//ets_printf("§socket_dns_found is called§");
   struct espconn *pesp_conn = arg;
   netsocketUserData_t *nud;
   if (pesp_conn == NULL) {
