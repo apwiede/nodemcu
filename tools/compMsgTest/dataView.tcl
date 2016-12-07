@@ -51,7 +51,7 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export dataView freeDataView setData getFieldTypeIdFromStr getFieldTypeStrFromId appendData getData
-    namespace export getFieldTypeIntFromId
+    namespace export getFieldTypeIntFromId dumpBinary
     namespace export getUint8 getInt8 setUint8 setInt8
     namespace export getUint16 getInt16 setUint16 setInt16
     namespace export getUint32 getInt32 setUint32 setInt32
@@ -125,6 +125,24 @@ namespace eval compMsg {
     dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT32_VECTOR 11
     dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT32_VECTOR 12
 
+    # ================================= dumpBinary ====================================
+    
+    proc dumpBinary {data lgth what} {
+      variable compMsgData
+
+      puts stderr $what
+      set idx 0
+      foreach ch [split $data ""] {
+        set pch $ch
+        binary scan $ch c pch
+        puts stderr "$idx: $ch [format 0x%02x [expr {$pch & 0xFF}]]!"
+        incr idx
+        if {$idx > $lgth} {
+          break
+        }
+      }
+    }
+
     # ================================= getFieldTypeIdFromStr ====================================
 
     proc getFieldTypeIdFromStr {fieldTypeStr fieldTypeIdVar} {
@@ -183,6 +201,11 @@ puts stderr "getUint8 OUT_OF_RANGE!$offset!$lgth!"
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
       set ch [string range $data $offset $offset]
+if {$ch eq ""} {
+puts stderr "getUint8 ch is empty: offset: $offset!lgth: $lgth!ll data: [string length $data]!"
+dumpBinary $data $lgth "getuint8"
+}
+      set pch $ch
       binary scan $ch c pch
       if {[string is integer $pch]} {
         set value [expr {$pch & 0xFF}]
@@ -455,6 +478,10 @@ puts stderr "getUint8Vector OUT_OF_RANGE!$offset!$lgth!"
       if {[expr {$offset + $size}] > $lgth} {
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
+      # expand to field length otherwise problems with "string replace" !!!
+      while {[string length $value] < $size} {
+        append value " "
+      }
       set data [string replace $data $offset [expr {$offset + $size - 1}] [string range $value 0 [expr {$size - 1}]]]
       return $::DATA_VIEW_ERR_OK
     }
@@ -633,6 +660,7 @@ puts stderr "getUint8Vector OUT_OF_RANGE!$offset!$lgth!"
       variable data
       variable lgth
 
+puts stderr "setData: size: $size!ll buffer: [string length $buffer]!"
       if {[string length $data] != 0} {
         set data ""
       }

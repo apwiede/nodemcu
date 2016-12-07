@@ -72,6 +72,8 @@ set ::msgLgth 0
 set ::afterId ""
 set ::inReceiveMsg false
 
+set ::handleInputDbg false
+
 # ================================ checkErrOK ===============================
 
 proc checkErrOK {result} {
@@ -238,7 +240,14 @@ proc handleInput0 {ch bufVar lgthVar} {
 
   set pch 0
   binary scan $ch c pch
+#if {$::handleInputDbg} {
 #puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+#}
+#  if {$::lastCh eq "\r"} {
+#    puts stderr "==buf: $buf!"
+#    set buf ""
+#    set lgth 0
+#  }
   if {$::inReceiveMsg && ($pch == 0)} {
     if {$::lastCh eq "M"} {
 #puts stderr "found MSG START"
@@ -280,6 +289,10 @@ puts stderr "got '>'"
       set ::inDebug false
 # puts stderr "  ==handleInput0: DBG: $::debugBuf!"
       append ::debugTxt $ch
+#if {[string match "espconn_regist_disconcb:*" $::debugTxt]} {
+#  set ::handleInputDbg true
+#  puts stderr "set ::handleInputDbg true"
+#}
 puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
       set lgth 0
       set buf ""

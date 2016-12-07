@@ -56,6 +56,10 @@ source compMsgWifiData.tcl
 source compMsgBuildMsg.tcl
 source compMsgModuleData.tcl
 
+if {[file exist ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl]} {
+  source ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl
+}
+
 set ::PORT 80
 set ::path /getaplist
 set ::host "192.168.4.1"
@@ -276,6 +280,29 @@ if {0} {
   pack $tableFr
 }
 
+# ================================ handleRow ===============================
+
+proc handleRow {w x y} {
+puts stderr "handleRow: $w $x $y!"
+  foreach {tbl x y} [tablelist::convEventFields $w $x $y] {}
+  puts "clicked on cell [$tbl containingcell $x $y]"
+  set lst [$tbl getcells 0,0 0,0]
+  set ssid [lindex $lst 0]
+  set fd [open [format "%s/../%s" $::moduleFilesPath myConfig.txt] "r"]
+  gets $fd line1
+  set flds1 [split $line1 ","]
+  dict set ::compMsgDispatcher clientSsid [lindex $flds1 1]
+  gets $fd line2
+  set flds2 [split $line2 ","]
+  dict set ::compMsgDispatcher clientPassword [lindex $flds2 1]
+  close $fd
+puts stderr "ssid: [dict get $::compMsgDispatcher clientSsid]![dict get $::compMsgDispatcher clientPassword]!"
+  set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 SP hdr]
+  checkErrOK $result
+  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
+  checkErrOK $result
+}
+
 # ================================ fillTable ===============================
 
 proc fillTable {} {
@@ -307,6 +334,7 @@ proc fillTable {} {
     }
     incr idx
   }
+  bind [$::APTableId  bodytag] <Button-1> {handleRow %W %x %y}
 }
 
 # ================================ clientHandler ===============================
@@ -325,7 +353,7 @@ proc clientHandler { sock type msg } {
     }
     binary {
 #      puts "===RECEIVED BINARY: $msg"
-# ::compMsg compMsgData dumpBinary $msg [string length $msg] "MSG"
+# ::compMsg dataView dumpBinary $msg [string length $msg] "MSG"
 puts stderr "need handler for received MSG!lgth: [string length $msg]!"
 
       set result [::compMsg compMsgIdentify compMsgIdentifyInit ::compMsgDispatcher]
@@ -341,7 +369,7 @@ flush $fd
 close $fd
       set result [::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]]
       checkErrOK $result
-fillTable
+      fillTable
     }
   }
 }
@@ -353,7 +381,8 @@ proc getAPInfos { sock } {
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 AD hdr]
   checkErrOK $result
 #puts stderr "===after getHeaderFromUniqueFields"
-  set ::compMsgDispatcher [dict create]
+  set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
+  checkErrOK $result
   set result [::compMsg compMsgDispatcher setSocketForAnswer ::compMsgDispatcher $sock]
 #puts stderr "===after setSocket"
   checkErrOK $result
@@ -365,8 +394,7 @@ proc getAPInfos { sock } {
 # ================================ InitCompMsg ===============================
 
 proc InitCompMsg {} {
-  set ::compMsgDispatcher [dict create]
-  set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
+  set result [::compMsg compMsgDispatcher newCompMsgDispatcher ::compMsgDispatcher]
   checkErrOK $result
   set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
   checkErrOK $result

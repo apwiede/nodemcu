@@ -145,47 +145,27 @@ namespace eval compMsg {
     
     # ================================= setMsgFieldValue ====================================
     
-    proc setMsgFieldValue {compMsgDispatcherVar numTableRowsVar numTableRowFieldsVar type} {
+    proc setMsgFieldValue {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
-      upvar $numTableRowsVar numTableRows
-      upvar $numTableRowFieldsVar numTableRowFields
     
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set fieldValueStr [dict get $compMsgDispatcher msgValPart fieldValueStr]
       set fieldNameStr [dict get $compMsgDispatcher msgValPart fieldNameStr]
-#puts stderr "setMsgFieldValue: $fieldNameStr!$fieldValueStr!"
       if {[string range $fieldValueStr 0 0] eq "@"} {
         # call the callback function for the field!!
-        if {$numTableRows > 0} {
-          set currTableRow 0
-          set currTableCol 0
-          while {$currTableRow < $numTableRows} {
-            incr currTableRow
+        set callback [dict get $compMsgDispatcher msgValPart fieldValueCallback]
+        if {$callback ne [list]} {
+          if {[info procs ::compMsg::compMsgModuleData::$callback] ne [list]} {
+            set result [::compMsg::compMsgModuleData::$callback compMsgDispatcher value]
+            dict set compMsgDispatcher msgValPart fieldValue $value
+          } else {
+            set result [$callback compMsgDispatcher value]
+            dict set compMsgDispatcher msgValPart fieldValue $value
           }
-          set currTableRow 0
-          incr currTableCol
-          if {$currTableCol > $numTableRowFields} {
-            # table rows done
-            set numTableRows 0
-            set numTableRowFields 0
-            set currTableRow 0
-            set currTableCol 0
-          }
-        } else {
-          set callback [dict get $compMsgDispatcher msgValPart fieldValueCallback]
-          if {$callback ne [list]} {
-            if {[info procs ::compMsg::compMsgModuleData::$callback] ne [list]} {
-              set result [::compMsg::compMsgModuleData::$callback compMsgDispatcher value]
-              dict set compMsgDispatcher msgValPart fieldValue $value
-            } else {
-              set result [$callback compMsgDispatcher value]
-              dict set compMsgDispatcher msgValPart fieldValue $value
-            }
-            checkErrOK $result
-          }
-          set value [dict get $compMsgDispatcher msgValPart fieldValue]
-          set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
+          checkErrOK $result
         }
+        set value [dict get $compMsgDispatcher msgValPart fieldValue]
+        set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
       } else {
         set msgValPart [dict get $compMsgDispatcher msgValPart]
         if {[lsearch [dict get $msgValPart fieldFlags] COMP_DISP_DESC_VALUE_IS_NUMBER] >= 0} {
@@ -210,7 +190,7 @@ namespace eval compMsg {
         }
         checkErrOK $result
       }
-    #ets_printf{"setMsgFieldValue: done\n"}
+#puts stderr "setMsgFieldValue: done\n"
       return $::COMP_DISP_ERR_OK
     }
     
@@ -221,18 +201,12 @@ namespace eval compMsg {
     
     #ets_printf{"setMsgValues\n"}
       set compMsgData [dict get $compMsgDispatcher compMsgData]
-#      set handle [dict get $compMsgDispatcher msgHandle]
-      set type "A"
-      # loop over MSG Fields, to check if we eventually have table rows!!
       set msgDescPartIdx 0
       set msgValPartIdx 0
       set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
       set msgKeyValueDescParts [dict get $compMsgDispatcher msgKeyValueDescParts]
       set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
       set msgValPart [lindex $msgValParts $msgValPartIdx]
-      set tableFieldIdx 0
-      set numTableRows 0
-      set numTableRowFields 0
       while {($msgDescPartIdx < [dict get $compMsgData numFields]) && ($msgValPartIdx <= [dict get $compMsgDispatcher compMsgMsgDesc numMsgValParts])} {
         set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
         dict set compMsgDispatcher msgDescPart $msgDescPart
@@ -255,48 +229,29 @@ namespace eval compMsg {
         }
         set msgValPart [lindex $msgValParts $msgValPartIdx]
         dict set compMsgDispatcher msgValPart $msgValPart
-    #ets_printf{"setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n", fieldIdx, tableFieldIdx, entryIdx, compMsgData numFields}
-    #ets_printf{"fieldIdx: %d entryIdx: %d numtableRows: %d\n", fieldIdx, entryIdx, numTableRows}
-        if {$numTableRows > 0} {
-          set tableFields [dict get $compMsgData tableFields]
-          set fieldInfo [lindex $tableFields $tableFieldIdx]
-          incr tableFieldIdx
-        } else {
-          set fields [dict get $compMsgData fields]
-          set fieldInfo [lindex $fields $msgDescPartIdx]
-          incr msgDescPartIdx
-        }
-    #ets_printf{"fieldNameId: %d numtabrows: %d\n", fieldInfo fieldNameId, numTableRows}
+        set fields [dict get $compMsgData fields]
+        set fieldInfo [lindex $fields $msgDescPartIdx]
         set fieldNameId [dict get $fieldInfo fieldNameId]
         set fieldNameStr [dict get $msgDescPart fieldNameStr]
-        switch $fieldNameId {
-          COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
-            set numTableRows [dict get $compMsgData numTableRows]
-            set numTableRowFields [dict get $compMsgData numTableRowFields]
-          }
-          default {
-            if {($msgValPart ne [list]) && ([dict get $fieldInfo fieldNameId] eq [dict get $msgValPart fieldNameId])} {
+        if {($msgValPart ne [list]) && ([dict get $fieldInfo fieldNameId] eq [dict get $msgValPart fieldNameId])} {
 #puts stderr [format "default fieldNameId: %s buildMsgInfo fieldNameId: %s" [dict get $fieldInfo fieldNameId] [dict get $msgValPart fieldNameId]]
-              set result [setMsgFieldValue compMsgDispatcher numTableRows numTableRowFields $type]
-              checkErrOK $result
-              set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
-              set msgValPart [dict get $compMsgDispatcher msgValPart]
-              set msgValParts [lreplace $msgValParts $msgValPartIdx $msgValPartIdx $msgValPart]
-              dict set compMsgDispatcher compMsgData msgValParts $msgValParts
-              incr msgValPartIdx
-            }
-          }
+          set result [setMsgFieldValue compMsgDispatcher]
+          checkErrOK $result
+          set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
+          set msgValPart [dict get $compMsgDispatcher msgValPart]
+          set msgValParts [lreplace $msgValParts $msgValPartIdx $msgValPartIdx $msgValPart]
+          dict set compMsgDispatcher compMsgData msgValParts $msgValParts
+          incr msgValPartIdx
         }
+        incr msgDescPartIdx
       }
       set msgCmdKey [dict get $compMsgDispatcher currHdr hdrU16CmdKey]
       set result [::compMsg compMsgData setFieldValue compMsgDispatcher "@cmdKey" $msgCmdKey]
       checkErrOK $result
-#      dict set compMsgDispatcher compMsgData $compMsgData
-    
       set result [::compMsg compMsgData prepareMsg compMsgDispatcher]
       checkErrOK $result
 #puts stderr "setMsgValues end"
-#::compMsg compMsgData dumpMsg compMsgDispatcher
+::compMsg compMsgData dumpMsg compMsgDispatcher
       return $::COMP_DISP_ERR_OK
     }
 
@@ -323,14 +278,14 @@ namespace eval compMsg {
       
       set result [fixOffsetsForKeyValues compMsgDispatcher]
       checkErrOK $result
-      set result [::compMsg compMsgData initMsg compMsgDispatcher numTableRows numTableRowFields]
+      set result [::compMsg compMsgData initMsg compMsgDispatcher]
       checkErrOK $result
       set result [setMsgValues compMsgDispatcher]
       checkErrOK $result
       set result [::compMsg compMsgData getMsgData compMsgDispatcher msgData msgLgth]
       checkErrOK $result
 #::compMsg compMsgData dumpMsg compMsgDispatcher
-#::compMsg compMsgData dumpBinary $msgData $msgLgth "msgData"
+#::compMsg compMsgData dataView $msgData $msgLgth "msgData"
       if {[dict get $compMsgDispatcher currHdr hdrEncryption] eq "E"} {
         set cryptKey "a1b2c3d4e5f6g7h8"
         set ivlen 16
@@ -363,7 +318,7 @@ puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
 #puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
         
-::compMsg compMsgData dumpBinary $msgData [string length $msgData] "msgData"
+#::compMsg dataView dumpBinary $msgData [string length $msgData] "msgData"
       # here we need to decide where and how to send the message!!
       # from currHdr we can see the handle type and - if needed - the @dst
       # that is now done in sendMsg!

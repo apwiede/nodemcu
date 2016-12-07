@@ -46,9 +46,6 @@
 #     fieldOffset
 #   numFields
 #   maxFields
-#   numTableRows
-#   numTableRowFields
-#   numRowFields
 #   fieldOffset
 #   totalLgth
 #   cmdLgth
@@ -70,8 +67,8 @@ namespace eval compMsg {
       
     namespace export compMsgDataInit freeCompMsgDataView createMsg addField
     namespace export initMsg prepareMsg setMsgData getMsgData getFieldTypeFromFieldNameId
-    namespace export setFieldValue getFieldValue setTableFieldValue getTableFieldValue
-    namespace export addFlag deleteFlag dumpBinary dumpMsg initReceivedMsg
+    namespace export setFieldValue getFieldValue
+    namespace export addFlag deleteFlag dumpMsg initReceivedMsg
 
     variable compMsgData [dict create]
     variable numHandles 0
@@ -83,24 +80,6 @@ namespace eval compMsg {
     dict set compMsgHandles handles [list]
     dict set compMsgHandles numHandles 0
 
-
-    # ================================= dumpBinary ====================================
-    
-    proc dumpBinary {data lgth what} {
-      variable compMsgData
-
-      puts stderr $what
-      set idx 0
-      foreach ch [split $data ""] {
-        set pch $ch
-        binary scan $ch c pch
-        puts stderr "$idx: $ch [format 0x%02x [expr {$pch & 0xFF}]]!"
-        incr idx
-        if {$idx > $lgth} {
-          break
-        }
-      }
-    }
 
     # ===================== dumpValues =============================
     
@@ -135,7 +114,6 @@ namespace eval compMsg {
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       puts stderr "dumpMsg handle: [dict get $compMsgData handle]"
       puts stderr [format "  numFields: %d max: %d" [dict get $compMsgData numFields] [dict get $compMsgData maxFields]]
-      puts stderr [format "  numTableRows: %d numTableRowFields: %d numRowFields: %d" [dict get $compMsgData numTableRows] [dict get $compMsgData numTableRowFields] [dict get $compMsgData numRowFields]]
       puts stderr [format "  headerLgth: %d totalLgth: %d fieldOffset: %d" [dict get $compMsgData headerLgth] [dict get $compMsgData totalLgth] [dict get $compMsgData fieldOffset]]
       puts stderr [format "  flags: %s" [dict get $compMsgData flags]]
 
@@ -215,17 +193,6 @@ namespace eval compMsg {
       set fields [dict get $compMsgData fields]
       while {$idx < [dict get $compMsgData numFields]} {
         set fieldInfo [lindex $fields $idx]
-        if {[dict get $fieldInfo fieldNameId] == $fieldNameId} {
-          set fieldTypeId [dict get $fieldInfo fieldTypeId]
-          return $::COMP_DISP_ERR_OK
-        }
-        incr idx
-      }
-      # and now check the table fields
-      set idx 0
-      set fields [dict get $compMsgData tableFields]
-      while {$idx < [dict get $compMsgData numTableRowFields]} {
-        set fieldInfo [lindex fields $idx]
         if {[dict get $fieldInfo fieldNameId] == $fieldNameId} {
           set fieldTypeId [dict get $fieldInfo fieldTypeId]
           return $::COMP_DISP_ERR_OK
@@ -376,6 +343,7 @@ namespace eval compMsg {
       # temporary replace data entry of dataView by our param data
       # to be able to use the get* functions for gettting totalLgth entry value
       set result [::compMsg dataView getData saveData saveLgth]
+puts stderr "compMsgData1 setData"
       set result [::compMsg dataView setData $data [expr {[dict get $fieldOffset fieldOffset] + 4}]]
       # get totalLgth value from data
       set result [::compMsg dataView getUint16 [dict get $fieldInfo fieldOffset] lgth]
@@ -384,7 +352,7 @@ namespace eval compMsg {
         checkErrOK $::COMP_MSG_ERR_BAD_DATA_LGTH
       }
       # now make a copy of the data to be on the safe side
-      # for freeing the Lua space in Lua set the variable to nil!!
+puts stderr "compMsgData2 setData"
       set result [::compMsg dataView setData $data [dict get $compMsgDate totalLgth]
       # and now set the IS_SET flags and other stuff
       set idx 0
@@ -421,9 +389,6 @@ namespace eval compMsg {
       dict set compMsgData flags [list]
       dict set compMsgData numFields 0
       dict set compMsgData maxFields $numFields
-      dict set compMsgData numTableRows 0
-      dict set compMsgData numTableRowFields 0
-      dict set compMsgData numRowFields 0
       dict set compMsgData fieldOffset 0
       dict set compMsgData totalLgth 0
       dict set compMsgData cmdLgth 0
@@ -463,82 +428,18 @@ namespace eval compMsg {
         dict incr compMsgData numFields 1
         return $::COMP_MSG_ERR_OK
       }
-      if {$fieldName eq "@tablerows"} {
-        dict set compMsgData numTableRows $fieldLgth
-        set fieldLgth 0
-        dict lappend compMsgData flags COMP_MSG_HAS_TABLE_ROWS
-        dict set fieldInfo fieldNameId $fieldNameId
-        dict set fieldInfo fieldTypeId $fieldTypeId
-        dict set fieldInfo fieldLgth $fieldLgth
-        dict set fieldInfo fieldFlags [list]
-        dict lappend compMsgData fields $fieldInfo
-        dict incr compMsg numFields 1
-        return $::COMP_MSG_ERR_OK
+      if {$fieldName eq "@crc"} {
+        dict lappend compMsgData flags COMP_MSG_HAS_CRC
+        if {$fieldType eq "uint8_t"} {
+          dict lappend compMsgData flags COMP_MSG_UINT8_CRC
+        }
       }
-      if {$fieldName eq "@tablerowfields"} {
-        dict set compMsgData numTableRowFields $fieldLgth
-        set fieldLgth 0
-        dict set fieldInfo fieldNameId $fieldNameId
-        dict set fieldInfo fieldTypeId $fieldTypeId
-        dict set fieldInfo fieldLgth $fieldLgth
-        dict set fieldInfo fieldFlags [list]
-        dict lappend compMsgData fields $fieldInfo
-        set numTableFields [expr {[dict get $compMsgData numTableRows] * [dict get $compMsgData numTableRowFields]}]
-        if {([dict get $compMsgData tableFields] eq [list]) && ($numTableFields != 0)} {
-        }
-        dict incr compMsgData numFields 1
-        return $::COMP_MSG_ERR_OK
-      }
-      set numTableRowFields [dict get $compMsgData numTableRowFields]
-      set numTableRows [dict get $compMsgData numTableRows]
-      set numTableFields [expr {$numTableRows * $numTableRowFields}]
-      if {!(($numTableFields > 0) && ([dict get $compMsgData numRowFields] < $numTableRowFields)) || ($numTableRowFields == 0)} {
-        set numTableFields 0
-        set numTableRows 1
-        set numTableRowFields 0
-    
-        if {$fieldName eq "@crc"} {
-          dict lappend compMsgData flags COMP_MSG_HAS_CRC
-          if {$fieldType eq "uint8_t"} {
-            dict lappend compMsgData flags COMP_MSG_UINT8_CRC
-          }
-        }
-        dict set fieldInfo fieldNameId $fieldNameId
-        dict set fieldInfo fieldTypeId $fieldTypeId
-        dict set fieldInfo fieldLgth $fieldLgth
-        dict set fieldInfo fieldFlags [list]
-        dict lappend compMsgData fields $fieldInfo
-        dict incr compMsgData numFields 1
-      } else {
-        set row 0
-        set tableFields [list]
-        set tabIdx 0
-        set numTabFlds [expr {$numTableRowFields * $numTableRows}]
-        if {[llength [dict get $compMsgData tableFields]] == 0} {
-          while {$tabIdx < $numTabFlds} {
-            lappend tableFields [list]
-            incr tabIdx
-          }
-puts stderr "ll tableFields![llength $tableFields]!"
-          dict set compMsgData tableFields $tableFields
-        }
-        set tableFields [dict get $compMsgData tableFields]
-        while {$row < $numTableRows} {
-          set cellIdx [expr {[dict get $compMsgData numRowFields] + $row * $numTableRowFields}]
-          set fieldInfo [dict create]
-    #ets_printf{"table field1: %s totalLgth: %d cmdLgth: %d\n", fieldInfo->fieldStr, compMsg->hdr.hdrInfo.hdrKeys.totalLgth, compMsg->hdr.hdrInfo.hdrKeys.cmdLgth}
-puts stderr "TAB!$fieldNameId!$row!$cellIdx!"
-          dict set fieldInfo fieldNameId $fieldNameId
-          dict set fieldInfo fieldTypeId $fieldTypeId
-          dict set fieldInfo fieldLgth $fieldLgth
-          dict set fieldInfo fieldFlags [list]
-          set tableFields [lreplace $tableFields $cellIdx $cellIdx $fieldInfo]
-          incr row
-        }
-        dict set compMsgData tableFields $tableFields
-puts stderr "tableFields!$tableFields!"
-        dict incr compMsgData numRowFields 1
-      } 
+      dict set fieldInfo fieldNameId $fieldNameId
+      dict set fieldInfo fieldTypeId $fieldTypeId
+      dict set fieldInfo fieldLgth $fieldLgth
+      dict set fieldInfo fieldFlags [list]
+      dict lappend compMsgData fields $fieldInfo
+      dict incr compMsgData numFields 1
       return $::COMP_MSG_ERR_OK
     }
 
@@ -643,70 +544,6 @@ puts stderr "tableFields!$tableFields!"
       checkErrOK $::DATA_VIEW_ERR_FIELD_NOT_FOUND
     }
     
-    
-    # ================================= getTableFieldValue ====================================
-    
-    proc getTableFieldValue {fieldName row valueVar} {
-      variable compMsgData
-      upvar $valueVar value
-    
-#puts stderr "getTableFieldValue!"
-      if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_INITTED
-      }
-      set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId COMP_MSG_NO_INCR]
-      checkErrOK $result
-      if {[string range $fieldName 0 0] eq "@"} {
-        return $::COMP_MSG_ERR_NO_SUCH_FIELD
-      }
-      if {$row >= [dict get $compMsgData numTableRows]} {
-        checkErrOK $::COMP_MSG_ERR_BAD_TABLE_ROW
-      }
-
-      set idx 0
-      set cellIdx [expr {$row * [dict get $compMsgData numRowFields]}]
-      set tableFields [dict get $compMsgData tableFields]
-      while {$idx < [dict get $compMsgData numRowFields]} {
-        set fieldInfo [lindex $tableFields $cellIdx]
-        if {$fieldNameId == [dict get $fieldInfo fieldNameId]} {
-          return [::compMsg compMsgDataView getFieldValue $fieldInfo value 0]
-        }
-        incr cellIdx
-        incr idx
-      }
-      checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
-    }
-    
-    # ================================= setTableFieldValue ====================================
-    
-    proc setTableFieldValue {fieldName row value} {
-      variable compMsgData
-    
-      if {(self->flags & COMP_MSG_IS_INITTED} == 0) {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_INITTED
-      }
-      result = self->compMsgDataView->getFieldNameIdFromStr{self->compMsgDataView, fieldName, &fieldNameId, COMP_MSG_NO_INCR}
-      checkErrOK{result}
-      if {fieldName[0] == '@'} {
-        checkErrOK $::COMP_MSG_ERR_FIELD_CANNOT_BE_SET
-      }
-      if {row >= self->numTableRows} {
-        checkErrOK $::COMP_MSG_ERR_BAD_TABLE_ROW
-      }
-      idx = 0
-      cellIdx = 0 + row * self->numRowFields
-      while {idx < self->numRowFields} {
-        fieldInfo = &self->tableFields[cellIdx]
-        if {fieldNameId == fieldInfo->fieldNameId} {
-          fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET
-          return self->compMsgDataView->setFieldValue{self->compMsgDataView, fieldInfo, numericValue, stringValue, 0}
-        }
-        cellIdx++
-        idx++
-      }
-      checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
-    }
-    
     # ================================= prepareMsg ====================================
     
     proc prepareMsg {compMsgDispatcherVar} {
@@ -796,10 +633,8 @@ puts stderr "tableFields!$tableFields!"
 
     # ================================= initMsg ====================================
     
-    proc initMsg {compMsgDispatcherVar numTableRowsVar numTableRowFieldsVar} {
+    proc initMsg {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
-      upvar numTableRowsVar numTableRows
-      upvar numTableRowFieldsVar numTableRowFields
     
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       # initialize field offsets for each field
@@ -824,30 +659,6 @@ puts stderr "tableFields!$tableFields!"
           COMP_MSG_SPEC_FIELD_HDR_FILLER {
             dict incr compMsgData headerLgth [dict get $fieldInfo fieldLgth]
             dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
-          }
-          COMP_MSG_SPEC_FIELD_TABLE_ROWS {
-#            dict set fieldInfo fieldLgth $numTableRows
-dict set compMsgData numTabRows $numTableRows
-          }
-          COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
-#            dict set fieldInfo fieldLgth $numTableRowFields
-dict set compMsgData numTabRowFields $numTableRowFields
-            set row 0
-            set col 0
-            set tableFields [dict get $compMsgData tableFields]
-            while {$row < [dict get $compMsgData numTableRows]} {
-              while {$col < [dict get $compMsgData numTableRowFields]} {
-                set cellIdx [expr {$col + $row * [dict get $compMsgData numRowFields]}]
-                set fieldInfo2 [lindex $tableFields $cellIdx]
-                dict set fieldInfo2 fieldOffset [dict get $compMsgData fieldOffset]
-                set tableFields [lreplace $tableFields $cellIdx $cellIdx $fieldInfo2]
-                dict set compMsgData tableFields $tableFields
-                dict incr compMsgData fieldOffset [dict get $fieldInfo2 fieldLgth]
-                incr col
-              }
-              set col 0 
-              incr row
-            }
           }
           COMP_MSG_SPEC_FIELD_FILLER {
             set fillerLgth 0
@@ -883,6 +694,7 @@ dict set compMsgData numTabRowFields $numTableRowFields
         checkErrOK $::COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING
       }
       set totalLgth [dict get $compMsgData totalLgth]
+puts stderr "compMsgData3 setData: totalLgth: $totalLgth!"
       set result [::compMsg dataView setData [string repeat " " $totalLgth] $totalLgth]
       checkErrOK $result
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
@@ -914,10 +726,8 @@ dict set compMsgData numTabRowFields $numTableRowFields
     
     # ================================= initReceivedMsg ====================================
     
-    proc initReceivedMsg {compMsgDispatcherVar numTableRowsVar numTableRowFieldsVar} {
+    proc initReceivedMsg {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
-      upvar numTableRowsVar numTableRows
-      upvar numTableRowFieldsVar numTableRowFields
     
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       # initialize field offsets for each field
@@ -956,30 +766,6 @@ dict set compMsgData numTabRowFields $numTableRowFields
             dict incr compMsgData headerLgth [dict get $fieldInfo fieldLgth]
             dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
             dict set compMsgDispatcher compMsgData $compMsgData
-          }
-          COMP_MSG_SPEC_FIELD_TABLE_ROWS {
-#            dict set fieldInfo fieldLgth $numTableRows
-dict set compMsgData numTabRows $numTableRows
-          }
-          COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
-#            dict set fieldInfo fieldLgth $numTableRowFields
-dict set compMsgData numTabRowFields $numTableRowFields
-            set row 0
-            set col 0
-            set tableFields [dict get $compMsgData tableFields]
-            while {$row < [dict get $compMsgData numTableRows]} {
-              while {$col < [dict get $compMsgData numTableRowFields]} {
-                set cellIdx [expr {$col + $row * [dict get $compMsgData numRowFields]}]
-                set fieldInfo2 [lindex $tableFields $cellIdx]
-                dict set fieldInfo2 fieldOffset [dict get $compMsgData fieldOffset]
-                set tableFields [lreplace $tableFields $cellIdx $cellIdx $fieldInfo2]
-                dict set compMsgData tableFields $tableFields
-                dict incr compMsgData fieldOffset [dict get $fieldInfo2 fieldLgth]
-                incr col
-              }
-              set col 0 
-              incr row
-            }
           }
           COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES {
             dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
@@ -1044,7 +830,7 @@ dict set compMsgData numTabRowFields $numTableRowFields
 #puts stderr "dumpMsg"
 #::compMsg compMsgData dumpMsg compMsgDispatcher
 #puts stderr "hexDump"
-#::compMsg compMsgData dumpBinary $::compMsg::dataView::data $::compMsg::dataView::lgth "MSG_AA"
+#::compMsg dataView dumpBinary $::compMsg::dataView::data $::compMsg::dataView::lgth "MSG_AA"
       return $::COMP_MSG_ERR_OK
     }
     

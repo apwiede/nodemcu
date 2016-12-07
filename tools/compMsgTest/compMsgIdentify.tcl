@@ -328,6 +328,7 @@ puts stderr "Fitting entry not found!"
      
       set headerInfos [dict get $compMsgDispatcher headerInfos]
 #puts stderr "buf len: [string length [dict get $received buf]]!len: [dict get $received lgth]!"
+puts stderr "compMsgIdentify1 setData"
       set result [::compMsg dataView setData [dict get $received buf] [dict get $received lgth]]
       checkErrOK $result
       set hdrIdx [dict get $headerInfos currPartIdx]
@@ -349,7 +350,7 @@ puts stderr "Fitting entry not found!"
         incr idx
       }
       dict set compMsgDispatcher compMsgData $compMsgData
-      set result [::compMsg compMsgData initReceivedMsg compMsgDispatcher numTableRows numTableRowFields]
+      set result [::compMsg compMsgData initReceivedMsg compMsgDispatcher]
       checkErrOK $result
 #puts stderr "handleReceivedMsg done"
 #::compMsg compMsgData dumpMsg compMsgDispatcher
@@ -408,7 +409,7 @@ puts stderr "Fitting entry not found!"
 #puts stderr "lgth: $lgth endIdx: $endIdx!totalCrcOffset: $totalCrcOffset!myHeaderLgth: $myHeaderLgth!"
             set crypted [string range $buffer $myHeaderLgth $endIdx]
 #puts stderr "cryptedLgth: [string length $crypted]!mlen: $mlen!"
-#::compMsg compMsgData dumpBinary $crypted $mlen "crypted msg"
+#::compMsg dataView dumpBinary $crypted $mlen "crypted msg"
             set cryptKey "a1b2c3d4e5f6g7h8"
             set result [::compMsg compMsgDispatcher decryptMsg $crypted $mlen $cryptKey 16 $cryptKey 16 decrypted decryptedLgth]
 #puts stderr "decryptedLgth: $decryptedLgth!result!$result!"

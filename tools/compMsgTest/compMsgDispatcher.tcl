@@ -337,6 +337,7 @@ namespace eval compMsg {
       set offset 0
       set result [::compMsg dataView getData saveData saveLgth]
       set lgth [dict get $msgParts totalLgth]
+puts stderr "compMsgDispatcher1 setData"
       ::compMsg dataView setData [string repeat " " $lgth] $lgth
       set result [::compMsg dataView setUint16 $offset [dict get $msgParts fromPart]]
       checkErrOK $result
@@ -359,6 +360,7 @@ namespace eval compMsg {
       }
       set result [::compMsg dataView getData header headerLgth]
       checkErrOK $result
+puts stderr "compMsgDispatcher2 setData"
       set result [::compMsg dataView setData $saveData $saveLgth]
       checkErrOK $result
       # end build header from msgParts
@@ -414,6 +416,7 @@ namespace eval compMsg {
           }
         }
       }
+puts stderr "compMsgDispatcher3 setData"
       set result [::compMsg dataView setData $saveData $saveLgth]
       return $::COMP_DISP_ERR_OK;
     }
@@ -660,8 +663,8 @@ namespace eval compMsg {
 
     # ================================= newCompMsgDispatcher ====================================
     
-     proc newCompMsgDispatcher {} {
-      variable compMsgDispatcher
+     proc newCompMsgDispatcher {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
 
       dict set compMsgDispatcher numMsgHeaders 0
       dict set compMsgDispatcher maxMsgHeaders 0
