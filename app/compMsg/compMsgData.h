@@ -118,6 +118,7 @@ typedef uint8_t (* dumpKeyValueFields_t)(compMsgDispatcher_t *self, size_t offse
 typedef uint8_t (* dumpFieldInfo_t)(compMsgDispatcher_t *self, compMsgField_t *fieldInfo);
 typedef uint8_t (* dumpMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* initMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* initReceivedMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* prepareMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getMsgData_t)(compMsgDispatcher_t *compMsgData, uint8_t **data, int *lgth);
 typedef uint8_t (* deleteMsgDescParts_t)(compMsgDispatcher_t *self);
@@ -175,6 +176,7 @@ typedef struct compMsgData {
   dumpFieldInfo_t dumpFieldInfo;
   dumpMsg_t dumpMsg;
   initMsg_t initMsg;
+  initReceivedMsg_t initReceivedMsg;
   prepareMsg_t prepareMsg;
   getMsgData_t getMsgData;
   deleteMsgDescParts_t deleteMsgDescParts;

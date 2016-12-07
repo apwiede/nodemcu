@@ -281,6 +281,25 @@ static uint8_t getBssScanInfo(compMsgDispatcher_t *self) {
   return COMP_DISP_ERR_OK;
 }
 
+
+// ================================= connectToAP ====================================
+
+static uint8_t connectToAP(compMsgDispatcher_t *self) {
+  uint8_t result;
+  uint8_t *ssid;
+  uint8_t *passwd;
+  int numericValue;
+
+ets_printf("connecToAP:\n");
+  result = self->compMsgData->getFieldValue(self, "ssid", &numericValue, &ssid);
+ets_printf("connecToAP: ssid: result: %d\n", result);
+  checkErrOK(result);
+  result = self->compMsgData->getFieldValue(self, "password", &numericValue, &passwd);
+  checkErrOK(result);
+ets_printf("ssid: %s passwd: %s\n", ssid, passwd);
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= getStationConfig ====================================
 
 static uint8_t getStationConfig(compMsgDispatcher_t *self) {
@@ -804,6 +823,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->setWifiValue = &setWifiValue;
   self->getWifiRemotePort = &getWifiRemotePort;
   self->bssStr2BssInfoId = &bssStr2BssInfoId;
+  self->connectToAP = &connectToAP;
 
   bssScanInfos.compMsgDispatcher = self;
   self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);

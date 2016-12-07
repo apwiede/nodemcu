@@ -382,21 +382,26 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     idx++;
   }
 
-ets_printf("§heap4: %d§", system_get_free_heap_size());
+ets_printf("§heap4: %d§\n", system_get_free_heap_size());
   // runAction calls at the end buildMsg
 //  self->resetBuildMsgInfos(self);
 //  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
   if (self->compMsgData->prepareValuesCbName != NULL) {
     uint8_t actionMode;
+    action_t actionCallback;
     uint8_t type;
 
-ets_printf("§prepareValuesCbName: %s!§", self->compMsgData->prepareValuesCbName);
-    result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
-    self->actionMode = actionMode;
+ets_printf("§prepareValuesCbName: %s!§\n", self->compMsgData->prepareValuesCbName);
+    result = self->getActionCallback(self, self->compMsgData->prepareValuesCbName+1, &actionCallback);
     checkErrOK(result);
-    result  = self->runAction(self, &type);
-    // runAction starts a call with a callback and returns here before the callback has been running!!
-    // when when coming here we are finished and the callback will do the work later on!
+    result = actionCallback(self);
+    checkErrOK(result);
+//    result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
+//    self->actionMode = actionMode;
+//    checkErrOK(result);
+//    result  = self->runAction(self, &type);
+    // actionCallback starts a call with eventually a callback and returns here before the callback has been running!!
+    // when coming here we are finished and the callback will do the work later on!
     return result;
   } else {
     result = self->buildMsg(self);
@@ -652,13 +657,15 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   compMsgData_t *compMsgData;
 
   if (self->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
+ets_printf("§COMP_DISP_ERR_TOO_MANY_REQUESTS§");
     return COMP_DISP_ERR_TOO_MANY_REQUESTS;
   }
   self->msgRequestInfos.lastRequestIdx++;
-//ets_printf("addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
+ets_printf("addRequest1: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
   self->msgRequestInfos.requestTypes[self->msgRequestInfos.lastRequestIdx] = requestType;
   self->msgRequestInfos.requestHandles[self->msgRequestInfos.lastRequestIdx] = requestHandle;
   self->msgRequestInfos.requestData[self->msgRequestInfos.lastRequestIdx] = requestData;
+ets_printf("addRequest2: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
 //FIXME TEMPORARY last if clause!!
   if ((self->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->msgRequestInfos.currRequestIdx++;
@@ -666,15 +673,36 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
     compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
     switch (compMsgData->direction) {
     case COMP_MSG_TO_SEND_DATA:
+ets_printf("addRequest: toSendData: %p\n", compMsgData->receivedData);
       result = self->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
       break;
     case COMP_MSG_RECEIVED_DATA:
-//ets_printf("addRequest: receivedData: %p\n", compMsgData->receivedData);
+ets_printf("addRequest: receivedData: %p\n", compMsgData->receivedData);
       result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
       break;
     default:
 ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
       return COMP_MSG_ERR_BAD_VALUE;
+    }
+  } else {
+ets_printf("direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA);
+    self->msgRequestInfos.currRequestIdx = self->msgRequestInfos.lastRequestIdx;
+    compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
+    requestData = compMsgData;
+    if (requestData->direction == COMP_MSG_RECEIVED_DATA) {
+// FIXME TEMPORARY need flag to see if no uart activity!!
+      switch (compMsgData->direction) {
+      case COMP_MSG_TO_SEND_DATA:
+        break;
+      case COMP_MSG_RECEIVED_DATA:
+ets_printf("COMP_MSG_RECEIVED_DATA: compMsgData: %p\n", compMsgData);
+ets_printf("received: %p %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
+        result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
+        break;
+      default:
+ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
     }
   }
   return COMP_DISP_ERR_OK;
@@ -748,6 +776,7 @@ uint8_t *handle;
 
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
+ets_printf("fieldsToSave: %d\n", self->numFieldsToSave);
   result = compMsgBuildMsgInit(self);
   checkErrOK(result);
   result = compMsgSendReceiveInit(self);
@@ -765,7 +794,7 @@ uint8_t *handle;
 #define KEY_VALUE_DESC_PARTS_FILE "CompMsgKeyValueKeys.txt"
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
-//#define WEBSOCKETAP
+#define WEBSOCKETAP
 #ifdef WEBSOCKETAP
 // FIXME !! temporary starting for testing only !!
 ets_printf("start RunAPMode\n");
@@ -795,7 +824,7 @@ ets_printf("handle: %s result: %d\n", handle, result);
 checkErrOK(result);
 #endif
 // if nothing of the above is defined the uart input callback is used
-#define UART_INPUT
+//#define UART_INPUT
 #ifdef UART_INPUT
   id = 0;
   stopbits = PLATFORM_UART_STOPBITS_1;
@@ -880,6 +909,8 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->sendCloudMsg = NULL;
   compMsgDispatcher->cloudMsgData = NULL;
   compMsgDispatcher->cloudMsgDataLgth = 0;
+  compMsgDispatcher->cloudPayload = NULL;
+  compMsgDispatcher->cloudPayloadLgth = 0;
 
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
   compMsgDispatcher->createMsgFromHeaderPart = &createMsgFromHeaderPart;

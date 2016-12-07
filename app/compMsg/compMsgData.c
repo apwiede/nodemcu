@@ -499,16 +499,21 @@ static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
   compMsgData_t *compMsgData;
 
   compMsgData = self->compMsgData;
+ets_printf("getFieldValue: compMsgData: %p\n", compMsgData);
   if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
+ets_printf("getFieldValue: compMsgTypesAndNames: %p\n", self->compMsgTypesAndNames, fieldName);
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   idx = 0;
   numEntries = compMsgData->numFields;
+ets_printf("getFieldValue: numEntries: %d\n", numEntries);
   while (idx < numEntries) {
     fieldInfo = &compMsgData->fields[idx];
+ets_printf("getFieldValue: fieldInfo: %p\n", fieldInfo);
     if (fieldNameId == fieldInfo->fieldNameId) {
+ets_printf("getFieldValue: compMsgDataView: %p\n", compMsgData->compMsgDataView);
       result = compMsgData->compMsgDataView->getFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       break;
@@ -777,6 +782,128 @@ static uint8_t initMsg(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= initReceivedMsg ====================================
+
+/**
+ * \brief initialize the basic message info of a received message
+ * \param self The dispatcher struct
+ * \return Error code or ErrorOK
+ *
+ */
+static uint8_t initReceivedMsg(compMsgDispatcher_t *self) {
+  int numEntries;
+  int idx;
+  int row;
+  int col;
+  int cellIdx;
+  int result;
+  uint16_t u16;
+  uint8_t u8;
+  uint8_t *stringValue;
+  size_t lgth;
+  uint8_t *data;
+  uint8_t *where;
+  size_t myLgth;
+  size_t fillerLgth;
+  size_t crcLgth;
+  size_t msgDescPartIdx;
+  size_t msgValPartIdx;
+  size_t offset;
+  compMsgField_t *fieldInfo;
+  compMsgField_t *fieldInfo2;
+  compMsgData_t *compMsgData;
+  msgDescPart_t *msgDescPart;
+  msgValPart_t *msgValPart;
+
+  compMsgData = self->compMsgData;
+  // initialize field offsets for each field
+  // initialize totalLgth, headerLgth, cmdLgth
+  if ((compMsgData->flags & COMP_MSG_IS_INITTED) != 0) {
+    return COMP_MSG_ERR_ALREADY_INITTED;
+  }
+  compMsgData->fieldOffset = 0;
+  numEntries = compMsgData->numFields;
+  idx = 0;
+  msgDescPartIdx = 0;
+  msgValPartIdx = 0;
+  compMsgData->headerLgth = 0;
+  while (idx < numEntries) {
+    fieldInfo = &compMsgData->fields[idx];
+    fieldInfo->fieldOffset = compMsgData->fieldOffset;
+    msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
+    self->compMsgData->msgDescPart = msgDescPart;
+    msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
+    self->compMsgData->msgValPart = msgValPart;
+    fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
+//ets_printf("§initReceivedMsg2 idx: %d§", idx);
+    switch (fieldInfo->fieldNameId) {
+      case COMP_MSG_SPEC_FIELD_SRC:
+      case COMP_MSG_SPEC_FIELD_DST:
+      case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
+      case COMP_MSG_SPEC_FIELD_GUID:
+      case COMP_MSG_SPEC_FIELD_SRC_ID:
+      case COMP_MSG_SPEC_FIELD_HDR_FILLER:
+        compMsgData->headerLgth += fieldInfo->fieldLgth;
+        compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
+        break;
+      case COMP_MSG_SPEC_FIELD_FILLER:
+        fillerLgth = 0;
+        crcLgth = 0;
+        if (compMsgData->flags & COMP_MSG_HAS_CRC) {
+          if (compMsgData->flags & COMP_MSG_UINT8_CRC) {
+            crcLgth = 1;
+          } else {
+            crcLgth = 2;
+          }
+        }
+        myLgth = compMsgData->fieldOffset + crcLgth - compMsgData->headerLgth;
+        while ((myLgth % 16) != 0) {
+          myLgth++;
+          fillerLgth++;
+        }
+        fieldInfo->fieldLgth = fillerLgth;
+        compMsgData->totalLgth = compMsgData->fieldOffset + fillerLgth + crcLgth;
+        compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
+//ets_printf("§initMsg2a idx: %d§", idx);
+        break;
+      default:
+        if (msgDescPart->fieldNameStr[0] == '#') {
+          offset = self->compMsgData->fieldOffset;
+          result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, offset, &u16);
+          checkErrOK(result);
+          offset += 2;
+          result = self->compMsgData->compMsgDataView->dataView->getUint8(self->compMsgData->compMsgDataView->dataView, offset, &u8);
+          checkErrOK(result);
+          offset += 1;
+          result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, offset, &u16);
+          checkErrOK(result);
+          fieldInfo->fieldLgth += (2 + 1 + 2 + u16);
+//          self->compMsgData->totalLgth = self->compMsgData->fieldOffset + fieldInfo->fieldLgth;
+        } else {
+//          compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
+//          compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
+        }
+//ets_printf("§initReceivedMsg2b idx: %d§", idx);
+        break;
+    }
+    compMsgData->fieldOffset += fieldInfo->fieldLgth;
+    idx++;
+  }
+//ets_printf("§initMsg2c§");
+  if (compMsgData->totalLgth == 0) {
+//ets_printf("§initMsg3a§");
+    return COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING;
+  }
+//ets_printf("§initMsg3b§");
+  compMsgData->flags |= COMP_MSG_IS_INITTED;
+
+
+//ets_printf("§compMsgData: %p!§", compMsgData);
+//ets_printf("§compMsgData->totalLgth: %d!direction: %d!SEND: %d§", compMsgData->totalLgth, compMsgData->direction, COMP_MSG_TO_SEND_DATA);
+//ets_printf("§initReceivedMsg done§");
+  return COMP_MSG_ERR_OK;
+}
+
 // ============================= getMsgData ========================
 
 /**
@@ -987,6 +1114,7 @@ compMsgData_t *newCompMsgData(void) {
   compMsgData->dumpKeyValueFields = &dumpKeyValueFields;
   compMsgData->dumpFieldInfo = &dumpFieldInfo;
   compMsgData->dumpMsg = &dumpMsg;
+  compMsgData->initReceivedMsg = &initReceivedMsg;
   compMsgData->initMsg = &initMsg;
   compMsgData->prepareMsg = &prepareMsg;
   compMsgData->getMsgData = &getMsgData;

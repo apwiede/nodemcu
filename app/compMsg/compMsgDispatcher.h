@@ -142,6 +142,7 @@ typedef uint8_t (* getActionCallbackName_t)(compMsgDispatcher_t *self, action_t 
 // Wifi stuff
 typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
@@ -200,6 +201,7 @@ typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t 
 typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 // SendReceive
@@ -209,7 +211,6 @@ typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, 
 typedef uint8_t (* prepareCloudMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* sendCloudMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth);
-
 
 // MsgData stuff
 typedef uint8_t (* getNewCompMsgDataPtr_t)(compMsgDispatcher_t *self);
@@ -254,6 +255,10 @@ typedef struct compMsgDispatcher {
   uint8_t maxFieldValueCallbackInfos;
   fieldValueCallbackInfos_t *fieldValueCallbackInfos;
 
+  uint8_t numFieldsToSave;
+  uint8_t maxFieldsToSave;
+  fieldsToSave_t *fieldsToSave;
+
   compMsgData_t *compMsgData;
   uint8_t *msgHandle;
 
@@ -274,6 +279,7 @@ typedef struct compMsgDispatcher {
   getActionCallbackName_t getActionCallbackName;
   getActionMode_t getActionMode;
   getBssScanInfo_t getBssScanInfo;
+  connectToAP_t connectToAP;
 
   // BuildMsg
   setMsgFieldValue_t setMsgFieldValue;
@@ -317,6 +323,7 @@ typedef struct compMsgDispatcher {
   handleToSendPart_t handleToSendPart;
   handleReceivedHeader_t handleReceivedHeader;
   handleReceivedMsg_t handleReceivedMsg;
+  storeReceivedMsg_t storeReceivedMsg;
 
   // wifi
   bssStr2BssInfoId_t bssStr2BssInfoId;

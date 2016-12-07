@@ -127,6 +127,16 @@ ets_printf("§runDeletePasswdC§");
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= connectAP ====================================
+
+static uint8_t connectAP(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+ets_printf("connectAP\n");
+  result = self->connectToAP(self);
+  return result;
+}
+
 // ================================= getAPList ====================================
 
 static uint8_t getAPList(compMsgDispatcher_t *self) {
@@ -154,6 +164,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "runTestMode",               (action_t)(&runModulTestMode),          0, 0, 0 },
   { "runDeletePasswdCMode",      (action_t)(&runDeletePasswdCMode),      0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
+  { "connectAP",                 (action_t)(&connectAP),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "getWifiSrcId",              (action_t)(&getWifiSrcId),              0x4141, 0, 8 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };
@@ -205,7 +216,7 @@ static uint8_t getActionCallback(compMsgDispatcher_t *self, uint8_t *actionName,
     idx++;
     actionEntry = &actionName2Actions[idx];
   }
-ets_printf("§getActionCallback: %s§", actionName);
+ets_printf("§getActionCallback: %s§\n", actionName);
   return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
 }
 

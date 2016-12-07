@@ -1381,6 +1381,78 @@ static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *file
 //ets_printf("getWifiKeyValueKeys done\n");
 }
 
+// ================================= getFieldsToSave ====================================
+
+static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
+  uint8_t result;
+  uint8_t numEntries;
+  char *endPtr;
+  uint8_t lgth;
+  uint8_t *fieldNameStr;
+  uint8_t buf[100];
+  uint8_t *buffer = buf;
+  uint8_t *myStr;
+  int idx;
+  long uval;
+  uint8_t*cp;
+  uint8_t*ep;
+  bool isEnd;
+  fieldsToSave_t *fieldsToSave;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  fieldsToSave = self->fieldsToSave;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
+  checkErrOK(result);
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+  checkErrOK(result);
+  buffer[lgth] = 0;
+  if ((lgth < 4) || (buffer[0] != '#')) {
+     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+  }
+  uval = c_strtoul(buffer+2, &endPtr, 10);
+  numEntries = (uint8_t)uval;
+  self->numFieldsToSave = 0;
+  self->maxFieldsToSave = numEntries;
+ets_printf("getFieldsToSave: numEntries: %d\n");
+  self->fieldsToSave = os_zalloc(numEntries * sizeof(fieldsToSave_t));
+  checkAllocOK(self->fieldsToSave);
+  idx = 0;
+  while(idx < numEntries) {
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+    }
+    buffer[lgth] = 0;
+    cp = buffer;
+    fieldsToSave = &self->fieldsToSave[self->numFieldsToSave];
+    // fieldName
+    fieldNameStr = cp;
+    result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
+ets_printf("getFieldsToSave: fieldName: %s %d\n", fieldNameStr,  self->numFieldsToSave);
+    checkErrOK(result);
+    fieldsToSave->fieldNameStr = os_zalloc(c_strlen(fieldNameStr) + 1);
+    checkAllocOK(fieldsToSave->fieldNameStr);
+    c_memcpy(fieldsToSave->fieldNameStr, fieldNameStr, c_strlen(fieldNameStr) + 1);
+    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &fieldsToSave->fieldNameId, COMP_MSG_INCR);
+    checkErrOK(result);
+    if (!isEnd) {
+      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    }
+    self->numFieldsToSave++;
+    idx++;
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
+  checkErrOK(result);
+  return COMP_MSG_ERR_OK;
+//ets_printf("getFieldsToSave done\n");
+}
+
 // ================================= getWifiKeyValueKeys ====================================
 
 static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t *compMsgWifiData) {
@@ -1564,6 +1636,7 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->getMsgPartsFromHeaderPart = &getMsgPartsFromHeaderPart;
   compMsgMsgDesc->getHeaderFromUniqueFields = &getHeaderFromUniqueFields;
   compMsgMsgDesc->getMsgKeyValueDescParts = &getMsgKeyValueDescParts;
+  compMsgMsgDesc->getFieldsToSave = &getFieldsToSave;
   compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;
 
   return compMsgMsgDesc;
