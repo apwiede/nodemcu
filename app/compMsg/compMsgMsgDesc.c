@@ -1093,7 +1093,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   compMsgMsgDesc = self->compMsgMsgDesc;
   self->compMsgData->currHdr = hdr;
   os_sprintf(fileName, "CompDesc%c%c.txt", (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
-//ets_printf("§file: %s§", fileName);
+//ets_printf("§file: %s§\n", fileName);
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
@@ -1261,9 +1261,15 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
       msgValPart->fieldValue = (uint32_t)uval;
     }
-    if (fieldValueStr[0] == '@') {
+    if (ets_strncmp(fieldValueStr, "@get", 4) == 0) {
       result = self->getFieldValueCallback(self, fieldValueStr, &msgValPart->fieldValueCallback, msgValPart->fieldValueCallbackType);
-      checkErrOK(result);
+      if (result != COMP_MSG_ERR_OK) {
+//ets_printf("§WARNING: fieldValueCallback %s for field: %s not found§\n", fieldValueStr, fieldNameStr);
+      }
+//      checkErrOK(result);
+    }
+    if (ets_strncmp(fieldValueStr, "@run",4) == 0) {
+      msgValPart->fieldValueActionCb = msgValPart->fieldValueStr;
     }
 //self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
     if (!isEnd) {
@@ -1416,7 +1422,6 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
   numEntries = (uint8_t)uval;
   self->numFieldsToSave = 0;
   self->maxFieldsToSave = numEntries;
-ets_printf("getFieldsToSave: numEntries: %d\n");
   self->fieldsToSave = os_zalloc(numEntries * sizeof(fieldsToSave_t));
   checkAllocOK(self->fieldsToSave);
   idx = 0;
@@ -1432,7 +1437,6 @@ ets_printf("getFieldsToSave: numEntries: %d\n");
     // fieldName
     fieldNameStr = cp;
     result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
-ets_printf("getFieldsToSave: fieldName: %s %d\n", fieldNameStr,  self->numFieldsToSave);
     checkErrOK(result);
     fieldsToSave->fieldNameStr = os_zalloc(c_strlen(fieldNameStr) + 1);
     checkAllocOK(fieldsToSave->fieldNameStr);

@@ -286,17 +286,63 @@ static uint8_t getBssScanInfo(compMsgDispatcher_t *self) {
 
 static uint8_t connectToAP(compMsgDispatcher_t *self) {
   uint8_t result;
+  bool boolResult;
   uint8_t *ssid;
   uint8_t *passwd;
   int numericValue;
+  fieldsToSave_t *fieldsToSave;
+  int idx;
+  struct station_config *station_config;
+  struct ip_info ip_info;
+  char temp[64];
 
 ets_printf("connecToAP:\n");
-  result = self->compMsgData->getFieldValue(self, "ssid", &numericValue, &ssid);
-ets_printf("connecToAP: ssid: result: %d\n", result);
+  ssid = NULL;
+  passwd = NULL;
+  idx = 0;
+  while (idx < self->numFieldsToSave) {
+    fieldsToSave = &self->fieldsToSave[idx];
+    if (c_strcmp("clientSsid", fieldsToSave->fieldNameStr) == 0) {
+      ssid = fieldsToSave->fieldValueStr;
+    }
+    if (c_strcmp("clientPassword", fieldsToSave->fieldNameStr) == 0) {
+      passwd = fieldsToSave->fieldValueStr;
+    }
+    idx++;
+  }
+ets_printf("connecToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
+  result = self->setWifiValue(self, "@clientSsid", 0, ssid);
+ets_printf("set @clientSsid: result: %d\n", result);
   checkErrOK(result);
-  result = self->compMsgData->getFieldValue(self, "password", &numericValue, &passwd);
+  result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
+ets_printf("set @clientPasswd: result: %d\n", result);
   checkErrOK(result);
-ets_printf("ssid: %s passwd: %s\n", ssid, passwd);
+  result = self->netsocketRunClientMode(self);
+ets_printf("runClientMode: result: %d\n", result);
+  checkErrOK(result);
+#ifdef NOTDEF
+  station_config = os_zalloc(sizeof(struct station_config));
+  checkAllocOK(station_config);
+  c_memcpy(station_config->ssid, ssid, c_strlen(ssid));
+  c_memcpy(station_config->password, passwd, c_strlen(passwd));
+  station_config->bssid_set = 0;
+  boolResult = wifi_station_set_config(station_config);
+ets_printf("set_config: result: %d\n", boolResult);
+  boolResult = wifi_station_connect();
+ets_printf("connect: result: %d\n", boolResult);
+  if (boolResult) {
+    boolResult = wifi_set_opmode(STATION_MODE);
+ets_printf("set_opmode: result: %d\n", boolResult);
+    boolResult = wifi_get_ip_info(STATION_IF, &ip_info);
+ets_printf("ip_info: result: %d\n", boolResult);
+    if (boolResult) {
+      os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ip_info.ip));
+ets_printf("IP_Addr: %s\n", temp);
+    }
+  }
+#endif
+ets_printf("connectToAP done\n");
+  
   return COMP_DISP_ERR_OK;
 }
 
@@ -506,6 +552,24 @@ static uint8_t getWifiAPFreq_offsets(compMsgDispatcher_t *self, int* numericValu
 // ================================= getWifiAPFreqcal_vals ====================================
 
 static uint8_t getWifiAPFreqcal_vals(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getClientIPAddr ====================================
+
+static uint8_t getClientIPAddr(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+ets_printf("§compMsgWifiData.clientIPAddr: 0x%08x§\n", compMsgWifiData.clientIPAddr);
+  *numericValue = compMsgWifiData.clientIPAddr;
+  *stringValue = NULL;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getClientPort ====================================
+
+static uint8_t getClientPort(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+ets_printf("§compMsgWifiData.clientPort: %d§\n", compMsgWifiData.clientPort);
+  *numericValue = compMsgWifiData.clientPort;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -815,6 +879,8 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->addFieldValueCallbackName(self, "@getWifiAPIs_hiddens",   &getWifiAPIs_hiddens, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->addFieldValueCallbackName(self, "@getWifiAPFreq_offsets", &getWifiAPFreq_offsets, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->addFieldValueCallbackName(self, "@getWifiAPFreqcal_vals", &getWifiAPFreqcal_vals, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getClientIPAddr", &getClientIPAddr, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
 
   self->bssScanInfos = &bssScanInfos;
   self->getBssScanInfo = &getBssScanInfo;

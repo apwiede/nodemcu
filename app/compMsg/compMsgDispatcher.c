@@ -369,7 +369,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-//ets_printf("§createMsgFromHeaderPart1§");
+ets_printf("§createMsgFromHeaderPart1§\n");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);
@@ -391,7 +391,6 @@ ets_printf("§heap4: %d§\n", system_get_free_heap_size());
     action_t actionCallback;
     uint8_t type;
 
-ets_printf("§prepareValuesCbName: %s!§\n", self->compMsgData->prepareValuesCbName);
     result = self->getActionCallback(self, self->compMsgData->prepareValuesCbName+1, &actionCallback);
     checkErrOK(result);
     result = actionCallback(self);
@@ -661,11 +660,10 @@ ets_printf("§COMP_DISP_ERR_TOO_MANY_REQUESTS§");
     return COMP_DISP_ERR_TOO_MANY_REQUESTS;
   }
   self->msgRequestInfos.lastRequestIdx++;
-ets_printf("addRequest1: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
   self->msgRequestInfos.requestTypes[self->msgRequestInfos.lastRequestIdx] = requestType;
   self->msgRequestInfos.requestHandles[self->msgRequestInfos.lastRequestIdx] = requestHandle;
   self->msgRequestInfos.requestData[self->msgRequestInfos.lastRequestIdx] = requestData;
-ets_printf("addRequest2: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
+//ets_printf("addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
 //FIXME TEMPORARY last if clause!!
   if ((self->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->msgRequestInfos.currRequestIdx++;
@@ -673,11 +671,11 @@ ets_printf("addRequest2: lastRequestIdx: %d requestType: %d compMsgData: %p\n", 
     compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
     switch (compMsgData->direction) {
     case COMP_MSG_TO_SEND_DATA:
-ets_printf("addRequest: toSendData: %p\n", compMsgData->receivedData);
+ets_printf("addRequest: toSendData: %p\n", compMsgData->toSendData);
       result = self->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
       break;
     case COMP_MSG_RECEIVED_DATA:
-ets_printf("addRequest: receivedData: %p\n", compMsgData->receivedData);
+//ets_printf("addRequest: receivedData: %p\n", compMsgData->receivedData);
       result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
       break;
     default:
@@ -685,7 +683,7 @@ ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData
       return COMP_MSG_ERR_BAD_VALUE;
     }
   } else {
-ets_printf("direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA);
+//ets_printf("direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA);
     self->msgRequestInfos.currRequestIdx = self->msgRequestInfos.lastRequestIdx;
     compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
     requestData = compMsgData;
@@ -695,8 +693,8 @@ ets_printf("direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA)
       case COMP_MSG_TO_SEND_DATA:
         break;
       case COMP_MSG_RECEIVED_DATA:
-ets_printf("COMP_MSG_RECEIVED_DATA: compMsgData: %p\n", compMsgData);
-ets_printf("received: %p %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
+//ets_printf("COMP_MSG_RECEIVED_DATA: compMsgData: %p\n", compMsgData);
+//ets_printf("received: %p lgth: %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
         result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
         break;
       default:
@@ -776,7 +774,6 @@ uint8_t *handle;
 
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
-ets_printf("fieldsToSave: %d\n", self->numFieldsToSave);
   result = compMsgBuildMsgInit(self);
   checkErrOK(result);
   result = compMsgSendReceiveInit(self);

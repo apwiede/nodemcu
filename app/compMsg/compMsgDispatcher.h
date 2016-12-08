@@ -202,6 +202,7 @@ typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, uint8_t **hand
 typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* sendClientIPMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 
 // SendReceive
@@ -324,6 +325,7 @@ typedef struct compMsgDispatcher {
   handleReceivedHeader_t handleReceivedHeader;
   handleReceivedMsg_t handleReceivedMsg;
   storeReceivedMsg_t storeReceivedMsg;
+  sendClientIPMsg_t sendClientIPMsg;
 
   // wifi
   bssStr2BssInfoId_t bssStr2BssInfoId;

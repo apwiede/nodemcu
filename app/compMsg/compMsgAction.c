@@ -127,12 +127,11 @@ ets_printf("§runDeletePasswdC§");
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= connectAP ====================================
+// ================================= runAPConnect ====================================
 
-static uint8_t connectAP(compMsgDispatcher_t *self) {
+static uint8_t runAPConnect(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("connectAP\n");
   result = self->connectToAP(self);
   return result;
 }
@@ -164,7 +163,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "runTestMode",               (action_t)(&runModulTestMode),          0, 0, 0 },
   { "runDeletePasswdCMode",      (action_t)(&runDeletePasswdCMode),      0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
-  { "connectAP",                 (action_t)(&connectAP),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
+  { "runAPConnect",              (action_t)(&runAPConnect),              0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "getWifiSrcId",              (action_t)(&getWifiSrcId),              0x4141, 0, 8 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };

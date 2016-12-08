@@ -196,6 +196,7 @@ typedef struct msgValPart {
   uint8_t fieldNameId;
   uint8_t *fieldValueStr;    // the value or the callback for getting the value
   uint8_t *fieldKeyValueStr; // the value for a string
+  uint8_t *fieldValueActionCb; // the name of a callback to run an action
   uint32_t fieldValue;       // the value for an integer
   uint8_t fieldFlags;
   uint8_t fieldValueCallbackType;

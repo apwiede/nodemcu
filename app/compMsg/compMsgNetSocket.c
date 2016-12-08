@@ -195,7 +195,7 @@ static uint8_t netsocket_recv(char *payload, netsocketUserData_t *nud, char **da
   int found;
 
   idx = 0;
-ets_printf("netsocket_recv:remote_port: %d\n", nud->remote_port);
+ets_printf("§netsocket_recv:remote_port: %d§\n", nud->remote_port);
 //ets_printf("netsocket_recv: %s!remote_port: %d\n",payload, nud->remote_port);
 
 //ets_printf("payload: %d!%s!\n", c_strlen(payload), payload);
@@ -207,7 +207,7 @@ ets_printf("netsocket_recv:remote_port: %d\n", nud->remote_port);
 
 }
 
-static uint16_t tcp_server_timeover = 10;
+static uint16_t tcp_server_timeover = 30;
 
 // ================================= serverDisconnected  ====================================
 
@@ -239,15 +239,15 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   int result;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("§socketReceived: arg: %p len: %d§", arg, len);
-//ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
+//ets_printf("§socketReceived: arg: %p len: %d§"\n, arg, len);
+ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
   char temp[20] = {0};
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
   ets_printf("§remote ");
   ets_printf(temp);
   ets_printf(":");
   ets_printf("%d",pesp_conn->proto.tcp->remote_port);
-  ets_printf(" received§");
+  ets_printf(" received§\n");
 
   nud = (netsocketUserData_t *)pesp_conn->reverse;
   nud->remote_ip[0] = pesp_conn->proto.tcp->remote_ip[0];
@@ -375,7 +375,7 @@ static void netSocketConnected(void *arg) {
   netsocketUserData_t *nud;
   int result;
 
-//ets_printf("§netSocketConnected§");
+ets_printf("§netSocketConnected§\n");
   pesp_conn = arg;
   if (pesp_conn == NULL) {
     return;
@@ -386,12 +386,13 @@ static void netSocketConnected(void *arg) {
   }
   // can receive and send data
   result = espconn_regist_recvcb (pesp_conn, netSocketReceived);
-//ets_printf("§espconn_regist_recvcb: result: %d§", result);
+ets_printf("§espconn_regist_recvcb: result: %d§\n", result);
   result = espconn_regist_sentcb (pesp_conn, netSocketSent);
-//ets_printf("§espconn_regist_sentcb: result: %d§", result);
+ets_printf("§espconn_regist_sentcb: result: %d§\n", result);
   result = espconn_regist_disconcb (pesp_conn, netSocketDisconnected);
-//ets_printf("§espconn_regist_disconcb: result: %d§", result);
+ets_printf("§espconn_regist_disconcb: result: %d§\n", result);
   nud->compMsgDispatcher->compMsgData->nud = nud;
+ets_printf("§sendCloudMsg: %p§\n", nud->compMsgDispatcher->sendCloudMsg );
   if (nud->compMsgDispatcher->sendCloudMsg != NULL) {
     result = nud->compMsgDispatcher->sendCloudMsg(nud->compMsgDispatcher);
   } else {
@@ -672,24 +673,25 @@ static  void alarmTimerClientMode(void *arg) {
   timerId = (uint8_t)((uint32_t)arg);
   tmr = &compMsgTimers[timerId];
   self = tmr->self;
-ets_printf("§alarmTimerClientMode: timerId: %d self: %p§", timerId, self);
+//ets_printf("§alarmTimerClientMode: timerId: %d self: %p§\n", timerId, self);
   wifi_get_ip_info(mode, &pTempIp);
-ets_printf("§wifi is in mode: %d status: %d hostname: %s!§", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
+ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
   if(pTempIp.ip.addr==0){
-ets_printf("§ip: nil§");
+ets_printf("§ip: nil§\n");
     return;
   }
   tmr->mode |= TIMER_IDLE_FLAG;
-  c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
-ets_printf("§IP: %s§", temp);
+//  c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
+//ets_printf("§IP: %s§\n", temp);
   ets_timer_disarm(&tmr->timer);
-  result = self->setWifiValue(self, "ip", pTempIp.ip.addr, NULL);
+  result = self->setWifiValue(self, "@clientIPAddr", pTempIp.ip.addr, NULL);
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-ets_printf("§ip2: 0x%08x§", numericValue);
+//ets_printf("§ip2: 0x%08x§\n", numericValue);
+  c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&numericValue));
 
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
-ets_printf("§port: %d result: %d§", port, result);
+ets_printf("§IP: %s port: %d result: %d§\n", temp, port, result);
 
   nud = (netsocketUserData_t *)os_zalloc(sizeof(netsocketUserData_t));
 //   checkAllocOK(nud);
@@ -700,10 +702,10 @@ ets_printf("§port: %d result: %d§", port, result);
   nud->secure = numericValue;
 #endif
   result = self->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-ets_printf("§netReceivedCallback: %p!%d!§", numericValue, result);
+//ets_printf("§netReceivedCallback: %p!%d!§\n", numericValue, result);
   nud->netsocketReceived = (netsocketReceived_t)numericValue;
   result = self->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-ets_printf("§netToSendCallback: %p!%d!§", numericValue, result);
+//ets_printf("§netToSendCallback: %p!%d!§\n", numericValue, result);
   nud->netsocketToSend = (netsocketToSend_t)numericValue;
   nud->compMsgDispatcher = self;
 
@@ -727,24 +729,36 @@ ets_printf("§netToSendCallback: %p!%d!§", numericValue, result);
 //    checkErrOK(COMP_DISP_ERR_OUT_OF_MEMORY);
   }
   pesp_conn->proto.tcp->local_port = port;
-ets_printf("§port: %d§", port);
+ets_printf("§port: %d§\n", port);
 
-ets_printf("§call regist connectcb§");
+ets_printf("§call regist connectcb§\n");
   result = espconn_regist_connectcb(pesp_conn, serverConnected);
   if (result != COMP_DISP_ERR_OK) {
 //    return COMP_DISP_ERR_REGIST_CONNECT_CB;
   }
-ets_printf("§regist connectcb result: %d§", result);
-  result = espconn_accept(pesp_conn);    // if it's a server, no need to dns.
+ets_printf("§regist connectcb result: %d§\n", result);
+  result = espconn_regist_recvcb(pesp_conn, socketReceived);
+  if (result != COMP_DISP_ERR_OK) {
+ets_printf("§regist socketReceived err: %d§\n", result);
+  }
+  result = espconn_regist_sentcb(pesp_conn, socketSent);
+  if (result != COMP_DISP_ERR_OK) {
+ets_printf("§regist socketSent err: %d§\n", result);
+  }
+ets_printf("§recv_callback: %p sent_callback: %p!§\n", pesp_conn->recv_callback, pesp_conn->sent_callback);
+  result = espconn_accept(pesp_conn);
   if (result != COMP_DISP_ERR_OK) {
 //    return COMP_DISP_ERR_TCP_ACCEPT;
   }
-ets_printf("§regist_accept result: %d§", result);
-  result =espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
+ets_printf("§regist_accept result: %d§\n", result);
+  result = espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
   if (result != COMP_DISP_ERR_OK) {
 //    return COMP_DISP_ERR_REGIST_TIME;
   }
-ets_printf("§regist_time result: %d§", result);
+ets_printf("§regist_time result: %d§\n", result);
+  result = self->sendClientIPMsg(self);
+ets_printf("§sendClientIPMsg result: %d§\n", result);
+
 }
 
 // ================================= netsocketRunClientMode ====================================
@@ -756,8 +770,9 @@ static uint8_t netsocketRunClientMode(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t *stringValue;
 
-ets_printf("§netsocketRunClientMode called§");
+ets_printf("§netsocketRunClientMode called§\n");
   
+#ifdef NOTDEF
   boolResult = wifi_station_disconnect();
   if (!boolResult) {
 ets_printf("§COMP_DISP_ERR_CANNOT_DISCONNECT§");
@@ -768,29 +783,33 @@ ets_printf("§COMP_DISP_ERR_CANNOT_DISCONNECT§");
 ets_printf("§COMP_DISP_ERR_CANNOT_SET_OPMODE§");
     return COMP_DISP_ERR_CANNOT_SET_OPMODE;
   }
+#endif
 
   c_memset(station_config.ssid,0,sizeof(station_config.ssid));
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
-ets_printf("§getSsid: result: %d§", result);
+//ets_printf("§getSsid: result: %d§\n", result);
   checkErrOK(result);
   c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
 
   c_memset(station_config.password,0,sizeof(station_config.password));
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
-ets_printf("§getPasswd: result: %d§", result);
+//ets_printf("§getPasswd: result: %d§\n", result);
   checkErrOK(result);
 //ets_printf("len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
-ets_printf("§ssid: %s password: %s!§", station_config.ssid, station_config.password);
+ets_printf("§ssid: %s password: %s!§\n", station_config.ssid, station_config.password);
 
   boolResult = wifi_station_set_config(&station_config);
   if (!boolResult) {
     return COMP_DISP_ERR_CANNOT_SET_OPMODE;
   }
-  wifi_station_set_auto_connect(true);
-  wifi_station_connect();
-
-ets_printf("§wifi is in mode: %d status: %d hostname: %s!§", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
+//  wifi_station_set_auto_connect(true);
+  boolResult = wifi_station_connect();
+  if (!boolResult) {
+    return COMP_DISP_ERR_CANNOT_CONNECT;
+  }
+boolResult = wifi_station_set_hostname("testDeviceClient");
+ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
 
   int repeat = 1;
   int interval = 1000;
@@ -807,7 +826,7 @@ ets_printf("§wifi is in mode: %d status: %d hostname: %s!§", wifi_get_opmode()
   tmr->interval = interval;
   tmr->mode &= ~TIMER_IDLE_FLAG;
   ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
-ets_printf("§netsocketRunClientMode done§");
+ets_printf("§netsocketRunClientMode done§\n");
   return COMP_DISP_ERR_OK;
 }
 

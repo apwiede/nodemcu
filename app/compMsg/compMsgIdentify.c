@@ -258,13 +258,12 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t **handle) {
   msgHeaderInfos_t *hdrInfos;
   int hdrIdx;
 
-ets_printf("§prepareAnswerMsg§\n");
+//ets_printf("§prepareAnswerMsg§\n");
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdrIdx++; // the Ack message has to be the next entry in headerInfos!!
   hdr = &hdrInfos->headerParts[hdrIdx];
   result = self->createMsgFromHeaderPart(self, hdr, handle);
-ets_printf("§prepareAnswerMsg:hdrIdx: %d cmdKey: 0x%04x handle: %s result: %d§\n", hdrIdx, hdr->hdrU16CmdKey, handle, result);
   checkErrOK(result);
   return result;
 }
@@ -286,7 +285,7 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
   size_t startOffset;
   size_t idx;
 
-ets_printf("§handleReceivedHeader§\n");
+//ets_printf("§handleReceivedHeader§\n");
   hdrInfos = &self->msgHeaderInfos;
   received = &self->compMsgData->received;
   u8TotalCrc = false;
@@ -298,7 +297,7 @@ ets_printf("§handleReceivedHeader§\n");
 //received->compMsgDataView->dataView->dumpBinary(received->buf+30, 10, "Received->buf");
 //ets_printf("§");
   hdrIdx = hdrInfos->currPartIdx;
-ets_printf("§handleReceivedHeader: currPartIdx: %d totalLgth: %d§\n", hdrInfos->currPartIdx, received->totalLgth);
+//ets_printf("§handleReceivedHeader: currPartIdx: %d totalLgth: %d§\n", hdrInfos->currPartIdx, received->totalLgth);
   hdr = &hdrInfos->headerParts[hdrIdx];
 
   // set received->lgth to end of the header
@@ -441,24 +440,27 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   msgHeaderInfos_t *hdrInfos;
   headerPart_t *hdr;
   msgDescPart_t *msgDescPart;
+  msgValPart_t *msgValPart;
   fieldsToSave_t *fieldsToSave;
+  action_t actionCallback;
   uint8_t answerType;
   uint8_t *handle;
+  bool hadActionCb;
 
 ets_printf("§storeReceivedMsg§\n");
   received = &self->compMsgData->received;
+//ets_printf("handleReceivedHeader\n");
+  // next line deletes compMsgData !!
   result = self->handleReceivedHeader(self);
   checkErrOK(result);
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
-ets_printf("§storeReceivedMsg: currPartIdx: %d totalLgth: %d§\n", hdrInfos->currPartIdx, received->totalLgth);
   hdr = &hdrInfos->headerParts[hdrIdx];
+//ets_printf("getMsgPartsFromHeaderPart\n");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, &handle);
-ets_printf("currHdr: %p hdrIdx: %d\n", self->compMsgData->currHdr, hdrIdx);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, &handle);
   checkErrOK(result);
   idx = 0;
-ets_printf("numMsgDescParts: %d numFieldsToSave: %d\n", self->compMsgData->numMsgDescParts, self->numFieldsToSave);
   while (idx < self->compMsgData->numMsgDescParts) {
     msgDescPart = &self->compMsgData->msgDescParts[idx];
     result = self->compMsgData->addField(self, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
@@ -466,21 +468,18 @@ ets_printf("numMsgDescParts: %d numFieldsToSave: %d\n", self->compMsgData->numMs
     idx++;
   }
   self->compMsgData->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
-ets_printf("compMsgDataView: %p\n", self->compMsgData->compMsgDataView);
   result = self->compMsgData->initReceivedMsg(self);
   checkErrOK(result);
   fieldToSaveIdx = 0;
   while (fieldToSaveIdx < self->numFieldsToSave) {
     fieldsToSave = &self->fieldsToSave[fieldToSaveIdx];
     idx = 0;
-ets_printf("fieldToSave: %s num: %d\n", fieldsToSave->fieldNameStr, self->compMsgData->numMsgDescParts);
     while (idx < self->compMsgData->numMsgDescParts) {
       msgDescPart = &self->compMsgData->msgDescParts[idx];
-ets_printf("fieldToSave2: %s %s\n", fieldsToSave->fieldNameStr, msgDescPart->fieldNameStr);
       if (c_strcmp(msgDescPart->fieldNameStr, fieldsToSave->fieldNameStr) == 0) {
         result = self->compMsgData->getFieldValue(self, fieldsToSave->fieldNameStr, &numericValue, &stringValue);
         checkErrOK(result);
-ets_printf("found fieldToSave: %s %s\n", fieldsToSave->fieldNameStr, stringValue);
+//ets_printf("§found fieldToSave: %s %s§\n", fieldsToSave->fieldNameStr, stringValue);
         fieldsToSave->fieldValueStr = stringValue;
         fieldsToSave->fieldValue = numericValue;
       }
@@ -488,12 +487,57 @@ ets_printf("found fieldToSave: %s %s\n", fieldsToSave->fieldNameStr, stringValue
     }
     fieldToSaveIdx++;
   }
+  idx = 0;
+  hadActionCb = false;
+  while (idx < self->compMsgData->numMsgValParts) {
+    msgValPart = &self->compMsgData->msgValParts[idx];
+    if (msgValPart->fieldValueActionCb != NULL) {
+ets_printf("§have actionCb: %s\n", msgValPart->fieldValueActionCb);
+      hadActionCb = true;
+      result = self->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
+      checkErrOK(result);
+      result = actionCallback(self);
+      checkErrOK(result);
+    }
+    idx++;
+  }
+  if (!hadActionCb) {
+    result = self->prepareAnswerMsg(self, &handle);
+    checkErrOK(result);
+    result = self->resetMsgInfo(self, received);
+    checkErrOK(result);
+  }
+ets_printf("§storeReceivedMsg done§\n");
+  return COMP_MSG_ERR_OK;
+}
 
+// ================================= sendClientIPMsg ====================================
+    
+static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
+  uint8_t result;
+  int ipAddr;
+  int port;
+  int numericValue;
+  char temp[64];
+  uint8_t *stringValue;
+  uint8_t *handle;
+  msgParts_t *received;
+
+ets_printf("§sendClientIPMsg§\n");
+  received = &self->compMsgData->received;
+  result = self->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
+  checkErrOK(result);
+  result = self->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
+  checkErrOK(result);
+  os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
+ets_printf("§IP: %s port: %d§\n", temp, port);
   result = self->prepareAnswerMsg(self, &handle);
+ets_printf("§prepareAnswerMsg: result: %d§\n", result);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
+ets_printf("§resteMsgInfo: result: %d§\n", result);
   checkErrOK(result);
-ets_printf("§storeReceivedMsg done§\n");
+ets_printf("§sendClientIPMsg done§\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -674,6 +718,7 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   self->handleReceivedHeader = &handleReceivedHeader;
   self->handleReceivedMsg = &handleReceivedMsg;
   self->storeReceivedMsg = &storeReceivedMsg;
+  self->sendClientIPMsg = &sendClientIPMsg;
   result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
   checkErrOK(result);
   result=self->compMsgMsgDesc->getFieldsToSave(self, MSG_FIELDS_TO_SAVE_FILE_NAME);

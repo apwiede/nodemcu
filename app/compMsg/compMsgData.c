@@ -499,21 +499,16 @@ static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
   compMsgData_t *compMsgData;
 
   compMsgData = self->compMsgData;
-ets_printf("getFieldValue: compMsgData: %p\n", compMsgData);
   if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
-ets_printf("getFieldValue: compMsgTypesAndNames: %p\n", self->compMsgTypesAndNames, fieldName);
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   idx = 0;
   numEntries = compMsgData->numFields;
-ets_printf("getFieldValue: numEntries: %d\n", numEntries);
   while (idx < numEntries) {
     fieldInfo = &compMsgData->fields[idx];
-ets_printf("getFieldValue: fieldInfo: %p\n", fieldInfo);
     if (fieldNameId == fieldInfo->fieldNameId) {
-ets_printf("getFieldValue: compMsgDataView: %p\n", compMsgData->compMsgDataView);
       result = compMsgData->compMsgDataView->getFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
       checkErrOK(result);
       break;

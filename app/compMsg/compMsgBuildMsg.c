@@ -143,16 +143,18 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
   int numericValue;
   compMsgData_t *compMsgData;
 
-//ets_printf("§setMsgFieldValue: %s %s§", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
+ets_printf("§setMsgFieldValue: %s %s§\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
   compMsgData = self->compMsgData;
-  if (self->compMsgData->msgValPart->fieldValueStr[0] == '@') {
+  if (ets_strncmp(self->compMsgData->msgValPart->fieldValueStr, "@get", 4) == 0) {
     // call the callback function for the field!!
-//ets_printf("§setMsgFieldValue:cb %s!%p!size: %d§\n", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
+ets_printf("§setMsgFieldValue:cb %s!%p!size: %d§\n", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
     if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
       result = self->compMsgData->msgValPart->fieldValueCallback(self, &numericValue, &stringValue);
+ets_printf("§fieldValueCallback: result: %d§\n", result);
       checkErrOK(result);
     }
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
+ets_printf("§isNumber: %d§\n", self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER);
     if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
       stringValue = NULL;
       numericValue = self->compMsgData->msgValPart->fieldValue;
@@ -160,11 +162,11 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
       stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
       numericValue = 0;
     }
-//ets_printf("§cb field: %s!value: 0x%04x %s!§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+ets_printf("§cb field: %s!value: 0x%04x %s!§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
     result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
-//ets_printf("§fieldName: %s!id: %d!§\n", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
+ets_printf("§fieldName: %s!id: %d!§\n", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
     if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
       stringValue = NULL;
       numericValue = self->compMsgData->msgValPart->fieldValue;
@@ -186,7 +188,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
         result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
       default:
-//ets_printf("§fieldName: %s!value: 0x%04x %s§", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+ets_printf("§fieldName: %s!value: 0x%04x %s§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
         result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
     }
@@ -228,7 +230,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t *stringValue;
 
-//ets_printf("§setMsgValues§");
+ets_printf("§setMsgValues§\n");
   compMsgData = self->compMsgData;
   handle = self->msgHandle;
   type = 'A';
@@ -310,7 +312,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-//ets_printf("§buildMsg§");
+ets_printf("§buildMsg§\n");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
