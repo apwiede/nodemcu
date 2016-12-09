@@ -150,18 +150,18 @@ static void netsocketReceived(void *arg, void *nud, char *pdata, unsigned short 
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-ets_printf("§netsocketReceived: len: %d dispatcher: %p§", len, compMsgDispatcher);
+ets_printf("§netsocketReceived: len: %d dispatcher: %p§\n", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->received);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
-ets_printf("§received compMsgData: %p remote_port: %d receivedLgth: %d§", self->compMsgData, ((netsocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
+ets_printf("§received compMsgData: %p remote_port: %d receivedLgth: %d§\n", self->compMsgData, ((netsocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
   self->compMsgData->wud = NULL;
   self->compMsgData->nud = nud;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = (uint8_t *)pdata;
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
-ets_printf("§netsocketReceived end result: %d§", result);
+ets_printf("§netsocketReceived end result: %d§\n", result);
 }
 
 // ================================= websocketTextReceived ====================================
@@ -312,35 +312,12 @@ ets_printf("connecToAP:\n");
   }
 ets_printf("connecToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
   result = self->setWifiValue(self, "@clientSsid", 0, ssid);
-ets_printf("set @clientSsid: result: %d\n", result);
   checkErrOK(result);
   result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
-ets_printf("set @clientPasswd: result: %d\n", result);
   checkErrOK(result);
   result = self->netsocketRunClientMode(self);
-ets_printf("runClientMode: result: %d\n", result);
+//ets_printf("runClientMode: result: %d\n", result);
   checkErrOK(result);
-#ifdef NOTDEF
-  station_config = os_zalloc(sizeof(struct station_config));
-  checkAllocOK(station_config);
-  c_memcpy(station_config->ssid, ssid, c_strlen(ssid));
-  c_memcpy(station_config->password, passwd, c_strlen(passwd));
-  station_config->bssid_set = 0;
-  boolResult = wifi_station_set_config(station_config);
-ets_printf("set_config: result: %d\n", boolResult);
-  boolResult = wifi_station_connect();
-ets_printf("connect: result: %d\n", boolResult);
-  if (boolResult) {
-    boolResult = wifi_set_opmode(STATION_MODE);
-ets_printf("set_opmode: result: %d\n", boolResult);
-    boolResult = wifi_get_ip_info(STATION_IF, &ip_info);
-ets_printf("ip_info: result: %d\n", boolResult);
-    if (boolResult) {
-      os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ip_info.ip));
-ets_printf("IP_Addr: %s\n", temp);
-    }
-  }
-#endif
 ets_printf("connectToAP done\n");
   
   return COMP_DISP_ERR_OK;
@@ -558,7 +535,6 @@ static uint8_t getWifiAPFreqcal_vals(compMsgDispatcher_t *self, int* numericValu
 // ================================= getClientIPAddr ====================================
 
 static uint8_t getClientIPAddr(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-ets_printf("§compMsgWifiData.clientIPAddr: 0x%08x§\n", compMsgWifiData.clientIPAddr);
   *numericValue = compMsgWifiData.clientIPAddr;
   *stringValue = NULL;
   return COMP_DISP_ERR_OK;
@@ -567,7 +543,6 @@ ets_printf("§compMsgWifiData.clientIPAddr: 0x%08x§\n", compMsgWifiData.clientI
 // ================================= getClientPort ====================================
 
 static uint8_t getClientPort(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-ets_printf("§compMsgWifiData.clientPort: %d§\n", compMsgWifiData.clientPort);
   *numericValue = compMsgWifiData.clientPort;
   *stringValue = NULL;
   return COMP_DISP_ERR_OK;

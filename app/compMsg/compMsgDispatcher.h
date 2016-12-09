@@ -233,6 +233,7 @@ typedef struct compMsgDispatcher {
   size_t cloudMsgDataLgth;
   uint8_t *cloudPayload;
   size_t cloudPayloadLgth;
+  uint8_t stopAP;
 
   msgHeaderInfos_t msgHeaderInfos;
 

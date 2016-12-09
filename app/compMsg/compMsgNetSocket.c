@@ -356,6 +356,7 @@ static void netSocketSent(void *arg) {
   struct espconn *pesp_conn;
   netsocketUserData_t *nud;
   int result;
+  bool boolResult;
 
 ets_printf("§netSocketSent is called§");
   pesp_conn = (struct espconn *)arg;
@@ -666,6 +667,7 @@ static  void alarmTimerClientMode(void *arg) {
   ip_addr_t ipaddr;
   unsigned type;
   int result;
+  bool boolResult;
   netsocketUserData_t *nud;
 
   pesp_conn = NULL;
@@ -731,12 +733,12 @@ ets_printf("§IP: %s port: %d result: %d§\n", temp, port, result);
   pesp_conn->proto.tcp->local_port = port;
 ets_printf("§port: %d§\n", port);
 
-ets_printf("§call regist connectcb§\n");
+//ets_printf("§call regist connectcb§\n");
   result = espconn_regist_connectcb(pesp_conn, serverConnected);
   if (result != COMP_DISP_ERR_OK) {
 //    return COMP_DISP_ERR_REGIST_CONNECT_CB;
   }
-ets_printf("§regist connectcb result: %d§\n", result);
+//ets_printf("§regist connectcb result: %d§\n", result);
   result = espconn_regist_recvcb(pesp_conn, socketReceived);
   if (result != COMP_DISP_ERR_OK) {
 ets_printf("§regist socketReceived err: %d§\n", result);
@@ -745,20 +747,19 @@ ets_printf("§regist socketReceived err: %d§\n", result);
   if (result != COMP_DISP_ERR_OK) {
 ets_printf("§regist socketSent err: %d§\n", result);
   }
-ets_printf("§recv_callback: %p sent_callback: %p!§\n", pesp_conn->recv_callback, pesp_conn->sent_callback);
   result = espconn_accept(pesp_conn);
   if (result != COMP_DISP_ERR_OK) {
 //    return COMP_DISP_ERR_TCP_ACCEPT;
+ets_printf("§regist_accept err result: %d§\n", result);
   }
-ets_printf("§regist_accept result: %d§\n", result);
   result = espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
   if (result != COMP_DISP_ERR_OK) {
 //    return COMP_DISP_ERR_REGIST_TIME;
+ets_printf("§regist_time err result: %d§\n", result);
   }
-ets_printf("§regist_time result: %d§\n", result);
   result = self->sendClientIPMsg(self);
+  self->stopAP = 1;
 ets_printf("§sendClientIPMsg result: %d§\n", result);
-
 }
 
 // ================================= netsocketRunClientMode ====================================

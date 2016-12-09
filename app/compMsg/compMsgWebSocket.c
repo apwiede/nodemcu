@@ -437,11 +437,29 @@ ets_printf("iswebsocket: %d %s\n", wud->isWebsocket, wud->curr_url);
 
 static void socketSent(void *arg) {
   struct espconn *pesp_conn;
+  websocketUserData_t *wud;
+  int result;
+  bool boolResult;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("socketSent: arg: %p\n", arg);
-  pesp_conn = arg;
-
+ets_printf("websocketSent: arg: %p\n", arg);
+  pesp_conn = (struct espconn *)arg;
+  if (pesp_conn == NULL) {
+    return;
+  }
+  wud = (websocketUserData_t *)pesp_conn->reverse;
+  if(wud == NULL) {
+    return;
+  }
+  if (wud->compMsgDispatcher->stopAP) {
+ets_printf("§stopAP§\n");
+    wud->compMsgDispatcher->stopAP = 0;
+    boolResult = wifi_set_opmode(OPMODE_STATION);
+    if (!boolResult) {
+ets_printf("§COMP_DISP_ERR_CANNOT_SET_OPMODE§");
+//      return COMP_DISP_ERR_CANNOT_SET_OPMODE;
+    }
+  }
 }
 
 // ================================= serverConnected  ====================================

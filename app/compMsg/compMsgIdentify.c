@@ -158,7 +158,7 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
     hdrIdx++;
   }
   if (!found) {
-ets_printf("§nextFitting HANDLE_NOT_FOUND§");
+ets_printf("§nextFitting HANDLE_NOT_FOUND§\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
   }
   hdrInfos->currPartIdx = hdrIdx;
@@ -523,19 +523,19 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   uint8_t *handle;
   msgParts_t *received;
 
-ets_printf("§sendClientIPMsg§\n");
+//ets_printf("§sendClientIPMsg§\n");
   received = &self->compMsgData->received;
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
   checkErrOK(result);
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
   checkErrOK(result);
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
-ets_printf("§IP: %s port: %d§\n", temp, port);
+//ets_printf("§IP: %s port: %d§\n", temp, port);
   result = self->prepareAnswerMsg(self, &handle);
-ets_printf("§prepareAnswerMsg: result: %d§\n", result);
+//ets_printf("§prepareAnswerMsg: result: %d§\n", result);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
-ets_printf("§resteMsgInfo: result: %d§\n", result);
+//ets_printf("§resteMsgInfo: result: %d§\n", result);
   checkErrOK(result);
 ets_printf("§sendClientIPMsg done§\n");
   return COMP_MSG_ERR_OK;

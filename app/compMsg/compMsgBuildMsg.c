@@ -143,30 +143,31 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
   int numericValue;
   compMsgData_t *compMsgData;
 
-ets_printf("§setMsgFieldValue: %s %s§\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
+//ets_printf("§setMsgFieldValue: %s %s§\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
   compMsgData = self->compMsgData;
   if (ets_strncmp(self->compMsgData->msgValPart->fieldValueStr, "@get", 4) == 0) {
     // call the callback function for the field!!
-ets_printf("§setMsgFieldValue:cb %s!%p!size: %d§\n", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
+//ets_printf("§setMsgFieldValue:cb %s!%p!size: %d§\n", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
     if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
       result = self->compMsgData->msgValPart->fieldValueCallback(self, &numericValue, &stringValue);
-ets_printf("§fieldValueCallback: result: %d§\n", result);
+//ets_printf("§fieldValueCallback: result: %d§\n", result);
       checkErrOK(result);
+      self->compMsgData->msgValPart->fieldValue = numericValue;
     }
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
-ets_printf("§isNumber: %d§\n", self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER);
-    if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
+//ets_printf("§isNumber: %d§\n", self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER);
+    if ((self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) || (stringValue == NULL)) {
       stringValue = NULL;
       numericValue = self->compMsgData->msgValPart->fieldValue;
     } else {
       stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
       numericValue = 0;
     }
-ets_printf("§cb field: %s!value: 0x%04x %s!§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+//ets_printf("§cb field: %s!value: 0x%04x %s!§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
     result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
-ets_printf("§fieldName: %s!id: %d!§\n", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
+//ets_printf("§fieldName: %s!id: %d!§\n", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
     if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
       stringValue = NULL;
       numericValue = self->compMsgData->msgValPart->fieldValue;
@@ -188,7 +189,7 @@ ets_printf("§fieldName: %s!id: %d!§\n", fieldNameStr, self->compMsgData->msgVa
         result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
       default:
-ets_printf("§fieldName: %s!value: 0x%04x %s§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+//ets_printf("§fieldName: %s!value: 0x%04x %s§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
         result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
     }
@@ -230,7 +231,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t *stringValue;
 
-ets_printf("§setMsgValues§\n");
+//ets_printf("§setMsgValues§\n");
   compMsgData = self->compMsgData;
   handle = self->msgHandle;
   type = 'A';
@@ -241,6 +242,7 @@ ets_printf("§setMsgValues§\n");
   msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
   tableFieldIdx = 0;
   compMsgData = self->compMsgData;
+//ets_printf("§numFields: %d numMsgValParts: %d§", compMsgData->numFields, self->compMsgData->numMsgValParts);
   while ((msgDescPartIdx < compMsgData->numFields) && (msgValPartIdx <= self->compMsgData->numMsgValParts)) {
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;

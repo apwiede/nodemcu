@@ -617,7 +617,11 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_CRC:
-        headerLgth = 0;
+        if (compMsgData->currHdr->hdrEncryption == 'E') {
+          headerLgth = self->msgHeaderInfos.headerLgth;
+        } else {
+          headerLgth = 0;
+        }
         lgth = compMsgData->cmdLgth-fieldInfo->fieldLgth + compMsgData->headerLgth;
         if (compMsgData->flags & COMP_MSG_CRC_USE_HEADER_LGTH) {
             headerLgth = compMsgData->headerLgth;
@@ -635,10 +639,6 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_TOTAL_CRC:
-        headerLgth = 0;
-        result = compMsgData->compMsgDataView->setTotalCrc(compMsgData->compMsgDataView, fieldInfo);
-        checkErrOK(result);
-        fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
     }
     idx++;

@@ -177,19 +177,19 @@ static uint8_t setCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
 
   crc = 0;
   idx = startOffset;
-//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx-startOffset, self->dataView->data[idx], crc);
+//ets_printf("§setCrc startOffset: %d ch: 0x%02x crc: 0x%04x lgth: %d§\n", startOffset, self->dataView->data[idx], crc, lgth);
   while (idx < lgth) {
-//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx-startOffset, self->dataView->data[idx], crc);
+//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x§\n", idx-startOffset, self->dataView->data[idx], crc);
     crc += self->dataView->data[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
-//ets_printf("§crc8: 0x%04x 0x%02x\n§", crc, (uint8_t)(crc & 0xFF));
+//ets_printf("§crc8: 0x%04x 0x%02x§\n", crc, (uint8_t)(crc & 0xFF));
     self->dataView->setUint8(self->dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
   } else {
     self->dataView->setUint16(self->dataView,fieldInfo->fieldOffset,crc);
   }
-//ets_printf("crc: 0x%04x\n", crc);
+//ets_printf("§crc: 0x%04x§\n", crc);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -243,7 +243,7 @@ static uint8_t setTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
 
   crc = 0;
   idx = 0;
-//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx, self->dataView->data[idx], crc);
+//ets_printf("§setTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d\n§", idx, self->dataView->data[idx], crc, fieldInfo->fieldOffset);
   while (idx < fieldInfo->fieldOffset) {
 //ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx, self->dataView->data[idx], crc);
     crc += self->dataView->data[idx++];
