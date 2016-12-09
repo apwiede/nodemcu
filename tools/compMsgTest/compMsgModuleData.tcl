@@ -358,19 +358,19 @@ namespace eval compMsg {
       dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
       switch [dict get $compMsgModuleData operatingMode] {
        MODULE_OPERATING_MODE_CLIENT {
-         set value 1
+         set value \x10
        }
        MODULE_OPERATING_MODE_AP {
-         set value 2
+         set value \x20
        }
        MODULE_OPERATING_MODE_LIGHT_SLEEP_WAKEUP {
-         set value 3
+         set value \x12
        }
        MODULE_OPERATING_MODE_LIGHT_SLEEP {
-         set value 4
+         set value x13
        }
        MODULE_OPERATING_MODE_WPS {
-         set value 5
+         set value \x14
        }
        MODULE_OPERATING_MODE_MODULE_TEST {
          set value \xD0

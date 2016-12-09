@@ -103,84 +103,6 @@ namespace eval compMsg {
       return $::COMP_MSG_ERR_OK
     }
 
-    # ================================= prepareNotEncryptedAnswer ====================================
-    
-    proc prepareNotEncryptedAnswer {partsVar type} {
-      upvar $partsVar parts
-    #ets_printf{"§@1@§", parts->u8CmdKey}
-      if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
-    #ets_printf{"§@prepareNotEncryptedAnsweru8!%c!t!%c!@§", parts->u8CmdKey, type}
-        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
-      } else {
-    #ets_printf{"§@prepareNotEncryptedAnsweru16!%c%c!t!%c!@§", (parts->u16CmdKey>>8}& 0xFF, parts->u16CmdKey&0xFF, type)
-        set fileName [format "%s/Desc%c%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}] $type]
-      }
-      set fd [open $fileName "r"]
-      get $fd line
-      set flds [split $line ","]
-      foreach {dummy numEntries} $flds break
-    #ets_printf{"§@NE1!%d!@§", numEntries}
-      set numRows 0
-      set result [createMsgFromLines $parts $numEntries $numRows $type compMsgData handle]
-      checkErrOk $result
-    #ets_printf{"heap2: %d\n", system_get_free_heap_size(})
-      close $fd
-      if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
-        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
-      } else {
-        set fileName [format "%s/Val%c%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}] $type]
-      }
-      set fd [open $fileName "r"]
-      gets $fd line
-      set flds [split $line ","]
-      foreach {dummy numEntries} $flds break
-    #ets_printf{"§@NE2!%d!@§", numEntries}
-      set result [::compMsg compMsgData setMsgValuesFromLines $numEntries $handle [dict get $parts u8CmdKey]]
-      checkErrOK $result
-      close $fd
-    #ets_printf{"§heap3: %d§", system_get_free_heap_size(})
-      set result [::compMsg compMsgData getMsgData data msgLgth]
-      checkErrOK $result
-      set result [typeRSendAnswer $data $msgLgth]
-      resetMsgInfo parts
-      return $::COMP_MSG_ERR_OK
-    }
-    
-    # ================================= prepareEncryptedAnswer ====================================
-    
-    proc prepareEncryptedAnswer {parts type} {
-      if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
-        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
-      } else {
-        set fileName [format "%s/Desc%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
-      }
-      set fd [open $fileName "r"]
-      gets $fd line
-      set flds [split $line ","]
-      foreach {dummy numEntries} $flds break
-      set numRows 0
-      set result [::compMsg compMsgDispatcher createMsgFromLines $fd $parts $numEntries $numRows $type handle]
-      checkErrOK $result
-      close $fd
-      if {[lsearch [dict get $parts partsFlags] COMP_DISP_U8_CMD_KEY] >= 0} {
-        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [dict get $parts u8CmdKey] $type]
-      } else {
-        set fileName [format "%s/Val%c%c.txt" $::moduleFilesPath [expr {([dict get $parts u16CmdKey] >> 8) & 0xFF}] [expr {[dict get $parts u16CmdKey] & 0xFF}]]
-      }
-      set fd [open $fileName "r"]
-      gets $fd line
-      set flds [split $line ","]
-      foreach {dummy numEntries} $flds break
-      set result [::compMsg compMsgDispatcher setMsgValuesFromLines $fd $numEntries $handle [dict get $parts u8CmdKey]]
-      checkErrOK $result
-      close $fd
-      set result [::compMsg compMsgData getMsgData data msgLgth]
-      checkErrOK $result
-      set result [typeRSendAnswer $data $msgLgth]
-      resetMsgInfo parts
-      return $::COMP_MSG_ERR_OK
-    }
-    
     # ================================= nextFittingEntry ====================================
     
     proc nextFittingEntry {compMsgDispatcherVar receivedVar u8CmdKey u16CmdKey} {
@@ -208,7 +130,7 @@ namespace eval compMsg {
                 }
               } else {
                 if {$u16CmdKey != 0} {
-#puts stderr "u16cmdkey: $u16cmdKey!rec u16CmdKey: [dict get $received u16CmdKey]!"
+#puts stderr "u16Cmdkey: $u16CmdKey!rec u16CmdKey: [dict get $received u16CmdKey]!"
                   if {$u16CmdKey == [dict get $received u16CmdKey]} {
 #puts stderr "found hdrIdx: $hdrIdx!"
                     set found true
@@ -229,7 +151,6 @@ namespace eval compMsg {
 puts stderr "Fitting entry not found!"
         checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
       }
-#puts stderr "hdrIdx: $hdrIdx!"
       dict set headerInfos currPartIdx $hdrIdx
       # next sequence field is extraLgth {skip, we have it in hdr fields}
       dict incr headerInfos seqIdx 1
@@ -320,6 +241,144 @@ puts stderr "Fitting entry not found!"
       return $::COMP_MSG_ERR_OK
     }
     
+    # ================================= handleReceivedHeader ====================================
+    
+    proc handleReceivedHeader {compMsgDispatcherVar receivedVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $receivedVar received
+     
+      set headerInfos [dict get $compMsgDispatcher headerInfos]
+#puts stderr "handleReceivedHeader"
+      set u8TotalCrc false
+      set u16TotalCrc false
+#      set set received compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
+      set hdrIdx [dict get $headerInfos currPartIdx]
+      set headerParts [dict get $headerInfos headerParts]
+      set hdr [lindex $headerParts $hdrIdx]
+
+      dict set received lgth [dict get $headerInfos headerLgth]
+# we loop over the fieldSequence entries and handle them as needed
+# attention not all entries of the message are handled here, only some special entries!
+ 
+#self->compMsgMsgDesc->dumpHeaderPart(self, hdr);
+      # check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
+      set idx 0
+      set fieldSequence [dict get $hdr fieldSequence]
+      set sequenceEntry [lindex $fieldSequence $idx]
+      while {$sequenceEntry ne [list]} {
+        if {$sequenceEntry eq "COMP_DISP_U8_TOTAL_CRC"} {
+          set u8TotalCrc true
+        }
+        if {$sequenceEntry eq "COMP_DISP_U16_TOTAL_CRC"} {
+          set u16TotalCrc true
+        }
+        incr idx
+        set sequenceEntry [lindex $fieldSequence $idx]
+      }
+      set result $::COMP_MSG_ERR_OK
+      dict set headerInfos seqIdx 0
+#puts stderr "seqIdx: [dict get $headerInfos seqIdx]!"
+      set sequenceEntry [lindex $fieldSequence [dict get $headerInfos seqIdx]]
+#puts stderr "sequenceEntry: $sequenceEntry!"
+      while {$sequenceEntry ne [list]} {
+        dict set received fieldOffset [dict get $headerInfos headerLgth]
+        switch $sequenceEntry {
+          COMP_DISP_U16_CMD_KEY {
+            set result [::compMsg dataView getUint16 [dict get $received fieldOffset] u16]
+            dict set received u16CmdKey $u16
+            dict incr received fieldOffset 2
+            dict lappend received partsFlags COMP_DISP_U16_CMD_KEY
+            set val [dict get $received u16CmdKey]
+            set receivedCmdKey [format "%c%c" [expr {($val >> 8) & 0xFF}] [expr {$val & 0xFF}]]
+            while {$receivedCmdKey ne [dict get $hdr hdrU16CmdKey]} {
+              dict incr headerInfos currPartIdx
+#              set result [nextFittingEntry compMsgDispatcher received 0 $receivedCmdKey]
+              set result [nextFittingEntry compMsgDispatcher received 0 $val]
+              checkErrOK $result
+              set hdr [lindex $headerParts [dict get $headerInfos currPartIdx]]
+            }
+          }
+          COMP_DISP_U0_CMD_LGTH {
+            dict incr received fieldOffset 2
+#puts stderr "u0CmdLgth!0!"
+          }
+          COMP_DISP_U16_CMD_LGTH {
+            set result [::compMsg dataView getUint16 [dict get $received fieldOffset] u16]
+            dict set received u16CmdLgth $u16
+            dict incr received fieldOffset 2
+#puts stderr [format "u16CmdLgth!0x%04x!" [dict get $received u16CmdLgth]]
+          }
+          COMP_DISP_U0_CRC {
+#puts stderr "u0Crc!0!"
+            set result $::COMP_MSG_ERR_OK
+          }
+          COMP_DISP_U8_CRC {
+            set fieldInfo [dict create]
+            dict set fieldInfo fieldLgth 1
+            dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 1}]
+            if {[lsearch [dict get $hdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+              if {$u8TotalCrc} {
+                dict incr fieldInfo fieldOffset -1
+              } else {
+                dict incr fieldInfo fieldOffset -2
+              }
+            }
+            set startOffset [dict get $headerInfos headerLgth]
+            set result [::compMsg compMsgDataView getCrc $fieldInfo crcVal $startOffset [dict get $fieldInfo fieldOffset]]
+#puts stderr [format "u8Crc!res!%d!" $result]
+          }
+          COMP_DISP_U16_CRC {
+            set fieldInfo [dict create]
+            dict set fieldInfo fieldLgth 2
+            dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 2}]
+            if {[lsearch [dict get $hdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+              if {$u8TotalCrc} {
+                dict incr fieldInfo fieldOffset -1
+              } else {
+                dict incr fieldInfo fieldOffset -2
+              }
+            }
+            set startOffset [dict get $headerInfos headerLgth]
+            set size [dict get $fieldInfo fieldOffset]
+            set result [::compMsg compMsgDataView getCrc $fieldInfo crcVal $startOffset [dict get $fieldInfo fieldOffset]]
+#puts stderr [format "u16Crc!res!%d!" $result]
+          }
+          COMP_DISP_U0_TOTAL_CRC {
+#puts stderr "u0TotalCrc!0!"
+            set result $COMP_MSG_ERR_OK
+          }
+          COMP_DISP_U8_TOTAL_CRC {
+            set fieldInfo [dict create]
+            dict set fieldInfo fieldLgth 1
+            dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 1}]
+#puts stderr [format "u8TotalCrc!fieldOffset: %d" [dict get $fieldInfo fieldOffset]]
+            # the totalCrc only fits if not yet decrypted and we have decrypted here!!
+            set result $::COMP_MSG_ERR_OK
+#            set result [::compMsg compMsgDataView getTotalCrc $fieldInfo totalCrc]
+#puts stderr [format "u8totalCrc!res!%d!" $result]
+#puts stderr [format "u8totalCrc: currPartIdx: %d" [dict get $headerInfos currPartIdx]]
+          }
+          COMP_DISP_U16_TOTAL_CRC {
+            set fieldInfo [dict create]
+            dict set fieldInfo fieldLgth 2
+            dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 2}]
+            set result $::COMP_MSG_ERR_OK
+#            set result [::compMsg compMsgDataView getTotalCrc $fieldInfo totalCrc]
+puts stderr [format "u16TotalCrc!res!%d!" $result]
+          }
+        }
+        checkErrOK $result
+        dict incr headerInfos seqIdx
+        set sequenceEntry [lindex $fieldSequence [dict get $headerInfos seqIdx]]
+      }
+      dict set compMsgDispatcher headerInfos $headerInfos
+  # free all space of received message
+#puts stderr "call deleteMsg"
+#  ::compMsg compMsgData deleteMsg compMsgDispatcher
+#puts stderr "received msg deleted"
+      return $::COMP_MSG_ERR_OK
+    }
+
     # ================================= handleReceivedMsg ====================================
     
     proc handleReceivedMsg {compMsgDispatcherVar receivedVar} {
@@ -328,9 +387,12 @@ puts stderr "Fitting entry not found!"
      
       set headerInfos [dict get $compMsgDispatcher headerInfos]
 #puts stderr "buf len: [string length [dict get $received buf]]!len: [dict get $received lgth]!"
-puts stderr "compMsgIdentify1 setData"
+#puts stderr "compMsgIdentify1 setData hdrIdx: [dict get $headerInfos currPartIdx]"
       set result [::compMsg dataView setData [dict get $received buf] [dict get $received lgth]]
+#::compMsg dataView dumpBinary [dict get $received buf] [dict get $received lgth] "ReceivedMsg"
       checkErrOK $result
+      set result [handleReceivedHeader compMsgDispatcher received]
+      set headerInfos [dict get $compMsgDispatcher headerInfos]
       set hdrIdx [dict get $headerInfos currPartIdx]
       set headerParts [dict get $headerInfos headerParts]
       set hdr [lindex $headerParts $hdrIdx]

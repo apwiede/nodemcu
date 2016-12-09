@@ -116,6 +116,7 @@ set ::HDR_FILLER_LGTH 40
 #   fieldValue        # the value for an integer
 #   fieldFlags
 #   fieldValueCallback
+#   fieldValueActionCb
 
 set ::moduleFilesPath $::env(HOME)/bene-nodemcu-firmware/module_image_files
 
@@ -611,7 +612,8 @@ namespace eval compMsg {
       set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
       dict set compMsgDispatcher compMsgData msgValParts [list]
       set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
-      set fd [open [format "%s/CompDesc%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]] "r"]
+      set fileName [format "%s/CompDesc%s.txt" $::moduleFilesPath [dict get $hdr hdrU16CmdKey]]
+      set fd [open $fileName "r"]
       gets $fd line
       set flds [split $line ","]
       set prepareValuesCbName [list]
@@ -629,6 +631,7 @@ namespace eval compMsg {
         set flds [split $line ","]
         set callback [list]
         foreach {fieldNameStr fieldTypeStr fieldLgthStr callback} $flds break
+#puts stderr "fieldNameStr: $fieldNameStr!"
         if {$fieldLgthStr eq "@numRows"} {
           set fieldLgth $numRows
         } else {
@@ -678,9 +681,12 @@ namespace eval compMsg {
         # fieldName
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_NO_INCR]
         checkErrOK $result
-        set callback [list]
-        if {[string range $fieldValueStr 0 0] eq "@"} {
+        if {[string range $fieldValueStr 0 3] eq "@get"} {
           set callback [string range $fieldValueStr 1 end]
+        }
+        set fieldValueActionCb [list]
+        if {[string range $fieldValueStr 0 3] eq "@run"} {
+          set fieldValueActionCb $fieldValueStr
         }
     
         set msgValPart [dict create]
@@ -691,12 +697,14 @@ namespace eval compMsg {
         dict set msgValPart fieldValueCallback $callback
         dict set msgValPart fieldNameStr $fieldNameStr
         dict set msgValPart fieldValueStr $fieldValueStr
+        dict set msgValPart fieldValueAcvtionCb $fieldValueActionCb
         lappend msgValParts $msgValPart
 #dumpMsgValPart compMsgDispatcher $msgValPart
         incr idx
       }
       close $fd
       dict set compMsgDispatcher compMsgData msgValParts $msgValParts
+#puts stderr "getMsgPartsFromHeaderPart done"
       return $::COMP_MSG_DESC_ERR_OK
     }
 

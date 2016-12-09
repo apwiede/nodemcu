@@ -291,10 +291,14 @@ puts stderr "handleRow: $w $x $y!"
   set fd [open [format "%s/../%s" $::moduleFilesPath myConfig.txt] "r"]
   gets $fd line1
   set flds1 [split $line1 ","]
-  dict set ::compMsgDispatcher clientSsid [lindex $flds1 1]
+  set ssid [lindex $flds1 1]
+  append ssid \x00
+  dict set ::compMsgDispatcher clientSsid $ssid
   gets $fd line2
   set flds2 [split $line2 ","]
-  dict set ::compMsgDispatcher clientPassword [lindex $flds2 1]
+  set passwd [lindex $flds2 1]
+  append passwd \x00
+  dict set ::compMsgDispatcher clientPassword $passwd
   close $fd
 puts stderr "ssid: [dict get $::compMsgDispatcher clientSsid]![dict get $::compMsgDispatcher clientPassword]!"
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 SP hdr]
@@ -369,7 +373,30 @@ flush $fd
 close $fd
       set result [::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]]
       checkErrOK $result
-      fillTable
+      set headerInfos [dict get $::compMsgDispatcher headerInfos]
+      set hdrIdx [dict get $headerInfos currPartIdx]
+      set headerParts [dict get $headerInfos headerParts]
+      set hdr [lindex $headerParts $hdrIdx]
+puts stderr "hdrIdx: $hdrIdx hdrU16CmdKey: [dict get $hdr hdrU16CmdKey]!"
+      switch [dict get $hdr hdrU16CmdKey] {
+        "AA" {
+          fillTable
+        }
+        "SA" {
+          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "@clientIPAddr" ipAddr]
+          checkErrOK $result
+          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "@clientPort" port]
+          checkErrOK $result
+          set part1 [expr {($ipAddr >>24) & 0xFF}]
+          set part2 [expr {($ipAddr >>16) & 0xFF}]
+          set part3 [expr {($ipAddr >>8) & 0xFF}]
+          set part4 [expr {$ipAddr & 0xFF}]
+          puts stderr [format "IP: %d.%d.%d.%d port: $port!" $part4 $part3 $part2 $part1]
+        }
+        default {
+          puts stderr "unexpected cmdKey: [dict get $hdr hdrU16CmdKey]!"
+        }
+      }
     }
   }
 }

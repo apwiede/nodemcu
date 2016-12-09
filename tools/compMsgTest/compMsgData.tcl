@@ -694,7 +694,7 @@ puts stderr "compMsgData2 setData"
         checkErrOK $::COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING
       }
       set totalLgth [dict get $compMsgData totalLgth]
-puts stderr "compMsgData3 setData: totalLgth: $totalLgth!"
+#puts stderr "compMsgData3 setData: totalLgth: $totalLgth!"
       set result [::compMsg dataView setData [string repeat " " $totalLgth] $totalLgth]
       checkErrOK $result
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
@@ -795,18 +795,18 @@ puts stderr "compMsgData3 setData: totalLgth: $totalLgth!"
           default {
             if {[string range [dict get $msgDescPart fieldNameStr] 0 0] eq "#"} {
               set offset [dict get $compMsgData fieldOffset]
-#puts stderr "== offet!$offset!"
+puts stderr "== offet!$offset!"
               set result [::compMsg dataView getUint16 $offset value]
               checkErrOK $result
-#puts stderr "key: $value!"
+puts stderr "key: $value!"
               incr offset 2
               set result [::compMsg dataView getUint8 $offset value]
               checkErrOK $result
-#puts stderr "type: $value!"
+puts stderr "type: $value!"
               incr offset 1
               set result [::compMsg dataView getUint16 $offset value]
               checkErrOK $result
-#puts stderr "size: $value!"
+puts stderr "size: $value!"
               dict set fieldInfo fieldLgth [expr {2 + 1 + 2 + $value}]
               dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
             } else {

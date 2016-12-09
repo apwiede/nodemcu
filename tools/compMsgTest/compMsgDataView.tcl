@@ -524,12 +524,14 @@ namespace eval ::compMsg {
     proc getCrc {fieldInfo valueVar startOffset size} {
       upvar $valueVar value
 
+#set ::crcDebug true
       set crcLgth [dict get $fieldInfo fieldLgth]
       set value ""
       set lgth [expr {$size - $crcLgth}]
       set crcVal 0
       set offset $startOffset
 set cnt 0
+puts stderr "getCrc: offset: $offset size: $size ::crcDebug: $::crcDebug!"
       while {$offset < $size} {
         set result [::compMsg dataView getUint8 $offset ch]
         set pch $ch
@@ -632,6 +634,7 @@ puts stderr "crc11: $crc![format 0x%04x $crc]![format 0x%02x [expr {$crc & 0xFF}
       set size [dict get $fieldInfo fieldOffset]
       set crcVal 0
       set offset 0
+#set ::crcDebug true
 set cnt 0
       while {$offset < $size} {
         set result [::compMsg dataView getUint8 $offset ch]
@@ -687,7 +690,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
       set crcLgth [dict get $fieldInfo fieldLgth]
       set size [dict get $fieldInfo fieldOffset]
 #set ::crcDebug true
-#set cnt 0
+set cnt 0
 #puts stderr "setTotalCrc: $::compMsg::dataView::lgth!$::compMsg::dataView::data!"
       set crc  0
       set offset 0

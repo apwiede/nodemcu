@@ -151,7 +151,7 @@ namespace eval compMsg {
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set fieldValueStr [dict get $compMsgDispatcher msgValPart fieldValueStr]
       set fieldNameStr [dict get $compMsgDispatcher msgValPart fieldNameStr]
-      if {[string range $fieldValueStr 0 0] eq "@"} {
+      if {[string range $fieldValueStr 0 3] eq "@get"} {
         # call the callback function for the field!!
         set callback [dict get $compMsgDispatcher msgValPart fieldValueCallback]
         if {$callback ne [list]} {
@@ -251,7 +251,7 @@ namespace eval compMsg {
       set result [::compMsg compMsgData prepareMsg compMsgDispatcher]
       checkErrOK $result
 #puts stderr "setMsgValues end"
-::compMsg compMsgData dumpMsg compMsgDispatcher
+#::compMsg compMsgData dumpMsg compMsgDispatcher
       return $::COMP_DISP_ERR_OK
     }
 
