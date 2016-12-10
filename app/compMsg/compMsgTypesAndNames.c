@@ -99,6 +99,7 @@ static str2id_t specialFieldNames[] = {
   {"@clientPasswd",       COMP_MSG_SPEC_FIELD_CLIENT_PASSWD},
   {"@clientIPAddr",       COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR},
   {"@clientPort",         COMP_MSG_SPEC_FIELD_CLIENT_PORT},
+  {"@clientStatus",       COMP_MSG_SPEC_FIELD_CLIENT_STATUS},
   {"@cloudDomain",        COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN},
   {"@cloudPort",          COMP_MSG_SPEC_FIELD_CLOUD_PORT},
   {"@cloudHost1",         COMP_MSG_SPEC_FIELD_CLOUD_HOST_1},

@@ -511,6 +511,7 @@ static  void alarmTimerAP(void *arg) {
   compMsgDispatcher_t *self;
   struct ip_info pTempIp;
   uint8_t timerId;
+  uint8_t status;
   char temp[64];
   compMsgTimer_t *tmr;
   uint8_t mode;
@@ -523,7 +524,7 @@ static  void alarmTimerAP(void *arg) {
   int result;
   websocketUserData_t *wud;
 
-//ets_printf("§alarmTimerAP§\n");
+ets_printf("§alarmTimerAP§\n");
   pesp_conn = NULL;
   mode = SOFTAP_IF;
   timerId = (uint8_t)((uint32_t)arg);
@@ -531,15 +532,49 @@ static  void alarmTimerAP(void *arg) {
   tmr = &compMsgTimers[timerId];
   self = tmr->self;
 //ets_printf("§alarmTimerAP: timerId: %d self: %p§\n", timerId, self);
+  status = wifi_station_get_connect_status();
+ets_printf("alarmTimerAP:wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+  switch (status) {
+  case STATION_IDLE:
+ets_printf("§STATION_IDLE§\n");
+    break;
+  case STATION_CONNECTING:
+ets_printf("§STATION_CONNECTING§\n");
+    break;
+  case STATION_WRONG_PASSWORD:
+ets_printf("§STATION_WRONG_PASSWORD§\n");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->websocketSendConnectError(self, status);
+    return;
+    break;
+  case STATION_NO_AP_FOUND:
+ets_printf("§STATION_NO_AP_FOUND§\n");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->websocketSendConnectError(self, status);
+    return;
+    break;
+  case STATION_CONNECT_FAIL:
+ets_printf("§STATION_CONNECT_FAIL§\n");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->websocketSendConnectError(self, status);
+    return;
+    break;
+  case STATION_GOT_IP:
+ets_printf("§STATION_GOT_IP§\n");
+    break;
+  }
   wifi_get_ip_info(mode, &pTempIp);
   if(pTempIp.ip.addr==0){
 ets_printf("ip: nil\n");
     return;
   }
   tmr->mode |= TIMER_IDLE_FLAG;
+  ets_timer_disarm(&tmr->timer);
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
 ets_printf("IP: %s\n", temp);
-  ets_timer_disarm(&tmr->timer);
 
   result = self->getWifiValue(self, WIFI_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
 //ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
@@ -627,6 +662,7 @@ static uint8_t initTimers(compMsgDispatcher_t *self) {
 static uint8_t websocketRunAPMode(compMsgDispatcher_t *self) {
   int result;
   bool boolResult;
+  uint8_t status;
   struct softap_config softap_config;
   int numericValue;
   uint8_t *stringValue;
@@ -658,7 +694,22 @@ ets_printf("§websocketRunAPMode COMP_DISP_ERR_CANNOT_SET_OPMODE§\n");
   if (!boolResult) {
     return COMP_DISP_ERR_CANNOT_SET_OPMODE;
   }
-ets_printf("wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+  status = wifi_station_get_connect_status();
+ets_printf("wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+  switch (status) {
+  case STATION_IDLE:
+    break;
+  case STATION_CONNECTING:
+    break;
+  case STATION_WRONG_PASSWORD:
+    break;
+  case STATION_NO_AP_FOUND:
+    break;
+  case STATION_CONNECT_FAIL:
+    break;
+  case STATION_GOT_IP:
+    break;
+  }
 
   int repeat = 1;
   int interval = 1000;

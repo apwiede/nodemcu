@@ -322,6 +322,46 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= websocketSendConnectError ====================================
+
+static uint8_t websocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
+  uint8_t result;
+  uint8_t *handle;
+  msgParts_t *received;
+
+ets_printf("§websocketSendConnectError: status: %d§\n", status);
+  result = self->setWifiValue(self, "@clientStatus", (int)status, NULL);
+  checkErrOK(result);
+  received = &self->compMsgData->received;
+  result = self->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
+  checkErrOK(result);
+  result = self->resetMsgInfo(self, received);
+ets_printf("§resetMsgInfo: result: %d§\n", result);
+  checkErrOK(result);
+ets_printf("§websocketSendConnectError: done§\n");
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= netsocketSendConnectError ====================================
+
+static uint8_t netsocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
+  uint8_t result;
+  uint8_t *handle;
+  msgParts_t *received;
+
+ets_printf("§netsocketSendConnectError: status: %d§\n", status);
+  result = self->setWifiValue(self, "@clientStatus", (int)status, NULL);
+  checkErrOK(result);
+  received = &self->compMsgData->received;
+  result = self->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
+  checkErrOK(result);
+  result = self->resetMsgInfo(self, received);
+ets_printf("§resetMsgInfo: result: %d§\n", result);
+  checkErrOK(result);
+ets_printf("§netsocketSendConnectError done§\n");
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= getStationConfig ====================================
 
 static uint8_t getStationConfig(compMsgDispatcher_t *self) {
@@ -547,6 +587,14 @@ static uint8_t getClientPort(compMsgDispatcher_t *self, int* numericValue, uint8
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= getClientStatus ====================================
+
+static uint8_t getClientStatus(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.clientStatus;
+  *stringValue = NULL;
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= getWifiKeyValue ====================================
 
 static uint8_t xgetWifiKeyValue(compMsgDispatcher_t *self) {
@@ -686,6 +734,9 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_CLIENT_PORT:
     *numericValue = compMsgWifiData.clientPort;
     break;
+  case WIFI_INFO_CLIENT_STATUS:
+    *numericValue = compMsgWifiData.clientStatus;
+    break;
   case WIFI_INFO_CLOUD_DOMAIN:
     *stringValue = compMsgWifiData.cloudDomain;
     break;
@@ -782,6 +833,9 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
   case COMP_MSG_SPEC_FIELD_CLIENT_PORT:
     compMsgWifiData.clientPort = numericValue;
     break;
+  case COMP_MSG_SPEC_FIELD_CLIENT_STATUS:
+    compMsgWifiData.clientStatus = numericValue;
+    break;
   case COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN:
     compMsgWifiData.cloudDomain = os_zalloc(c_strlen(stringValue) + 1);
     checkAllocOK(compMsgWifiData.cloudDomain);
@@ -855,6 +909,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->addFieldValueCallbackName(self, "@getWifiAPFreqcal_vals", &getWifiAPFreqcal_vals, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->addFieldValueCallbackName(self, "@getClientIPAddr", &getClientIPAddr, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->addFieldValueCallbackName(self, "@getClientStatus", &getClientStatus, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
 
   self->bssScanInfos = &bssScanInfos;
   self->getBssScanInfo = &getBssScanInfo;
@@ -863,7 +918,10 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->setWifiValue = &setWifiValue;
   self->getWifiRemotePort = &getWifiRemotePort;
   self->bssStr2BssInfoId = &bssStr2BssInfoId;
+
   self->connectToAP = &connectToAP;
+  self->websocketSendConnectError = &websocketSendConnectError;
+  self->netsocketSendConnectError = &netsocketSendConnectError;
 
   bssScanInfos.compMsgDispatcher = self;
   self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);

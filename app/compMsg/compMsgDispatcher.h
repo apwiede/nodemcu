@@ -94,6 +94,10 @@ enum compMsgDispatcherErrorCode
   COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND = 164,
 };
 
+// answer message types
+#define COMP_MSG_ACK_MSG 0x01
+#define COMP_MSG_NAK_MSG 0x02
+
 // input source types
 #define COMP_DISP_INPUT_UART       0x01
 #define COMP_DISP_INPUT_NET_SOCKET 0x02
@@ -147,6 +151,8 @@ typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, ui
 typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* websocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
+typedef uint8_t (* netsocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 
 // ModuleData stuff
 typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
@@ -198,7 +204,7 @@ typedef uint8_t (* forwardMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
-typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, uint8_t **handle);
+typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, uint8_t type, uint8_t **handle);
 typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self);
@@ -335,6 +341,8 @@ typedef struct compMsgDispatcher {
   setWifiValue_t setWifiValue;
   getWifiRemotePort_t getWifiRemotePort;
   websocketRunAPMode_t websocketRunAPMode;
+  websocketSendConnectError_t websocketSendConnectError;
+  netsocketSendConnectError_t netsocketSendConnectError;
 
   websocketRunClientMode_t websocketRunClientMode;
   websocketSendData_t websocketSendData;

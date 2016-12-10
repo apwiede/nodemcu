@@ -252,7 +252,7 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
 
 // ================================= prepareAnswerMsg ====================================
     
-static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t **handle) {
+static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t **handle) {
   int result;
   headerPart_t *hdr;
   msgHeaderInfos_t *hdrInfos;
@@ -261,7 +261,14 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t **handle) {
 //ets_printf("§prepareAnswerMsg§\n");
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
-  hdrIdx++; // the Ack message has to be the next entry in headerInfos!!
+  switch (type) {
+  case COMP_MSG_ACK_MSG:
+    hdrIdx++; // the Ack message has to be the next entry in headerInfos!!
+    break;
+  case COMP_MSG_NAK_MSG:
+    hdrIdx += 2; // the Nak message has to be the second following entry in headerInfos!!
+    break;
+  }
   hdr = &hdrInfos->headerParts[hdrIdx];
   result = self->createMsgFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
@@ -419,7 +426,7 @@ ets_printf("§handleReceivedMsg§\n");
   received = &self->compMsgData->received;
   result = self->handleReceivedHeader(self);
 //ets_printf("§call prepareAnswerMsg§");
-  result = self->prepareAnswerMsg(self, &handle);
+  result = self->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
   checkErrOK(result);
@@ -502,7 +509,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
     idx++;
   }
   if (!hadActionCb) {
-    result = self->prepareAnswerMsg(self, &handle);
+    result = self->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
     checkErrOK(result);
     result = self->resetMsgInfo(self, received);
     checkErrOK(result);
@@ -531,11 +538,11 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   checkErrOK(result);
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
 //ets_printf("§IP: %s port: %d§\n", temp, port);
-  result = self->prepareAnswerMsg(self, &handle);
+  result = self->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
 //ets_printf("§prepareAnswerMsg: result: %d§\n", result);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
-//ets_printf("§resteMsgInfo: result: %d§\n", result);
+//ets_printf("§resetMsgInfo: result: %d§\n", result);
   checkErrOK(result);
 //ets_printf("§sendClientIPMsg done§\n");
   return COMP_MSG_ERR_OK;

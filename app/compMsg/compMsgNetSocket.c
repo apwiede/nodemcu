@@ -667,6 +667,7 @@ static  void alarmTimerClientMode(void *arg) {
   ip_addr_t ipaddr;
   unsigned type;
   int result;
+  uint8_t status;
   bool boolResult;
   netsocketUserData_t *nud;
 
@@ -676,8 +677,42 @@ static  void alarmTimerClientMode(void *arg) {
   tmr = &compMsgTimers[timerId];
   self = tmr->self;
 //ets_printf("§alarmTimerClientMode: timerId: %d self: %p§\n", timerId, self);
+  status = wifi_station_get_connect_status();
+ets_printf("alarmTimerClientMode: wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+  switch (status) {
+  case STATION_IDLE:
+ets_printf("§STATION_IDLE§\n");
+    break;
+  case STATION_CONNECTING:
+ets_printf("§STATION_CONNECTING§\n");
+    return;
+    break;
+  case STATION_WRONG_PASSWORD:
+ets_printf("§STATION_WRONG_PASSWORD§\n");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->netsocketSendConnectError(self, status);
+    return;
+    break;
+  case STATION_NO_AP_FOUND:
+ets_printf("§STATION_NO_AP_FOUND§\n");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->netsocketSendConnectError(self, status);
+    return;
+    break;
+  case STATION_CONNECT_FAIL:
+ets_printf("§STATION_CONNECT_FAIL§\n");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->netsocketSendConnectError(self, status);
+    return;
+    break;
+  case STATION_GOT_IP:
+ets_printf("§STATION_GOT_IP§\n");
+    break;
+  }
   wifi_get_ip_info(mode, &pTempIp);
-ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
   if(pTempIp.ip.addr==0){
 ets_printf("§ip: nil§\n");
     return;

@@ -83,13 +83,14 @@
 #define WIFI_INFO_CLIENT_PASSWD          29
 #define WIFI_INFO_CLIENT_IP_ADDR         30
 #define WIFI_INFO_CLIENT_PORT            31
-#define WIFI_INFO_CLOUD_DOMAIN           32
-#define WIFI_INFO_CLOUD_PORT             33
-#define WIFI_INFO_CLOUD_HOST_1           34
-#define WIFI_INFO_CLOUD_HOST_2           35
-#define WIFI_INFO_CLOUD_SECURE_CONNECT   36
-#define WIFI_INFO_CLOUD_SUB_URL          37
-#define WIFI_INFO_CLOUD_NODE_TOKEN       38
+#define WIFI_INFO_CLIENT_STATUS          32
+#define WIFI_INFO_CLOUD_DOMAIN           33
+#define WIFI_INFO_CLOUD_PORT             34
+#define WIFI_INFO_CLOUD_HOST_1           35
+#define WIFI_INFO_CLOUD_HOST_2           36
+#define WIFI_INFO_CLOUD_SECURE_CONNECT   37
+#define WIFI_INFO_CLOUD_SUB_URL          38
+#define WIFI_INFO_CLOUD_NODE_TOKEN       39
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -206,6 +207,7 @@ typedef struct compMsgWifiData {
   uint8_t clientPasswd[65];
   uint32_t clientIPAddr;
   uint16_t clientPort;
+  uint8_t clientStatus;
 #ifdef CLIENT_SSL_ENABLE
   uint8_t cloudSecureConnect;
 #endif
