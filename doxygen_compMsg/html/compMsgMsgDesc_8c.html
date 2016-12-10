@@ -135,6 +135,14 @@ Macros</h2></td></tr>
 <tr class="separator:adfac0f453f0aeb587f03d73855a998ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfac0f453f0aeb587f03d73855a998ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result)&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) return result</td></tr>
 <tr class="separator:adfac0f453f0aeb587f03d73855a998ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfac0f453f0aeb587f03d73855a998ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result)&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) { <a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>-&gt;<a class="el" href="compMsgMsgDesc_8c.html#a6667b5bc140657f70293deb1bd6e52aa">closeFile</a>(<a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>); return result; }</td></tr>
+<tr class="separator:adfac0f453f0aeb587f03d73855a998ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfac0f453f0aeb587f03d73855a998ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result)&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) return result</td></tr>
+<tr class="separator:adfac0f453f0aeb587f03d73855a998ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfac0f453f0aeb587f03d73855a998ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result)&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) { <a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>-&gt;<a class="el" href="compMsgMsgDesc_8c.html#a6667b5bc140657f70293deb1bd6e52aa">closeFile</a>(<a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>); return result; }</td></tr>
+<tr class="separator:adfac0f453f0aeb587f03d73855a998ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfac0f453f0aeb587f03d73855a998ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result)&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) return result</td></tr>
+<tr class="separator:adfac0f453f0aeb587f03d73855a998ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -175,6 +183,10 @@ Functions</h2></td></tr>
 <tr class="separator:ae7cab82f2540a8398880e69883cbf57b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09322135b69202b27742510c22355c12"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#a09322135b69202b27742510c22355c12">getMsgPartsFromHeaderPart</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr, uint8_t **handle)</td></tr>
 <tr class="separator:a09322135b69202b27742510c22355c12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a3b2dfc22df0425e9083ab6479a5c4a"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#a7a3b2dfc22df0425e9083ab6479a5c4a">getMsgKeyValueDescParts</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="separator:a7a3b2dfc22df0425e9083ab6479a5c4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d483aee4295e0e070491baf219c7113"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#a1d483aee4295e0e070491baf219c7113">getFieldsToSave</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="separator:a1d483aee4295e0e070491baf219c7113"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e9b920853c29d19f92fb74fed30547b"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#a1e9b920853c29d19f92fb74fed30547b">getWifiKeyValueKeys</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgWifiData_8h.html#aed2dd7c8fb4f7712d1bf891b31102573">compMsgWifiData_t</a> *<a class="el" href="structcompMsgWifiData.html">compMsgWifiData</a>)</td></tr>
 <tr class="separator:a1e9b920853c29d19f92fb74fed30547b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2feade549f707d795e9ad83193cabd46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgMsgDesc_8h.html#a7f91f58c4f90dd90d4336bfa76dfe490">compMsgMsgDesc_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8c.html#a2feade549f707d795e9ad83193cabd46">newCompMsgMsgDesc</a> ()</td></tr>
@@ -218,6 +230,78 @@ Variables</h2></td></tr>
           <td class="paramtype">&#160;</td>
           <td class="paramname">result</td><td>)</td>
           <td>&#160;&#160;&#160;if(result != <a class="el" href="dataView_8h.html#ab5edd382d127d6a8118b51108a843e26ac66d8d6c37b1964fc139ce19b5be75c6">DATA_VIEW_ERR_OK</a>) return result</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l00745">745</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adfac0f453f0aeb587f03d73855a998ae"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define checkErrOK</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">result</td><td>)</td>
+          <td>&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) { <a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>-&gt;<a class="el" href="compMsgMsgDesc_8c.html#a6667b5bc140657f70293deb1bd6e52aa">closeFile</a>(<a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>); return result; }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l00745">745</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adfac0f453f0aeb587f03d73855a998ae"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define checkErrOK</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">result</td><td>)</td>
+          <td>&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) return result</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l00745">745</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adfac0f453f0aeb587f03d73855a998ae"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define checkErrOK</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">result</td><td>)</td>
+          <td>&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) { <a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>-&gt;<a class="el" href="compMsgMsgDesc_8c.html#a6667b5bc140657f70293deb1bd6e52aa">closeFile</a>(<a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>); return result; }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l00745">745</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adfac0f453f0aeb587f03d73855a998ae"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define checkErrOK</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">result</td><td>)</td>
+          <td>&#160;&#160;&#160;if(result != <a class="el" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>) return result</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -671,7 +755,43 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01462">1462</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01651">1651</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a1d483aee4295e0e070491baf219c7113"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getFieldsToSave </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>fileName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01392">1392</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
 
 </div>
 </div>
@@ -831,6 +951,42 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a7a3b2dfc22df0425e9083ab6479a5c4a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getMsgKeyValueDescParts </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>fileName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01292">1292</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a09322135b69202b27742510c22355c12"></a>
 <div class="memitem">
 <div class="memproto">
@@ -947,7 +1103,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01286">1286</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01462">1462</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
 
 </div>
 </div>
@@ -964,7 +1120,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01427">1427</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01614">1614</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
 
 </div>
 </div>

@@ -1,8 +1,10 @@
 var searchData=
 [
   ['websocketbinaryreceived',['websocketBinaryReceived',['../structwebsocketUserData.html#a84c1a3755b58fb145af7aa95a01e28f0',1,'websocketUserData::websocketBinaryReceived()'],['../structcompMsgWifiData.html#aefc496ba8aff8a2820ceebee7b3cecd1',1,'compMsgWifiData::websocketBinaryReceived()']]],
+  ['websocketerror',['websocketError',['../structcompMsgDispatcher.html#a168651947fc2b4066ae333d9c4292a67',1,'compMsgDispatcher']]],
   ['websocketrunapmode',['websocketRunAPMode',['../structcompMsgDispatcher.html#a745034dd27db50255534fdba31d167fa',1,'compMsgDispatcher']]],
   ['websocketrunclientmode',['websocketRunClientMode',['../structcompMsgDispatcher.html#a996487a84862837362d8654f198999b8',1,'compMsgDispatcher']]],
+  ['websocketsendconnecterror',['websocketSendConnectError',['../structcompMsgDispatcher.html#ad32a459cc46f2e751f0c891b8a0ff337',1,'compMsgDispatcher']]],
   ['websocketsenddata',['websocketSendData',['../structcompMsgDispatcher.html#a22499f79040a02bc9113627545ec5a3f',1,'compMsgDispatcher']]],
   ['websockettextreceived',['websocketTextReceived',['../structwebsocketUserData.html#ac452e00132339a6482bda2cd9d7db704',1,'websocketUserData::websocketTextReceived()'],['../structcompMsgWifiData.html#a725908f1221ad91d8f03c2d07f0518df',1,'compMsgWifiData::websocketTextReceived()']]],
   ['where',['where',['../structdataView.html#afdc01cf74e230ce4e601e70ca64b5dea',1,'dataView']]],

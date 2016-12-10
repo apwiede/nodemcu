@@ -45,6 +45,7 @@ var searchData=
   ['rssitype',['rssiType',['../structbssScanTypes.html#ac27313452f83024d79396c6090baad8a',1,'bssScanTypes']]],
   ['runaction',['runAction',['../structcompMsgDispatcher.html#a8995881b1502e6cc571ea63247ef1acc',1,'compMsgDispatcher::runAction()'],['../compMsgAction_8c.html#aa14d645df7056fbe69e042aa6a26c64e',1,'runAction():&#160;compMsgAction.c']]],
   ['runaction_5ft',['runAction_t',['../compMsgDispatcher_8h.html#aa8f9e9f8e9cd72db93ae841d7af2f39b',1,'compMsgDispatcher.h']]],
+  ['runapconnect',['runAPConnect',['../compMsgAction_8c.html#a3ea9d16104472d246e8bd5ae75293e05',1,'compMsgAction.c']]],
   ['runapmode',['runAPMode',['../compMsgAction_8c.html#a045ae26e909dcff21b326aa69bc12f1f',1,'compMsgAction.c']]],
   ['runclientmode',['runClientMode',['../compMsgAction_8c.html#a3e6d9c306c17c80c431b0a89cc944d73',1,'compMsgAction.c']]],
   ['rundeletepasswdcmode',['runDeletePasswdCMode',['../compMsgAction_8c.html#af69083f7341d04f3cb3e2ee328950cf7',1,'compMsgAction.c']]],

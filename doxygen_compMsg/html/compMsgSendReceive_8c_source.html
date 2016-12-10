@@ -205,143 +205,202 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="comment">/**</span></div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="comment"> * \brief send a message via http socket to Cloud</span></div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="comment"> * \param msgData The message data</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;<span class="comment"> * \param msgLgth The number of characters in the message</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00123"></a><span class="lineno"><a class="line" href="compMsgSendReceive_8c.html#a718574352b437bbe574573cfcb224ef9">  123</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgSendReceive_8c.html#a718574352b437bbe574573cfcb224ef9">sendCloudMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, uint8_t *msgData, <span class="keywordtype">size_t</span> msgLgth) {</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  uint8_t *b64Msg;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  uint8_t *host;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  uint8_t *subUrl;</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  uint8_t *nodeToken;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  uint8_t *hostPart;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  uint8_t *alive;</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  uint8_t *contentType;</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;  uint8_t *contentLgth;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  uint8_t *accept;</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="keywordtype">size_t</span> payloadLgth;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed">  121</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed">sendCloudMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  uint8_t *b64Msg;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  uint8_t *host;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  uint8_t *subUrl;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  uint8_t *nodeToken;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  uint8_t *hostPart;</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  uint8_t *alive;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  uint8_t *contentType;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  uint8_t *contentLgth;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  uint8_t *accept;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  <span class="keywordtype">size_t</span> payloadLgth;</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  uint8_t *msgData;</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="keywordtype">size_t</span> msgLgth;</div>
 <div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
 <div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;nud == NULL) {</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3ad7feff62c30c91194f532e76a87e02f4">COMP_DISP_ERR_NO_WEBSOCKET_OPENED</a>;</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  }</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;ets_printf(<span class="stringliteral">&quot;sendCloudData: msgLgth: %d\n&quot;</span>, msgLgth);</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  payloadLgth = c_strlen(<span class="stringliteral">&quot;POST &quot;</span>);</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  hostPart=<span class="stringliteral">&quot; HTTP/1.1\r\nHost: &quot;</span>;</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  payloadLgth += c_strlen(hostPart);</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  alive=<span class="stringliteral">&quot;\r\nConnection: keep-alive\r\n&quot;</span>;</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;  payloadLgth += c_strlen(alive);</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  contentType=<span class="stringliteral">&quot;\r\nContent-Type: application/x-www-form-urlencoded\r\n&quot;</span>;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  payloadLgth += c_strlen(contentType);</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;  contentLgth=<span class="stringliteral">&quot;Content-length: &quot;</span>;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  payloadLgth += c_strlen(contentLgth);</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;  payloadLgth += 5; <span class="comment">// for contentLgth value</span></div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  accept=<span class="stringliteral">&quot;\r\nAccept: */*\r\n\r\n=&quot;</span>;</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  payloadLgth += c_strlen(accept);</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;  payloadLgth += msgLgth + 3;  <span class="comment">// \r\n\0</span></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;  result = <span class="keyword">self</span>-&gt;toBase64(msgData, &amp;msgLgth, &amp;b64Msg);</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="comment">//ets_printf(&quot;base64 msg: mlen: %d %s %d\n&quot;, mlen, b64Msg, c_strlen(b64Msg));</span></div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;  b64Msg[msgLgth] = <span class="charliteral">&#39;\0&#39;</span>;</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;  </div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  result = <span class="keyword">self</span>-&gt;getWifiValue(<span class="keyword">self</span>, <a class="code" href="compMsgWifiData_8h.html#aa1a8e1150f5e5c4dbb0c5f4f90ac525f">WIFI_INFO_CLOUD_HOST_1</a>, <a class="code" href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e">DATA_VIEW_FIELD_UINT8_T</a>, &amp;numericValue, &amp;host);</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  payloadLgth += c_strlen(host);</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  result = <span class="keyword">self</span>-&gt;getWifiValue(<span class="keyword">self</span>, <a class="code" href="compMsgWifiData_8h.html#ae19ae6ed4b4353b9bd466310ac61d992">WIFI_INFO_CLOUD_SUB_URL</a>, <a class="code" href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e">DATA_VIEW_FIELD_UINT8_T</a>, &amp;numericValue, &amp;subUrl);</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  payloadLgth += c_strlen(subUrl);</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  result = <span class="keyword">self</span>-&gt;getWifiValue(<span class="keyword">self</span>, <a class="code" href="compMsgWifiData_8h.html#a489dfb1500bb284b69a28ebf4c427a57">WIFI_INFO_CLOUD_NODE_TOKEN</a>, <a class="code" href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e">DATA_VIEW_FIELD_UINT8_T</a>, &amp;numericValue, &amp;nodeToken);</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  payloadLgth += c_strlen(nodeToken);</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="keywordtype">char</span> payload[payloadLgth];</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  os_sprintf(payload, <span class="stringliteral">&quot;POST %s%s%s%s%s%s%s%d%s%s\r\n&quot;</span>, subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, msgLgth+1, accept, b64Msg);</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;ets_printf(<span class="stringliteral">&quot;request: %d %s\n&quot;</span>, c_strlen(payload), payload);</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  result = <span class="keyword">self</span>-&gt;netsocketSendData(self-&gt;compMsgData-&gt;nud, payload, c_strlen(payload));</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;}</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;ets_printf(<span class="stringliteral">&quot;§COMP_DISP_ERR_NO_WEBSOCKET_OPENED§&quot;</span>);</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3ad7feff62c30c91194f532e76a87e02f4">COMP_DISP_ERR_NO_WEBSOCKET_OPENED</a>;</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  }</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;ets_printf(<span class="stringliteral">&quot;§request: %d %s§&quot;</span>, self-&gt;cloudPayloadLgth, self-&gt;cloudPayload);</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  result = <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  result = <span class="keyword">self</span>-&gt;netsocketSendData(self-&gt;compMsgData-&gt;nud, self-&gt;cloudPayload, self-&gt;cloudPayloadLgth);</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;  <span class="keyword">self</span>-&gt;cloudPayload = NULL;</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  <span class="keyword">self</span>-&gt;cloudPayloadLgth = 0;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;ets_printf(<span class="stringliteral">&quot;§sendCloudMsg: done result: %d§&quot;</span>, result);</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;}</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;<span class="comment">// ================================= prepareCloudMsg ====================================</span></div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;<span class="comment">/**</span></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;<span class="comment"> * \brief prepare a message to be sent via http socket to Cloud</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno"><a class="line" href="compMsgSendReceive_8c.html#a0c4a3859285dc077c8af471c1ae567c8">  159</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgSendReceive_8c.html#a0c4a3859285dc077c8af471c1ae567c8">prepareCloudMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  uint8_t *b64Msg;</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  uint8_t *host;</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  uint8_t *subUrl;</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  uint8_t *nodeToken;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  uint8_t *hostPart;</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  uint8_t *alive;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  uint8_t *contentType;</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  uint8_t *contentLgth;</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  uint8_t *accept;</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  <span class="keywordtype">size_t</span> payloadLgth;</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  uint8_t *msgData;</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <span class="keywordtype">size_t</span> msgLgth;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="keywordtype">char</span> lgthBuf[20];</div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="comment">// ================================= sendMsg ====================================</span></div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;</div>
-<div class="line"><a name="l00178"></a><span class="lineno"><a class="line" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">  178</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, uint8_t *msgData, <span class="keywordtype">size_t</span> msgLgth) {</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <span class="keywordflow">switch</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType) {</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;A&#39;</span>:</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;ets_printf(<span class="stringliteral">&quot;wud: %p\n&quot;</span>, self-&gt;compMsgData-&gt;wud);</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;wud == NULL) {</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3ad7feff62c30c91194f532e76a87e02f4">COMP_DISP_ERR_NO_WEBSOCKET_OPENED</a>;</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    }</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;ets_printf(<span class="stringliteral">&quot;remote_ip: %d %d %d %d port: %d\n&quot;</span>, self-&gt;compMsgData-&gt;wud-&gt;remote_ip[0], self-&gt;compMsgData-&gt;wud-&gt;remote_ip[1], self-&gt;compMsgData-&gt;wud-&gt;remote_ip[2], self-&gt;compMsgData-&gt;wud-&gt;remote_ip[3], self-&gt;compMsgData-&gt;wud-&gt;remote_port);</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;    result = <span class="keyword">self</span>-&gt;websocketSendData(self-&gt;compMsgData-&gt;wud, msgData, msgLgth, <a class="code" href="compMsgWifiData_8h.html#a207402575311103c75906143724e8c35a94db506e524731b9e7dc36c1ed809f06">OPCODE_BINARY</a>);</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;G&#39;</span>:</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;S&#39;</span>:</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    result = <a class="code" href="compMsgSendReceive_8c.html#a56e0f6974ba1dbae9e3ff02ddfee7515">typeRSendAnswer</a>(<span class="keyword">self</span>, msgData, msgLgth);</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgData-&gt;deleteMsg(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;R&#39;</span>:</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;U&#39;</span>:</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;W&#39;</span>:</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;N&#39;</span>:</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <span class="comment">// just ignore</span></div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  <span class="keywordflow">default</span>:</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3af33275a6861f4d6cad994c293d9c2d16">COMP_DISP_ERR_BAD_HANDLE_TYPE</a>;</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  }</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;}</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="comment">// ================================= compMsgSendReceiveInit ====================================</span></div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;</div>
-<div class="line"><a name="l00217"></a><span class="lineno"><a class="line" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">  217</a></span>&#160;uint8_t <a class="code" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceiveInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  result = <span class="keyword">self</span>-&gt;getNewCompMsgDataPtr(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;wud = NULL;</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;nud = NULL;</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;receivedData = NULL;</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;receivedLgth = 0;</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;direction = <a class="code" href="compMsgData_8h.html#abd4783205a2e140cfea97caded2f784d">COMP_MSG_RECEIVED_DATA</a>;</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  result = <span class="keyword">self</span>-&gt;addRequest(<span class="keyword">self</span>, <a class="code" href="compMsgDispatcher_8h.html#a877aa173ddd529a5034fe4bf0f6764a4">COMP_DISP_INPUT_UART</a>, NULL, self-&gt;compMsgData);</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="keyword">self</span>-&gt;uartSetup = &amp;<a class="code" href="compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387">uartSetup</a>;</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="keyword">self</span>-&gt;uartReceiveCb = &amp;<a class="code" href="compMsgSendReceive_8c.html#a6a99fe74ff4bcfd4f6fe85123783604a">uartReceiveCb</a>;</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  <span class="keyword">self</span>-&gt;typeRSendAnswer = &amp;<a class="code" href="compMsgSendReceive_8c.html#a56e0f6974ba1dbae9e3ff02ddfee7515">typeRSendAnswer</a>;</div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  <span class="keyword">self</span>-&gt;sendCloudMsg = &amp;<a class="code" href="compMsgSendReceive_8c.html#a718574352b437bbe574573cfcb224ef9">sendCloudMsg</a>;</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  <span class="keyword">self</span>-&gt;sendMsg = &amp;<a class="code" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a>;</div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;}</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;</div>
-<div class="ttc" id="structcompMsgDispatcher_html"><div class="ttname"><a href="structcompMsgDispatcher.html">compMsgDispatcher</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00205">compMsgDispatcher.h:205</a></div></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  msgData = <span class="keyword">self</span>-&gt;cloudMsgData;</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  msgLgth = <span class="keyword">self</span>-&gt;cloudMsgDataLgth;</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="comment">//ets_printf(&quot;§prepareCloudMsg: msgLgth: %d§&quot;, msgLgth);</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="comment">//ets_printf(&quot;base64 msg: mlen: %d %s %d\n&quot;, mlen, b64Msg, c_strlen(b64Msg));</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  result = <span class="keyword">self</span>-&gt;toBase64(msgData, &amp;msgLgth, &amp;b64Msg);</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="comment">//ets_printf(&quot;§prepareCloudMsg: b64msgLgth: %d§&quot;, msgLgth);</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;  payloadLgth = c_strlen(<span class="stringliteral">&quot;POST &quot;</span>);</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  result = <span class="keyword">self</span>-&gt;getWifiValue(<span class="keyword">self</span>, <a class="code" href="compMsgWifiData_8h.html#ae19ae6ed4b4353b9bd466310ac61d992">WIFI_INFO_CLOUD_SUB_URL</a>, <a class="code" href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e">DATA_VIEW_FIELD_UINT8_T</a>, &amp;numericValue, &amp;subUrl);</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  payloadLgth += c_strlen(subUrl);</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  hostPart=<span class="stringliteral">&quot; HTTP/1.1\r\nHost: &quot;</span>;</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  payloadLgth += c_strlen(hostPart);</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  result = <span class="keyword">self</span>-&gt;getWifiValue(<span class="keyword">self</span>, <a class="code" href="compMsgWifiData_8h.html#aa1a8e1150f5e5c4dbb0c5f4f90ac525f">WIFI_INFO_CLOUD_HOST_1</a>, <a class="code" href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e">DATA_VIEW_FIELD_UINT8_T</a>, &amp;numericValue, &amp;host);</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  payloadLgth += c_strlen(host);</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  alive=<span class="stringliteral">&quot;\r\nConnection: keep-alive\r\n&quot;</span>;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  payloadLgth += c_strlen(alive);</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  result = <span class="keyword">self</span>-&gt;getWifiValue(<span class="keyword">self</span>, <a class="code" href="compMsgWifiData_8h.html#a489dfb1500bb284b69a28ebf4c427a57">WIFI_INFO_CLOUD_NODE_TOKEN</a>, <a class="code" href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e">DATA_VIEW_FIELD_UINT8_T</a>, &amp;numericValue, &amp;nodeToken);</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  payloadLgth += c_strlen(nodeToken);</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  contentType=<span class="stringliteral">&quot;\r\nContent-Type: application/x-www-form-urlencoded\r\n&quot;</span>;</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  payloadLgth += c_strlen(contentType);</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  contentLgth=<span class="stringliteral">&quot;Content-length: &quot;</span>;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  payloadLgth += c_strlen(contentLgth);</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  os_sprintf(lgthBuf, <span class="stringliteral">&quot;%d\0&quot;</span>, msgLgth+1);</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  payloadLgth += c_strlen(lgthBuf); <span class="comment">// for contentLgth value</span></div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  accept=<span class="stringliteral">&quot;\r\nAccept: */*\r\n\r\n=&quot;</span>;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  payloadLgth += c_strlen(accept);</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  b64Msg[msgLgth] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  payloadLgth += (msgLgth + 3);  <span class="comment">// \r\n\0</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  </div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;  <span class="keywordtype">char</span> *payload = os_zalloc(payloadLgth);</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  os_sprintf(payload, <span class="stringliteral">&quot;POST %s%s%s%s%s%s%s%s%s%s\r\n&quot;</span>, subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;<span class="comment">//ets_printf(&quot;§payloadLgth: %d %d§&quot;, c_strlen(payload), payloadLgth);</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;<span class="comment">//ets_printf(&quot;§request: %d %s§&quot;, c_strlen(payload), payload);</span></div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;  <span class="keyword">self</span>-&gt;cloudPayload = payload;</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  <span class="keyword">self</span>-&gt;cloudPayloadLgth = payloadLgth;</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  <span class="keyword">self</span>-&gt;cloudMsgData = NULL;</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="keyword">self</span>-&gt;cloudMsgDataLgth = 0;</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="comment">//ets_printf(&quot;§prepareCloudMsg: done§&quot;);</span></div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;}</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;<span class="comment">// ================================= sendMsg ====================================</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;</div>
+<div class="line"><a name="l00224"></a><span class="lineno"><a class="line" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">  224</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, uint8_t *msgData, <span class="keywordtype">size_t</span> msgLgth) {</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;<span class="comment">//ets_printf(&quot;§sendMsg: %c§&quot;, self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType);</span></div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="keywordflow">switch</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType) {</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;A&#39;</span>:</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;<span class="comment">//ets_printf(&quot;wud: %p\n&quot;, self-&gt;compMsgData-&gt;wud);</span></div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;wud == NULL) {</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3ad7feff62c30c91194f532e76a87e02f4">COMP_DISP_ERR_NO_WEBSOCKET_OPENED</a>;</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    }</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;ets_printf(<span class="stringliteral">&quot;remote_ip: %d %d %d %d port: %d\n&quot;</span>, self-&gt;compMsgData-&gt;wud-&gt;remote_ip[0], self-&gt;compMsgData-&gt;wud-&gt;remote_ip[1], self-&gt;compMsgData-&gt;wud-&gt;remote_ip[2], self-&gt;compMsgData-&gt;wud-&gt;remote_ip[3], self-&gt;compMsgData-&gt;wud-&gt;remote_port);</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;    result = <span class="keyword">self</span>-&gt;websocketSendData(self-&gt;compMsgData-&gt;wud, msgData, msgLgth, <a class="code" href="compMsgWifiData_8h.html#a207402575311103c75906143724e8c35a94db506e524731b9e7dc36c1ed809f06">OPCODE_BINARY</a>);</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;G&#39;</span>:</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;S&#39;</span>:</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    result = <a class="code" href="compMsgSendReceive_8c.html#a56e0f6974ba1dbae9e3ff02ddfee7515">typeRSendAnswer</a>(<span class="keyword">self</span>, msgData, msgLgth);</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgData-&gt;deleteMsg(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;R&#39;</span>:</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;U&#39;</span>:</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;ets_printf(<span class="stringliteral">&quot;§type U msg send to cloud§&quot;</span>);</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keyword">self</span>-&gt;cloudMsgData = msgData;</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    <span class="keyword">self</span>-&gt;cloudMsgDataLgth = msgLgth;</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    <span class="keyword">self</span>-&gt;sendCloudMsg = <a class="code" href="compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed">sendCloudMsg</a>;</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;    result = <span class="keyword">self</span>-&gt;prepareCloudMsg(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;    result = <span class="keyword">self</span>-&gt;netsocketStartCloudSocket(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="comment">//ets_printf(&quot;§netsocketStartCloudSocket: result: %d§&quot;, result);</span></div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;W&#39;</span>:</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;  <span class="keywordflow">case</span> <span class="charliteral">&#39;N&#39;</span>:</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    <span class="comment">// just ignore</span></div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;  <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3af33275a6861f4d6cad994c293d9c2d16">COMP_DISP_ERR_BAD_HANDLE_TYPE</a>;</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  }</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;<span class="comment">//ets_printf(&quot;§sendMsg: done§&quot;);</span></div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;}</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<span class="comment">// ================================= compMsgSendReceiveInit ====================================</span></div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;</div>
+<div class="line"><a name="l00274"></a><span class="lineno"><a class="line" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">  274</a></span>&#160;uint8_t <a class="code" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceiveInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;  result = <span class="keyword">self</span>-&gt;getNewCompMsgDataPtr(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;wud = NULL;</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;nud = NULL;</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;receivedData = NULL;</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;receivedLgth = 0;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;direction = <a class="code" href="compMsgData_8h.html#abd4783205a2e140cfea97caded2f784d">COMP_MSG_RECEIVED_DATA</a>;</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  result = <span class="keyword">self</span>-&gt;addRequest(<span class="keyword">self</span>, <a class="code" href="compMsgDispatcher_8h.html#a877aa173ddd529a5034fe4bf0f6764a4">COMP_DISP_INPUT_UART</a>, NULL, self-&gt;compMsgData);</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;  <span class="keyword">self</span>-&gt;uartSetup = &amp;<a class="code" href="compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387">uartSetup</a>;</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;  <span class="keyword">self</span>-&gt;uartReceiveCb = &amp;<a class="code" href="compMsgSendReceive_8c.html#a6a99fe74ff4bcfd4f6fe85123783604a">uartReceiveCb</a>;</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;  <span class="keyword">self</span>-&gt;typeRSendAnswer = &amp;<a class="code" href="compMsgSendReceive_8c.html#a56e0f6974ba1dbae9e3ff02ddfee7515">typeRSendAnswer</a>;</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  <span class="keyword">self</span>-&gt;prepareCloudMsg = &amp;<a class="code" href="compMsgSendReceive_8c.html#a0c4a3859285dc077c8af471c1ae567c8">prepareCloudMsg</a>;</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  <span class="keyword">self</span>-&gt;sendCloudMsg = &amp;<a class="code" href="compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed">sendCloudMsg</a>;</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;  <span class="keyword">self</span>-&gt;sendMsg = &amp;<a class="code" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a>;</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a>;</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;}</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;</div>
+<div class="ttc" id="structcompMsgDispatcher_html"><div class="ttname"><a href="structcompMsgDispatcher.html">compMsgDispatcher</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00226">compMsgDispatcher.h:226</a></div></div>
 <div class="ttc" id="compMsgDispatcher_8h_html"><div class="ttname"><a href="compMsgDispatcher_8h.html">compMsgDispatcher.h</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a207402575311103c75906143724e8c35a94db506e524731b9e7dc36c1ed809f06"><div class="ttname"><a href="compMsgWifiData_8h.html#a207402575311103c75906143724e8c35a94db506e524731b9e7dc36c1ed809f06">OPCODE_BINARY</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00117">compMsgWifiData.h:117</a></div></div>
-<div class="ttc" id="compMsgSendReceive_8c_html_a71d792ff835ac5e58d69a9267dc184bc"><div class="ttname"><a href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a></div><div class="ttdeci">static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00178">compMsgSendReceive.c:178</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a207402575311103c75906143724e8c35a94db506e524731b9e7dc36c1ed809f06"><div class="ttname"><a href="compMsgWifiData_8h.html#a207402575311103c75906143724e8c35a94db506e524731b9e7dc36c1ed809f06">OPCODE_BINARY</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00119">compMsgWifiData.h:119</a></div></div>
+<div class="ttc" id="compMsgSendReceive_8c_html_a71d792ff835ac5e58d69a9267dc184bc"><div class="ttname"><a href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a></div><div class="ttdeci">static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00224">compMsgSendReceive.c:224</a></div></div>
+<div class="ttc" id="compMsgSendReceive_8c_html_a0c4a3859285dc077c8af471c1ae567c8"><div class="ttname"><a href="compMsgSendReceive_8c.html#a0c4a3859285dc077c8af471c1ae567c8">prepareCloudMsg</a></div><div class="ttdeci">static uint8_t prepareCloudMsg(compMsgDispatcher_t *self)</div><div class="ttdoc">prepare a message to be sent via http socket to Cloud </div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00159">compMsgSendReceive.c:159</a></div></div>
 <div class="ttc" id="compMsgTypesAndNames_8h_html_ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e"><div class="ttname"><a href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8a47afdfc7bba9bccbf0b8175d6a42159e">DATA_VIEW_FIELD_UINT8_T</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgTypesAndNames_8h_source.html#l00052">compMsgTypesAndNames.h:52</a></div></div>
 <div class="ttc" id="compMsgDispatcher_8h_html_ada620477f104ed0713b523dae6f875d3ad7feff62c30c91194f532e76a87e02f4"><div class="ttname"><a href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3ad7feff62c30c91194f532e76a87e02f4">COMP_DISP_ERR_NO_WEBSOCKET_OPENED</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00089">compMsgDispatcher.h:89</a></div></div>
 <div class="ttc" id="compMsgDispatcher_8h_html_ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b"><div class="ttname"><a href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3a5dbfd98308eeca579bc8ce32d66da17b">COMP_DISP_ERR_OK</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00058">compMsgDispatcher.h:58</a></div></div>
 <div class="ttc" id="compMsgSendReceive_8c_html_aa5cf50b1c194c81b5873720426c64387"><div class="ttname"><a href="compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387">uartSetup</a></div><div class="ttdeci">static uint8_t uartSetup(compMsgDispatcher_t *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00054">compMsgSendReceive.c:54</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a489dfb1500bb284b69a28ebf4c427a57"><div class="ttname"><a href="compMsgWifiData_8h.html#a489dfb1500bb284b69a28ebf4c427a57">WIFI_INFO_CLOUD_NODE_TOKEN</a></div><div class="ttdeci">#define WIFI_INFO_CLOUD_NODE_TOKEN</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00091">compMsgWifiData.h:91</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a489dfb1500bb284b69a28ebf4c427a57"><div class="ttname"><a href="compMsgWifiData_8h.html#a489dfb1500bb284b69a28ebf4c427a57">WIFI_INFO_CLOUD_NODE_TOKEN</a></div><div class="ttdeci">#define WIFI_INFO_CLOUD_NODE_TOKEN</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00093">compMsgWifiData.h:93</a></div></div>
 <div class="ttc" id="structmsgParts_html"><div class="ttname"><a href="structmsgParts.html">msgParts</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00163">compMsgMsgDesc.h:163</a></div></div>
+<div class="ttc" id="compMsgSendReceive_8c_html_afd13038c64d91617febba63c221ec4ed"><div class="ttname"><a href="compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed">sendCloudMsg</a></div><div class="ttdeci">static uint8_t sendCloudMsg(compMsgDispatcher_t *self)</div><div class="ttdoc">send a message via http socket to Cloud </div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00121">compMsgSendReceive.c:121</a></div></div>
 <div class="ttc" id="compMsgSendReceive_8c_html_a6a99fe74ff4bcfd4f6fe85123783604a"><div class="ttname"><a href="compMsgSendReceive_8c.html#a6a99fe74ff4bcfd4f6fe85123783604a">uartReceiveCb</a></div><div class="ttdeci">static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00065">compMsgSendReceive.c:65</a></div></div>
 <div class="ttc" id="compMsgDispatcher_8h_html_ada620477f104ed0713b523dae6f875d3af33275a6861f4d6cad994c293d9c2d16"><div class="ttname"><a href="compMsgDispatcher_8h.html#ada620477f104ed0713b523dae6f875d3af33275a6861f4d6cad994c293d9c2d16">COMP_DISP_ERR_BAD_HANDLE_TYPE</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00084">compMsgDispatcher.h:84</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_ae19ae6ed4b4353b9bd466310ac61d992"><div class="ttname"><a href="compMsgWifiData_8h.html#ae19ae6ed4b4353b9bd466310ac61d992">WIFI_INFO_CLOUD_SUB_URL</a></div><div class="ttdeci">#define WIFI_INFO_CLOUD_SUB_URL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00090">compMsgWifiData.h:90</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_ae19ae6ed4b4353b9bd466310ac61d992"><div class="ttname"><a href="compMsgWifiData_8h.html#ae19ae6ed4b4353b9bd466310ac61d992">WIFI_INFO_CLOUD_SUB_URL</a></div><div class="ttdeci">#define WIFI_INFO_CLOUD_SUB_URL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00092">compMsgWifiData.h:92</a></div></div>
 <div class="ttc" id="compMsgSendReceive_8c_html_a56e0f6974ba1dbae9e3ff02ddfee7515"><div class="ttname"><a href="compMsgSendReceive_8c.html#a56e0f6974ba1dbae9e3ff02ddfee7515">typeRSendAnswer</a></div><div class="ttdeci">static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth)</div><div class="ttdoc">send a message via Uart to Mcu </div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00099">compMsgSendReceive.c:99</a></div></div>
-<div class="ttc" id="compMsgSendReceive_8c_html_a99b03f94b6f850e76216c1f23da16b39"><div class="ttname"><a href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceiveInit</a></div><div class="ttdeci">uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00217">compMsgSendReceive.c:217</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_aa1a8e1150f5e5c4dbb0c5f4f90ac525f"><div class="ttname"><a href="compMsgWifiData_8h.html#aa1a8e1150f5e5c4dbb0c5f4f90ac525f">WIFI_INFO_CLOUD_HOST_1</a></div><div class="ttdeci">#define WIFI_INFO_CLOUD_HOST_1</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00087">compMsgWifiData.h:87</a></div></div>
-<div class="ttc" id="compMsgData_8h_html_abd4783205a2e140cfea97caded2f784d"><div class="ttname"><a href="compMsgData_8h.html#abd4783205a2e140cfea97caded2f784d">COMP_MSG_RECEIVED_DATA</a></div><div class="ttdeci">#define COMP_MSG_RECEIVED_DATA</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00065">compMsgData.h:65</a></div></div>
-<div class="ttc" id="compMsgSendReceive_8c_html_a718574352b437bbe574573cfcb224ef9"><div class="ttname"><a href="compMsgSendReceive_8c.html#a718574352b437bbe574573cfcb224ef9">sendCloudMsg</a></div><div class="ttdeci">static uint8_t sendCloudMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth)</div><div class="ttdoc">send a message via http socket to Cloud </div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00123">compMsgSendReceive.c:123</a></div></div>
-<div class="ttc" id="compMsgDispatcher_8h_html_a877aa173ddd529a5034fe4bf0f6764a4"><div class="ttname"><a href="compMsgDispatcher_8h.html#a877aa173ddd529a5034fe4bf0f6764a4">COMP_DISP_INPUT_UART</a></div><div class="ttdeci">#define COMP_DISP_INPUT_UART</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00096">compMsgDispatcher.h:96</a></div></div>
+<div class="ttc" id="compMsgSendReceive_8c_html_a99b03f94b6f850e76216c1f23da16b39"><div class="ttname"><a href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceiveInit</a></div><div class="ttdeci">uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgSendReceive_8c_source.html#l00274">compMsgSendReceive.c:274</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_aa1a8e1150f5e5c4dbb0c5f4f90ac525f"><div class="ttname"><a href="compMsgWifiData_8h.html#aa1a8e1150f5e5c4dbb0c5f4f90ac525f">WIFI_INFO_CLOUD_HOST_1</a></div><div class="ttdeci">#define WIFI_INFO_CLOUD_HOST_1</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00089">compMsgWifiData.h:89</a></div></div>
+<div class="ttc" id="compMsgData_8h_html_abd4783205a2e140cfea97caded2f784d"><div class="ttname"><a href="compMsgData_8h.html#abd4783205a2e140cfea97caded2f784d">COMP_MSG_RECEIVED_DATA</a></div><div class="ttdeci">#define COMP_MSG_RECEIVED_DATA</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00067">compMsgData.h:67</a></div></div>
+<div class="ttc" id="compMsgDispatcher_8h_html_a877aa173ddd529a5034fe4bf0f6764a4"><div class="ttname"><a href="compMsgDispatcher_8h.html#a877aa173ddd529a5034fe4bf0f6764a4">COMP_DISP_INPUT_UART</a></div><div class="ttdeci">#define COMP_DISP_INPUT_UART</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00102">compMsgDispatcher.h:102</a></div></div>
 <div class="ttc" id="compMsgMsgDesc_8c_html_adfac0f453f0aeb587f03d73855a998ae"><div class="ttname"><a href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a></div><div class="ttdeci">#define checkErrOK(result)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8c_source.html#l00745">compMsgMsgDesc.c:745</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

@@ -11,6 +11,8 @@ var searchData=
   ['actions',['actions',['../structcompMsgActions.html#a95534c00cf88e1d8ccc313524a6ec43c',1,'compMsgActions']]],
   ['addfield',['addField',['../structcompMsgData.html#a0ff0aad8649441a04517b19fc8c98f80',1,'compMsgData::addField()'],['../compMsgData_8c.html#a949c7883609b2b7ee3b62dc8c68469bb',1,'addField():&#160;compMsgData.c']]],
   ['addfield_5ft',['addField_t',['../compMsgData_8h.html#a83aaea2eefa1ca32ef7e1ae7ff7c783a',1,'compMsgData.h']]],
+  ['addfieldvaluecallbackname',['addFieldValueCallbackName',['../structcompMsgDispatcher.html#a28ba40e9666142f5c60fcb0ba617d2ca',1,'compMsgDispatcher::addFieldValueCallbackName()'],['../compMsgDispatcher_8c.html#a7974951936b53ded8fe424f1fb20762c',1,'addFieldValueCallbackName():&#160;compMsgDispatcher.c']]],
+  ['addfieldvaluecallbackname_5ft',['addFieldValueCallbackName_t',['../compMsgDispatcher_8h.html#a1697b6d076b13742bbbc2386842afc3d',1,'compMsgDispatcher.h']]],
   ['addhandle',['addHandle',['../compMsgData_8c.html#a98334fb0870cd690e2927e1504ce778a',1,'addHandle(compMsgDispatcher_t *self, uint8_t *handle):&#160;compMsgData.c'],['../compMsgDispatcher_8c.html#a6a565129a4238d55e8457101a293bc56',1,'addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher):&#160;compMsgDispatcher.c']]],
   ['addrequest',['addRequest',['../structcompMsgDispatcher.html#a2028e9361a4f170babeda6df16b94035',1,'compMsgDispatcher::addRequest()'],['../compMsgDispatcher_8c.html#a1a7a27d27d9f487cb54c322995304542',1,'addRequest():&#160;compMsgDispatcher.c']]],
   ['addrequest_5ft',['addRequest_t',['../compMsgDispatcher_8h.html#a79b917d6bf927a6a4ee842bcfdc24743',1,'compMsgDispatcher.h']]],

@@ -8,6 +8,7 @@ var searchData=
   ['netsocketreceived',['netsocketReceived',['../compMsgWifiData_8c.html#aeb6ba608667e25fee02c97e99ea7861f',1,'netsocketReceived(void *arg, void *nud, char *pdata, unsigned short len):&#160;compMsgWifiData.c'],['../compMsgNetSocket_8c.html#aa37bf10b42301dce8c4cc0530cc7e38e',1,'netSocketReceived(void *arg, char *pdata, unsigned short len):&#160;compMsgNetSocket.c']]],
   ['netsocketreconnected',['netSocketReconnected',['../compMsgNetSocket_8c.html#a2131cf705acaad2df649dc2bf24f0bf2',1,'compMsgNetSocket.c']]],
   ['netsocketrunclientmode',['netsocketRunClientMode',['../compMsgNetSocket_8c.html#a3fc4f425c1aaee86fbbc5c3d51bcce6f',1,'compMsgNetSocket.c']]],
+  ['netsocketsendconnecterror',['netsocketSendConnectError',['../compMsgWifiData_8c.html#a187f84155454953fbb8514feedd2da58',1,'compMsgWifiData.c']]],
   ['netsocketsenddata',['netsocketSendData',['../compMsgNetSocket_8c.html#afba0d93c1dcc040ad1e91b794f1048ca',1,'compMsgNetSocket.c']]],
   ['netsocketsent',['netSocketSent',['../compMsgNetSocket_8c.html#aa9474a6de93bd89962db9deff38e4e37',1,'compMsgNetSocket.c']]],
   ['netsocketstart',['netSocketStart',['../compMsgNetSocket_8c.html#ae2fe52f276d28d3a68b80c044be7a910',1,'compMsgNetSocket.c']]],

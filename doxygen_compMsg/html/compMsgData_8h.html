@@ -127,6 +127,10 @@ Macros</h2></td></tr>
 <tr class="separator:a442febc25546e700bca90e35f8b35ffd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73f87fa7a522c72d501d6f40e90ac59c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a73f87fa7a522c72d501d6f40e90ac59c">COMP_MSG_CRC_USE_HEADER_LGTH</a>&#160;&#160;&#160;(1 &lt;&lt; 7)</td></tr>
 <tr class="separator:a73f87fa7a522c72d501d6f40e90ac59c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8abfa735ec13e2c9f90ef187a46a3077"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a8abfa735ec13e2c9f90ef187a46a3077">COMP_MSG_HAS_TOTAL_CRC</a>&#160;&#160;&#160;(1 &lt;&lt; 8)</td></tr>
+<tr class="separator:a8abfa735ec13e2c9f90ef187a46a3077"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade5f7ea937ddfe028a4de1a85700dbd7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ade5f7ea937ddfe028a4de1a85700dbd7">COMP_MSG_UINT8_TOTAL_CRC</a>&#160;&#160;&#160;(1 &lt;&lt; 9)</td></tr>
+<tr class="separator:ade5f7ea937ddfe028a4de1a85700dbd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4259e433e655f4f07cbc747ea6b20b7a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a4259e433e655f4f07cbc747ea6b20b7a">COMP_MSG_FIELD_IS_SET</a>&#160;&#160;&#160;(1 &lt;&lt; 0)</td></tr>
 <tr class="separator:a4259e433e655f4f07cbc747ea6b20b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0073c3bf29ce9e5cc3ad7b619bfc91c3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a0073c3bf29ce9e5cc3ad7b619bfc91c3">COMP_MSG_KEY_VALUE_FIELD</a>&#160;&#160;&#160;(1 &lt;&lt; 1)</td></tr>
@@ -170,6 +174,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:ad95a22749faaa2872c4afcd36c7bbe2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47c36f983f85297b2aaef068ec3c7389"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a47c36f983f85297b2aaef068ec3c7389">initMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a47c36f983f85297b2aaef068ec3c7389"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9017cb850869906124c355883348cafc"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a9017cb850869906124c355883348cafc">initReceivedMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a9017cb850869906124c355883348cafc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a016fc7d36e9d34571eac3c1a3715f780"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a016fc7d36e9d34571eac3c1a3715f780">prepareMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a016fc7d36e9d34571eac3c1a3715f780"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf10b50b47ca665f74876984fdbe9e12"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#aaf10b50b47ca665f74876984fdbe9e12">getMsgData_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *<a class="el" href="structcompMsgData.html">compMsgData</a>, uint8_t **data, int *lgth)</td></tr>
@@ -205,7 +211,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00070">70</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00072">72</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -219,7 +225,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00068">68</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00070">70</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -233,7 +239,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00067">67</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00069">69</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -261,7 +267,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00061">61</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00063">63</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -307,6 +313,20 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a8abfa735ec13e2c9f90ef187a46a3077"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COMP_MSG_HAS_TOTAL_CRC&#160;&#160;&#160;(1 &lt;&lt; 8)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00060">60</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="aecb6e8fd54197a9e5281755af79dde3d"></a>
 <div class="memitem">
 <div class="memproto">
@@ -345,7 +365,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00062">62</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00064">64</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -359,7 +379,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00065">65</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00067">67</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -373,7 +393,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00064">64</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00066">66</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -405,6 +425,20 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ade5f7ea937ddfe028a4de1a85700dbd7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COMP_MSG_UINT8_TOTAL_CRC&#160;&#160;&#160;(1 &lt;&lt; 9)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00061">61</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Typedef Documentation</h2>
 <a class="anchor" id="a83aaea2eefa1ca32ef7e1ae7ff7c783a"></a>
 <div class="memitem">
@@ -416,7 +450,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00110">110</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00112">112</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -456,7 +490,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00109">109</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00111">111</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -470,7 +504,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00123">123</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00126">126</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -484,7 +518,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00121">121</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00124">124</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -498,7 +532,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00122">122</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00125">125</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -512,7 +546,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00116">116</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00118">118</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -526,7 +560,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00114">114</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00116">116</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -540,7 +574,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00115">115</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00117">117</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -554,7 +588,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00117">117</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00119">119</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -568,7 +602,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00111">111</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00113">113</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -582,7 +616,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00120">120</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00123">123</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -596,7 +630,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00118">118</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00120">120</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a9017cb850869906124c355883348cafc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint8_t(*  initReceivedMsg_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00121">121</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -622,7 +670,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00119">119</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00122">122</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -636,7 +684,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00124">124</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00127">127</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -650,7 +698,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00112">112</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00114">114</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -691,7 +739,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l00377">377</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l00378">378</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
 
 </div>
 </div>
@@ -709,7 +757,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l00918">918</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l01075">1075</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
 
 </div>
 </div>

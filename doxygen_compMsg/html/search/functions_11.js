@@ -5,6 +5,7 @@ var searchData=
   ['websocketbinaryreceived',['websocketBinaryReceived',['../compMsgWifiData_8c.html#aa4435d0ceb3a662fddb3fb8cd5981aa4',1,'compMsgWifiData.c']]],
   ['websocketrunapmode',['websocketRunAPMode',['../compMsgWebSocket_8c.html#a01dcf3f4f3a1a6829ddcf061a3be1ee8',1,'compMsgWebSocket.c']]],
   ['websocketrunclientmode',['websocketRunClientMode',['../compMsgWebSocket_8c.html#addaef475174044ba8c921aff78ebe4a9',1,'compMsgWebSocket.c']]],
+  ['websocketsendconnecterror',['websocketSendConnectError',['../compMsgWifiData_8c.html#a6467c909163627e7ac886c3e1048a3e3',1,'compMsgWifiData.c']]],
   ['websocketsenddata',['websocketSendData',['../compMsgWebSocket_8c.html#a3fcd27a100142b88d7c6373ac2f11327',1,'compMsgWebSocket.c']]],
   ['websockettextreceived',['websocketTextReceived',['../compMsgWifiData_8c.html#af8283380358bbf0352271cff8e6ac901',1,'compMsgWifiData.c']]],
   ['writeline',['writeLine',['../compMsgMsgDesc_8c.html#acf2deae07a07bd4901d494e12c99882d',1,'compMsgMsgDesc.c']]]

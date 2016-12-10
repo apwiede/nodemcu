@@ -15,6 +15,7 @@ var searchData=
   ['compmsgtimer_5ft',['compMsgTimer_t',['../compMsgNetSocket_8c.html#a7b85d3bafec5a5644af3d9d8d851769b',1,'compMsgTimer_t():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a7b85d3bafec5a5644af3d9d8d851769b',1,'compMsgTimer_t():&#160;compMsgWebSocket.c']]],
   ['compmsgtypesandnames_5ft',['compMsgTypesAndNames_t',['../compMsgTypesAndNames_8h.html#a57e4eb3cb0470c6b93267fe1003033cf',1,'compMsgTypesAndNames.h']]],
   ['compmsgwifidata_5ft',['compMsgWifiData_t',['../compMsgWifiData_8h.html#aed2dd7c8fb4f7712d1bf891b31102573',1,'compMsgWifiData.h']]],
+  ['connecttoap_5ft',['connectToAP_t',['../compMsgDispatcher_8h.html#a8f89da3a1a774011f08d68c13c0ce7d3',1,'compMsgDispatcher.h']]],
   ['createdispatcher_5ft',['createDispatcher_t',['../compMsgDispatcher_8h.html#a0775461f5806d95023c5d30f65c42d01',1,'compMsgDispatcher.h']]],
   ['createmsg_5ft',['createMsg_t',['../compMsgData_8h.html#a59cc79ddc334e86d8d542d1febedcbf5',1,'compMsgData.h']]],
   ['createmsgfromheaderpart_5ft',['createMsgFromHeaderPart_t',['../compMsgDispatcher_8h.html#a30df4a7a099ac28f0439dad7a1fea3e7',1,'compMsgDispatcher.h']]]

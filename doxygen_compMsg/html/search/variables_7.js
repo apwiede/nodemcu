@@ -1,6 +1,7 @@
 var searchData=
 [
   ['handle',['handle',['../structhandle2Header.html#a656a9b89148f39366b4a0325251c516b',1,'handle2Header::handle()'],['../structcompMsgData.html#af3925b86dc7b8e17a1c8a268206a04d4',1,'compMsgData::handle()'],['../structhandle2Dispatcher.html#ace5f67738b26e66c363d3957f38d5f52',1,'handle2Dispatcher::handle()'],['../structcompMsgDispatcher.html#a72eb2f19b4dfdc6dd15dd0e2a3871ac3',1,'compMsgDispatcher::handle()']]],
+  ['handlereceivedheader',['handleReceivedHeader',['../structcompMsgDispatcher.html#aa749d732d109d0f773e901f2709c9905',1,'compMsgDispatcher']]],
   ['handlereceivedmsg',['handleReceivedMsg',['../structcompMsgDispatcher.html#a4d2aae7a44dc927af177ef11a5e765c1',1,'compMsgDispatcher']]],
   ['handlereceivedpart',['handleReceivedPart',['../structcompMsgDispatcher.html#ac385f8b688903ad369d937e9c1d948f8',1,'compMsgDispatcher']]],
   ['handles',['handles',['../structcompMsgHandles.html#a92e0bff89cf2cf97f278d8b397658925',1,'compMsgHandles::handles()'],['../structcompMsgDispatcherHandles.html#acd700171c469a1c2c780373aa084cf16',1,'compMsgDispatcherHandles::handles()']]],

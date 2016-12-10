@@ -9,6 +9,7 @@ var searchData=
   ['key_5frssi',['key_rssi',['../structcompMsgWifiData.html#a63d1e0988a92f84241185dadc95cfdd9',1,'compMsgWifiData']]],
   ['key_5fssid',['key_ssid',['../structcompMsgWifiData.html#a0d18f702359318bad9e96336f3ea6f46',1,'compMsgWifiData']]],
   ['key_5fssid_5flen',['key_ssid_len',['../structcompMsgWifiData.html#a8ebc4bf48dc9ff69e9e50d4059aef11b',1,'compMsgWifiData']]],
+  ['key_5fvalue_5fdesc_5fparts_5ffile',['KEY_VALUE_DESC_PARTS_FILE',['../compMsgDispatcher_8c.html#a99bfe55c67674006f82a54ccee8b4ccf',1,'compMsgDispatcher.c']]],
   ['key_5fvalue_5fkey_5fauthmode',['KEY_VALUE_KEY_AUTHMODE',['../compMsgWifiData_8h.html#a280db2c030fa36d5c5acce581ae6cb19',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fbssid',['KEY_VALUE_KEY_BSSID',['../compMsgWifiData_8h.html#ac1374bd847534447fa4bf5202a4dc050',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fbssidset',['KEY_VALUE_KEY_BSSIDSET',['../compMsgWifiData_8h.html#a5fb39b346222ad12fcce16d63aff93d5',1,'compMsgWifiData.h']]],
@@ -19,5 +20,9 @@ var searchData=
   ['key_5fvalue_5fkey_5fpassword',['KEY_VALUE_KEY_PASSWORD',['../compMsgWifiData_8h.html#a20d9c231b7eb5d2a8b460cf5f6cf7ca2',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fssid',['KEY_VALUE_KEY_SSID',['../compMsgWifiData_8h.html#a2ccfc8f7a79068cdec4e164a31b0c72f',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fstatus',['KEY_VALUE_KEY_STATUS',['../compMsgWifiData_8h.html#adae3f248ba792aeee90d960863b27bd9',1,'compMsgWifiData.h']]],
+  ['keyid',['keyId',['../structmsgKeyValueDescPart.html#a8aa393f8eb9bb31b61bdc07140511d02',1,'msgKeyValueDescPart']]],
+  ['keylgth',['keyLgth',['../structmsgKeyValueDescPart.html#a6319221f530dddb3cf18443daed55da0',1,'msgKeyValueDescPart']]],
+  ['keynamestr',['keyNameStr',['../structmsgKeyValueDescPart.html#acedbbd811d568c4520c95e7928154bec',1,'msgKeyValueDescPart']]],
+  ['keytype',['keyType',['../structmsgKeyValueDescPart.html#a95e1b0f72b2be9b3f3ba9e3fdeef9560',1,'msgKeyValueDescPart']]],
   ['keyvaluefields',['keyValueFields',['../structcompMsgData.html#a4cab343f8afffae3889a3ae0eaf99d92',1,'compMsgData']]]
 ];

@@ -126,8 +126,8 @@ Macros</h2></td></tr>
 <tr class="separator:aeb26101030115be5dfcbedd08090f86c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af64d73c14bf29197d64115677f6db2fa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#af64d73c14bf29197d64115677f6db2fa">DISP_HANDLE_PREFIX</a>&#160;&#160;&#160;&quot;stmsgdisp_&quot;</td></tr>
 <tr class="separator:af64d73c14bf29197d64115677f6db2fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8f859b67185930087f8fcd5844f882f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#ab8f859b67185930087f8fcd5844f882f">UART_INPUT</a></td></tr>
-<tr class="separator:ab8f859b67185930087f8fcd5844f882f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99bfe55c67674006f82a54ccee8b4ccf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#a99bfe55c67674006f82a54ccee8b4ccf">KEY_VALUE_DESC_PARTS_FILE</a>&#160;&#160;&#160;&quot;CompMsgKeyValueKeys.txt&quot;</td></tr>
+<tr class="separator:a99bfe55c67674006f82a54ccee8b4ccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -168,6 +168,14 @@ Functions</h2></td></tr>
 <tr class="separator:aacd84db472c7ed5fe7cf18226276e324"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac908215051f3c7f5f73fded0ab49debf"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#ac908215051f3c7f5f73fded0ab49debf">compMsgDispatcherGetPtrFromHandle</a> (const char *handle, <a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> **<a class="el" href="structcompMsgDispatcher.html">compMsgDispatcher</a>)</td></tr>
 <tr class="separator:ac908215051f3c7f5f73fded0ab49debf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bf7577d1a73e7ee0d5f3491295e867c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#a7bf7577d1a73e7ee0d5f3491295e867c">setFieldValueCallback</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *callbackName, <a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a> callback, uint8_t callbackType)</td></tr>
+<tr class="separator:a7bf7577d1a73e7ee0d5f3491295e867c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7974951936b53ded8fe424f1fb20762c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#a7974951936b53ded8fe424f1fb20762c">addFieldValueCallbackName</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *callbackName, <a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a> callback, uint8_t callbackType)</td></tr>
+<tr class="separator:a7974951936b53ded8fe424f1fb20762c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf15e2c742b4f54858e2e5a54ca7f692"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#abf15e2c742b4f54858e2e5a54ca7f692">getFieldValueCallback</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *callbackName, <a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a> *callback, uint8_t callbackType)</td></tr>
+<tr class="separator:abf15e2c742b4f54858e2e5a54ca7f692"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adecc9538b69ac6d082fa08c04ca64ac4"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#adecc9538b69ac6d082fa08c04ca64ac4">getFieldValueCallbackName</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a> callback, uint8_t **callbackName, uint8_t callbackType)</td></tr>
+<tr class="separator:adecc9538b69ac6d082fa08c04ca64ac4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abddd63cd01a9e440fe850f97ad42cf7a"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#abddd63cd01a9e440fe850f97ad42cf7a">startRequest</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:abddd63cd01a9e440fe850f97ad42cf7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad5151dde08653635d7f5b6483c1f066"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#aad5151dde08653635d7f5b6483c1f066">startNextRequest</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
@@ -178,8 +186,8 @@ Functions</h2></td></tr>
 <tr class="separator:a1a7a27d27d9f487cb54c322995304542"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50b9f58acfa186dc44aa350ef55234f7"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#a50b9f58acfa186dc44aa350ef55234f7">deleteRequest</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t requestType, void *requestHandle)</td></tr>
 <tr class="separator:a50b9f58acfa186dc44aa350ef55234f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91802bdf0ea30aec3157a73663615f4a"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#a91802bdf0ea30aec3157a73663615f4a">initDispatcher</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
-<tr class="separator:a91802bdf0ea30aec3157a73663615f4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f00ccffe93a3909efafd427a4c4ad20"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#a5f00ccffe93a3909efafd427a4c4ad20">initDispatcher</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *type, size_t typelen)</td></tr>
+<tr class="separator:a5f00ccffe93a3909efafd427a4c4ad20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf21408164ed1246e83336384f549514"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#abf21408164ed1246e83336384f549514">createDispatcher</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t **handle)</td></tr>
 <tr class="separator:abf21408164ed1246e83336384f549514"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acaa173d98c05109cc9c02b847d1bf5a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDispatcher_8c.html#acaa173d98c05109cc9c02b847d1bf5a5">newCompMsgDispatcher</a> ()</td></tr>
@@ -259,15 +267,17 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab8f859b67185930087f8fcd5844f882f"></a>
+<a class="anchor" id="a99bfe55c67674006f82a54ccee8b4ccf"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define UART_INPUT</td>
+          <td class="memname">#define KEY_VALUE_DESC_PARTS_FILE&#160;&#160;&#160;&quot;CompMsgKeyValueKeys.txt&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00060">60</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -297,6 +307,54 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a7974951936b53ded8fe424f1fb20762c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t addFieldValueCallbackName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>callbackName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a>&#160;</td>
+          <td class="paramname"><em>callback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>callbackType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00535">535</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a6a565129a4238d55e8457101a293bc56"></a>
 <div class="memitem">
 <div class="memproto">
@@ -329,7 +387,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00182">182</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00184">184</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -377,7 +435,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00556">556</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00656">656</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -419,7 +477,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00537">537</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00637">637</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -455,7 +513,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00254">254</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00257">257</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -483,7 +541,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00496">496</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00504">504</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -519,7 +577,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00716">716</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00840">840</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -561,7 +619,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00364">364</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00367">367</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -633,7 +691,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00459">459</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00467">467</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -659,7 +717,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00218">218</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00220">220</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -701,7 +759,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00590">590</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00713">713</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -737,7 +795,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00275">275</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00278">278</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -809,7 +867,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00421">421</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00429">429</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -827,7 +885,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00795">795</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00938">938</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -869,7 +927,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00123">123</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00125">125</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -917,7 +975,103 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00334">334</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00337">337</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abf15e2c742b4f54858e2e5a54ca7f692"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getFieldValueCallback </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>callbackName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a> *&#160;</td>
+          <td class="paramname"><em>callback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>callbackType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00560">560</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adecc9538b69ac6d082fa08c04ca64ac4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getFieldValueCallbackName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a>&#160;</td>
+          <td class="paramname"><em>callback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>callbackName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>callbackType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00585">585</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -943,11 +1097,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00308">308</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00311">311</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a91802bdf0ea30aec3157a73663615f4a"></a>
+<a class="anchor" id="a5f00ccffe93a3909efafd427a4c4ad20"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -958,8 +1112,24 @@ Variables</h2></td></tr>
           <td class="memname">static uint8_t initDispatcher </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
-          <td class="paramname"><em>self</em></td><td>)</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>typelen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -969,7 +1139,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00644">644</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00767">767</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -986,7 +1156,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00735">735</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00859">859</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1012,7 +1182,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00352">352</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00355">355</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1048,7 +1218,55 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00407">407</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00415">415</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a7bf7577d1a73e7ee0d5f3491295e867c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t setFieldValueCallback </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>callbackName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a>&#160;</td>
+          <td class="paramname"><em>callback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>callbackType</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00515">515</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1074,7 +1292,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00516">516</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00616">616</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1100,7 +1318,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00507">507</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00607">607</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1153,7 +1371,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Error code or ErrorOK </dd></dl>
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00092">92</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00093">93</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1176,7 +1394,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00080">80</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00081">81</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1198,7 +1416,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00074">74</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00075">75</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1220,7 +1438,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00076">76</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00077">77</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -1242,7 +1460,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00078">78</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00079">79</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>

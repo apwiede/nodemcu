@@ -34,5 +34,6 @@ var searchData=
   ['module_5foperating_5fmode_5flight_5fsleep_5fwakeup',['MODULE_OPERATING_MODE_LIGHT_SLEEP_WAKEUP',['../compMsgModuleData_8h.html#ab3d1cbbe94aac7c4205f8836cc3d72c0',1,'compMsgModuleData.h']]],
   ['module_5foperating_5fmode_5fmodule_5ftest',['MODULE_OPERATING_MODE_MODULE_TEST',['../compMsgModuleData_8h.html#a79b53060c1597da2edfab5b82a46ad10',1,'compMsgModuleData.h']]],
   ['module_5foperating_5fmode_5fwps',['MODULE_OPERATING_MODE_WPS',['../compMsgModuleData_8h.html#af09ce77767c620a3ef0b174b2984bc43',1,'compMsgModuleData.h']]],
+  ['msg_5ffields_5fto_5fsave_5ffile_5fname',['MSG_FIELDS_TO_SAVE_FILE_NAME',['../compMsgIdentify_8c.html#ab6216aa0c22f2c11af80dc3d816ad622',1,'compMsgIdentify.c']]],
   ['msg_5fheads_5ffile_5fname',['MSG_HEADS_FILE_NAME',['../compMsgIdentify_8c.html#afdef03d92ac1525887dc0cc11ba02433',1,'compMsgIdentify.c']]]
 ];

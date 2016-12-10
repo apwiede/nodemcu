@@ -2,6 +2,7 @@ var searchData=
 [
   ['scaninfocomplete',['scanInfoComplete',['../structbssScanInfos.html#a49d8b949bff9abf8173e61084f7b8c25',1,'bssScanInfos']]],
   ['self',['self',['../structcompMsgTimer.html#a1239d997da4a5281c0f12518b94fcc3f',1,'compMsgTimer']]],
+  ['sendclientipmsg',['sendClientIPMsg',['../structcompMsgDispatcher.html#a1e1e7fd036da5c319bb0038f635e8b2a',1,'compMsgDispatcher']]],
   ['sendcloudmsg',['sendCloudMsg',['../structcompMsgDispatcher.html#a823783b5853d6360bbee6b7fdbb34846',1,'compMsgDispatcher']]],
   ['sendmsg',['sendMsg',['../structcompMsgDispatcher.html#a7fa1b8a03f608ff66f60f4d674a35ddb',1,'compMsgDispatcher']]],
   ['seqidx',['seqIdx',['../structmsgHeaderInfos.html#a0ee2307e9011f7590c19593d26b51a61',1,'msgHeaderInfos']]],
@@ -12,6 +13,7 @@ var searchData=
   ['setcrc',['setCrc',['../structcompMsgDataView.html#ad9f640b2c30af10c036e83f3fd7a9083',1,'compMsgDataView']]],
   ['setdispatcher',['setDispatcher',['../structcompMsgData.html#a33523dde7489ee88311378dbab2a9327',1,'compMsgData']]],
   ['setfieldvalue',['setFieldValue',['../structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042',1,'compMsgData::setFieldValue()'],['../structcompMsgDataView.html#ae46c07a95670d2f89618709b453c3cf6',1,'compMsgDataView::setFieldValue()']]],
+  ['setfieldvaluecallback',['setFieldValueCallback',['../structcompMsgDispatcher.html#a302d8b6ff543f18c179526c19fe40e1d',1,'compMsgDispatcher']]],
   ['setfiller',['setFiller',['../structcompMsgDataView.html#acf32965e7b5fbcb10cb4f5c649f1bbcd',1,'compMsgDataView']]],
   ['setint16',['setInt16',['../structdataView.html#a0a642cbf7ee182b4e67f139a457fde4d',1,'dataView']]],
   ['setint16vector',['setInt16Vector',['../structdataView.html#ac1afada3739bcc20664a0dbd05a75e85',1,'dataView']]],
@@ -48,6 +50,8 @@ var searchData=
   ['station_5fip',['station_ip',['../structcompMsgDispatcher.html#ac1051f3d46c7af7c6cc87f3eeacf5525',1,'compMsgDispatcher']]],
   ['stationconfig',['stationConfig',['../compMsgWifiData_8c.html#acf38b099dbf2c6fe69f8c7844c2c69ae',1,'compMsgWifiData.c']]],
   ['status',['status',['../structstationConfig.html#a44451b1ec51d0d28e69d5fe524c9f614',1,'stationConfig']]],
+  ['stopap',['stopAP',['../structcompMsgDispatcher.html#a69fbf77b932d7821b5e328a4bbc65310',1,'compMsgDispatcher']]],
+  ['storereceivedmsg',['storeReceivedMsg',['../structcompMsgDispatcher.html#ae98e68fec5b38b4e1d93fd2a2c3f47a8',1,'compMsgDispatcher']]],
   ['str',['str',['../structstr2id.html#a612d758fdba83470d69915cb3bcae3a5',1,'str2id']]],
   ['stringvalue',['stringValue',['../structbuildMsgInfos.html#aa4971e563fefba5dc5d8ff8d81b98ea5',1,'buildMsgInfos::stringValue()'],['../structcompMsgDispatcher.html#aad895849d5df2017dca6c0cce6f37135',1,'compMsgDispatcher::stringValue()']]]
 ];

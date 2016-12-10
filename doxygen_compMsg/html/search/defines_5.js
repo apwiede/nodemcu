@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['key_5fvalue_5fdesc_5fparts_5ffile',['KEY_VALUE_DESC_PARTS_FILE',['../compMsgDispatcher_8c.html#a99bfe55c67674006f82a54ccee8b4ccf',1,'compMsgDispatcher.c']]],
   ['key_5fvalue_5fkey_5fauthmode',['KEY_VALUE_KEY_AUTHMODE',['../compMsgWifiData_8h.html#a280db2c030fa36d5c5acce581ae6cb19',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fbssid',['KEY_VALUE_KEY_BSSID',['../compMsgWifiData_8h.html#ac1374bd847534447fa4bf5202a4dc050',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fbssidset',['KEY_VALUE_KEY_BSSIDSET',['../compMsgWifiData_8h.html#a5fb39b346222ad12fcce16d63aff93d5',1,'compMsgWifiData.h']]],

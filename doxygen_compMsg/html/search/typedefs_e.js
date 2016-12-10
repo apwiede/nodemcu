@@ -1,11 +1,13 @@
 var searchData=
 [
-  ['sendcloudmsg_5ft',['sendCloudMsg_t',['../compMsgDispatcher_8h.html#a70c24407a16afac927458413271022b4',1,'compMsgDispatcher.h']]],
+  ['sendclientipmsg_5ft',['sendClientIPMsg_t',['../compMsgDispatcher_8h.html#a993032b9a896f89d22db43092970dcc7',1,'compMsgDispatcher.h']]],
+  ['sendcloudmsg_5ft',['sendCloudMsg_t',['../compMsgDispatcher_8h.html#af4fa61cfeb713f8fe971dbe32bb14ef4',1,'compMsgDispatcher.h']]],
   ['sendmsg_5ft',['sendMsg_t',['../compMsgDispatcher_8h.html#aabb75c53676dc7d96dc6d82c4c94e37c',1,'compMsgDispatcher.h']]],
   ['setactionentry_5ft',['setActionEntry_t',['../compMsgDispatcher_8h.html#ab5a15905b937901393efc16fcf30fd5a',1,'compMsgDispatcher.h']]],
   ['setcrc_5ft',['setCrc_t',['../compMsgDataView_8h.html#a4b4961dac209d3862fe86990a7e4705b',1,'compMsgDataView.h']]],
   ['setdispatcher_5ft',['setDispatcher_t',['../compMsgData_8h.html#afa53523d8b28fd08b96afcac111f7582',1,'compMsgData.h']]],
   ['setfieldvalue_5ft',['setFieldValue_t',['../compMsgData_8h.html#ad3f75cb86b380ea3d6ac156d26a84fda',1,'compMsgData.h']]],
+  ['setfieldvaluecallback_5ft',['setFieldValueCallback_t',['../compMsgDispatcher_8h.html#a6d159ac5fcb6bfec7dee49b50c0a95e6',1,'compMsgDispatcher.h']]],
   ['setfiller_5ft',['setFiller_t',['../compMsgDataView_8h.html#a9cc1c9adee99fd740655b2f0ae534bfb',1,'compMsgDataView.h']]],
   ['setint16_5ft',['setInt16_t',['../dataView_8h.html#a9b84c0f95284201cf295c296e19c55fd',1,'dataView.h']]],
   ['setint16vector_5ft',['setInt16Vector_t',['../dataView_8h.html#a20ec3c8e23fc86497aae0e77a069d130',1,'dataView.h']]],
@@ -31,5 +33,6 @@ var searchData=
   ['startnextrequest_5ft',['startNextRequest_t',['../compMsgDispatcher_8h.html#a7f446e992df2725579bef457b7807899',1,'compMsgDispatcher.h']]],
   ['startrequest_5ft',['startRequest_t',['../compMsgDispatcher_8h.html#a232562c24a87437020d5460ecaa46d3c',1,'compMsgDispatcher.h']]],
   ['stationconfig_5ft',['stationConfig_t',['../compMsgWifiData_8h.html#a9f4a0fdef812501c532f0a3f59a12322',1,'compMsgWifiData.h']]],
+  ['storereceivedmsg_5ft',['storeReceivedMsg_t',['../compMsgDispatcher_8h.html#ae80cd7fd2cce50bde29f6ee58cc0bd64',1,'compMsgDispatcher.h']]],
   ['str2id_5ft',['str2id_t',['../compMsgTypesAndNames_8h.html#a5baf305c5d5937aec34b1fe2bb55a598',1,'compMsgTypesAndNames.h']]]
 ];

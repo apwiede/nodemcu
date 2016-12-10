@@ -4,6 +4,7 @@ var searchData=
   ['infos',['infos',['../structbssScanInfos.html#a1ee5eeaae1bf358e7de513e840725385',1,'bssScanInfos']]],
   ['initdispatcher',['initDispatcher',['../structcompMsgDispatcher.html#a257956dc6d5099670343b63760026716',1,'compMsgDispatcher']]],
   ['initmsg',['initMsg',['../structcompMsgData.html#af90e3fee3243cdbac0c6d0f7256ee9e6',1,'compMsgData']]],
+  ['initreceivedmsg',['initReceivedMsg',['../structcompMsgData.html#a0295f624d173dd4771328375c90b7338',1,'compMsgData']]],
   ['interval',['interval',['../structcompMsgTimer.html#a453f1d7b34e25056f50c82411343601d',1,'compMsgTimer']]],
   ['ipaddr',['IPAddr',['../structcompMsgModuleData.html#a3066d0f739087d3fed6720540b418bcb',1,'compMsgModuleData']]],
   ['is_5fhidden',['is_hidden',['../structbssScanInfo.html#a7de21329dcf4c05a4d73e0e8059eadd8',1,'bssScanInfo']]],
