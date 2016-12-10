@@ -441,10 +441,8 @@ puts stderr "===clientSocket: $clientSocket"
 puts stderr "buildAPListWidget start"
 buildAPListWidget
 puts stderr "buildAPListWidget built"
-#after 1000 [list update idletasks]
 set startBtn [::ttk::button .start -text "Start" -command [list getAPInfos $::clientSocket]]
 pack $startBtn
-#after 500 [list update idletasks]
 
 
 vwait forever
