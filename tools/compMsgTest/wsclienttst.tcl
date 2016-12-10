@@ -219,6 +219,7 @@ source autoscroll.tcl
 # ================================ buildAPListWidget ===============================
 
 proc buildAPListWidget {} {
+puts stderr "buildAPListWidget"
   apwWin Init
   showDefinition Init
   frame .tbl -width 600 -height 100
@@ -235,12 +236,23 @@ set ::APTableId $tableId
   foreach rowLst $valueLst {
     $tableId insert end $rowLst
   }
-  pack $tableFr
+  frame .info -width 600 -height 10
+  set ::infoFr .info
+  ttk::label ${::infoFr}.passwdl -text Passwd
+  ttk::entry ${::infoFr}.passwd -width 64
+  ttk::label ${::infoFr}.ipAddrl -text "IP: "
+  ttk::label ${::infoFr}.ipAddr -text "_______________"
+  ttk::label ${::infoFr}.portl -text "Port: "
+  ttk::label ${::infoFr}.port -text "_____"
+  pack ${::infoFr}.passwdl ${::infoFr}.passwd ${::infoFr}.ipAddrl ${::infoFr}.ipAddr ${::infoFr}.portl ${::infoFr}.port -side left
+  pack $tableFr $::infoFr -side top
+puts stderr "buildAPListWidget end"
 }
 
 # ================================ showApList ===============================
 
 proc showApList {def handle2 lst} {
+puts stderr "showApList"
   apwWin Init
   showDefinition Init
   frame .tbl -width 600 -height 100
@@ -249,35 +261,13 @@ proc showApList {def handle2 lst} {
   set lst [list]
   set valueLst [list]
   set rowLst [list]
-  set row 0
-if {0} {
-  set result [::compMsg get_definitionTableFieldNames $def tableFieldNames]
-  checkErrOK $result
-  set result [::compMsg get_definitionNumTableRows $def numTableRows]
-  checkErrOK $result
-  set result [::compMsg get_definitionNumTableRowFields $def numTableRowFields]
-  checkErrOK $result
-  set row 0
-  while {$row < $numTableRows} {
-    foreach name $tableFieldNames {
-      compMsg get_definitionTableFieldInfo $def $name 0 fieldInfo
-      if {$row == 0} {
-        lappend lst 0 $name
-      }
-      set result [compMsg get_tableFieldValue $handle2 $name $row value]
-      lappend rowLst $value
-    }
-    lappend valueLst $rowLst
-    set rowLst [list]
-    incr row
-  }
-}
   $tableId configure -width 100
   $tableId configure -columns $lst
   foreach rowLst $valueLst {
     $tableId insert end $rowLst
   }
   pack $tableFr
+puts stderr "showApList end"
 }
 
 # ================================ handleRow ===============================
@@ -288,6 +278,9 @@ puts stderr "handleRow: $w $x $y!"
   puts "clicked on cell [$tbl containingcell $x $y]"
   set lst [$tbl getcells 0,0 0,0]
   set ssid [lindex $lst 0]
+  append ssid \x00
+  dict set ::compMsgDispatcher clientSsid $ssid
+if {0} {
   set fd [open [format "%s/../%s" $::moduleFilesPath myConfig.txt] "r"]
   gets $fd line1
   set flds1 [split $line1 ","]
@@ -298,8 +291,11 @@ puts stderr "handleRow: $w $x $y!"
   set flds2 [split $line2 ","]
   set passwd [lindex $flds2 1]
   append passwd \x00
-  dict set ::compMsgDispatcher clientPassword $passwd
   close $fd
+}
+  set passwd [$::infoFr.passwd get]
+  append passwd \x00
+  dict set ::compMsgDispatcher clientPassword $passwd
 puts stderr "ssid: [dict get $::compMsgDispatcher clientSsid]![dict get $::compMsgDispatcher clientPassword]!"
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 SP hdr]
   checkErrOK $result
@@ -344,7 +340,7 @@ proc fillTable {} {
 # ================================ clientHandler ===============================
 
 proc clientHandler { sock type msg } {
-#puts stderr "clientHandler: $type $msg!"
+puts stderr "===clientHandler: $type $msg!"
   switch -glob -nocase -- $type {
     co* {
       puts "===Connected on $sock"
@@ -391,6 +387,10 @@ puts stderr "hdrIdx: $hdrIdx hdrU16CmdKey: [dict get $hdr hdrU16CmdKey]!"
           set part2 [expr {($ipAddr >>16) & 0xFF}]
           set part3 [expr {($ipAddr >>8) & 0xFF}]
           set part4 [expr {$ipAddr & 0xFF}]
+          set ipAddrStr [format "%d.%d.%d.%d" $part4 $part3 $part2 $part1]
+          set portStr [format "%d" $port]
+          ${::infoFr}.ipAddr configure -text $ipAddrStr -background lightgreen
+          ${::infoFr}.port configure -text $portStr -background lightgreen
           puts stderr [format "IP: %d.%d.%d.%d port: $port!" $part4 $part3 $part2 $part1]
         }
         default {
@@ -438,9 +438,13 @@ puts stderr "ws://${host}:${PORT}${path}"
 set clientSocket [::websocket::open "ws://${host}:${PORT}${path}" ::clientHandler] 
 puts stderr "===clientSocket: $clientSocket"
 
+puts stderr "buildAPListWidget start"
 buildAPListWidget
+puts stderr "buildAPListWidget built"
+#after 1000 [list update idletasks]
 set startBtn [::ttk::button .start -text "Start" -command [list getAPInfos $::clientSocket]]
 pack $startBtn
+#after 500 [list update idletasks]
 
 
 vwait forever
