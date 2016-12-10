@@ -98,11 +98,11 @@ static void websocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned 
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+//ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->received);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
-ets_printf("received compMsgData: %p\n", self->compMsgData);
+//ets_printf("received compMsgData: %p\n", self->compMsgData);
   self->compMsgData->wud = wud;
   self->compMsgData->nud = NULL;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
@@ -114,7 +114,7 @@ ets_printf("received compMsgData: %p\n", self->compMsgData);
   c_memcpy(self->compMsgData->receivedData, pdata, len);
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, wud, self->compMsgData);
-ets_printf("websocketBinaryReceived end result: %d\n", result);
+//ets_printf("websocketBinaryReceived end result: %d\n", result);
 }
 
 // ================================= netsocketToSend ====================================
@@ -296,7 +296,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
   struct ip_info ip_info;
   char temp[64];
 
-ets_printf("connecToAP:\n");
+//ets_printf("connectToAP:\n");
   ssid = NULL;
   passwd = NULL;
   idx = 0;
@@ -310,7 +310,7 @@ ets_printf("connecToAP:\n");
     }
     idx++;
   }
-ets_printf("connecToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
+ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
   result = self->setWifiValue(self, "@clientSsid", 0, ssid);
   checkErrOK(result);
   result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
@@ -318,8 +318,7 @@ ets_printf("connecToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)s
   result = self->netsocketRunClientMode(self);
 //ets_printf("runClientMode: result: %d\n", result);
   checkErrOK(result);
-ets_printf("connectToAP done\n");
-  
+//ets_printf("connectToAP done\n");
   return COMP_DISP_ERR_OK;
 }
 

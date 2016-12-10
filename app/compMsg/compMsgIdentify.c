@@ -447,7 +447,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   uint8_t *handle;
   bool hadActionCb;
 
-ets_printf("§storeReceivedMsg§\n");
+//ets_printf("§storeReceivedMsg§\n");
   received = &self->compMsgData->received;
 //ets_printf("handleReceivedHeader\n");
   // next line deletes compMsgData !!
@@ -492,7 +492,7 @@ ets_printf("§storeReceivedMsg§\n");
   while (idx < self->compMsgData->numMsgValParts) {
     msgValPart = &self->compMsgData->msgValParts[idx];
     if (msgValPart->fieldValueActionCb != NULL) {
-ets_printf("§have actionCb: %s\n", msgValPart->fieldValueActionCb);
+//ets_printf("§have actionCb: %s\n", msgValPart->fieldValueActionCb);
       hadActionCb = true;
       result = self->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
       checkErrOK(result);
@@ -507,7 +507,7 @@ ets_printf("§have actionCb: %s\n", msgValPart->fieldValueActionCb);
     result = self->resetMsgInfo(self, received);
     checkErrOK(result);
   }
-ets_printf("§storeReceivedMsg done§\n");
+//ets_printf("§storeReceivedMsg done§\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -537,7 +537,7 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   result = self->resetMsgInfo(self, received);
 //ets_printf("§resteMsgInfo: result: %d§\n", result);
   checkErrOK(result);
-ets_printf("§sendClientIPMsg done§\n");
+//ets_printf("§sendClientIPMsg done§\n");
   return COMP_MSG_ERR_OK;
 }
 

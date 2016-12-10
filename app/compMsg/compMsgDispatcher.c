@@ -57,6 +57,7 @@
 #define ISBASE64(c) (unbytes64[c] != BASE64_INVALID)
 
 #define DISP_HANDLE_PREFIX "stmsgdisp_"
+#define KEY_VALUE_DESC_PARTS_FILE "CompMsgKeyValueKeys.txt"
 
 typedef struct handle2Dispatcher
 {
@@ -113,6 +114,7 @@ static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
     *q++ = (i + 1 < n) ? bytes64[((b & 15) << 2) | (c >> 6)] : BASE64_PADDING;
     *q++ = (i + 2 < n) ? bytes64[(c & 63)] : BASE64_PADDING;
   }
+  *q = '\0';
   *len = q - out;
   *encoded = out;
   return COMP_DISP_ERR_OK;
@@ -369,7 +371,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-ets_printf("§createMsgFromHeaderPart1§\n");
+//ets_printf("§createMsgFromHeaderPart1§\n");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);
@@ -574,7 +576,7 @@ static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
     }
     idx++;
   }
-ets_printf("§getFieldValueCallback NOT found: %s 0x%02x§\n", callbackName, callbackType);
+//ets_printf("§getFieldValueCallback NOT found: %s 0x%02x§\n", callbackName, callbackType);
   return COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
@@ -762,10 +764,10 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
 
 // ================================= initDispatcher ====================================
 
-static uint8_t initDispatcher(compMsgDispatcher_t *self) {
+static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, size_t typelen) {
   uint8_t result;
-headerPart_t *hdr;
-uint8_t *handle;
+  headerPart_t *hdr;
+  uint8_t *handle;
   int id;
   int stopbits;
   int parity;
@@ -788,49 +790,48 @@ uint8_t *handle;
   checkErrOK(result);
   result = compMsgNetsocketInit(self);
   checkErrOK(result);
-#define KEY_VALUE_DESC_PARTS_FILE "CompMsgKeyValueKeys.txt"
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
-#define WEBSOCKETAP
-#ifdef WEBSOCKETAP
-// FIXME !! temporary starting for testing only !!
+  if (typelen > 0) {
+    switch(type[0]) {
+    case 'W':
 ets_printf("start RunAPMode\n");
-  result = self->websocketRunAPMode(self);
-  checkErrOK(result);
-#endif
-
-#ifdef NETSOCKET
-// FIXME !! temporary starting for testing only !!
+      result = self->websocketRunAPMode(self);
+      checkErrOK(result);
+      break;
+    case 'N':
 ets_printf("start RunClientMode\n");
-  result = self->netsocketRunClientMode(self);
-  checkErrOK(result);
-#endif
-
-#ifdef CLOUDSOCKET
-// FIXME !! temporary starting for testing only !!
+      result = self->netsocketRunClientMode(self);
+      checkErrOK(result);
+      break;
+    case 'C':
 ets_printf("start startCloudSocket\n");
-  result = self->netsocketStartCloudSocket(self);
-  checkErrOK(result);
-#endif
-
-#ifdef COMP_DESC_AA
-result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
-checkErrOK(result);
-result = self->createMsgFromHeaderPart(self, hdr, &handle);
-ets_printf("handle: %s result: %d\n", handle, result);
-checkErrOK(result);
-#endif
-// if nothing of the above is defined the uart input callback is used
-//#define UART_INPUT
-#ifdef UART_INPUT
-  id = 0;
-  stopbits = PLATFORM_UART_STOPBITS_1;
-  parity = PLATFORM_UART_PARITY_NONE;
-  databits = 8;
-  baud = BIT_RATE_115200;
-  result = self->uartSetup(self, id, baud, databits, parity, stopbits);
-  checkErrOK(result);
-#endif
+      result = self->netsocketStartCloudSocket(self);
+      checkErrOK(result);
+      break;
+    case 'A':
+ets_printf("start send AA message\n");
+      result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
+      checkErrOK(result);
+      result = self->createMsgFromHeaderPart(self, hdr, &handle);
+      ets_printf("handle: %s result: %d\n", handle, result);
+      checkErrOK(result);
+      break;
+    case 'U':
+ets_printf("§start Uart input§");
+      id = 0;
+      stopbits = PLATFORM_UART_STOPBITS_1;
+      parity = PLATFORM_UART_PARITY_NONE;
+      databits = 8;
+      baud = BIT_RATE_115200;
+      result = self->uartSetup(self, id, baud, databits, parity, stopbits);
+      checkErrOK(result);
+      break;
+    default:
+ets_printf("§initDispatcher: funny type: %s§", type);
+      break;
+    }
+  }
   return COMP_DISP_ERR_OK;
 }
 

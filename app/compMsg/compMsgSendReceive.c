@@ -224,10 +224,10 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
 static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
   uint8_t result;
 
-ets_printf("§sendMsg: %c§", self->compMsgData->currHdr->hdrHandleType);
+//ets_printf("§sendMsg: %c§", self->compMsgData->currHdr->hdrHandleType);
   switch (self->compMsgData->currHdr->hdrHandleType) {
   case 'A':
-ets_printf("wud: %p\n", self->compMsgData->wud);
+//ets_printf("wud: %p\n", self->compMsgData->wud);
     if (self->compMsgData->wud == NULL) {
       return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
     }

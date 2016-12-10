@@ -314,7 +314,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-ets_printf("§buildMsg§\n");
+//ets_printf("§buildMsg§\n");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
@@ -363,7 +363,7 @@ ets_printf("§buildMsg§\n");
 ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n", mlen, encryptedMsgDataLgth);
     }
     c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);
-ets_printf("§crypted: len: %d!mlen: %d!§", encryptedMsgDataLgth, mlen);
+//ets_printf("§crypted: len: %d!mlen: %d!§", encryptedMsgDataLgth, mlen);
   }
   // if we have a @totalCrc we need to set it here
 //ets_printf("§totalCrc: %d§", self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC);

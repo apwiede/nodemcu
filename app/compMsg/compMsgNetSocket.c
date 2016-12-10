@@ -731,7 +731,7 @@ ets_printf("§IP: %s port: %d result: %d§\n", temp, port, result);
 //    checkErrOK(COMP_DISP_ERR_OUT_OF_MEMORY);
   }
   pesp_conn->proto.tcp->local_port = port;
-ets_printf("§port: %d§\n", port);
+//ets_printf("§port: %d§\n", port);
 
 //ets_printf("§call regist connectcb§\n");
   result = espconn_regist_connectcb(pesp_conn, serverConnected);
@@ -759,7 +759,7 @@ ets_printf("§regist_time err result: %d§\n", result);
   }
   result = self->sendClientIPMsg(self);
   self->stopAP = 1;
-ets_printf("§sendClientIPMsg result: %d§\n", result);
+//ets_printf("§sendClientIPMsg result: %d§\n", result);
 }
 
 // ================================= netsocketRunClientMode ====================================
@@ -771,21 +771,8 @@ static uint8_t netsocketRunClientMode(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t *stringValue;
 
-ets_printf("§netsocketRunClientMode called§\n");
+//ets_printf("§netsocketRunClientMode called§\n");
   
-#ifdef NOTDEF
-  boolResult = wifi_station_disconnect();
-  if (!boolResult) {
-ets_printf("§COMP_DISP_ERR_CANNOT_DISCONNECT§");
-    return COMP_DISP_ERR_CANNOT_DISCONNECT;
-  }
-  boolResult = wifi_set_opmode(OPMODE_STATION);
-  if (!boolResult) {
-ets_printf("§COMP_DISP_ERR_CANNOT_SET_OPMODE§");
-    return COMP_DISP_ERR_CANNOT_SET_OPMODE;
-  }
-#endif
-
   c_memset(station_config.ssid,0,sizeof(station_config.ssid));
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
 //ets_printf("§getSsid: result: %d§\n", result);
@@ -798,7 +785,7 @@ ets_printf("§COMP_DISP_ERR_CANNOT_SET_OPMODE§");
   checkErrOK(result);
 //ets_printf("len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
-ets_printf("§ssid: %s password: %s!§\n", station_config.ssid, station_config.password);
+ets_printf("§netsocketRunClientMode: ssid: %s password: %s!§\n", station_config.ssid, station_config.password);
 
   boolResult = wifi_station_set_config(&station_config);
   if (!boolResult) {
@@ -809,7 +796,7 @@ ets_printf("§ssid: %s password: %s!§\n", station_config.ssid, station_config.p
   if (!boolResult) {
     return COMP_DISP_ERR_CANNOT_CONNECT;
   }
-boolResult = wifi_station_set_hostname("testDeviceClient");
+  boolResult = wifi_station_set_hostname("testDeviceClient");
 ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
 
   int repeat = 1;
@@ -827,7 +814,7 @@ ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode
   tmr->interval = interval;
   tmr->mode &= ~TIMER_IDLE_FLAG;
   ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
-ets_printf("§netsocketRunClientMode done§\n");
+//ets_printf("§netsocketRunClientMode done§\n");
   return COMP_DISP_ERR_OK;
 }
 
