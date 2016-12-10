@@ -393,6 +393,28 @@ puts stderr "hdrIdx: $hdrIdx hdrU16CmdKey: [dict get $hdr hdrU16CmdKey]!"
           ${::infoFr}.port configure -text $portStr -background lightgreen
           puts stderr [format "IP: %d.%d.%d.%d port: $port!" $part4 $part3 $part2 $part1]
         }
+        "SN" {
+          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "@clientStatus" status]
+          checkErrOK $result
+          switch $status {
+            2 {
+              set statusStr "WrongPasswd"
+            }
+            3 {
+              set statusStr "NoAPFound"
+            }
+            4 {
+              set statusStr "ConnectFailed"
+            }
+            default {
+              set statusStr "unknown"
+            }
+          }
+          set port 0
+          set portStr [format "%d" $port]
+          ${::infoFr}.ipAddr configure -text $statusStr -background red
+          ${::infoFr}.port configure -text $portStr -background red
+        }
         default {
           puts stderr "unexpected cmdKey: [dict get $hdr hdrU16CmdKey]!"
         }

@@ -165,6 +165,7 @@ namespace eval ::compMsg {
     dict set specialFieldNames2Ids "@clientPasswd"       COMP_MSG_SPEC_FIELD_CLIENT_PASSWD
     dict set specialFieldNames2Ids "@clientIPAddr"       COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR
     dict set specialFieldNames2Ids "@clientPort"         COMP_MSG_SPEC_FIELD_CLIENT_PORT
+    dict set specialFieldNames2Ids "@clientStatus"       COMP_MSG_SPEC_FIELD_CLIENT_STATUS
     dict set specialFieldNames2Ids "@cloudDomain"        COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN
     dict set specialFieldNames2Ids "@cloudPort"          COMP_MSG_SPEC_FIELD_CLOUD_PORT
     dict set specialFieldNames2Ids "@cloudHost1"         COMP_MSG_SPEC_FIELD_CLOUD_HOST_1
@@ -211,6 +212,7 @@ namespace eval ::compMsg {
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_PASSWD        "@clientPasswd"
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR       "@clientIPAddr"
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_PORT          "@clientPort"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_STATUS        "@clientStatus"
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN         "@cloudDomain"
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_PORT           "@cloudPort"
     dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_HOST_1         "@cloudHost1"
@@ -256,16 +258,17 @@ namespace eval ::compMsg {
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_PASSWD        224
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR       223
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_PORT          222
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN         221
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_PORT           220
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_1         219
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_2         218
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT 217
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL        216
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN     215
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TOTAL_CRC            214
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_STATUS        221
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN         220
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_PORT           219
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_1         218
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_2         217
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT 216
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL        215
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN     214
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TOTAL_CRC            213
 
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LOW                  213  ; # this must be the last entry!!
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LOW                  212  ; # this must be the last entry!!
 
     variable specialFieldInts2Ids
     set specialFieldInts2Ids [dict create]
@@ -303,16 +306,17 @@ namespace eval ::compMsg {
     dict set specialFieldInts2Ids 224 COMP_MSG_SPEC_FIELD_CLIENT_PASSWD
     dict set specialFieldInts2Ids 223 COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR
     dict set specialFieldInts2Ids 222 COMP_MSG_SPEC_FIELD_CLIENT_PORT
-    dict set specialFieldInts2Ids 221 COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN
-    dict set specialFieldInts2Ids 220 COMP_MSG_SPEC_FIELD_CLOUD_PORT
-    dict set specialFieldInts2Ids 219 COMP_MSG_SPEC_FIELD_CLOUD_HOST_1
-    dict set specialFieldInts2Ids 218 COMP_MSG_SPEC_FIELD_CLOUD_HOST_2
-    dict set specialFieldInts2Ids 217 COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT
-    dict set specialFieldInts2Ids 216 COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL
-    dict set specialFieldInts2Ids 215 COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN
-    dict set specialFieldInts2Ids 214 COMP_MSG_SPEC_FIELD_TOTAL_CRC
+    dict set specialFieldInts2Ids 221 COMP_MSG_SPEC_FIELD_CLIENT_STATUS
+    dict set specialFieldInts2Ids 220 COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN
+    dict set specialFieldInts2Ids 219 COMP_MSG_SPEC_FIELD_CLOUD_PORT
+    dict set specialFieldInts2Ids 218 COMP_MSG_SPEC_FIELD_CLOUD_HOST_1
+    dict set specialFieldInts2Ids 217 COMP_MSG_SPEC_FIELD_CLOUD_HOST_2
+    dict set specialFieldInts2Ids 216 COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT
+    dict set specialFieldInts2Ids 215 COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL
+    dict set specialFieldInts2Ids 214 COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN
+    dict set specialFieldInts2Ids 213 COMP_MSG_SPEC_FIELD_TOTAL_CRC
 
-    dict set specialFieldInts2Ids 228 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
+    dict set specialFieldInts2Ids 222 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
 
     dict set ::compMsg(fieldNameDefinitions) numDefinitions 0
 
