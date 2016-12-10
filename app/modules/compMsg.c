@@ -209,13 +209,16 @@ static int compMsg_createDispatcher(lua_State* L)
 static int compMsg_initDispatcher(lua_State* L)
 {
   const uint8_t *handle;
+  const uint8_t *type;
+  size_t typelen;
   compMsgDispatcher_t *compMsgDispatcher;
   int result;
 
   handle = luaL_checkstring (L, 1);
+  type = luaL_optlstring (L, 2, "", &typelen);
   result = compMsgDispatcherGetPtrFromHandle(handle, &compMsgDispatcher);
   checkOKOrErr(L, result, "initDispatcher", "");
-  result = compMsgDispatcher->initDispatcher(compMsgDispatcher);
+  result = compMsgDispatcher->initDispatcher(compMsgDispatcher, type, typelen);
   checkOKOrErr(L, result, "initDispatcher", "");
   return 1;
 }
