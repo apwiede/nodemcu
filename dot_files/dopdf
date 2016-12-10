@@ -1,0 +1,6 @@
+set -x
+for file in *.dot
+do
+  fileName=`basename $file .dot`
+  dot -Tpdf ${fileName}.dot -o pdf_files/${fileName}.pdf
+done
