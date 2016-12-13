@@ -660,7 +660,7 @@ puts stderr "getUint8Vector OUT_OF_RANGE!$offset!$lgth!"
       variable data
       variable lgth
 
-puts stderr "setData: size: $size!ll buffer: [string length $buffer]!"
+#puts stderr "setData: size: $size!ll buffer: [string length $buffer]!"
       if {[string length $data] != 0} {
         set data ""
       }

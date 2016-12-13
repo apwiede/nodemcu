@@ -124,29 +124,94 @@ namespace eval compMsg {
       return $::COMP_DISP_ERR_OK
     }
     
-    # ================================= getModuleConnection ====================================
+    # ================================= getRSSIMax ====================================
     
-    proc getModuleConnection {compMsgDispatcherVar valueVar} {
+    proc getRSSIMax {compMsgDispatcherVar valueVar} {
       variable compMsgModuleData
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $valueVar value
     
-      set value [dict get $compMsgModuleData ModuleConnection]
+      set value [dict get $compMsgModuleData RSSIMax]
       dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ModuleConnection]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData RSSIMax]
       return $::COMP_DISP_ERR_OK
     }
     
-    # ================================= getDeviceMode ====================================
+    # ================================= getConnectionState ====================================
     
-    proc getDeviceMode {compMsgDispatcherVar valueVar} {
+    proc getConnectionState {compMsgDispatcherVar valueVar} {
       variable compMsgModuleData
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $valueVar value
     
-      set value [dict get $compMsgModuleData DeviceMode]
+      set value [dict get $compMsgModuleData ConnectionState]
       dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
-      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData DeviceMode]
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ConnectionState]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getConnectedUsers ====================================
+    
+    proc getConnectedUsers {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData ConnectedUsers]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ConnectedUsers]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getProgRunningMode ====================================
+    
+    proc getProgRunningMode {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData ProgRunningMode]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData ProgRunningMode]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getCurrentRunningMode ====================================
+    
+    proc getCurrentRunningMode {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData CurrentRunningMode]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData CurrentRunningMode]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getIPProtocol ====================================
+    
+    proc getIPProtocol {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData IPProtocol]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData IPProtocol]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getRegion ====================================
+    
+    proc getRegion {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData Region]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData Region]
       return $::COMP_DISP_ERR_OK
     }
     
@@ -211,6 +276,19 @@ namespace eval compMsg {
       set value [dict get $compMsgModuleData SSIDs]
       dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
       dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData SSIDs]
+      return $::COMP_DISP_ERR_OK
+    }
+    
+    # ================================= getPingState ====================================
+    
+    proc getPingState {compMsgDispatcherVar valueVar} {
+      variable compMsgModuleData
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueVar value
+    
+      set value [dict get $compMsgModuleData PingState]
+      dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
+      dict set compMsgDispatcher msgValPart fieldValue [dict get $compMsgModuleData PingState]
       return $::COMP_DISP_ERR_OK
     }
     
@@ -350,7 +428,7 @@ namespace eval compMsg {
     
     # ================================= getOperatingMode ====================================
     
-    proc ::getOperatingMode {compMsgDispatcherVar valueVar} {
+    proc getOperatingMode {compMsgDispatcherVar valueVar} {
       variable compMsgModuleData
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $valueVar value
@@ -358,7 +436,7 @@ namespace eval compMsg {
       dict lappend compMsgDispatcher msgValPart fieldFlags COMP_DISP_DESC_VALUE_IS_NUMBER
       switch [dict get $compMsgModuleData operatingMode] {
        MODULE_OPERATING_MODE_CLIENT {
-         set value \x10
+        set value \x10
        }
        MODULE_OPERATING_MODE_AP {
          set value \x20
@@ -375,7 +453,7 @@ namespace eval compMsg {
        MODULE_OPERATING_MODE_MODULE_TEST {
          set value \xD0
        }
-       MODULE_OPERATING_MODE_CELAR_PASSWDC {
+       MODULE_OPERATING_MODE_CLEAR_PASSWDC {
          set value \xE0
        }
        default {
@@ -394,20 +472,6 @@ namespace eval compMsg {
     
       set result [::compMsg compMsgModuleData setModuleValue compMsgDispatcher MODULE_INFO_operatingMode MODULE_OPERATING_MODE_AP]
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK
-    }
-    
-    # ================================= xgetModuleValue ====================================
-    
-    proc xgetModuleValue {compMsgDispatcherVar which valueTypeId} {
-      upvar $compMsgDispatcherVar compMsgDispatcher
-      variable compMsgModuleData
-    
-      switch $which {
-        default {
-          checkErrOK $::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH
-        }
-      }
       return $::COMP_DISP_ERR_OK
     }
     
@@ -444,13 +508,19 @@ namespace eval compMsg {
       dict set compMsgModuleData SerieNumber \x02\x13\x2A\x10
 #      dict set compMsgModuleData RSSI [wifi_station_get_rssi]
       dict set compMsgModuleData RSSI -67
-      dict set compMsgModuleData ModuleConnection 0x41
-      dict set compMsgModuleData DeviceMode 0x34
+      dict set compMsgModuleData RSSIMax -70
+      dict set compMsgModuleData ConnectionState 0x41
+      dict set compMsgModuleData ConnectedUsers 1
+      dict set compMsgModuleData ProgRunningMode 0x34
+      dict set compMsgModuleData CurrentRunningMode 0x34
+      dict set compMsgModuleData IPProtocol 1
+      dict set compMsgModuleData Region 1
       dict set compMsgModuleData DeviceSecurity 0
       dict set compMsgModuleData ErrorMain 0
       dict set compMsgModuleData ErrorSub 0
       dict set compMsgModuleData DateAndTime "0000000000"
       dict set compMsgModuleData SSIDs = 2
+      dict set compMsgModuleData PingState = 2
       dict set compMsgModuleData Reserve1 "X"
       dict set compMsgModuleData Reserve2 "XY"
       dict set compMsgModuleData Reserve3 "XYZ"
@@ -458,11 +528,14 @@ namespace eval compMsg {
       dict set compMsgModuleData Reserve5 "ABCDE"
       dict set compMsgModuleData Reserve6 "ABCDEF"
       dict set compMsgModuleData Reserve7 "ABCDEFG"
-      dict set compMsgModuleData Reserve8 "ABCDEFGH"
-      dict set compMsgModuleData GUID "1234-5678-9012-1"
-      dict set compMsgModuleData srcId 12312
+#      dict set compMsgModuleData Reserve8 "ABCDEFGH"
+      dict set compMsgModuleData Reserve8 "\x00\x00\x00\x00\x00\x00\x00r"
+#      dict set compMsgModuleData GUID "1234-5678-9012-1"
+      dict set compMsgModuleData GUID "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+#      dict set compMsgModuleData srcId 12312
+      dict set compMsgModuleData srcId 0
       dict set compMsgModuleData passwdC "apwiede1apwiede2"
-      dict set compMsgModuleData operatingMode MODULE_OPERATING_MODE_CELAR_PASSWDC
+      dict set compMsgModuleData operatingMode MODULE_OPERATING_MODE_CLEAR_PASSWDC
 
       return $::COMP_DISP_ERR_OK
     }

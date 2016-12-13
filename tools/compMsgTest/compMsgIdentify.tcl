@@ -148,8 +148,8 @@ namespace eval compMsg {
         incr hdrIdx
       }
       if {!$found} {
-puts stderr "Fitting entry not found!"
-        checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
+puts stderr "Fitting header not found!"
+        checkErrOK $::COMP_DISP_ERR_HEADER_NOT_FOUND
       }
       dict set headerInfos currPartIdx $hdrIdx
       # next sequence field is extraLgth {skip, we have it in hdr fields}

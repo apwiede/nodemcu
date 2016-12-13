@@ -403,7 +403,7 @@ set ::totalLgth 999
 
 proc InitCompMsg {} {
   set ::compMsgDispatcher [dict create]
-  set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
+  set result [::compMsg compMsgDispatcher newCompMsgDispatcher ::compMsgDispatcher]
   checkErrOK $result
   set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
   checkErrOK $result

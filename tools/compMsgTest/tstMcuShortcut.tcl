@@ -48,24 +48,23 @@ source compMsgModuleData.tcl
 
 set ::crcDebug false
 
-set currState INIT
-set states [dict create]
-
 set ::debugBuf ""
 set ::debugTxt ""
 set ::startBuf ""
 set ::startTxt ""
 set ::startCommunication false
 
+set ::inStart true
 set ::inDebug false
 set ::lastCh ""
 set ::totalLgth 999
-set ::handleStateInterval 1000
+set ::totalLgth1 999
 set ::receivedMsg false
 set ::msg ""
 set ::msgLgth 0
 set ::afterId ""
 set ::inReceiveMsg false
+set ::hadGt false
 
 # ================================ checkErrOK ===============================
 
@@ -78,6 +77,9 @@ proc checkErrOK {result} {
     }
   }
 }
+
+# ::dev0 is the Wifi module
+# ::dev1 is the Mcu module
 
 # ================================ init0 ===============================
 
@@ -93,117 +95,18 @@ proc init0 {} {
   fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
 }
 
-# ================================ handleState ===============================
+# ================================ init1 ===============================
 
-proc handleState {bufVar lgthVar} {
-  upvar $bufVar buf
-  upvar $lgthVar lgth
+proc init1 {} {
+  set ::dev1 "/dev/ttyUSB1"
+  set ::dev1Buf ""
+  set ::dev1Lgth 0
 
-  set myState $::currState
-puts stderr "  ==handleInput0: 3 DBT: os handleState: $myState!"
-  switch $myState {
-    INIT {
-      set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 ID hdr]
-      checkErrOK $result
-#puts stderr "=== I after getHeaderFromUniqueFields"
-      dict set ::compMsgDispatcher WifiFd $::fd0
-      set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
-#puts stderr " I createMsgFromHeaderPart: result!$result!"
-      checkErrOK $result
-      set ::inDebug false
-      set buf ""
-      set lgth 0
-#      set ::currState MODULE_INFO
-    }
-    MODULE_INFO {
-      set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 MD hdr]
-      checkErrOK $result
-#puts stderr "=== M after getHeaderFromUniqueFields"
-      dict set ::compMsgDispatcher WifiFd $::fd0
-      set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
-#puts stderr " M createMsgFromHeaderPart: result!$result!"
-      checkErrOK $result
-      set ::inDebug false
-      set buf ""
-      set lgth 0
-      set ::currState OPERATION_MODE
-    }
-    OPERATION_MODE {
-      set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 BD hdr]
-      checkErrOK $result
-#puts stderr "===after getHeaderFromUniqueFields"
-      dict set ::compMsgDispatcher WifiFd $::fd0
-      set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
-#puts stderr "createMsgFromHeaderPart: result!$result!"
-      checkErrOK $result
-      set ::currState OPERATION_MODE
-    }
-    default {
-puts stderr "funny state: $myState!"
-    }
-  }
-  return $::COMP_MSG_ERR_OK
-}
 
-# ================================ handleAnswer ===============================
-
-proc handleAnswer {bufVar lgthVar} {
-  upvar $bufVar buf
-  upvar $lgthVar lgth
-
-#puts stderr "handleAnswer receivedMsg: $::receivedMsg!"
-  if {!$::receivedMsg} {
-#puts stderr "handleAnswer no message"
-    return $::COMP_MSG_ERR_OK
-  }
-  set buf $::msg
-  set lgth $::msgLgth
-  set ::receivedHeader false
-  set ::receivedMsg false
-  set myState $::currState
-#puts stderr "handleAnswer: $myState!!"
-  set received [dict create]
-  dict set received buf $buf
-  dict set received lgth $lgth
-  dict incr received realLgth $lgth
-  dict incr received totalLgth $lgth
-  ::compMsg dataView setData $buf $lgth
-  set result [::compMsg compMsgIdentify getHeaderIndexFromHeaderFields ::compMsgDispatcher received]
-  checkErrOK $result
-  set result [::compMsg compMsgIdentify handleReceivedMsg ::compMsgDispatcher received]
-  checkErrOK $result
-#::compMsg compMsgData dumpMsg ::compMsgDispatcher
-  set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher @cmdKey value]
-#puts stderr "cmdKey: $value!result: $result!"
-  checkErrOK $result
-
-  switch $myState {
-    INIT {
-#puts stderr "INIT handleAnswer lgth: $lgth!"
-      binary scan \x49\x41 S cmdKey ; # IA
-      if {$value == $cmdKey} {
-        set ::currState MODULE_INFO
-      }
-    }
-    MODULE_INFO {
-#puts stderr "MODULE_INFO handleAnswer lgth: $lgth!"
-      binary scan \x4d\x41 S cmdKey ; # MA
-      if {$value == $cmdKey} {
-        set ::currState OPERATION_MODE
-      }
-    }
-    OPERATION_MODE {
-#puts stderr "OPERATION_MODE handleAnswer lgth: $lgth!"
-      # nothing to do
-    }
-    default {
-puts stderr "funny state: $myState!"
-    }
-  }
-  set result [handleState buf lgth]
-#puts stderr "handleState: result: $result!"
-  checkErrOK $result
-  return $result
+  set ::fd1 [open $::dev1 w+]
+  fconfigure $::fd1 -blocking 0 -translation binary
+  fconfigure $::fd1 -mode 115200,n,8,1
+  fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
 }
 
 # ================================ handleInput0 ===============================
@@ -214,34 +117,56 @@ proc handleInput0 {ch bufVar lgthVar} {
 
   set pch 0
   binary scan $ch c pch
-#puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+if {!$::inStart} {
+puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+}
   if {$::inReceiveMsg && ($pch == 0)} {
-    if {$::lastCh eq "M"} {
+    if {$::lastCh eq "W"} {
 #puts stderr "found MSG START"
       append buf $ch
       incr lgth
       set ::lastCh $ch
+      puts -nonewline $::fd0 $ch
+      flush $::fd0
       return $::COMP_MSG_ERR_OK
     } else {
       set ::inReceiveMsg true
     }
   }
+  if {$::inStart} {
+    if {($ch eq "\n") || ($ch eq "\r")} {
+      puts stderr "startBuf: $buf!"
+      set buf ""
+      set lgth 0
+      set ::lastCh $ch
+    } else {
+      append buf $ch
+      incr lgth
+      set ::lastCh $ch
+    }
+    return $::COMP_MSG_ERR_OK
+  }
   if {$::inReceiveMsg} {
     append buf $ch
     incr lgth
     set ::lastCh $ch
+    puts -nonewline $::fd0 $ch
+    flush $::fd0
     return $::COMP_MSG_ERR_OK
   }
-  if {!$::inDebug && ($ch eq "M")} {
-#puts stderr "got 'M'"
+  if {!$::inDebug && ($ch eq "W")} {
+#puts stderr "got 'W'"
     set ::inReceiveMsg true
     append buf $ch
     incr lgth
     set ::lastCh $ch
+    puts -nonewline $::fd1 $ch
+    flush $::fd1
     return $::COMP_MSG_ERR_OK
   }
   if {!$::inDebug && ($ch eq ">")} {
-puts stderr "got '>'"
+    set hadGt true
+puts stderr "===got '>'"
     set ::lastCh $ch
     return $::COMP_MSG_ERR_OK
   }
@@ -262,9 +187,11 @@ puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
       set ::debugBuf ""
       set ::debugTxt ""
     } else {
-      set ::inDebug true
-      set ::debugBuf ""
-      set ::debugTxt ""
+      if {$::hadGt} {
+        set ::inDebug true
+        set ::debugBuf ""
+        set ::debugTxt ""
+      }
     }
     return -code return
   } else {
@@ -304,10 +231,15 @@ puts stderr "  ==handleInput0 5: not inDebug rch: lgth!$lgth!$ch![format 0x%02x 
     }
     if {($ch eq " ") && ($::lastCh eq ">")} {
 puts stderr "received '> '"
+      set ::inStart false
       set ::startCommunication true
       set lgth 0
       set buf ""
       set ::lastCh $ch
+      # we have skipped the garbage at start of Wifi
+      # now get the Mcu characters
+      fileevent $::fd0 readable [list]
+      fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
       return $::COMP_MSG_ERR_OK
     }
   }
@@ -320,25 +252,33 @@ puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]
 
 # ================================ readByte0 ===============================
 
+set ::cnt0 0
 proc readByte0 {fd bufVar lgthVar} {
   upvar $bufVar buf
   upvar $lgthVar lgth
 
 #puts stderr "=readByte0: read!"
-  if {$::afterId ne ""} {
-    after cancel $::afterId
-  }
   set ch [read $fd 1]
-  set ::afterId [after 500 [list handleAnswer ::dev0Buf ::dev0Lgth]]
+incr ::cnt0
   set pch 0
   binary scan $ch c pch
+puts stderr "=readByte0: read: $::cnt0 0 ch: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
+  if {$lgth == 0} {
+    fileevent $::fd1 readable [list]
+  }
+  puts -nonewline $::fd1 $ch
+  flush $::fd1
+  return $::COMP_MSG_ERR_OK
+  
 if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
-#puts stderr "=readByte0: read: $ch!lgth: $lgth!inDebug: $::inDebug!"
+#puts stderr "=readByte0: read: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
 }
+
   set result [handleInput0 $ch buf lgth]
   checkErrOK $result
   
 
+if {0} {
   if {$lgth == $::headerLgth} {
     # next line needed to set ::totalLgth!!
     binary scan $buf SSSS ::dst ::src ::srcId ::totalLgth
@@ -358,6 +298,65 @@ if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0x
 #    puts stderr "1: got message: for $myBuf"
 set ::totalLgth 999
 #puts stderr "readByte0: end"
+    return $::COMP_MSG_ERR_OK
+  }
+}
+}
+
+# ================================ handleInput1 ===============================
+
+proc handleInput1 {ch bufVar lgthVar} {
+  upvar $bufVar buf
+  upvar $lgthVar lgth
+
+  set pch 0
+  binary scan $ch c pch
+#puts stderr "handleInput1 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+#puts stderr "  ==handleInput1 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
+  append buf $ch
+  incr lgth
+  return $::COMP_MSG_ERR_OK
+}
+
+# ================================ readByte1 ===============================
+
+set ::cnt1 0
+proc readByte1 {fd bufVar lgthVar} {
+  upvar $bufVar buf
+  upvar $lgthVar lgth
+
+#puts stderr "=readByte1: read!"
+  set ch [read $fd 1]
+incr ::cnt1
+  set pch 0
+  binary scan $ch c pch
+puts stderr "=readByte1: read: $::cnt1 ch: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
+  puts -nonewline $::fd0 $ch
+  flush $::fd0
+  return $::COMP_MSG_ERR_OK
+
+
+  set result [handleInput1 $ch buf lgth]
+  checkErrOK $result
+  
+
+  if {$lgth == $::headerLgth} {
+    # next line needed to set ::totalLgth1!!
+    binary scan $buf SSSS ::dst1 ::src1 ::srcId1 ::totalLgth1
+puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst1 $::src1 $::srcId1 $::totalLgth1]
+  }
+  if {$lgth >= $::totalLgth1} {
+puts stderr "lgth: $lgth totalLgth1: $::totalLgth1!"
+    foreach ch [split $buf ""] {
+      binary scan $ch c pch
+      append myBuf " [format 0x%02x [expr {$pch & 0xFF}]]"
+    }
+    puts stderr "1: got message: for $myBuf"
+set ::totalLgth1 999
+puts stderr "readByte1: end"
+    set buf ""
+    set lgth 0
+    fileevent $::fd1 readable [list] ; # prevent more input before Wifi has answered
     return $::COMP_MSG_ERR_OK
   }
 }
@@ -404,23 +403,10 @@ proc getGUID {compMsgDispatcherVar valueVar} {
   return $::COMP_MSG_ERR_OK
 }
 
-# ================================ getSsid ===============================
-
-proc getSsid {compMsgDispatcherVar valueVar} {
-  upvar $compMsgDispatcherVar compMsgDispatcher
-  upvar $valueVar value
-
-  set msgValPart [dict get $compMsgDispatcher msgValPart]
-  set value "testDeviceConnect"
-  dict set msgValPart fieldValue $value
-  dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
-}
-
 # ================================ main ===============================
 
 InitCompMsg
-set ::afterHandleStateId [after $::handleStateInterval [list handleState ::dev0Buf ::dev0Lgth]]
 init0
+init1
 
 vwait forever

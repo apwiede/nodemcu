@@ -50,6 +50,7 @@ set ::COMP_MSG_DESC_FILE_NOT_OPENED           188
 set ::COMP_MSG_DESC_ERR_FLUSH_FILE            187
 set ::COMP_MSG_DESC_ERR_WRITE_FILE            186
 set ::COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS    185
+set ::COMP_MSG_DESC_ERR_FIELD_TOO_LONG        184
 
 # handle types
 # A/G/R/S/W/U/N
@@ -678,6 +679,7 @@ namespace eval compMsg {
         set flds [split $line ","]
         set callback [list]
         foreach {fieldNameStr fieldValueStr} $flds break
+#puts stderr "val fieldName: $fieldNameStr!"
         # fieldName
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldNameStr fieldNameId $::COMP_MSG_NO_INCR]
         checkErrOK $result

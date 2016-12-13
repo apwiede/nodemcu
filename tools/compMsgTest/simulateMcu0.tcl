@@ -302,7 +302,7 @@ puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
 
 proc InitCompMsg {} {
   set ::compMsgDispatcher [dict create]
-  set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
+  set result [::compMsg compMsgDispatcher newCompMsgDispatcher ::compMsgDispatcher]
   checkErrOK $result
   set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
   checkErrOK $result

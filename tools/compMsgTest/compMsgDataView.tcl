@@ -849,7 +849,7 @@ puts stderr "compMsgDataView setFieldValue uint32 value too big !$value!"
           set result [::compMsg dataView setInt8Vector [dict get $fieldInfo fieldOffset] $value]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-puts stderr "setUint8Vector: lgth: [dict get $fieldInfo fieldLgth]!offset: [dict get $fieldInfo fieldOffset]!dv lgth: $::compMsg::dataView::lgth!"
+#puts stderr "setUint8Vector: lgth: [dict get $fieldInfo fieldLgth]!offset: [dict get $fieldInfo fieldOffset]!dv lgth: $::compMsg::dataView::lgth!"
           set result [::compMsg dataView setUint8Vector [dict get $fieldInfo fieldOffset] $value [dict get $fieldInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {

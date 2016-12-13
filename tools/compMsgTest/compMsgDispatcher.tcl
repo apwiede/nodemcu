@@ -80,20 +80,27 @@ set ::COMP_DISP_ERR_HANDLE_NOT_FOUND      227
   # must correspond to the values in compMsgDataView.tcl !!!
   # with the names like COMP_MSG_ERR_*
 
-set ::COMP_DISP_ERR_OPEN_FILE             189
-set ::COMP_DISP_FILE_NOT_OPENED           188
-set ::COMP_DISP_ERR_FLUSH_FILE            187
-set ::COMP_DISP_ERR_WRITE_FILE            186
-set ::COMP_DISP_ERR_BAD_RECEIVED_LGTH     185
-set ::COMP_DISP_ERR_BAD_FILE_CONTENTS     184
-set ::COMP_DISP_ERR_HEADER_NOT_FOUND      183
-set ::COMP_DISP_ERR_DUPLICATE_FIELD       182
-set ::COMP_DISP_ERR_BAD_FIELD_NAME        181
-set ::COMP_DISP_ERR_BAD_HANDLE_TYPE       180
-set ::COMP_DISP_ERR_INVALID_BASE64_STRING 179
-set ::COMP_DISP_ERR_TOO_FEW_FILE_LINES    178
-set ::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND 177
-set ::COMP_DISP_ERR_DUPLICATE_ENTRY       176
+  # be carefull the values 189-180
+  # must correspond to the values in compMsgMsgDesc.tcl !!!
+  # with the names like COMP_DESC_ERR_*
+
+set ::COMP_DISP_ERR_BAD_RECEIVED_LGTH     179
+set ::COMP_DISP_ERR_BAD_FILE_CONTENTS     178
+set ::COMP_DISP_ERR_HEADER_NOT_FOUND      177
+set ::COMP_DISP_ERR_DUPLICATE_FIELD       176
+set ::COMP_DISP_ERR_BAD_FIELD_NAME        175
+set ::COMP_DISP_ERR_BAD_HANDLE_TYPE       174
+set ::COMP_DISP_ERR_INVALID_BASE64_STRING 173
+set ::COMP_DISP_ERR_TOO_FEW_FILE_LINES    172
+set ::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND 171
+set ::COMP_DISP_ERR_DUPLICATE_ENTRY       170
+set ::COMP_DISP_ERR_NO_WEBSOCKET_OPENED   169
+set ::COMP_DISP_ERR_TOO_MANY_REQUESTS     168
+set ::COMP_DISP_ERR_REQUEST_NOT_FOUND     167
+set ::COMP_DISP_ERR_UART_REQUEST_NOT_SET  166
+set ::COMP_DISP_ERR_FUNNY_HANDLE_TYPE     165
+set ::COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND 164
+set ::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH 163
 
 namespace eval compMsg {
   namespace ensemble create
@@ -338,7 +345,7 @@ namespace eval compMsg {
       set result [::compMsg dataView getData saveData saveLgth]
       set lgth [dict get $msgParts totalLgth]
 puts stderr "compMsgDispatcher1 setData"
-      ::compMsg dataView setData [string repeat " " $lgth] $lgth
+      ::compMsg dataView setData [string repeat "\x00" $lgth] $lgth
       set result [::compMsg dataView setUint16 $offset [dict get $msgParts fromPart]]
       checkErrOK $result
       incr offset 2

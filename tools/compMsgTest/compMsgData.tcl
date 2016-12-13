@@ -699,7 +699,7 @@ puts stderr "compMsgData2 setData"
       }
       set totalLgth [dict get $compMsgData totalLgth]
 #puts stderr "compMsgData3 setData: totalLgth: $totalLgth!"
-      set result [::compMsg dataView setData [string repeat " " $totalLgth] $totalLgth]
+      set result [::compMsg dataView setData [string repeat "\x00" $totalLgth] $totalLgth]
       checkErrOK $result
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
       # set the appropriate field values for the lgth entries
