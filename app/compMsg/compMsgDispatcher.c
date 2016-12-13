@@ -222,7 +222,7 @@ static int deleteHandle(const uint8_t *handle) {
   int numUsed;
   int found;
 
-//ets_printf("§dispatcher deleteHandle: %s!§\n", handle);
+ets_printf("§dispatcher deleteHandle: %s!§\n", handle);
   if (compMsgDispatcherHandles.handles == NULL) {
 ets_printf("dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_DISP_ERR_HANDLE_NOT_FOUND;
@@ -230,6 +230,9 @@ ets_printf("dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
   found = 0;
   idx = 0;
   numUsed = 0;
+  if (compMsgDispatcherHandles.numHandles == 0) {
+      return COMP_DISP_ERR_OK;
+  }
   while (idx < compMsgDispatcherHandles.numHandles) {
     if ((compMsgDispatcherHandles.handles[idx].handle != NULL) && (c_strcmp(compMsgDispatcherHandles.handles[idx].handle, handle) == 0)) {
       compMsgDispatcherHandles.handles[idx].handle = NULL;
@@ -269,7 +272,7 @@ ets_printf("checkHandle 1 HANLDE_NOT_FOUND\n");
     }
     idx++;
   }
-ets_printf("checkHandle 2 HANLDE_NOT_FOUND\n");
+ets_printf("checkHandle 2 HANDLE_NOT_FOUND\n");
   return COMP_DISP_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -371,7 +374,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-//ets_printf("§createMsgFromHeaderPart1§\n");
+ets_printf("§createMsgFromHeaderPart1§\n");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);
@@ -384,7 +387,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     idx++;
   }
 
-ets_printf("§heap4: %d§\n", system_get_free_heap_size());
+//ets_printf("§heap4: %d§\n", system_get_free_heap_size());
   // runAction calls at the end buildMsg
 //  self->resetBuildMsgInfos(self);
 //  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
@@ -818,7 +821,7 @@ ets_printf("start send AA message\n");
       checkErrOK(result);
       break;
     case 'U':
-ets_printf("§start Uart input§");
+//ets_printf("§start Uart input§");
       id = 0;
       stopbits = PLATFORM_UART_STOPBITS_1;
       parity = PLATFORM_UART_PARITY_NONE;

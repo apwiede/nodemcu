@@ -61,26 +61,32 @@
 #define MODULE_INFO_FirmwareVersion      3
 #define MODULE_INFO_SerieNumber          4
 #define MODULE_INFO_RSSI                 5
-#define MODULE_INFO_ModuleConnection     6
-#define MODULE_INFO_DeviceMode           7
-#define MODULE_INFO_DeviceSecurity       8
-#define MODULE_INFO_ErrorMain            9
-#define MODULE_INFO_ErrorSub             10
-#define MODULE_INFO_DateAndTime          11
-#define MODULE_INFO_SSIDs                12
-#define MODULE_INFO_Reserve1             13
-#define MODULE_INFO_Reserve2             14
-#define MODULE_INFO_Reserve3             15
-#define MODULE_INFO_Reserve4             16
-#define MODULE_INFO_Reserve5             17
-#define MODULE_INFO_Reserve6             18
-#define MODULE_INFO_Reserve7             19
-#define MODULE_INFO_Reserve8             20
-#define MODULE_INFO_AP_LIST_CALL_BACK    21
-#define MODULE_INFO_GUID                 22
-#define MODULE_INFO_srcId                23
-#define MODULE_INFO_PASSWDC              24
-#define MODULE_INFO_operatingMode        25
+#define MODULE_INFO_RSSIMax              6
+#define MODULE_INFO_ConnectionState      7
+#define MODULE_INFO_ConnectedUsers       8
+#define MODULE_INFO_ProgRunningMode      9
+#define MODULE_INFO_CurrentRunningMode   10
+#define MODULE_INFO_IPProtocol           11
+#define MODULE_INFO_Region               12
+#define MODULE_INFO_DeviceSecurity       13
+#define MODULE_INFO_ErrorMain            14
+#define MODULE_INFO_ErrorSub             15
+#define MODULE_INFO_DateAndTime          16
+#define MODULE_INFO_SSIDs                17
+#define MODULE_INFO_PingState            18
+#define MODULE_INFO_Reserve1             19
+#define MODULE_INFO_Reserve2             20
+#define MODULE_INFO_Reserve3             21
+#define MODULE_INFO_Reserve4             22
+#define MODULE_INFO_Reserve5             23
+#define MODULE_INFO_Reserve6             24
+#define MODULE_INFO_Reserve7             25
+#define MODULE_INFO_Reserve8             26
+#define MODULE_INFO_AP_LIST_CALL_BACK    27
+#define MODULE_INFO_GUID                 28
+#define MODULE_INFO_srcId                29
+#define MODULE_INFO_PASSWDC              30
+#define MODULE_INFO_operatingMode        31
 
 #define MODULE_OPERATING_MODE_CLIENT             1
 #define MODULE_OPERATING_MODE_AP                 2
@@ -103,13 +109,19 @@ typedef struct compMsgModuleData {
   uint8_t FirmwareVersion[6];
   uint8_t SerieNumber[4];
   uint8_t RSSI;
-  uint8_t ModuleConnection;
-  uint8_t DeviceMode;
+  uint8_t RSSIMax;
+  uint8_t ConnectionState;
+  uint8_t ConnectedUsers;
+  uint8_t ProgRunningMode;
+  uint8_t CurrentRunningMode;
+  uint8_t IPProtocol;
+  uint8_t Region;
   uint8_t DeviceSecurity;
   uint8_t ErrorMain;
   uint8_t ErrorSub;
   uint8_t DateAndTime[6];
   uint8_t SSIDs;
+  uint8_t PingState;
   uint8_t Reserve1;
   uint8_t Reserve2[2];
   uint8_t Reserve3[3];

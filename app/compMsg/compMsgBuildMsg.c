@@ -147,14 +147,15 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
   compMsgData = self->compMsgData;
   if (ets_strncmp(self->compMsgData->msgValPart->fieldValueStr, "@get", 4) == 0) {
     // call the callback function for the field!!
-//ets_printf("§setMsgFieldValue:cb %s!%p!size: %d§\n", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
+ets_printf("§setMsgFieldValue:cb %s!%p!size: %d§", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
+    fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
     if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
       result = self->compMsgData->msgValPart->fieldValueCallback(self, &numericValue, &stringValue);
 //ets_printf("§fieldValueCallback: result: %d§\n", result);
       checkErrOK(result);
+ets_printf("§cb field1: %s!value: 0x%04x %s!§", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
       self->compMsgData->msgValPart->fieldValue = numericValue;
     }
-    fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
 //ets_printf("§isNumber: %d§\n", self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER);
     if ((self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) || (stringValue == NULL)) {
       stringValue = NULL;
@@ -163,11 +164,11 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
       stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
       numericValue = 0;
     }
-//ets_printf("§cb field: %s!value: 0x%04x %s!§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+ets_printf("§cb field2: %s!value: 0x%04x %s!§", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
     result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
-//ets_printf("§fieldName: %s!id: %d!§\n", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
+ets_printf("§fieldName: %s!id: %d!§", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
     if (self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
       stringValue = NULL;
       numericValue = self->compMsgData->msgValPart->fieldValue;
@@ -189,7 +190,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
         result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
       default:
-//ets_printf("§fieldName: %s!value: 0x%04x %s§\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+ets_printf("§fieldName: %s!value: 0x%04x %s§", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
         result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
     }
@@ -262,16 +263,16 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   }
   numericValue = compMsgData->currHdr->hdrU16CmdKey;
   stringValue = NULL;
-//ets_printf("§cmdKey value: 0x%04x§", numericValue);
+ets_printf("§cmdKey value: 0x%04x§", numericValue);
   result = compMsgData->setFieldValue(self, "@cmdKey", numericValue, stringValue);
 //ets_printf("§cmdKey result: %d§", result);
   checkErrOK(result);
-//ets_printf("§setMsgvalues done§");
+ets_printf("§setMsgvalues done§");
   compMsgData->prepareMsg(self);
   checkErrOK(result);
-//ets_printf("§");
-//compMsgData->dumpMsg(self);
-//ets_printf("§");
+ets_printf("§");
+compMsgData->dumpMsg(self);
+ets_printf("§");
   return COMP_DISP_ERR_OK;
 }
 
@@ -298,7 +299,6 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   int src;
   int dst;
 
-//ets_printf("§buildMsg§");
   // at this point an eventual callback for getting the values 
   // has been already done using runAction in createMsgFromHeaderPart
   // so now we can fix the offsets if needed for key value list entries
@@ -314,7 +314,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-//ets_printf("§buildMsg§\n");
+ets_printf("§buildMsg§\n");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
@@ -324,7 +324,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   checkErrOK(result);
 
   result = self->compMsgData->getMsgData(self, &msgData, &msgLgth);
-//ets_printf("§getMsgData res: %d!msgLgth: %d!§", result, msgLgth);
+ets_printf("§getMsgData res: %d!msgLgth: %d!§", result, msgLgth);
   checkErrOK(result);
 //self->compMsgData->dumpMsg(self);
 //ets_printf("§");
@@ -375,7 +375,7 @@ ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually tot
   }
   // here we need to decide where and how to send the message!!
   // from currHdr we can see the handle type and - if needed - the @dst
-//ets_printf("§transferType: %c dst: 0x%04x§", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart);
+//ets_printf("§transferType: %c dst: 0x%04x msgLgth: %d§", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart, msgLgth);
   result = self->sendMsg(self, msgData, msgLgth);
 //ets_printf("§buildMsg sendMsg has been called result: %d§", result);
   checkErrOK(result);

@@ -125,6 +125,27 @@ static uint8_t setFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
   return DATA_VIEW_ERR_OK;
 }
 
+// ================================= setZeroFiller ====================================
+
+static uint8_t setZeroFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+  uint8_t val;
+  int idx;
+  int lgth;
+  int result;
+  size_t offset;
+
+  lgth = fieldInfo->fieldLgth;
+  offset = fieldInfo->fieldOffset;
+  val = 0;
+  idx = 0;
+  while (idx < lgth) {
+    result = self->dataView->setUint8(self->dataView, offset, val);
+    checkErrOK(result);
+    offset += 1;
+  }
+  return DATA_VIEW_ERR_OK;
+}
+
 
 // ================================= getCrc ====================================
 
@@ -531,6 +552,7 @@ compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
 
   compMsgDataView->getFiller = &getFiller;
   compMsgDataView->setFiller = &setFiller;
+  compMsgDataView->setZeroFiller = &setZeroFiller;
 
   compMsgDataView->getCrc = &getCrc;
   compMsgDataView->setCrc = &setCrc;

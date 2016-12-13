@@ -51,21 +51,25 @@
 
 static compMsgModuleData_t compMsgModuleData;
 
-#define MODULE_INFO_PASSWDC              24
-
 static str2id_t modeluFieldName2Ids[] = {
   { "MACAddr",                MODULE_INFO_MACAddr },
   { "IPAddr",                 MODULE_INFO_IPAddr },
   { "FirmwareVersion",        MODULE_INFO_FirmwareVersion },
   { "SerieNumber",            MODULE_INFO_SerieNumber },
   { "RSSI",                   MODULE_INFO_RSSI },
-  { "ModuleConnection",       MODULE_INFO_ModuleConnection },
-  { "DeviceMode",             MODULE_INFO_DeviceMode },
+  { "RSSIMax",                MODULE_INFO_RSSIMax },
+  { "ConnectionState",        MODULE_INFO_ConnectionState },
+  { "ConnectedUsers",         MODULE_INFO_ConnectedUsers },
+  { "ProgRunningMode",        MODULE_INFO_ProgRunningMode },
+  { "CurrentRunningMode",     MODULE_INFO_CurrentRunningMode },
+  { "IPProtocol",             MODULE_INFO_IPProtocol },
+  { "Region",                 MODULE_INFO_Region },
   { "DeviceSecurity",         MODULE_INFO_DeviceSecurity },
   { "ErrorMain",              MODULE_INFO_ErrorMain },
   { "ErrorSub",               MODULE_INFO_ErrorSub },
   { "DateAndTime",            MODULE_INFO_DateAndTime },
   { "SSIDs",                  MODULE_INFO_SSIDs },
+  { "PingState",              MODULE_INFO_PingState },
   { "Reserve1",               MODULE_INFO_Reserve1 },
   { "Reserve2",               MODULE_INFO_Reserve2 },
   { "Reserve3",               MODULE_INFO_Reserve3 },
@@ -119,19 +123,59 @@ static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **s
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= getModuleConnection ====================================
+// ================================= getRSSIMax ====================================
 
-static uint8_t getModuleConnection(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+static uint8_t getRSSIMax(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ModuleConnection;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSIMax;
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= getDeviceMode ====================================
+// ================================= getConnectionState ====================================
 
-static uint8_t getDeviceMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+static uint8_t getConnectionState(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceMode;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectionState;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getConnectedUsers ====================================
+
+static uint8_t getConnectedUsers(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectedUsers;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getProgRunningMode ====================================
+
+static uint8_t getProgRunningMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ProgRunningMode;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= CurrentProgRunningMode ====================================
+
+static uint8_t getCurrentRunningMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.CurrentRunningMode;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getIPProtocol ====================================
+
+static uint8_t getIPProtocol(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.IPProtocol;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getRegion ====================================
+
+static uint8_t getRegion(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.Region;
   return COMP_DISP_ERR_OK;
 }
 
@@ -171,6 +215,14 @@ static uint8_t getDateAndTime(compMsgDispatcher_t *self, int *numericValue, uint
 static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= getPingState ====================================
+
+static uint8_t getPingState(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.PingState;
   return COMP_DISP_ERR_OK;
 }
 
@@ -228,6 +280,7 @@ static uint8_t getReserve7(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve8;
+  *stringValue = compMsgModuleData.Reserve8;
   return COMP_DISP_ERR_OK;
 }
 
@@ -235,6 +288,7 @@ static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getGUID(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
+  *stringValue = compMsgModuleData.GUID;
   return COMP_DISP_ERR_OK;
 }
 
@@ -242,6 +296,7 @@ static uint8_t getGUID(compMsgDispatcher_t *self, int *numericValue, uint8_t **s
 
 static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
+  *stringValue = compMsgModuleData.passwdC;
   return COMP_DISP_ERR_OK;
 }
 
@@ -250,6 +305,7 @@ static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t 
 static uint8_t getSrcId(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
+  *numericValue = compMsgModuleData.srcId;
   return COMP_DISP_ERR_OK;
 }
 
@@ -302,11 +358,26 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
   case MODULE_INFO_RSSI:
     compMsgModuleData.RSSI = numericValue;
     break;
-  case MODULE_INFO_ModuleConnection:
-    compMsgModuleData.ModuleConnection = numericValue;
+  case MODULE_INFO_RSSIMax:
+    compMsgModuleData.RSSIMax = numericValue;
     break;
-  case MODULE_INFO_DeviceMode:
-    compMsgModuleData.DeviceMode = numericValue;
+  case MODULE_INFO_ConnectionState:
+    compMsgModuleData.ConnectionState = numericValue;
+    break;
+  case MODULE_INFO_ConnectedUsers:
+    compMsgModuleData.ConnectedUsers = numericValue;
+    break;
+  case MODULE_INFO_ProgRunningMode:
+    compMsgModuleData.ProgRunningMode = numericValue;
+    break;
+  case MODULE_INFO_CurrentRunningMode:
+    compMsgModuleData.CurrentRunningMode = numericValue;
+    break;
+  case MODULE_INFO_IPProtocol:
+    compMsgModuleData.IPProtocol = numericValue;
+    break;
+  case MODULE_INFO_Region:
+    compMsgModuleData.Region = numericValue;
     break;
   case MODULE_INFO_DeviceSecurity:
     compMsgModuleData.DeviceSecurity = numericValue;
@@ -322,6 +393,9 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
     break;
   case MODULE_INFO_SSIDs:
     compMsgModuleData.SSIDs = numericValue;
+    break;
+  case MODULE_INFO_PingState:
+    compMsgModuleData.PingState = numericValue;
     break;
   case MODULE_INFO_Reserve1:
     compMsgModuleData.Reserve1 = numericValue;
@@ -401,8 +475,13 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.SerieNumber[2] = 0x2A;
   compMsgModuleData.SerieNumber[3] = 0x10;
   compMsgModuleData.RSSI = (uint8_t)wifi_station_get_rssi();
-  compMsgModuleData.ModuleConnection = 0x41;
-  compMsgModuleData.DeviceMode = 0x34;
+  compMsgModuleData.RSSIMax = 5;
+  compMsgModuleData.ConnectionState = 5;
+  compMsgModuleData.ConnectedUsers = 1;
+  compMsgModuleData.ProgRunningMode = 0;
+  compMsgModuleData.CurrentRunningMode = 0;
+  compMsgModuleData.IPProtocol = 1;
+  compMsgModuleData.Region = 0;
   compMsgModuleData.DeviceSecurity = 0x00;
   compMsgModuleData.ErrorMain = 0;
   compMsgModuleData.ErrorSub = 0;
@@ -413,6 +492,7 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.DateAndTime[4] = 0x00;
   compMsgModuleData.DateAndTime[5] = 0x00;
   compMsgModuleData.SSIDs = 2;
+  compMsgModuleData.PingState = 1;
   compMsgModuleData.Reserve1 = 'X';
   c_memcpy(compMsgModuleData.Reserve2, "XY", 2);
   c_memcpy(compMsgModuleData.Reserve3, "XYZ", 3);
@@ -443,13 +523,19 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->addFieldValueCallbackName(self, "@getFirmwareVersion", &getFirmwareVersion, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getSerieNumber", &getSerieNumber, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getRSSI", &getRSSI, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->addFieldValueCallbackName(self, "@getModuleConnection", &getModuleConnection, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->addFieldValueCallbackName(self, "@getDeviceMode", &getDeviceMode, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getRSSIMax", &getRSSIMax, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getConnectionState", &getConnectionState, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getConnectedUsers", &getConnectedUsers, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getProgRunningMode", &getProgRunningMode, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getCurrentRunningMode", &getCurrentRunningMode, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getIPProtocol", &getIPProtocol, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getRegion", &getRegion, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getDeviceSecurity", &getDeviceSecurity, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getErrorMain", &getErrorMain, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getErrorSub", &getErrorSub, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getDateAndTime", &getDateAndTime, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getSSIDs", &getSSIDs, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->addFieldValueCallbackName(self, "@getPingState", &getPingState, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getReserve1", &getReserve1, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getReserve2", &getReserve2, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getReserve3", &getReserve3, COMP_DISP_CALLBACK_TYPE_MODULE);

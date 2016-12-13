@@ -71,6 +71,7 @@ typedef uint8_t (* setSequenceNum_t)(compMsgDataView_t *self, compMsgField_t *fi
 
 typedef uint8_t (* getFiller_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, uint8_t **value);
 typedef uint8_t (* setFiller_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
+typedef uint8_t (* setZeroFiller_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
 
 typedef uint8_t (* getCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
 typedef uint8_t (* setCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
@@ -93,6 +94,7 @@ typedef struct compMsgDataView {
 
   getFiller_t getFiller;
   setFiller_t setFiller;
+  setZeroFiller_t setZeroFiller;
 
   getCrc_t getCrc;
   setCrc_t setCrc;

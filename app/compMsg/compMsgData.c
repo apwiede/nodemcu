@@ -322,14 +322,17 @@ static int deleteHandle(compMsgDispatcher_t *self, const uint8_t *handle) {
   int numUsed;
   int found;
 
-//ets_printf("compMsgData deleteHandle: %s!\n", handle);
+//ets_printf("compMsgData deleteHandle: %s %d!\n", handle, compMsgHandles.numHandles);
   if (compMsgHandles.handles == NULL) {
-ets_printf("deleteHandle 1 HANDLE_NOT_FOUND\n");
+ets_printf("§deleteHandle 1 HANDLE_NOT_FOUND§");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   found = 0;
   idx = 0;
   numUsed = 0;
+  if (compMsgHandles.numHandles == 0) {
+    return COMP_MSG_ERR_OK;
+  }
   while (idx < compMsgHandles.numHandles) {
     if ((compMsgHandles.handles[idx].handle != NULL) && (c_strcmp(compMsgHandles.handles[idx].handle, handle) == 0)) {
       compMsgHandles.handles[idx].handle = NULL;
@@ -348,7 +351,7 @@ ets_printf("deleteHandle 1 HANDLE_NOT_FOUND\n");
   if (found) {
       return COMP_MSG_ERR_OK;
   }
-ets_printf("deleteHandle 2 HANDLE_NOT_FOUND\n");
+ets_printf("§deleteHandle 2 HANDLE_NOT_FOUND§");
   return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -612,7 +615,7 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
         break;
       case COMP_MSG_SPEC_FIELD_HDR_FILLER:
       case COMP_MSG_SPEC_FIELD_FILLER:
-        result = compMsgData->compMsgDataView->setFiller(compMsgData->compMsgDataView, fieldInfo);
+        result = compMsgData->compMsgDataView->setZeroFiller(compMsgData->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;

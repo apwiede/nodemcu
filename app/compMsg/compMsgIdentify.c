@@ -121,7 +121,6 @@ static uint8_t resetHeaderInfos(compMsgDispatcher_t *self) {
 static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey) {
   msgParts_t *received;
   msgHeaderInfos_t *hdrInfos;
-//  dataView_t *dataView;
   headerPart_t *hdr;
   int hdrIdx;
   int found;
@@ -158,8 +157,8 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
     hdrIdx++;
   }
   if (!found) {
-ets_printf("§nextFitting HANDLE_NOT_FOUND§\n");
-    return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+ets_printf("§nextFitting HEADER_NOT_FOUND§\n");
+    return COMP_DISP_ERR_HEADER_NOT_FOUND;
   }
   hdrInfos->currPartIdx = hdrIdx;
 //ets_printf("§encryption: %c handleType: %c§", hdr->hdrEncryption, hdr->hdrHandleType);
@@ -258,7 +257,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   msgHeaderInfos_t *hdrInfos;
   int hdrIdx;
 
-//ets_printf("§prepareAnswerMsg§\n");
+ets_printf("§prepareAnswerMsg§\n");
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   switch (type) {
@@ -577,14 +576,14 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
 if (buffer == NULL) {
 //ets_printf("§++++handleReceivedPart: buffer == NULL lgth: %d§", lgth);
 } else {
-//ets_printf("§++++handleReceivedPart: 0x%02x§", buffer[0]);
+ets_printf("§++++handleReceivedPart: 0x%02x§", buffer[0]);
 }
   hdrInfos = &self->msgHeaderInfos;
   compMsgData = self->compMsgData;
   received = &compMsgData->received;
 //FIXME need to free at end of message handling !!!
 //ets_printf("§handleReceivedPart: !received->buf: %p!§", received->buf);
-//ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
+ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
   idx = 0;
   while (idx < lgth) {
     received->buf[received->lgth++] = buffer[idx];
@@ -592,7 +591,7 @@ if (buffer == NULL) {
     if (received->lgth == hdrInfos->headerLgth) {
 //ets_printf("§received lgth: %d lgth: %d idx: %d§", received->lgth, lgth, idx);
 //ets_printf("§receveived->lgth: %d§", received->lgth);
-	    result = getHeaderIndexFromHeaderFields(self, hdrInfos);
+      result = getHeaderIndexFromHeaderFields(self, hdrInfos);
 //ets_printf("§getHeaderIndexFromHeaderFields result: %d currPartIdx: %d§\n", result, hdrInfos->currPartIdx);
     }
     // loop until we have full message then decrypt if necessary and then handle the message
@@ -600,8 +599,8 @@ if (buffer == NULL) {
     if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("hdrIdx: %d\n", hdrIdx);
-//ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
+ets_printf("§hdrIdx: %d§", hdrIdx);
+ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
       // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
       seqIdx = 0;
       u8TotalCrc = false;
@@ -615,6 +614,7 @@ if (buffer == NULL) {
         }
         seqIdx++;
       }
+ets_printf("§hdr->hdrHandleType: %c§", hdr->hdrHandleType);
       switch (hdr->hdrHandleType) {
       case 'G':
       case 'R':
