@@ -48,24 +48,23 @@ source compMsgModuleData.tcl
 
 set ::crcDebug false
 
-set currState INIT
-set states [dict create]
-
 set ::debugBuf ""
 set ::debugTxt ""
 set ::startBuf ""
 set ::startTxt ""
 set ::startCommunication false
 
+set ::inStart true
 set ::inDebug false
 set ::lastCh ""
 set ::totalLgth 999
-set ::handleStateInterval 1000
+set ::totalLgth1 999
 set ::receivedMsg false
 set ::msg ""
 set ::msgLgth 0
 set ::afterId ""
 set ::inReceiveMsg false
+set ::hadGt false
 
 # ================================ checkErrOK ===============================
 
@@ -119,12 +118,18 @@ proc handleInput0 {ch bufVar lgthVar} {
   set pch 0
   binary scan $ch c pch
 #puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+if {!$::inStart} {
+#puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+}
   if {$::inReceiveMsg && ($pch == 0)} {
-    if {$::lastCh eq "M"} {
+    if {$::lastCh eq "W"} {
 #puts stderr "found MSG START"
       append buf $ch
       incr lgth
       set ::lastCh $ch
+#      puts -nonewline $::fd0 $ch
+#      flush $::fd0
+puts stderr "handleInput0 return 1"
       return $::COMP_MSG_ERR_OK
     } else {
       set ::inReceiveMsg true
@@ -134,28 +139,52 @@ proc handleInput0 {ch bufVar lgthVar} {
     append buf $ch
     incr lgth
     set ::lastCh $ch
+    puts -nonewline $::fd0 $ch
+    flush $::fd0
+puts stderr "handleInput0 return 3"
     return $::COMP_MSG_ERR_OK
   }
-  if {!$::inDebug && ($ch eq "M")} {
-#puts stderr "got 'M'"
+  if {!$::inDebug && ($ch eq "W")} {
+#puts stderr "got 'W'"
     set ::inReceiveMsg true
     append buf $ch
     incr lgth
     set ::lastCh $ch
+    puts -nonewline $::fd1 $ch
+    flush $::fd1
+puts stderr "handleInput0 return 4"
     return $::COMP_MSG_ERR_OK
   }
+#puts stderr "  ==handleInput0: 2 DBT: $::inDebug!ch: $ch!"
   if {!$::inDebug && ($ch eq ">")} {
-puts stderr "got '>'"
+    set ::hadGt true
+puts stderr "===got '>'"
     set ::lastCh $ch
+puts stderr "handleInput0 return 5"
+    return $::COMP_MSG_ERR_OK
+  }
+  if {$::hadGt && ($ch eq " ") && ($::lastCh eq ">")} {
+puts stderr "received '> '"
+    set ::inStart false
+    set ::startCommunication true
+    set lgth 0
+    set buf ""
+    set ::lastCh $ch
+    # we have skipped the garbage at start of Wifi
+    # now get the Mcu characters
+    fileevent $::fd0 readable [list]
+    fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
+puts stderr "handleInput0 return 12"
     return $::COMP_MSG_ERR_OK
   }
   if {[format 0x%02x [expr {$pch & 0xff}]] eq "0xc2"} {
 #puts stderr "ch: $ch!pch: $pch!"
     set ::lastCh $ch
+#puts stderr "handleInput0 return 6"
     return -code return
   }
   if {$ch eq "§"} {
-#puts stderr "  ==handleInput0 2: got §!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
+#puts stderr "  ==handleInput0 2a: got §!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
     if {$::inDebug} {
       set ::inDebug false
 # puts stderr "  ==handleInput0: DBG: $::debugBuf!"
@@ -170,12 +199,28 @@ puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
       set ::debugBuf ""
       set ::debugTxt ""
     }
+#puts stderr "handleInput0 return 7 inDebug: $::inDebug!"
     return -code return
   } else {
+    if {$::inStart} {
+      if {($ch eq "\n") || ($ch eq "\r")} {
+        puts stderr "startBuf: $buf!"
+        set buf ""
+        set lgth 0
+        set ::lastCh $ch
+      } else {
+        append buf $ch
+        incr lgth
+        set ::lastCh $ch
+      }
+#puts stderr "handleInput0 return 2"
+      return $::COMP_MSG_ERR_OK
+    }
     if {$::inDebug} {
 #      append ::debugBuf $ch
       append ::debugTxt "$ch"
       set ::lastCh $ch
+#puts stderr "handleInput0 return 8"
       return -code return
     } else {
 #puts stderr "  ==handleInput0 3a no debug: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
@@ -186,6 +231,7 @@ puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
         incr lgth
       }
       set ::lastCh $ch
+puts stderr "handleInput0 return 9"
       return $::COMP_MSG_ERR_OK
     }
   }
@@ -195,6 +241,7 @@ puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
     append ::debugBuf " [format 0x%02x [expr {$pch & 0xff}]]"
     append ::debugTxt "$ch"
     set ::lastCh $ch
+puts stderr "handleInput0 return 10"
     return -code return
   } else {
 puts stderr "  ==handleInput0 5: not inDebug rch: lgth!$lgth!$ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
@@ -204,45 +251,42 @@ puts stderr "  ==handleInput0 5: not inDebug rch: lgth!$lgth!$ch![format 0x%02x 
       set lgth 0
       set buf ""
       set ::lastCh $ch
+puts stderr "handleInput0 return 11"
       return -code return
     }
-    if {($ch eq " ") && ($::lastCh eq ">")} {
-puts stderr "received '> '"
-      set ::startCommunication true
-      set lgth 0
-      set buf ""
-      set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
-    }
-  }
 puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
+  }
   append buf $ch
   incr lgth
   set ::lastCh $ch
+puts stderr "handleInput0 return 13"
   return $::COMP_MSG_ERR_OK
 }
 
 # ================================ readByte0 ===============================
 
+set ::cnt0 0
 proc readByte0 {fd bufVar lgthVar} {
   upvar $bufVar buf
   upvar $lgthVar lgth
 
 #puts stderr "=readByte0: read!"
-  if {$::afterId ne ""} {
-    after cancel $::afterId
-  }
   set ch [read $fd 1]
-  set ::afterId [after 500 [list handleAnswer ::dev0Buf ::dev0Lgth]]
+incr ::cnt0
   set pch 0
   binary scan $ch c pch
+if {!$::inStart} {
+#puts stderr "=readByte0: read: cnt: $::cnt0 0 ch: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
+}
 if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
 #puts stderr "=readByte0: read: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
 }
+
   set result [handleInput0 $ch buf lgth]
   checkErrOK $result
   
 
+if {0} {
   if {$lgth == $::headerLgth} {
     # next line needed to set ::totalLgth!!
     binary scan $buf SSSS ::dst ::src ::srcId ::totalLgth
@@ -265,6 +309,8 @@ set ::totalLgth 999
     return $::COMP_MSG_ERR_OK
   }
 }
+  return $::COMP_MSG_ERR_OK
+}
 
 # ================================ handleInput1 ===============================
 
@@ -274,64 +320,10 @@ proc handleInput1 {ch bufVar lgthVar} {
 
   set pch 0
   binary scan $ch c pch
-#puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
-  if {$::inReceiveMsg && ($pch == 0)} {
-    if {$::lastCh eq "M"} {
-#puts stderr "found MSG START"
-      append buf $ch
-      incr lgth
-      set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
-    } else {
-      set ::inReceiveMsg true
-    }
-  }
-  if {$::inReceiveMsg} {
-    append buf $ch
-    incr lgth
-    set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
-  }
-  if {!$::inDebug && ($ch eq "M")} {
-#puts stderr "got 'M'"
-    set ::inReceiveMsg true
-    append buf $ch
-    incr lgth
-    set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
-  }
-  if {$::inDebug} {
-#    append ::debugBuf $ch
-    append ::debugTxt "$ch"
-    set ::lastCh $ch
-    return -code return
-  } else {
-#puts stderr "  ==handleInput1 3a no debug: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
-    if {($lgth <= 2) && (($ch eq "\r") || ($ch eq "\n"))} {
-      # ignore debug line end!!
-    } else {
-      append buf $ch
-      incr lgth
-    }
-    set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
-  }
-#puts stderr "  ==handleInput1 4 inDebug!$::inDebug!"
-  if {$::inDebug} {
-#puts stderr "  ==handleInput1: inDebug2 rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
-    append ::debugBuf " [format 0x%02x [expr {$pch & 0xff}]]"
-    append ::debugTxt "$ch"
-    set ::lastCh $ch
-    return -code return
-  } else {
-puts stderr "  ==handleInput1 5: not inDebug rch: lgth!$lgth!$ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
-    append ::debugBuf " [format 0x%02x [expr {$pch & 0xff}]]"
-    append ::debugTxt "$ch"
-  }
-puts stderr "  ==handleInput1 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
+#puts stderr "handleInput1 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+#puts stderr "  ==handleInput1 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
   append buf $ch
   incr lgth
-  set ::lastCh $ch
   return $::COMP_MSG_ERR_OK
 }
 
@@ -341,47 +333,77 @@ proc readByte1 {fd bufVar lgthVar} {
   upvar $bufVar buf
   upvar $lgthVar lgth
 
-puts stderr "=readByte1: read!"
+#puts stderr "=readByte1: read!"
   set ch [read $fd 1]
   set pch 0
   binary scan $ch c pch
-if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
 puts stderr "=readByte1: read: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
-}
-if {0} {
+
   set result [handleInput1 $ch buf lgth]
   checkErrOK $result
   
 
   if {$lgth == $::headerLgth} {
-    # next line needed to set ::totalLgth!!
-    binary scan $buf SSSS ::dst ::src ::srcId ::totalLgth
-#puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst $::src $::srcId $::totalLgth]
+    # next line needed to set ::totalLgth1!!
+    binary scan $buf SSSS ::dst1 ::src1 ::srcId1 ::totalLgth1
+puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst1 $::src1 $::srcId1 $::totalLgth1]
   }
-  if {$lgth >= $::totalLgth} {
-#puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
-    set ::inReceiveMsg false
-    set ::receivedMsg true
-    set ::msg $buf
-    set ::msgLgth $lgth
-    set myBuf ""
+  if {$lgth >= $::totalLgth1} {
+puts stderr "lgth: $lgth totalLgth1: $::totalLgth1!"
     foreach ch [split $buf ""] {
       binary scan $ch c pch
       append myBuf " [format 0x%02x [expr {$pch & 0xFF}]]"
     }
-#    puts stderr "1: got message: for $myBuf"
-set ::totalLgth 999
+    puts stderr "1: got message: for $myBuf"
+set ::totalLgth1 999
 puts stderr "readByte1: end"
+
+    set simulate false
+    if {!$simulate} {
+      fileevent $::fd1 readable [list] ; # prevent more input before Wifi has answered
+      fileevent $::fd0 readable [list ::readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
+      foreach ch [split $buf ""] {
+        puts -nonewline $::fd0 $ch
+        flush $::fd0
+      }
+    } else {
+      binary scan $buf x32S cmdKey
+puts stderr [format "cmdKey: 0x%04x $cmdKey" $cmdKey]
+      switch $cmdKey {
+        18756 {
+puts stderr "IA"
+          set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 19712 22272 IA hdr]
+        }
+        16964 {
+puts stderr "BA"
+          set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 19712 22272 BA hdr]
+        }
+        19780 {
+puts stderr "MA"
+          set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 19712 22272 MA hdr]
+        }
+      }
+puts stderr "result1: $result!"
+      checkErrOK $result
+#puts stderr "=== I after getHeaderFromUniqueFields"
+      dict set ::compMsgDispatcher WifiFd $::fd1
+      set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
+puts stderr " I createMsgFromHeaderPart: result!$result!"
+      checkErrOK $result
+}
+
+puts stderr "readByte1: msg sent"
+    set buf ""
+    set lgth 0
     return $::COMP_MSG_ERR_OK
   }
-}
 }
 
 # ================================ InitCompMsg ===============================
 
 proc InitCompMsg {} {
   set ::compMsgDispatcher [dict create]
-  set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
+  set result [::compMsg compMsgDispatcher newCompMsgDispatcher ::compMsgDispatcher]
   checkErrOK $result
   set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
   checkErrOK $result
