@@ -644,11 +644,14 @@ puts stderr "compMsgData2 setData"
       }
       dict set compMsgData fieldOffset 0
       set numEntries [dict get $compMsgData numFields]
+      set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
+      set msgDescPartIdx 0
       set idx 0
       dict set compMsgData headerLgth 0
       while {$idx < $numEntries} {
         set fields [dict get $compMsgData fields]
         set fieldInfo [lindex $fields $idx]
+        set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
         dict set fieldInfo fieldOffset [dict get $compMsgData fieldOffset]
         switch [dict get $fieldInfo fieldNameId] {
           COMP_MSG_SPEC_FIELD_SRC -
@@ -688,6 +691,7 @@ puts stderr "compMsgData2 setData"
         set fields [lreplace $fields $idx $idx $fieldInfo]
         dict set compMsgData fields $fields
         dict incr compMsgData fieldOffset [dict get $fieldInfo fieldLgth]
+        incr msgDescPartIdx
         incr idx
       }
       if {[dict get $compMsgData totalLgth] == 0} {

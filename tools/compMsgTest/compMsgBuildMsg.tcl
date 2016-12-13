@@ -165,6 +165,7 @@ namespace eval compMsg {
           checkErrOK $result
         }
         set value [dict get $compMsgDispatcher msgValPart fieldValue]
+puts stderr "setMsgFieldValue1: $fieldNameStr!$value!"
         set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
       } else {
         set msgValPart [dict get $compMsgDispatcher msgValPart]
@@ -173,6 +174,7 @@ namespace eval compMsg {
         } else {
           set value [dict get $msgValPart fieldValueStr]
         }
+puts stderr "setMsgFieldValue2: $fieldNameStr!$value!"
         switch [dict get $msgValPart fieldNameId] {
           COMP_MSG_SPEC_FIELD_DST {
             set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
@@ -199,7 +201,7 @@ namespace eval compMsg {
     proc setMsgValues {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-    #ets_printf{"setMsgValues\n"}
+puts stderr "setMsgValues"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set msgDescPartIdx 0
       set msgValPartIdx 0
