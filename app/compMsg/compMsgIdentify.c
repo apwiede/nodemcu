@@ -130,7 +130,7 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("§HEAD:!to:0x%04x!from:0x%04x!totalLgth:0x%04x!seqIdx!%d!§", received->toPart, received->fromPart, received->totalLgth, hdrInfos->seqIdx);
+//ets_printf("§HEAD:!to:0x%04x!from:0x%04x!totalLgth:0x%04x!seqIdx!%d!§\n", received->toPart, received->fromPart, received->totalLgth, hdrInfos->seqIdx);
   // and now search in the headers to find the appropriate message
   hdrInfos->seqIdx = hdrInfos->seqIdxAfterHeader;
   found = 0;
@@ -197,19 +197,19 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
     case COMP_DISP_U16_DST:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
       checkErrOK(result);
-//ets_printf("§to: 0x%04x§", received->toPart);
+//ets_printf("§to: 0x%04x§\n", received->toPart);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U16_SRC:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
       checkErrOK(result);
-//ets_printf("§from: 0x%04x§", received->fromPart);
+//ets_printf("§from: 0x%04x§\n", received->fromPart);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U16_TOTAL_LGTH:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
       checkErrOK(result);
-//ets_printf("§total: 0x%04x§", received->totalLgth);
+//ets_printf("§total: 0x%04x§\n", received->totalLgth);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U16_SRC_ID:
@@ -422,7 +422,7 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self) {
   uint8_t answerType;
   uint8_t *handle;
 
-ets_printf("§handleReceivedMsg§\n");
+//ets_printf("§handleReceivedMsg§\n");
   received = &self->compMsgData->received;
   result = self->handleReceivedHeader(self);
 //ets_printf("§call prepareAnswerMsg§");
@@ -593,7 +593,7 @@ if (buffer == NULL) {
 //ets_printf("§received lgth: %d lgth: %d idx: %d§", received->lgth, lgth, idx);
 //ets_printf("§receveived->lgth: %d§", received->lgth);
 	    result = getHeaderIndexFromHeaderFields(self, hdrInfos);
-//ets_printf("§getHeaderIndexFromHeaderFields result: %d currPartIdx: %d§", result, hdrInfos->currPartIdx);
+//ets_printf("§getHeaderIndexFromHeaderFields result: %d currPartIdx: %d§\n", result, hdrInfos->currPartIdx);
     }
     // loop until we have full message then decrypt if necessary and then handle the message
 //ets_printf("§totalLgth: %d§", received->totalLgth);
