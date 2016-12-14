@@ -876,6 +876,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->id = compMsgDispatcherId;
 
   compMsgDispatcher->stopAP = 0;
+  compMsgDispatcher->startStationOnly = false;
 
   compMsgDispatcher->numMsgHeaders = 0;
   compMsgDispatcher->maxMsgHeaders = 0;

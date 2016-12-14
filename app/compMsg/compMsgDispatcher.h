@@ -147,6 +147,7 @@ typedef uint8_t (* getActionCallbackName_t)(compMsgDispatcher_t *self, action_t 
 typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* startStationCb_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
@@ -240,6 +241,7 @@ typedef struct compMsgDispatcher {
   uint8_t *cloudPayload;
   size_t cloudPayloadLgth;
   uint8_t stopAP;
+  bool startStationOnly;
 
   msgHeaderInfos_t msgHeaderInfos;
 
@@ -278,6 +280,7 @@ typedef struct compMsgDispatcher {
   typeRSendAnswer_t typeRSendAnswer;
   sendMsg_t sendMsg;
   prepareCloudMsg_t prepareCloudMsg;
+  prepareCloudMsg_t prepareCloudMsg2;
   sendCloudMsg_t sendCloudMsg;
 
   // Action
@@ -288,6 +291,7 @@ typedef struct compMsgDispatcher {
   getActionMode_t getActionMode;
   getBssScanInfo_t getBssScanInfo;
   connectToAP_t connectToAP;
+  startStationCb_t startStationCb;
 
   // BuildMsg
   setMsgFieldValue_t setMsgFieldValue;

@@ -322,6 +322,27 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
   return COMP_DISP_ERR_OK;
 }
 
+// ================================= startStationCb ====================================
+
+static uint8_t startStationCb(compMsgDispatcher_t *self) {
+  uint8_t result;
+  bool boolResult;
+  uint8_t *ssid;
+  uint8_t *passwd;
+  int numericValue;
+  fieldsToSave_t *fieldsToSave;
+  int idx;
+  struct station_config *station_config;
+  struct ip_info ip_info;
+  char temp[64];
+
+ets_printf("§startStationCb:§");
+  self->startStationOnly = false;
+  self->prepareCloudMsg2(self);
+ets_printf("§startStationCb done§");
+  return COMP_DISP_ERR_OK;
+}
+
 // ================================= websocketSendConnectError ====================================
 
 static uint8_t websocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
@@ -737,23 +758,37 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_CLIENT_STATUS:
     *numericValue = compMsgWifiData.clientStatus;
     break;
-  case WIFI_INFO_CLOUD_DOMAIN:
-    *stringValue = compMsgWifiData.cloudDomain;
-    break;
   case WIFI_INFO_CLOUD_PORT:
+ets_printf("§cloudPort: %p§", compMsgWifiData.cloudPort);
     *numericValue = compMsgWifiData.cloudPort;
+    break;
+  case WIFI_INFO_CLOUD_DOMAIN_1:
+    *stringValue = compMsgWifiData.cloudDomain1;
+    break;
+  case WIFI_INFO_CLOUD_DOMAIN_2:
+ets_printf("§cloudDomain2: %p§", compMsgWifiData.cloudDomain2);
+    *stringValue = compMsgWifiData.cloudDomain2;
     break;
   case WIFI_INFO_CLOUD_HOST_1:
     *stringValue = compMsgWifiData.cloudHost1;
     break;
   case WIFI_INFO_CLOUD_HOST_2:
+ets_printf("§cloudHost2: %p§", compMsgWifiData.cloudHost2);
     *stringValue = compMsgWifiData.cloudHost2;
     break;
-  case WIFI_INFO_CLOUD_SUB_URL:
-    *stringValue = compMsgWifiData.cloudSubUrl;
+  case WIFI_INFO_CLOUD_SUB_URL_1:
+    *stringValue = compMsgWifiData.cloudSubUrl1;
     break;
-  case WIFI_INFO_CLOUD_NODE_TOKEN:
-    *stringValue = compMsgWifiData.cloudNodeToken;
+  case WIFI_INFO_CLOUD_SUB_URL_2:
+ets_printf("§cloudSubUrl2: %p§", compMsgWifiData.cloudSubUrl2);
+    *stringValue = compMsgWifiData.cloudSubUrl2;
+    break;
+  case WIFI_INFO_CLOUD_NODE_TOKEN_1:
+    *stringValue = compMsgWifiData.cloudNodeToken1;
+    break;
+  case WIFI_INFO_CLOUD_NODE_TOKEN_2:
+ets_printf("§cloudNodeToken2: %p§", compMsgWifiData.cloudNodeToken2);
+    *stringValue = compMsgWifiData.cloudNodeToken2;
     break;
 #ifdef CLIENT_SSL_ENABLE
   case WIFI_INFO_CLOUD_SECURE_CONNECT:
@@ -789,15 +824,6 @@ static uint8_t getWifiConfig(compMsgDispatcher_t *self) {
   uint8_t provisioningPort;
   uint8_t *provisioningIPAddr;
 
-
-#ifdef NOTDEF
-  provisioningSsid = "testDevice_connect";
-  c_memcpy(compMsgWifiData.provisioningSsid, provisioningSsid, c_strlen(provisioningSsid));
-  compMsgWifiData.provisioningPort = 80;
-  provisioningIPAddr = "192.168.4.1";
-  c_memcpy(compMsgWifiData.provisioningIPAddr, provisioningIPAddr, c_strlen(provisioningIPAddr));
-  compMsgWifiData.stationPort = 80;
-#endif
   result = getStationConfig(self);
   checkErrOK(result);
   return COMP_DISP_ERR_OK;
@@ -836,13 +862,18 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
   case COMP_MSG_SPEC_FIELD_CLIENT_STATUS:
     compMsgWifiData.clientStatus = numericValue;
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN:
-    compMsgWifiData.cloudDomain = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudDomain);
-    c_memcpy(compMsgWifiData.cloudDomain, stringValue, c_strlen(stringValue));
-    break;
   case COMP_MSG_SPEC_FIELD_CLOUD_PORT:
     compMsgWifiData.cloudPort = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN_1:
+    compMsgWifiData.cloudDomain1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudDomain1);
+    c_memcpy(compMsgWifiData.cloudDomain1, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN_2:
+    compMsgWifiData.cloudDomain2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudDomain2);
+    c_memcpy(compMsgWifiData.cloudDomain2, stringValue, c_strlen(stringValue));
     break;
   case COMP_MSG_SPEC_FIELD_CLOUD_HOST_1:
     compMsgWifiData.cloudHost1 = os_zalloc(c_strlen(stringValue) + 1);
@@ -854,15 +885,25 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
     checkAllocOK(compMsgWifiData.cloudHost2);
     c_memcpy(compMsgWifiData.cloudHost2, stringValue, c_strlen(stringValue));
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL:
-    compMsgWifiData.cloudSubUrl = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudSubUrl);
-    c_memcpy(compMsgWifiData.cloudSubUrl, stringValue, c_strlen(stringValue));
+  case COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL_1:
+    compMsgWifiData.cloudSubUrl1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudSubUrl1);
+    c_memcpy(compMsgWifiData.cloudSubUrl1, stringValue, c_strlen(stringValue));
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN:
-    compMsgWifiData.cloudNodeToken = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudNodeToken);
-    c_memcpy(compMsgWifiData.cloudNodeToken, stringValue, c_strlen(stringValue));
+  case COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL_2:
+    compMsgWifiData.cloudSubUrl2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudSubUrl2);
+    c_memcpy(compMsgWifiData.cloudSubUrl2, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1:
+    compMsgWifiData.cloudNodeToken1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudNodeToken1);
+    c_memcpy(compMsgWifiData.cloudNodeToken1, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2:
+    compMsgWifiData.cloudNodeToken2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudNodeToken2);
+    c_memcpy(compMsgWifiData.cloudNodeToken2, stringValue, c_strlen(stringValue));
     break;
 #ifdef CLIENT_SSL_ENABLE
   case COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT:
@@ -920,6 +961,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->bssStr2BssInfoId = &bssStr2BssInfoId;
 
   self->connectToAP = &connectToAP;
+  self->startStationCb = &startStationCb;
   self->websocketSendConnectError = &websocketSendConnectError;
   self->netsocketSendConnectError = &netsocketSendConnectError;
 
