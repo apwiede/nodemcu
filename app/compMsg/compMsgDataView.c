@@ -142,6 +142,7 @@ static uint8_t setZeroFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo)
     result = self->dataView->setUint8(self->dataView, offset, val);
     checkErrOK(result);
     offset += 1;
+    idx++;
   }
   return DATA_VIEW_ERR_OK;
 }
@@ -391,6 +392,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
   int result;
   int numEntries;
 
+//ets_printf("§compMsgDataView setFieldValue: data: %p lgth: %d§", self->dataView->data, self->dataView->lgth);
   switch (fieldInfo->fieldTypeId) {
     case DATA_VIEW_FIELD_INT8_T:
       if (stringValue == NULL) {
@@ -476,10 +478,10 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
       break;
     case DATA_VIEW_FIELD_UINT8_VECTOR:
       if (stringValue != NULL) {
-        // check for length needed!!
         if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
         }
+//ets_printf("§compMsgDataView: u8vector: offset: %d lgth: %d val: %s§", fieldInfo->fieldOffset + fieldIdx, fieldInfo->fieldLgth, stringValue);
         os_memcpy(self->dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;

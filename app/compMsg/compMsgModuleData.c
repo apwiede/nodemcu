@@ -91,6 +91,8 @@ static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t 
   int result;
 
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.MACAddr;
   return COMP_DISP_ERR_OK;
 }
 
@@ -98,6 +100,8 @@ static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t 
 
 static uint8_t getIPAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.IPAddr;
   return COMP_DISP_ERR_OK;
 }
 
@@ -105,6 +109,8 @@ static uint8_t getIPAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t *
 
 static uint8_t getFirmwareVersion(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.FirmwareVersion;
   return COMP_DISP_ERR_OK;
 }
 
@@ -112,6 +118,8 @@ static uint8_t getFirmwareVersion(compMsgDispatcher_t *self, int *numericValue, 
 
 static uint8_t getSerieNumber(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.SerieNumber;
   return COMP_DISP_ERR_OK;
 }
 
@@ -120,6 +128,8 @@ static uint8_t getSerieNumber(compMsgDispatcher_t *self, int *numericValue, uint
 static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSI;
+  *numericValue = compMsgModuleData.RSSI;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -128,6 +138,8 @@ static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **s
 static uint8_t getRSSIMax(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSIMax;
+  *numericValue = compMsgModuleData.RSSIMax;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -136,6 +148,8 @@ static uint8_t getRSSIMax(compMsgDispatcher_t *self, int *numericValue, uint8_t 
 static uint8_t getConnectionState(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectionState;
+  *numericValue = compMsgModuleData.ConnectionState;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -144,6 +158,8 @@ static uint8_t getConnectionState(compMsgDispatcher_t *self, int *numericValue, 
 static uint8_t getConnectedUsers(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectedUsers;
+  *numericValue = compMsgModuleData.ConnectedUsers;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -152,6 +168,8 @@ static uint8_t getConnectedUsers(compMsgDispatcher_t *self, int *numericValue, u
 static uint8_t getProgRunningMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ProgRunningMode;
+  *numericValue = compMsgModuleData.ProgRunningMode;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -160,6 +178,8 @@ static uint8_t getProgRunningMode(compMsgDispatcher_t *self, int *numericValue, 
 static uint8_t getCurrentRunningMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.CurrentRunningMode;
+  *numericValue = compMsgModuleData.CurrentRunningMode;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -168,6 +188,8 @@ static uint8_t getCurrentRunningMode(compMsgDispatcher_t *self, int *numericValu
 static uint8_t getIPProtocol(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.IPProtocol;
+  *numericValue = compMsgModuleData.IPProtocol;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -176,6 +198,8 @@ static uint8_t getIPProtocol(compMsgDispatcher_t *self, int *numericValue, uint8
 static uint8_t getRegion(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.Region;
+  *numericValue = compMsgModuleData.Region;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -184,6 +208,8 @@ static uint8_t getRegion(compMsgDispatcher_t *self, int *numericValue, uint8_t *
 static uint8_t getDeviceSecurity(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
+  *numericValue = compMsgModuleData.DeviceSecurity;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -192,6 +218,8 @@ static uint8_t getDeviceSecurity(compMsgDispatcher_t *self, int *numericValue, u
 static uint8_t getErrorMain(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
+  *numericValue = compMsgModuleData.ErrorMain;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -200,6 +228,8 @@ static uint8_t getErrorMain(compMsgDispatcher_t *self, int *numericValue, uint8_
 static uint8_t getErrorSub(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
+  *numericValue = compMsgModuleData.ErrorSub;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -207,6 +237,8 @@ static uint8_t getErrorSub(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getDateAndTime(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.DateAndTime;
   return COMP_DISP_ERR_OK;
 }
 
@@ -215,6 +247,8 @@ static uint8_t getDateAndTime(compMsgDispatcher_t *self, int *numericValue, uint
 static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
+  *numericValue = compMsgModuleData.SSIDs;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -223,6 +257,8 @@ static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **
 static uint8_t getPingState(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.PingState;
+  *numericValue = compMsgModuleData.PingState;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -231,6 +267,8 @@ static uint8_t getPingState(compMsgDispatcher_t *self, int *numericValue, uint8_
 static uint8_t getReserve1(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
+  *numericValue = (int)compMsgModuleData.Reserve1;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -238,6 +276,8 @@ static uint8_t getReserve1(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve2(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.Reserve2;
   return COMP_DISP_ERR_OK;
 }
 
@@ -245,6 +285,8 @@ static uint8_t getReserve2(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve3(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.Reserve3;
   return COMP_DISP_ERR_OK;
 }
 
@@ -252,6 +294,8 @@ static uint8_t getReserve3(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve4(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve4;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.Reserve4;
   return COMP_DISP_ERR_OK;
 }
 
@@ -259,6 +303,8 @@ static uint8_t getReserve4(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve5(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve5;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.Reserve5;
   return COMP_DISP_ERR_OK;
 }
 
@@ -266,6 +312,8 @@ static uint8_t getReserve5(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve6(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve6;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.Reserve6;
   return COMP_DISP_ERR_OK;
 }
 
@@ -273,6 +321,8 @@ static uint8_t getReserve6(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve7(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve7;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.Reserve7;
   return COMP_DISP_ERR_OK;
 }
 
@@ -280,6 +330,7 @@ static uint8_t getReserve7(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve8;
+  *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve8;
   return COMP_DISP_ERR_OK;
 }
@@ -288,6 +339,7 @@ static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t
 
 static uint8_t getGUID(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
+  *numericValue = 0;
   *stringValue = compMsgModuleData.GUID;
   return COMP_DISP_ERR_OK;
 }
@@ -296,6 +348,7 @@ static uint8_t getGUID(compMsgDispatcher_t *self, int *numericValue, uint8_t **s
 
 static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
+  *numericValue = 0;
   *stringValue = compMsgModuleData.passwdC;
   return COMP_DISP_ERR_OK;
 }
@@ -306,6 +359,7 @@ static uint8_t getSrcId(compMsgDispatcher_t *self, int *numericValue, uint8_t **
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
   *numericValue = compMsgModuleData.srcId;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -314,6 +368,8 @@ static uint8_t getSrcId(compMsgDispatcher_t *self, int *numericValue, uint8_t **
 static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.operatingMode;
+  *numericValue = compMsgModuleData.operatingMode;
+  *stringValue = NULL;
   return COMP_DISP_ERR_OK;
 }
 
@@ -345,15 +401,19 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
   switch (id) {
   case MODULE_INFO_MACAddr:
     c_memcpy(compMsgModuleData.MACAddr, stringValue, c_strlen(stringValue));
+    compMsgModuleData.MACAddr[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_IPAddr:
     c_memcpy(compMsgModuleData.IPAddr, stringValue, c_strlen(stringValue));
+    compMsgModuleData.IPAddr[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_FirmwareVersion:
     c_memcpy(compMsgModuleData.FirmwareVersion, stringValue, c_strlen(stringValue));
+    compMsgModuleData.FirmwareVersion[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_SerieNumber:
     c_memcpy(compMsgModuleData.SerieNumber, stringValue, c_strlen(stringValue));
+    compMsgModuleData.SerieNumber[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_RSSI:
     compMsgModuleData.RSSI = numericValue;
@@ -390,6 +450,7 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
     break;
   case MODULE_INFO_DateAndTime:
     c_memcpy(compMsgModuleData.DateAndTime, stringValue, c_strlen(stringValue));
+    compMsgModuleData.DateAndTime[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_SSIDs:
     compMsgModuleData.SSIDs = numericValue;
@@ -402,33 +463,42 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
     break;
   case MODULE_INFO_Reserve2:
     c_memcpy(compMsgModuleData.Reserve2, stringValue, c_strlen(stringValue));
+    compMsgModuleData.Reserve2[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_Reserve3:
     c_memcpy(compMsgModuleData.Reserve3, stringValue, c_strlen(stringValue));
+    compMsgModuleData.Reserve3[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_Reserve4:
     c_memcpy(compMsgModuleData.Reserve4, stringValue, c_strlen(stringValue));
+    compMsgModuleData.Reserve4[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_Reserve5:
     c_memcpy(compMsgModuleData.Reserve5, stringValue, c_strlen(stringValue));
+    compMsgModuleData.Reserve5[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_Reserve6:
     c_memcpy(compMsgModuleData.Reserve6, stringValue, c_strlen(stringValue));
+    compMsgModuleData.Reserve6[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_Reserve7:
     c_memcpy(compMsgModuleData.Reserve7, stringValue, c_strlen(stringValue));
+    compMsgModuleData.Reserve7[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_Reserve8:
     c_memcpy(compMsgModuleData.Reserve8, stringValue, c_strlen(stringValue));
+    compMsgModuleData.Reserve8[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_GUID:
     c_memcpy(compMsgModuleData.GUID, stringValue, c_strlen(stringValue));
+    compMsgModuleData.GUID[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_srcId:
     compMsgModuleData.srcId = numericValue;
     break;
   case MODULE_INFO_PASSWDC:
     c_memcpy(compMsgModuleData.passwdC, stringValue, c_strlen(stringValue));
+    compMsgModuleData.passwdC[c_strlen(stringValue)] = '\0';
     break;
   case MODULE_INFO_operatingMode:
     compMsgModuleData.operatingMode = numericValue;
@@ -454,26 +524,31 @@ static uint8_t updateModuleValues(compMsgDispatcher_t *self) {
 static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   int result;
 
+ets_printf("§setModuleVaues§");
   compMsgModuleData.MACAddr[0] = 0xAB;
   compMsgModuleData.MACAddr[1] = 0xCD;
   compMsgModuleData.MACAddr[2] = 0xEF;
   compMsgModuleData.MACAddr[3] = 0x12;
   compMsgModuleData.MACAddr[4] = 0x34;
   compMsgModuleData.MACAddr[5] = 0x56;
+  compMsgModuleData.MACAddr[6] = 0;
   compMsgModuleData.IPAddr[0] = 0xD4;
   compMsgModuleData.IPAddr[1] = 0xC3;
   compMsgModuleData.IPAddr[2] = 0x12;
   compMsgModuleData.IPAddr[3] = 0x34;
+  compMsgModuleData.IPAddr[4] = 0;
   compMsgModuleData.FirmwareVersion[0] = 0x12;
   compMsgModuleData.FirmwareVersion[1] = 0x34;
   compMsgModuleData.FirmwareVersion[2] = 0x56;
   compMsgModuleData.FirmwareVersion[3] = 0xAB;
   compMsgModuleData.FirmwareVersion[4] = 0xCD;
   compMsgModuleData.FirmwareVersion[5] = 0xEF;
+  compMsgModuleData.FirmwareVersion[6] = 0;
   compMsgModuleData.SerieNumber[0] = 0x02;
   compMsgModuleData.SerieNumber[1] = 0x13;
   compMsgModuleData.SerieNumber[2] = 0x2A;
   compMsgModuleData.SerieNumber[3] = 0x10;
+  compMsgModuleData.SerieNumber[4] = 0;
   compMsgModuleData.RSSI = (uint8_t)wifi_station_get_rssi();
   compMsgModuleData.RSSIMax = 5;
   compMsgModuleData.ConnectionState = 5;
@@ -491,21 +566,22 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.DateAndTime[3] = 0x00;
   compMsgModuleData.DateAndTime[4] = 0x00;
   compMsgModuleData.DateAndTime[5] = 0x00;
+  compMsgModuleData.DateAndTime[6] = 0;
   compMsgModuleData.SSIDs = 2;
   compMsgModuleData.PingState = 1;
   compMsgModuleData.Reserve1 = 'X';
-  c_memcpy(compMsgModuleData.Reserve2, "XY", 2);
-  c_memcpy(compMsgModuleData.Reserve3, "XYZ", 3);
-  c_memcpy(compMsgModuleData.Reserve4, "ABCD", 4);
-  c_memcpy(compMsgModuleData.Reserve5, "ABCDE", 5);
-  c_memcpy(compMsgModuleData.Reserve6, "ABCDEF", 6);
-  c_memcpy(compMsgModuleData.Reserve7, "ABCDEFG", 7);
-  c_memcpy(compMsgModuleData.Reserve8, "ABCDEFGH", 8);
-  c_memcpy(compMsgModuleData.GUID, "1234-5678-9012-1", 16);
+  c_memcpy(compMsgModuleData.Reserve2, "XY\0", 3);
+  c_memcpy(compMsgModuleData.Reserve3, "XYZ\0", 4);
+  c_memcpy(compMsgModuleData.Reserve4, "ABCD\0", 5);
+  c_memcpy(compMsgModuleData.Reserve5, "ABCDE\0", 6);
+  c_memcpy(compMsgModuleData.Reserve6, "ABCDEF\0", 7);
+  c_memcpy(compMsgModuleData.Reserve7, "ABCDEFG\0", 8);
+  c_memcpy(compMsgModuleData.Reserve8, "ABCDEFGH\0", 9);
+  c_memcpy(compMsgModuleData.GUID, "1234-5678-9012-1\0", 17);
   compMsgModuleData.srcId = 12312;
-  c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2", 16);
+  c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2\0", 17);
   compMsgModuleData.operatingMode = 0xE0;
-
+ets_printf("§setModuleVaues done§");
   return COMP_DISP_ERR_OK;
 }
 

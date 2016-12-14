@@ -374,7 +374,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-ets_printf("§createMsgFromHeaderPart1§\n");
+//ets_printf("§createMsgFromHeaderPart1§\n");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);

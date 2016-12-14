@@ -257,7 +257,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   msgHeaderInfos_t *hdrInfos;
   int hdrIdx;
 
-ets_printf("§prepareAnswerMsg§\n");
+//ets_printf("§prepareAnswerMsg§\n");
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   switch (type) {
@@ -576,14 +576,14 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
 if (buffer == NULL) {
 //ets_printf("§++++handleReceivedPart: buffer == NULL lgth: %d§", lgth);
 } else {
-ets_printf("§++++handleReceivedPart: 0x%02x§", buffer[0]);
+//ets_printf("§++++handleReceivedPart: 0x%02x lgth: %d§", buffer[0], lgth);
 }
   hdrInfos = &self->msgHeaderInfos;
   compMsgData = self->compMsgData;
   received = &compMsgData->received;
 //FIXME need to free at end of message handling !!!
 //ets_printf("§handleReceivedPart: !received->buf: %p!§", received->buf);
-ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
+//ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
   idx = 0;
   while (idx < lgth) {
     received->buf[received->lgth++] = buffer[idx];
@@ -599,8 +599,8 @@ ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", rece
     if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
-ets_printf("§hdrIdx: %d§", hdrIdx);
-ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
+//ets_printf("§hdrIdx: %d§", hdrIdx);
+//ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
       // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
       seqIdx = 0;
       u8TotalCrc = false;
@@ -614,7 +614,7 @@ ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
         }
         seqIdx++;
       }
-ets_printf("§hdr->hdrHandleType: %c§", hdr->hdrHandleType);
+//ets_printf("§hdr->hdrHandleType: %c§", hdr->hdrHandleType);
       switch (hdr->hdrHandleType) {
       case 'G':
       case 'R':

@@ -66,9 +66,10 @@ static uint8_t dumpFieldValue(compMsgDispatcher_t *self, compMsgField_t *fieldIn
   uint32_t uval;
   int32_t val;
   uint8_t *stringValue;
-  int numericValue = 0;
+  int numericValue;
   compMsgData_t *compMsgData;
 
+  numericValue = 0;
   compMsgData = self->compMsgData;
   result = compMsgData->compMsgDataView->getFieldValue(compMsgData->compMsgDataView, fieldInfo, &numericValue, &stringValue, 0);
   checkErrOK(result);
@@ -570,6 +571,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
         result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
         
       } else {
+//ets_printf("§compMsgData setFieldValue: %s!value: 0x%04x %s!§", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
         result = compMsgData->compMsgDataView->setFieldValue(compMsgData->compMsgDataView, fieldInfo, numericValue, stringValue, 0);
       }
       checkErrOK(result);
@@ -614,8 +616,12 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_HDR_FILLER:
-      case COMP_MSG_SPEC_FIELD_FILLER:
         result = compMsgData->compMsgDataView->setZeroFiller(compMsgData->compMsgDataView, fieldInfo);
+        checkErrOK(result);
+        fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
+        break;
+      case COMP_MSG_SPEC_FIELD_FILLER:
+        result = compMsgData->compMsgDataView->setFiller(compMsgData->compMsgDataView, fieldInfo);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
@@ -625,7 +631,7 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
         } else {
           headerLgth = 0;
         }
-        lgth = compMsgData->cmdLgth-fieldInfo->fieldLgth + compMsgData->headerLgth;
+        lgth = compMsgData->headerLgth + compMsgData->cmdLgth-fieldInfo->fieldLgth;
         if (compMsgData->flags & COMP_MSG_CRC_USE_HEADER_LGTH) {
             headerLgth = compMsgData->headerLgth;
             lgth -= headerLgth;

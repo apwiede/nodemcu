@@ -104,10 +104,10 @@ typedef struct compMsgModuleDataName2Value {
 } compMsgModuleDataName2Value_t;
 
 typedef struct compMsgModuleData {
-  uint8_t MACAddr[6];
-  uint8_t IPAddr[4];
-  uint8_t FirmwareVersion[6];
-  uint8_t SerieNumber[4];
+  uint8_t MACAddr[7];
+  uint8_t IPAddr[5];
+  uint8_t FirmwareVersion[7];
+  uint8_t SerieNumber[5];
   uint8_t RSSI;
   uint8_t RSSIMax;
   uint8_t ConnectionState;
@@ -119,20 +119,20 @@ typedef struct compMsgModuleData {
   uint8_t DeviceSecurity;
   uint8_t ErrorMain;
   uint8_t ErrorSub;
-  uint8_t DateAndTime[6];
+  uint8_t DateAndTime[7];
   uint8_t SSIDs;
   uint8_t PingState;
   uint8_t Reserve1;
-  uint8_t Reserve2[2];
-  uint8_t Reserve3[3];
-  uint8_t Reserve4[4];
-  uint8_t Reserve5[5];
-  uint8_t Reserve6[6];
-  uint8_t Reserve7[7];
-  uint8_t Reserve8[8];
-  uint8_t GUID[16];
+  uint8_t Reserve2[3];
+  uint8_t Reserve3[4];
+  uint8_t Reserve4[5];
+  uint8_t Reserve5[6];
+  uint8_t Reserve6[7];
+  uint8_t Reserve7[8];
+  uint8_t Reserve8[9];
+  uint8_t GUID[17];
   uint16_t srcId;
-  uint8_t passwdC[16];
+  uint8_t passwdC[17];
   uint8_t operatingMode;
 } compMsgModuleData_t;
 

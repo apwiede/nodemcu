@@ -236,6 +236,7 @@ ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_i
     checkErrOK(result);
     break;
   case 'G':
+ets_printf("§sendMsg G not yet implemented§");
     break;
   case 'S':
     result = typeRSendAnswer(self, msgData, msgLgth);
@@ -244,6 +245,7 @@ ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_i
     checkErrOK(result);
     break;
   case 'R':
+ets_printf("§sendMsg R not yet implemented§");
     break;
   case 'U':
 ets_printf("§type U msg send to cloud§");
@@ -257,9 +259,11 @@ ets_printf("§type U msg send to cloud§");
     checkErrOK(result);
     break;
   case 'W':
+ets_printf("§sendMsg W not yet implemented§");
     break;
   case 'N':
     // just ignore
+ets_printf("§sendMsg N not yet implemented§");
     return COMP_DISP_ERR_OK;
     break;
   default:
