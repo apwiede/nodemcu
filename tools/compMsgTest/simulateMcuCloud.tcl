@@ -74,6 +74,11 @@ set ::inReceiveMsg false
 
 set ::handleInputDbg false
 
+# ==========================================================================
+# we simulate the Mcu start and the 4th state is Cloud
+# start Wifi with startCompMsgU.lua renamed to init.lua!
+# ==========================================================================
+
 # ================================ checkErrOK ===============================
 
 proc checkErrOK {result} {

@@ -33,7 +33,7 @@
 # *
 # ==========================================================================
 
-package require websocket
+#package require websocket
 package require aes
 #package require tls
 #tls::init -tls1 1 ;# forcibly activate support for the TLS1 protocol
@@ -50,6 +50,9 @@ source compMsgAction.tcl
 source compMsgWifiData.tcl
 source compMsgBuildMsg.tcl
 source compMsgModuleData.tcl
+if {[file exist ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl]} {
+  source ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl
+}
 
 # ================================ checkErrOK ===============================
 
@@ -66,7 +69,7 @@ proc checkErrOK {result} {
 # ================================ sendMcuData ===============================
 
 proc sendMcuData {} {
-  set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 19712 17152 CD hdr]
+  set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 17152 19712 CD hdr]
   checkErrOK $result
 puts stderr "===after getHeaderFromUniqueFields"
 #  set ::compMsgDispatcher [dict create]
@@ -198,15 +201,19 @@ puts stderr "ch: $ch!$pch!lgth: $lgth"
 
 # ================================ InitCompMsg ===============================
 
-set compMsgDispatcher [dict create]
+set ::compMsgDispatcher [dict create]
 set compMsgWifiData [dict create]
-set result [::compMsg compMsgDispatcher newCompMsgDispatcher]
+set result [::compMsg compMsgDispatcher newCompMsgDispatcher ::compMsgDispatcher]
 checkErrOK $result
 set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
 checkErrOK $result
 puts stderr "dispatcherHandle!$dispatcherHandle!"
 set result [::compMsg compMsgDispatcher initDispatcher compMsgDispatcher]
 checkErrOK $result
+
+set ::fd0 [open "/dev/ttyUSB0" w+]
+fconfigure $::fd0 -blocking 0 -translation binary
+fconfigure $::fd0 -mode 115200,n,8,1
 
 sendMcuData
 
