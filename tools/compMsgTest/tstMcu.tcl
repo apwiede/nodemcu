@@ -64,6 +64,7 @@ set ::msg ""
 set ::msgLgth 0
 set ::afterId ""
 set ::inReceiveMsg false
+set ::inSendMsg false
 set ::hadGt false
 
 # ================================ checkErrOK ===============================
@@ -121,38 +122,53 @@ proc handleInput0 {ch bufVar lgthVar} {
 if {!$::inStart} {
 #puts stderr "handleInput0 1: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
 }
-  if {$::inReceiveMsg && ($pch == 0)} {
+  if {$::inSendMsg && ($pch == 0)} {
     if {$::lastCh eq "W"} {
-#puts stderr "found MSG START"
+puts stderr "found MSG START"
       append buf $ch
       incr lgth
       set ::lastCh $ch
-#      puts -nonewline $::fd0 $ch
-#      flush $::fd0
 puts stderr "handleInput0 return 1"
       return $::COMP_MSG_ERR_OK
     } else {
-      set ::inReceiveMsg true
+      set ::inSendMsg true
     }
   }
-  if {$::inReceiveMsg} {
+  if {$::inSendMsg} {
     append buf $ch
     incr lgth
     set ::lastCh $ch
-    puts -nonewline $::fd0 $ch
-    flush $::fd0
-puts stderr "handleInput0 return 3"
+#    puts -nonewline $::fd1 $ch
+#    flush $::fd1
+    if {$lgth == $::headerLgth} {
+      # next line needed to set ::totalLgth!!
+      binary scan $buf SSSS ::dst ::src ::srcId ::totalLgth
+puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst $::src $::srcId $::totalLgth]
+    }
+#puts stderr "handleInput0 sendMsg: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
+    if {$lgth >= $::totalLgth} {
+puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
+      puts -nonewline $::fd1 $buf
+      flush $::fd1
+      set ::inSendMsg false
+      set ::totalLgth 999
+      set lgth 0
+      set buf ""
+      fileevent $::fd0 readable [list]
+      fileevent $::fd1 readable [list readByte1 $::fd1 ::dev1Buf ::dev1Lgth]
+    }
+#puts stderr "handleInput0 return 3"
     return $::COMP_MSG_ERR_OK
   }
   if {!$::inDebug && ($ch eq "W")} {
-#puts stderr "got 'W'"
-    set ::inReceiveMsg true
+puts stderr "got 'W'"
+    set ::inSendMsg true
     append buf $ch
     incr lgth
     set ::lastCh $ch
-    puts -nonewline $::fd1 $ch
-    flush $::fd1
-puts stderr "handleInput0 return 4"
+#    puts -nonewline $::fd1 $ch
+#    flush $::fd1
+#puts stderr "handleInput0 return 4"
     return $::COMP_MSG_ERR_OK
   }
 #puts stderr "  ==handleInput0: 2 DBT: $::inDebug!ch: $ch!"
@@ -231,7 +247,7 @@ puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
         incr lgth
       }
       set ::lastCh $ch
-puts stderr "handleInput0 return 9"
+#puts stderr "handleInput0 return 9"
       return $::COMP_MSG_ERR_OK
     }
   }
