@@ -82,6 +82,7 @@ proc checkErrOK {result} {
 # ::dev0 is the Wifi module
 # ::dev1 is the Mcu module
 
+# the wifi module has to be connected to /dev/ttyUSB0
 # ================================ init0 ===============================
 
 proc init0 {} {
@@ -96,6 +97,7 @@ proc init0 {} {
 #  fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
 }
 
+# the ftdi adapter for the Mcu boar has to be connected to /dev/ttyUSB1
 # ================================ init1 ===============================
 
 proc init1 {} {
@@ -143,11 +145,11 @@ puts stderr "handleInput0 return 1"
     if {$lgth == $::headerLgth} {
       # next line needed to set ::totalLgth!!
       binary scan $buf SSSS ::dst ::src ::srcId ::totalLgth
-puts stderr [format "dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst $::src $::srcId $::totalLgth]
+puts stderr [format "sendMsg0 dst: 0x%04x src: 0x%04x srcId: 0x%04x totalLgth: 0x%04x" $::dst $::src $::srcId $::totalLgth]
     }
 #puts stderr "handleInput0 sendMsg: ch: $ch lastCh: $::lastCh!inDebug: $::inDebug!lgth: $lgth!"
     if {$lgth >= $::totalLgth} {
-puts stderr "lgth: $lgth totalLgth: $::totalLgth!"
+puts stderr "sendMsg0 lgth: $lgth totalLgth: $::totalLgth!"
       puts -nonewline $::fd1 $buf
       flush $::fd1
       set ::inSendMsg false
