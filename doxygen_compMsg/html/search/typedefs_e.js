@@ -29,6 +29,7 @@ var searchData=
   ['setuint8_5ft',['setUint8_t',['../dataView_8h.html#a82dd4952dd8f20005f139aa6f4c365e7',1,'dataView.h']]],
   ['setuint8vector_5ft',['setUint8Vector_t',['../dataView_8h.html#a9e6023ae36457b35343e961a5b91016f',1,'dataView.h']]],
   ['setwifivalue_5ft',['setWifiValue_t',['../compMsgDispatcher_8h.html#ab060db5655d17c581db88741802afa55',1,'compMsgDispatcher.h']]],
+  ['setzerofiller_5ft',['setZeroFiller_t',['../compMsgDataView_8h.html#aa69be45595b80d4fd314066714a7c79e',1,'compMsgDataView.h']]],
   ['socketinfo_5ft',['socketInfo_t',['../compMsgNetSocket_8c.html#a89c393a31244ad94f583e6f74fe66936',1,'socketInfo_t():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a89c393a31244ad94f583e6f74fe66936',1,'socketInfo_t():&#160;compMsgWebSocket.c']]],
   ['startnextrequest_5ft',['startNextRequest_t',['../compMsgDispatcher_8h.html#a7f446e992df2725579bef457b7807899',1,'compMsgDispatcher.h']]],
   ['startrequest_5ft',['startRequest_t',['../compMsgDispatcher_8h.html#a232562c24a87437020d5460ecaa46d3c',1,'compMsgDispatcher.h']]],

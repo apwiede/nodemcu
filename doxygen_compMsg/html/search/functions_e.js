@@ -33,6 +33,7 @@ var searchData=
   ['setuint8',['setUint8',['../dataView_8c.html#a597300f875a562de1b7e89e64bf42d3b',1,'dataView.c']]],
   ['setuint8vector',['setUint8Vector',['../dataView_8c.html#a34bd7a9a77b978125ba125ff4750fcae',1,'dataView.c']]],
   ['setwifivalue',['setWifiValue',['../compMsgWifiData_8c.html#a2be7edc78f3c25086aec73e522937c4a',1,'compMsgWifiData.c']]],
+  ['setzerofiller',['setZeroFiller',['../compMsgDataView_8c.html#ab3310078e8ca4fd2292d50903a21a5e8',1,'compMsgDataView.c']]],
   ['socketconnect',['socketConnect',['../compMsgNetSocket_8c.html#a980f2c5b8c5840b43d47ad6fc7feaa25',1,'compMsgNetSocket.c']]],
   ['socketdnsfound',['socketDnsFound',['../compMsgNetSocket_8c.html#a5a585f116978fce5891187c7703a5d67',1,'compMsgNetSocket.c']]],
   ['socketreceived',['socketReceived',['../compMsgNetSocket_8c.html#a618ff1663a47d6b48f113de058b211b5',1,'socketReceived(void *arg, char *pdata, unsigned short len):&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a618ff1663a47d6b48f113de058b211b5',1,'socketReceived(void *arg, char *pdata, unsigned short len):&#160;compMsgWebSocket.c']]],
