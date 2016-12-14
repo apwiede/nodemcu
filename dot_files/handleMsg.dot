@@ -15,6 +15,7 @@ digraph G1 {
   Provisioning -> WebSocket;
   Provisioning -> App;
   App -> WebSocket;
+  WebSocket -> App;
   WebSocket -> Provisioning;
   WebSocket -> Queue:f1;
   WebSocket -> Queue:f2;
