@@ -206,11 +206,10 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   payloadLgth += c_strlen(contentType);
   contentLgth="Content-length: ";
   payloadLgth += c_strlen(contentLgth);
-  os_sprintf(lgthBuf, "%d\0", msgLgth+1);
+  os_sprintf(lgthBuf, "%d\0", msgLgth);
   payloadLgth += c_strlen(lgthBuf); // for contentLgth value
-  accept="\r\nAccept: */*\r\n\r\n=";
+  accept="\r\nAccept: */*\r\n\r\n";
   payloadLgth += c_strlen(accept);
-  b64Msg[msgLgth] = '\0';
   payloadLgth += (msgLgth + 3);  // \r\n\0
 #else
   payloadLgth = c_strlen("POST ");
@@ -231,9 +230,9 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   payloadLgth += c_strlen(contentType);
   contentLgth="Content-length: ";
   payloadLgth += c_strlen(contentLgth);
-  os_sprintf(lgthBuf, "%d\0", msgLgth+1);
+  os_sprintf(lgthBuf, "%d\0", msgLgth);
   payloadLgth += c_strlen(lgthBuf); // for contentLgth value
-  accept="\r\n\r\n=";
+  accept="\r\n\r\n";
   payloadLgth += c_strlen(accept);
   payloadLgth += (msgLgth + 3);  // \r\n\0
 #endif
