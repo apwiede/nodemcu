@@ -345,9 +345,6 @@ ets_printf("§sendMsg R not yet implemented§");
 ets_printf("§type U msg send to cloud§");
     self->cloudMsgData = msgData;
     self->cloudMsgDataLgth = msgLgth;
-//    self->sendCloudMsg = sendCloudMsg;
-//    result = self->prepareCloudMsg(self);
-//    checkErrOK(result);
 // FIXME TEMPORARY!!!
 result = checkClientMode(self);
 checkErrOK(result);

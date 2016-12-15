@@ -323,9 +323,9 @@ static int deleteHandle(compMsgDispatcher_t *self, const uint8_t *handle) {
   int numUsed;
   int found;
 
-//ets_printf("compMsgData deleteHandle: %s %d!\n", handle, compMsgHandles.numHandles);
+ets_printf("§compMsgData deleteHandle: %s numHandles: %d!§", handle, compMsgHandles.numHandles);
   if (compMsgHandles.handles == NULL) {
-ets_printf("§deleteHandle 1 HANDLE_NOT_FOUND§");
+ets_printf("§compMsgData deleteHandle 1 HANDLE_NOT_FOUND§");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   found = 0;
@@ -335,7 +335,11 @@ ets_printf("§deleteHandle 1 HANDLE_NOT_FOUND§");
     return COMP_MSG_ERR_OK;
   }
   while (idx < compMsgHandles.numHandles) {
+    if (compMsgHandles.handles[idx].handle != NULL) {
+//ets_printf("§idx: %d handle: %s %s§", idx, compMsgHandles.handles[idx].handle, handle);
+    }
     if ((compMsgHandles.handles[idx].handle != NULL) && (c_strcmp(compMsgHandles.handles[idx].handle, handle) == 0)) {
+//ets_printf("§set idx: %d handle: %s to NULL§", idx, compMsgHandles.handles[idx].handle);
       compMsgHandles.handles[idx].handle = NULL;
       found++;
     } else {
@@ -352,7 +356,7 @@ ets_printf("§deleteHandle 1 HANDLE_NOT_FOUND§");
   if (found) {
       return COMP_MSG_ERR_OK;
   }
-ets_printf("§deleteHandle 2 HANDLE_NOT_FOUND§");
+ets_printf("§compMsgData deleteHandle 2 HANDLE_NOT_FOUND§");
   return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -362,7 +366,7 @@ static int checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatch
   int idx;
 
   if (compMsgHandles.handles == NULL) {
-ets_printf("checkHandle 1 HANDLE_NOT_FOUND\n");
+ets_printf("§compMsgData checkHandle 1 HANDLE_NOT_FOUND§");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   idx = 0;
@@ -373,7 +377,7 @@ ets_printf("checkHandle 1 HANDLE_NOT_FOUND\n");
     }
     idx++;
   }
-ets_printf("checkHandle 2 HANDLE_NOT_FOUND\n");
+ets_printf("§compMsgData checkHandle 2 HANDLE_NOT_FOUND§");
   return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -381,7 +385,7 @@ ets_printf("checkHandle 2 HANDLE_NOT_FOUND\n");
 
 uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher) {
   if (checkHandle(handle, compMsgDispatcher) != COMP_MSG_ERR_OK) {
-ets_printf("compMsgGetPtrFromHandle 1 HANDLE_NOT_FOUND\n");
+ets_printf("§compMsgGetPtrFromHandle 1 HANDLE_NOT_FOUND§");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   return COMP_MSG_ERR_OK;
@@ -1053,6 +1057,7 @@ static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
     
   if (c_strlen(compMsgData->handle) > 0) {
     deleteHandle(self, compMsgData->handle);
+    compMsgData->handle[0] = '\0';
   }
 //  websocketUserData_t *wud;
 //  netsocketUserData_t *nud;

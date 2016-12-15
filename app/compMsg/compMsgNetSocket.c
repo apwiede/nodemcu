@@ -150,43 +150,6 @@ static int ICACHE_FLASH_ATTR netsocket_parse(char * data, size_t size, char **re
   return NETSOCKET_ERR_OK;
 }
 
-// ============================ toBase64 =========================================
-
-static uint8_t *toBase64 ( const uint8_t *msg, size_t *len){
-  size_t i;
-  size_t n;
-  size_t lgth;
-  uint8_t * q;
-  uint8_t *out;
-
-  n = *len;
-  if (!n)  // handle empty string case 
-    return NULL;
-
-  lgth = (n + 2) / 3 * 4;
-  out = (uint8_t *)os_malloc(lgth + 1);
-  out[lgth] = '\0';
-  if (out == NULL) {
-    return NULL;
-  }
-  uint8 bytes64[sizeof(b64)];
-  c_memcpy(bytes64, b64, sizeof(b64));   //Avoid lots of flash unaligned fetches
-
-  for (i = 0, q = out; i < n; i += 3) {
-    int a = msg[i];
-    int b = (i + 1 < n) ? msg[i + 1] : 0;
-    int c = (i + 2 < n) ? msg[i + 2] : 0;
-    *q++ = bytes64[a >> 2];
-    *q++ = bytes64[((a & 3) << 4) | (b >> 4)];
-    *q++ = (i + 1 < n) ? bytes64[((b & 15) << 2) | (c >> 6)] : BASE64_PADDING;
-    *q++ = (i + 2 < n) ? bytes64[(c & 63)] : BASE64_PADDING;
-  }
-  *q = '\0';
-  *len = q - out;
-  return out;
-}
-
-
 // ================================= netsocket_recv ====================================
 
 static uint8_t netsocket_recv(char *payload, netsocketUserData_t *nud, char **data, int *lgth) {
@@ -658,7 +621,7 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
 ets_printf("§regist socketSent err: %d§", result);
   }
 #ifdef CLIENT_SSL_ENABLE
-ets_printf("§socket: secure: %d§", nud->secure);
+//ets_printf("§socket: secure: %d§", nud->secure);
   if (nud->secure){
     if (pesp_conn->proto.tcp->remote_port || pesp_conn->proto.tcp->local_port)
       espconn_secure_disconnect(pesp_conn);
