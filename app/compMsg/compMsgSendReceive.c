@@ -138,120 +138,20 @@ static uint8_t sendCloudMsg(compMsgDispatcher_t *self) {
 ets_printf("§COMP_DISP_ERR_NO_WEBSOCKET_OPENED§");
     return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
   }
-ets_printf("§request: %d %s§", self->cloudPayloadLgth, self->cloudPayload);
+//ets_printf("§request: %d %s§", self->cloudPayloadLgth, self->cloudPayload);
   result = COMP_DISP_ERR_OK;
   if (self->cloudPayload == NULL) {
-    result = self->prepareCloudMsg2(self);
-    checkErrOK(result);
+//    result = self->prepareCloudMsg2(self);
+//    checkErrOK(result);
+ets_printf("§sendCloudMsg: cloudPayload == NULL§");
+    return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
   }
   result = self->netsocketSendData(self->compMsgData->nud, self->cloudPayload, self->cloudPayloadLgth);
   checkErrOK(result);
+  os_free(self->cloudPayload);
   self->cloudPayload = NULL;
   self->cloudPayloadLgth = 0;
-ets_printf("§sendCloudMsg: done result: %d§", result);
-  return COMP_DISP_ERR_OK;
-}
-
-// ================================= prepareCloudMsg2 ====================================
-
-/**
- * \brief prepare a message to be sent via http socket to Cloud
- * \param self The dispatcher struct
- * \return Error code or ErrorOK
- *
- */
-static uint8_t prepareCloudMsg2(compMsgDispatcher_t *self) {
-  uint8_t result;
-  uint8_t *b64Msg;
-  uint8_t *host;
-  uint8_t *subUrl;
-  uint8_t *nodeToken;
-  uint8_t *hostPart;
-  uint8_t *alive;
-  uint8_t *contentType;
-  uint8_t *contentLgth;
-  uint8_t *accept;
-  int numericValue;
-  size_t payloadLgth;
-  uint8_t *msgData;
-  size_t msgLgth;
-  char lgthBuf[20];
-
-  msgData = self->cloudMsgData;
-  msgLgth = self->cloudMsgDataLgth;
-ets_printf("§prepareCloudMsg2: msgLgth: %d§", msgLgth);
-  result = self->toBase64(msgData, &msgLgth, &b64Msg);
-  checkErrOK(result);
-ets_printf("§prepareCloudMsg2: b64msgLgth: %d§", msgLgth);
-
-#ifndef NOTDEF
-  payloadLgth = c_strlen("POST ");
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
-  checkErrOK(result);
-  payloadLgth += c_strlen(subUrl);
-  hostPart=" HTTP/1.1\r\nHost: ";
-  payloadLgth += c_strlen(hostPart);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
-  checkErrOK(result);
-  payloadLgth += c_strlen(host);
-  alive="\r\nConnection: keep-alive\r\n";
-  payloadLgth += c_strlen(alive);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
-  checkErrOK(result);
-  payloadLgth += c_strlen(nodeToken);
-  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
-  payloadLgth += c_strlen(contentType);
-  contentLgth="Content-length: ";
-  payloadLgth += c_strlen(contentLgth);
-  os_sprintf(lgthBuf, "%d\0", msgLgth+1);
-  payloadLgth += c_strlen(lgthBuf); // for contentLgth value
-  accept="\r\nAccept: */*\r\n\r\n=";
-  payloadLgth += c_strlen(accept);
-  b64Msg[msgLgth] = '\0';
-  payloadLgth += (msgLgth + 3);  // \r\n\0
-#else
-  payloadLgth = c_strlen("POST ");
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
-ets_printf("§1 res: %d§", result);
-  checkErrOK(result);
-  payloadLgth += c_strlen(subUrl);
-  hostPart=" HTTP/1.1\r\nHost: ";
-  payloadLgth += c_strlen(hostPart);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
-ets_printf("§2 res: %d§", result);
-  checkErrOK(result);
-  payloadLgth += c_strlen(host);
-  alive="\r\n";
-  payloadLgth += c_strlen(alive);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
-ets_printf("§3 res: %d§", result);
-  checkErrOK(result);
-  payloadLgth += c_strlen(nodeToken);
-  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
-  payloadLgth += c_strlen(contentType);
-  contentLgth="Content-length: ";
-  payloadLgth += c_strlen(contentLgth);
-  os_sprintf(lgthBuf, "%d\0", msgLgth+1);
-  payloadLgth += c_strlen(lgthBuf); // for contentLgth value
-  accept="\r\n\r\n=";
-  payloadLgth += c_strlen(accept);
-  b64Msg[msgLgth] = '\0';
-  payloadLgth += (msgLgth + 3);  // \r\n\0
-#endif
-  
-  char *payload = os_zalloc(payloadLgth);
-#ifndef NOTDEF
-  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
-#else
-  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
-#endif
-ets_printf("§payloadLgth: %d %d§", c_strlen(payload), payloadLgth);
-ets_printf("§request: %d %s§", c_strlen(payload), payload);
-  self->cloudPayload = payload;
-  self->cloudPayloadLgth = payloadLgth;
-  self->cloudMsgData = NULL;
-  self->cloudMsgDataLgth = 0;
-//ets_printf("§prepareCloudMsg: done§");
+//ets_printf("§sendCloudMsg: done result: %d§", result);
   return COMP_DISP_ERR_OK;
 }
 
@@ -280,21 +180,137 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   size_t msgLgth;
   char lgthBuf[20];
 
-ets_printf("§prepareCloudMsg: §");
+  msgData = self->cloudMsgData;
+  msgLgth = self->cloudMsgDataLgth;
+//ets_printf("§prepareCloudMsg: msgLgth: %d§", msgLgth);
+  result = self->toBase64(msgData, &msgLgth, &b64Msg);
+  checkErrOK(result);
+//ets_printf("§prepareCloudMsg: b64msgLgth: %d§", msgLgth);
 
+#ifdef CLOUD_1
+  payloadLgth = c_strlen("POST ");
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
+  checkErrOK(result);
+  payloadLgth += c_strlen(subUrl);
+  hostPart=" HTTP/1.1\r\nHost: ";
+  payloadLgth += c_strlen(hostPart);
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
+  checkErrOK(result);
+  payloadLgth += c_strlen(host);
+  alive="\r\nConnection: keep-alive\r\n";
+  payloadLgth += c_strlen(alive);
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
+  checkErrOK(result);
+  payloadLgth += c_strlen(nodeToken);
+  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+  payloadLgth += c_strlen(contentType);
+  contentLgth="Content-length: ";
+  payloadLgth += c_strlen(contentLgth);
+  os_sprintf(lgthBuf, "%d\0", msgLgth+1);
+  payloadLgth += c_strlen(lgthBuf); // for contentLgth value
+  accept="\r\nAccept: */*\r\n\r\n=";
+  payloadLgth += c_strlen(accept);
+  b64Msg[msgLgth] = '\0';
+  payloadLgth += (msgLgth + 3);  // \r\n\0
+#else
+  payloadLgth = c_strlen("POST ");
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
+  checkErrOK(result);
+  payloadLgth += c_strlen(subUrl);
+  hostPart=" HTTP/1.1\r\nHost: ";
+  payloadLgth += c_strlen(hostPart);
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
+  checkErrOK(result);
+  payloadLgth += c_strlen(host);
+  alive="\r\n";
+  payloadLgth += c_strlen(alive);
+  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
+  checkErrOK(result);
+  payloadLgth += c_strlen(nodeToken);
+  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+  payloadLgth += c_strlen(contentType);
+  contentLgth="Content-length: ";
+  payloadLgth += c_strlen(contentLgth);
+  os_sprintf(lgthBuf, "%d\0", msgLgth+1);
+  payloadLgth += c_strlen(lgthBuf); // for contentLgth value
+  accept="\r\n\r\n=";
+  payloadLgth += c_strlen(accept);
+  payloadLgth += (msgLgth + 3);  // \r\n\0
+#endif
+  
+  // FIXME need to free this somehwere!!!
+  char *payload = os_zalloc(payloadLgth);
+//ets_printf("§payloadLgth1: %d payload: %p§", payloadLgth, payload);
+#ifdef CLOUD_1
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
+//ets_printf("§payloadLgth2: %d %d§", c_strlen(payload), payloadLgth);
+#else
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
+//ets_printf("§payloadLgth3: %d %d§", c_strlen(payload), payloadLgth);
+#endif
+ets_printf("§request: %d %s§", c_strlen(payload), payload);
+  os_free(b64Msg);
+  self->cloudPayload = payload;
+  self->cloudPayloadLgth = payloadLgth;
+  self->cloudMsgData = NULL;
+  self->cloudMsgDataLgth = 0;
+  result = sendCloudMsg(self);
+  checkErrOK(result);
+//ets_printf("§prepareCloudMsg: done§");
+  return COMP_DISP_ERR_OK;
+}
+
+// ================================= checkClientMode ====================================
+
+/**
+ * \brief start the connection with the router
+ * \param self The dispatcher struct
+ * \return Error code or ErrorOK
+ *
+ */
+static uint8_t checkClientMode(compMsgDispatcher_t *self) {
+  uint8_t result;
+  uint8_t *b64Msg;
+  uint8_t *host;
+  uint8_t *subUrl;
+  uint8_t *nodeToken;
+  uint8_t *hostPart;
+  uint8_t *alive;
+  uint8_t *contentType;
+  uint8_t *contentLgth;
+  uint8_t *accept;
+  int numericValue;
+  size_t payloadLgth;
+  uint8_t *msgData;
+  size_t msgLgth;
+  char lgthBuf[20];
+
+//ets_printf("§checkClientMode: §");
+
+  if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
 // FIXME !!! TEMPORARY
 uint8_t *ssid = "Wiedemann3";
 uint8_t *passwd = "58855473601443679162";
-  result = self->setWifiValue(self, "@clientSsid", 0, ssid);
-  checkErrOK(result);
-  result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
-  checkErrOK(result);
-  self->startStationOnly = true;
-  result = self->netsocketRunClientMode(self);
-//ets_printf("runClientMode: result: %d\n", result);
-  checkErrOK(result);
+    result = self->setWifiValue(self, "@clientSsid", 0, ssid);
+    checkErrOK(result);
+    result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
+    checkErrOK(result);
+    self->startStationOnly = true;
+    // set the callback used after client mode is running
+    self->startSendMsg = self->netsocketStartCloudSocket;
+    self->startSendMsg2 = self->prepareCloudMsg;
+//ets_printf("§call netsocketRunClientMode§");
+    result = self->netsocketRunClientMode(self);
+//ets_printf("§netsocketRunClientMode: result: %d§", result);
+    checkErrOK(result);
 // FIXME !!! TEMPORARY END
-
+  } else {
+//ets_printf("§netsocketStartCloudSocket§");
+    self->startSendMsg2 = self->prepareCloudMsg;
+    result = self->netsocketStartCloudSocket(self);
+//ets_printf("§netsocketStartCloudSocket: result: %d§", result);
+    checkErrOK(result);
+  }
   return COMP_DISP_ERR_OK;
 }
 
@@ -330,12 +346,13 @@ ets_printf("§sendMsg R not yet implemented§");
 ets_printf("§type U msg send to cloud§");
     self->cloudMsgData = msgData;
     self->cloudMsgDataLgth = msgLgth;
-    self->sendCloudMsg = sendCloudMsg;
-    result = self->prepareCloudMsg(self);
-    checkErrOK(result);
-    result = self->netsocketStartCloudSocket(self);
-ets_printf("§netsocketStartCloudSocket: result: %d§", result);
-    checkErrOK(result);
+//    self->sendCloudMsg = sendCloudMsg;
+//    result = self->prepareCloudMsg(self);
+//    checkErrOK(result);
+// FIXME TEMPORARY!!!
+result = checkClientMode(self);
+checkErrOK(result);
+// FIXME TEMPORARY!!!
     break;
   case 'W':
 ets_printf("§sendMsg W not yet implemented§");
@@ -369,7 +386,7 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   self->uartReceiveCb = &uartReceiveCb;
   self->typeRSendAnswer = &typeRSendAnswer;
   self->prepareCloudMsg = &prepareCloudMsg;
-  self->prepareCloudMsg2 = &prepareCloudMsg2;
+  self->checkClientMode = &checkClientMode;
   self->sendCloudMsg = &sendCloudMsg;
   self->sendMsg = &sendMsg;
   return COMP_DISP_ERR_OK;

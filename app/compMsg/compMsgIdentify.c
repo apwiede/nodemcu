@@ -530,6 +530,8 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   msgParts_t *received;
 
 //ets_printf("§sendClientIPMsg§\n");
+  self->startSendMsg = NULL;
+  self->stopAccessPoint = true;
   received = &self->compMsgData->received;
   result = self->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
   checkErrOK(result);

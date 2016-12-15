@@ -53,6 +53,9 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgMsgDesc.h"
 #include "compMsgData.h"
 
+//#define CLOUD_1
+#define CLOUD_2
+
 enum compMsgDispatcherErrorCode
 {
   COMP_DISP_ERR_OK                    = 0,
@@ -107,6 +110,13 @@ enum compMsgDispatcherErrorCode
 #define COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE  0x02
 #define COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE 0x04
 #define COMP_DISP_CALLBACK_TYPE_MODULE             0x08
+
+// running mode flags
+#define COMP_DISP_RUNNING_MODE_AP       0x01
+#define COMP_DISP_RUNNING_MODE_CLIENT   0x02
+#define COMP_DISP_RUNNING_MODE_CLOUD    0x04
+#define COMP_DISP_RUNNING_MODE_APP      0x08
+#define COMP_DISP_RUNNING_MODE_WEBSOCKT 0x10
 
 #define COMP_DISP_MAX_REQUESTS     5
 
@@ -217,6 +227,7 @@ typedef uint8_t (* uartSetup_t)(compMsgDispatcher_t *self, unsigned id, uint32_t
 typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
 typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 typedef uint8_t (* prepareCloudMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* startSendMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* sendCloudMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth);
 
@@ -240,12 +251,15 @@ typedef struct compMsgDispatcher {
   size_t cloudMsgDataLgth;
   uint8_t *cloudPayload;
   size_t cloudPayloadLgth;
-  uint8_t stopAP;
+  bool stopAccessPoint;
   bool startStationOnly;
 
   msgHeaderInfos_t msgHeaderInfos;
 
   compMsgTypesAndNames_t *compMsgTypesAndNames;
+
+  // running mode flags
+  uint16_t runningModeFlags;
 
   // station mode
   uint32_t station_ip;
@@ -280,8 +294,10 @@ typedef struct compMsgDispatcher {
   typeRSendAnswer_t typeRSendAnswer;
   sendMsg_t sendMsg;
   prepareCloudMsg_t prepareCloudMsg;
-  prepareCloudMsg_t prepareCloudMsg2;
+  prepareCloudMsg_t checkClientMode;
   sendCloudMsg_t sendCloudMsg;
+  startSendMsg_t startSendMsg;
+  startSendMsg_t startSendMsg2;
 
   // Action
   setActionEntry_t setActionEntry;

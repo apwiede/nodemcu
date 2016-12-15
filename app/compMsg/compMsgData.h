@@ -69,6 +69,10 @@ extern "C" {
 #define COMP_LIST_NUM_LIST_FIELDS 9
 #define COMP_LIST_CMD_KEY 0x5A5A
 
+#define NET_SOCKET_TYPE_SOCKET        0x01
+#define NET_SOCKET_TYPE_CLIENT        0x02
+#define WEB_SOCKET_TYPE_ACCESS_POINT  0x04
+
 #define checkHandleOK(addr) if(addr == NULL) return COMP_MSG_ERR_BAD_HANDLE
 
 typedef struct buildMsgInfos {
@@ -87,6 +91,7 @@ typedef struct websocketUserData {
   uint8_t isWebsocket;
   uint8_t num_urls;
   uint8_t max_urls;
+  uint8_t connectionType;
   int remote_port;
   uint8_t remote_ip[4];
   char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
@@ -100,6 +105,7 @@ typedef struct netsocketUserData {
   struct espconn *pesp_conn;
   int remote_port;
   uint8_t remote_ip[4];
+  uint8_t connectionType;
 #ifdef CLIENT_SSL_ENABLE
   uint8_t secure;
 #endif

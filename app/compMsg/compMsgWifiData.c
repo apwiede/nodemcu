@@ -315,6 +315,7 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
   checkErrOK(result);
   result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
   checkErrOK(result);
+  self->startSendMsg = self->sendClientIPMsg;
   result = self->netsocketRunClientMode(self);
 //ets_printf("runClientMode: result: %d\n", result);
   checkErrOK(result);
@@ -338,7 +339,7 @@ static uint8_t startStationCb(compMsgDispatcher_t *self) {
 
 ets_printf("§startStationCb:§");
   self->startStationOnly = false;
-  self->prepareCloudMsg2(self);
+  self->startSendMsg(self);
 ets_printf("§startStationCb done§");
   return COMP_DISP_ERR_OK;
 }
@@ -759,35 +760,30 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
     *numericValue = compMsgWifiData.clientStatus;
     break;
   case WIFI_INFO_CLOUD_PORT:
-ets_printf("§cloudPort: %p§", compMsgWifiData.cloudPort);
     *numericValue = compMsgWifiData.cloudPort;
     break;
   case WIFI_INFO_CLOUD_DOMAIN_1:
     *stringValue = compMsgWifiData.cloudDomain1;
     break;
   case WIFI_INFO_CLOUD_DOMAIN_2:
-ets_printf("§cloudDomain2: %p§", compMsgWifiData.cloudDomain2);
     *stringValue = compMsgWifiData.cloudDomain2;
     break;
   case WIFI_INFO_CLOUD_HOST_1:
     *stringValue = compMsgWifiData.cloudHost1;
     break;
   case WIFI_INFO_CLOUD_HOST_2:
-ets_printf("§cloudHost2: %p§", compMsgWifiData.cloudHost2);
     *stringValue = compMsgWifiData.cloudHost2;
     break;
   case WIFI_INFO_CLOUD_SUB_URL_1:
     *stringValue = compMsgWifiData.cloudSubUrl1;
     break;
   case WIFI_INFO_CLOUD_SUB_URL_2:
-ets_printf("§cloudSubUrl2: %p§", compMsgWifiData.cloudSubUrl2);
     *stringValue = compMsgWifiData.cloudSubUrl2;
     break;
   case WIFI_INFO_CLOUD_NODE_TOKEN_1:
     *stringValue = compMsgWifiData.cloudNodeToken1;
     break;
   case WIFI_INFO_CLOUD_NODE_TOKEN_2:
-ets_printf("§cloudNodeToken2: %p§", compMsgWifiData.cloudNodeToken2);
     *stringValue = compMsgWifiData.cloudNodeToken2;
     break;
 #ifdef CLIENT_SSL_ENABLE

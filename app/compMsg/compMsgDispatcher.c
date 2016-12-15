@@ -101,7 +101,7 @@ static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
   if (!n) { // handle empty string case 
     return COMP_DISP_ERR_OUT_OF_MEMORY;
   }
-  out = (uint8_t *)os_zalloc((n + 2) / 3 * 4);
+  out = (uint8_t *)os_zalloc(((n + 2) / 3 * 4) + 1);
   checkAllocOK(out);
   c_memcpy(bytes64, b64, sizeof(b64));   //Avoid lots of flash unaligned fetches
   
@@ -116,6 +116,8 @@ static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
   }
   *q = '\0';
   *len = q - out;
+//ets_printf("§b64Len: %d *len: %d§", ((n + 2) / 3 * 4) + 1, *len);
+  // ATTENTION the caller has to free *encoded!!
   *encoded = out;
   return COMP_DISP_ERR_OK;
 }
@@ -875,7 +877,8 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;
 
-  compMsgDispatcher->stopAP = 0;
+  compMsgDispatcher->runningModeFlags = 0;
+  compMsgDispatcher->stopAccessPoint = false;
   compMsgDispatcher->startStationOnly = false;
 
   compMsgDispatcher->numMsgHeaders = 0;
@@ -910,6 +913,8 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->addUartRequestData = &addUartRequestData;
   compMsgDispatcher->deleteRequest = &deleteRequest;
 
+  compMsgDispatcher->startSendMsg = NULL;
+  compMsgDispatcher->startSendMsg2 = NULL;
   compMsgDispatcher->sendCloudMsg = NULL;
   compMsgDispatcher->cloudMsgData = NULL;
   compMsgDispatcher->cloudMsgDataLgth = 0;

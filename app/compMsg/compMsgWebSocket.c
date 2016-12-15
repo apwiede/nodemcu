@@ -452,9 +452,9 @@ static void socketSent(void *arg) {
   if(wud == NULL) {
     return;
   }
-  if (wud->compMsgDispatcher->stopAP) {
-//ets_printf("§stopAP§\n");
-    wud->compMsgDispatcher->stopAP = 0;
+  if (wud->compMsgDispatcher->stopAccessPoint) {
+//ets_printf("§stopAccessPoint§\n");
+    wud->compMsgDispatcher->stopAccessPoint = false;
     boolResult = wifi_set_opmode(OPMODE_STATION);
     if (!boolResult) {
 ets_printf("§websocketSent: COMP_DISP_ERR_CANNOT_SET_OPMODE§");
@@ -505,9 +505,9 @@ static void serverConnected(void *arg) {
 
 }
 
-// ================================= alarmTimerAP ====================================
+// ================================= startAccessPoint ====================================
 
-static  void alarmTimerAP(void *arg) {
+static  void startAccessPoint(void *arg) {
   compMsgDispatcher_t *self;
   struct ip_info pTempIp;
   uint8_t timerId;
@@ -524,16 +524,16 @@ static  void alarmTimerAP(void *arg) {
   int result;
   websocketUserData_t *wud;
 
-ets_printf("§alarmTimerAP§\n");
+ets_printf("§startAccessPoint§\n");
   pesp_conn = NULL;
   mode = SOFTAP_IF;
   timerId = (uint8_t)((uint32_t)arg);
-//ets_printf("§alarmTimerAP timerId: %d§\n", timerId);
+//ets_printf("§startAccessPoint timerId: %d§\n", timerId);
   tmr = &compMsgTimers[timerId];
   self = tmr->self;
-//ets_printf("§alarmTimerAP: timerId: %d self: %p§\n", timerId, self);
+//ets_printf("§startAccessPoint: timerId: %d self: %p§\n", timerId, self);
   status = wifi_station_get_connect_status();
-ets_printf("alarmTimerAP:wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+ets_printf("startAccessPoint:wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
   switch (status) {
   case STATION_IDLE:
 ets_printf("§STATION_IDLE§\n");
@@ -711,6 +711,7 @@ ets_printf("wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_
     break;
   }
 
+  self->runningModeFlags |= COMP_DISP_RUNNING_MODE_AP;
   int repeat = 1;
   int interval = 1000;
   int timerId = 0;
@@ -721,7 +722,7 @@ ets_printf("wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_
   }
   // this is only preparing
 //ets_printf("§websocketRunAPMode timer_setfcn§\n");
-  ets_timer_setfn(&tmr->timer, alarmTimerAP, (void*)timerId);
+  ets_timer_setfn(&tmr->timer, startAccessPoint, (void*)timerId);
   tmr->mode = mode | TIMER_IDLE_FLAG;
   // here is the start
   tmr->interval = interval;
