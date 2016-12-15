@@ -38,7 +38,10 @@ var searchData=
   ['socketdnsfound',['socketDnsFound',['../compMsgNetSocket_8c.html#a5a585f116978fce5891187c7703a5d67',1,'compMsgNetSocket.c']]],
   ['socketreceived',['socketReceived',['../compMsgNetSocket_8c.html#a618ff1663a47d6b48f113de058b211b5',1,'socketReceived(void *arg, char *pdata, unsigned short len):&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a618ff1663a47d6b48f113de058b211b5',1,'socketReceived(void *arg, char *pdata, unsigned short len):&#160;compMsgWebSocket.c']]],
   ['socketsent',['socketSent',['../compMsgNetSocket_8c.html#a4a4d6a97b5c704288217e4dd52a442e3',1,'socketSent(void *arg):&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a4a4d6a97b5c704288217e4dd52a442e3',1,'socketSent(void *arg):&#160;compMsgWebSocket.c']]],
+  ['startaccesspoint',['startAccessPoint',['../compMsgWebSocket_8c.html#a0c21a69e481bc294d04d0178c2c30b7d',1,'compMsgWebSocket.c']]],
+  ['startclientmode',['startClientMode',['../compMsgNetSocket_8c.html#aa1e73712f01a66ad70242b3cfce883f5',1,'compMsgNetSocket.c']]],
   ['startnextrequest',['startNextRequest',['../compMsgDispatcher_8c.html#aad5151dde08653635d7f5b6483c1f066',1,'compMsgDispatcher.c']]],
   ['startrequest',['startRequest',['../compMsgDispatcher_8c.html#abddd63cd01a9e440fe850f97ad42cf7a',1,'compMsgDispatcher.c']]],
+  ['startstationcb',['startStationCb',['../compMsgWifiData_8c.html#af4a43120fae8d04758fe0cc25ae7c61c',1,'compMsgWifiData.c']]],
   ['storereceivedmsg',['storeReceivedMsg',['../compMsgIdentify_8c.html#afd30989db9be5f14c75bd5f2eec0558b',1,'compMsgIdentify.c']]]
 ];

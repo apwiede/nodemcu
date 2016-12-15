@@ -33,6 +33,8 @@ var searchData=
   ['socketinfo_5ft',['socketInfo_t',['../compMsgNetSocket_8c.html#a89c393a31244ad94f583e6f74fe66936',1,'socketInfo_t():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a89c393a31244ad94f583e6f74fe66936',1,'socketInfo_t():&#160;compMsgWebSocket.c']]],
   ['startnextrequest_5ft',['startNextRequest_t',['../compMsgDispatcher_8h.html#a7f446e992df2725579bef457b7807899',1,'compMsgDispatcher.h']]],
   ['startrequest_5ft',['startRequest_t',['../compMsgDispatcher_8h.html#a232562c24a87437020d5460ecaa46d3c',1,'compMsgDispatcher.h']]],
+  ['startsendmsg_5ft',['startSendMsg_t',['../compMsgDispatcher_8h.html#a2261e0ff45c09819eee336c88c950219',1,'compMsgDispatcher.h']]],
+  ['startstationcb_5ft',['startStationCb_t',['../compMsgDispatcher_8h.html#ac16c17a95ccddb7d840e96be6bc96eff',1,'compMsgDispatcher.h']]],
   ['stationconfig_5ft',['stationConfig_t',['../compMsgWifiData_8h.html#a9f4a0fdef812501c532f0a3f59a12322',1,'compMsgWifiData.h']]],
   ['storereceivedmsg_5ft',['storeReceivedMsg_t',['../compMsgDispatcher_8h.html#ae80cd7fd2cce50bde29f6ee58cc0bd64',1,'compMsgDispatcher.h']]],
   ['str2id_5ft',['str2id_t',['../compMsgTypesAndNames_8h.html#a5baf305c5d5937aec34b1fe2bb55a598',1,'compMsgTypesAndNames.h']]]

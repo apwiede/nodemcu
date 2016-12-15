@@ -18,8 +18,6 @@ var searchData=
   ['addrequest_5ft',['addRequest_t',['../compMsgDispatcher_8h.html#a79b917d6bf927a6a4ee842bcfdc24743',1,'compMsgDispatcher.h']]],
   ['adduartrequestdata',['addUartRequestData',['../structcompMsgDispatcher.html#ace38d25d8650b790ccc76a15ef06ccd6',1,'compMsgDispatcher::addUartRequestData()'],['../compMsgDispatcher_8c.html#a4fd6a8f7ec4c58ac66deb44d06c2b140',1,'addUartRequestData():&#160;compMsgDispatcher.c']]],
   ['adduartrequestdata_5ft',['addUartRequestData_t',['../compMsgDispatcher_8h.html#a381585118de549f161400e464653fcb7',1,'compMsgDispatcher.h']]],
-  ['alarmtimerap',['alarmTimerAP',['../compMsgWebSocket_8c.html#ae209a900298e01723c84cf5b17ce3430',1,'compMsgWebSocket.c']]],
-  ['alarmtimerclientmode',['alarmTimerClientMode',['../compMsgNetSocket_8c.html#a95fb4ed6698d93e1c79187d48a6880bf',1,'compMsgNetSocket.c']]],
   ['aptimer',['apTimer',['../compMsgNetSocket_8c.html#a01854a56587dc8a7b39564f82b3227b7',1,'apTimer():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a01854a56587dc8a7b39564f82b3227b7',1,'apTimer():&#160;compMsgWebSocket.c']]],
   ['authmode',['authmode',['../structbssScanInfo.html#a9d77e6f72ed0ba5db4728196bf7fb303',1,'bssScanInfo::authmode()'],['../structstationConfig.html#a523c91e6ea1310a5c69473ae27e73066',1,'stationConfig::authmode()']]],
   ['authmodesize',['authmodeSize',['../structbssScanSizes.html#af0a46a13b6ff224ad0838487f40196d0',1,'bssScanSizes']]],

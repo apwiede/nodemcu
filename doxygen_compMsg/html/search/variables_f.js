@@ -27,9 +27,10 @@ var searchData=
   ['resetbuildmsginfos',['resetBuildMsgInfos',['../structcompMsgDispatcher.html#af03e4c610e730409d833190f21aa71e2',1,'compMsgDispatcher']]],
   ['resetheaderinfos',['resetHeaderInfos',['../structcompMsgDispatcher.html#a74e7a57badb2555c4a2cc5214b31372f',1,'compMsgDispatcher']]],
   ['resetmsginfo',['resetMsgInfo',['../structcompMsgDispatcher.html#ad9bd6591d89dc27ab19443898a8c9968',1,'compMsgDispatcher']]],
-  ['rssi',['RSSI',['../structcompMsgModuleData.html#a9dcba9d2813372a0c63cf60662ef4a82',1,'compMsgModuleData::RSSI()'],['../structbssScanInfo.html#ae0afb8976cef65087ecbe45e3e4cf108',1,'bssScanInfo::rssi()']]],
+  ['rssi',['rssi',['../structbssScanInfo.html#ae0afb8976cef65087ecbe45e3e4cf108',1,'bssScanInfo::rssi()'],['../structcompMsgModuleData.html#a9dcba9d2813372a0c63cf60662ef4a82',1,'compMsgModuleData::RSSI()']]],
   ['rssimax',['RSSIMax',['../structcompMsgModuleData.html#a108bb17d9f79a305672247098941eefd',1,'compMsgModuleData']]],
   ['rssisize',['rssiSize',['../structbssScanSizes.html#a5e186d2dab75303002b98113066c6e83',1,'bssScanSizes']]],
   ['rssitype',['rssiType',['../structbssScanTypes.html#ac27313452f83024d79396c6090baad8a',1,'bssScanTypes']]],
-  ['runaction',['runAction',['../structcompMsgDispatcher.html#a8995881b1502e6cc571ea63247ef1acc',1,'compMsgDispatcher']]]
+  ['runaction',['runAction',['../structcompMsgDispatcher.html#a8995881b1502e6cc571ea63247ef1acc',1,'compMsgDispatcher']]],
+  ['runningmodeflags',['runningModeFlags',['../structcompMsgDispatcher.html#a56bd558d2c868b90a42c1f002dad76dc',1,'compMsgDispatcher']]]
 ];

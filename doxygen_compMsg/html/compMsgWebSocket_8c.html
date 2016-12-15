@@ -201,8 +201,8 @@ Functions</h2></td></tr>
 <tr class="separator:a4a4d6a97b5c704288217e4dd52a442e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30b408f19e7e577377facdf4c8da4120"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a30b408f19e7e577377facdf4c8da4120">serverConnected</a> (void *arg)</td></tr>
 <tr class="separator:a30b408f19e7e577377facdf4c8da4120"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae209a900298e01723c84cf5b17ce3430"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#ae209a900298e01723c84cf5b17ce3430">alarmTimerAP</a> (void *arg)</td></tr>
-<tr class="separator:ae209a900298e01723c84cf5b17ce3430"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c21a69e481bc294d04d0178c2c30b7d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a0c21a69e481bc294d04d0178c2c30b7d">startAccessPoint</a> (void *arg)</td></tr>
+<tr class="separator:a0c21a69e481bc294d04d0178c2c30b7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a12217b1628dcb7287d7f66b9d3f97a"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a">initTimers</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a1a12217b1628dcb7287d7f66b9d3f97a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01dcf3f4f3a1a6829ddcf061a3be1ee8"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a01dcf3f4f3a1a6829ddcf061a3be1ee8">websocketRunAPMode</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
@@ -507,32 +507,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="ae209a900298e01723c84cf5b17ce3430"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void alarmTimerAP </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>arg</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00510">510</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="a90b7fc903fa41d5da29798d23f7eb4b9"></a>
 <div class="memitem">
 <div class="memproto">
@@ -547,7 +521,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00736">736</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00737">737</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
@@ -730,6 +704,32 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00439">439</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0c21a69e481bc294d04d0178c2c30b7d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void startAccessPoint </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00510">510</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>

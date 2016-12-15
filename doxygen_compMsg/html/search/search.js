@@ -15,7 +15,7 @@ var indexSectionsWithContent =
   5: "abcdefghimnoprstuw",
   6: "cdw",
   7: "cdnow",
-  8: "bcdhikmorstw",
+  8: "bcdhikmnorstw",
   9: "cgsu",
   10: "c"
 };

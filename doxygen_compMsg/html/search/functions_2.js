@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['checkclientmode',['checkClientMode',['../compMsgSendReceive_8c.html#a80405511244d585196c9636f9ce0ec07',1,'compMsgSendReceive.c']]],
   ['checkhandle',['checkHandle',['../compMsgData_8c.html#ac9b11526909a3e5058c51eddaad503db',1,'checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher):&#160;compMsgData.c'],['../compMsgDispatcher_8c.html#ac9b11526909a3e5058c51eddaad503db',1,'checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher):&#160;compMsgDispatcher.c']]],
   ['closefile',['closeFile',['../compMsgMsgDesc_8c.html#a6667b5bc140657f70293deb1bd6e52aa',1,'compMsgMsgDesc.c']]],
   ['compmsgactioninit',['compMsgActionInit',['../compMsgAction_8c.html#a38e9ccd7469257de006ee354d39ec56c',1,'compMsgActionInit(compMsgDispatcher_t *self):&#160;compMsgAction.c'],['../compMsgDispatcher_8h.html#a38e9ccd7469257de006ee354d39ec56c',1,'compMsgActionInit(compMsgDispatcher_t *self):&#160;compMsgAction.c']]],

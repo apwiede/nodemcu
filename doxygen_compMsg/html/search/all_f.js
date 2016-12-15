@@ -41,7 +41,7 @@ var searchData=
   ['resetheaderinfos_5ft',['resetHeaderInfos_t',['../compMsgDispatcher_8h.html#a9ba4511b90af70cca2267616e9fb589e',1,'compMsgDispatcher.h']]],
   ['resetmsginfo',['resetMsgInfo',['../structcompMsgDispatcher.html#ad9bd6591d89dc27ab19443898a8c9968',1,'compMsgDispatcher::resetMsgInfo()'],['../compMsgDispatcher_8c.html#a9ff4cbb39b176f628288e95364bd7c02',1,'resetMsgInfo():&#160;compMsgDispatcher.c']]],
   ['resetmsginfo_5ft',['resetMsgInfo_t',['../compMsgDispatcher_8h.html#a1550b40296f2ed5bc7fa1767fbfeec0b',1,'compMsgDispatcher.h']]],
-  ['rssi',['RSSI',['../structcompMsgModuleData.html#a9dcba9d2813372a0c63cf60662ef4a82',1,'compMsgModuleData::RSSI()'],['../structbssScanInfo.html#ae0afb8976cef65087ecbe45e3e4cf108',1,'bssScanInfo::rssi()']]],
+  ['rssi',['rssi',['../structbssScanInfo.html#ae0afb8976cef65087ecbe45e3e4cf108',1,'bssScanInfo::rssi()'],['../structcompMsgModuleData.html#a9dcba9d2813372a0c63cf60662ef4a82',1,'compMsgModuleData::RSSI()']]],
   ['rssimax',['RSSIMax',['../structcompMsgModuleData.html#a108bb17d9f79a305672247098941eefd',1,'compMsgModuleData']]],
   ['rssisize',['rssiSize',['../structbssScanSizes.html#a5e186d2dab75303002b98113066c6e83',1,'bssScanSizes']]],
   ['rssitype',['rssiType',['../structbssScanTypes.html#ac27313452f83024d79396c6090baad8a',1,'bssScanTypes']]],
@@ -54,5 +54,6 @@ var searchData=
   ['runlightsleepnowakeupmode',['runLightSleepNoWakeupMode',['../compMsgAction_8c.html#a40869cf0422e53a33294e40334f704cf',1,'compMsgAction.c']]],
   ['runlightsleepwakeupmode',['runLightSleepWakeupMode',['../compMsgAction_8c.html#a3a91028a6c6aa818010cfa104c701fe1',1,'compMsgAction.c']]],
   ['runmodultestmode',['runModulTestMode',['../compMsgAction_8c.html#a7ba018f583d7a2b37257dd99fec2dbff',1,'compMsgAction.c']]],
+  ['runningmodeflags',['runningModeFlags',['../structcompMsgDispatcher.html#a56bd558d2c868b90a42c1f002dad76dc',1,'compMsgDispatcher']]],
   ['runwpsmode',['runWpsMode',['../compMsgAction_8c.html#a8bf8162323711ab66fce8dcc9520c8ab',1,'compMsgAction.c']]]
 ];

@@ -2,6 +2,8 @@ var searchData=
 [
   ['name',['name',['../structcompMsgModuleDataName2Value.html#a04e4d164d175b62d3cf978603e6549eb',1,'compMsgModuleDataName2Value']]],
   ['names',['names',['../structfieldNames.html#a36dc46c08767291eea0409cf52eb53b2',1,'fieldNames']]],
+  ['net_5fsocket_5ftype_5fclient',['NET_SOCKET_TYPE_CLIENT',['../compMsgData_8h.html#a3f02e282bfa99f327251ab50681a5e2d',1,'compMsgData.h']]],
+  ['net_5fsocket_5ftype_5fsocket',['NET_SOCKET_TYPE_SOCKET',['../compMsgData_8h.html#ad7c9e139bf786e53035a37ce7a9ba8da',1,'compMsgData.h']]],
   ['netdelete',['netDelete',['../compMsgNetSocket_8c.html#ab85f91794bd775bc3652d7880187a9ba',1,'compMsgNetSocket.c']]],
   ['netsocket_5ferr_5finvalid_5fframe_5fopcode',['NETSOCKET_ERR_INVALID_FRAME_OPCODE',['../compMsgNetSocket_8c.html#a4b580606f257139825138c0532fd3d0aae41dd1cb245c496bcddd8f092b288935',1,'compMsgNetSocket.c']]],
   ['netsocket_5ferr_5fmax_5fsocket_5freached',['NETSOCKET_ERR_MAX_SOCKET_REACHED',['../compMsgNetSocket_8c.html#a4b580606f257139825138c0532fd3d0aa0473f2d70209ac844580d71cd0540a64',1,'compMsgNetSocket.c']]],
