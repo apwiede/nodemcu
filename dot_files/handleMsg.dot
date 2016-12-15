@@ -69,7 +69,7 @@ digraph G1 {
   sendMsgSwitch:f3 -> sendCloudMsg;
   sendMsgSwitch:f1 -> typeWForwardMsg;
   typeRSendAnswer[style="filled", color="green", label=<<u>typeRSendAnswer</u>> URL="\ref typeRSendAnswer"];
-  sendCloudMsg[style="filled", color="green", label=<<u>sendCloudMsg</u>> URL="\ref grp_sendCloudMsg"];
+  sendCloudMsg[style="filled", color="green", label=<<u>sendMsgToCloud</u>> URL="\ref grp_sendCloudMsg"];
   webSocketSendData[style="filled", color="green", label=<<u>webSocketSendData</u>> URL="\ref websocketSendData"];
   webSocketSendData -> Queue:f1;
   webSocketSendData -> Queue:f2;
