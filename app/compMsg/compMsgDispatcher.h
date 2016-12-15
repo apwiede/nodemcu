@@ -252,7 +252,6 @@ typedef struct compMsgDispatcher {
   uint8_t *cloudPayload;
   size_t cloudPayloadLgth;
   bool stopAccessPoint;
-  bool startStationOnly;
 
   msgHeaderInfos_t msgHeaderInfos;
 

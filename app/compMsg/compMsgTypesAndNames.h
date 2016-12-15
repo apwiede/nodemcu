@@ -168,6 +168,20 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_LOW                  = 209,         // this must be the last entry!!
 };
 
+enum compMsgHttpHeaderNames
+{
+  COMP_MSG_HTTP_CODE                        = 1,
+  COMP_MSG_HTTP_CONTENT_TYPE                = 2,
+  COMP_MSG_HTTP_CONTENT_LENGTH              = 3,
+  COMP_MSG_HTTP_CONNECTION                  = 4,
+  COMP_MSG_HTTP_SERVER                      = 5,
+  COMP_MSG_HTTP_DATE                        = 6,
+  COMP_MSG_HTTP_CACHE_CONTROL               = 7,
+  COMP_MSG_HTTP_NODE_CODE                   = 8,
+  COMP_MSG_HTTP_SET_COOKIE                  = 9,
+  COMP_MSG_HTTP_X_POWER_BY                  = 10,
+};
+
 #define COMP_MSG_NO_INCR 0
 #define COMP_MSG_INCR    1
 #define COMP_MSG_DECR    -1
@@ -199,6 +213,7 @@ typedef uint8_t (* getFieldTypeStrFromId_t)(compMsgTypesAndNames_t *self, uint8_
 
 typedef uint8_t (* getFieldNameIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt);
 typedef uint8_t (* getFieldNameStrFromId_t)(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName);
+typedef uint8_t (* getHttpHeaderIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *httpHeaderStr, uint8_t *httpHeaderId);
 typedef uint8_t (* freeCompMsgTypesAndNames_t)(compMsgTypesAndNames_t *compMsgTypesAndNames);
 
 typedef struct compMsgTypesAndNames {
@@ -210,6 +225,8 @@ typedef struct compMsgTypesAndNames {
 
   getFieldNameIdFromStr_t getFieldNameIdFromStr;
   getFieldNameStrFromId_t getFieldNameStrFromId;
+
+  getHttpHeaderIdFromStr_t getHttpHeaderIdFromStr;
 
   freeCompMsgTypesAndNames_t freeCompMsgTypesAndNames;
 } compMsgTypesAndNames_t;

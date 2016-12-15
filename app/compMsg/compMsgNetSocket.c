@@ -54,6 +54,9 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
+#define _tolower(__c) ((unsigned char)(__c) - 'A' + 'a')
+#define _toupper(__c) ((unsigned char)(__c) - 'a' + 'A')
+
 #define TCP ESPCONN_TCP
 
 typedef struct socketInfo {
@@ -142,11 +145,123 @@ ets_printf("§netsocketSendData: result: %d§", result);
 
 // ============================ netsocket_parse =========================================
 
-static int ICACHE_FLASH_ATTR netsocket_parse(char * data, size_t size, char **resData, int *len, netsocketUserData_t *nud) {
+static uint8_t ICACHE_FLASH_ATTR netsocket_parse(char * data, size_t size, netsocketUserData_t *nud) {
   uint8_t result;
+  size_t numEol;
+  char *lowerData;
+  char *cp;
+  char *lastNewLine;
+  char *dp;
+  char *endHeader;
+  size_t idx;
+  size_t httpHeaderIdx;
+  size_t headerLgth;
+  bool hadColon;
+  httpHeaderPart_t *httpHeaderPart;
+  uint8_t *headerStr;
+  uint8_t *lowerHeaderStr;
+  char *endPtr;
+  long uval;
 
-//  result = nud->netsocketBinaryReceived(nud->compMsgDispatcher, nud, data, size);
-//  checkErrOK(result);
+  numEol = 0;
+  idx = 0;
+  lowerData = os_zalloc(size + 1);
+  cp = data;
+  lastNewLine = cp;
+  // get the number of lines of the request
+  while (idx < size) {
+    if ((*cp == '\n')) {
+      // check for end of http header
+      if ((cp - lastNewLine) < 3) {
+c_memcpy(lowerData, data, cp - data);
+ets_printf("§cp-data: %d len: %d§", cp - data, c_strlen(lowerData));
+cp[1] = '\0';
+         endHeader = cp;
+         break;
+      }
+      lastNewLine = cp;
+      numEol++;
+    }
+    idx++;
+    cp++;
+  }
+ets_printf("§numEol: %d lowerData: %s!§", numEol, lowerData);  
+  headerLgth = endHeader - data;
+  nud->receivedHeaders = os_zalloc(numEol * sizeof(httpHeaderPart_t));
+  checkAllocOK(nud->receivedHeaders);
+
+  dp = lowerData;
+  idx = 0;
+  cp = data;
+  httpHeaderIdx = 0;
+  hadColon = false;
+  lowerHeaderStr = dp;
+  headerStr = cp;
+  httpHeaderPart = &nud->receivedHeaders[httpHeaderIdx];
+  httpHeaderPart->httpHeaderId = COMP_MSG_HTTP_CODE;
+  httpHeaderPart->httpHeaderName = "Code";
+  httpHeaderPart->httpHeaderValue = headerStr;
+  // get result code
+  while (*cp != '\n') {
+     if (*cp == ' ') {
+       uval = c_strtoul(cp+1, &endPtr, 10);
+       nud->httpCode = (int)uval;
+ets_printf("§CODE: %d!§", nud->httpCode);
+       break;
+     }
+     cp++;
+  }
+  cp = data;
+  while (idx < headerLgth) {
+    if ((*cp == '\n')) {
+      if (httpHeaderIdx > 0) {
+//ets_printf("§dp: %d cp: %d§", dp-(char *)lowerHeaderStr, cp-(char *)headerStr);
+//ets_printf("§id: %d name: %s value: %s!§", httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
+      }
+      cp[-1] = '\0'; // ignore \r
+      cp++;
+      idx++;
+      httpHeaderIdx++;
+      hadColon = false;
+      httpHeaderPart = &nud->receivedHeaders[httpHeaderIdx];
+      dp = lowerData + (cp - data);
+      lowerHeaderStr = dp;
+      headerStr = cp;
+//ets_printf("§lh: %s!hs: %s!§", lowerHeaderStr, headerStr);
+    }
+    if (httpHeaderIdx > 0) {
+      if (!hadColon && (*cp == ':')) {
+        hadColon = true;
+        *cp = '\0';
+        *dp = '\0';
+//ets_printf("§lowerHeaderStr: %s!§", lowerHeaderStr);
+        result = nud->compMsgDispatcher->compMsgTypesAndNames->getHttpHeaderIdFromStr(nud->compMsgDispatcher->compMsgTypesAndNames, lowerHeaderStr, &httpHeaderPart->httpHeaderId);
+        httpHeaderPart->httpHeaderName = headerStr;
+        while (cp[1] == ' ') {
+          cp++;
+          idx++;
+        }
+        httpHeaderPart->httpHeaderValue = cp + 1;
+      } else {
+        if ((*cp > 0x40) && (*cp < 0x60)) {
+          *dp = _tolower(*cp);
+        } else {
+          *dp = *cp;
+        }
+      }
+    } else {
+      *dp = *cp;
+    }
+    dp++;
+    cp++;
+    idx++;
+  }
+  idx = 0;
+  while (idx < httpHeaderIdx) {
+    httpHeaderPart = &nud->receivedHeaders[idx];
+ets_printf("§idx: %d id: %d name: %s value: %s!§", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
+    idx++;
+  }
   return NETSOCKET_ERR_OK;
 }
 
@@ -159,12 +274,9 @@ static uint8_t netsocket_recv(char *payload, netsocketUserData_t *nud, char **da
 
   idx = 0;
 ets_printf("§netsocket_recv:remote_port: %d§\n", nud->remote_port);
-//ets_printf("netsocket_recv: %s!remote_port: %d\n",payload, nud->remote_port);
 
-//ets_printf("payload: %d!%s!\n", c_strlen(payload), payload);
-//ets_printf("netsocket_parse: %d!curr_url: %s!\n", os_strlen(string), nud->curr_url);
-//FIXME need to handle payload!!
-  nud->netsocketReceived(nud->compMsgDispatcher, nud, payload, c_strlen(payload));
+//FIXME need to handle data!!
+//  nud->netsocketReceived(nud->compMsgDispatcher, nud, data, lgth);
 //  netsocket_parse(string, os_strlen(string), data, lgth, nud);
   return NETSOCKET_ERR_OK;
 
@@ -322,6 +434,7 @@ ets_printf("§netSocketReceived is called. %d %s§", len, pdata);
   if(nud == NULL) {
     return;
   }
+  netsocket_parse(pdata, len, nud);
 }
 
 // ================================= netSocketSent  ====================================
@@ -564,6 +677,7 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   result = self->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
   nud->netsocketReceived = (netsocketReceived_t)numericValue;
   result = self->getWifiValue(self, WIFI_INFO_NET_TO_SEND_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  nud->receivedHeaders = NULL;
   nud->netsocketToSend = (netsocketToSend_t)numericValue;
   nud->compMsgDispatcher = self;
 //ets_printf("§netsocketReceived: %p netsocketToSend: %p§", nud->netsocketReceived, nud->netsocketToSend);

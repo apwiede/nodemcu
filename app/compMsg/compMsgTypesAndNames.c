@@ -114,6 +114,19 @@ static str2id_t specialFieldNames[] = {
   {NULL, -1},
 };
 
+static str2id_t httpHeaderNames[] = {
+  {"content-type",     COMP_MSG_HTTP_CONTENT_TYPE},
+  {"content-length",   COMP_MSG_HTTP_CONTENT_LENGTH},
+  {"connection",       COMP_MSG_HTTP_CONNECTION},
+  {"server",           COMP_MSG_HTTP_SERVER},
+  {"date",             COMP_MSG_HTTP_DATE},
+  {"cache-control",    COMP_MSG_HTTP_CACHE_CONTROL},
+  {"node-code",        COMP_MSG_HTTP_NODE_CODE},
+  {"set-cookie",       COMP_MSG_HTTP_SET_COOKIE},
+  {"x-powered-by",     COMP_MSG_HTTP_X_POWER_BY},
+  {NULL, -1},
+};
+
 // ================================= getFieldTypeIdFromStr ====================================
 
 static uint8_t getFieldTypeIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId) {
@@ -279,6 +292,22 @@ static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t field
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
+// ================================= getHttpHeaderIdFromStr ====================================
+
+static uint8_t getHttpHeaderIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *httpHeaderStr, uint8_t *httpHeaderId) {
+  str2id_t *entry;
+
+  entry = &httpHeaderNames[0];
+  while (entry->str != NULL) {
+    if (c_strcmp(httpHeaderStr, entry->str) == 0) {
+      *httpHeaderId = entry->id;
+      return DATA_VIEW_ERR_OK;
+    }
+    entry++;
+  }
+  return DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND;
+}
+
 // ================================= freeCompMsgTypesAndNames ====================================
 
 static uint8_t freeCompMsgTypesAndNames(compMsgTypesAndNames_t *compMsgTypesAndNames) {
@@ -323,6 +352,8 @@ compMsgTypesAndNames_t *newCompMsgTypesAndNames() {
 
   compMsgTypesAndNames->getFieldNameIdFromStr = &getFieldNameIdFromStr;
   compMsgTypesAndNames->getFieldNameStrFromId = &getFieldNameStrFromId;
+
+  compMsgTypesAndNames->getHttpHeaderIdFromStr = &getHttpHeaderIdFromStr;
 
   compMsgTypesAndNames->freeCompMsgTypesAndNames = &freeCompMsgTypesAndNames;
   return compMsgTypesAndNames;

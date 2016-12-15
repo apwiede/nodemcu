@@ -283,31 +283,21 @@ static uint8_t checkClientMode(compMsgDispatcher_t *self) {
   uint8_t *msgData;
   size_t msgLgth;
   char lgthBuf[20];
+uint8_t *ssid;
+uint8_t *passwd;
 
 //ets_printf("§checkClientMode: §");
 
+  self->startSendMsg2 = self->prepareCloudMsg;
   if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
 // FIXME !!! TEMPORARY
-uint8_t *ssid = "Wiedemann3";
-uint8_t *passwd = "58855473601443679162";
-    result = self->setWifiValue(self, "@clientSsid", 0, ssid);
-    checkErrOK(result);
-    result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
-    checkErrOK(result);
-    self->startStationOnly = true;
     // set the callback used after client mode is running
     self->startSendMsg = self->netsocketStartCloudSocket;
-    self->startSendMsg2 = self->prepareCloudMsg;
-//ets_printf("§call netsocketRunClientMode§");
     result = self->netsocketRunClientMode(self);
-//ets_printf("§netsocketRunClientMode: result: %d§", result);
     checkErrOK(result);
 // FIXME !!! TEMPORARY END
   } else {
-//ets_printf("§netsocketStartCloudSocket§");
-    self->startSendMsg2 = self->prepareCloudMsg;
     result = self->netsocketStartCloudSocket(self);
-//ets_printf("§netsocketStartCloudSocket: result: %d§", result);
     checkErrOK(result);
   }
   return COMP_DISP_ERR_OK;

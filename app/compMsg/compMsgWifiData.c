@@ -327,20 +327,9 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
 
 static uint8_t startStationCb(compMsgDispatcher_t *self) {
   uint8_t result;
-  bool boolResult;
-  uint8_t *ssid;
-  uint8_t *passwd;
-  int numericValue;
-  fieldsToSave_t *fieldsToSave;
-  int idx;
-  struct station_config *station_config;
-  struct ip_info ip_info;
-  char temp[64];
 
-ets_printf("§startStationCb:§");
-  self->startStationOnly = false;
-  self->startSendMsg(self);
-ets_printf("§startStationCb done§");
+  result = self->startSendMsg(self);
+  checkErrOK(result);
   return COMP_DISP_ERR_OK;
 }
 
@@ -351,16 +340,16 @@ static uint8_t websocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   uint8_t *handle;
   msgParts_t *received;
 
-ets_printf("§websocketSendConnectError: status: %d§\n", status);
+//ets_printf("§websocketSendConnectError: status: %d§\n", status);
   result = self->setWifiValue(self, "@clientStatus", (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
   result = self->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
-ets_printf("§resetMsgInfo: result: %d§\n", result);
+//ets_printf("§resetMsgInfo: result: %d§\n", result);
   checkErrOK(result);
-ets_printf("§websocketSendConnectError: done§\n");
+//ets_printf("§websocketSendConnectError: done§\n");
   return COMP_DISP_ERR_OK;
 }
 

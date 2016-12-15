@@ -800,22 +800,22 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   if (typelen > 0) {
     switch(type[0]) {
     case 'W':
-ets_printf("start RunAPMode\n");
+ets_printf("§start RunAPMode§");
       result = self->websocketRunAPMode(self);
       checkErrOK(result);
       break;
     case 'N':
-ets_printf("start RunClientMode\n");
+ets_printf("§start RunClientMode§");
       result = self->netsocketRunClientMode(self);
       checkErrOK(result);
       break;
     case 'C':
-ets_printf("start startCloudSocket\n");
+ets_printf("§start startCloudSocket§");
       result = self->netsocketStartCloudSocket(self);
       checkErrOK(result);
       break;
     case 'A':
-ets_printf("start send AA message\n");
+ets_printf("§start send AA message§");
       result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
       checkErrOK(result);
       result = self->createMsgFromHeaderPart(self, hdr, &handle);
@@ -823,7 +823,7 @@ ets_printf("start send AA message\n");
       checkErrOK(result);
       break;
     case 'U':
-//ets_printf("§start Uart input§");
+ets_printf("§start Uart input§");
       id = 0;
       stopbits = PLATFORM_UART_STOPBITS_1;
       parity = PLATFORM_UART_PARITY_NONE;
@@ -879,7 +879,6 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
 
   compMsgDispatcher->runningModeFlags = 0;
   compMsgDispatcher->stopAccessPoint = false;
-  compMsgDispatcher->startStationOnly = false;
 
   compMsgDispatcher->numMsgHeaders = 0;
   compMsgDispatcher->maxMsgHeaders = 0;

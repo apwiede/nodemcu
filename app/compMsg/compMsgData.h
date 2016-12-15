@@ -101,6 +101,12 @@ typedef struct websocketUserData {
   websocketTextReceived_t websocketTextReceived;
 } websocketUserData_t;
 
+typedef struct httpHeaderPart {
+  uint8_t httpHeaderId;
+  uint8_t *httpHeaderName;
+  uint8_t *httpHeaderValue;
+} httpHeaderPart_t;
+
 typedef struct netsocketUserData {
   struct espconn *pesp_conn;
   int remote_port;
@@ -112,6 +118,8 @@ typedef struct netsocketUserData {
   compMsgDispatcher_t *compMsgDispatcher;
   netsocketReceived_t netsocketReceived;
   netsocketToSend_t netsocketToSend;
+  httpHeaderPart_t *receivedHeaders;
+  int httpCode;
 } netsocketUserData_t;
 
 typedef uint8_t (* createMsg_t)(compMsgDispatcher_t *self, int numFields, uint8_t **handle);
