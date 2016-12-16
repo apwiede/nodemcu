@@ -57,18 +57,6 @@
 #define OPMODE_SOFTAP     SOFTAP_MODE
 #define OPMODE_STATIONAP  STATIONAP_MODE
 
-// check against compMsgDispatcher.h defines to avoid duplicates!!
-#define COMP_DISP_ERR_STATION_SCAN         150
-#define COMP_DISP_ERR_GET_STATION_CONFIG   149
-#define COMP_DISP_ERR_CANNOT_DISCONNECT    148
-#define COMP_DISP_ERR_CANNOT_SET_OPMODE    147
-#define COMP_DISP_ERR_REGIST_CONNECT_CB    146
-#define COMP_DISP_ERR_TCP_ACCEPT           145
-#define COMP_DISP_ERR_REGIST_TIME          144
-#define COMP_DISP_ERR_BAD_WIFI_VALUE_WHICH 143
-#define COMP_DISP_ERR_BAD_ROW              142
-#define COMP_DISP_ERR_CANNOT_CONNECT       99
-
 #define WIFI_INFO_WIFI                 (1 << 1)
 
 #define WIFI_INFO_WIFI_OPMODE            20
@@ -186,10 +174,6 @@ typedef struct stationConfig {
   int16_t freqcal_val;
 } stationConfig_t;
 
-typedef void (* webSocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
-typedef void (* webSocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
-typedef void (* netSocketToSend_t)(void *arg, void *wud, char *pdata, unsigned short len);
-typedef void (* netSocketReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 
 typedef struct compMsgWifiData {
   uint16_t key_ssid;

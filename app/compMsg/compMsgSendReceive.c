@@ -57,7 +57,7 @@ static uint8_t uartSetup(compMsgDispatcher_t *self, unsigned id, uint32_t baud, 
   result = platform_uart_setup(id, baud, databits, parity, stopbits);
 //ets_printf("§uartSetup:id: %d baud: %d§", id, baud);
   checkErrOK(result);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= uartReceiveCb ====================================
@@ -79,11 +79,11 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
     myBuffer = buf;
   }
   result =self->addUartRequestData(self, (uint8_t *)myBuffer, lgth);
-if (result != COMP_DISP_ERR_OK) {
+if (result != COMP_MSG_ERR_OK) {
 ets_printf("§uartReceiveCb end result: %d§", result);
 }
   checkErrOK(result);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= typeRSendAnswer ====================================
@@ -107,7 +107,7 @@ static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t
     idx++;
   }
 //ets_printf("§typeRSendAnswer done§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= sendCloudMsg ====================================
@@ -134,25 +134,25 @@ static uint8_t sendCloudMsg(compMsgDispatcher_t *self) {
   uint8_t *msgData;
   size_t msgLgth;
 
-  if (self->compMsgData->nud == NULL) {
-ets_printf("§COMP_DISP_ERR_NO_WEBSOCKET_OPENED§");
-    return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
+  if (self->compMsgData->sud == NULL) {
+ets_printf("§COMP_MSG_ERR_NO_WEBSOCKET_OPENED§");
+    return COMP_MSG_ERR_NO_WEBSOCKET_OPENED;
   }
 //ets_printf("§request: %d %s§", self->cloudPayloadLgth, self->cloudPayload);
-  result = COMP_DISP_ERR_OK;
+  result = COMP_MSG_ERR_OK;
   if (self->cloudPayload == NULL) {
 //    result = self->prepareCloudMsg2(self);
 //    checkErrOK(result);
 ets_printf("§sendCloudMsg: cloudPayload == NULL§");
-    return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
+    return COMP_MSG_ERR_NO_WEBSOCKET_OPENED;
   }
-  result = self->netSocketSendData(self->compMsgData->nud, self->cloudPayload, self->cloudPayloadLgth);
+  result = self->netSocketSendData(self->compMsgData->sud, self->cloudPayload, self->cloudPayloadLgth);
   checkErrOK(result);
   os_free(self->cloudPayload);
   self->cloudPayload = NULL;
   self->cloudPayloadLgth = 0;
 //ets_printf("§sendCloudMsg: done result: %d§", result);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= prepareCloudMsg ====================================
@@ -256,7 +256,7 @@ ets_printf("§request: %d %s§", c_strlen(payload), payload);
   result = sendCloudMsg(self);
   checkErrOK(result);
 //ets_printf("§prepareCloudMsg: done§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= checkClientMode ====================================
@@ -300,7 +300,7 @@ uint8_t *passwd;
     result = self->netSocketStartCloudSocket(self);
     checkErrOK(result);
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= sendMsg ====================================
@@ -311,12 +311,12 @@ static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLg
 //ets_printf("§sendMsg: %c§", self->compMsgData->currHdr->hdrHandleType);
   switch (self->compMsgData->currHdr->hdrHandleType) {
   case 'A':
-//ets_printf("wud: %p\n", self->compMsgData->wud);
-    if (self->compMsgData->wud == NULL) {
-      return COMP_DISP_ERR_NO_WEBSOCKET_OPENED;
+//ets_printf("sud: %p\n", self->compMsgData->sud);
+    if (self->compMsgData->sud == NULL) {
+      return COMP_MSG_ERR_NO_WEBSOCKET_OPENED;
     }
-ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->wud->remote_ip[0], self->compMsgData->wud->remote_ip[1], self->compMsgData->wud->remote_ip[2], self->compMsgData->wud->remote_ip[3], self->compMsgData->wud->remote_port);
-    result = self->webSocketSendData(self->compMsgData->wud, msgData, msgLgth, OPCODE_BINARY);
+ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->sud->remote_ip[0], self->compMsgData->sud->remote_ip[1], self->compMsgData->sud->remote_ip[2], self->compMsgData->sud->remote_ip[3], self->compMsgData->sud->remote_port);
+    result = self->webSocketSendData(self->compMsgData->sud, msgData, msgLgth, OPCODE_BINARY);
     checkErrOK(result);
     break;
   case 'G':
@@ -346,13 +346,13 @@ ets_printf("§sendMsg W not yet implemented§");
   case 'N':
     // just ignore
 ets_printf("§sendMsg N not yet implemented§");
-    return COMP_DISP_ERR_OK;
+    return COMP_MSG_ERR_OK;
     break;
   default:
-    return COMP_DISP_ERR_BAD_HANDLE_TYPE;
+    return COMP_MSG_ERR_BAD_HANDLE_TYPE;
   }
 //ets_printf("§sendMsg: done§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= compMsgSendReceiveInit ====================================
@@ -361,8 +361,7 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
   result = self->getNewCompMsgDataPtr(self);
-  self->compMsgData->wud = NULL;
-  self->compMsgData->nud = NULL;
+  self->compMsgData->sud = NULL;
   self->compMsgData->receivedData = NULL;
   self->compMsgData->receivedLgth = 0;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
@@ -375,6 +374,6 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   self->checkClientMode = &checkClientMode;
   self->sendCloudMsg = &sendCloudMsg;
   self->sendMsg = &sendMsg;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 

@@ -45,57 +45,22 @@
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
+#include "platform.h"
+
 #include "dataView.h"
+#include "compMsgErrorCodes.h"
 #include "compMsgTypesAndNames.h"
 #include "compMsgDataView.h"
+#include "compMsgTimer.h"
 #include "compMsgModuleData.h"
+#include "compMsgSocket.h"
 #include "compMsgWifiData.h"
 #include "compMsgMsgDesc.h"
 #include "compMsgData.h"
+#include "compMsgHttp.h"
 
 //#define CLOUD_1
 #define CLOUD_2
-
-enum compMsgDispatcherErrorCode
-{
-  COMP_DISP_ERR_OK                    = 0,
-  COMP_DISP_ERR_VALUE_NOT_SET         = 255,
-  COMP_DISP_ERR_VALUE_OUT_OF_RANGE    = 254,
-  COMP_DISP_ERR_BAD_VALUE             = 253,
-  COMP_DISP_ERR_BAD_FIELD_TYPE        = 252,
-  COMP_DISP_ERR_FIELD_TYPE_NOT_FOUND  = 251,
-  COMP_DISP_ERR_VALUE_TOO_BIG         = 250,
-  COMP_DISP_ERR_OUT_OF_MEMORY         = 249,
-  COMP_DISP_ERR_OUT_OF_RANGE          = 248,
-  // be carefull the values up to here
-  // must correspond to the values in dataView.h !!!
-  // with the names like DATA_VIEW_ERR_*
-
-  COMP_DISP_ERR_FIELD_NOT_FOUND       = 230,
-  COMP_DISP_ERR_HANDLE_NOT_FOUND      = 227,
-  // be carefull the values up to here
-  // must correspond to the values in compMsgDataView.h !!!
-  // with the names like COMP_MSG_ERR_*
-
-  // 189 - 180 are used for COMP_MSG_DESC_ERR_* !!
-
-  COMP_DISP_ERR_BAD_RECEIVED_LGTH     = 179,
-  COMP_DISP_ERR_BAD_FILE_CONTENTS     = 178,
-  COMP_DISP_ERR_HEADER_NOT_FOUND      = 177,
-  COMP_DISP_ERR_DUPLICATE_FIELD       = 176,
-  COMP_DISP_ERR_BAD_FIELD_NAME        = 175,
-  COMP_DISP_ERR_BAD_HANDLE_TYPE       = 174,
-  COMP_DISP_ERR_INVALID_BASE64_STRING = 173,
-  COMP_DISP_ERR_TOO_FEW_FILE_LINES    = 172,
-  COMP_DISP_ERR_ACTION_NAME_NOT_FOUND = 171,
-  COMP_DISP_ERR_DUPLICATE_ENTRY       = 170,
-  COMP_DISP_ERR_NO_WEBSOCKET_OPENED   = 169,
-  COMP_DISP_ERR_TOO_MANY_REQUESTS     = 168,
-  COMP_DISP_ERR_REQUEST_NOT_FOUND     = 167,
-  COMP_DISP_ERR_UART_REQUEST_NOT_SET  = 166,
-  COMP_DISP_ERR_FUNNY_HANDLE_TYPE     = 165,
-  COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND = 164,
-};
 
 // answer message types
 #define COMP_MSG_ACK_MSG 0x01
@@ -173,12 +138,12 @@ typedef uint8_t (* webSocketRunAPMode_t)(compMsgDispatcher_t *self);
 
 // WebSocket stuff
 typedef uint8_t (* webSocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
-typedef uint8_t (* webSocketSendData_t)(webSocketUserData_t *wud, const char *payload, int size, int opcode);
+typedef uint8_t (* webSocketSendData_t)(socketUserData_t *sud, const char *payload, int size, int opcode);
 
 // NetSocket stuff
 typedef uint8_t (* netSocketStartCloudSocket_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netSocketRunClientMode_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* netSocketSendData_t)(netSocketUserData_t *wud, const char *payload, int size);
+typedef uint8_t (* netSocketSendData_t)(socketUserData_t *sud, const char *payload, int size);
 
 // Dispatcher stuff
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
@@ -252,19 +217,26 @@ typedef struct compMsgDispatcher {
   uint8_t *cloudPayload;
   size_t cloudPayloadLgth;
   bool stopAccessPoint;
-
-  msgHeaderInfos_t msgHeaderInfos;
-
-  compMsgTypesAndNames_t *compMsgTypesAndNames;
-
   // running mode flags
   uint16_t runningModeFlags;
 
   // station mode
   uint32_t station_ip;
 
+
+  msgHeaderInfos_t msgHeaderInfos;
+
+  // compMsgTypesAndNames info
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
+
   // compMsgMsgDesc info
   compMsgMsgDesc_t *compMsgMsgDesc;
+
+  // compMsgTimer info
+  compMsgTimer_t *compMsgTimer;
+
+  // compMsgHttp info
+  compMsgHttp_t *compMsgHttp;
 
   // request infos
   msgRequestInfos_t msgRequestInfos;
@@ -363,6 +335,7 @@ typedef struct compMsgDispatcher {
   webSocketSendConnectError_t webSocketSendConnectError;
   netSocketSendConnectError_t netSocketSendConnectError;
 
+
   webSocketRunClientMode_t webSocketRunClientMode;
   webSocketSendData_t webSocketSendData;
 
@@ -382,7 +355,9 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self);
 uint8_t compMsgActionInit(compMsgDispatcher_t *self);
 uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self);
 uint8_t compMsgWifiInit(compMsgDispatcher_t *self);
-uint8_t compMsgWebsocketInit(compMsgDispatcher_t *self);
-uint8_t compMsgNetsocketInit(compMsgDispatcher_t *self);
+uint8_t compMsgWebSocketInit(compMsgDispatcher_t *self);
+uint8_t compMsgNetSocketInit(compMsgDispatcher_t *self);
+uint8_t compMsgHttpInit(compMsgDispatcher_t *self);
+uint8_t compMsgTimerInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_DISPATCHER_H */

@@ -43,17 +43,6 @@
 #ifndef COMP_MSG_MODULE_DATA_H
 #define	COMP_MSG_MODULE_DATA_H
 
-// check against compMsgDispatcher.h defines to avoid duplicates!!
-#define COMP_DISP_ERR_STATION_SCAN       150
-#define COMP_DISP_ERR_GET_STATION_CONFIG 149
-#define COMP_DISP_ERR_CANNOT_DISCONNECT  148
-#define COMP_DISP_ERR_CANNOT_SET_OPMODE  147
-#define COMP_DISP_ERR_REGIST_CONNECT_CB  146
-#define COMP_DISP_ERR_TCP_ACCEPT         145
-#define COMP_DISP_ERR_REGIST_TIME        144
-#define COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH 143
-#define COMP_DISP_ERR_BAD_ROW            142
-
 #define MODULE_INFO_MODULE            (1 << 0)
 
 #define MODULE_INFO_MACAddr              1

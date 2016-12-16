@@ -113,7 +113,7 @@ static uint8_t resetHeaderInfos(compMsgDispatcher_t *self) {
   hdrInfos->seqIdx = 0;
   hdrInfos->seqIdxAfterHeader = 0;
   hdrInfos->currPartIdx = 0;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= nextFittingEntry ====================================
@@ -158,13 +158,13 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   }
   if (!found) {
 ets_printf("§nextFitting HEADER_NOT_FOUND§\n");
-    return COMP_DISP_ERR_HEADER_NOT_FOUND;
+    return COMP_MSG_ERR_HEADER_NOT_FOUND;
   }
   hdrInfos->currPartIdx = hdrIdx;
 //ets_printf("§encryption: %c handleType: %c§", hdr->hdrEncryption, hdr->hdrHandleType);
   received->encryption = hdr->hdrEncryption;
 //ets_printf("§nextFitting!found!%d!hdrIdx!%d!hdr->cmdKey:0x%04x!received->cmdKey: 0x%04x§", found, hdrIdx, hdr->hdrU16CmdKey, received->u16CmdKey);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getHeaderIndexFromHeaderFields ====================================
@@ -658,12 +658,12 @@ ets_printf("§forwardMsg result: %d§", result);
         return result;
       default:
 ets_printf("handleReceivedPart: funny handleType: %c 0x%02x\n", hdr->hdrHandleType, hdr->hdrHandleType);
-        return COMP_DISP_ERR_FUNNY_HANDLE_TYPE;
+        return COMP_MSG_ERR_FUNNY_HANDLE_TYPE;
       }
     }
     idx++;
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= handleToSendPart ====================================
@@ -711,7 +711,7 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
   self->cloudMsgDataLgth = encryptedLgth;
   result = self->sendCloudMsg(self);
   checkErrOK(result);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= compMsgIdentifyInit ====================================
@@ -732,5 +732,5 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   checkErrOK(result);
   result=self->compMsgMsgDesc->getFieldsToSave(self, MSG_FIELDS_TO_SAVE_FILE_NAME);
   checkErrOK(result);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }

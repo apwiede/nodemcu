@@ -967,7 +967,7 @@ static uint8_t deleteMsgDescParts(compMsgDispatcher_t *self) {
 ets_printf("§self->compMsgData->msgDescParts != NULL and numMsgDescParts == 0§");
     }
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= deleteMsgValParts ====================================
@@ -999,7 +999,7 @@ static uint8_t deleteMsgValParts(compMsgDispatcher_t *self) {
 ets_printf("§self->compMsgData->msgValParts != NULL and numMsgValParts == 0§");
     }
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= freeCompMsgData ====================================
@@ -1059,8 +1059,7 @@ static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
     deleteHandle(self, compMsgData->handle);
     compMsgData->handle[0] = '\0';
   }
-//  webSocketUserData_t *wud;
-//  netSocketUserData_t *nud;
+//  socketUserData_t *sud;
 
 // ???  os_free(self->compMsgData);
 //  self->compMsgData = NULL;

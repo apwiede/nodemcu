@@ -43,29 +43,6 @@
 #ifndef COMP_MSG_MSG_DESC_H
 #define	COMP_MSG_MSG_DESC_H
 
-enum compMsgDataErrorCode
-{
-  COMP_MSG_DESC_ERR_OK                    = 0,
-  COMP_MSG_DESC_ERR_VALUE_NOT_SET         = 255,
-  COMP_MSG_DESC_ERR_VALUE_OUT_OF_RANGE    = 254,
-  COMP_MSG_DESC_ERR_BAD_VALUE             = 253,
-  COMP_MSG_DESC_ERR_BAD_FIELD_TYPE        = 252,
-  COMP_MSG_DESC_ERR_FIELD_TYPE_NOT_FOUND  = 251,
-  COMP_MSG_DESC_ERR_VALUE_TOO_BIG         = 250,
-  COMP_MSG_DESC_ERR_OUT_OF_MEMORY         = 249,
-  COMP_MSG_DESC_ERR_OUT_OF_RANGE          = 248,
-  // be carefull the values up to here
-  // must correspond to the values in dataView.h !!!
-  // with the names like DATA_VIEW_ERR_*
-
-  COMP_MSG_DESC_ERR_OPEN_FILE             = 189,
-  COMP_MSG_DESC_ERR_FILE_NOT_OPENED       = 188,
-  COMP_MSG_DESC_ERR_FLUSH_FILE            = 187,
-  COMP_MSG_DESC_ERR_WRITE_FILE            = 186,
-  COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS    = 185,
-  COMP_MSG_DESC_ERR_FIELD_TOO_LONG        = 184,
-};
-
 #define DISP_BUF_LGTH 1024
 
 // handle types

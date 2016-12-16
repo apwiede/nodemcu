@@ -93,7 +93,7 @@ static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t 
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
   *numericValue = 0;
   *stringValue = compMsgModuleData.MACAddr;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getIPAddr ====================================
@@ -102,7 +102,7 @@ static uint8_t getIPAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t *
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
   *numericValue = 0;
   *stringValue = compMsgModuleData.IPAddr;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getFirmwareVersion ====================================
@@ -111,7 +111,7 @@ static uint8_t getFirmwareVersion(compMsgDispatcher_t *self, int *numericValue, 
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
   *numericValue = 0;
   *stringValue = compMsgModuleData.FirmwareVersion;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getSerieNumber ====================================
@@ -120,7 +120,7 @@ static uint8_t getSerieNumber(compMsgDispatcher_t *self, int *numericValue, uint
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
   *numericValue = 0;
   *stringValue = compMsgModuleData.SerieNumber;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getRSSI ====================================
@@ -130,7 +130,7 @@ static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **s
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSI;
   *numericValue = compMsgModuleData.RSSI;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getRSSIMax ====================================
@@ -140,7 +140,7 @@ static uint8_t getRSSIMax(compMsgDispatcher_t *self, int *numericValue, uint8_t 
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSIMax;
   *numericValue = compMsgModuleData.RSSIMax;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getConnectionState ====================================
@@ -150,7 +150,7 @@ static uint8_t getConnectionState(compMsgDispatcher_t *self, int *numericValue, 
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectionState;
   *numericValue = compMsgModuleData.ConnectionState;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getConnectedUsers ====================================
@@ -160,7 +160,7 @@ static uint8_t getConnectedUsers(compMsgDispatcher_t *self, int *numericValue, u
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectedUsers;
   *numericValue = compMsgModuleData.ConnectedUsers;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getProgRunningMode ====================================
@@ -170,7 +170,7 @@ static uint8_t getProgRunningMode(compMsgDispatcher_t *self, int *numericValue, 
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ProgRunningMode;
   *numericValue = compMsgModuleData.ProgRunningMode;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= CurrentProgRunningMode ====================================
@@ -180,7 +180,7 @@ static uint8_t getCurrentRunningMode(compMsgDispatcher_t *self, int *numericValu
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.CurrentRunningMode;
   *numericValue = compMsgModuleData.CurrentRunningMode;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getIPProtocol ====================================
@@ -190,7 +190,7 @@ static uint8_t getIPProtocol(compMsgDispatcher_t *self, int *numericValue, uint8
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.IPProtocol;
   *numericValue = compMsgModuleData.IPProtocol;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getRegion ====================================
@@ -200,7 +200,7 @@ static uint8_t getRegion(compMsgDispatcher_t *self, int *numericValue, uint8_t *
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.Region;
   *numericValue = compMsgModuleData.Region;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getDeviceSecurity ====================================
@@ -210,7 +210,7 @@ static uint8_t getDeviceSecurity(compMsgDispatcher_t *self, int *numericValue, u
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
   *numericValue = compMsgModuleData.DeviceSecurity;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getErrorMain ====================================
@@ -220,7 +220,7 @@ static uint8_t getErrorMain(compMsgDispatcher_t *self, int *numericValue, uint8_
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
   *numericValue = compMsgModuleData.ErrorMain;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getErrorSub ====================================
@@ -230,7 +230,7 @@ static uint8_t getErrorSub(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
   *numericValue = compMsgModuleData.ErrorSub;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getDateAndTime ====================================
@@ -239,7 +239,7 @@ static uint8_t getDateAndTime(compMsgDispatcher_t *self, int *numericValue, uint
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
   *numericValue = 0;
   *stringValue = compMsgModuleData.DateAndTime;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getSSIDs ====================================
@@ -249,7 +249,7 @@ static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
   *numericValue = compMsgModuleData.SSIDs;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getPingState ====================================
@@ -259,7 +259,7 @@ static uint8_t getPingState(compMsgDispatcher_t *self, int *numericValue, uint8_
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.PingState;
   *numericValue = compMsgModuleData.PingState;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve1 ====================================
@@ -269,7 +269,7 @@ static uint8_t getReserve1(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
   *numericValue = (int)compMsgModuleData.Reserve1;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve2 ====================================
@@ -278,7 +278,7 @@ static uint8_t getReserve2(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve2;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve3 ====================================
@@ -287,7 +287,7 @@ static uint8_t getReserve3(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve3;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve4 ====================================
@@ -296,7 +296,7 @@ static uint8_t getReserve4(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve4;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve4;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve5 ====================================
@@ -305,7 +305,7 @@ static uint8_t getReserve5(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve5;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve5;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve6 ====================================
@@ -314,7 +314,7 @@ static uint8_t getReserve6(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve6;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve6;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve7 ====================================
@@ -323,7 +323,7 @@ static uint8_t getReserve7(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve7;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve7;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getReserve8 ====================================
@@ -332,7 +332,7 @@ static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve8;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve8;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getGUID ====================================
@@ -341,7 +341,7 @@ static uint8_t getGUID(compMsgDispatcher_t *self, int *numericValue, uint8_t **s
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
   *numericValue = 0;
   *stringValue = compMsgModuleData.GUID;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getPasswdC ====================================
@@ -350,7 +350,7 @@ static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t 
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
   *numericValue = 0;
   *stringValue = compMsgModuleData.passwdC;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getSrcId ====================================
@@ -360,7 +360,7 @@ static uint8_t getSrcId(compMsgDispatcher_t *self, int *numericValue, uint8_t **
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
   *numericValue = compMsgModuleData.srcId;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getOperatingMode ====================================
@@ -370,7 +370,7 @@ static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.operatingMode;
   *numericValue = compMsgModuleData.operatingMode;
   *stringValue = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= setOperatingMode ====================================
@@ -379,7 +379,7 @@ static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
   int result;
 
   result = self->setModuleValue(self, "operatingMode", self->operatingMode, NULL);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= moduleFieldName2Id ====================================
@@ -387,7 +387,7 @@ static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
 static uint8_t moduleFieldName2Id(compMsgDispatcher_t *self, uint8_t *fieldNameStr, uint8_t *id) {
   int result;
 
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= setModuleValue ====================================
@@ -504,10 +504,10 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
     compMsgModuleData.operatingMode = numericValue;
     break;
   default:
-    return COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH;
+    return COMP_MSG_ERR_BAD_MODULE_VALUE_WHICH;
     break;
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= updateModuleValues ====================================
@@ -516,7 +516,7 @@ static uint8_t updateModuleValues(compMsgDispatcher_t *self) {
   int result;
 
   compMsgModuleData.RSSI = (uint8_t)wifi_station_get_rssi();
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= setModuleValues ====================================
@@ -524,7 +524,7 @@ static uint8_t updateModuleValues(compMsgDispatcher_t *self) {
 static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   int result;
 
-ets_printf("§setModuleVaues§");
+ets_printf("§setModuleVaues\n§");
   compMsgModuleData.MACAddr[0] = 0xAB;
   compMsgModuleData.MACAddr[1] = 0xCD;
   compMsgModuleData.MACAddr[2] = 0xEF;
@@ -581,8 +581,8 @@ ets_printf("§setModuleVaues§");
   compMsgModuleData.srcId = 12312;
   c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2\0", 17);
   compMsgModuleData.operatingMode = 0xE0;
-ets_printf("§setModuleVaues done§");
-  return COMP_DISP_ERR_OK;
+ets_printf("§setModuleVaues done\n§");
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= compMsgModuleDataInit ====================================
@@ -626,6 +626,6 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->addFieldValueCallbackName(self, "@setOperatingMode", &setOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getOperatingMode", &getOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->setModuleValues(self);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 

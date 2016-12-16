@@ -78,7 +78,7 @@ static uint8_t runClientMode(compMsgDispatcher_t *self, uint8_t mode) {
   int result;
 
   self->webSocketRunClientMode(self, mode);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= runAPMode ====================================
@@ -87,35 +87,35 @@ static uint8_t runAPMode(compMsgDispatcher_t *self) {
   int result;
 
   self->webSocketRunAPMode(self);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= runLightSleepWakeupMode ====================================
 
 static uint8_t runLightSleepWakeupMode(compMsgDispatcher_t *self) {
   int result;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= runLightSleepNoWakeupMode ====================================
 
 static uint8_t runLightSleepNoWakeupMode(compMsgDispatcher_t *self) {
   int result;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= runWpsMode ====================================
 
 static uint8_t runWpsMode(compMsgDispatcher_t *self) {
   int result;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= runModulTestMode ====================================
 
 static uint8_t runModulTestMode(compMsgDispatcher_t *self) {
   int result;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= runDeletePasswdCMode ====================================
@@ -124,7 +124,7 @@ static uint8_t runDeletePasswdCMode(compMsgDispatcher_t *self) {
   int result;
 
 ets_printf("§runDeletePasswdC§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= runAPConnect ====================================
@@ -189,13 +189,13 @@ static uint8_t getActionMode(compMsgDispatcher_t *self, uint8_t *actionName, uin
     if (c_strcmp(actionEntry->actionName, actionName) == 0) {
       *actionMode = actionEntry->mode;
 ets_printf("§actionMode: %d§", *actionMode);
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
     idx++;
     actionEntry = &actionName2Actions[idx];
   }
 ets_printf("§getActionMode: %s§", actionName);
-  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+  return COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= getActionCallback ====================================
@@ -210,13 +210,13 @@ static uint8_t getActionCallback(compMsgDispatcher_t *self, uint8_t *actionName,
   while (actionEntry->actionName != NULL) { 
     if (c_strcmp(actionEntry->actionName, actionName) == 0) {
       *callback = actionEntry->action;
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
     idx++;
     actionEntry = &actionName2Actions[idx];
   }
 ets_printf("§getActionCallback: %s§\n", actionName);
-  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+  return COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= getActionCallbackName ====================================
@@ -231,13 +231,13 @@ static uint8_t getActionCallbackName(compMsgDispatcher_t *self, action_t callbac
   while (actionEntry->actionName != NULL) { 
     if (actionEntry->action == callback) {
       *actionName = actionEntry->actionName;
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
     idx++;
     actionEntry = &actionName2Actions[idx];
   }
 ets_printf("§getActionCallbackName: %s§", actionName);
-  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+  return COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= setActionEntry ====================================
@@ -258,19 +258,19 @@ static uint8_t setActionEntry(compMsgDispatcher_t *self, uint8_t *actionName, ui
     if (c_strcmp(actionEntry->actionName, actionName) == 0) {
       compMsgActionEntries.actionEntries[compMsgActionEntries.numActionEntries] = actionEntry;
       if (actionEntry->mode != 0) {
-        return COMP_DISP_ERR_DUPLICATE_ENTRY;
+        return COMP_MSG_ERR_DUPLICATE_ENTRY;
       }
       actionEntry->mode = mode;
       actionEntry->u8CmdKey = u8CmdKey;
       actionEntry->u16CmdKey = u16CmdKey;
       compMsgActionEntries.numActionEntries++;
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
     idx++;
     actionEntry = &actionName2Actions[idx];
   }
 ets_printf("§setActionEntry: %s§", actionName);
-  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+  return COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= runAction ====================================
@@ -310,7 +310,7 @@ ets_printf("§runAction0!%s!%d!§", actionEntry->actionName, actionEntry->mode);
         os_free(self->compMsgData->compMsgDataView->dataView);
         os_free(self->compMsgData->compMsgDataView);
         self->compMsgData->compMsgDataView = NULL;
-        return COMP_DISP_ERR_OK;
+        return COMP_MSG_ERR_OK;
       }
       idx++;
       actionEntry = &actionName2Actions[idx];
@@ -319,7 +319,7 @@ ets_printf("§runAction0!%s!%d!§", actionEntry->actionName, actionEntry->mode);
     os_free(self->compMsgData->compMsgDataView);
     self->compMsgData->compMsgDataView = NULL;
 ets_printf("§runAction1:§");
-    return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+    return COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
   } else {
 //ets_printf("§runAction u16!%c%c!%c!§\n", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, *answerType);
     switch (self->actionMode) {
@@ -337,7 +337,7 @@ ets_printf("§runAction1:§");
           os_free(self->compMsgData->compMsgDataView->dataView);
           os_free(self->compMsgData->compMsgDataView);
           self->compMsgData->compMsgDataView = NULL;
-          return COMP_DISP_ERR_OK;
+          return COMP_MSG_ERR_OK;
         }
         idx++;
         actionEntry = &actionName2Actions[idx];
@@ -346,7 +346,7 @@ ets_printf("§runAction1:§");
       os_free(self->compMsgData->compMsgDataView);
       self->compMsgData->compMsgDataView = NULL;
 ets_printf("§runAction3:§");
-      return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      return COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
       break;
     }
   }
@@ -354,7 +354,7 @@ ets_printf("§runAction3:§");
   os_free(self->compMsgData->compMsgDataView);
   self->compMsgData->compMsgDataView = NULL;
 ets_printf("§runAction4:§");
-  return COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+  return COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
 }
 
 // ================================= compMsgActionInit ====================================

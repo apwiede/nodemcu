@@ -63,59 +63,6 @@ enum CompMsgFieldType
   DATA_VIEW_FIELD_INT32_VECTOR  = 12,
 };
 
-enum compMsgErrorCode
-{
-  COMP_MSG_ERR_OK                    = 0,
-  COMP_MSG_ERR_VALUE_NOT_SET         = 255,
-  COMP_MSG_ERR_VALUE_OUT_OF_RANGE    = 254,
-  COMP_MSG_ERR_BAD_VALUE             = 253,
-  COMP_MSG_ERR_BAD_FIELD_TYPE        = 252,
-  COMP_MSG_ERR_FIELD_TYPE_NOT_FOUND  = 251,
-  COMP_MSG_ERR_VALUE_TOO_BIG         = 250,
-  COMP_MSG_ERR_OUT_OF_MEMORY         = 249,
-  COMP_MSG_ERR_OUT_OF_RANGE          = 248,
-  // be carefull the values up to here
-  // must correspond to the values in dataView.h !!!
-  // with the names like DATA_VIEW_ERR_*
-
-  COMP_MSG_ERR_FIELD_NOT_FOUND       = 230,
-  COMP_MSG_ERR_BAD_SPECIAL_FIELD     = 229,
-  COMP_MSG_ERR_BAD_HANDLE            = 228,
-  COMP_MSG_ERR_HANDLE_NOT_FOUND      = 227,
-  COMP_MSG_ERR_NOT_ENCODED           = 226,
-  COMP_MSG_ERR_ENCODE_ERROR          = 225,
-  COMP_MSG_ERR_DECODE_ERROR          = 224,
-  COMP_MSG_ERR_BAD_CRC_VALUE         = 223,
-  COMP_MSG_ERR_CRYPTO_INIT_FAILED    = 222,
-  COMP_MSG_ERR_CRYPTO_OP_FAILED      = 221,
-  COMP_MSG_ERR_CRYPTO_BAD_MECHANISM  = 220,
-  COMP_MSG_ERR_NOT_ENCRYPTED         = 219,
-  COMP_MSG_ERR_DEFINITION_NOT_FOUND  = 218,
-  COMP_MSG_ERR_DEFINITION_TOO_MANY_FIELDS = 217,
-  COMP_MSG_ERR_BAD_TABLE_ROW         = 216,
-  COMP_MSG_ERR_TOO_MANY_FIELDS       = 215,
-  COMP_MSG_ERR_BAD_DEFINTION_CMD_KEY = 214,
-  COMP_MSG_ERR_NO_SLOT_FOUND         = 213,
-  COMP_MSG_ERR_BAD_NUM_FIELDS        = 212,
-  COMP_MSG_ERR_ALREADY_INITTED       = 211,
-  COMP_MSG_ERR_NOT_YET_INITTED       = 210,
-  COMP_MSG_ERR_FIELD_CANNOT_BE_SET   = 209,
-  COMP_MSG_ERR_NO_SUCH_FIELD         = 208,
-  COMP_MSG_ERR_DUPLICATE_FIELD       = 207,
-
-  COMP_MSG_ERR_BAD_DATA_LGTH         = 206,
-  COMP_MSG_ERR_NOT_YET_PREPARED      = 205,
-  COMP_DEF_ERR_ALREADY_INITTED       = 204,
-  COMP_DEF_ERR_NOT_YET_INITTED       = 203,
-  COMP_DEF_ERR_NOT_YET_PREPARED      = 202,
-  COMP_DEF_ERR_ALREADY_CREATED       = 201,
-  COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING = 200,
-  COMP_LIST_ERR_ALREADY_INITTED      = 199,
-  COMP_LIST_ERR_NOT_YET_INITTED      = 198,
-  COMP_LIST_ERR_NOT_YET_PREPARED     = 197,
-  COMP_LIST_ERR_ALREADY_CREATED      = 196,
-};
-
 enum compMsgSpecialFieldNames
 {
   COMP_MSG_SPEC_FIELD_SRC                  = 255,
@@ -168,20 +115,6 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_LOW                  = 209,         // this must be the last entry!!
 };
 
-enum compMsgHttpHeaderNames
-{
-  COMP_MSG_HTTP_CODE                        = 1,
-  COMP_MSG_HTTP_CONTENT_TYPE                = 2,
-  COMP_MSG_HTTP_CONTENT_LENGTH              = 3,
-  COMP_MSG_HTTP_CONNECTION                  = 4,
-  COMP_MSG_HTTP_SERVER                      = 5,
-  COMP_MSG_HTTP_DATE                        = 6,
-  COMP_MSG_HTTP_CACHE_CONTROL               = 7,
-  COMP_MSG_HTTP_NODE_CODE                   = 8,
-  COMP_MSG_HTTP_SET_COOKIE                  = 9,
-  COMP_MSG_HTTP_X_POWER_BY                  = 10,
-};
-
 #define COMP_MSG_NO_INCR 0
 #define COMP_MSG_INCR    1
 #define COMP_MSG_DECR    -1
@@ -213,7 +146,7 @@ typedef uint8_t (* getFieldTypeStrFromId_t)(compMsgTypesAndNames_t *self, uint8_
 
 typedef uint8_t (* getFieldNameIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt);
 typedef uint8_t (* getFieldNameStrFromId_t)(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName);
-typedef uint8_t (* getHttpHeaderIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *httpHeaderStr, uint8_t *httpHeaderId);
+
 typedef uint8_t (* freeCompMsgTypesAndNames_t)(compMsgTypesAndNames_t *compMsgTypesAndNames);
 
 typedef struct compMsgTypesAndNames {
@@ -225,8 +158,6 @@ typedef struct compMsgTypesAndNames {
 
   getFieldNameIdFromStr_t getFieldNameIdFromStr;
   getFieldNameStrFromId_t getFieldNameStrFromId;
-
-  getHttpHeaderIdFromStr_t getHttpHeaderIdFromStr;
 
   freeCompMsgTypesAndNames_t freeCompMsgTypesAndNames;
 } compMsgTypesAndNames_t;

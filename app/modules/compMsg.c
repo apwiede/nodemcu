@@ -157,18 +157,6 @@ ets_printf("§error result: %d\n§", result);
   case COMP_MSG_ERR_NOT_YET_PREPARED:
     lua_pushfstring(L, "%s: not yet prepared", errStr);
     break;
-  case COMP_DEF_ERR_ALREADY_INITTED:
-    lua_pushfstring(L, "%s: def already initted", errStr);
-    break;
-  case COMP_DEF_ERR_NOT_YET_INITTED:
-    lua_pushfstring(L, "%s: def not yet initted", errStr);
-    break;
-  case COMP_DEF_ERR_NOT_YET_PREPARED:
-    lua_pushfstring(L, "%s: def not yet prepared", errStr);
-    break;
-  case COMP_DEF_ERR_ALREADY_CREATED:
-    lua_pushfstring(L, "%s: def already created", errStr);
-    break;
   case COMP_MSG_ERR_OUT_OF_RANGE:
     lua_pushfstring(L, "%s: out of range", errStr);
     break;

@@ -58,9 +58,9 @@ static uint8_t openFile(compMsgMsgDesc_t *self, const uint8_t *fileName, const u
   self->fileName = fileName;
   fileFd = fs_open(fileName, fs_mode2flag(fileMode));
   if (fileFd < FS_OPEN_OK) {
-    return COMP_MSG_DESC_ERR_OPEN_FILE;
+    return COMP_MSG_ERR_OPEN_FILE;
   }
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= closeFile ====================================
@@ -71,19 +71,19 @@ static uint8_t closeFile(compMsgMsgDesc_t *self) {
     fs_close(fileFd);
     fileFd = FS_OPEN_OK - 1;
   }
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= flushFile ====================================
 
 static uint8_t flushFile(compMsgMsgDesc_t *self) {
   if (fileFd == (FS_OPEN_OK - 1)) {
-    return COMP_MSG_DESC_ERR_FILE_NOT_OPENED;
+    return COMP_MSG_ERR_FILE_NOT_OPENED;
   }
   if (fs_flush(fileFd) == 0) {
-    return COMP_MSG_DESC_ERR_OK;
+    return COMP_MSG_ERR_OK;
   }
-  return COMP_MSG_DESC_ERR_FLUSH_FILE;
+  return COMP_MSG_ERR_FLUSH_FILE;
 }
 
 // ================================= readLine ====================================
@@ -96,7 +96,7 @@ static uint8_t readLine(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t *lgth)
   uint8_t end_char = '\n';
 
   if (fileFd == (FS_OPEN_OK - 1)) {
-    return COMP_MSG_DESC_ERR_FILE_NOT_OPENED;
+    return COMP_MSG_ERR_FILE_NOT_OPENED;
   }
   n = fs_read(fileFd, buf, n);
   cp = *buffer;
@@ -111,7 +111,7 @@ static uint8_t readLine(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t *lgth)
   cp[i] = 0;
   *lgth = i;
   fs_seek (fileFd, -(n - i), SEEK_CUR);
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= writeLine ====================================
@@ -120,13 +120,13 @@ static uint8_t writeLine(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t 
   int result;
 
   if (fileFd == (FS_OPEN_OK - 1)) {
-    return COMP_MSG_DESC_ERR_FILE_NOT_OPENED;
+    return COMP_MSG_ERR_FILE_NOT_OPENED;
   }
   result = fs_write(fileFd, buffer, lgth);
   if (result == lgth) {
-    return COMP_MSG_DESC_ERR_OK;
+    return COMP_MSG_ERR_OK;
   }
-  return COMP_MSG_DESC_ERR_WRITE_FILE;
+  return COMP_MSG_ERR_WRITE_FILE;
 }
 
 // ================================= dumpHeaderPart ====================================
@@ -231,7 +231,7 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
     idx++;
   }
 //  ets_printf("§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= dumpMsgHeaderInfos ====================================
@@ -308,7 +308,7 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
   }
   ets_printf("\n");
   ets_printf("headerLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterHeader: %d\n", hdrInfos->headerLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterHeader);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getIntFromLine ====================================
@@ -330,10 +330,10 @@ static uint8_t getIntFromLine(uint8_t *myStr, long *uval, uint8_t **ep, bool *is
   *uval = c_strtoul(myStr, &endPtr, 10);
   if (cp-1 != (uint8_t *)endPtr) {
 //ets_printf("getIntFromLine: %s %d %p %p\n", myStr, *uval, cp, endPtr);
-     return COMP_MSG_DESC_ERR_BAD_VALUE;
+     return COMP_MSG_ERR_BAD_VALUE;
   }
   *ep = cp;
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getStrFromLine ====================================
@@ -353,7 +353,7 @@ static uint8_t getStrFromLine(uint8_t *myStr, uint8_t **ep, bool *isEnd) {
   }
   *cp++ = '\0';
   *ep = cp;
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 #define checkIsEnd(val) { hdrInfos->lgth = *ep - myStr; if (val) return result; }
@@ -434,7 +434,7 @@ static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos
   }
   hdrInfos->seqIdxAfterHeader = *seqIdx;
   if (!isEnd) {
-    return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
   }
   return COMP_MSG_ERR_OK;
 }
@@ -491,7 +491,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+     return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
@@ -515,7 +515,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     hdr = &hdrInfos->headerParts[idx];
     hdr->hdrFlags = 0;
@@ -576,7 +576,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
           result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
           checkErrOK(result);
           if (c_strlen(cp) > DISP_GUID_LGTH) {
-            checkErrOK(COMP_MSG_DESC_ERR_FIELD_TOO_LONG);
+            checkErrOK(COMP_MSG_ERR_FIELD_TOO_LONG);
           }
           c_memcpy(hdr->hdrGUID, cp, c_strlen(cp));
           hdr->hdrGUID[c_strlen(cp)] = '\0';
@@ -589,7 +589,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
           result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
           checkErrOK(result);
           if (c_strlen(cp) > DISP_MAX_HDR_FILLER_LGTH) {
-            checkErrOK(COMP_MSG_DESC_ERR_FIELD_TOO_LONG);
+            checkErrOK(COMP_MSG_ERR_FIELD_TOO_LONG);
           }
           c_memcpy(hdr->hdrFiller, cp, c_strlen(cp));
           hdr->hdrFiller[c_strlen(cp)] = '\0';
@@ -627,7 +627,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
       break;
     default:
 ets_printf("bad value: %s\n", cp);
-      checkErrOK(COMP_DISP_ERR_BAD_VALUE);
+      checkErrOK(COMP_MSG_ERR_BAD_VALUE);
       break;
     }
     checkIsEnd(isEnd);
@@ -650,7 +650,7 @@ ets_printf("bad value: %s\n", cp);
 //ets_printf("§u16CmdKey!0x%04x!§\n", hdr->hdrU16CmdKey);
       break;
     default:
-      checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
+      checkErrOK(COMP_MSG_ERR_BAD_FIELD_TYPE);
     }
     checkIsEnd(isEnd);
     cp = ep;
@@ -674,7 +674,7 @@ ets_printf("bad value: %s\n", cp);
       hdr->hdrFlags |= COMP_DISP_PAYLOAD_CMD_LGTH;
       break;
     default:
-      checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
+      checkErrOK(COMP_MSG_ERR_BAD_FIELD_TYPE);
     }
     checkIsEnd(isEnd);
     cp = ep;
@@ -698,7 +698,7 @@ ets_printf("bad value: %s\n", cp);
       hdr->hdrFlags |= COMP_DISP_PAYLOAD_CRC;
       break;
     default:
-      checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
+      checkErrOK(COMP_MSG_ERR_BAD_FIELD_TYPE);
 //ets_printf("§flag idx!%d!%s!§", flagIdx, getFlagStr(hdrInfos->headerSequence[flagIdx]));
     }
     checkIsEnd(isEnd);
@@ -727,11 +727,11 @@ ets_printf("bad value: %s\n", cp);
       hdr->hdrFlags |= COMP_DISP_TOTAL_CRC;
       break;
     default:
-      checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
+      checkErrOK(COMP_MSG_ERR_BAD_FIELD_TYPE);
 //ets_printf("§flag idx!%d!%s!§", flagIdx, getFlagStr(hdrInfos->headerSequence[flagIdx]));
     }
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     hdrInfos->numHeaderParts++;
     idx++;
@@ -774,13 +774,13 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
-  return COMP_MSG_DESC_ERR_OK;
+     return COMP_MSG_ERR_BAD_FILE_CONTENTS;
+  return COMP_MSG_ERR_OK;
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
@@ -791,7 +791,7 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     cp = buffer;
@@ -828,20 +828,20 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
       u16CmdKey = (cp[0]<<8)|cp[1];
       break;
     default:
-      checkErrOK(COMP_DISP_ERR_BAD_FIELD_TYPE);
+      checkErrOK(COMP_MSG_ERR_BAD_FIELD_TYPE);
     }
     result = self->setActionEntry(self, actionName, actionMode, u8CmdKey, u16CmdKey);
     checkErrOK(result);
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     idx++;
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= readWifiValues ====================================
@@ -867,16 +867,16 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
-ets_printf("§readWifiValues: %s§", fileName);
+ets_printf("§readWifiValues: %s\n§", fileName);
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
-  return COMP_MSG_DESC_ERR_OK;
+     return COMP_MSG_ERR_BAD_FILE_CONTENTS;
+  return COMP_MSG_ERR_OK;
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
@@ -885,7 +885,7 @@ ets_printf("§readWifiValues: %s§", fileName);
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     cp = buffer;
@@ -912,16 +912,16 @@ ets_printf("§readWifiValues: %s§", fileName);
       result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
     }
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     checkErrOK(result);
     idx++;
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= readModuleValues ====================================
@@ -949,13 +949,13 @@ static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
-  return COMP_MSG_DESC_ERR_OK;
+     return COMP_MSG_ERR_BAD_FILE_CONTENTS;
+  return COMP_MSG_ERR_OK;
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
@@ -964,7 +964,7 @@ static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     cp = buffer;
@@ -991,16 +991,16 @@ static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
       result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
     }
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     checkErrOK(result);
     idx++;
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getHeaderFromUniqueFields ====================================
@@ -1020,7 +1020,7 @@ static uint8_t  getHeaderFromUniqueFields (compMsgDispatcher_t *self, uint16_t d
     }
     idx++;
   }
-  return COMP_DISP_ERR_HEADER_NOT_FOUND;
+  return COMP_MSG_ERR_HEADER_NOT_FOUND;
 }
 
 // ================================= dumpMsgDescPart ====================================
@@ -1036,7 +1036,7 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
     checkErrOK(result);
   }
   ets_printf("msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= dumpMsgValPart ====================================
@@ -1056,7 +1056,7 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
      ets_printf(" COMP_DISP_DESC_VALUE_IS_NUMBER");
   }
   ets_printf("\n");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getMsgPartsFromHeaderPart ====================================
@@ -1098,7 +1098,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
@@ -1106,10 +1106,10 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
   checkErrOK(result);
   if (isEnd) {
-    return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+    return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   if (cp[0] != '#') {
-    return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+    return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   cp = ep;
   result = compMsgData->deleteMsgDescParts(self);
@@ -1131,7 +1131,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     compMsgData->prepareValuesCbName[c_strlen(cp)] = '\0';
   }
   if (!isEnd) {
-    return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
   }
   compMsgData->msgDescParts = os_zalloc(sizeof(msgDescPart_t) * compMsgData->maxMsgDescParts);
   checkAllocOK(compMsgData->msgDescParts);
@@ -1141,7 +1141,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     msgDescPart = &compMsgData->msgDescParts[compMsgData->numMsgDescParts++];
     buffer[lgth] = 0;
@@ -1192,7 +1192,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     }
 //self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     cp = ep;
     idx++;
@@ -1211,10 +1211,10 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
   checkErrOK(result);
   if (isEnd) {
-    return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+    return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   if (cp[0] != '#') {
-    return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+    return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   cp = ep;
   result = compMsgData->deleteMsgValParts(self);
@@ -1224,7 +1224,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   self->compMsgData->maxMsgValParts = (uint8_t)uval;
   cp = ep;
   if (!isEnd) {
-    return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+    return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
   }
   compMsgData->msgValParts = os_zalloc(sizeof(msgValPart_t) * compMsgData->maxMsgValParts);
   checkAllocOK(compMsgData->msgValParts);
@@ -1233,7 +1233,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     msgValPart = &compMsgData->msgValParts[compMsgData->numMsgValParts++];
     buffer[lgth] = 0;
@@ -1274,18 +1274,18 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     }
 //self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     idx++;
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
 //ets_printf("§getMsgPartsFromHeaderPart9 res: %d§", result);
   checkErrOK(result);
 //ets_printf("§heap2: %d§", system_get_free_heap_size());
 
-  return COMP_MSG_DESC_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getMsgKeyValueDescParts ====================================
@@ -1317,12 +1317,12 @@ static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *file
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+     return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
@@ -1335,7 +1335,7 @@ static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *file
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     cp = buffer;
@@ -1374,14 +1374,14 @@ static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *file
     msgKeyValueDescPart->keyLgth = (uint16_t)uval;
 //ets_printf("field: %s Id: %d type: %d length: %d\n", msgKeyValueDescPart->keyNameStr, msgKeyValueDescPart->keyId, msgKeyValueDescPart->keyType, msgKeyValueDescPart->keyLgth);
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     cp = ep;
     self->numMsgKeyValueDescParts++;
     idx++;
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
@@ -1412,12 +1412,12 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+     return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
@@ -1430,7 +1430,7 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     cp = buffer;
@@ -1445,13 +1445,13 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
     result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &fieldsToSave->fieldNameId, COMP_MSG_INCR);
     checkErrOK(result);
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     self->numFieldsToSave++;
     idx++;
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
@@ -1487,12 +1487,12 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, "CompMsgKeyValueKeys.txt", "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
   checkErrOK(result);
   buffer[lgth] = 0;
   if ((lgth < 4) || (buffer[0] != '#')) {
-     return COMP_DISP_ERR_BAD_FILE_CONTENTS;
+     return COMP_MSG_ERR_BAD_FILE_CONTENTS;
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
@@ -1501,7 +1501,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      return COMP_DISP_ERR_TOO_FEW_FILE_LINES;
+      return COMP_MSG_ERR_TOO_FEW_FILE_LINES;
     }
     buffer[lgth] = 0;
     cp = buffer;
@@ -1595,13 +1595,13 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     checkErrOK(result);
 //ets_printf("field: %s length: %s\n", fieldNameStr, cp);
     if (!isEnd) {
-      return COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS;
+      return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     cp = ep;
     idx++;
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_DISP_ERR_OK) return result
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) return result
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;

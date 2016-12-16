@@ -100,7 +100,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
     if (msgDescPart->fieldSizeCallback != NULL) {
       // the key name must have the prefix: "#key_"!
       if (msgDescPart->fieldNameStr[0] != '#') {
-        return COMP_DISP_ERR_FIELD_NOT_FOUND;
+        return COMP_MSG_ERR_FIELD_NOT_FOUND;
       }
       result = msgDescPart->fieldSizeCallback(self, &numericValue, &stringValue);
 //ets_printf("fieldSizeCallback for: %s %d %p\n", msgDescPart->fieldNameStr, numericValue, stringValue);
@@ -124,7 +124,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
     fieldIdx++;
   }
 //ets_printf("§fixOffsetsForKeyValues: done!§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= setMsgFieldValue ====================================
@@ -198,7 +198,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
     checkErrOK(result);
   }
 //ets_printf("§setMsgFieldValue: done§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= setMsgValues ====================================
@@ -274,7 +274,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
 //ets_printf("§");
 //compMsgData->dumpMsg(self);
 //ets_printf("§");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= buildMsg ====================================
@@ -408,5 +408,5 @@ uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
   self->buildMsg = &buildMsg;
   self->setMsgValues = &setMsgValues;
   self->forwardMsg = &forwardMsg;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }

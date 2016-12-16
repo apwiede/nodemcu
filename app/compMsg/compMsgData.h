@@ -86,45 +86,6 @@ typedef struct buildMsgInfos {
   uint16_t srcId;
 } buildMsgInfos_t;
 
-typedef struct webSocketUserData {
-  struct espconn *pesp_conn;
-  uint8_t isWebsocket;
-  uint8_t num_urls;
-  uint8_t max_urls;
-  uint8_t connectionType;
-  int remote_port;
-  uint8_t remote_ip[4];
-  char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
-  char *curr_url; // that is url which has been provided in the received data
-  compMsgDispatcher_t *compMsgDispatcher;
-  webSocketBinaryReceived_t webSocketBinaryReceived;
-  webSocketTextReceived_t webSocketTextReceived;
-} webSocketUserData_t;
-
-typedef struct httpHeaderPart {
-  uint8_t httpHeaderId;
-  uint8_t *httpHeaderName;
-  uint8_t *httpHeaderValue;
-} httpHeaderPart_t;
-
-typedef struct netSocketUserData {
-  struct espconn *pesp_conn;
-  int remote_port;
-  uint8_t remote_ip[4];
-  uint8_t connectionType;
-#ifdef CLIENT_SSL_ENABLE
-  uint8_t secure;
-#endif
-  compMsgDispatcher_t *compMsgDispatcher;
-  netSocketReceived_t netSocketReceived;
-  netSocketToSend_t netSocketToSend;
-  httpHeaderPart_t *receivedHeaders;
-  int httpCode;
-  size_t currLgth;
-  size_t expectedLgth;
-  uint8_t *content;
-} netSocketUserData_t;
-
 typedef uint8_t (* createMsg_t)(compMsgDispatcher_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* addField_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
 typedef uint8_t (* getFieldValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
@@ -176,8 +137,7 @@ typedef struct compMsgData {
   uint8_t *prepareValuesCbName;
   
   buildMsgInfos_t buildMsgInfos;
-  webSocketUserData_t *wud;
-  netSocketUserData_t *nud;
+  socketUserData_t *sud;
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
   headerPart_t *currHdr;

@@ -99,7 +99,7 @@ static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
 
   n = *len;
   if (!n) { // handle empty string case 
-    return COMP_DISP_ERR_OUT_OF_MEMORY;
+    return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
   out = (uint8_t *)os_zalloc(((n + 2) / 3 * 4) + 1);
   checkAllocOK(out);
@@ -119,7 +119,7 @@ static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
 //ets_printf("§b64Len: %d *len: %d§", ((n + 2) / 3 * 4) + 1, *len);
   // ATTENTION the caller has to free *encoded!!
   *encoded = out;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ============================= fromBase64 ========================
@@ -138,10 +138,10 @@ static uint8_t fromBase64(const uint8_t *encodedMsg, size_t *len, uint8_t **deco
   blocks = (n>>2);
   pad = 0;
   if (!n) { // handle empty string case 
-    return COMP_DISP_ERR_OUT_OF_MEMORY;
+    return COMP_MSG_ERR_OUT_OF_MEMORY;
   } 
   if (n & 3) {
-    return COMP_DISP_ERR_INVALID_BASE64_STRING;
+    return COMP_MSG_ERR_INVALID_BASE64_STRING;
   } 
   c_memset(unbytes64, BASE64_INVALID, sizeof(unbytes64));
   for (i = 0; i < sizeof(b64)-1; i++) {
@@ -154,7 +154,7 @@ static uint8_t fromBase64(const uint8_t *encodedMsg, size_t *len, uint8_t **deco
 
   for (i = 0; i < n - pad; i++) {
     if (!ISBASE64(encodedMsg[i])) {
-      return COMP_DISP_ERR_INVALID_BASE64_STRING;
+      return COMP_MSG_ERR_INVALID_BASE64_STRING;
     }
   }
   unbytes64[BASE64_PADDING] = 0;
@@ -178,7 +178,7 @@ static uint8_t fromBase64(const uint8_t *encodedMsg, size_t *len, uint8_t **deco
   }
   *len = q - msg;
   *decodedMsg = msg;
-  return COMP_DISP_ERR_OK;;
+  return COMP_MSG_ERR_OK;;
 }
 
 // ============================= addHandle ========================
@@ -190,12 +190,12 @@ static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
   if (compMsgDispatcherHandles.handles == NULL) {
     compMsgDispatcherHandles.handles = os_zalloc(sizeof(handle2Dispatcher_t));
     if (compMsgDispatcherHandles.handles == NULL) {
-      return COMP_DISP_ERR_OUT_OF_MEMORY;
+      return COMP_MSG_ERR_OUT_OF_MEMORY;
     } else {
       compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].handle = handle;
       compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].compMsgDispatcher = compMsgDispatcher;
       compMsgDispatcherHandles.numHandles++;
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
   } else {
     // check for unused slot first
@@ -204,7 +204,7 @@ static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
       if (compMsgDispatcherHandles.handles[idx].handle == NULL) {
         compMsgDispatcherHandles.handles[idx].handle = handle;
         compMsgDispatcherHandles.handles[idx].compMsgDispatcher = compMsgDispatcher;
-        return COMP_DISP_ERR_OK;
+        return COMP_MSG_ERR_OK;
       }
       idx++;
     }
@@ -214,7 +214,7 @@ static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
     compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].compMsgDispatcher = compMsgDispatcher;
     compMsgDispatcherHandles.numHandles++;
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ============================= deleteHandle ========================
@@ -227,13 +227,13 @@ static int deleteHandle(const uint8_t *handle) {
 ets_printf("§dispatcher deleteHandle: %s!§\n", handle);
   if (compMsgDispatcherHandles.handles == NULL) {
 ets_printf("dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
-    return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+    return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   found = 0;
   idx = 0;
   numUsed = 0;
   if (compMsgDispatcherHandles.numHandles == 0) {
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
   }
   while (idx < compMsgDispatcherHandles.numHandles) {
     if ((compMsgDispatcherHandles.handles[idx].handle != NULL) && (c_strcmp(compMsgDispatcherHandles.handles[idx].handle, handle) == 0)) {
@@ -251,10 +251,10 @@ ets_printf("dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
     compMsgDispatcherHandles.handles = NULL;
   }
   if (found) {
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
   }
 ets_printf("deleteHandle 2 HANLDE_NOT_FOUND\n");
-  return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+  return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
 // ============================= checkHandle ========================
@@ -264,18 +264,18 @@ static int checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatch
 
   if (compMsgDispatcherHandles.handles == NULL) {
 ets_printf("checkHandle 1 HANLDE_NOT_FOUND\n");
-    return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+    return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   idx = 0;
   while (idx < compMsgDispatcherHandles.numHandles) {
     if ((compMsgDispatcherHandles.handles[idx].handle != NULL) && (c_strcmp(compMsgDispatcherHandles.handles[idx].handle, handle) == 0)) {
       *compMsgDispatcher = compMsgDispatcherHandles.handles[idx].compMsgDispatcher;
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
     idx++;
   }
 ets_printf("checkHandle 2 HANDLE_NOT_FOUND\n");
-  return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+  return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
 // ================================= dumpMsgParts ====================================
@@ -308,7 +308,7 @@ static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
     ets_printf(" COMP_DISP_U16_CMD_KEY");
   }
   ets_printf("\n");
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getNewCompMsgDataPtr ====================================
@@ -334,7 +334,7 @@ static uint8_t getNewCompMsgDataPtr(compMsgDispatcher_t *self) {
   newHeaderEntry->compMsgData->setDispatcher(newHeaderEntry->compMsgData, self);
   self->compMsgData = newHeaderEntry->compMsgData;
   self->numMsgHeaders++;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= getFieldType ====================================
@@ -348,11 +348,11 @@ static uint8_t getFieldType(compMsgDispatcher_t *self, compMsgData_t *compMsgDat
     fieldInfo = &compMsgData->fields[idx];
     if (fieldInfo->fieldNameId == fieldNameId) {
       *fieldTypeId = fieldInfo->fieldTypeId;
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
     idx++;
   }
-  return COMP_DISP_ERR_FIELD_NOT_FOUND;
+  return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
 // ================================= resetBuildMsgInfos ====================================
@@ -364,7 +364,7 @@ static uint8_t resetBuildMsgInfos(compMsgDispatcher_t *self) {
   self->compMsgData->buildMsgInfos.numericValue = 0;
   self->compMsgData->buildMsgInfos.stringValue = NULL;
   self->compMsgData->buildMsgInfos.actionName = NULL;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= createMsgFromHeaderPart ====================================
@@ -426,7 +426,7 @@ static uint8_t resetMsgInfo(compMsgDispatcher_t *self, msgParts_t *parts) {
   c_memcpy(parts->GUID, "                ", 16);
   parts->srcId = 0;
   parts->u16CmdKey = 0;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ============================= encryptMsg ========================
@@ -508,11 +508,11 @@ static uint8_t decryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, s
 
 uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher) {
 
-  if (checkHandle(handle, compMsgDispatcher) != COMP_DISP_ERR_OK) {
+  if (checkHandle(handle, compMsgDispatcher) != COMP_MSG_ERR_OK) {
 ets_printf("compMsgDispatcherGetPtrFromHandle 1 HANLDE_NOT_FOUND\n");
-    return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+    return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ============================= setFieldValueCallback ========================
@@ -528,11 +528,11 @@ static uint8_t setFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
     if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
       fieldValueCallbackInfo->callback = callback;
       fieldValueCallbackInfo->callbackType = callbackType;
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
     idx++;
   }
-  return COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
+  return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
 // ============================= addFieldValueCallbackName ========================
@@ -557,7 +557,7 @@ static uint8_t addFieldValueCallbackName(compMsgDispatcher_t *self, uint8_t *cal
   fieldValueCallbackInfo->callback = callback;
   fieldValueCallbackInfo->callbackType = callbackType;
   self->numFieldValueCallbackInfos++;
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ============================= getFieldValueCallback ========================
@@ -576,13 +576,13 @@ static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
       if ((callbackType == 0) || (fieldValueCallbackInfo->callbackType == callbackType)) {
         *callback = fieldValueCallbackInfo->callback;
 //ets_printf("§getFieldValueCallback found: %s 0x%02x§\n", callbackName, callbackType);
-        return COMP_DISP_ERR_OK;
+        return COMP_MSG_ERR_OK;
       }
     }
     idx++;
   }
 //ets_printf("§getFieldValueCallback NOT found: %s 0x%02x§\n", callbackName, callbackType);
-  return COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
+  return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
 // ============================= getFieldValueCallbackName ========================
@@ -598,13 +598,13 @@ static uint8_t getFieldValueCallbackName(compMsgDispatcher_t *self, fieldValueCa
     if (fieldValueCallbackInfo->callback == callback) {
       if ((callbackType == 0) || (fieldValueCallbackInfo->callbackType == callbackType)) {
         *callbackName = fieldValueCallbackInfo->callbackName;
-        return COMP_DISP_ERR_OK;
+        return COMP_MSG_ERR_OK;
       }
     }
     idx++;
   }
 ets_printf("§getFieldValueCallbackName NOT found: 0x%02x§\n", callbackType);
-  return COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
+  return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
 // ================================= startRequest ====================================
@@ -613,7 +613,7 @@ static uint8_t startRequest(compMsgDispatcher_t *self) {
   uint8_t result;
 
 ets_printf("should start request: %d\n", self->msgRequestInfos.currRequestIdx);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= startNextRequest ====================================
@@ -626,7 +626,7 @@ static uint8_t startNextRequest(compMsgDispatcher_t *self) {
       self->msgRequestInfos.currRequestIdx = 0;
       result = startRequest(self);
       checkErrOK(result);
-      return COMP_DISP_ERR_OK;
+      return COMP_MSG_ERR_OK;
     }
   }
   if (self->msgRequestInfos.currRequestIdx < self->msgRequestInfos.lastRequestIdx) {
@@ -634,7 +634,7 @@ static uint8_t startNextRequest(compMsgDispatcher_t *self) {
     result = startRequest(self);
     checkErrOK(result);
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= addUartRequestData ====================================
@@ -645,7 +645,7 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
 
   // slot 0 is reserved for Uart
   if (self->msgRequestInfos.requestTypes[0] != COMP_DISP_INPUT_UART) {
-    return COMP_DISP_ERR_UART_REQUEST_NOT_SET;
+    return COMP_MSG_ERR_UART_REQUEST_NOT_SET;
   }
   compMsgData = self->msgRequestInfos.requestData[0];
   compMsgData->direction = COMP_MSG_RECEIVED_DATA;
@@ -653,7 +653,7 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
   self->compMsgData = compMsgData;
   result = self->handleReceivedPart(self, data, lgth);
   checkErrOK(result);
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= addRequest ====================================
@@ -663,8 +663,8 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   compMsgData_t *compMsgData;
 
   if (self->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
-ets_printf("§COMP_DISP_ERR_TOO_MANY_REQUESTS§");
-    return COMP_DISP_ERR_TOO_MANY_REQUESTS;
+ets_printf("§COMP_MSG_ERR_TOO_MANY_REQUESTS§");
+    return COMP_MSG_ERR_TOO_MANY_REQUESTS;
   }
   self->msgRequestInfos.lastRequestIdx++;
   self->msgRequestInfos.requestTypes[self->msgRequestInfos.lastRequestIdx] = requestType;
@@ -710,7 +710,7 @@ ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData
       }
     }
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= deleteRequest ====================================
@@ -728,7 +728,7 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
   found = false;
   while (idx < self->msgRequestInfos.lastRequestIdx) {
     if (idx >= COMP_DISP_MAX_REQUESTS) {
-      return COMP_DISP_ERR_REQUEST_NOT_FOUND;
+      return COMP_MSG_ERR_REQUEST_NOT_FOUND;
     }
     if (!found) {
       if ((self->msgRequestInfos.requestTypes[idx] == requestType) && (self->msgRequestInfos.requestHandles[idx] == requestHandle)) {
@@ -764,7 +764,7 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
     // nothing to do the current request is different from the deleted one
     // so just let the current one continue
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= initDispatcher ====================================
@@ -791,16 +791,20 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   checkErrOK(result);
   result = compMsgModuleDataInit(self);
   checkErrOK(result);
-  result = compMsgWebsocketInit(self);
+  result = compMsgTimerInit(self);
   checkErrOK(result);
-  result = compMsgNetsocketInit(self);
+  result = compMsgWebSocketInit(self);
+  checkErrOK(result);
+  result = compMsgNetSocketInit(self);
+  checkErrOK(result);
+  result = compMsgHttpInit(self);
   checkErrOK(result);
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
   if (typelen > 0) {
     switch(type[0]) {
     case 'W':
-ets_printf("§start RunAPMode§");
+ets_printf("§start RunAPMode\n§");
       result = self->webSocketRunAPMode(self);
       checkErrOK(result);
       break;
@@ -837,7 +841,7 @@ ets_printf("§initDispatcher: funny type: %s§", type);
       break;
     }
   }
-  return COMP_DISP_ERR_OK;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= createDispatcher ====================================
@@ -846,9 +850,9 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
   uint8_t result;
 
   os_sprintf(self->handle, "%s%p", DISP_HANDLE_PREFIX, self);
-//ets_printf("§os createDispatcher: %s!§", self->handle);
+ets_printf("§os createDispatcher: %s!\n§", self->handle);
   result = addHandle(self->handle, self);
-  if (result != COMP_DISP_ERR_OK) {
+  if (result != COMP_MSG_ERR_OK) {
     deleteHandle(self->handle);
     os_free(self);
     return result;
@@ -856,12 +860,14 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
 //  resetMsgInfo(self, &self->received);
 //  resetMsgInfo(self, &self->toSend);
   *handle = self->handle;
-  return COMP_DISP_ERR_OK;
+ets_printf("§createDispatcher: done\n§");
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= newCompMsgDispatcher ====================================
 
 compMsgDispatcher_t *newCompMsgDispatcher() {
+ets_printf("newCompMsgDispatcher\n");
   if (compMsgDispatcherSingleton != NULL) {
     return compMsgDispatcherSingleton;
   }
@@ -870,9 +876,17 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
     return NULL;
   }
 
+  // TypesAndNames
   compMsgDispatcher->compMsgTypesAndNames = newCompMsgTypesAndNames();
 
+  // MsgDesc
   compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
+
+  // Timer
+  compMsgDispatcher->compMsgTimer = newCompMsgTimer();
+
+  // Http
+  compMsgDispatcher->compMsgHttp = newCompMsgHttp();
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;
