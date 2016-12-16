@@ -117,7 +117,7 @@
 #define KEY_VALUE_KEY_FREQ_OFFSET  9
 #define KEY_VALUE_KEY_FREQCAL_VAL  10
 
-enum websocket_opcode {
+enum webSocket_opcode {
   OPCODE_TEXT = 1,
   OPCODE_BINARY = 2,
   OPCODE_CLOSE = 8,
@@ -186,10 +186,10 @@ typedef struct stationConfig {
   int16_t freqcal_val;
 } stationConfig_t;
 
-typedef void (* websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
-typedef void (* websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
-typedef void (* netsocketToSend_t)(void *arg, void *wud, char *pdata, unsigned short len);
-typedef void (* netsocketReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* webSocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* webSocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* netSocketToSend_t)(void *arg, void *wud, char *pdata, unsigned short len);
+typedef void (* netSocketReceived_t)(void *arg, void *wud, char *pdata, unsigned short len);
 
 typedef struct compMsgWifiData {
   uint16_t key_ssid;
@@ -226,10 +226,10 @@ typedef struct compMsgWifiData {
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
 
-  websocketBinaryReceived_t websocketBinaryReceived;
-  websocketTextReceived_t websocketTextReceived;
-  netsocketToSend_t netsocketToSend;
-  netsocketReceived_t netsocketReceived;
+  webSocketBinaryReceived_t webSocketBinaryReceived;
+  webSocketTextReceived_t webSocketTextReceived;
+  netSocketToSend_t netSocketToSend;
+  netSocketReceived_t netSocketReceived;
 } compMsgWifiData_t;
 
 #endif	/* COMP_MSG_WIFI_DATA_H */

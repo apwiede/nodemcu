@@ -801,17 +801,17 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
     switch(type[0]) {
     case 'W':
 ets_printf("§start RunAPMode§");
-      result = self->websocketRunAPMode(self);
+      result = self->webSocketRunAPMode(self);
       checkErrOK(result);
       break;
     case 'N':
 ets_printf("§start RunClientMode§");
-      result = self->netsocketRunClientMode(self);
+      result = self->netSocketRunClientMode(self);
       checkErrOK(result);
       break;
     case 'C':
 ets_printf("§start startCloudSocket§");
-      result = self->netsocketStartCloudSocket(self);
+      result = self->netSocketStartCloudSocket(self);
       checkErrOK(result);
       break;
     case 'A':

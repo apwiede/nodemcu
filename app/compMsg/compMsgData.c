@@ -1059,8 +1059,8 @@ static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
     deleteHandle(self, compMsgData->handle);
     compMsgData->handle[0] = '\0';
   }
-//  websocketUserData_t *wud;
-//  netsocketUserData_t *nud;
+//  webSocketUserData_t *wud;
+//  netSocketUserData_t *nud;
 
 // ???  os_free(self->compMsgData);
 //  self->compMsgData = NULL;

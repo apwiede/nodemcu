@@ -162,23 +162,23 @@ typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, ui
 typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* websocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
-typedef uint8_t (* netsocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
+typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
+typedef uint8_t (* netSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 
 // ModuleData stuff
 typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* websocketRunAPMode_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* webSocketRunAPMode_t)(compMsgDispatcher_t *self);
 
 // WebSocket stuff
-typedef uint8_t (* websocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
-typedef uint8_t (* websocketSendData_t)(websocketUserData_t *wud, const char *payload, int size, int opcode);
+typedef uint8_t (* webSocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
+typedef uint8_t (* webSocketSendData_t)(webSocketUserData_t *wud, const char *payload, int size, int opcode);
 
 // NetSocket stuff
-typedef uint8_t (* netsocketStartCloudSocket_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* netsocketRunClientMode_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* netsocketSendData_t)(netsocketUserData_t *wud, const char *payload, int size);
+typedef uint8_t (* netSocketStartCloudSocket_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* netSocketRunClientMode_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* netSocketSendData_t)(netSocketUserData_t *wud, const char *payload, int size);
 
 // Dispatcher stuff
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
@@ -242,7 +242,7 @@ typedef struct compMsgDispatcher {
   uint8_t *stringValue;
   uint8_t actionMode;
   uint8_t operatingMode;
-  uint8_t websocketError;
+  uint8_t webSocketError;
   bssScanInfos_t *bssScanInfos;
   msgKeyValueDescPart_t *msgKeyValueDescParts;
   size_t numMsgKeyValueDescParts;
@@ -359,16 +359,16 @@ typedef struct compMsgDispatcher {
   getWifiConfig_t getWifiConfig;
   setWifiValue_t setWifiValue;
   getWifiRemotePort_t getWifiRemotePort;
-  websocketRunAPMode_t websocketRunAPMode;
-  websocketSendConnectError_t websocketSendConnectError;
-  netsocketSendConnectError_t netsocketSendConnectError;
+  webSocketRunAPMode_t webSocketRunAPMode;
+  webSocketSendConnectError_t webSocketSendConnectError;
+  netSocketSendConnectError_t netSocketSendConnectError;
 
-  websocketRunClientMode_t websocketRunClientMode;
-  websocketSendData_t websocketSendData;
+  webSocketRunClientMode_t webSocketRunClientMode;
+  webSocketSendData_t webSocketSendData;
 
-  netsocketStartCloudSocket_t netsocketStartCloudSocket;
-  netsocketRunClientMode_t netsocketRunClientMode;
-  netsocketSendData_t netsocketSendData;
+  netSocketStartCloudSocket_t netSocketStartCloudSocket;
+  netSocketRunClientMode_t netSocketRunClientMode;
+  netSocketSendData_t netSocketSendData;
 
   dumpMsgParts_t dumpMsgParts;
 } compMsgDispatcher_t;

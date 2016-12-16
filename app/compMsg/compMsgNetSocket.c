@@ -91,8 +91,8 @@ enum compMsg_error_code
 
 static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-typedef void (* netsocketBinaryReceived_t)(void *arg, void *nud, char *pdata, unsigned short len);
-typedef void (* netsocketTextReceived_t)(void *arg, void *nud, char *pdata, unsigned short len);
+typedef void (* netSocketBinaryReceived_t)(void *arg, void *nud, char *pdata, unsigned short len);
+typedef void (* netSocketTextReceived_t)(void *arg, void *nud, char *pdata, unsigned short len);
 
 #define TIMER_MODE_OFF 3
 #define TIMER_MODE_SINGLE 0
@@ -114,7 +114,7 @@ static int cnt = 0;
 static ip_addr_t host_ip; // for dns
 static int dns_reconn_count = 0;
 
-// ============================ netsocketSendData =======================
+// ============================ netSocketSendData =======================
 
 /**
  * \brief send message data to a http scoket
@@ -124,11 +124,11 @@ static int dns_reconn_count = 0;
  * \return Error code or ErrorOK
  *
  */
-static uint8_t netsocketSendData(netsocketUserData_t *nud, const char *payload, int size)
+static uint8_t netSocketSendData(netSocketUserData_t *nud, const char *payload, int size)
 {
   uint8_t result;
 
-ets_printf("§netsocketSendData: size: %d§", size);
+ets_printf("§netSocketSendData: size: %d§", size);
 #ifdef CLIENT_SSL_ENABLE
   if (nud->secure) {
     result = espconn_secure_sent(nud->pesp_conn, (unsigned char *)payload, size);
@@ -138,21 +138,20 @@ ets_printf("§netsocketSendData: size: %d§", size);
     result = espconn_sent(nud->pesp_conn, (unsigned char *)payload, size);
   }
 
-ets_printf("§netsocketSendData: result: %d§", result);
+ets_printf("§netSocketSendData: result: %d§", result);
   checkErrOK(result);
   return NETSOCKET_ERR_OK;
 }
 
-// ============================ netsocket_parse =========================================
+// ============================ netSocketParse =========================================
 
-static uint8_t ICACHE_FLASH_ATTR netsocket_parse(char * data, size_t size, netsocketUserData_t *nud) {
+static uint8_t ICACHE_FLASH_ATTR netSocketParse(char * data, size_t size, netSocketUserData_t *nud) {
   uint8_t result;
   size_t numEol;
   char *lowerData;
   char *cp;
   char *lastNewLine;
   char *dp;
-  char *endHeader;
   size_t idx;
   size_t httpHeaderIdx;
   size_t headerLgth;
@@ -163,6 +162,8 @@ static uint8_t ICACHE_FLASH_ATTR netsocket_parse(char * data, size_t size, netso
   char *endPtr;
   long uval;
 
+ets_printf("§netSocketParse§");
+ets_printf("§===\nNUD: %p\n§", nud);
   numEol = 0;
   idx = 0;
   lowerData = os_zalloc(size + 1);
@@ -173,10 +174,9 @@ static uint8_t ICACHE_FLASH_ATTR netsocket_parse(char * data, size_t size, netso
     if ((*cp == '\n')) {
       // check for end of http header
       if ((cp - lastNewLine) < 3) {
-c_memcpy(lowerData, data, cp - data);
-ets_printf("§cp-data: %d len: %d§", cp - data, c_strlen(lowerData));
-cp[1] = '\0';
-         endHeader = cp;
+ets_printf("§cp-data: %d§", cp - data);
+         *cp = '\0';
+         nud->content = cp + 1;
          break;
       }
       lastNewLine = cp;
@@ -185,8 +185,8 @@ cp[1] = '\0';
     idx++;
     cp++;
   }
-ets_printf("§numEol: %d lowerData: %s!§", numEol, lowerData);  
-  headerLgth = endHeader - data;
+ets_printf("§numEol: %d lowerData: %s!\nnud->content: %s!len: %d!§", numEol, lowerData, nud->content, c_strlen(nud->content));  
+  headerLgth = (char *)nud->content - data;
   nud->receivedHeaders = os_zalloc(numEol * sizeof(httpHeaderPart_t));
   checkAllocOK(nud->receivedHeaders);
 
@@ -260,24 +260,33 @@ ets_printf("§CODE: %d!§", nud->httpCode);
   while (idx < httpHeaderIdx) {
     httpHeaderPart = &nud->receivedHeaders[idx];
 ets_printf("§idx: %d id: %d name: %s value: %s!§", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
+    if (httpHeaderPart->httpHeaderId == COMP_MSG_HTTP_CONTENT_LENGTH) {
+      if (nud->expectedLgth == 0) {
+        uval = c_strtoul(httpHeaderPart->httpHeaderValue, &endPtr, 10);
+ets_printf("§expectedLgth: %d§", uval);
+        nud->expectedLgth = (size_t)uval;
+      }
+    }
     idx++;
   }
+//FIXME handle message here need code!!
+  nud->expectedLgth = 0;
   return NETSOCKET_ERR_OK;
 }
 
-// ================================= netsocket_recv ====================================
+// ================================= netSocketRecv ====================================
 
-static uint8_t netsocket_recv(char *payload, netsocketUserData_t *nud, char **data, int *lgth) {
+static uint8_t netSocketRecv(char *payload, netSocketUserData_t *nud, char **data, int *lgth) {
   char *key = NULL;
   int idx;
   int found;
 
   idx = 0;
-ets_printf("§netsocket_recv:remote_port: %d§\n", nud->remote_port);
+ets_printf("§netSocketRecv:remote_port: %d§\n", nud->remote_port);
 
 //FIXME need to handle data!!
-//  nud->netsocketReceived(nud->compMsgDispatcher, nud, data, lgth);
-//  netsocket_parse(string, os_strlen(string), data, lgth, nud);
+//  nud->netSocketReceived(nud->compMsgDispatcher, nud, data, lgth);
+//  netSocketParse(string, os_strlen(string), data, lgth, nud);
   return NETSOCKET_ERR_OK;
 
 }
@@ -308,7 +317,7 @@ ets_printf("serverReconnected: arg: %p\n", arg);
 
 static void socketReceived(void *arg, char *pdata, unsigned short len) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   char *data = "";
   int lgth = 0;
   int result;
@@ -324,7 +333,7 @@ ets_printf("§socketReceived: arg: %p pdata: %s len: %d§", arg, pdata, len);
   ets_printf("%d",pesp_conn->proto.tcp->remote_port);
   ets_printf(" received§\n");
 
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   nud->remote_ip[0] = pesp_conn->proto.tcp->remote_ip[0];
   nud->remote_ip[1] = pesp_conn->proto.tcp->remote_ip[1];
   nud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
@@ -332,8 +341,8 @@ ets_printf("§socketReceived: arg: %p pdata: %s len: %d§", arg, pdata, len);
   nud->remote_port = pesp_conn->proto.tcp->remote_port;
 //ets_printf("==received remote_port: %d\n", nud->remote_port);
 
-  result = netsocket_recv(pdata, nud, &data, &lgth);
-//  checkErrOK(gL,result,"netsocket_recv");
+  result = netSocketRecv(pdata, nud, &data, &lgth);
+//  checkErrOK(gL,result,"netSocketRecv");
 }
 
 // ================================= socketSent  ====================================
@@ -351,7 +360,7 @@ ets_printf("§socketSent: arg: %p§", arg);
 
 static void netDelete(void *arg) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
 
 ets_printf("§netDelete§");
@@ -359,7 +368,7 @@ ets_printf("§netDelete§");
   if (pesp_conn == NULL) {
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
     return;
   }
@@ -378,7 +387,7 @@ ets_printf("§netDelete§");
 
 static void netSocketDisconnected(void *arg) {  // tcp only
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
 
 ets_printf("§netSocketDisconnected is called§");
@@ -386,7 +395,7 @@ ets_printf("§netSocketDisconnected is called§");
   if (pesp_conn == NULL) {
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
     return;
   }
@@ -422,26 +431,29 @@ ets_printf("§net_socket_reconnected is called err: %d§", err);
 
 static void netSocketReceived(void *arg, char *pdata, unsigned short len) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
 
   pesp_conn = (struct espconn *)arg;
 ets_printf("§netSocketReceived is called. %d %s§", len, pdata);
+ets_printf("§pesp_conn: %p§", pesp_conn);
   if (pesp_conn == NULL) {
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
+ets_printf("§nud: %p§", nud);
   if(nud == NULL) {
     return;
   }
-  netsocket_parse(pdata, len, nud);
+ets_printf("§call netSocketParse§");
+  netSocketParse(pdata, len, nud);
 }
 
 // ================================= netSocketSent  ====================================
 
 static void netSocketSent(void *arg) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
   bool boolResult;
 
@@ -450,7 +462,7 @@ ets_printf("§netSocketSent is called§");
   if (pesp_conn == NULL) {
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
     return;
   }
@@ -460,7 +472,7 @@ ets_printf("§netSocketSent is called§");
 
 static void netSocketConnected(void *arg) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
 
 //ets_printf("§netSocketConnected§\n");
@@ -468,7 +480,7 @@ static void netSocketConnected(void *arg) {
   if (pesp_conn == NULL) {
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
     return;
   }
@@ -499,7 +511,7 @@ ets_printf("§nud->compMsgDispatcher->startSendMsg2 is NULL§");
 
 static void socketConnect(void *arg) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
 
 //ets_printf("§socketConnect§");
@@ -507,7 +519,7 @@ static void socketConnect(void *arg) {
   if (pesp_conn == NULL) {
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
     return;
   }
@@ -531,13 +543,13 @@ static void socketConnect(void *arg) {
 
 static void serverConnected(void *arg) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
   int i;
 
 //ets_printf("§serverConnected: arg: %p§", arg);
   pesp_conn = arg;
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
     return;
   }
@@ -559,7 +571,7 @@ static void serverConnected(void *arg) {
         espconn_disconnect(pesp_conn);
       }
     }
-//    checkErrOK(gL, NETSOCKET_ERR_MAX_SOCKET_REACHED, "netsocket_server_connected");
+//    checkErrOK(gL, NETSOCKET_ERR_MAX_SOCKET_REACHED, "netSocketServerConnected");
     pesp_conn->reverse = NULL;    // not accept this conn
     return;
   }
@@ -586,14 +598,14 @@ ets_printf("§regist serverReconnected err: %d§", result);
 
 static void netSocketStart(void *arg) {
   struct espconn *pesp_conn;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   int result;
 
 ets_printf("§netSocketStart§");
   if (pesp_conn == NULL) {
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if(nud == NULL) {
     return;
   }
@@ -605,12 +617,12 @@ ets_printf("§netSocketStart§");
 static void socketDnsFound(const char *name, ip_addr_t *ipaddr, void *arg) {
 //ets_printf("§socket_dns_found is called§");
   struct espconn *pesp_conn = arg;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   if (pesp_conn == NULL) {
     ets_printf("§pesp_conn null§");
     return;
   }
-  nud = (netsocketUserData_t *)pesp_conn->reverse;
+  nud = (netSocketUserData_t *)pesp_conn->reverse;
   if (nud == NULL) {
     return;
   }
@@ -661,11 +673,11 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   unsigned type;
   int result;
   const char *domain;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
 
   pesp_conn = NULL;
 
-  nud = (netsocketUserData_t *)os_zalloc(sizeof(netsocketUserData_t));
+  nud = (netSocketUserData_t *)os_zalloc(sizeof(netSocketUserData_t));
 //   checkAllocOK(nud);
 //ets_printf("§nud0: %p§", nud);
 //  checkAllocgLOK(nud->urls);
@@ -675,12 +687,12 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   nud->secure = numericValue;
 #endif
   result = self->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-  nud->netsocketReceived = (netsocketReceived_t)numericValue;
+  nud->netSocketReceived = (netSocketReceived_t)numericValue;
   result = self->getWifiValue(self, WIFI_INFO_NET_TO_SEND_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
   nud->receivedHeaders = NULL;
-  nud->netsocketToSend = (netsocketToSend_t)numericValue;
+  nud->netSocketToSend = (netSocketToSend_t)numericValue;
   nud->compMsgDispatcher = self;
-//ets_printf("§netsocketReceived: %p netsocketToSend: %p§", nud->netsocketReceived, nud->netsocketToSend);
+//ets_printf("§netSocketReceived: %p netSocketToSend: %p§", nud->netSocketReceived, nud->netSocketToSend);
 
   result = self->getWifiValue(self, WIFI_INFO_CLOUD_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
@@ -773,7 +785,7 @@ static  void startClientMode(void *arg) {
   int result;
   uint8_t status;
   bool boolResult;
-  netsocketUserData_t *nud;
+  netSocketUserData_t *nud;
   char *hostname;
   uint8_t ap_id;
   uint8_t opmode;
@@ -805,21 +817,21 @@ ets_printf("§startClientMode: wifi is in mode: %d status: %d ap_id: %d hostname
 //ets_printf("§STATION_WRONG_PASSWORD§");
     tmr->mode |= TIMER_IDLE_FLAG;
     ets_timer_disarm(&tmr->timer);
-    self->netsocketSendConnectError(self, status);
+    self->netSocketSendConnectError(self, status);
     return;
     break;
   case STATION_NO_AP_FOUND:
 //ets_printf("§STATION_NO_AP_FOUND§");
     tmr->mode |= TIMER_IDLE_FLAG;
     ets_timer_disarm(&tmr->timer);
-    self->netsocketSendConnectError(self, status);
+    self->netSocketSendConnectError(self, status);
     return;
     break;
   case STATION_CONNECT_FAIL:
 //ets_printf("§STATION_CONNECT_FAIL§");
     tmr->mode |= TIMER_IDLE_FLAG;
     ets_timer_disarm(&tmr->timer);
-    self->netsocketSendConnectError(self, status);
+    self->netSocketSendConnectError(self, status);
     return;
     break;
   case STATION_GOT_IP:
@@ -845,7 +857,7 @@ ets_printf("§startClientMode: wifi is in mode: %d status: %d ap_id: %d hostname
   port = numericValue;
 ets_printf("§IP: %s port: %d result: %d§", temp, port, result);
 
-  nud = (netsocketUserData_t *)os_zalloc(sizeof(netsocketUserData_t));
+  nud = (netSocketUserData_t *)os_zalloc(sizeof(netSocketUserData_t));
 //   checkAllocOK(nud);
 //ets_printf("nud0: %p\n", nud);
 //  checkAllocgLOK(nud->urls);
@@ -856,10 +868,10 @@ ets_printf("§IP: %s port: %d result: %d§", temp, port, result);
 #endif
   result = self->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("§netReceivedCallback: %p!%d!§\n", numericValue, result);
-  nud->netsocketReceived = (netsocketReceived_t)numericValue;
+  nud->netSocketReceived = (netSocketReceived_t)numericValue;
   result = self->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("§netToSendCallback: %p!%d!§\n", numericValue, result);
-  nud->netsocketToSend = (netsocketToSend_t)numericValue;
+  nud->netSocketToSend = (netSocketToSend_t)numericValue;
   nud->compMsgDispatcher = self;
 
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
@@ -914,9 +926,9 @@ ets_printf("§regist_time err result: %d§", result);
   }
 }
 
-// ================================= netsocketRunClientMode ====================================
+// ================================= netSocketRunClientMode ====================================
 
-static uint8_t netsocketRunClientMode(compMsgDispatcher_t *self) {
+static uint8_t netSocketRunClientMode(compMsgDispatcher_t *self) {
   int result;
   bool boolResult;
   struct station_config station_config;
@@ -924,7 +936,7 @@ static uint8_t netsocketRunClientMode(compMsgDispatcher_t *self) {
   uint8_t *stringValue;
   uint8_t opmode;
 
-//ets_printf("§netsocketRunClientMode called§\n");
+//ets_printf("§netSocketRunClientMode called§\n");
   
   opmode = wifi_get_opmode();
 //ets_printf("§opmode: %d§", opmode);
@@ -942,7 +954,7 @@ static uint8_t netsocketRunClientMode(compMsgDispatcher_t *self) {
   checkErrOK(result);
 //ets_printf("len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
-ets_printf("§netsocketRunClientMode: ssid: %s password: %s!§\n", station_config.ssid, station_config.password);
+ets_printf("§netSocketRunClientMode: ssid: %s password: %s!§\n", station_config.ssid, station_config.password);
 
   boolResult = wifi_station_set_config(&station_config);
   if (!boolResult) {
@@ -971,16 +983,16 @@ ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode
   tmr->interval = interval;
   tmr->mode &= ~TIMER_IDLE_FLAG;
   ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
-//ets_printf("§netsocketRunClientMode done§\n");
+//ets_printf("§netSocketRunClientMode done§\n");
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= netsocketStartCloudSocket ====================================
+// ================================= netSocketStartCloudSocket ====================================
 
-static uint8_t netsocketStartCloudSocket (compMsgDispatcher_t *self) {
+static uint8_t netSocketStartCloudSocket (compMsgDispatcher_t *self) {
   int result;
 
-//ets_printf("§netsocketStartCloudSocket called§");
+//ets_printf("§netSocketStartCloudSocket called§");
   self->startSendMsg = NULL;
   result = openCloudSocket( self);
   checkErrOK(result);
@@ -1008,8 +1020,8 @@ uint8_t compMsgNetsocketInit(compMsgDispatcher_t *self) {
   result = initTimers(self);
   checkErrOK(result);
 
-  self->netsocketStartCloudSocket = &netsocketStartCloudSocket;
-  self->netsocketRunClientMode = &netsocketRunClientMode;
-  self->netsocketSendData = netsocketSendData;
+  self->netSocketStartCloudSocket = &netSocketStartCloudSocket;
+  self->netSocketRunClientMode = &netSocketRunClientMode;
+  self->netSocketSendData = netSocketSendData;
   return COMP_DISP_ERR_OK;
 }

@@ -89,16 +89,16 @@ static uint8_t bssStr2BssInfoId(uint8_t *fieldName, uint8_t *fieldId) {
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
-// ================================= websocketBinaryReceived ====================================
+// ================================= webSocketBinaryReceived ====================================
 
-static void websocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned short len) {
+static void webSocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned short len) {
   compMsgDispatcher_t *compMsgDispatcher;
   compMsgDispatcher_t *self;
   uint8_t result;
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-//ets_printf("websocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+//ets_printf("webSocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->received);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
@@ -108,25 +108,25 @@ static void websocketBinaryReceived(void *arg, void *wud, char *pdata, unsigned 
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = os_zalloc(len);
   if (self->compMsgData->receivedData == NULL) {
-    compMsgDispatcher->websocketError = COMP_DISP_ERR_OUT_OF_MEMORY;
+    compMsgDispatcher->webSocketError = COMP_DISP_ERR_OUT_OF_MEMORY;
     return;
   }
   c_memcpy(self->compMsgData->receivedData, pdata, len);
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, wud, self->compMsgData);
-//ets_printf("websocketBinaryReceived end result: %d\n", result);
+//ets_printf("webSocketBinaryReceived end result: %d\n", result);
 }
 
-// ================================= netsocketToSend ====================================
+// ================================= netSocketToSend ====================================
 
-static void netsocketToSend(void *arg, void *nud, char *pdata, unsigned short len) {
+static void netSocketToSend(void *arg, void *nud, char *pdata, unsigned short len) {
   compMsgDispatcher_t *compMsgDispatcher;
   compMsgDispatcher_t *self;
   uint8_t result;
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-ets_printf("§netsocketSend: len: %d dispatcher: %p§", len, compMsgDispatcher);
+ets_printf("§netSocketSend: len: %d dispatcher: %p§", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->toSend);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
@@ -138,39 +138,39 @@ ets_printf("§send compMsgData: %p lgth: %d§", self->compMsgData, len);
   self->compMsgData->toSendData = (uint8_t *)pdata;
   self->compMsgData->toSendLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
-ets_printf("§netsocketSend end result: %d§", result);
+ets_printf("§netSocketSend end result: %d§", result);
 }
 
-// ================================= netsocketReceived ====================================
+// ================================= netSocketReceived ====================================
 
-static void netsocketReceived(void *arg, void *nud, char *pdata, unsigned short len) {
+static void netSocketReceived(void *arg, void *nud, char *pdata, unsigned short len) {
   compMsgDispatcher_t *compMsgDispatcher;
   compMsgDispatcher_t *self;
   uint8_t result;
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-ets_printf("§netsocketReceived: len: %d dispatcher: %p§\n", len, compMsgDispatcher);
+ets_printf("§wifi netSocketReceived: len: %d dispatcher: %p§", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->received);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
-ets_printf("§received compMsgData: %p remote_port: %d receivedLgth: %d§\n", self->compMsgData, ((netsocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
+ets_printf("§received compMsgData: %p remote_port: %d receivedLgth: %d§", self->compMsgData, ((netSocketUserData_t*)nud)->remote_port, self->compMsgData->receivedLgth);
   self->compMsgData->wud = NULL;
   self->compMsgData->nud = nud;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = (uint8_t *)pdata;
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, nud, self->compMsgData);
-ets_printf("§netsocketReceived end result: %d§\n", result);
+ets_printf("§wifi netSocketReceived end result: %d§", result);
 }
 
-// ================================= websocketTextReceived ====================================
+// ================================= webSocketTextReceived ====================================
 
-static void websocketTextReceived(void *arg, void *wud, char *pdata, unsigned short len) {
+static void webSocketTextReceived(void *arg, void *wud, char *pdata, unsigned short len) {
   compMsgDispatcher_t *compMsgDispatcher;
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
-//ets_printf("websocketTextReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+//ets_printf("webSocketTextReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
 }
 
 // ================================= bssScanDoneCb ====================================
@@ -316,7 +316,7 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
   result = self->setWifiValue(self, "@clientPasswd", 0, passwd);
   checkErrOK(result);
   self->startSendMsg = self->sendClientIPMsg;
-  result = self->netsocketRunClientMode(self);
+  result = self->netSocketRunClientMode(self);
 //ets_printf("runClientMode: result: %d\n", result);
   checkErrOK(result);
 //ets_printf("connectToAP done\n");
@@ -333,14 +333,14 @@ static uint8_t startStationCb(compMsgDispatcher_t *self) {
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= websocketSendConnectError ====================================
+// ================================= webSocketSendConnectError ====================================
 
-static uint8_t websocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
+static uint8_t webSocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
   uint8_t result;
   uint8_t *handle;
   msgParts_t *received;
 
-//ets_printf("§websocketSendConnectError: status: %d§\n", status);
+//ets_printf("§webSocketSendConnectError: status: %d§\n", status);
   result = self->setWifiValue(self, "@clientStatus", (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
@@ -349,18 +349,18 @@ static uint8_t websocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   result = self->resetMsgInfo(self, received);
 //ets_printf("§resetMsgInfo: result: %d§\n", result);
   checkErrOK(result);
-//ets_printf("§websocketSendConnectError: done§\n");
+//ets_printf("§webSocketSendConnectError: done§\n");
   return COMP_DISP_ERR_OK;
 }
 
-// ================================= netsocketSendConnectError ====================================
+// ================================= netSocketSendConnectError ====================================
 
-static uint8_t netsocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
+static uint8_t netSocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
   uint8_t result;
   uint8_t *handle;
   msgParts_t *received;
 
-ets_printf("§netsocketSendConnectError: status: %d§\n", status);
+ets_printf("§netSocketSendConnectError: status: %d§\n", status);
   result = self->setWifiValue(self, "@clientStatus", (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
@@ -369,7 +369,7 @@ ets_printf("§netsocketSendConnectError: status: %d§\n", status);
   result = self->resetMsgInfo(self, received);
 ets_printf("§resetMsgInfo: result: %d§\n", result);
   checkErrOK(result);
-ets_printf("§netsocketSendConnectError done§\n");
+ets_printf("§netSocketSendConnectError done§\n");
   return COMP_DISP_ERR_OK;
 }
 
@@ -722,16 +722,16 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
     *stringValue = compMsgWifiData.provisioningIPAddr;
     break;
   case WIFI_INFO_BINARY_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.websocketBinaryReceived;
+    *numericValue = (int)compMsgWifiData.webSocketBinaryReceived;
     break;
   case WIFI_INFO_TEXT_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.websocketTextReceived;
+    *numericValue = (int)compMsgWifiData.webSocketTextReceived;
     break;
   case WIFI_INFO_NET_RECEIVED_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.netsocketReceived;
+    *numericValue = (int)compMsgWifiData.netSocketReceived;
     break;
   case WIFI_INFO_NET_TO_SEND_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.netsocketToSend;
+    *numericValue = (int)compMsgWifiData.netSocketToSend;
     break;
   case WIFI_INFO_CLIENT_SSID:
     *stringValue = compMsgWifiData.clientSsid;
@@ -907,10 +907,10 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
 uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  compMsgWifiData.websocketBinaryReceived = &websocketBinaryReceived;
-  compMsgWifiData.websocketTextReceived = &websocketTextReceived;
-  compMsgWifiData.netsocketToSend = &netsocketToSend;
-  compMsgWifiData.netsocketReceived = &netsocketReceived;
+  compMsgWifiData.webSocketBinaryReceived = &webSocketBinaryReceived;
+  compMsgWifiData.webSocketTextReceived = &webSocketTextReceived;
+  compMsgWifiData.netSocketToSend = &netSocketToSend;
+  compMsgWifiData.netSocketReceived = &netSocketReceived;
 
   self->addFieldValueCallbackName(self, "@getWifiAPBssidSize",       &getWifiAPBssidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
   self->addFieldValueCallbackName(self, "@getWifiAPBssidStrSize",    &getWifiAPBssidStrSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
@@ -947,8 +947,8 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
 
   self->connectToAP = &connectToAP;
   self->startStationCb = &startStationCb;
-  self->websocketSendConnectError = &websocketSendConnectError;
-  self->netsocketSendConnectError = &netsocketSendConnectError;
+  self->webSocketSendConnectError = &webSocketSendConnectError;
+  self->netSocketSendConnectError = &netSocketSendConnectError;
 
   bssScanInfos.compMsgDispatcher = self;
   self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);

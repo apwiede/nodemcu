@@ -86,7 +86,7 @@ typedef struct buildMsgInfos {
   uint16_t srcId;
 } buildMsgInfos_t;
 
-typedef struct websocketUserData {
+typedef struct webSocketUserData {
   struct espconn *pesp_conn;
   uint8_t isWebsocket;
   uint8_t num_urls;
@@ -97,9 +97,9 @@ typedef struct websocketUserData {
   char **urls; // that is the array of url parts which is used in socket_on for the different receive callbacks
   char *curr_url; // that is url which has been provided in the received data
   compMsgDispatcher_t *compMsgDispatcher;
-  websocketBinaryReceived_t websocketBinaryReceived;
-  websocketTextReceived_t websocketTextReceived;
-} websocketUserData_t;
+  webSocketBinaryReceived_t webSocketBinaryReceived;
+  webSocketTextReceived_t webSocketTextReceived;
+} webSocketUserData_t;
 
 typedef struct httpHeaderPart {
   uint8_t httpHeaderId;
@@ -107,7 +107,7 @@ typedef struct httpHeaderPart {
   uint8_t *httpHeaderValue;
 } httpHeaderPart_t;
 
-typedef struct netsocketUserData {
+typedef struct netSocketUserData {
   struct espconn *pesp_conn;
   int remote_port;
   uint8_t remote_ip[4];
@@ -116,11 +116,14 @@ typedef struct netsocketUserData {
   uint8_t secure;
 #endif
   compMsgDispatcher_t *compMsgDispatcher;
-  netsocketReceived_t netsocketReceived;
-  netsocketToSend_t netsocketToSend;
+  netSocketReceived_t netSocketReceived;
+  netSocketToSend_t netSocketToSend;
   httpHeaderPart_t *receivedHeaders;
   int httpCode;
-} netsocketUserData_t;
+  size_t currLgth;
+  size_t expectedLgth;
+  uint8_t *content;
+} netSocketUserData_t;
 
 typedef uint8_t (* createMsg_t)(compMsgDispatcher_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* addField_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
@@ -173,8 +176,8 @@ typedef struct compMsgData {
   uint8_t *prepareValuesCbName;
   
   buildMsgInfos_t buildMsgInfos;
-  websocketUserData_t *wud;
-  netsocketUserData_t *nud;
+  webSocketUserData_t *wud;
+  netSocketUserData_t *nud;
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
   headerPart_t *currHdr;
