@@ -67,7 +67,7 @@ static socketInfo_t *socket[MAX_SOCKET] = { NULL, NULL, NULL, NULL, NULL };
 static const char *header_key = "Sec-WebSocket-Key: ";
 static const char *ws_uuid ="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-static const char *HEADER_WEBSOCKETLINE = "Upgrade: webSocket";
+static const char *HEADER_WEBSOCKETLINE = "Upgrade: websocket";
 
 static char *HEADER_OK = "HTTP/1.x 200 OK \r\n\
 Server: ESP \r\n\
@@ -79,7 +79,7 @@ Content-Encoding: gzip \r\n\r\n";
 static char *HEADER_WEBSOCKET_START = "\
 HTTP/1.1 101 WebSocket Protocol Handshake\r\n\
 Connection: Upgrade\r\n\
-Upgrade: WebSocket\r\n\
+Upgrade: websocket\r\n\
 Access-Control-Allow-Origin: http://";
 
 static char *HEADER_WEBSOCKET_URL = "192.168.178.67";
@@ -184,10 +184,10 @@ static int ICACHE_FLASH_ATTR webSocketParse(char * data, size_t dataLenb, char *
   //   opcodes: {1 text 2 binary 8 close 9 ping 10 pong}
   switch (opcode) {
   case OPCODE_TEXT:
-//ets_printf("parse text\n");
+ets_printf("parse text\n");
     break;
   case OPCODE_BINARY:
-//ets_printf("parse binary\n");
+ets_printf("parse binary\n");
     break;
   case OPCODE_CLOSE:
     break;
@@ -240,16 +240,16 @@ static int ICACHE_FLASH_ATTR webSocketParse(char * data, size_t dataLenb, char *
   }
   recv_data = &data[offset];
 for (int i = 0; i < size; i++) {
-//  ets_printf("i: %d 0x%02x\n", i, recv_data[i]&0xFF);
+  ets_printf("i: %d 0x%02x\n", i, recv_data[i]&0xFF);
 }
   switch (opcode) {
   case OPCODE_TEXT:
-//ets_printf("cb text\n");
+ets_printf("cb text\n");
     sud->webSocketTextReceived(sud->compMsgDispatcher, sud, recv_data, size);
     break;
   case OPCODE_BINARY:
-//ets_printf("cb binary\n");
-//ets_printf("parse binary: size: %d\n", size);
+ets_printf("cb binary\n");
+ets_printf("parse binary: size: %d\n", size);
     sud->webSocketBinaryReceived(sud->compMsgDispatcher, sud, recv_data, size);
     break;
   }
@@ -365,6 +365,8 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   char url[50] = { 0 };
   int idx;
   socketUserData_t *sud;
+  const uint8_t *value;
+  uint8_t result;
 
   pesp_conn = (struct espconn *)arg;
 //ets_printf("§webSocketReceived: arg: %p len: %d§\n", arg, len);
@@ -391,8 +393,18 @@ ets_printf("§==received remote_port: %d\n§", sud->remote_port);
     url[end - begin] = 0;
 ets_printf("url: %s\n", url);
   }
-ets_printf("pdata: %s!\n%p!", pdata, strstr(pdata, HEADER_WEBSOCKETLINE));
+ets_printf("pdata: %s!\n", pdata);
+#ifdef NODTEF
+  result = sud->compMsgDispatcher->compMsgHttp->httpParse(sud, pdata, len);
+ets_printf("httpParse: result: %d!\n", result);
+  value = NULL;
+  result = sud->compMsgDispatcher->compMsgHttp->getHttpGetHeaderValueForId(sud, COMP_MSG_HTTP_CONNECTION, &value);
+ets_printf("value connection: %s result: %d\n", value, result);
+  result = sud->compMsgDispatcher->compMsgHttp->getHttpGetHeaderValueForId(sud, COMP_MSG_HTTP_UPGRADE, &value);
+ets_printf("value upgrade: %s result: %d\n", value, result);
+#endif
   if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0)) {
+ets_printf("XX\n");
     idx = 0;
     sud->curr_url = NULL;
 ets_printf("num_urls: %d\n", sud->num_urls);
@@ -576,6 +588,9 @@ ets_printf("§IP: %s\n§", temp);
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
 //   checkAllocOK(sud);
 //ets_printf("sud0: %p\n", sud);
+  sud->maxHttpMsgInfos = 5;
+  sud->numHttpMsgInfos = 0;
+  sud->httpMsgInfos = os_zalloc(sud->maxHttpMsgInfos * sizeof(httpMsgInfo_t));
   sud->isWebsocket = 0;
   sud->num_urls = 0;
   sud->max_urls = 4;

@@ -80,6 +80,13 @@ static httpHeaderKeyInfo_t httpHeaderKeyInfos[] = {
   {"access-control-allow-credentials", "Access-Control-Allow-Credentials", COMP_MSG_HTTP_ACCESS_CONTROL_ALLOW_CREDENTIALS},
   {"access-control-allow-headers",     "Access-Control-Allow-Headers",     COMP_MSG_HTTP_ACCESS_CONTROL_ALLOW_HEADERS},
   {"sec-websocket-accept",             "Sec-WebSocket-Accept",             COMP_MSG_HTTP_SEC_WEBSOCKET_ACCEPT},
+  {"host",                             "Host",                             COMP_MSG_HTTP_HOST},
+  {"user-agent",                       "User-Agent",                       COMP_MSG_HTTP_USER_AGENT},
+  {"sec-websocket-version",            "Sec-WebSocket-Version",            COMP_MSG_HTTP_SEC_WEBSOCKET_VERSION},
+  {"sec-websocket-protocol",           "Sec-WebSocket-Protocol",           COMP_MSG_HTTP_SEC_WEBSOCKET_PROTOCOL},
+  {"accept",                           "Accept",                           COMP_MSG_HTTP_ACCEPT},
+  {"accept-encoding",                  "Accept-Encoding",                  COMP_MSG_HTTP_ACCEPT_ENCODING},
+  {"host",                             "Host",                             COMP_MSG_HTTP_HOST},
 
   {NULL, NULL, -1},
 };
@@ -92,6 +99,22 @@ static uint8_t getHttpHeaderKeyIdFromKey(compMsgDispatcher_t *self, const uint8_
   entry = &httpHeaderKeyInfos[0];
   while (entry->key != NULL) {
     if (c_strcmp(httpHeaderKey, entry->key) == 0) {
+      *httpHeaderKeyId = entry->id;
+      return DATA_VIEW_ERR_OK;
+    }
+    entry++;
+  }
+  return DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND;
+}
+
+// ================================= getHttpHeaderKeyIdFromLowerKey ====================================
+
+static uint8_t getHttpHeaderKeyIdFromLowerKey(compMsgDispatcher_t *self, const uint8_t *httpHeaderKey, uint8_t *httpHeaderKeyId) {
+  httpHeaderKeyInfo_t *entry;
+
+  entry = &httpHeaderKeyInfos[0];
+  while (entry->key != NULL) {
+    if (c_strcmp(httpHeaderKey, entry->lowerKey) == 0) {
       *httpHeaderKeyId = entry->id;
       return DATA_VIEW_ERR_OK;
     }
@@ -116,32 +139,18 @@ static uint8_t getHttpHeaderKeyFromId(compMsgDispatcher_t *self, uint8_t httpHea
   return DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND;
 }
 
-// ============================ httpParse =========================================
+// ============================ getContentAndNumHeaders =========================================
 
-static uint8_t ICACHE_FLASH_ATTR httpParse(char * data, size_t size, socketUserData_t *sud) {
+static uint8_t getContentAndNumHeaders(char *data, size_t size, socketUserData_t *sud) {
   uint8_t result;
-  size_t numEol;
-  char *lowerData;
+  httpMsgInfo_t *httpMsgInfo;
+  size_t idx;
   char *cp;
   char *lastNewLine;
-  char *dp;
-  size_t idx;
-  size_t httpHeaderIdx;
-  size_t headerLgth;
-  bool hadColon;
-  httpHeaderPart_t *httpHeaderPart;
-  uint8_t *headerStr;
-  uint8_t *lowerHeaderStr;
-  char *endPtr;
-  long uval;
-  httpMsgInfo_t *httpMsgInfo;
 
-ets_printf("§netSocketParse§");
-ets_printf("§===\nSUD: %p\n§", sud);
   httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
-  numEol = 0;
+  httpMsgInfo->numHeaders = 0;
   idx = 0;
-  lowerData = os_zalloc(size + 1);
   cp = data;
   lastNewLine = cp;
   // get the number of lines of the request
@@ -156,38 +165,75 @@ ets_printf("§cp-data: %d§", cp - data);
          break;
       }
       lastNewLine = cp;
-      numEol++;
+      httpMsgInfo->numHeaders++;
     }
     idx++;
     cp++;
   }
-ets_printf("§numEol: %d lowerData: %s!\nsud->content: %s!len: %d!§", numEol, lowerData, httpMsgInfo->content, c_strlen(httpMsgInfo->content));  
-  headerLgth = (char *)httpMsgInfo->content - data;
-  httpMsgInfo->receivedHeaders = os_zalloc(numEol * sizeof(httpHeaderPart_t));
-  checkAllocOK(httpMsgInfo->receivedHeaders);
+  return COMP_MSG_ERR_OK;
+}
 
-  dp = lowerData;
+// ============================ getHttpRequestCode =========================================
+
+static uint8_t getHttpRequestCode(char * data, socketUserData_t *sud) {
+  uint8_t result;
+  httpMsgInfo_t *httpMsgInfo;
+  size_t idx;
+  char *cp;
+  size_t httpHeaderIdx;
+  httpHeaderPart_t *httpHeaderPart;
+  char *endPtr;
+  long uval;
+
+  httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
   idx = 0;
-  cp = data;
   httpHeaderIdx = 0;
-  hadColon = false;
-  lowerHeaderStr = dp;
-  headerStr = cp;
+ets_printf("get RequestCode: httpMsgInfo->receivedHeaders: %p\n", httpMsgInfo->receivedHeaders);
   httpHeaderPart = &httpMsgInfo->receivedHeaders[httpHeaderIdx];
+ets_printf("httpHeaderPart: %p\n", httpHeaderPart);
   httpHeaderPart->httpHeaderId = COMP_MSG_HTTP_CODE;
   httpHeaderPart->httpHeaderName = "Code";
-  httpHeaderPart->httpHeaderValue = headerStr;
+  httpHeaderPart->httpHeaderValue = data ;
   // get result code
+  cp = data;
   while (*cp != '\n') {
      if (*cp == ' ') {
        uval = c_strtoul(cp+1, &endPtr, 10);
-       httpMsgInfo->httpCode = (int)uval;
-ets_printf("§CODE: %d!§", httpMsgInfo->httpCode);
+ets_printf("uval: %d\n", uval);
+       httpMsgInfo->httpRequestCode = (int)uval;
+ets_printf("§CODE: %d!\n§", httpMsgInfo->httpRequestCode);
        break;
      }
      cp++;
   }
+  return COMP_MSG_ERR_OK;
+}
+
+// ============================ getHttpHeaders =========================================
+
+static uint8_t getHttpHeaders(char * data, size_t size, socketUserData_t *sud) {
+  uint8_t result;
+  char *cp;
+  bool hadColon;
+  size_t idx;
+  size_t headerLgth;
+  size_t httpHeaderIdx;
+  httpHeaderPart_t *httpHeaderPart;
+  httpMsgInfo_t *httpMsgInfo;
+  uint8_t *headerStr;
+  uint8_t *lowerHeaderStr;
+  char *lowerData;
+  char *dp;
+
+  idx = 0;
+  httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
+  httpHeaderIdx = 0;
   cp = data;
+  hadColon = false;
+  lowerData = os_zalloc(size + 1);
+  dp = lowerData;
+  lowerHeaderStr = dp;
+  headerLgth = (char *)httpMsgInfo->content - data;
   while (idx < headerLgth) {
     if ((*cp == '\n')) {
       if (httpHeaderIdx > 0) {
@@ -210,8 +256,8 @@ ets_printf("§CODE: %d!§", httpMsgInfo->httpCode);
         hadColon = true;
         *cp = '\0';
         *dp = '\0';
-//ets_printf("§lowerHeaderStr: %s!§", lowerHeaderStr);
-        result = sud->compMsgDispatcher->compMsgHttp->getHttpHeaderKeyIdFromKey(sud->compMsgDispatcher, lowerHeaderStr, &httpHeaderPart->httpHeaderId);
+        result = sud->compMsgDispatcher->compMsgHttp->getHttpHeaderKeyIdFromLowerKey(sud->compMsgDispatcher, lowerHeaderStr, &httpHeaderPart->httpHeaderId);
+        checkErrOK(result);
         httpHeaderPart->httpHeaderName = headerStr;
         while (cp[1] == ' ') {
           cp++;
@@ -232,10 +278,43 @@ ets_printf("§CODE: %d!§", httpMsgInfo->httpCode);
     cp++;
     idx++;
   }
+  return COMP_MSG_ERR_OK;
+}
+
+// ============================ httpParse =========================================
+
+static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char * data, size_t size) {
+  uint8_t result;
+  int idx;
+  size_t httpHeaderIdx;
+  httpHeaderPart_t *httpHeaderPart;
+  httpMsgInfo_t *httpMsgInfo;
+  char *endPtr;
+  long uval;
+
+ets_printf("§httpParse\n§");
+ets_printf("§===\nSUD: %p\n§", sud);
+
+  result = getContentAndNumHeaders(data, size, sud);
+  checkErrOK(result);
+  httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
+
+ets_printf("§numHeaders: %d sud->content: %s!len: %d!\n§", httpMsgInfo->numHeaders, httpMsgInfo->content, c_strlen(httpMsgInfo->content));  
+ets_printf("receivedHeadersSize: %d\n", httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
+  httpMsgInfo->receivedHeaders = os_zalloc(httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
+  checkAllocOK(httpMsgInfo->receivedHeaders);
+ets_printf("httpMsgInfo->receivedHeaders: %p\n", httpMsgInfo->receivedHeaders);
+
+  result = getHttpRequestCode(data, sud);
+  checkErrOK(result);
+
+  result = getHttpHeaders(data, size, sud);
+  checkErrOK(result);
+
   idx = 0;
-  while (idx < httpHeaderIdx) {
+  while (idx < httpMsgInfo->numHeaders) {
     httpHeaderPart = &httpMsgInfo->receivedHeaders[idx];
-ets_printf("§idx: %d id: %d name: %s value: %s!§", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
+ets_printf("§idx: %d id: %d name: %s value: %s!\n§", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
     if (httpHeaderPart->httpHeaderId == COMP_MSG_HTTP_CONTENT_LENGTH) {
       if (httpMsgInfo->expectedLgth == 0) {
         uval = c_strtoul(httpHeaderPart->httpHeaderValue, &endPtr, 10);
@@ -250,14 +329,38 @@ ets_printf("§expectedLgth: %d§", uval);
   return COMP_MSG_ERR_OK;
 }
 
+// ============================ getHttpGetHeaderValueForId =========================================
+
+static uint8_t getHttpGetHeaderValueForId(socketUserData_t *sud, uint8_t id, const uint8_t **value) {
+  uint8_t result;
+  int idx;
+  size_t httpHeaderIdx;
+  httpHeaderPart_t *httpHeaderPart;
+  httpMsgInfo_t *httpMsgInfo;
+
+  httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
+  idx = 0;
+  while (idx < httpMsgInfo->numHeaders) {
+    httpHeaderPart = &httpMsgInfo->receivedHeaders[idx];
+    if (httpHeaderPart->httpHeaderId == id) {
+      *value = httpHeaderPart->httpHeaderValue;
+      return COMP_MSG_ERR_OK;
+    }
+    idx++;
+  }
+  return COMP_MSG_ERR_FIELD_NOT_FOUND;
+}
+
 // ================================= compMsgHttpInit ====================================
 
 uint8_t compMsgHttpInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->compMsgHttp->httpParse = &httpParse;
   self->compMsgHttp->getHttpHeaderKeyIdFromKey = &getHttpHeaderKeyIdFromKey;
+  self->compMsgHttp->getHttpHeaderKeyIdFromLowerKey = &getHttpHeaderKeyIdFromLowerKey;
   self->compMsgHttp->getHttpHeaderKeyFromId = &getHttpHeaderKeyFromId;
+  self->compMsgHttp->httpParse = &httpParse;
+  self->compMsgHttp->getHttpGetHeaderValueForId = &getHttpGetHeaderValueForId;
 
   return COMP_MSG_ERR_OK;
 }

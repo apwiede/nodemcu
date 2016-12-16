@@ -65,19 +65,29 @@ enum compMsgHttpHeaderNames
   COMP_MSG_HTTP_ACCESS_CONTROL_ALLOW_CREDENTIALS  = 15,
   COMP_MSG_HTTP_ACCESS_CONTROL_ALLOW_HEADERS      = 16,
   COMP_MSG_HTTP_SEC_WEBSOCKET_ACCEPT              = 17,
+  COMP_MSG_HTTP_HOST                              = 18,
+  COMP_MSG_HTTP_USER_AGENT                        = 19,
+  COMP_MSG_HTTP_SEC_WEBSOCKET_VERSION             = 20,
+  COMP_MSG_HTTP_SEC_WEBSOCKET_PROTOCOL            = 21,
+  COMP_MSG_HTTP_ACCEPT                            = 22,
+  COMP_MSG_HTTP_ACCEPT_ENCODING                   = 23,
 };
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef uint8_t (* getHttpHeaderKeyIdFromKey_t)(compMsgDispatcher_t *self, const uint8_t *httpHeaderStr, uint8_t *httpHeaderKeyId);
+typedef uint8_t (* getHttpHeaderKeyIdFromLowerKey_t)(compMsgDispatcher_t *self, const uint8_t *httpHeaderStr, uint8_t *httpHeaderKeyId);
 typedef uint8_t (* getHttpHeaderKeyFromId_t)(compMsgDispatcher_t *self, uint8_t httpHeaderKeyId, const uint8_t **key);
-typedef uint8_t (* httpParse_t)(char * data, size_t size, socketUserData_t *sud);
+typedef uint8_t (* httpParse_t)(socketUserData_t *sud, char * data, size_t size);
+typedef uint8_t ( *getHttpGetHeaderValueForId_t)(socketUserData_t *sud, uint8_t id, const uint8_t **value);
 
 typedef struct compMsgHttp {
 
   getHttpHeaderKeyIdFromKey_t getHttpHeaderKeyIdFromKey;
+  getHttpHeaderKeyIdFromLowerKey_t getHttpHeaderKeyIdFromLowerKey;
   getHttpHeaderKeyFromId_t getHttpHeaderKeyFromId;
   httpParse_t httpParse;
+  getHttpGetHeaderValueForId_t getHttpGetHeaderValueForId;
 } compMsgHttp_t;
 
 compMsgHttp_t *newCompMsgHttp();

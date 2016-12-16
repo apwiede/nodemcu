@@ -56,7 +56,8 @@ typedef struct httpHeaderPart {
 
 typedef struct httpMsgInfo {
   httpHeaderPart_t *receivedHeaders;
-  int httpCode;
+  int httpRequestCode;
+  uint8_t numHeaders;
   size_t currLgth;
   size_t expectedLgth;
   uint8_t *content;

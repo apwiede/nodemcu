@@ -296,7 +296,7 @@ ets_printf("§sud: %p§", sud);
     return;
   }
 ets_printf("§call httpParse§");
-  result = sud->compMsgDispatcher->compMsgHttp->httpParse(pdata, len, sud);
+  result = sud->compMsgDispatcher->compMsgHttp->httpParse(sud, pdata, len);
   if (result != NETSOCKET_ERR_OK) {
     // FIXME
     // add error to ErrorMain or ErrorSub list
@@ -535,6 +535,9 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
 //   checkAllocOK(sud);
 //ets_printf("§sud0: %p§", sud);
 //  checkAllocgLOK(sud->urls);
+  sud->maxHttpMsgInfos = 5;
+  sud->numHttpMsgInfos = 0;
+  sud->httpMsgInfos = os_zalloc(sud->maxHttpMsgInfos * sizeof(httpMsgInfo_t));
   sud->connectionType = NET_SOCKET_TYPE_SOCKET;
 #ifdef CLIENT_SSL_ENABLE
   result = self->getWifiValue(self, WIFI_INFO_CLOUD_SECURE_CONNECT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
