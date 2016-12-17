@@ -132,7 +132,7 @@ ets_printf("§runDeletePasswdC§");
 static uint8_t runAPConnect(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  result = self->connectToAP(self);
+  result = self->compMsgWifiData->connectToAP(self);
   return result;
 }
 
@@ -141,7 +141,8 @@ static uint8_t runAPConnect(compMsgDispatcher_t *self) {
 static uint8_t getAPList(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  result = self->getBssScanInfo(self);
+ets_printf("getAPList compMsgWifiData: %p\n", self->compMsgWifiData);
+  result = self->compMsgWifiData->getBssScanInfo(self);
   return result;
 }
 
@@ -150,7 +151,7 @@ static uint8_t getAPList(compMsgDispatcher_t *self) {
 static uint8_t getWifiSrcId(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  result = self->getWifiRemotePort(self);
+  result = self->compMsgWifiData->getWifiRemotePort(self);
   return result;
 }
 
@@ -362,11 +363,11 @@ ets_printf("§runAction4:§");
 uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->setActionEntry = &setActionEntry;
-  self->runAction = &runAction;
-  self->getActionCallback = &getActionCallback;
-  self->getActionCallbackName = &getActionCallbackName;
-  self->getActionMode = &getActionMode;
+  self->compMsgAction->setActionEntry = &setActionEntry;
+  self->compMsgAction->runAction = &runAction;
+  self->compMsgAction->getActionCallback = &getActionCallback;
+  self->compMsgAction->getActionCallbackName = &getActionCallbackName;
+  self->compMsgAction->getActionMode = &getActionMode;
 
   compMsgActionEntries.numActionEntries = 0;
   compMsgActionEntries.maxActionEntries = 10;
@@ -382,3 +383,13 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   return result;
 }
 
+// ================================= newCompMsgAction ====================================
+
+compMsgAction_t *newCompMsgAction() {
+  compMsgAction_t *compMsgAction = os_zalloc(sizeof(compMsgAction_t));
+  if (compMsgAction == NULL) {
+    return NULL;
+  }
+
+  return compMsgAction;
+}

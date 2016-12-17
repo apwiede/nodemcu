@@ -830,7 +830,7 @@ static uint8_t readActions(compMsgDispatcher_t *self, uint8_t *fileName) {
     default:
       checkErrOK(COMP_MSG_ERR_BAD_FIELD_TYPE);
     }
-    result = self->setActionEntry(self, actionName, actionMode, u8CmdKey, u16CmdKey);
+    result = self->compMsgAction->setActionEntry(self, actionName, actionMode, u8CmdKey, u16CmdKey);
     checkErrOK(result);
     if (!isEnd) {
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
@@ -904,12 +904,12 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
     if ((endPtr - (char *)fieldValueStr) == c_strlen(fieldValueStr)) {
       if (c_strlen(fieldValueStr) > 10) {
         // seems to be a password key, so use the stringValue
-        result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+        result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
       } else {
-        result = self->setWifiValue(self, fieldNameStr, uval, NULL);
+        result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, uval, NULL);
       }
     } else {
-      result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+      result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
     }
     if (!isEnd) {
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
@@ -983,12 +983,12 @@ static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
     if ((endPtr - (char *)fieldValueStr) == c_strlen(fieldValueStr)) {
       if (c_strlen(fieldValueStr) > 10) {
         // seems to be a password key, so use the stringValue
-        result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+        result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
       } else {
-        result = self->setWifiValue(self, fieldNameStr, uval, NULL);
+        result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, uval, NULL);
       }
     } else {
-      result = self->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+      result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
     }
     if (!isEnd) {
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
@@ -1517,7 +1517,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     fieldValueStr = cp;
     result = compMsgMsgDesc->getIntFromLine(cp, &uval, &ep, &isEnd);
     checkErrOK(result);
-    result = self->bssStr2BssInfoId(fieldNameStr + c_strlen("@key_"), &bssInfoType);
+    result = self->compMsgWifiData->bssStr2BssInfoId(fieldNameStr + c_strlen("@key_"), &bssInfoType);
     if (result != COMP_MSG_ERR_OK) {
       // not a key the Wifi is handling (normally cloud keys)
       idx++;

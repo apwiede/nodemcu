@@ -213,17 +213,17 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   payloadLgth += (msgLgth + 3);  // \r\n\0
 #else
   payloadLgth = c_strlen("POST ");
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
   checkErrOK(result);
   payloadLgth += c_strlen(subUrl);
   hostPart=" HTTP/1.1\r\nHost: ";
   payloadLgth += c_strlen(hostPart);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
   checkErrOK(result);
   payloadLgth += c_strlen(host);
   alive="\r\n";
   payloadLgth += c_strlen(alive);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
   contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";

@@ -503,7 +503,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
     if (msgValPart->fieldValueActionCb != NULL) {
 //ets_printf("§have actionCb: %s\n§", msgValPart->fieldValueActionCb);
       hadActionCb = true;
-      result = self->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
+      result = self->compMsgAction->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
       checkErrOK(result);
       result = actionCallback(self);
       checkErrOK(result);
@@ -536,9 +536,9 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   self->startSendMsg = NULL;
   self->stopAccessPoint = true;
   received = &self->compMsgData->received;
-  result = self->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
   checkErrOK(result);
-  result = self->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
   checkErrOK(result);
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
 //ets_printf("§IP: %s port: %d§\n", temp, port);

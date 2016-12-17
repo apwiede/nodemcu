@@ -92,6 +92,10 @@ typedef struct compMsgModuleDataName2Value {
   uint8_t *value;
 } compMsgModuleDataName2Value_t;
 
+typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
+typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
+
 typedef struct compMsgModuleData {
   uint8_t MACAddr[7];
   uint8_t IPAddr[5];
@@ -123,6 +127,12 @@ typedef struct compMsgModuleData {
   uint16_t srcId;
   uint8_t passwdC[17];
   uint8_t operatingMode;
+
+  setModuleValue_t setModuleValue;
+  setModuleValues_t setModuleValues;
+  updateModuleValues_t updateModuleValues;
 } compMsgModuleData_t;
+
+compMsgModuleData_t *newCompMsgModuleData();
 
 #endif	/* COMP_MSG_MODULE_DATA_H */

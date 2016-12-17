@@ -378,7 +378,7 @@ static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
 static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   int result;
 
-  result = self->setModuleValue(self, "operatingMode", self->operatingMode, NULL);
+  result = self->compMsgModuleData->setModuleValue(self, "operatingMode", self->operatingMode, NULL);
   return COMP_MSG_ERR_OK;
 }
 
@@ -590,9 +590,9 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
 uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->setModuleValue = &setModuleValue;
-  self->setModuleValues = &setModuleValues;
-  self->updateModuleValues = &updateModuleValues;
+  self->compMsgModuleData->setModuleValue = &setModuleValue;
+  self->compMsgModuleData->setModuleValues = &setModuleValues;
+  self->compMsgModuleData->updateModuleValues = &updateModuleValues;
 
   self->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
@@ -625,7 +625,17 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->addFieldValueCallbackName(self, "@getPasswdC", &getPasswdC, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@setOperatingMode", &setOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->addFieldValueCallbackName(self, "@getOperatingMode", &getOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->setModuleValues(self);
+  self->compMsgModuleData->setModuleValues(self);
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= newCompMsgModuleData ====================================
+
+compMsgModuleData_t *newCompMsgModuleData() {
+  compMsgModuleData_t *compMsgModuleData = os_zalloc(sizeof(compMsgModuleData_t));
+  if (compMsgModuleData == NULL) {
+    return NULL;
+  }
+
+  return compMsgModuleData;
+}

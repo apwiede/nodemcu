@@ -373,7 +373,5 @@ compMsgHttp_t *newCompMsgHttp() {
     return NULL;
   }
 
-//  compMsgHttp->xx = &xx;
-
   return compMsgHttp;
 }

@@ -174,6 +174,16 @@ typedef struct stationConfig {
   int16_t freqcal_val;
 } stationConfig_t;
 
+typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
+typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* startStationCb_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
+typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
+typedef uint8_t (* netSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 
 typedef struct compMsgWifiData {
   uint16_t key_ssid;
@@ -210,10 +220,24 @@ typedef struct compMsgWifiData {
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
 
+  bssScanInfos_t bssScanInfos;
+  getBssScanInfo_t getBssScanInfo;
+  getWifiValue_t getWifiValue;
+  getWifiConfig_t getWifiConfig;
+  setWifiValue_t setWifiValue;
+  getWifiRemotePort_t getWifiRemotePort;
+  bssStr2BssInfoId_t bssStr2BssInfoId;
+  connectToAP_t connectToAP;
+  startStationCb_t startStationCb;
+  webSocketSendConnectError_t webSocketSendConnectError;
+  netSocketSendConnectError_t netSocketSendConnectError;
+
   webSocketBinaryReceived_t webSocketBinaryReceived;
   webSocketTextReceived_t webSocketTextReceived;
   netSocketToSend_t netSocketToSend;
   netSocketReceived_t netSocketReceived;
 } compMsgWifiData_t;
+
+compMsgWifiData_t *newCompMsgWifiData();
 
 #endif	/* COMP_MSG_WIFI_DATA_H */

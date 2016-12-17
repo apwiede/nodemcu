@@ -52,6 +52,7 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgTypesAndNames.h"
 #include "compMsgDataView.h"
 #include "compMsgTimer.h"
+#include "compMsgAction.h"
 #include "compMsgModuleData.h"
 #include "compMsgSocket.h"
 #include "compMsgWifiData.h"
@@ -108,35 +109,11 @@ typedef struct fieldValueCallbackInfos {
   fieldValueCallback_t callback;
   uint8_t callbackType;
 } fieldValueCallbackInfos_t;
+
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-// Action stuff
-typedef uint8_t (* action_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* setActionEntry_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
-typedef uint8_t (* runAction_t)(compMsgDispatcher_t *self, uint8_t *answerType);
-typedef uint8_t (* getActionMode_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode);
-typedef uint8_t (* getActionCallback_t)(compMsgDispatcher_t *self, uint8_t *actionName, action_t *callback);
-typedef uint8_t (* getActionCallbackName_t)(compMsgDispatcher_t *self, action_t callback, uint8_t **actionName);
-
-// Wifi stuff
-typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
-typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* startStationCb_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
-typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
-typedef uint8_t (* netSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
-
-// ModuleData stuff
-typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* webSocketRunAPMode_t)(compMsgDispatcher_t *self);
-
 // WebSocket stuff
+typedef uint8_t (* webSocketRunAPMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* webSocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* webSocketSendData_t)(socketUserData_t *sud, const char *payload, int size, int opcode);
 
@@ -238,6 +215,15 @@ typedef struct compMsgDispatcher {
   // compMsgHttp info
   compMsgHttp_t *compMsgHttp;
 
+  // compMsgAction info
+  compMsgAction_t *compMsgAction;
+
+  // compMsgWifiData info
+  compMsgWifiData_t *compMsgWifiData;
+
+  // compMsgModuleData info
+  compMsgModuleData_t *compMsgModuleData;
+
   // request infos
   msgRequestInfos_t msgRequestInfos;
 
@@ -270,27 +256,12 @@ typedef struct compMsgDispatcher {
   startSendMsg_t startSendMsg;
   startSendMsg_t startSendMsg2;
 
-  // Action
-  setActionEntry_t setActionEntry;
-  runAction_t runAction;
-  getActionCallback_t getActionCallback;
-  getActionCallbackName_t getActionCallbackName;
-  getActionMode_t getActionMode;
-  getBssScanInfo_t getBssScanInfo;
-  connectToAP_t connectToAP;
-  startStationCb_t startStationCb;
-
   // BuildMsg
   setMsgFieldValue_t setMsgFieldValue;
   fixOffsetsForKeyValues_t fixOffsetsForKeyValues;
   buildMsg_t buildMsg;
   setMsgValues_t setMsgValues;
   forwardMsg_t forwardMsg;
-
-  // ModuleData
-  setModuleValue_t setModuleValue;
-  setModuleValues_t setModuleValues;
-  updateModuleValues_t updateModuleValues;
 
   // Dispatcher
   getFieldType_t getFieldType;
@@ -325,16 +296,7 @@ typedef struct compMsgDispatcher {
   storeReceivedMsg_t storeReceivedMsg;
   sendClientIPMsg_t sendClientIPMsg;
 
-  // wifi
-  bssStr2BssInfoId_t bssStr2BssInfoId;
-  getWifiValue_t getWifiValue;
-  getWifiConfig_t getWifiConfig;
-  setWifiValue_t setWifiValue;
-  getWifiRemotePort_t getWifiRemotePort;
   webSocketRunAPMode_t webSocketRunAPMode;
-  webSocketSendConnectError_t webSocketSendConnectError;
-  netSocketSendConnectError_t netSocketSendConnectError;
-
 
   webSocketRunClientMode_t webSocketRunClientMode;
   webSocketSendData_t webSocketSendData;

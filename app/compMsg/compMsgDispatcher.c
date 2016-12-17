@@ -398,15 +398,15 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     action_t actionCallback;
     uint8_t type;
 
-ets_printf("§call prepareValuesCbName: %s\n§", self->compMsgData->prepareValuesCbName);
-    result = self->getActionCallback(self, self->compMsgData->prepareValuesCbName+1, &actionCallback);
+//ets_printf("§call prepareValuesCbName: %s\n§", self->compMsgData->prepareValuesCbName);
+    result = self->compMsgAction->getActionCallback(self, self->compMsgData->prepareValuesCbName+1, &actionCallback);
     checkErrOK(result);
     result = actionCallback(self);
     checkErrOK(result);
-    result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
+    result = self->compMsgAction->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
     self->actionMode = actionMode;
     checkErrOK(result);
-    result  = self->runAction(self, &type);
+    result  = self->compMsgAction->runAction(self, &type);
     // actionCallback starts a call with eventually a callback and returns here before the callback has been running!!
     // when coming here we are finished and the callback will do the work later on!
     return result;
@@ -888,6 +888,15 @@ ets_printf("newCompMsgDispatcher\n");
 
   // Http
   compMsgDispatcher->compMsgHttp = newCompMsgHttp();
+
+  // Action
+  compMsgDispatcher->compMsgAction = newCompMsgAction();
+
+  // WifiData
+  compMsgDispatcher->compMsgWifiData = newCompMsgWifiData();
+
+  // ModuleData
+  compMsgDispatcher->compMsgModuleData = newCompMsgModuleData();
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

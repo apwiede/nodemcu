@@ -544,21 +544,21 @@ ets_printf("§startAccessPoint:wifi is in mode: %d status: %d ap_id: %d hostname
 ets_printf("§STATION_WRONG_PASSWORD\n§");
     tmr->mode |= TIMER_IDLE_FLAG;
     ets_timer_disarm(&tmr->timer);
-    self->webSocketSendConnectError(self, status);
+    self->compMsgWifiData->webSocketSendConnectError(self, status);
     return;
     break;
   case STATION_NO_AP_FOUND:
 ets_printf("§STATION_NO_AP_FOUND\n§");
     tmr->mode |= TIMER_IDLE_FLAG;
     ets_timer_disarm(&tmr->timer);
-    self->webSocketSendConnectError(self, status);
+    self->compMsgWifiData->webSocketSendConnectError(self, status);
     return;
     break;
   case STATION_CONNECT_FAIL:
 ets_printf("§STATION_CONNECT_FAIL\n§");
     tmr->mode |= TIMER_IDLE_FLAG;
     ets_timer_disarm(&tmr->timer);
-    self->webSocketSendConnectError(self, status);
+    self->compMsgWifiData->webSocketSendConnectError(self, status);
     return;
     break;
   case STATION_GOT_IP:
@@ -575,7 +575,7 @@ ets_printf("§STATION_GOT_IP\n§");
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
 ets_printf("§IP: %s\n§", temp);
 
-  result = self->getWifiValue(self, WIFI_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
 //ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
 //  checkErrOK(result);
   port = numericValue;
@@ -598,10 +598,10 @@ ets_printf("§IP: %s\n§", temp);
 sud->urls[0] = "/getaplist";
 sud->urls[1] = "/getapdeflist";
 sud->num_urls = 2;
-  result = self->getWifiValue(self, WIFI_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)numericValue;
-  result = self->getWifiValue(self, WIFI_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
 //ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketTextReceived = (webSocketTextReceived_t)numericValue;
   sud->compMsgDispatcher = self;
@@ -668,7 +668,7 @@ ets_printf("§webSocketRunAPMode COMP_MSG_ERR_CANNOT_SET_OPMODE\n§");
     return COMP_MSG_ERR_CANNOT_SET_OPMODE;
   }
   c_memset(softap_config.ssid,0,sizeof(softap_config.ssid));
-  result = self->getWifiValue(self, WIFI_INFO_PROVISIONING_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_PROVISIONING_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
 //ets_printf("§webSocketRunAPMode get_PROVISIONING_SSID result: %d§\n", result);
   checkErrOK(result);
   c_memcpy(softap_config.ssid, stringValue, c_strlen(stringValue));
