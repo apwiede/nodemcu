@@ -226,7 +226,7 @@ static int compMsg_uartReceiveCb( lua_State* L ) {
   lgth = c_strlen(buffer);
   result = compMsgDispatcherGetPtrFromHandle(handle, &compMsgDispatcher);
   checkOKOrErr(L, result, "uartReceiveCb", "");
-  result = compMsgDispatcher->uartReceiveCb(compMsgDispatcher, buffer, lgth);
+  result = compMsgDispatcher->compMsgSendReceive->uartReceiveCb(compMsgDispatcher, buffer, lgth);
   checkOKOrErr(L, result, "uartReceiveCbwriteLine", "");
   return 1;
 }
