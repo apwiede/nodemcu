@@ -645,16 +645,15 @@ static  void startClientMode(void *arg) {
   char *hostname;
   uint8_t ap_id;
   uint8_t opmode;
-  timerInfo_t *timerInfo;
+  compMsgTimerInfo_t *compMsgTimerInfo;
 
   pesp_conn = NULL;
   mode = STATION_IF;
-  timerInfo = (timerInfo_t *)arg;
-ets_printf("§startClientMode timerInfo:%p\n§", timerInfo);
+  compMsgTimerInfo = (compMsgTimerInfo_t *)arg;
+ets_printf("§startClientMode timerInfo:%p\n§", compMsgTimerInfo);
 //  timerId = (uint8_t)((uint32_t)arg);
-  timerId = timerInfo->timerId;
-  self = timerInfo->compMsgDispatcher;
-  os_free(timerInfo);
+  timerId = compMsgTimerInfo->timerId;
+  self = compMsgTimerInfo->compMsgDispatcher;
 ets_printf("§startClientMode timerId: %d\n§", timerId);
   tmr = &self->compMsgTimer->compMsgTimers[timerId];
 //  self = tmr->self;
@@ -670,29 +669,29 @@ ets_printf("§startClientMode timerId: %d\n§", timerId);
 ets_printf("§startClientMode: wifi is in mode: %d status: %d ap_id: %d hostname: %s!§", opmode, status, ap_id, hostname);
   switch (status) {
   case STATION_IDLE:
-//ets_printf("§STATION_IDLE§");
+ets_printf("§STATION_IDLE§");
     break;
   case STATION_CONNECTING:
-//ets_printf("§STATION_CONNECTING§");
+ets_printf("§STATION_CONNECTING§");
     return;
     break;
   case STATION_WRONG_PASSWORD:
-//ets_printf("§STATION_WRONG_PASSWORD§");
-    tmr->mode |= TIMER_IDLE_FLAG;
+ets_printf("§STATION_WRONG_PASSWORD§");
+    tmr->mode = TIMER_MODE_OFF;
     ets_timer_disarm(&tmr->timer);
     self->netSocketSendConnectError(self, status);
     return;
     break;
   case STATION_NO_AP_FOUND:
-//ets_printf("§STATION_NO_AP_FOUND§");
-    tmr->mode |= TIMER_IDLE_FLAG;
+ets_printf("§STATION_NO_AP_FOUND§");
+    tmr->mode = TIMER_MODE_OFF;
     ets_timer_disarm(&tmr->timer);
     self->netSocketSendConnectError(self, status);
     return;
     break;
   case STATION_CONNECT_FAIL:
-//ets_printf("§STATION_CONNECT_FAIL§");
-    tmr->mode |= TIMER_IDLE_FLAG;
+ets_printf("§STATION_CONNECT_FAIL§");
+    tmr->mode = TIMER_MODE_OFF;
     ets_timer_disarm(&tmr->timer);
     self->netSocketSendConnectError(self, status);
     return;
@@ -703,12 +702,13 @@ ets_printf("§STATION_GOT_IP§");
   }
   wifi_get_ip_info(mode, &pTempIp);
   if(pTempIp.ip.addr==0){
-//ets_printf("§ip: nil§");
+ets_printf("§ip: nil§");
     return;
   }
   tmr->mode |= TIMER_IDLE_FLAG;
-//  c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
-//ets_printf("§IP: %s§", temp);
+ets_printf("§timer->mode: 0x%02x\n§", tmr->mode);
+  c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
+ets_printf("§IP: %s§", temp);
   ets_timer_disarm(&tmr->timer);
   self->runningModeFlags |= COMP_DISP_RUNNING_MODE_CLIENT;
   result = self->setWifiValue(self, "@clientIPAddr", pTempIp.ip.addr, NULL);
@@ -835,17 +835,17 @@ ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode
   int interval = 1000;
   int timerId = 2;
   int mode = TIMER_MODE_AUTO;
-  timerInfo_t *timerInfo;
+  compMsgTimerInfo_t *compMsgTimerInfo;
 
-  timerInfo = os_zalloc(sizeof(timerInfo_t));
-  timerInfo->timerId = timerId;
-  timerInfo->compMsgDispatcher = self;
+  compMsgTimerInfo = &self->compMsgTimer->compMsgTimerInfos[timerId];
+  compMsgTimerInfo->timerId = timerId;
+  compMsgTimerInfo->compMsgDispatcher = self;
   compMsgTimerSlot_t *tmr = &self->compMsgTimer->compMsgTimers[timerId];
   if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
     ets_timer_disarm(&tmr->timer);
   }
   // this is only preparing
-  ets_timer_setfn(&tmr->timer, startClientMode, (void*)timerInfo);
+  ets_timer_setfn(&tmr->timer, startClientMode, (void*)compMsgTimerInfo);
   tmr->mode = mode | TIMER_IDLE_FLAG;
   // here is the start
   tmr->interval = interval;

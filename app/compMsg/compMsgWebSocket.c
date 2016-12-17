@@ -518,16 +518,15 @@ static  void startAccessPoint(void *arg) {
   unsigned type;
   int result;
   socketUserData_t *sud;
-  timerInfo_t *timerInfo;
+  compMsgTimerInfo_t *compMsgTimerInfo;
 
 //ets_printf("§startAccessPoint\n§");
   pesp_conn = NULL;
   mode = SOFTAP_IF;
-  timerInfo = (timerInfo_t *)arg;
-//ets_printf("§timerInfo:%p\n§", timerInfo);
-  timerId = timerInfo->timerId;
-  self = timerInfo->compMsgDispatcher;
-  os_free(timerInfo);
+  compMsgTimerInfo = (compMsgTimerInfo_t *)arg;
+ets_printf("§startAccessPoint timerInfo:%p\n§", compMsgTimerInfo);
+  timerId = compMsgTimerInfo->timerId;
+  self = compMsgTimerInfo->compMsgDispatcher;
 //ets_printf("§startAccessPoint timerId: %d\n§", timerId);
   tmr = &self->compMsgTimer->compMsgTimers[timerId];
 //  self = tmr->self;
@@ -706,18 +705,18 @@ ets_printf("§wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n§", wifi_
   int interval = 1000;
   int timerId = 0;
   int mode = TIMER_MODE_AUTO;
-  timerInfo_t *timerInfo;
+  compMsgTimerInfo_t *compMsgTimerInfo;
 
-  timerInfo = os_zalloc(sizeof(timerInfo_t)); 
-  timerInfo->timerId = timerId;
-  timerInfo->compMsgDispatcher = self;
+  compMsgTimerInfo = os_zalloc(sizeof(compMsgTimerInfo_t)); 
+  compMsgTimerInfo->timerId = timerId;
+  compMsgTimerInfo->compMsgDispatcher = self;
   compMsgTimerSlot_t *tmr = &self->compMsgTimer->compMsgTimers[timerId];
   if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
     ets_timer_disarm(&tmr->timer);
   }
   // this is only preparing
-//ets_printf("§webSocketRunAPMode timer_setfcn: %p\n§", timerInfo);
-  ets_timer_setfn(&tmr->timer, startAccessPoint, (void*)timerInfo);
+//ets_printf("§webSocketRunAPMode timer_setfcn: %p\n§", compMsgTimerInfo);
+  ets_timer_setfn(&tmr->timer, startAccessPoint, (void*)compMsgTimerInfo);
   tmr->mode = mode | TIMER_IDLE_FLAG;
   // here is the start
   tmr->interval = interval;

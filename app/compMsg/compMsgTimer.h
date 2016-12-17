@@ -61,15 +61,16 @@ typedef struct compMsgTimerSlot {
   uint8_t mode;
 } compMsgTimerSlot_t;
 
-typedef struct timerInfo {
+typedef struct compMsgTimerInfo {
   uint8_t timerId;
   compMsgDispatcher_t *compMsgDispatcher;
-} timerInfo_t;
+} compMsgTimerInfo_t;
 
 typedef uint8_t (* initTimers_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgTimer {
   compMsgTimerSlot_t compMsgTimers[NUM_TMR];
+  compMsgTimerInfo_t compMsgTimerInfos[NUM_TMR];
   int isMstimer;
   os_timer_t apTimer;
 
