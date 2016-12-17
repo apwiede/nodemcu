@@ -308,7 +308,7 @@ uint8_t *passwd;
 static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
   uint8_t result;
 
-//ets_printf("§sendMsg: %c§", self->compMsgData->currHdr->hdrHandleType);
+ets_printf("§sendMsg: %c\n§", self->compMsgData->currHdr->hdrHandleType);
   switch (self->compMsgData->currHdr->hdrHandleType) {
   case 'A':
 //ets_printf("sud: %p\n", self->compMsgData->sud);

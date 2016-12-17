@@ -53,13 +53,13 @@
 static uint8_t initTimers(compMsgDispatcher_t *self) {
   int result;
 
-ets_printf("§initTimers\n§");
+//ets_printf("§initTimers\n§");
   for(int i = 0; i < NUM_TMR; i++) {
     self->compMsgTimer->compMsgTimers[i].self = self;
     self->compMsgTimer->compMsgTimers[i].mode = TIMER_MODE_OFF;
     ets_timer_disarm(&self->compMsgTimer->compMsgTimers[i].timer);
   }
-ets_printf("§initTimers end\n§");
+//ets_printf("§initTimers end\n§");
   return COMP_MSG_ERR_OK;
 }
 

@@ -96,14 +96,14 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
         msgKeyValueDescPart = NULL;
       }
     }
-//ets_printf("§fixOffsetsForKeyValues: idx: %d!%p!%s!§", fieldIdx, msgDescPart->fieldSizeCallback, msgDescPart->fieldNameStr);
+//ets_printf("§fixOffsetsForKeyValues: idx: %d!%p!%s!\n§", fieldIdx, msgDescPart->fieldSizeCallback, msgDescPart->fieldNameStr);
     if (msgDescPart->fieldSizeCallback != NULL) {
       // the key name must have the prefix: "#key_"!
       if (msgDescPart->fieldNameStr[0] != '#') {
         return COMP_MSG_ERR_FIELD_NOT_FOUND;
       }
       result = msgDescPart->fieldSizeCallback(self, &numericValue, &stringValue);
-//ets_printf("fieldSizeCallback for: %s %d %p\n", msgDescPart->fieldNameStr, numericValue, stringValue);
+//ets_printf("§fieldSizeCallback for: %s numericValue: %d stringValue: %p\n§", msgDescPart->fieldNameStr, numericValue, stringValue);
       checkErrOK(result);
       if (msgKeyValueDescPart != NULL) {
         fieldInfo->fieldKey = msgKeyValueDescPart->keyId;
@@ -112,7 +112,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
         fieldInfo->fieldKey = msgDescPart->fieldKey;
       }
       fieldInfo->fieldLgth = msgDescPart->fieldSize + 2 * sizeof(uint16_t) + sizeof(uint8_t); // for key, type and lgth in front of value!!
-//ets_printf("fixOffsetsForKeyValues: %s size: %d lgth: %d\n", msgDescPart->fieldNameStr, msgDescPart->fieldSize, fieldInfo->fieldLgth);
+//ets_printf("§fixOffsetsForKeyValues: %s size: %d lgth: %d\n§", msgDescPart->fieldNameStr, msgDescPart->fieldSize, fieldInfo->fieldLgth);
     } else {
       if (msgKeyValueDescPart != NULL) {
         fieldInfo->fieldKey = msgKeyValueDescPart->keyId;
@@ -123,7 +123,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
     msgDescPartIdx++;
     fieldIdx++;
   }
-//ets_printf("§fixOffsetsForKeyValues: done!§");
+//ets_printf("§fixOffsetsForKeyValues: done!\n§");
   return COMP_MSG_ERR_OK;
 }
 
@@ -315,7 +315,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-//ets_printf("§buildMsg§\n");
+//ets_printf("§buildMsg\n§");
   result = self->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
@@ -325,13 +325,15 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   checkErrOK(result);
 
   result = self->compMsgData->getMsgData(self, &msgData, &msgLgth);
-//ets_printf("§getMsgData res: %d!msgLgth: %d!§", result, msgLgth);
+//ets_printf("§getMsgData res: %d!msgLgth: %d!\n§", result, msgLgth);
   checkErrOK(result);
+//ets_printf("§");
 //self->compMsgData->dumpMsg(self);
+//ets_printf("§");
 //ets_printf("§");
 //self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dumpMsg");
 //ets_printf("§");
-//ets_printf("§encryption: %c§", self->compMsgData->currHdr->hdrEncryption);
+//ets_printf("§encryption: %c\n§", self->compMsgData->currHdr->hdrEncryption);
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {
     uint8_t *toCryptPtr;
     uint8_t *encryptedMsgData;
@@ -356,7 +358,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
       totalCrcOffset = 2;
       mlen -= 2;
     }
-//ets_printf("msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
+//ets_printf("§msglen!%d!mlen: %d, headerLgth!%d\n§", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
     toCryptPtr = msgData + self->compMsgData->headerLgth;
     result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
     checkErrOK(result);
@@ -364,14 +366,14 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
 ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n", mlen, encryptedMsgDataLgth);
     }
     c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);
-//ets_printf("§crypted: len: %d!mlen: %d!§", encryptedMsgDataLgth, mlen);
+//ets_printf("§crypted: len: %d!mlen: %d!\n§", encryptedMsgDataLgth, mlen);
   }
   // if we have a @totalCrc we need to set it here
-//ets_printf("§totalCrc: %d§", self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC);
+//ets_printf("§totalCrc: %d\n§", self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC);
   if (self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
     fieldInfo = &self->compMsgData->fields[self->compMsgData->numFields - 1];
     result = self->compMsgData->compMsgDataView->setTotalCrc(self->compMsgData->compMsgDataView, fieldInfo);
-//ets_printf("§setTotalCrc: result: %d fieldOffset: %d§", result, fieldInfo->fieldOffset);
+//ets_printf("§setTotalCrc: result: %d fieldOffset: %d\n§", result, fieldInfo->fieldOffset);
     checkErrOK(result);
   }
   // here we need to decide where and how to send the message!!

@@ -650,12 +650,12 @@ static  void startClientMode(void *arg) {
   pesp_conn = NULL;
   mode = STATION_IF;
   timerInfo = (timerInfo_t *)arg;
-ets_printf("§timerInfo:%p\n§", timerInfo);
+ets_printf("§startClientMode timerInfo:%p\n§", timerInfo);
 //  timerId = (uint8_t)((uint32_t)arg);
   timerId = timerInfo->timerId;
   self = timerInfo->compMsgDispatcher;
   os_free(timerInfo);
-ets_printf("§startAccessPoint timerId: %d\n§", timerId);
+ets_printf("§startClientMode timerId: %d\n§", timerId);
   tmr = &self->compMsgTimer->compMsgTimers[timerId];
 //  self = tmr->self;
 //ets_printf("§startClientMode: timerId: %d self: %p§", timerId, self);
@@ -698,7 +698,7 @@ ets_printf("§startClientMode: wifi is in mode: %d status: %d ap_id: %d hostname
     return;
     break;
   case STATION_GOT_IP:
-//ets_printf("§STATION_GOT_IP§");
+ets_printf("§STATION_GOT_IP§");
     break;
   }
   wifi_get_ip_info(mode, &pTempIp);
@@ -833,7 +833,7 @@ ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode
 
   int repeat = 1;
   int interval = 1000;
-  int timerId = 1;
+  int timerId = 2;
   int mode = TIMER_MODE_AUTO;
   timerInfo_t *timerInfo;
 

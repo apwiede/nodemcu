@@ -867,7 +867,7 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
-ets_printf("§readWifiValues: %s\n§", fileName);
+//ets_printf("§readWifiValues: %s\n§", fileName);
   checkErrOK(result);
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
@@ -1129,6 +1129,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     checkAllocOK(compMsgData->prepareValuesCbName);
     c_memcpy(compMsgData->prepareValuesCbName, cp, c_strlen(cp));
     compMsgData->prepareValuesCbName[c_strlen(cp)] = '\0';
+//ets_printf("§prepareValuesCbName: %s\n§", compMsgData->prepareValuesCbName);
   }
   if (!isEnd) {
     return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;

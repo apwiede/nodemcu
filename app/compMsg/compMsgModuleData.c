@@ -524,7 +524,7 @@ static uint8_t updateModuleValues(compMsgDispatcher_t *self) {
 static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   int result;
 
-ets_printf("§setModuleVaues\n§");
+//ets_printf("§setModuleValues\n§");
   compMsgModuleData.MACAddr[0] = 0xAB;
   compMsgModuleData.MACAddr[1] = 0xCD;
   compMsgModuleData.MACAddr[2] = 0xEF;
@@ -581,7 +581,7 @@ ets_printf("§setModuleVaues\n§");
   compMsgModuleData.srcId = 12312;
   c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2\0", 17);
   compMsgModuleData.operatingMode = 0xE0;
-ets_printf("§setModuleVaues done\n§");
+//ets_printf("§setModuleVaues done\n§");
   return COMP_MSG_ERR_OK;
 }
 

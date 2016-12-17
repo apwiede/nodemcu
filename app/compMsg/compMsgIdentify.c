@@ -257,7 +257,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   msgHeaderInfos_t *hdrInfos;
   int hdrIdx;
 
-//ets_printf("§prepareAnswerMsg§\n");
+//ets_printf("§prepareAnswerMsg\n§");
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   switch (type) {
@@ -269,7 +269,9 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
     break;
   }
   hdr = &hdrInfos->headerParts[hdrIdx];
+//ets_printf("hdrCmdKey: 0x%04x\n§", hdr->hdrU16CmdKey);
   result = self->createMsgFromHeaderPart(self, hdr, handle);
+//ets_printf("§createMsgFromHeaderPart result: %d\n§", result);
   checkErrOK(result);
   return result;
 }
@@ -421,15 +423,15 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self) {
   uint8_t answerType;
   uint8_t *handle;
 
-//ets_printf("§handleReceivedMsg§\n");
+//ets_printf("§handleReceivedMsg\n§");
   received = &self->compMsgData->received;
   result = self->handleReceivedHeader(self);
-//ets_printf("§call prepareAnswerMsg§");
+//ets_printf("§call prepareAnswerMsg\n§");
   result = self->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
   checkErrOK(result);
-//ets_printf("§handleReceivedMsg done§");
+//ets_printf("§handleReceivedMsg done\n§");
   return COMP_MSG_ERR_OK;
 }
 
@@ -453,17 +455,18 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   uint8_t *handle;
   bool hadActionCb;
 
-//ets_printf("§storeReceivedMsg§\n");
+//ets_printf("§storeReceivedMsg\n§");
   received = &self->compMsgData->received;
-//ets_printf("handleReceivedHeader\n");
+//ets_printf("§handleReceivedHeader\n§");
   // next line deletes compMsgData !!
   result = self->handleReceivedHeader(self);
   checkErrOK(result);
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("getMsgPartsFromHeaderPart\n");
+//ets_printf("§getMsgPartsFromHeaderPart\n§");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, &handle);
+  checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, &handle);
   checkErrOK(result);
   idx = 0;
@@ -498,7 +501,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   while (idx < self->compMsgData->numMsgValParts) {
     msgValPart = &self->compMsgData->msgValParts[idx];
     if (msgValPart->fieldValueActionCb != NULL) {
-//ets_printf("§have actionCb: %s\n", msgValPart->fieldValueActionCb);
+//ets_printf("§have actionCb: %s\n§", msgValPart->fieldValueActionCb);
       hadActionCb = true;
       result = self->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
       checkErrOK(result);
@@ -513,7 +516,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
     result = self->resetMsgInfo(self, received);
     checkErrOK(result);
   }
-//ets_printf("§storeReceivedMsg done§\n");
+//ets_printf("§storeReceivedMsg done\n§");
   return COMP_MSG_ERR_OK;
 }
 
@@ -601,8 +604,8 @@ if (buffer == NULL) {
     if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("§hdrIdx: %d§", hdrIdx);
-//ets_printf("§receveived->totalLgth: %d§", received->totalLgth);
+//ets_printf("§hdrIdx: %d\n§", hdrIdx);
+//ets_printf("§receveived->totalLgth: %d\n§", received->totalLgth);
       // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
       seqIdx = 0;
       u8TotalCrc = false;
@@ -616,7 +619,7 @@ if (buffer == NULL) {
         }
         seqIdx++;
       }
-//ets_printf("§hdr->hdrHandleType: %c§", hdr->hdrHandleType);
+//ets_printf("§hdr->hdrHandleType: %c\n§", hdr->hdrHandleType);
       switch (hdr->hdrHandleType) {
       case 'G':
       case 'R':
@@ -644,20 +647,20 @@ cryptKey = "a1b2c3d4e5f6g7h8";
           cryptedPtr = received->buf + hdrInfos->headerLgth;
           result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
           checkErrOK(result);
-//ets_printf("mlen: %d decryptedLgth: %d\n", mlen, decryptedLgth);
+//ets_printf("§mlen: %d decryptedLgth: %d\n§", mlen, decryptedLgth);
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
         }
         result = self->storeReceivedMsg(self);
-//ets_printf("§handleReceivedMsg end buffer idx: %d result: %d§", idx, result);
+//ets_printf("§handleReceivedMsg end buffer idx: %d result: %d\n§", idx, result);
         return result;
       case 'U':
       case 'W':
         self->compMsgData->currHdr = hdr;
         result = self->forwardMsg(self);
-ets_printf("§forwardMsg result: %d§", result);
+//ets_printf("§forwardMsg result: %d\n§", result);
         return result;
       default:
-ets_printf("handleReceivedPart: funny handleType: %c 0x%02x\n", hdr->hdrHandleType, hdr->hdrHandleType);
+ets_printf("§handleReceivedPart: funny handleType: %c 0x%02x\n§", hdr->hdrHandleType, hdr->hdrHandleType);
         return COMP_MSG_ERR_FUNNY_HANDLE_TYPE;
       }
     }

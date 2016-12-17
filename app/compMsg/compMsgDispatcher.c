@@ -398,14 +398,15 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     action_t actionCallback;
     uint8_t type;
 
+ets_printf("§call prepareValuesCbName: %s\n§", self->compMsgData->prepareValuesCbName);
     result = self->getActionCallback(self, self->compMsgData->prepareValuesCbName+1, &actionCallback);
     checkErrOK(result);
     result = actionCallback(self);
     checkErrOK(result);
-//    result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
-//    self->actionMode = actionMode;
-//    checkErrOK(result);
-//    result  = self->runAction(self, &type);
+    result = self->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
+    self->actionMode = actionMode;
+    checkErrOK(result);
+    result  = self->runAction(self, &type);
     // actionCallback starts a call with eventually a callback and returns here before the callback has been running!!
     // when coming here we are finished and the callback will do the work later on!
     return result;
@@ -678,7 +679,7 @@ ets_printf("§COMP_MSG_ERR_TOO_MANY_REQUESTS§");
     compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
     switch (compMsgData->direction) {
     case COMP_MSG_TO_SEND_DATA:
-ets_printf("addRequest: toSendData: %p\n", compMsgData->toSendData);
+//ets_printf("addRequest: toSendData: %p\n", compMsgData->toSendData);
       result = self->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
       break;
     case COMP_MSG_RECEIVED_DATA:
@@ -804,22 +805,22 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   if (typelen > 0) {
     switch(type[0]) {
     case 'W':
-ets_printf("§start RunAPMode\n§");
+//ets_printf("§start RunAPMode\n§");
       result = self->webSocketRunAPMode(self);
       checkErrOK(result);
       break;
     case 'N':
-ets_printf("§start RunClientMode§");
+//ets_printf("§start RunClientMode§");
       result = self->netSocketRunClientMode(self);
       checkErrOK(result);
       break;
     case 'C':
-ets_printf("§start startCloudSocket§");
+//ets_printf("§start startCloudSocket§");
       result = self->netSocketStartCloudSocket(self);
       checkErrOK(result);
       break;
     case 'A':
-ets_printf("§start send AA message§");
+//ets_printf("§start send AA message§");
       result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
       checkErrOK(result);
       result = self->createMsgFromHeaderPart(self, hdr, &handle);
@@ -827,7 +828,7 @@ ets_printf("§start send AA message§");
       checkErrOK(result);
       break;
     case 'U':
-ets_printf("§start Uart input§");
+//ets_printf("§start Uart input§");
       id = 0;
       stopbits = PLATFORM_UART_STOPBITS_1;
       parity = PLATFORM_UART_PARITY_NONE;
@@ -850,7 +851,7 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
   uint8_t result;
 
   os_sprintf(self->handle, "%s%p", DISP_HANDLE_PREFIX, self);
-ets_printf("§os createDispatcher: %s!\n§", self->handle);
+//ets_printf("§os createDispatcher: %s!\n§", self->handle);
   result = addHandle(self->handle, self);
   if (result != COMP_MSG_ERR_OK) {
     deleteHandle(self->handle);
@@ -860,7 +861,7 @@ ets_printf("§os createDispatcher: %s!\n§", self->handle);
 //  resetMsgInfo(self, &self->received);
 //  resetMsgInfo(self, &self->toSend);
   *handle = self->handle;
-ets_printf("§createDispatcher: done\n§");
+//ets_printf("§createDispatcher: done\n§");
   return COMP_MSG_ERR_OK;
 }
 

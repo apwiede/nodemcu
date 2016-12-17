@@ -98,12 +98,12 @@ static void webSocketBinaryReceived(void *arg, socketUserData_t *sud, char *pdat
 
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
-//ets_printf("webSocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
+ets_printf("webSocketBinaryReceived: len: %d dispatcher: %p\n", len, compMsgDispatcher);
   result = self->resetMsgInfo(self, &self->compMsgData->received);
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
-//ets_printf("received compMsgData: %p\n", self->compMsgData);
-  self->compMsgData->sud = NULL;
+  self->compMsgData->sud = sud;
+ets_printf("§received compMsgData: %p sud: %p\n§", self->compMsgData, self->compMsgData->sud);
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = os_zalloc(len);
   if (self->compMsgData->receivedData == NULL) {
@@ -113,7 +113,7 @@ static void webSocketBinaryReceived(void *arg, socketUserData_t *sud, char *pdat
   c_memcpy(self->compMsgData->receivedData, pdata, len);
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, sud, self->compMsgData);
-//ets_printf("webSocketBinaryReceived end result: %d\n", result);
+ets_printf("webSocketBinaryReceived end result: %d\n", result);
 }
 
 // ================================= netSocketToSend ====================================
