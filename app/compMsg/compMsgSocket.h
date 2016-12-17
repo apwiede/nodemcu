@@ -61,6 +61,7 @@ typedef struct httpMsgInfo {
   size_t currLgth;
   size_t expectedLgth;
   uint8_t *content;
+  char *data;
 } httpMsgInfo_t;
 
 typedef struct socketUserData  socketUserData_t;
@@ -93,25 +94,37 @@ typedef struct socketUserData {
   httpMsgInfo_t *httpMsgInfos;
 } socketUserData_t;
 
+typedef void (* startConnection_t)(void *arg);
+
 // WebSocket stuff
 typedef uint8_t (* webSocketRunAPMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* webSocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
 typedef uint8_t (* webSocketSendData_t)(socketUserData_t *sud, const char *payload, int size, int opcode);
+typedef void (* startAccessPoint_t)(void *arg);
 
 // NetSocket stuff
 typedef uint8_t (* netSocketStartCloudSocket_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netSocketRunClientMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netSocketSendData_t)(socketUserData_t *sud, const char *payload, int size);
+typedef void (* startClientMode_t)(void *arg);
+
+typedef uint8_t (* checkConnectionStatus_t)(compMsgTimerSlot_t *compMsgTimerSlot);
+typedef uint8_t (* startConnectionTimer_t)(compMsgDispatcher_t *self, uint8_t timerId, startConnection_t fcn);
 
 typedef struct compMsgSocket {
 
   webSocketRunAPMode_t webSocketRunAPMode;
   webSocketRunClientMode_t webSocketRunClientMode;
   webSocketSendData_t webSocketSendData;
+  startAccessPoint_t startAccessPoint;
 
   netSocketStartCloudSocket_t netSocketStartCloudSocket;
   netSocketRunClientMode_t netSocketRunClientMode;
   netSocketSendData_t netSocketSendData;
+  startClientMode_t startClientMode;
+
+  startConnectionTimer_t startConnectionTimer;
+  checkConnectionStatus_t checkConnectionStatus;
 } compMsgSocket_t;
 
 #ifdef  __cplusplus

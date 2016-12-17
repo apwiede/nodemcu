@@ -56,22 +56,18 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef struct compMsgTimerSlot {
   os_timer_t timer;
-  compMsgDispatcher_t *self;
+  compMsgDispatcher_t *compMsgDispatcher;
   uint32_t interval;
   uint8_t mode;
-} compMsgTimerSlot_t;
-
-typedef struct compMsgTimerInfo {
+  uint8_t connectionMode;
   uint8_t timerId;
-  compMsgDispatcher_t *compMsgDispatcher;
-} compMsgTimerInfo_t;
+  uint32_t ip_addr;
+} compMsgTimerSlot_t;
 
 typedef uint8_t (* initTimers_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgTimer {
   compMsgTimerSlot_t compMsgTimers[NUM_TMR];
-  compMsgTimerInfo_t compMsgTimerInfos[NUM_TMR];
-  int isMstimer;
   os_timer_t apTimer;
 
   initTimers_t initTimers;

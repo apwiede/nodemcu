@@ -81,11 +81,11 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #define COMP_DISP_CALLBACK_TYPE_MODULE             0x08
 
 // running mode flags
-#define COMP_DISP_RUNNING_MODE_AP       0x01
-#define COMP_DISP_RUNNING_MODE_CLIENT   0x02
-#define COMP_DISP_RUNNING_MODE_CLOUD    0x04
-#define COMP_DISP_RUNNING_MODE_APP      0x08
-#define COMP_DISP_RUNNING_MODE_WEBSOCKT 0x10
+#define COMP_DISP_RUNNING_MODE_ACCESS_POINT 0x01
+#define COMP_DISP_RUNNING_MODE_CLIENT       0x02
+#define COMP_DISP_RUNNING_MODE_CLOUD        0x04
+#define COMP_DISP_RUNNING_MODE_APP          0x08
+#define COMP_DISP_RUNNING_MODE_WEBSOCKET    0x10
 
 #define COMP_DISP_MAX_REQUESTS     5
 

@@ -55,8 +55,9 @@ static uint8_t initTimers(compMsgDispatcher_t *self) {
 
 //ets_printf("§initTimers\n§");
   for(int i = 0; i < NUM_TMR; i++) {
-    self->compMsgTimer->compMsgTimers[i].self = self;
+    self->compMsgTimer->compMsgTimers[i].compMsgDispatcher = self;
     self->compMsgTimer->compMsgTimers[i].mode = TIMER_MODE_OFF;
+    self->compMsgTimer->compMsgTimers[i].timerId = i;
     ets_timer_disarm(&self->compMsgTimer->compMsgTimers[i].timer);
   }
 //ets_printf("§initTimers end\n§");
@@ -68,7 +69,6 @@ static uint8_t initTimers(compMsgDispatcher_t *self) {
 uint8_t compMsgTimerInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->compMsgTimer->isMstimer = 1;
   self->compMsgTimer->initTimers = &initTimers;
 
   result = self->compMsgTimer->initTimers(self);

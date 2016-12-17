@@ -54,6 +54,110 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
+// ================================= checkConnectionStatus ====================================
+
+static uint8_t checkConnectionStatus(compMsgTimerSlot_t *compMsgTimerSlot) {
+  uint8_t result;
+  compMsgDispatcher_t *self;
+  struct ip_info pTempIp;
+  uint8_t timerId;
+  uint8_t status;
+  char temp[64];
+  compMsgTimerSlot_t *tmr;
+
+  timerId = compMsgTimerSlot->timerId;
+  self = compMsgTimerSlot->compMsgDispatcher;
+//ets_printf("§startAccessPoint timerId: %d\n§", timerId);
+  tmr = &self->compMsgTimer->compMsgTimers[timerId];
+//ets_printf("§checkConnectionStatus: tmr: %p compMsgTimerSlot: %p\n§", tmr, compMsgTimerSlot);
+//ets_printf("§checkConnectionStatus: timerId: %d self: %p§\n", timerId, self);
+  status = wifi_station_get_connect_status();
+ets_printf("§checkConnectionStatus:wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n§", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+  switch (status) {
+  case STATION_IDLE:
+//ets_printf("§STATION_IDLE\n§");
+    break;
+  case STATION_CONNECTING:
+//ets_printf("§STATION_CONNECTING\n§");
+    break;
+  case STATION_WRONG_PASSWORD:
+//ets_printf("§STATION_WRONG_PASSWORD\n§");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->compMsgWifiData->webSocketSendConnectError(self, status);
+    return COMP_MSG_ERR_CONNECT_STATION_WRONG_PASSWD;
+    break;
+  case STATION_NO_AP_FOUND:
+//ets_printf("§STATION_NO_AP_FOUND\n§");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->compMsgWifiData->webSocketSendConnectError(self, status);
+    return COMP_MSG_ERR_CONNECT_STATION_NO_AP_FOUND;
+    break;
+  case STATION_CONNECT_FAIL:
+//ets_printf("§STATION_CONNECT_FAIL\n§");
+    tmr->mode |= TIMER_IDLE_FLAG;
+    ets_timer_disarm(&tmr->timer);
+    self->compMsgWifiData->webSocketSendConnectError(self, status);
+    return COMP_MSG_ERR_CONNECT_STATION_CONNECT_FAILED;
+    break;
+  case STATION_GOT_IP:
+//ets_printf("§STATION_GOT_IP\n§");
+    break;
+  } 
+  wifi_get_ip_info(tmr->connectionMode, &pTempIp);
+  if(pTempIp.ip.addr == 0){
+//ets_printf("ip: nil\n");
+    return COMP_MSG_ERR_CONNECT_STATION_CONNECTING;
+  }
+  tmr->mode |= TIMER_IDLE_FLAG;
+  tmr->ip_addr = pTempIp.ip.addr;
+  ets_timer_disarm(&tmr->timer);
+  c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
+ets_printf("§IP: %s\n§", temp);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= startConnectionTimer ====================================
+
+static uint8_t startConnectionTimer(compMsgDispatcher_t *self, uint8_t timerId, startConnection_t fcn) {
+  int repeat;
+  int interval;
+  int mode;
+  compMsgTimerSlot_t *compMsgTimerSlot;
+  int isMstimer;
+
+  repeat = 1;
+  interval = 1000;
+  mode = TIMER_MODE_AUTO;
+  isMstimer = 1;
+  compMsgTimerSlot = &self->compMsgTimer->compMsgTimers[timerId];
+  compMsgTimerSlot->timerId = timerId;
+  compMsgTimerSlot->compMsgDispatcher = self;
+  compMsgTimerSlot_t *tmr = &self->compMsgTimer->compMsgTimers[timerId];
+  if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
+    ets_timer_disarm(&tmr->timer);
+  }
+  // this is only preparing
+//ets_printf("§webSocketRunAPMode timer_setfcn: %p\n§", compMsgTimerSlot);
+  ets_timer_setfn(&tmr->timer, fcn, (void*)compMsgTimerSlot);
+  tmr->mode = mode | TIMER_IDLE_FLAG;
+  // here is the start
+  tmr->interval = interval;
+  tmr->mode &= ~TIMER_IDLE_FLAG;
+//ets_printf("§webSocketRunAPMode timer_arm_new\n§");
+  ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= compMsgSocketInit ====================================
+
+static uint8_t compMsgSocketInit(compMsgSocket_t *compMsgSocket) {
+  compMsgSocket->startConnectionTimer = &startConnectionTimer;
+  compMsgSocket->checkConnectionStatus = &checkConnectionStatus;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= newCompMsgSocket ====================================
 
 compMsgSocket_t *newCompMsgSocket() {
@@ -61,6 +165,6 @@ compMsgSocket_t *newCompMsgSocket() {
   if (compMsgSocket == NULL) {
     return NULL;
   }
-
+  compMsgSocketInit(compMsgSocket);
   return compMsgSocket;
 }
