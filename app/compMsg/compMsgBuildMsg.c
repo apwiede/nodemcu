@@ -379,7 +379,7 @@ ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually tot
   // here we need to decide where and how to send the message!!
   // from currHdr we can see the handle type and - if needed - the @dst
 //ets_printf("§transferType: %c dst: 0x%04x msgLgth: %d§", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart, msgLgth);
-  result = self->sendMsg(self, msgData, msgLgth);
+  result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
 //ets_printf("§buildMsg sendMsg has been called result: %d§", result);
   checkErrOK(result);
 //  result = self->resetMsgInfo(self, self->buildMsgInfos.parts);
@@ -398,7 +398,7 @@ static uint8_t forwardMsg(compMsgDispatcher_t *self) {
 ets_printf("§forwardMsg called handleType: %c!§", self->compMsgData->currHdr->hdrHandleType);
   received = &self->compMsgData->received;
 ets_printf("§handleType: %c msgLgth: %d§", self->compMsgData->currHdr->hdrHandleType, received->lgth);
-  self->sendMsg(self, received->buf, received->totalLgth);
+  self->compMsgSendReceive->sendMsg(self, received->buf, received->totalLgth);
   return COMP_MSG_ERR_OK;
 }
 

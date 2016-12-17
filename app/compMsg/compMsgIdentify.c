@@ -533,7 +533,7 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   msgParts_t *received;
 
 //ets_printf("§sendClientIPMsg§\n");
-  self->startSendMsg = NULL;
+  self->compMsgSendReceive->startSendMsg = NULL;
   self->stopAccessPoint = true;
   received = &self->compMsgData->received;
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
@@ -712,7 +712,7 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
 
   self->cloudMsgData = encrypted;
   self->cloudMsgDataLgth = encryptedLgth;
-  result = self->sendCloudMsg(self);
+  result = self->compMsgSendReceive->sendCloudMsg(self);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }

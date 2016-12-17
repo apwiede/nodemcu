@@ -354,8 +354,8 @@ ets_printf("§espconn_regist_disconcb: result: %d§\n", result);
   sud->compMsgDispatcher->compMsgData->sud = sud;
 //ets_printf("§startSendMsg2: %p§\n", sud->compMsgDispatcher->startSendMsg2);
   sud->compMsgDispatcher->runningModeFlags |= COMP_DISP_RUNNING_MODE_CLOUD;
-  if (sud->compMsgDispatcher->startSendMsg2 != NULL) {
-    result = sud->compMsgDispatcher->startSendMsg2(sud->compMsgDispatcher);
+  if (sud->compMsgDispatcher->compMsgSendReceive->startSendMsg2 != NULL) {
+    result = sud->compMsgDispatcher->compMsgSendReceive->startSendMsg2(sud->compMsgDispatcher);
   } else {
 ets_printf("§sud->compMsgDispatcher->startSendMsg2 is NULL§");
   }
@@ -783,8 +783,8 @@ ets_printf("§regist_accept err result: %d§", result);
 //    return COMP_MSG_ERR_REGIST_TIME;
 ets_printf("§regist_time err result: %d§", result);
   }
-  if (self->startSendMsg != NULL) {
-    result = self->startSendMsg(self);
+  if (self->compMsgSendReceive->startSendMsg != NULL) {
+    result = self->compMsgSendReceive->startSendMsg(self);
 //ets_printf("§startSendMsg result: %d§", result);
   }
 }
@@ -861,7 +861,7 @@ static uint8_t netSocketStartCloudSocket (compMsgDispatcher_t *self) {
   int result;
 
 //ets_printf("§netSocketStartCloudSocket called§");
-  self->startSendMsg = NULL;
+  self->compMsgSendReceive->startSendMsg = NULL;
   result = openCloudSocket( self);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;

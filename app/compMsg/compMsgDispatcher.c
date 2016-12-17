@@ -836,7 +836,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       parity = PLATFORM_UART_PARITY_NONE;
       databits = 8;
       baud = BIT_RATE_115200;
-      result = self->uartSetup(self, id, baud, databits, parity, stopbits);
+      result = self->compMsgSendReceive->uartSetup(self, id, baud, databits, parity, stopbits);
       checkErrOK(result);
       break;
     default:
@@ -906,6 +906,9 @@ ets_printf("newCompMsgDispatcher\n");
   // Identify
   compMsgDispatcher->compMsgIdentify = newCompMsgIdentify();
 
+  // SendReceive
+  compMsgDispatcher->compMsgSendReceive = newCompMsgSendReceive();
+
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;
 
@@ -944,9 +947,6 @@ ets_printf("newCompMsgDispatcher\n");
   compMsgDispatcher->addUartRequestData = &addUartRequestData;
   compMsgDispatcher->deleteRequest = &deleteRequest;
 
-  compMsgDispatcher->startSendMsg = NULL;
-  compMsgDispatcher->startSendMsg2 = NULL;
-  compMsgDispatcher->sendCloudMsg = NULL;
   compMsgDispatcher->cloudMsgData = NULL;
   compMsgDispatcher->cloudMsgDataLgth = 0;
   compMsgDispatcher->cloudPayload = NULL;

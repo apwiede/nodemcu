@@ -312,7 +312,7 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
   checkErrOK(result);
   result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
   checkErrOK(result);
-  self->startSendMsg = self->compMsgIdentify->sendClientIPMsg;
+  self->compMsgSendReceive->startSendMsg = self->compMsgIdentify->sendClientIPMsg;
   result = self->netSocketRunClientMode(self);
 //ets_printf("runClientMode: result: %d\n", result);
   checkErrOK(result);
@@ -325,7 +325,7 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
 static uint8_t startStationCb(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  result = self->startSendMsg(self);
+  result = self->compMsgSendReceive->startSendMsg(self);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }

@@ -288,11 +288,11 @@ uint8_t *passwd;
 
 //ets_printf("§checkClientMode: §");
 
-  self->startSendMsg2 = self->prepareCloudMsg;
+  self->compMsgSendReceive->startSendMsg2 = self->compMsgSendReceive->prepareCloudMsg;
   if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
 // FIXME !!! TEMPORARY
     // set the callback used after client mode is running
-    self->startSendMsg = self->netSocketStartCloudSocket;
+    self->compMsgSendReceive->startSendMsg = self->netSocketStartCloudSocket;
     result = self->netSocketRunClientMode(self);
     checkErrOK(result);
 // FIXME !!! TEMPORARY END
@@ -367,13 +367,27 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   result = self->addRequest(self, COMP_DISP_INPUT_UART, NULL, self->compMsgData);
 
-  self->uartSetup = &uartSetup;
-  self->uartReceiveCb = &uartReceiveCb;
-  self->typeRSendAnswer = &typeRSendAnswer;
-  self->prepareCloudMsg = &prepareCloudMsg;
-  self->checkClientMode = &checkClientMode;
-  self->sendCloudMsg = &sendCloudMsg;
-  self->sendMsg = &sendMsg;
+  self->compMsgSendReceive->startSendMsg = NULL;
+  self->compMsgSendReceive->startSendMsg2 = NULL;
+  self->compMsgSendReceive->sendCloudMsg = NULL;
+
+  self->compMsgSendReceive->uartSetup = &uartSetup;
+  self->compMsgSendReceive->uartReceiveCb = &uartReceiveCb;
+  self->compMsgSendReceive->typeRSendAnswer = &typeRSendAnswer;
+  self->compMsgSendReceive->prepareCloudMsg = &prepareCloudMsg;
+  self->compMsgSendReceive->checkClientMode = &checkClientMode;
+  self->compMsgSendReceive->sendCloudMsg = &sendCloudMsg;
+  self->compMsgSendReceive->sendMsg = &sendMsg;
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= newCompMsgSendReceive ====================================
+
+compMsgSendReceive_t *newCompMsgSendReceive() {
+  compMsgSendReceive_t *compMsgSendReceive = os_zalloc(sizeof(compMsgSendReceive_t));
+  if (compMsgSendReceive == NULL) {
+    return NULL;
+  }
+
+  return compMsgSendReceive;
+}

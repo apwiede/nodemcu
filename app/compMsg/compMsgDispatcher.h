@@ -53,6 +53,7 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgDataView.h"
 #include "compMsgTimer.h"
 #include "compMsgAction.h"
+#include "compMsgSendReceive.h"
 #include "compMsgIdentify.h"
 #include "compMsgBuildMsg.h"
 #include "compMsgModuleData.h"
@@ -148,15 +149,6 @@ typedef uint8_t (* addFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDisp
 typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t *callback, uint8_t callbackType);
 typedef uint8_t (* getFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDispatcher, fieldValueCallback_t callback, uint8_t **callbackName, uint8_t callbackType);
 
-// SendReceive
-typedef uint8_t (* uartSetup_t)(compMsgDispatcher_t *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits);
-typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
-typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
-typedef uint8_t (* prepareCloudMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* startSendMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* sendCloudMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth);
-
 // MsgData stuff
 typedef uint8_t (* getNewCompMsgDataPtr_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts);
@@ -214,6 +206,9 @@ typedef struct compMsgDispatcher {
   // compMsgBuildMsg info
   compMsgBuildMsg_t *compMsgBuildMsg;
 
+  // compMsgBuildMsg info
+  compMsgSendReceive_t *compMsgSendReceive;
+
   // request infos
   msgRequestInfos_t msgRequestInfos;
 
@@ -234,17 +229,6 @@ typedef struct compMsgDispatcher {
   uint8_t *msgHandle;
 
   // function pointers
-
-  // SendReceive
-  uartSetup_t uartSetup;
-  uartReceiveCb_t uartReceiveCb;
-  typeRSendAnswer_t typeRSendAnswer;
-  sendMsg_t sendMsg;
-  prepareCloudMsg_t prepareCloudMsg;
-  prepareCloudMsg_t checkClientMode;
-  sendCloudMsg_t sendCloudMsg;
-  startSendMsg_t startSendMsg;
-  startSendMsg_t startSendMsg2;
 
   // Dispatcher
   getFieldType_t getFieldType;
