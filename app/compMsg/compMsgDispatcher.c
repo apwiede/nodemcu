@@ -411,7 +411,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     // when coming here we are finished and the callback will do the work later on!
     return result;
   } else {
-    result = self->buildMsg(self);
+    result = self->compMsgBuildMsg->buildMsg(self);
   }
   return COMP_MSG_ERR_OK;
 }
@@ -652,7 +652,7 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
   compMsgData->direction = COMP_MSG_RECEIVED_DATA;
 //ets_printf("§call handleReceivePart: lgth: %d§", lgth);
   self->compMsgData = compMsgData;
-  result = self->handleReceivedPart(self, data, lgth);
+  result = self->compMsgIdentify->handleReceivedPart(self, data, lgth);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
@@ -680,11 +680,11 @@ ets_printf("§COMP_MSG_ERR_TOO_MANY_REQUESTS§");
     switch (compMsgData->direction) {
     case COMP_MSG_TO_SEND_DATA:
 //ets_printf("addRequest: toSendData: %p\n", compMsgData->toSendData);
-      result = self->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
+      result = self->compMsgIdentify->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
       break;
     case COMP_MSG_RECEIVED_DATA:
 //ets_printf("addRequest: receivedData: %p\n", compMsgData->receivedData);
-      result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
+      result = self->compMsgIdentify->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
       break;
     default:
 ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
@@ -703,7 +703,7 @@ ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData
       case COMP_MSG_RECEIVED_DATA:
 //ets_printf("COMP_MSG_RECEIVED_DATA: compMsgData: %p\n", compMsgData);
 //ets_printf("received: %p lgth: %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
-        result = self->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
+        result = self->compMsgIdentify->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
         break;
       default:
 ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
@@ -781,6 +781,8 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   uint32_t baud;
 
   result = compMsgIdentifyInit(self);
+  checkErrOK(result);
+  result = compMsgBuildMsgInit(self);
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
   checkErrOK(result);
@@ -897,6 +899,12 @@ ets_printf("newCompMsgDispatcher\n");
 
   // ModuleData
   compMsgDispatcher->compMsgModuleData = newCompMsgModuleData();
+
+  // BildMsg
+  compMsgDispatcher->compMsgBuildMsg = newCompMsgBuildMsg();
+
+  // Identify
+  compMsgDispatcher->compMsgIdentify = newCompMsgIdentify();
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

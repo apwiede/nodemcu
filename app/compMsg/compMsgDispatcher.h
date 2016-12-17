@@ -53,6 +53,8 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgDataView.h"
 #include "compMsgTimer.h"
 #include "compMsgAction.h"
+#include "compMsgIdentify.h"
+#include "compMsgBuildMsg.h"
 #include "compMsgModuleData.h"
 #include "compMsgSocket.h"
 #include "compMsgWifiData.h"
@@ -146,24 +148,6 @@ typedef uint8_t (* addFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDisp
 typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t *callback, uint8_t callbackType);
 typedef uint8_t (* getFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDispatcher, fieldValueCallback_t callback, uint8_t **callbackName, uint8_t callbackType);
 
-// BuildMsg stuff
-typedef uint8_t (* fixOffsetsForKeyValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t type);
-typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* forwardMsg_t)(compMsgDispatcher_t *self);
-
-// Identify stuff
-typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
-typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
-typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, uint8_t type, uint8_t **handle);
-typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* sendClientIPMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
-
 // SendReceive
 typedef uint8_t (* uartSetup_t)(compMsgDispatcher_t *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits);
 typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
@@ -224,6 +208,12 @@ typedef struct compMsgDispatcher {
   // compMsgModuleData info
   compMsgModuleData_t *compMsgModuleData;
 
+  // compMsgIdentify info
+  compMsgIdentify_t *compMsgIdentify;
+
+  // compMsgBuildMsg info
+  compMsgBuildMsg_t *compMsgBuildMsg;
+
   // request infos
   msgRequestInfos_t msgRequestInfos;
 
@@ -256,13 +246,6 @@ typedef struct compMsgDispatcher {
   startSendMsg_t startSendMsg;
   startSendMsg_t startSendMsg2;
 
-  // BuildMsg
-  setMsgFieldValue_t setMsgFieldValue;
-  fixOffsetsForKeyValues_t fixOffsetsForKeyValues;
-  buildMsg_t buildMsg;
-  setMsgValues_t setMsgValues;
-  forwardMsg_t forwardMsg;
-
   // Dispatcher
   getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
@@ -284,17 +267,6 @@ typedef struct compMsgDispatcher {
   addFieldValueCallbackName_t addFieldValueCallbackName;
   getFieldValueCallback_t getFieldValueCallback;
   getFieldValueCallbackName_t getFieldValueCallbackName;
-
-  // identify
-  resetHeaderInfos_t resetHeaderInfos;
-  nextFittingEntry_t nextFittingEntry;
-  prepareAnswerMsg_t prepareAnswerMsg;
-  handleReceivedPart_t handleReceivedPart;
-  handleToSendPart_t handleToSendPart;
-  handleReceivedHeader_t handleReceivedHeader;
-  handleReceivedMsg_t handleReceivedMsg;
-  storeReceivedMsg_t storeReceivedMsg;
-  sendClientIPMsg_t sendClientIPMsg;
 
   webSocketRunAPMode_t webSocketRunAPMode;
 

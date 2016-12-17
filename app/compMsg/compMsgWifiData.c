@@ -249,7 +249,7 @@ static void bssScanDoneCb(void *arg, STATUS status) {
     bssScanInfos.numScanInfos++;
   }
   bssScanInfos.scanInfoComplete = true;
-  bssScanInfos.compMsgDispatcher->buildMsg(bssScanInfos.compMsgDispatcher);
+  bssScanInfos.compMsgDispatcher->compMsgBuildMsg->buildMsg(bssScanInfos.compMsgDispatcher);
 }
 
 // ================================= getBssScanInfo ====================================
@@ -312,7 +312,7 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
   checkErrOK(result);
   result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
   checkErrOK(result);
-  self->startSendMsg = self->sendClientIPMsg;
+  self->startSendMsg = self->compMsgIdentify->sendClientIPMsg;
   result = self->netSocketRunClientMode(self);
 //ets_printf("runClientMode: result: %d\n", result);
   checkErrOK(result);
@@ -341,7 +341,7 @@ static uint8_t webSocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   result = self->compMsgWifiData->setWifiValue(self, "@clientStatus", (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
-  result = self->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
+  result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
 //ets_printf("§resetMsgInfo: result: %d§\n", result);
@@ -361,7 +361,7 @@ ets_printf("§netSocketSendConnectError: status: %d§\n", status);
   result = self->compMsgWifiData->setWifiValue(self, "@clientStatus", (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
-  result = self->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
+  result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
 ets_printf("§resetMsgInfo: result: %d§\n", result);

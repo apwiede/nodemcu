@@ -257,7 +257,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
 //ets_printf("fieldNameId: %d numtabrows: %d\n", fieldInfo->fieldNameId, numTableRows);
 //ets_printf("default fieldNameId: %d buildMsgInfo fieldNameId: %d\n", fieldInfo->fieldNameId, self->buildMsgInfos.fieldNameId);
     if (fieldInfo->fieldNameId == msgValPart->fieldNameId) {
-      result = self->setMsgFieldValue(self, type);
+      result = self->compMsgBuildMsg->setMsgFieldValue(self, type);
       checkErrOK(result);
       msgValPartIdx++;
     }
@@ -316,7 +316,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // the receiver must know how the value is built depending on the key!!
   
 //ets_printf("§buildMsg\n§");
-  result = self->fixOffsetsForKeyValues(self);
+  result = self->compMsgBuildMsg->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
   result = self->compMsgData->initMsg(self);
@@ -405,10 +405,22 @@ ets_printf("§handleType: %c msgLgth: %d§", self->compMsgData->currHdr->hdrHand
 // ================================= compMsgBuildMsgInit ====================================
 
 uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
-  self->fixOffsetsForKeyValues = &fixOffsetsForKeyValues;
-  self->setMsgFieldValue = &setMsgFieldValue;
-  self->buildMsg = &buildMsg;
-  self->setMsgValues = &setMsgValues;
-  self->forwardMsg = &forwardMsg;
+  self->compMsgBuildMsg->fixOffsetsForKeyValues = &fixOffsetsForKeyValues;
+  self->compMsgBuildMsg->setMsgFieldValue = &setMsgFieldValue;
+  self->compMsgBuildMsg->buildMsg = &buildMsg;
+  self->compMsgBuildMsg->setMsgValues = &setMsgValues;
+  self->compMsgBuildMsg->forwardMsg = &forwardMsg;
+
   return COMP_MSG_ERR_OK;
+}
+
+// ================================= newCompMsgBuildMsg ====================================
+
+compMsgBuildMsg_t *newCompMsgBuildMsg() {
+  compMsgBuildMsg_t *compMsgBuildMsg = os_zalloc(sizeof(compMsgBuildMsg_t));
+  if (compMsgBuildMsg == NULL) {
+    return NULL;
+  }
+
+  return compMsgBuildMsg;
 }

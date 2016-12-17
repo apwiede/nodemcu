@@ -338,7 +338,7 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
         hdrInfos->currPartIdx++;
-        result = self->nextFittingEntry(self, 0, received->u16CmdKey);
+        result = self->compMsgIdentify->nextFittingEntry(self, 0, received->u16CmdKey);
         checkErrOK(result);
         hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
 //ets_printf("§2 u16CmdKey: 0x%04x!hdr: 0x%04x§", received->u16CmdKey, hdr->hdrU16CmdKey);
@@ -425,9 +425,9 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self) {
 
 //ets_printf("§handleReceivedMsg\n§");
   received = &self->compMsgData->received;
-  result = self->handleReceivedHeader(self);
+  result = self->compMsgIdentify->handleReceivedHeader(self);
 //ets_printf("§call prepareAnswerMsg\n§");
-  result = self->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
+  result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
   checkErrOK(result);
@@ -459,7 +459,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   received = &self->compMsgData->received;
 //ets_printf("§handleReceivedHeader\n§");
   // next line deletes compMsgData !!
-  result = self->handleReceivedHeader(self);
+  result = self->compMsgIdentify->handleReceivedHeader(self);
   checkErrOK(result);
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
@@ -511,7 +511,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
     idx++;
   }
   if (!hadActionCb) {
-    result = self->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
+    result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
     checkErrOK(result);
     result = self->resetMsgInfo(self, received);
     checkErrOK(result);
@@ -542,7 +542,7 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   checkErrOK(result);
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
 //ets_printf("§IP: %s port: %d§\n", temp, port);
-  result = self->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
+  result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
 //ets_printf("§prepareAnswerMsg: result: %d§\n", result);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
@@ -650,13 +650,13 @@ cryptKey = "a1b2c3d4e5f6g7h8";
 //ets_printf("§mlen: %d decryptedLgth: %d\n§", mlen, decryptedLgth);
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
         }
-        result = self->storeReceivedMsg(self);
+        result = self->compMsgIdentify->storeReceivedMsg(self);
 //ets_printf("§handleReceivedMsg end buffer idx: %d result: %d\n§", idx, result);
         return result;
       case 'U':
       case 'W':
         self->compMsgData->currHdr = hdr;
-        result = self->forwardMsg(self);
+        result = self->compMsgBuildMsg->forwardMsg(self);
 //ets_printf("§forwardMsg result: %d\n§", result);
         return result;
       default:
@@ -722,18 +722,30 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
 uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->resetHeaderInfos = &resetHeaderInfos;
-  self->handleReceivedPart = &handleReceivedPart;
-  self->handleToSendPart = &handleToSendPart;
-  self->nextFittingEntry = &nextFittingEntry;
-  self->prepareAnswerMsg = &prepareAnswerMsg;
-  self->handleReceivedHeader = &handleReceivedHeader;
-  self->handleReceivedMsg = &handleReceivedMsg;
-  self->storeReceivedMsg = &storeReceivedMsg;
-  self->sendClientIPMsg = &sendClientIPMsg;
+  self->compMsgIdentify->resetHeaderInfos = &resetHeaderInfos;
+  self->compMsgIdentify->handleReceivedPart = &handleReceivedPart;
+  self->compMsgIdentify->handleToSendPart = &handleToSendPart;
+  self->compMsgIdentify->nextFittingEntry = &nextFittingEntry;
+  self->compMsgIdentify->prepareAnswerMsg = &prepareAnswerMsg;
+  self->compMsgIdentify->handleReceivedHeader = &handleReceivedHeader;
+  self->compMsgIdentify->handleReceivedMsg = &handleReceivedMsg;
+  self->compMsgIdentify->storeReceivedMsg = &storeReceivedMsg;
+  self->compMsgIdentify->sendClientIPMsg = &sendClientIPMsg;
+
   result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
   checkErrOK(result);
   result=self->compMsgMsgDesc->getFieldsToSave(self, MSG_FIELDS_TO_SAVE_FILE_NAME);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
+}
+
+// ================================= newCompMsgIdentify ====================================
+
+compMsgIdentify_t *newCompMsgIdentify() {
+  compMsgIdentify_t *compMsgIdentify = os_zalloc(sizeof(compMsgIdentify_t));
+  if (compMsgIdentify == NULL) {
+    return NULL;
+  }
+
+  return compMsgIdentify;
 }
