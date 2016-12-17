@@ -77,7 +77,7 @@ static compMsgActions_t compMsgActions = { NULL, 0, 0 };
 static uint8_t runClientMode(compMsgDispatcher_t *self, uint8_t mode) {
   int result;
 
-  self->webSocketRunClientMode(self, mode);
+  self->compMsgSocket->webSocketRunClientMode(self, mode);
   return COMP_MSG_ERR_OK;
 }
 
@@ -86,7 +86,7 @@ static uint8_t runClientMode(compMsgDispatcher_t *self, uint8_t mode) {
 static uint8_t runAPMode(compMsgDispatcher_t *self) {
   int result;
 
-  self->webSocketRunAPMode(self);
+  self->compMsgSocket->webSocketRunAPMode(self);
   return COMP_MSG_ERR_OK;
 }
 

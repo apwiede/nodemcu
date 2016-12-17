@@ -146,7 +146,7 @@ ets_printf("§COMP_MSG_ERR_NO_WEBSOCKET_OPENED§");
 ets_printf("§sendCloudMsg: cloudPayload == NULL§");
     return COMP_MSG_ERR_NO_WEBSOCKET_OPENED;
   }
-  result = self->netSocketSendData(self->compMsgData->sud, self->cloudPayload, self->cloudPayloadLgth);
+  result = self->compMsgSocket->netSocketSendData(self->compMsgData->sud, self->cloudPayload, self->cloudPayloadLgth);
   checkErrOK(result);
   os_free(self->cloudPayload);
   self->cloudPayload = NULL;
@@ -292,12 +292,12 @@ uint8_t *passwd;
   if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
 // FIXME !!! TEMPORARY
     // set the callback used after client mode is running
-    self->compMsgSendReceive->startSendMsg = self->netSocketStartCloudSocket;
-    result = self->netSocketRunClientMode(self);
+    self->compMsgSendReceive->startSendMsg = self->compMsgSocket->netSocketStartCloudSocket;
+    result = self->compMsgSocket->netSocketRunClientMode(self);
     checkErrOK(result);
 // FIXME !!! TEMPORARY END
   } else {
-    result = self->netSocketStartCloudSocket(self);
+    result = self->compMsgSocket->netSocketStartCloudSocket(self);
     checkErrOK(result);
   }
   return COMP_MSG_ERR_OK;
@@ -316,7 +316,7 @@ ets_printf("§sendMsg: %c\n§", self->compMsgData->currHdr->hdrHandleType);
       return COMP_MSG_ERR_NO_WEBSOCKET_OPENED;
     }
 ets_printf("remote_ip: %d %d %d %d port: %d\n", self->compMsgData->sud->remote_ip[0], self->compMsgData->sud->remote_ip[1], self->compMsgData->sud->remote_ip[2], self->compMsgData->sud->remote_ip[3], self->compMsgData->sud->remote_port);
-    result = self->webSocketSendData(self->compMsgData->sud, msgData, msgLgth, OPCODE_BINARY);
+    result = self->compMsgSocket->webSocketSendData(self->compMsgData->sud, msgData, msgLgth, OPCODE_BINARY);
     checkErrOK(result);
     break;
   case 'G':

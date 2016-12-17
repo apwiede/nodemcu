@@ -188,9 +188,9 @@ static uint8_t getHttpRequestCode(char * data, socketUserData_t *sud) {
   httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
   idx = 0;
   httpHeaderIdx = 0;
-ets_printf("get RequestCode: httpMsgInfo->receivedHeaders: %p\n", httpMsgInfo->receivedHeaders);
+ets_printf("§get RequestCode: httpMsgInfo->receivedHeaders: %p\n§", httpMsgInfo->receivedHeaders);
   httpHeaderPart = &httpMsgInfo->receivedHeaders[httpHeaderIdx];
-ets_printf("httpHeaderPart: %p\n", httpHeaderPart);
+ets_printf("§httpHeaderPart: %p\n§", httpHeaderPart);
   httpHeaderPart->httpHeaderId = COMP_MSG_HTTP_CODE;
   httpHeaderPart->httpHeaderName = "Code";
   httpHeaderPart->httpHeaderValue = data ;
@@ -199,7 +199,7 @@ ets_printf("httpHeaderPart: %p\n", httpHeaderPart);
   while (*cp != '\n') {
      if (*cp == ' ') {
        uval = c_strtoul(cp+1, &endPtr, 10);
-ets_printf("uval: %d\n", uval);
+ets_printf("§uval: %d\n§", uval);
        httpMsgInfo->httpRequestCode = (int)uval;
 ets_printf("§CODE: %d!\n§", httpMsgInfo->httpRequestCode);
        break;
@@ -300,10 +300,10 @@ ets_printf("§===\nSUD: %p\n§", sud);
   httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
 
 ets_printf("§numHeaders: %d sud->content: %s!len: %d!\n§", httpMsgInfo->numHeaders, httpMsgInfo->content, c_strlen(httpMsgInfo->content));  
-ets_printf("receivedHeadersSize: %d\n", httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
+ets_printf("§receivedHeadersSize: %d\n§", httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
   httpMsgInfo->receivedHeaders = os_zalloc(httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
   checkAllocOK(httpMsgInfo->receivedHeaders);
-ets_printf("httpMsgInfo->receivedHeaders: %p\n", httpMsgInfo->receivedHeaders);
+ets_printf("§httpMsgInfo->receivedHeaders: %p\n§", httpMsgInfo->receivedHeaders);
 
   result = getHttpRequestCode(data, sud);
   checkErrOK(result);

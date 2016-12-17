@@ -313,7 +313,7 @@ ets_printf("connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)
   result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
   checkErrOK(result);
   self->compMsgSendReceive->startSendMsg = self->compMsgIdentify->sendClientIPMsg;
-  result = self->netSocketRunClientMode(self);
+  result = self->compMsgSocket->netSocketRunClientMode(self);
 //ets_printf("runClientMode: result: %d\n", result);
   checkErrOK(result);
 //ets_printf("connectToAP done\n");

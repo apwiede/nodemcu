@@ -808,17 +808,17 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
     switch(type[0]) {
     case 'W':
 //ets_printf("§start RunAPMode\n§");
-      result = self->webSocketRunAPMode(self);
+      result = self->compMsgSocket->webSocketRunAPMode(self);
       checkErrOK(result);
       break;
     case 'N':
 //ets_printf("§start RunClientMode§");
-      result = self->netSocketRunClientMode(self);
+      result = self->compMsgSocket->netSocketRunClientMode(self);
       checkErrOK(result);
       break;
     case 'C':
 //ets_printf("§start startCloudSocket§");
-      result = self->netSocketStartCloudSocket(self);
+      result = self->compMsgSocket->netSocketStartCloudSocket(self);
       checkErrOK(result);
       break;
     case 'A':
@@ -908,6 +908,9 @@ ets_printf("newCompMsgDispatcher\n");
 
   // SendReceive
   compMsgDispatcher->compMsgSendReceive = newCompMsgSendReceive();
+
+  // Socket
+  compMsgDispatcher->compMsgSocket = newCompMsgSocket();
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

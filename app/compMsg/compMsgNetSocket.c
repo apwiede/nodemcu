@@ -872,8 +872,8 @@ static uint8_t netSocketStartCloudSocket (compMsgDispatcher_t *self) {
 uint8_t compMsgNetSocketInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->netSocketStartCloudSocket = &netSocketStartCloudSocket;
-  self->netSocketRunClientMode = &netSocketRunClientMode;
-  self->netSocketSendData = netSocketSendData;
+  self->compMsgSocket->netSocketStartCloudSocket = &netSocketStartCloudSocket;
+  self->compMsgSocket->netSocketRunClientMode = &netSocketRunClientMode;
+  self->compMsgSocket->netSocketSendData = netSocketSendData;
   return COMP_MSG_ERR_OK;
 }

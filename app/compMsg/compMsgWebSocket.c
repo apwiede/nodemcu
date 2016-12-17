@@ -731,8 +731,8 @@ ets_printf("§wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n§", wifi_
 uint8_t compMsgWebSocketInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  self->webSocketRunClientMode = &webSocketRunClientMode;
-  self->webSocketRunAPMode = &webSocketRunAPMode;
-  self->webSocketSendData = webSocketSendData;
+  self->compMsgSocket->webSocketRunClientMode = &webSocketRunClientMode;
+  self->compMsgSocket->webSocketRunAPMode = &webSocketRunAPMode;
+  self->compMsgSocket->webSocketSendData = webSocketSendData;
   return COMP_MSG_ERR_OK;
 }

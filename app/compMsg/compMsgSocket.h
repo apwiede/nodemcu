@@ -93,12 +93,32 @@ typedef struct socketUserData {
   httpMsgInfo_t *httpMsgInfos;
 } socketUserData_t;
 
+// WebSocket stuff
+typedef uint8_t (* webSocketRunAPMode_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* webSocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
+typedef uint8_t (* webSocketSendData_t)(socketUserData_t *sud, const char *payload, int size, int opcode);
+
+// NetSocket stuff
+typedef uint8_t (* netSocketStartCloudSocket_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* netSocketRunClientMode_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* netSocketSendData_t)(socketUserData_t *sud, const char *payload, int size);
+
 typedef struct compMsgSocket {
+
+  webSocketRunAPMode_t webSocketRunAPMode;
+  webSocketRunClientMode_t webSocketRunClientMode;
+  webSocketSendData_t webSocketSendData;
+
+  netSocketStartCloudSocket_t netSocketStartCloudSocket;
+  netSocketRunClientMode_t netSocketRunClientMode;
+  netSocketSendData_t netSocketSendData;
 } compMsgSocket_t;
 
 #ifdef  __cplusplus
 }
 #endif
+
+compMsgSocket_t *newCompMsgSocket();
 
 #endif  /* COMP_MSG_SOCKET_H */
 
