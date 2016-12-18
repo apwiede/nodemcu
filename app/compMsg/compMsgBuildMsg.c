@@ -49,6 +49,55 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
+// ================================= createMsgFromHeaderPart ====================================
+
+static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
+  uint8_t result;
+  int idx;
+  bool isEnd;
+  msgDescPart_t *msgDescPart;
+  msgValPart_t *msgValPart;
+
+//ets_printf("§createMsgFromHeaderPart1§\n");
+  result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
+  checkErrOK(result);
+  result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);
+  checkErrOK(result);
+  idx = 0;
+  while(idx < self->compMsgData->numMsgDescParts) {
+    msgDescPart = &self->compMsgData->msgDescParts[idx];
+    result = self->compMsgData->addField(self, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
+    checkErrOK(result);
+    idx++;
+  }
+
+//ets_printf("§heap4: %d§\n", system_get_free_heap_size());
+  // runAction calls at the end buildMsg
+//  self->resetBuildMsgInfos(self);
+//  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!
+  if (self->compMsgData->prepareValuesCbName != NULL) {
+    uint8_t actionMode;
+    action_t actionCallback;
+    uint8_t type;
+
+//ets_printf("§call prepareValuesCbName: %s\n§", self->compMsgData->prepareValuesCbName);
+    result = self->compMsgAction->getActionCallback(self, self->compMsgData->prepareValuesCbName+1, &actionCallback);
+    checkErrOK(result);
+    result = actionCallback(self);
+    checkErrOK(result);
+    result = self->compMsgAction->getActionMode(self, self->compMsgData->prepareValuesCbName+1, &actionMode);
+    self->actionMode = actionMode;
+    checkErrOK(result);
+    result  = self->compMsgAction->runAction(self, &type);
+    // actionCallback starts a call with eventually a callback and returns here before the callback has been running!!
+    // when coming here we are finished and the callback will do the work later on!
+    return result;
+  } else {
+    result = self->compMsgBuildMsg->buildMsg(self);
+  }
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= fixOffsetsForKeyValues ====================================
 
 /**
@@ -360,7 +409,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
     }
 //ets_printf("§msglen!%d!mlen: %d, headerLgth!%d\n§", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
     toCryptPtr = msgData + self->compMsgData->headerLgth;
-    result = self->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
+    result = self->compMsgUtil->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
     checkErrOK(result);
     if (encryptedMsgDataLgth != mlen) {
 ets_printf("WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n", mlen, encryptedMsgDataLgth);
@@ -405,6 +454,7 @@ ets_printf("§handleType: %c msgLgth: %d§", self->compMsgData->currHdr->hdrHand
 // ================================= compMsgBuildMsgInit ====================================
 
 uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
+  self->compMsgBuildMsg->createMsgFromHeaderPart = &createMsgFromHeaderPart;
   self->compMsgBuildMsg->fixOffsetsForKeyValues = &fixOffsetsForKeyValues;
   self->compMsgBuildMsg->setMsgFieldValue = &setMsgFieldValue;
   self->compMsgBuildMsg->buildMsg = &buildMsg;

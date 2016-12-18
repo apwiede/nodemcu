@@ -239,5 +239,6 @@ typedef struct compMsgWifiData {
 } compMsgWifiData_t;
 
 compMsgWifiData_t *newCompMsgWifiData();
+uint8_t compMsgWifiInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_WIFI_DATA_H */

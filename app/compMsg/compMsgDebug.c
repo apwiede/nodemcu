@@ -272,7 +272,7 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
 
   callbackName = "nil";
   if (msgDescPart->fieldSizeCallback != NULL) {
-    result = self->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
+    result = self->compMsgUtil->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
     checkErrOK(result);
   }
   ets_printf("msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
@@ -288,43 +288,7 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
 
   callbackName = "nil";
   if (msgValPart->fieldValueCallback != NULL) {
-    result = self->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName, msgValPart->fieldValueCallbackType);
-    checkErrOK(result);
-  }
-  ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
-  if (msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
-     ets_printf(" COMP_DISP_DESC_VALUE_IS_NUMBER");
-  }
-  ets_printf("\n");
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= dumpMsgDescPart ====================================
-
-static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart) {
-  uint8_t result;
-  fieldSizeCallback_t callback;
-  uint8_t *callbackName;
-
-  callbackName = "nil";
-  if (msgDescPart->fieldSizeCallback != NULL) {
-    result = self->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
-    checkErrOK(result);
-  }
-  ets_printf("msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= dumpMsgValPart ====================================
-
-static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPart) {
-  uint8_t result;
-  fieldValueCallback_t callback;
-  uint8_t *callbackName;
-
-  callbackName = "nil";
-  if (msgValPart->fieldValueCallback != NULL) {
-    result = self->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName, msgValPart->fieldValueCallbackType);
+    result = self->compMsgUtil->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName, msgValPart->fieldValueCallbackType);
     checkErrOK(result);
   }
   ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);

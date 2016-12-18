@@ -132,6 +132,9 @@ typedef struct compMsgSocket {
 #endif
 
 compMsgSocket_t *newCompMsgSocket();
+uint8_t compMsgWebSocketInit(compMsgDispatcher_t *self);
+uint8_t compMsgNetSocketInit(compMsgDispatcher_t *self);
+
 
 #endif  /* COMP_MSG_SOCKET_H */
 

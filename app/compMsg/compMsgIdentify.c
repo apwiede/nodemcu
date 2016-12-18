@@ -270,7 +270,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   }
   hdr = &hdrInfos->headerParts[hdrIdx];
 //ets_printf("hdrCmdKey: 0x%04x\n§", hdr->hdrU16CmdKey);
-  result = self->createMsgFromHeaderPart(self, hdr, handle);
+  result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, handle);
 //ets_printf("§createMsgFromHeaderPart result: %d\n§", result);
   checkErrOK(result);
   return result;
@@ -645,7 +645,7 @@ cryptKey = "a1b2c3d4e5f6g7h8";
           ivlen = 16;
           klen = 16;
           cryptedPtr = received->buf + hdrInfos->headerLgth;
-          result = self->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
+          result = self->compMsgUtil->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
           checkErrOK(result);
 //ets_printf("§mlen: %d decryptedLgth: %d\n§", mlen, decryptedLgth);
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
@@ -705,7 +705,7 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
   klen = 16;
   c_memcpy(buf, buffer, lgth);
   cryptedPtr = buf;
-  result = self->encryptMsg(cryptedPtr, mlen, cryptKey, klen, iv, ivlen, &encrypted, &encryptedLgth);
+  result = self->compMsgUtil->encryptMsg(cryptedPtr, mlen, cryptKey, klen, iv, ivlen, &encrypted, &encryptedLgth);
   checkErrOK(result);
   msgLgth = encryptedLgth;
 //ets_printf("encryptedLgth: %d %d\n", encryptedLgth, result);

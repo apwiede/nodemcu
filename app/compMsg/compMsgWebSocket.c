@@ -301,7 +301,7 @@ static uint8_t webSocketRecv(char *string, socketUserData_t *sud, char **data, i
     SHA1Update(&ctx, ws_uuid, os_strlen(ws_uuid));
     SHA1Final(digest, &ctx);
 
-    result = sud->compMsgDispatcher->toBase64(digest, &digestLen, &base64Digest);
+    result = sud->compMsgDispatcher->compMsgUtil->toBase64(digest, &digestLen, &base64Digest);
     checkErrOK(result);
     checkAllocOK(base64Digest);
     payloadLen = os_strlen(HEADER_WEBSOCKET_START) + os_strlen(HEADER_WEBSOCKET_URL) +os_strlen(HEADER_WEBSOCKET_END) + digestLen + trailerLen;

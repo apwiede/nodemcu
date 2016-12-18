@@ -50,18 +50,21 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "dataView.h"
 #include "compMsgErrorCodes.h"
 #include "compMsgTypesAndNames.h"
+#include "compMsgUtil.h"
 #include "compMsgDataView.h"
 #include "compMsgTimer.h"
+#include "compMsgMsgDesc.h"
 #include "compMsgAction.h"
+#include "compMsgRequest.h"
 #include "compMsgSendReceive.h"
 #include "compMsgIdentify.h"
 #include "compMsgBuildMsg.h"
 #include "compMsgModuleData.h"
 #include "compMsgSocket.h"
 #include "compMsgWifiData.h"
-#include "compMsgMsgDesc.h"
 #include "compMsgData.h"
 #include "compMsgHttp.h"
+#include "compMsgDebug.h"
 
 //#define CLOUD_1
 #define CLOUD_2
@@ -116,28 +119,10 @@ typedef struct fieldValueCallbackInfos {
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 // Dispatcher stuff
-typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* addUartRequestData_t)(compMsgDispatcher_t *self, uint8_t *data, size_t lgth);
-typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData);
-typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
-typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
-typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
-typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
-
 typedef uint8_t (* createDispatcher_t)(compMsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self, const uint8_t *type, size_t typelen);
-typedef uint8_t (* createMsgFromHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle);
-typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
-typedef uint8_t (* decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
-typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
-typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
 typedef uint8_t (* resetBuildMsgInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
-typedef uint8_t (* setFieldValueCallback_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t callback, uint8_t callbackType);
-typedef uint8_t (* addFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t callback, uint8_t callbackType);
-typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *compMsgDispatcher, uint8_t *callbackName, fieldValueCallback_t *callback, uint8_t callbackType);
-typedef uint8_t (* getFieldValueCallbackName_t)(compMsgDispatcher_t *compMsgDispatcher, fieldValueCallback_t callback, uint8_t **callbackName, uint8_t callbackType);
 
 // MsgData stuff
 typedef uint8_t (* getNewCompMsgDataPtr_t)(compMsgDispatcher_t *self);
@@ -165,6 +150,23 @@ typedef struct compMsgDispatcher {
 
   // station mode
   uint32_t station_ip;
+
+  // this is for mapping a msg handle from the header to a compMsgPtr
+  uint8_t numMsgHeaders;
+  uint8_t maxMsgHeaders;
+  msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
+
+  uint8_t numFieldValueCallbackInfos;
+  uint8_t maxFieldValueCallbackInfos;
+  fieldValueCallbackInfos_t *fieldValueCallbackInfos;
+
+  uint8_t numFieldsToSave;
+  uint8_t maxFieldsToSave;
+  fieldsToSave_t *fieldsToSave;
+
+  compMsgData_t *compMsgData;
+  uint8_t *msgHandle;
+
 
 
   msgHeaderInfos_t msgHeaderInfos;
@@ -196,70 +198,37 @@ typedef struct compMsgDispatcher {
   // compMsgBuildMsg info
   compMsgBuildMsg_t *compMsgBuildMsg;
 
-  // compMsgBuildMsg info
+  // compMsgSendReceive info
   compMsgSendReceive_t *compMsgSendReceive;
 
   // compMsgSocket info
   compMsgSocket_t *compMsgSocket;
 
+  // compMsgDebug info
+  compMsgDebug_t *compMsgDebug;
+
+  // compMsgUtil info
+  compMsgUtil_t *compMsgUtil;
+
+  // compMsgRequest info
+  compMsgRequest_t *compMsgRequest;
+
   // request infos
   msgRequestInfos_t msgRequestInfos;
 
-  // this is for mapping a msg handle from the header to a compMsgPtr
-  uint8_t numMsgHeaders;
-  uint8_t maxMsgHeaders;
-  msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
-
-  uint8_t numFieldValueCallbackInfos;
-  uint8_t maxFieldValueCallbackInfos;
-  fieldValueCallbackInfos_t *fieldValueCallbackInfos;
-
-  uint8_t numFieldsToSave;
-  uint8_t maxFieldsToSave;
-  fieldsToSave_t *fieldsToSave;
-
-  compMsgData_t *compMsgData;
-  uint8_t *msgHandle;
-
   // function pointers
+  resetBuildMsgInfos_t resetBuildMsgInfos;
 
   // Dispatcher
   getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
   createDispatcher_t createDispatcher;
   initDispatcher_t initDispatcher;
-  createMsgFromHeaderPart_t createMsgFromHeaderPart;
   getNewCompMsgDataPtr_t getNewCompMsgDataPtr;
-  startRequest_t startRequest;
-  startNextRequest_t startNextRequest;
-  addUartRequestData_t addUartRequestData;
-  addRequest_t addRequest;
-  deleteRequest_t deleteRequest;
-  encryptMsg_t encryptMsg;
-  decryptMsg_t decryptMsg;
-  toBase64_t toBase64;
-  fromBase64_t fromBase64;
-  resetBuildMsgInfos_t resetBuildMsgInfos;
-  setFieldValueCallback_t setFieldValueCallback;
-  addFieldValueCallbackName_t addFieldValueCallbackName;
-  getFieldValueCallback_t getFieldValueCallback;
-  getFieldValueCallbackName_t getFieldValueCallbackName;
-
-  dumpMsgParts_t dumpMsgParts;
 } compMsgDispatcher_t;
 
 compMsgDispatcher_t *newCompMsgDispatcher();
 uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher);
 void freeCompMsgDispatcher(compMsgDispatcher_t *compMsgDispatcher);
-uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self);
-uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self);
-uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self);
-uint8_t compMsgActionInit(compMsgDispatcher_t *self);
-uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self);
-uint8_t compMsgWifiInit(compMsgDispatcher_t *self);
-uint8_t compMsgWebSocketInit(compMsgDispatcher_t *self);
-uint8_t compMsgNetSocketInit(compMsgDispatcher_t *self);
-uint8_t compMsgHttpInit(compMsgDispatcher_t *self);
-uint8_t compMsgTimerInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_DISPATCHER_H */

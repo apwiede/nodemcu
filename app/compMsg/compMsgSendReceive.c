@@ -78,7 +78,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, u
     lgth = 1;
     myBuffer = buf;
   }
-  result =self->addUartRequestData(self, (uint8_t *)myBuffer, lgth);
+  result =self->compMsgRequest->addUartRequestData(self, (uint8_t *)myBuffer, lgth);
 if (result != COMP_MSG_ERR_OK) {
 ets_printf("§uartReceiveCb end result: %d§", result);
 }
@@ -183,23 +183,23 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   msgData = self->cloudMsgData;
   msgLgth = self->cloudMsgDataLgth;
 //ets_printf("§prepareCloudMsg: msgLgth: %d§", msgLgth);
-  result = self->toBase64(msgData, &msgLgth, &b64Msg);
+  result = self->compMsgUtil->toBase64(msgData, &msgLgth, &b64Msg);
   checkErrOK(result);
 //ets_printf("§prepareCloudMsg: b64msgLgth: %d§", msgLgth);
 
 #ifdef CLOUD_1
   payloadLgth = c_strlen("POST ");
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
   checkErrOK(result);
   payloadLgth += c_strlen(subUrl);
   hostPart=" HTTP/1.1\r\nHost: ";
   payloadLgth += c_strlen(hostPart);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
   checkErrOK(result);
   payloadLgth += c_strlen(host);
   alive="\r\nConnection: keep-alive\r\n";
   payloadLgth += c_strlen(alive);
-  result = self->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
   contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
@@ -365,7 +365,7 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   self->compMsgData->receivedData = NULL;
   self->compMsgData->receivedLgth = 0;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
-  result = self->addRequest(self, COMP_DISP_INPUT_UART, NULL, self->compMsgData);
+  result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_UART, NULL, self->compMsgData);
 
   self->compMsgSendReceive->startSendMsg = NULL;
   self->compMsgSendReceive->startSendMsg2 = NULL;

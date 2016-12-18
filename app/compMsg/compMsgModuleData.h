@@ -134,5 +134,6 @@ typedef struct compMsgModuleData {
 } compMsgModuleData_t;
 
 compMsgModuleData_t *newCompMsgModuleData();
+uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_MODULE_DATA_H */

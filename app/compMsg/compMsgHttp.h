@@ -91,6 +91,7 @@ typedef struct compMsgHttp {
 } compMsgHttp_t;
 
 compMsgHttp_t *newCompMsgHttp();
+uint8_t compMsgHttpInit(compMsgDispatcher_t *self);
 
 #ifdef  __cplusplus
 }

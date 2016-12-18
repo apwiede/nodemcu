@@ -74,6 +74,7 @@ typedef struct compMsgTimer {
 } compMsgTimer_t;
 
 compMsgTimer_t *newCompMsgTimer();
+uint8_t compMsgTimerInit(compMsgDispatcher_t *self);
 
 #ifdef  __cplusplus
 }

@@ -112,7 +112,7 @@ ets_printf("§received compMsgData: %p sud: %p\n§", self->compMsgData, self->co
   }
   c_memcpy(self->compMsgData->receivedData, pdata, len);
   self->compMsgData->receivedLgth = (uint8_t)len;
-  result = self->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, sud, self->compMsgData);
+  result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, sud, self->compMsgData);
 ets_printf("webSocketBinaryReceived end result: %d\n", result);
 }
 
@@ -135,7 +135,7 @@ ets_printf("§send compMsgData: %p lgth: %d§", self->compMsgData, len);
   self->compMsgData->u16CmdKey = 17220; // FIXME hard wired 'CD'
   self->compMsgData->toSendData = (uint8_t *)pdata;
   self->compMsgData->toSendLgth = (uint8_t)len;
-  result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
+  result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
 ets_printf("§netSocketSend end result: %d§", result);
 }
 
@@ -157,7 +157,7 @@ ets_printf("§received compMsgData: %p remote_port: %d receivedLgth: %d§", self
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = (uint8_t *)pdata;
   self->compMsgData->receivedLgth = (uint8_t)len;
-  result = self->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
+  result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
 ets_printf("§wifi netSocketReceived end result: %d§", result);
 }
 
@@ -909,30 +909,30 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   compMsgWifiData.netSocketToSend = &netSocketToSend;
   compMsgWifiData.netSocketReceived = &netSocketReceived;
 
-  self->addFieldValueCallbackName(self, "@getWifiAPBssidSize",       &getWifiAPBssidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPBssidStrSize",    &getWifiAPBssidStrSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPSsidSize",        &getWifiAPSsidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPSsid_lenSize",    &getWifiAPSsid_lenSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPChannelSize",     &getWifiAPChannelSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPRssiSize",        &getWifiAPRssiSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPAuthmodeSize",    &getWifiAPAuthmodeSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPIs_hiddenSize",   &getWifiAPIs_hiddenSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPFreq_offsetSize", &getWifiAPFreq_offsetSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
-  self->addFieldValueCallbackName(self, "@getWifiAPFreqcal_valSize", &getWifiAPFreqcal_valSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPBssidSize",       &getWifiAPBssidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPBssidStrSize",    &getWifiAPBssidStrSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPSsidSize",        &getWifiAPSsidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPSsid_lenSize",    &getWifiAPSsid_lenSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPChannelSize",     &getWifiAPChannelSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPRssiSize",        &getWifiAPRssiSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPAuthmodeSize",    &getWifiAPAuthmodeSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPIs_hiddenSize",   &getWifiAPIs_hiddenSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPFreq_offsetSize", &getWifiAPFreq_offsetSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPFreqcal_valSize", &getWifiAPFreqcal_valSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
 
-  self->addFieldValueCallbackName(self, "@getWifiAPBssids",       &getWifiAPBssids, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPBssidStrs",    &getWifiAPBssidStrs, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPSsids",        &getWifiAPSsids, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPSsid_lens",    &getWifiAPSsid_lens, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPChannels",     &getWifiAPChannels, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPRssis",        &getWifiAPRssis, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPAuthmodes",    &getWifiAPAuthmodes, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPIs_hiddens",   &getWifiAPIs_hiddens, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPFreq_offsets", &getWifiAPFreq_offsets, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getWifiAPFreqcal_vals", &getWifiAPFreqcal_vals, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getClientIPAddr", &getClientIPAddr, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->addFieldValueCallbackName(self, "@getClientStatus", &getClientStatus, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPBssids",       &getWifiAPBssids, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPBssidStrs",    &getWifiAPBssidStrs, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPSsids",        &getWifiAPSsids, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPSsid_lens",    &getWifiAPSsid_lens, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPChannels",     &getWifiAPChannels, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPRssis",        &getWifiAPRssis, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPAuthmodes",    &getWifiAPAuthmodes, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPIs_hiddens",   &getWifiAPIs_hiddens, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPFreq_offsets", &getWifiAPFreq_offsets, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPFreqcal_vals", &getWifiAPFreqcal_vals, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientIPAddr", &getClientIPAddr, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientStatus", &getClientStatus, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
 
   self->compMsgWifiData->getBssScanInfo = &getBssScanInfo;
   self->compMsgWifiData->getWifiValue = &getWifiValue;

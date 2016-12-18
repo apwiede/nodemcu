@@ -71,6 +71,7 @@ typedef struct compMsgIdentify {
 } compMsgIdentify_t;
 
 compMsgIdentify_t *newCompMsgIdentify();
+uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self);
 
 #ifdef  __cplusplus
 }

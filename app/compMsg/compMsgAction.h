@@ -64,6 +64,7 @@ typedef struct compMsgAction {
 } compMsgAction_t;
 
 compMsgAction_t *newCompMsgAction();
+uint8_t compMsgActionInit(compMsgDispatcher_t *self);
 
 #ifdef  __cplusplus
 }

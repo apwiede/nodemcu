@@ -129,188 +129,6 @@ static uint8_t writeLine(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t 
   return COMP_MSG_ERR_WRITE_FILE;
 }
 
-// ================================= dumpHeaderPart ====================================
-
-static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
-  int idx;
-
-  ets_printf("§dumpHeaderPart:§");
-  ets_printf("§headerPart: from: 0x%04x to: 0x%04x totalLgth: %d§", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth);
-  ets_printf("§            GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c§", hdr->hdrGUID, hdr->hdrSrcId, hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
-  ets_printf("§            u16CmdLgth: 0x%04x u16Crc: 0x%04x u16TotalCrc: 0x%04x§", hdr->hdrU16CmdLgth, hdr->hdrU16Crc, hdr->hdrU16TotalCrc);
-  ets_printf("§            u8CmdLgth: %d u8Crc: 0x%02x u8TotalCrc: 0x%02x§", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrU8TotalCrc);
-  ets_printf("§            enc: %c handleType: %c offset: %d§", hdr->hdrEncryption, hdr->hdrHandleType, hdr->hdrOffset);
-  ets_printf("§hdrFlags: 0x%04x", hdr->hdrFlags);
-  if (hdr->hdrFlags & COMP_DISP_HDR_DST) {
-    ets_printf(" COMP_DISP_HDR_DST");
-  }
-  if (hdr->hdrFlags & COMP_DISP_HDR_SRC) {
-    ets_printf(" COMP_DISP_HDR_SRC");
-  }
-  if (hdr->hdrFlags & COMP_DISP_HDR_TOTAL_LGTH) {
-    ets_printf(" COMP_DISP_HDR_TOTAL_LGTH");
-  }
-  if (hdr->hdrFlags & COMP_DISP_HDR_GUID) {
-    ets_printf(" COMP_DISP_HDR_GUID");
-  }
-  if (hdr->hdrFlags & COMP_DISP_HDR_SRC_ID) {
-    ets_printf(" COMP_DISP_HDR_SRC_ID");
-  }
-  if (hdr->hdrFlags & COMP_DISP_HDR_FILLER) {
-    ets_printf(" COMP_DISP_HDR_FILLER");
-  }
-  if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CMD_KEY) {
-    ets_printf(" COMP_DISP_PAYLOAD_CMD_KEY");
-  }
-  if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CMD_LGTH) {
-    ets_printf(" COMP_DISP_PAYLOAD_CMD_LGTH");
-  }
-  if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CRC) {
-    ets_printf(" COMP_DISP_PAYLOAD_CRC");
-  }
-  if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
-    ets_printf(" COMP_DISP_TOTAL_CRC");
-  }
-  ets_printf("§");
-  ets_printf("§hdr fieldSequence§");
-  idx = 0;
-  while (idx < COMP_DISP_MAX_SEQUENCE) {
-    if (hdr->fieldSequence[idx] == 0) {
-      break;
-    }
-    ets_printf("§ %d 0x%04x", idx, hdr->fieldSequence[idx]);
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_DST) {
-      ets_printf(" COMP_DISP_U16_DST");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC) {
-      ets_printf(" COMP_DISP_U16_SRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
-      ets_printf(" COMP_DISP_HDR_U16_LGTH");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
-      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC_ID) {
-      ets_printf(" COMP_DISP_U16_SRC_ID");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
-      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_KEY) {
-      ets_printf(" COMP_DISP_U16_CMD_KEY");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U0_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U0_CRC) {
-      ets_printf(" COMP_DISP_U0_CRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_CRC) {
-      ets_printf(" COMP_DISP_U8_CRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_CRC) {
-      ets_printf(" COMP_DISP_U16_CRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U0_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U0_TOTAL_CRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U8_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U8_TOTAL_CRC");
-    }
-    if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U16_TOTAL_CRC");
-    }
-    ets_printf("§");
-    idx++;
-  }
-//  ets_printf("§");
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= dumpMsgHeaderInfos ====================================
-
-static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos) {
-  int idx;
-
-  ets_printf("dumpMsgHeaderInfos:\n");
-  ets_printf("headerFlags: ");
-  if (hdrInfos->headerFlags & COMP_DISP_U16_SRC) {
-    ets_printf(" COMP_DISP_U16_SRC");
-  }
-  if (hdrInfos->headerFlags & COMP_DISP_U16_DST) {
-    ets_printf(" COMP_DISP_U16_DST");
-  }
-  if (hdrInfos->headerFlags & COMP_DISP_U16_TOTAL_LGTH) {
-    ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
-  }
-  ets_printf("\n");
-  ets_printf("hdrInfos headerSequence\n");
-  idx = 0;
-  while (idx < COMP_DISP_MAX_SEQUENCE) {
-    if (hdrInfos->headerSequence[idx] == 0) {
-      break;
-    }
-    ets_printf(" %d 0x%04x", idx, hdrInfos->headerSequence[idx]);
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_DST) {
-      ets_printf(" COMP_DISP_U16_DST");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_SRC) {
-      ets_printf(" COMP_DISP_U16_SRC");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
-      ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
-      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_SRC_ID) {
-      ets_printf(" COMP_DISP_U16_SRC_ID");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
-      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U8_CMD_LGTH");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U16_CMD_LGTH");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_CRC) {
-      ets_printf(" COMP_DISP_U0_CRC");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_CRC) {
-      ets_printf(" COMP_DISP_U8_CRC");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_CRC) {
-      ets_printf(" COMP_DISP_U16_CRC");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U0_TOTAL_CRC");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U8_TOTAL_CRC");
-    }
-    if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U16_TOTAL_CRC");
-    }
-    ets_printf("\n");
-    idx++;
-  }
-  ets_printf("\n");
-  ets_printf("headerLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterHeader: %d\n", hdrInfos->headerLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterHeader);
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getIntFromLine ====================================
 
 static uint8_t getIntFromLine(uint8_t *myStr, long *uval, uint8_t **ep, bool *isEnd) {
@@ -1023,42 +841,6 @@ static uint8_t  getHeaderFromUniqueFields (compMsgDispatcher_t *self, uint16_t d
   return COMP_MSG_ERR_HEADER_NOT_FOUND;
 }
 
-// ================================= dumpMsgDescPart ====================================
-
-static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart) {
-  uint8_t result;
-  fieldSizeCallback_t callback;
-  uint8_t *callbackName;
-
-  callbackName = "nil";
-  if (msgDescPart->fieldSizeCallback != NULL) {
-    result = self->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
-    checkErrOK(result);
-  }
-  ets_printf("msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= dumpMsgValPart ====================================
-
-static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPart) {
-  uint8_t result;
-  fieldValueCallback_t callback;
-  uint8_t *callbackName;
-
-  callbackName = "nil";
-  if (msgValPart->fieldValueCallback != NULL) {
-    result = self->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName, msgValPart->fieldValueCallbackType);
-    checkErrOK(result);
-  }
-  ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
-  if (msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
-     ets_printf(" COMP_DISP_DESC_VALUE_IS_NUMBER");
-  }
-  ets_printf("\n");
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getMsgPartsFromHeaderPart ====================================
 
 static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
@@ -1188,10 +970,10 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       keyValueCallback = cp;
       result = compMsgMsgDesc->getStrFromLine(cp, &ep, &isEnd);
       checkErrOK(result);
-      result = self->getFieldValueCallback(self, cp, &msgDescPart->fieldSizeCallback, 0);
+      result = self->compMsgUtil->getFieldValueCallback(self, cp, &msgDescPart->fieldSizeCallback, 0);
       checkErrOK(result);
     }
-//self->compMsgMsgDesc->dumpMsgDescPart(self, msgDescPart);
+//self->compMsgDebug->dumpMsgDescPart(self, msgDescPart);
     if (!isEnd) {
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
@@ -1264,7 +1046,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
       msgValPart->fieldValue = (uint32_t)uval;
     }
     if (ets_strncmp(fieldValueStr, "@get", 4) == 0) {
-      result = self->getFieldValueCallback(self, fieldValueStr, &msgValPart->fieldValueCallback, msgValPart->fieldValueCallbackType);
+      result = self->compMsgUtil->getFieldValueCallback(self, fieldValueStr, &msgValPart->fieldValueCallback, msgValPart->fieldValueCallbackType);
       if (result != COMP_MSG_ERR_OK) {
 //ets_printf("§WARNING: fieldValueCallback %s for field: %s not found§\n", fieldValueStr, fieldNameStr);
       }
@@ -1273,7 +1055,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
     if (ets_strncmp(fieldValueStr, "@run",4) == 0) {
       msgValPart->fieldValueActionCb = msgValPart->fieldValueStr;
     }
-//self->compMsgMsgDesc->dumpMsgValPart(self, msgValPart);
+//self->compMsgDebug->dumpMsgValPart(self, msgValPart);
     if (!isEnd) {
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
@@ -1626,8 +1408,6 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->flushFile = &flushFile;
   compMsgMsgDesc->readLine = &readLine;
   compMsgMsgDesc->writeLine = &writeLine;
-  compMsgMsgDesc->dumpHeaderPart = &dumpHeaderPart;
-  compMsgMsgDesc->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
   compMsgMsgDesc->getIntFromLine = &getIntFromLine;
   compMsgMsgDesc->getStrFromLine = &getStrFromLine;
   compMsgMsgDesc->getHeaderFieldsFromLine = &getHeaderFieldsFromLine;
@@ -1635,10 +1415,6 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   compMsgMsgDesc->readModuleValues = &readModuleValues;
   compMsgMsgDesc->readWifiValues = &readWifiValues;
   compMsgMsgDesc->readHeadersAndSetFlags = &readHeadersAndSetFlags;
-  compMsgMsgDesc->dumpMsgDescPart = &dumpMsgDescPart;
-  compMsgMsgDesc->dumpMsgValPart = &dumpMsgValPart;
-  compMsgMsgDesc->dumpHeaderPart = &dumpHeaderPart;
-  compMsgMsgDesc->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
   compMsgMsgDesc->getMsgPartsFromHeaderPart = &getMsgPartsFromHeaderPart;
   compMsgMsgDesc->getHeaderFromUniqueFields = &getHeaderFromUniqueFields;
   compMsgMsgDesc->getMsgKeyValueDescParts = &getMsgKeyValueDescParts;

@@ -200,7 +200,7 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
   if (self->msgRequestInfos.currRequestIdx < 0) {
     self->msgRequestInfos.currRequestIdx++;
     // start handling the request
-    self->startNextRequest(self);
+    self->compMsgRequest->startNextRequest(self);
   } else {
     // nothing to do the current request is different from the deleted one
     // so just let the current one continue

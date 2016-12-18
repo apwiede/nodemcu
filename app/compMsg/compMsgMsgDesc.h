@@ -196,14 +196,13 @@ typedef struct fieldsToSave {
 
 typedef struct compMsgMsgDesc compMsgMsgDesc_t;
 typedef struct compMsgData compMsgData_t;
+typedef struct compMsgWifiData compMsgWifiData_t;
 
 typedef uint8_t (* openFile_t)(compMsgMsgDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode);
 typedef uint8_t (* closeFile_t)(compMsgMsgDesc_t *self);
 typedef uint8_t (* flushFile_t)(compMsgMsgDesc_t *self);
 typedef uint8_t (* readLine_t)(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t *lgth);
 typedef uint8_t (* writeLine_t)(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t lgth);
-typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
-typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getStrFromLine_t)(uint8_t *myStr, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
@@ -216,8 +215,6 @@ typedef uint8_t (* getMsgPartsFromHeaderPart_t)(compMsgDispatcher_t *self, heade
 typedef uint8_t (* getMsgKeyValueDescParts_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* getFieldsToSave_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* getWifiKeyValueKeys_t)(compMsgDispatcher_t *self, compMsgWifiData_t *compMsgWifiData);
-typedef uint8_t (* dumpMsgDescPart_t)(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart);
-typedef uint8_t (* dumpMsgValPart_t)(compMsgDispatcher_t *self, msgValPart_t *msgValPart);
 
 typedef struct compMsgMsgDesc {
   uint8_t id;
@@ -230,8 +227,6 @@ typedef struct compMsgMsgDesc {
   flushFile_t flushFile;
   readLine_t readLine;
   writeLine_t writeLine;
-  dumpHeaderPart_t dumpHeaderPart;
-  dumpMsgHeaderInfos_t dumpMsgHeaderInfos;
   getIntFromLine_t getIntFromLine;
   getStrFromLine_t getStrFromLine;
   getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
@@ -240,8 +235,6 @@ typedef struct compMsgMsgDesc {
   readModuleValues_t readModuleValues;
   readWifiValues_t readWifiValues;
   getHeaderFromUniqueFields_t getHeaderFromUniqueFields;
-  dumpMsgDescPart_t dumpMsgDescPart;
-  dumpMsgValPart_t dumpMsgValPart;
   getMsgPartsFromHeaderPart_t getMsgPartsFromHeaderPart;
   getMsgKeyValueDescParts_t getMsgKeyValueDescParts;
   getFieldsToSave_t getFieldsToSave;

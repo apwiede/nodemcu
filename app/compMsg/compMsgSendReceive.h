@@ -69,6 +69,7 @@ typedef struct compMsgSendReceive {
 } compMsgSendReceive_t;
 
 compMsgSendReceive_t *newCompMsgSendReceive();
+uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self);
 
 #ifdef  __cplusplus
 }

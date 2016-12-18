@@ -43,10 +43,18 @@
 #include "mem.h"
 #include "flash_fs.h"
 
+#include "c_limits.h"
 #include "c_string.h"
 #include "c_stdio.h"
 #include "c_stdlib.h"
+#include "../crypto/mech.h"
 #include "compMsgDispatcher.h"
+
+#define BASE64_INVALID '\xff'
+#define BASE64_PADDING '='
+#define ISBASE64(c) (unbytes64[c] != BASE64_INVALID)
+
+static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 // ============================= toBase64 ========================
 
