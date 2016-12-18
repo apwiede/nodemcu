@@ -423,17 +423,9 @@ ets_printf("newCompMsgDispatcher\n");
   compMsgDispatcher->maxMsgKeyValueDescParts = 0;
   compMsgDispatcher->msgKeyValueDescParts = NULL;
 
-  // request handling
-  compMsgDispatcher->msgRequestInfos.currRequestIdx = -1;
-  compMsgDispatcher->msgRequestInfos.lastRequestIdx = -1;
-
   compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
   compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
   compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
-
-  compMsgDispatcher->numFieldValueCallbackInfos = 0;
-  compMsgDispatcher->maxFieldValueCallbackInfos = 0;
-  compMsgDispatcher->fieldValueCallbackInfos = NULL;
 
   compMsgDispatcher->operatingMode = MODULE_OPERATING_MODE_AP;
 

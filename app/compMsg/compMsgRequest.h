@@ -46,7 +46,22 @@
 extern "C" {
 #endif
 
+#define COMP_DISP_MAX_REQUESTS     5
+
+// input source types
+#define COMP_DISP_INPUT_UART       0x01
+#define COMP_DISP_INPUT_NET_SOCKET 0x02
+#define COMP_DISP_INPUT_WEB_SOCKET 0x04
+
 typedef struct compMsgDispatcher compMsgDispatcher_t;
+
+typedef struct msgRequestInfos {
+  uint8_t requestTypes[COMP_DISP_MAX_REQUESTS];
+  void *requestHandles[COMP_DISP_MAX_REQUESTS];
+  compMsgData_t *requestData[COMP_DISP_MAX_REQUESTS];
+  int currRequestIdx;
+  int lastRequestIdx;
+} msgRequestInfos_t;
 
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
@@ -55,6 +70,9 @@ typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType,
 typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
 
 typedef struct compMsgRequest {
+  // request infos
+  msgRequestInfos_t msgRequestInfos;
+
   startRequest_t startRequest;
   startNextRequest_t startNextRequest;
   addUartRequestData_t addUartRequestData;

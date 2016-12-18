@@ -240,8 +240,8 @@ static uint8_t setFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
   int idx;
 
   idx = 0;
-  while (idx < self->numFieldValueCallbackInfos) {
-    fieldValueCallbackInfo = &self->fieldValueCallbackInfos[idx];
+  while (idx < self->compMsgUtil->numFieldValueCallbackInfos) {
+    fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[idx];
     if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
       fieldValueCallbackInfo->callback = callback;
       fieldValueCallbackInfo->callbackType = callbackType;
@@ -258,22 +258,22 @@ static uint8_t addFieldValueCallbackName(compMsgDispatcher_t *self, uint8_t *cal
   uint8_t result;
   fieldValueCallbackInfos_t *fieldValueCallbackInfo;
 
-  if (self->numFieldValueCallbackInfos >= self->maxFieldValueCallbackInfos) {
-    if (self->fieldValueCallbackInfos == NULL) {
-      self->maxFieldValueCallbackInfos = 30;
-      self->fieldValueCallbackInfos = os_zalloc(self->maxFieldValueCallbackInfos * sizeof(fieldValueCallbackInfos_t));
-      checkAllocOK(self->fieldValueCallbackInfos);
+  if (self->compMsgUtil->numFieldValueCallbackInfos >= self->compMsgUtil->maxFieldValueCallbackInfos) {
+    if (self->compMsgUtil->fieldValueCallbackInfos == NULL) {
+      self->compMsgUtil->maxFieldValueCallbackInfos = 30;
+      self->compMsgUtil->fieldValueCallbackInfos = os_zalloc(self->compMsgUtil->maxFieldValueCallbackInfos * sizeof(fieldValueCallbackInfos_t));
+      checkAllocOK(self->compMsgUtil->fieldValueCallbackInfos);
     } else {
-      self->maxFieldValueCallbackInfos += 20;
-      self->fieldValueCallbackInfos = os_realloc(self->fieldValueCallbackInfos, (self->maxFieldValueCallbackInfos * sizeof(fieldValueCallbackInfos_t)));
+      self->compMsgUtil->maxFieldValueCallbackInfos += 20;
+      self->compMsgUtil->fieldValueCallbackInfos = os_realloc(self->compMsgUtil->fieldValueCallbackInfos, (self->compMsgUtil->maxFieldValueCallbackInfos * sizeof(fieldValueCallbackInfos_t)));
     }
   }
-  fieldValueCallbackInfo = &self->fieldValueCallbackInfos[self->numFieldValueCallbackInfos];
+  fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[self->compMsgUtil->numFieldValueCallbackInfos];
   fieldValueCallbackInfo->callbackName = os_zalloc(c_strlen(callbackName) + 1);
   c_memcpy(fieldValueCallbackInfo->callbackName, callbackName, c_strlen(callbackName));
   fieldValueCallbackInfo->callback = callback;
   fieldValueCallbackInfo->callbackType = callbackType;
-  self->numFieldValueCallbackInfos++;
+  self->compMsgUtil->numFieldValueCallbackInfos++;
   return COMP_MSG_ERR_OK;
 }
 
@@ -286,8 +286,8 @@ static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
 
 //ets_printf("§getFieldValueCallback: %s 0x%02x§\n", callbackName, callbackType);
   idx = 0;
-  while (idx < self->numFieldValueCallbackInfos) {
-    fieldValueCallbackInfo = &self->fieldValueCallbackInfos[idx];
+  while (idx < self->compMsgUtil->numFieldValueCallbackInfos) {
+    fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[idx];
 //ets_printf("§getFieldValueCallback: %s %s§", fieldValueCallbackInfo->callbackName, callbackName);
     if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
       if ((callbackType == 0) || (fieldValueCallbackInfo->callbackType == callbackType)) {
@@ -310,8 +310,8 @@ static uint8_t getFieldValueCallbackName(compMsgDispatcher_t *self, fieldValueCa
   int idx;
 
   idx = 0;
-  while (idx < self->numFieldValueCallbackInfos) {
-    fieldValueCallbackInfo = &self->fieldValueCallbackInfos[idx];
+  while (idx < self->compMsgUtil->numFieldValueCallbackInfos) {
+    fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[idx];
     if (fieldValueCallbackInfo->callback == callback) {
       if ((callbackType == 0) || (fieldValueCallbackInfo->callbackType == callbackType)) {
         *callbackName = fieldValueCallbackInfo->callbackName;
@@ -328,6 +328,10 @@ ets_printf("§getFieldValueCallbackName NOT found: 0x%02x§\n", callbackType);
 
 uint8_t compMsgUtilInit(compMsgDispatcher_t *self) {
   uint8_t result;
+
+  self->compMsgUtil->numFieldValueCallbackInfos = 0;
+  self->compMsgUtil->maxFieldValueCallbackInfos = 0;
+  self->compMsgUtil->fieldValueCallbackInfos = NULL;
 
   self->compMsgUtil->encryptMsg = &encryptMsg;
   self->compMsgUtil->decryptMsg = &decryptMsg;

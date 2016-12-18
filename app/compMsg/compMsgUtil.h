@@ -50,6 +50,12 @@ extern "C" {
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
+typedef struct fieldValueCallbackInfos {
+  uint8_t *callbackName;
+  fieldValueCallback_t callback;
+  uint8_t callbackType;
+} fieldValueCallbackInfos_t;
+
 typedef uint8_t (* toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded);
 typedef uint8_t (* fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
 typedef uint8_t (* encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
@@ -60,6 +66,10 @@ typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t *
 typedef uint8_t (* getFieldValueCallbackName_t)(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t **callbackName, uint8_t callbackType);
 
 typedef struct compMsgUtil {
+  uint8_t numFieldValueCallbackInfos;
+  uint8_t maxFieldValueCallbackInfos;
+  fieldValueCallbackInfos_t *fieldValueCallbackInfos;
+
   encryptMsg_t encryptMsg;
   decryptMsg_t decryptMsg;
   toBase64_t toBase64;

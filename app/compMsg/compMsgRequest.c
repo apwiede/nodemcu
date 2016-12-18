@@ -53,7 +53,7 @@
 static uint8_t startRequest(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("should start request: %d\n", self->msgRequestInfos.currRequestIdx);
+ets_printf("should start request: %d\n", self->compMsgRequest->msgRequestInfos.currRequestIdx);
   return COMP_MSG_ERR_OK;
 }
 
@@ -62,16 +62,16 @@ ets_printf("should start request: %d\n", self->msgRequestInfos.currRequestIdx);
 static uint8_t startNextRequest(compMsgDispatcher_t *self) {
   uint8_t result;
 
-  if (self->msgRequestInfos.currRequestIdx < 0) {
-    if (self->msgRequestInfos.currRequestIdx < self->msgRequestInfos.lastRequestIdx) {
-      self->msgRequestInfos.currRequestIdx = 0;
+  if (self->compMsgRequest->msgRequestInfos.currRequestIdx < 0) {
+    if (self->compMsgRequest->msgRequestInfos.currRequestIdx < self->compMsgRequest->msgRequestInfos.lastRequestIdx) {
+      self->compMsgRequest->msgRequestInfos.currRequestIdx = 0;
       result = startRequest(self);
       checkErrOK(result);
       return COMP_MSG_ERR_OK;
     }
   }
-  if (self->msgRequestInfos.currRequestIdx < self->msgRequestInfos.lastRequestIdx) {
-    self->msgRequestInfos.currRequestIdx++;
+  if (self->compMsgRequest->msgRequestInfos.currRequestIdx < self->compMsgRequest->msgRequestInfos.lastRequestIdx) {
+    self->compMsgRequest->msgRequestInfos.currRequestIdx++;
     result = startRequest(self);
     checkErrOK(result);
   }
@@ -85,10 +85,10 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
   compMsgData_t *compMsgData;
 
   // slot 0 is reserved for Uart
-  if (self->msgRequestInfos.requestTypes[0] != COMP_DISP_INPUT_UART) {
+  if (self->compMsgRequest->msgRequestInfos.requestTypes[0] != COMP_DISP_INPUT_UART) {
     return COMP_MSG_ERR_UART_REQUEST_NOT_SET;
   }
-  compMsgData = self->msgRequestInfos.requestData[0];
+  compMsgData = self->compMsgRequest->msgRequestInfos.requestData[0];
   compMsgData->direction = COMP_MSG_RECEIVED_DATA;
 //ets_printf("§call handleReceivePart: lgth: %d§", lgth);
   self->compMsgData = compMsgData;
@@ -103,20 +103,20 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   uint8_t result;
   compMsgData_t *compMsgData;
 
-  if (self->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
+  if (self->compMsgRequest->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
 ets_printf("§COMP_MSG_ERR_TOO_MANY_REQUESTS§");
     return COMP_MSG_ERR_TOO_MANY_REQUESTS;
   }
-  self->msgRequestInfos.lastRequestIdx++;
-  self->msgRequestInfos.requestTypes[self->msgRequestInfos.lastRequestIdx] = requestType;
-  self->msgRequestInfos.requestHandles[self->msgRequestInfos.lastRequestIdx] = requestHandle;
-  self->msgRequestInfos.requestData[self->msgRequestInfos.lastRequestIdx] = requestData;
+  self->compMsgRequest->msgRequestInfos.lastRequestIdx++;
+  self->compMsgRequest->msgRequestInfos.requestTypes[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestType;
+  self->compMsgRequest->msgRequestInfos.requestHandles[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestHandle;
+  self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestData;
 //ets_printf("addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
 //FIXME TEMPORARY last if clause!!
-  if ((self->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
-    self->msgRequestInfos.currRequestIdx++;
+  if ((self->compMsgRequest->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
+    self->compMsgRequest->msgRequestInfos.currRequestIdx++;
     checkErrOK(result);
-    compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
+    compMsgData = self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.currRequestIdx];
     switch (compMsgData->direction) {
     case COMP_MSG_TO_SEND_DATA:
 //ets_printf("addRequest: toSendData: %p\n", compMsgData->toSendData);
@@ -132,8 +132,8 @@ ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData
     }
   } else {
 //ets_printf("direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA);
-    self->msgRequestInfos.currRequestIdx = self->msgRequestInfos.lastRequestIdx;
-    compMsgData = self->msgRequestInfos.requestData[self->msgRequestInfos.currRequestIdx];
+    self->compMsgRequest->msgRequestInfos.currRequestIdx = self->compMsgRequest->msgRequestInfos.lastRequestIdx;
+    compMsgData = self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.currRequestIdx];
     requestData = compMsgData;
     if (requestData->direction == COMP_MSG_RECEIVED_DATA) {
 // FIXME TEMPORARY need flag to see if no uart activity!!
@@ -167,38 +167,38 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
   idxToStart = -1;
   idxDeleted = -1;
   found = false;
-  while (idx < self->msgRequestInfos.lastRequestIdx) {
+  while (idx < self->compMsgRequest->msgRequestInfos.lastRequestIdx) {
     if (idx >= COMP_DISP_MAX_REQUESTS) {
       return COMP_MSG_ERR_REQUEST_NOT_FOUND;
     }
     if (!found) {
-      if ((self->msgRequestInfos.requestTypes[idx] == requestType) && (self->msgRequestInfos.requestHandles[idx] == requestHandle)) {
+      if ((self->compMsgRequest->msgRequestInfos.requestTypes[idx] == requestType) && (self->compMsgRequest->msgRequestInfos.requestHandles[idx] == requestHandle)) {
         found = true;
         idxDeleted = idx;
-        if (idx == self->msgRequestInfos.currRequestIdx) {
-          if (idx < self->msgRequestInfos.lastRequestIdx) {
+        if (idx == self->compMsgRequest->msgRequestInfos.currRequestIdx) {
+          if (idx < self->compMsgRequest->msgRequestInfos.lastRequestIdx) {
             idxToStart = idx;
           }
-          self->msgRequestInfos.currRequestIdx = -1;
+          self->compMsgRequest->msgRequestInfos.currRequestIdx = -1;
         }
       }
     } else {
       // move the following entries one idx down
-      if (idx < self->msgRequestInfos.lastRequestIdx) {
-        self->msgRequestInfos.requestTypes[idx] = self->msgRequestInfos.requestTypes[idx + 1];
-        self->msgRequestInfos.requestHandles[idx] = self->msgRequestInfos.requestHandles[idx + 1];
-        if (idx + 1 == self->msgRequestInfos.currRequestIdx) {
-          self->msgRequestInfos.currRequestIdx--;
+      if (idx < self->compMsgRequest->msgRequestInfos.lastRequestIdx) {
+        self->compMsgRequest->msgRequestInfos.requestTypes[idx] = self->compMsgRequest->msgRequestInfos.requestTypes[idx + 1];
+        self->compMsgRequest->msgRequestInfos.requestHandles[idx] = self->compMsgRequest->msgRequestInfos.requestHandles[idx + 1];
+        if (idx + 1 == self->compMsgRequest->msgRequestInfos.currRequestIdx) {
+          self->compMsgRequest->msgRequestInfos.currRequestIdx--;
         }
       }
     }
     idx++;
   }
-  if (self->msgRequestInfos.lastRequestIdx >= 0) {
-    self->msgRequestInfos.lastRequestIdx--;
+  if (self->compMsgRequest->msgRequestInfos.lastRequestIdx >= 0) {
+    self->compMsgRequest->msgRequestInfos.lastRequestIdx--;
   }
-  if (self->msgRequestInfos.currRequestIdx < 0) {
-    self->msgRequestInfos.currRequestIdx++;
+  if (self->compMsgRequest->msgRequestInfos.currRequestIdx < 0) {
+    self->compMsgRequest->msgRequestInfos.currRequestIdx++;
     // start handling the request
     self->compMsgRequest->startNextRequest(self);
   } else {
@@ -212,6 +212,10 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
 
 uint8_t compMsgRequestInit(compMsgDispatcher_t *self) {
   uint8_t result;
+
+  // request handling
+  self->compMsgRequest->msgRequestInfos.currRequestIdx = -1;
+  self->compMsgRequest->msgRequestInfos.lastRequestIdx = -1;
 
   // request handling
   self->compMsgRequest->startRequest = &startRequest;
