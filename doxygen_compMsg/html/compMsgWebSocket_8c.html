@@ -115,8 +115,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsocketInfo.html">socketInfo</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcompMsgTimer.html">compMsgTimer</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
@@ -132,27 +130,11 @@ Macros</h2></td></tr>
 <tr class="separator:aeb26101030115be5dfcbedd08090f86c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0079ed47c49b847e1e1ba813e848b0b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#af0079ed47c49b847e1e1ba813e848b0b">SSL_BUFFER_SIZE</a>&#160;&#160;&#160;5120</td></tr>
 <tr class="separator:af0079ed47c49b847e1e1ba813e848b0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20817a864658161f1c9077899729a98a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a20817a864658161f1c9077899729a98a">TIMER_MODE_OFF</a>&#160;&#160;&#160;3</td></tr>
-<tr class="separator:a20817a864658161f1c9077899729a98a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ac7b5af7a0bfcae1dd2f1f6fce7103e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a7ac7b5af7a0bfcae1dd2f1f6fce7103e">TIMER_MODE_SINGLE</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:a7ac7b5af7a0bfcae1dd2f1f6fce7103e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20fd95e103e626373c239de06ecdc15f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a20fd95e103e626373c239de06ecdc15f">TIMER_MODE_SEMI</a>&#160;&#160;&#160;2</td></tr>
-<tr class="separator:a20fd95e103e626373c239de06ecdc15f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7119c4096ebe710c684afe19cf6c46f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#ad7119c4096ebe710c684afe19cf6c46f">TIMER_MODE_AUTO</a>&#160;&#160;&#160;1</td></tr>
-<tr class="separator:ad7119c4096ebe710c684afe19cf6c46f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a925ac437d521e71e11c025ddb3180fa4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a925ac437d521e71e11c025ddb3180fa4">TIMER_IDLE_FLAG</a>&#160;&#160;&#160;(1&lt;&lt;7)</td></tr>
-<tr class="separator:a925ac437d521e71e11c025ddb3180fa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:a89c393a31244ad94f583e6f74fe66936"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structsocketInfo.html">socketInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a89c393a31244ad94f583e6f74fe66936">socketInfo_t</a></td></tr>
 <tr class="separator:a89c393a31244ad94f583e6f74fe66936"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0783d2a8b1f554ad45bc6df2cce675e8"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a0783d2a8b1f554ad45bc6df2cce675e8">websocketBinaryReceived_t</a> )(void *arg, void *wud, char *pdata, unsigned short len)</td></tr>
-<tr class="separator:a0783d2a8b1f554ad45bc6df2cce675e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab06228407b982e22f1b00024f1501d77"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#ab06228407b982e22f1b00024f1501d77">websocketTextReceived_t</a> )(void *arg, void *wud, char *pdata, unsigned short len)</td></tr>
-<tr class="separator:ab06228407b982e22f1b00024f1501d77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b85d3bafec5a5644af3d9d8d851769b"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structcompMsgTimer.html">compMsgTimer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a7b85d3bafec5a5644af3d9d8d851769b">compMsgTimer_t</a></td></tr>
-<tr class="separator:a7b85d3bafec5a5644af3d9d8d851769b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -182,15 +164,15 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3fcd27a100142b88d7c6373ac2f11327"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a3fcd27a100142b88d7c6373ac2f11327">websocketSendData</a> (<a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a> *wud, const char *payload, int size, int opcode)</td></tr>
-<tr class="memdesc:a3fcd27a100142b88d7c6373ac2f11327"><td class="mdescLeft">&#160;</td><td class="mdescRight">send message data to a web scoket  <a href="#a3fcd27a100142b88d7c6373ac2f11327">More...</a><br /></td></tr>
-<tr class="separator:a3fcd27a100142b88d7c6373ac2f11327"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a060dfebe4b61e27fbd5a5bcd4455277f"><td class="memItemLeft" align="right" valign="top">static int ICACHE_FLASH_ATTR&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a060dfebe4b61e27fbd5a5bcd4455277f">websocket_parse</a> (char *data, size_t dataLenb, char **resData, int *len, <a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a> *wud)</td></tr>
-<tr class="separator:a060dfebe4b61e27fbd5a5bcd4455277f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c2aab134823269e669ae0d39a06051c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a3c2aab134823269e669ae0d39a06051c">websocket_recv</a> (char *string, <a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a> *wud, char **data, int *lgth)</td></tr>
-<tr class="separator:a3c2aab134823269e669ae0d39a06051c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:addaef475174044ba8c921aff78ebe4a9"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#addaef475174044ba8c921aff78ebe4a9">websocketRunClientMode</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t mode)</td></tr>
-<tr class="separator:addaef475174044ba8c921aff78ebe4a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecd99f05b08ccce081d31dd9a16880fb"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#aecd99f05b08ccce081d31dd9a16880fb">webSocketSendData</a> (<a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, const char *payload, int size, int opcode)</td></tr>
+<tr class="memdesc:aecd99f05b08ccce081d31dd9a16880fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">send message data to a web scoket  <a href="#aecd99f05b08ccce081d31dd9a16880fb">More...</a><br /></td></tr>
+<tr class="separator:aecd99f05b08ccce081d31dd9a16880fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87409db7bb9b320b662a403549b33b8a"><td class="memItemLeft" align="right" valign="top">static int ICACHE_FLASH_ATTR&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a87409db7bb9b320b662a403549b33b8a">webSocketParse</a> (char *data, size_t dataLenb, char **resData, int *len, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud)</td></tr>
+<tr class="separator:a87409db7bb9b320b662a403549b33b8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13195f446cd19fbce227fdc3524e295b"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a13195f446cd19fbce227fdc3524e295b">webSocketRecv</a> (char *string, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char **data, int *lgth)</td></tr>
+<tr class="separator:a13195f446cd19fbce227fdc3524e295b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad265b3aaa9f48d8ef1305c7c9bfd83a9"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#ad265b3aaa9f48d8ef1305c7c9bfd83a9">webSocketRunClientMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t mode)</td></tr>
+<tr class="separator:ad265b3aaa9f48d8ef1305c7c9bfd83a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5b7a821a95df9ef50b651e13221391"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#abe5b7a821a95df9ef50b651e13221391">serverDisconnected</a> (void *arg)</td></tr>
 <tr class="separator:abe5b7a821a95df9ef50b651e13221391"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add14ab070bc8bc84593024915206e278"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#add14ab070bc8bc84593024915206e278">serverReconnected</a> (void *arg, int8_t err)</td></tr>
@@ -203,17 +185,15 @@ Functions</h2></td></tr>
 <tr class="separator:a30b408f19e7e577377facdf4c8da4120"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c21a69e481bc294d04d0178c2c30b7d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a0c21a69e481bc294d04d0178c2c30b7d">startAccessPoint</a> (void *arg)</td></tr>
 <tr class="separator:a0c21a69e481bc294d04d0178c2c30b7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a12217b1628dcb7287d7f66b9d3f97a"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a">initTimers</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
-<tr class="separator:a1a12217b1628dcb7287d7f66b9d3f97a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01dcf3f4f3a1a6829ddcf061a3be1ee8"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a01dcf3f4f3a1a6829ddcf061a3be1ee8">websocketRunAPMode</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
-<tr class="separator:a01dcf3f4f3a1a6829ddcf061a3be1ee8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90b7fc903fa41d5da29798d23f7eb4b9"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a90b7fc903fa41d5da29798d23f7eb4b9">compMsgWebsocketInit</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
-<tr class="separator:a90b7fc903fa41d5da29798d23f7eb4b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fb67dc4b06d3e5e7002ca67f1def4fb"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a5fb67dc4b06d3e5e7002ca67f1def4fb">webSocketRunAPMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a5fb67dc4b06d3e5e7002ca67f1def4fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2886f069e24d083e166065895f9a7bc6"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a2886f069e24d083e166065895f9a7bc6">compMsgWebSocketInit</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a2886f069e24d083e166065895f9a7bc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a15b9cfe7d858ccebdac17c3eb3c799e9"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a15b9cfe7d858ccebdac17c3eb3c799e9">socket_num</a> = 0</td></tr>
-<tr class="separator:a15b9cfe7d858ccebdac17c3eb3c799e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56d10d5372a6e89febc4db6aee8e28e4"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a56d10d5372a6e89febc4db6aee8e28e4">socketNum</a> = 0</td></tr>
+<tr class="separator:a56d10d5372a6e89febc4db6aee8e28e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a7884fd2a13064f212d4f9d29126c48"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgNetSocket_8c.html#a89c393a31244ad94f583e6f74fe66936">socketInfo_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a0a7884fd2a13064f212d4f9d29126c48">socket</a> [<a class="el" href="compMsgWebSocket_8c.html#ac0ab6f439d003d912087974e24160b68">MAX_SOCKET</a>] = { NULL, NULL, NULL, NULL, NULL }</td></tr>
 <tr class="separator:a0a7884fd2a13064f212d4f9d29126c48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8102e2499318157bba00d8b7543afb4a"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a8102e2499318157bba00d8b7543afb4a">header_key</a> = &quot;Sec-WebSocket-Key: &quot;</td></tr>
@@ -234,12 +214,6 @@ Variables</h2></td></tr>
 <tr class="separator:adeb9f84254b5271fce4cd8b3dcda41a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba45dd274e61e7c61e3a035492f98334"><td class="memItemLeft" align="right" valign="top">static const uint8&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#aba45dd274e61e7c61e3a035492f98334">b64</a> [] = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;</td></tr>
 <tr class="separator:aba45dd274e61e7c61e3a035492f98334"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4a0a7ca70446af493a6594e2bf95acf"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgNetSocket_8c.html#a7b85d3bafec5a5644af3d9d8d851769b">compMsgTimer_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#ad4a0a7ca70446af493a6594e2bf95acf">compMsgTimers</a> [NUM_TMR]</td></tr>
-<tr class="separator:ad4a0a7ca70446af493a6594e2bf95acf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a570533374725643c33d5078b3e8fc3a6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a570533374725643c33d5078b3e8fc3a6">isMstimer</a> = 1</td></tr>
-<tr class="separator:a570533374725643c33d5078b3e8fc3a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01854a56587dc8a7b39564f82b3227b7"><td class="memItemLeft" align="right" valign="top">static os_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a01854a56587dc8a7b39564f82b3227b7">apTimer</a></td></tr>
-<tr class="separator:a01854a56587dc8a7b39564f82b3227b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cfbb269728dc4185236d28be58d9eab"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a9cfbb269728dc4185236d28be58d9eab">cnt</a> = 0</td></tr>
 <tr class="separator:a9cfbb269728dc4185236d28be58d9eab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a5760a2df21eb18be7482293a281cb9"><td class="memItemLeft" align="right" valign="top">static uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWebSocket_8c.html#a5a5760a2df21eb18be7482293a281cb9">tcp_server_timeover</a> = 30</td></tr>
@@ -334,89 +308,7 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a925ac437d521e71e11c025ddb3180fa4"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TIMER_IDLE_FLAG&#160;&#160;&#160;(1&lt;&lt;7)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00123">123</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="ad7119c4096ebe710c684afe19cf6c46f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TIMER_MODE_AUTO&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00122">122</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a20817a864658161f1c9077899729a98a"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TIMER_MODE_OFF&#160;&#160;&#160;3</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00119">119</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a20fd95e103e626373c239de06ecdc15f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TIMER_MODE_SEMI&#160;&#160;&#160;2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00121">121</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a7ac7b5af7a0bfcae1dd2f1f6fce7103e"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TIMER_MODE_SINGLE&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00120">120</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
 <h2 class="groupheader">Typedef Documentation</h2>
-<a class="anchor" id="a7b85d3bafec5a5644af3d9d8d851769b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef struct <a class="el" href="structcompMsgTimer.html">compMsgTimer</a>  <a class="el" href="compMsgNetSocket_8c.html#a7b85d3bafec5a5644af3d9d8d851769b">compMsgTimer_t</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a89c393a31244ad94f583e6f74fe66936"></a>
 <div class="memitem">
 <div class="memproto">
@@ -426,34 +318,6 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a0783d2a8b1f554ad45bc6df2cce675e8"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef void(*  websocketBinaryReceived_t)(void *arg, void *wud, char *pdata, unsigned short len)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00116">116</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="ab06228407b982e22f1b00024f1501d77"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef void(*  websocketTextReceived_t)(void *arg, void *wud, char *pdata, unsigned short len)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00117">117</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
@@ -507,47 +371,21 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a90b7fc903fa41d5da29798d23f7eb4b9"></a>
+<a class="anchor" id="a2886f069e24d083e166065895f9a7bc6"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t compMsgWebsocketInit </td>
+          <td class="memname">uint8_t compMsgWebSocketInit </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00737">737</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a1a12217b1628dcb7287d7f66b9d3f97a"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static uint8_t initTimers </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
-          <td class="paramname"><em>self</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00649">649</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00664">664</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
@@ -599,7 +437,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00362">362</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00343">343</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
@@ -635,7 +473,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00372">372</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00353">353</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
@@ -677,7 +515,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00382">382</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00363">363</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
@@ -733,7 +571,7 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a060dfebe4b61e27fbd5a5bcd4455277f"></a>
+<a class="anchor" id="a87409db7bb9b320b662a403549b33b8a"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -741,7 +579,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static int ICACHE_FLASH_ATTR websocket_parse </td>
+          <td class="memname">static int ICACHE_FLASH_ATTR webSocketParse </td>
           <td>(</td>
           <td class="paramtype">char *&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -767,8 +605,8 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a> *&#160;</td>
-          <td class="paramname"><em>wud</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *&#160;</td>
+          <td class="paramname"><em>sud</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -783,11 +621,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00193">193</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00174">174</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a3c2aab134823269e669ae0d39a06051c"></a>
+<a class="anchor" id="a13195f446cd19fbce227fdc3524e295b"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -795,7 +633,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t websocket_recv </td>
+          <td class="memname">static uint8_t webSocketRecv </td>
           <td>(</td>
           <td class="paramtype">char *&#160;</td>
           <td class="paramname"><em>string</em>, </td>
@@ -803,8 +641,8 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a> *&#160;</td>
-          <td class="paramname"><em>wud</em>, </td>
+          <td class="paramtype"><a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *&#160;</td>
+          <td class="paramname"><em>sud</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -831,11 +669,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00287">287</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00268">268</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a01dcf3f4f3a1a6829ddcf061a3be1ee8"></a>
+<a class="anchor" id="a5fb67dc4b06d3e5e7002ca67f1def4fb"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -843,9 +681,9 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t websocketRunAPMode </td>
+          <td class="memname">static uint8_t webSocketRunAPMode </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
           <td></td>
         </tr>
@@ -857,11 +695,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00662">662</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00607">607</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="addaef475174044ba8c921aff78ebe4a9"></a>
+<a class="anchor" id="ad265b3aaa9f48d8ef1305c7c9bfd83a9"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -869,9 +707,9 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t websocketRunClientMode </td>
+          <td class="memname">static uint8_t webSocketRunClientMode </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em>, </td>
         </tr>
         <tr>
@@ -893,11 +731,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00355">355</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00336">336</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a3fcd27a100142b88d7c6373ac2f11327"></a>
+<a class="anchor" id="aecd99f05b08ccce081d31dd9a16880fb"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -905,10 +743,10 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t websocketSendData </td>
+          <td class="memname">static uint8_t webSocketSendData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a> *&#160;</td>
-          <td class="paramname"><em>wud</em>, </td>
+          <td class="paramtype"><a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *&#160;</td>
+          <td class="paramname"><em>sud</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -944,7 +782,7 @@ Variables</h2></td></tr>
 <p>send message data to a web scoket </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">wud</td><td>The websocket user data </td></tr>
+    <tr><td class="paramname">sud</td><td>The webSocket user data </td></tr>
     <tr><td class="paramname">payload</td><td>The message data </td></tr>
     <tr><td class="paramname">size</td><td>The number of characters of the message </td></tr>
     <tr><td class="paramname">opcode</td><td>The type for sending the data (text/binary/...) </td></tr>
@@ -953,33 +791,11 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Error code or ErrorOK </dd></dl>
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00149">149</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00130">130</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a class="anchor" id="a01854a56587dc8a7b39564f82b3227b7"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">os_timer_t apTimer</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00134">134</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="aba45dd274e61e7c61e3a035492f98334"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1020,29 +836,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00135">135</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="ad4a0a7ca70446af493a6594e2bf95acf"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="compMsgNetSocket_8c.html#a7b85d3bafec5a5644af3d9d8d851769b">compMsgTimer_t</a> compMsgTimers[NUM_TMR]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00132">132</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00116">116</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1164,7 +958,7 @@ Variables</h2></td></tr>
 <b>Initial value:</b><div class="fragment"><div class="line">= <span class="stringliteral">&quot;\</span></div>
 <div class="line"><span class="stringliteral">HTTP/1.1 101 WebSocket Protocol Handshake\r\n\</span></div>
 <div class="line"><span class="stringliteral">Connection: Upgrade\r\n\</span></div>
-<div class="line"><span class="stringliteral">Upgrade: WebSocket\r\n\</span></div>
+<div class="line"><span class="stringliteral">Upgrade: websocket\r\n\</span></div>
 <div class="line"><span class="stringliteral">Access-Control-Allow-Origin: http://&quot;</span></div>
 </div><!-- fragment -->
 <p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00079">79</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
@@ -1215,28 +1009,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a570533374725643c33d5078b3e8fc3a6"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int isMstimer = 1</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00133">133</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="a0a7884fd2a13064f212d4f9d29126c48"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1259,7 +1031,7 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a15b9cfe7d858ccebdac17c3eb3c799e9"></a>
+<a class="anchor" id="a56d10d5372a6e89febc4db6aee8e28e4"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -1267,7 +1039,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int socket_num = 0</td>
+          <td class="memname">int socketNum = 0</td>
         </tr>
       </table>
   </td>
@@ -1299,7 +1071,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00136">136</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00117">117</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>

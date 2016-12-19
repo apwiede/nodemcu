@@ -104,26 +104,28 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa5cf50b1c194c81b5873720426c64387"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387">uartSetup</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits)</td></tr>
+<tr class="memitem:aa5cf50b1c194c81b5873720426c64387"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387">uartSetup</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits)</td></tr>
 <tr class="separator:aa5cf50b1c194c81b5873720426c64387"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a99fe74ff4bcfd4f6fe85123783604a"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a6a99fe74ff4bcfd4f6fe85123783604a">uartReceiveCb</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, uint8_t lgth)</td></tr>
+<tr class="memitem:a6a99fe74ff4bcfd4f6fe85123783604a"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a6a99fe74ff4bcfd4f6fe85123783604a">uartReceiveCb</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, uint8_t lgth)</td></tr>
 <tr class="separator:a6a99fe74ff4bcfd4f6fe85123783604a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56e0f6974ba1dbae9e3ff02ddfee7515"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a56e0f6974ba1dbae9e3ff02ddfee7515">typeRSendAnswer</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *data, uint8_t msgLgth)</td></tr>
+<tr class="memitem:a56e0f6974ba1dbae9e3ff02ddfee7515"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a56e0f6974ba1dbae9e3ff02ddfee7515">typeRSendAnswer</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *data, uint8_t msgLgth)</td></tr>
 <tr class="memdesc:a56e0f6974ba1dbae9e3ff02ddfee7515"><td class="mdescLeft">&#160;</td><td class="mdescRight">send a message via Uart to Mcu  <a href="#a56e0f6974ba1dbae9e3ff02ddfee7515">More...</a><br /></td></tr>
 <tr class="separator:a56e0f6974ba1dbae9e3ff02ddfee7515"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd13038c64d91617febba63c221ec4ed"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed">sendCloudMsg</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:afd13038c64d91617febba63c221ec4ed"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed">sendCloudMsg</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="memdesc:afd13038c64d91617febba63c221ec4ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">send a message via http socket to Cloud  <a href="#afd13038c64d91617febba63c221ec4ed">More...</a><br /></td></tr>
 <tr class="separator:afd13038c64d91617febba63c221ec4ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c4a3859285dc077c8af471c1ae567c8"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a0c4a3859285dc077c8af471c1ae567c8">prepareCloudMsg</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a0c4a3859285dc077c8af471c1ae567c8"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a0c4a3859285dc077c8af471c1ae567c8">prepareCloudMsg</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="memdesc:a0c4a3859285dc077c8af471c1ae567c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">prepare a message to be sent via http socket to Cloud  <a href="#a0c4a3859285dc077c8af471c1ae567c8">More...</a><br /></td></tr>
 <tr class="separator:a0c4a3859285dc077c8af471c1ae567c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80405511244d585196c9636f9ce0ec07"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a80405511244d585196c9636f9ce0ec07">checkClientMode</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a80405511244d585196c9636f9ce0ec07"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a80405511244d585196c9636f9ce0ec07">checkClientMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="memdesc:a80405511244d585196c9636f9ce0ec07"><td class="mdescLeft">&#160;</td><td class="mdescRight">start the connection with the router  <a href="#a80405511244d585196c9636f9ce0ec07">More...</a><br /></td></tr>
 <tr class="separator:a80405511244d585196c9636f9ce0ec07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71d792ff835ac5e58d69a9267dc184bc"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *msgData, size_t msgLgth)</td></tr>
+<tr class="memitem:a71d792ff835ac5e58d69a9267dc184bc"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc">sendMsg</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *msgData, size_t msgLgth)</td></tr>
 <tr class="separator:a71d792ff835ac5e58d69a9267dc184bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99b03f94b6f850e76216c1f23da16b39"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceiveInit</a> (<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a99b03f94b6f850e76216c1f23da16b39"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceiveInit</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a99b03f94b6f850e76216c1f23da16b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4920b1804bfb48694617b6d4d1bb84f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgSendReceive_8h.html#a47cd247bc61ca97f03f7c2888d24d609">compMsgSendReceive_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8c.html#af4920b1804bfb48694617b6d4d1bb84f">newCompMsgSendReceive</a> ()</td></tr>
+<tr class="separator:af4920b1804bfb48694617b6d4d1bb84f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="a80405511244d585196c9636f9ce0ec07"></a>
@@ -136,7 +138,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">static uint8_t checkClientMode </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
           <td></td>
         </tr>
@@ -168,14 +170,31 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">uint8_t compMsgSendReceiveInit </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00370">370</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00360">360</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="af4920b1804bfb48694617b6d4d1bb84f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="compMsgSendReceive_8h.html#a47cd247bc61ca97f03f7c2888d24d609">compMsgSendReceive_t</a>* newCompMsgSendReceive </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00386">386</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
 
 </div>
 </div>
@@ -189,7 +208,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">static uint8_t prepareCloudMsg </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
           <td></td>
         </tr>
@@ -224,7 +243,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">static uint8_t sendCloudMsg </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
           <td></td>
         </tr>
@@ -259,7 +278,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">static uint8_t sendMsg </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em>, </td>
         </tr>
         <tr>
@@ -287,7 +306,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00318">318</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00308">308</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
 
 </div>
 </div>
@@ -301,7 +320,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">static uint8_t typeRSendAnswer </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em>, </td>
         </tr>
         <tr>
@@ -354,7 +373,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">static uint8_t uartReceiveCb </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em>, </td>
         </tr>
         <tr>
@@ -396,7 +415,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">static uint8_t uartSetup </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em>, </td>
         </tr>
         <tr>

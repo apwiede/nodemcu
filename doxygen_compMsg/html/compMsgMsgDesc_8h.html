@@ -215,6 +215,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:a7f91f58c4f90dd90d4336bfa76dfe490"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f0db42938db12e05703debcec154dde"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structcompMsgData.html">compMsgData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData_t</a></td></tr>
 <tr class="separator:a0f0db42938db12e05703debcec154dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d1498b9c7a8b19ee7c657b006407f44"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structcompMsgWifiData.html">compMsgWifiData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a4d1498b9c7a8b19ee7c657b006407f44">compMsgWifiData_t</a></td></tr>
+<tr class="separator:a4d1498b9c7a8b19ee7c657b006407f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa87047d7fab2c7baf976b058a63fd0fe"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#aa87047d7fab2c7baf976b058a63fd0fe">openFile_t</a> )(<a class="el" href="compMsgMsgDesc_8h.html#a7f91f58c4f90dd90d4336bfa76dfe490">compMsgMsgDesc_t</a> *self, const uint8_t *fileName, const uint8_t *fileMode)</td></tr>
 <tr class="separator:aa87047d7fab2c7baf976b058a63fd0fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bf0a12e3872d780dec0546d4dc2d627"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a3bf0a12e3872d780dec0546d4dc2d627">closeFile_t</a> )(<a class="el" href="compMsgMsgDesc_8h.html#a7f91f58c4f90dd90d4336bfa76dfe490">compMsgMsgDesc_t</a> *self)</td></tr>
@@ -225,63 +227,33 @@ Typedefs</h2></td></tr>
 <tr class="separator:a138debcfe66886ad0b9b692b4a5a3e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63fe844451aa07825f1064642be5b798"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a63fe844451aa07825f1064642be5b798">writeLine_t</a> )(<a class="el" href="compMsgMsgDesc_8h.html#a7f91f58c4f90dd90d4336bfa76dfe490">compMsgMsgDesc_t</a> *self, const uint8_t *buffer, uint8_t lgth)</td></tr>
 <tr class="separator:a63fe844451aa07825f1064642be5b798"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeae63762713f3b5cbc50788fb6dca67a"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#aeae63762713f3b5cbc50788fb6dca67a">dumpHeaderPart_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr)</td></tr>
-<tr class="separator:aeae63762713f3b5cbc50788fb6dca67a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e0f3c7828bbe7244ad0fc8afb824783"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a9e0f3c7828bbe7244ad0fc8afb824783">dumpMsgHeaderInfos_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos)</td></tr>
-<tr class="separator:a9e0f3c7828bbe7244ad0fc8afb824783"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe7026706ff976340595bd4094fe5e82"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#afe7026706ff976340595bd4094fe5e82">getIntFromLine_t</a> )(uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd)</td></tr>
 <tr class="separator:afe7026706ff976340595bd4094fe5e82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0652c7b4f16d69d02a2b8a84b201157f"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a0652c7b4f16d69d02a2b8a84b201157f">getStrFromLine_t</a> )(uint8_t *myStr, uint8_t **ep, bool *isEnd)</td></tr>
 <tr class="separator:a0652c7b4f16d69d02a2b8a84b201157f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac1216d2a01882298083dbc817cacc936"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ac1216d2a01882298083dbc817cacc936">getHeaderFieldsFromLine_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx)</td></tr>
+<tr class="memitem:ac1216d2a01882298083dbc817cacc936"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ac1216d2a01882298083dbc817cacc936">getHeaderFieldsFromLine_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx)</td></tr>
 <tr class="separator:ac1216d2a01882298083dbc817cacc936"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad09dd9bf6db0a3323fd35d8f4d709490"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ad09dd9bf6db0a3323fd35d8f4d709490">readActions_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="memitem:ad09dd9bf6db0a3323fd35d8f4d709490"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ad09dd9bf6db0a3323fd35d8f4d709490">readActions_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
 <tr class="separator:ad09dd9bf6db0a3323fd35d8f4d709490"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a875830e9b91b8be3d9257017d807dc0d"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a875830e9b91b8be3d9257017d807dc0d">readModuleValues_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="memitem:a875830e9b91b8be3d9257017d807dc0d"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a875830e9b91b8be3d9257017d807dc0d">readModuleValues_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
 <tr class="separator:a875830e9b91b8be3d9257017d807dc0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e4434f6c6c0d43e981d4fcdcf54cf04"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a1e4434f6c6c0d43e981d4fcdcf54cf04">readWifiValues_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="memitem:a1e4434f6c6c0d43e981d4fcdcf54cf04"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a1e4434f6c6c0d43e981d4fcdcf54cf04">readWifiValues_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
 <tr class="separator:a1e4434f6c6c0d43e981d4fcdcf54cf04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4bab937ed12d0828f877bc0f817f758"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#aa4bab937ed12d0828f877bc0f817f758">readHeadersAndSetFlags_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="memitem:aa4bab937ed12d0828f877bc0f817f758"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#aa4bab937ed12d0828f877bc0f817f758">readHeadersAndSetFlags_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
 <tr class="separator:aa4bab937ed12d0828f877bc0f817f758"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2c210e1a96ae24e6a03b5809a73bc64"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ae2c210e1a96ae24e6a03b5809a73bc64">getHeaderFromUniqueFields_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint16_t dst, uint16_t src, uint16_t cmdKey, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> **hdr)</td></tr>
+<tr class="memitem:ae2c210e1a96ae24e6a03b5809a73bc64"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ae2c210e1a96ae24e6a03b5809a73bc64">getHeaderFromUniqueFields_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint16_t dst, uint16_t src, uint16_t cmdKey, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> **hdr)</td></tr>
 <tr class="separator:ae2c210e1a96ae24e6a03b5809a73bc64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55e7d0733ce807f1e474120de526e1d5"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a55e7d0733ce807f1e474120de526e1d5">getMsgPartsFromHeaderPart_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr, uint8_t **handle)</td></tr>
+<tr class="memitem:a55e7d0733ce807f1e474120de526e1d5"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a55e7d0733ce807f1e474120de526e1d5">getMsgPartsFromHeaderPart_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr, uint8_t **handle)</td></tr>
 <tr class="separator:a55e7d0733ce807f1e474120de526e1d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa24a9014a42547b1ad3fe5be9e248f3"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#afa24a9014a42547b1ad3fe5be9e248f3">getMsgKeyValueDescParts_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="memitem:afa24a9014a42547b1ad3fe5be9e248f3"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#afa24a9014a42547b1ad3fe5be9e248f3">getMsgKeyValueDescParts_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
 <tr class="separator:afa24a9014a42547b1ad3fe5be9e248f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65e49b1e7a9590b1c89d3e3f01ed5d0d"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a65e49b1e7a9590b1c89d3e3f01ed5d0d">getFieldsToSave_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
+<tr class="memitem:a65e49b1e7a9590b1c89d3e3f01ed5d0d"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a65e49b1e7a9590b1c89d3e3f01ed5d0d">getFieldsToSave_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
 <tr class="separator:a65e49b1e7a9590b1c89d3e3f01ed5d0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1134ab2b2dcf2ee74d8380a7a1e8748"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ab1134ab2b2dcf2ee74d8380a7a1e8748">getWifiKeyValueKeys_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgWifiData_8h.html#aed2dd7c8fb4f7712d1bf891b31102573">compMsgWifiData_t</a> *<a class="el" href="structcompMsgWifiData.html">compMsgWifiData</a>)</td></tr>
+<tr class="memitem:ab1134ab2b2dcf2ee74d8380a7a1e8748"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ab1134ab2b2dcf2ee74d8380a7a1e8748">getWifiKeyValueKeys_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a4d1498b9c7a8b19ee7c657b006407f44">compMsgWifiData_t</a> *<a class="el" href="structcompMsgWifiData.html">compMsgWifiData</a>)</td></tr>
 <tr class="separator:ab1134ab2b2dcf2ee74d8380a7a1e8748"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad29d4306ec0b0f5424e5c1f44c0162a4"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ad29d4306ec0b0f5424e5c1f44c0162a4">dumpMsgDescPart_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#abd0159d4db6e3e3b6ffc7512721320fb">msgDescPart_t</a> *<a class="el" href="structmsgDescPart.html">msgDescPart</a>)</td></tr>
-<tr class="separator:ad29d4306ec0b0f5424e5c1f44c0162a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd57f23ed87e3289571266b59474835f"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#abd57f23ed87e3289571266b59474835f">dumpMsgValPart_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#ae9daf2d9d93eff117588de5772033dad">msgValPart_t</a> *<a class="el" href="structmsgValPart.html">msgValPart</a>)</td></tr>
-<tr class="separator:abd57f23ed87e3289571266b59474835f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a13fa7792530bf474da22811f08951573"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573">compMsgDataErrorCode</a> { <br />
-&#160;&#160;<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a16bffbec75f76af98dbb3441dff8c0a2">COMP_MSG_DESC_ERR_OK</a> = 0, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a30c1d9086b423991d3ba6cdf65df1897">COMP_MSG_DESC_ERR_VALUE_NOT_SET</a> = 255, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a2bac1d720f2208c1c20a6b1e3c341950">COMP_MSG_DESC_ERR_VALUE_OUT_OF_RANGE</a> = 254, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a7fa4d903f4f9da4aac9ea683dc6286d4">COMP_MSG_DESC_ERR_BAD_VALUE</a> = 253, 
-<br />
-&#160;&#160;<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573ac7a68f8d760d44b2b01784bccbe49a5d">COMP_MSG_DESC_ERR_BAD_FIELD_TYPE</a> = 252, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a7d99ddf21acd3ecd7b9adb3655cd3e46">COMP_MSG_DESC_ERR_FIELD_TYPE_NOT_FOUND</a> = 251, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573af4aed715dad0261a7adfed4e008d88a3">COMP_MSG_DESC_ERR_VALUE_TOO_BIG</a> = 250, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a8c473434692571c64ad9ff827df644f3">COMP_MSG_DESC_ERR_OUT_OF_MEMORY</a> = 249, 
-<br />
-&#160;&#160;<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a17260f50d92768d02eb1b3e408919273">COMP_MSG_DESC_ERR_OUT_OF_RANGE</a> = 248, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a6e43d071d9098d3ffbd90040e86f9fc3">COMP_MSG_DESC_ERR_OPEN_FILE</a> = 189, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a802bb0dd1a7ce07f599c9f3d8260268b">COMP_MSG_DESC_ERR_FILE_NOT_OPENED</a> = 188, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573ab33985a501288204008a32c8da3ba6d7">COMP_MSG_DESC_ERR_FLUSH_FILE</a> = 187, 
-<br />
-&#160;&#160;<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573ae8ba34cca7075c1500afb1fca4a8019b">COMP_MSG_DESC_ERR_WRITE_FILE</a> = 186, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a981f6884cd7b6a6be608ee3fcb04093d">COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS</a> = 185, 
-<a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573a77d3cc483977aacfef6b802f642dfcca">COMP_MSG_DESC_ERR_FIELD_TOO_LONG</a> = 184
-<br />
- }</td></tr>
-<tr class="separator:a13fa7792530bf474da22811f08951573"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4dbff354e43b39a35fbf281ca450cbab"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a4dbff354e43b39a35fbf281ca450cbab">compMsgEncyptedCode</a> { <a class="el" href="compMsgMsgDesc_8h.html#a4dbff354e43b39a35fbf281ca450cbaba473ab76bbf7e484926cbfb51c56b4092">COMP_DISP_IS_NOT_ENCRYPTED</a> = 0, 
 <a class="el" href="compMsgMsgDesc_8h.html#a4dbff354e43b39a35fbf281ca450cbaba79b83eea9362b8831260da52b4496502">COMP_DISP_IS_ENCRYPTED</a> = 1, 
 <a class="el" href="compMsgMsgDesc_8h.html#a4dbff354e43b39a35fbf281ca450cbaba8080ac76bf86efe93791da37ca3e5edb">COMP_DISP_U8_ENCRYPTION</a> = 2, 
@@ -307,7 +279,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00121">121</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00098">98</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -321,7 +293,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00090">90</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00067">67</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -335,7 +307,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00095">95</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00072">72</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -349,7 +321,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00093">93</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00070">70</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -363,7 +335,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00091">91</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00068">68</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -377,7 +349,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00094">94</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00071">71</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -391,7 +363,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00092">92</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00069">69</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -405,7 +377,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00119">119</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00096">96</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -419,7 +391,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00079">79</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00056">56</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -433,7 +405,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00096">96</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00073">73</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -447,7 +419,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00097">97</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00074">74</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -461,7 +433,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00098">98</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00075">75</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -475,7 +447,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00074">74</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00051">51</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -489,7 +461,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00076">76</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00053">53</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -503,7 +475,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00073">73</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00050">50</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -517,7 +489,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00075">75</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00052">52</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -531,7 +503,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00099">99</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00076">76</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -545,7 +517,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00078">78</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00055">55</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -559,7 +531,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00077">77</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00054">54</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -573,7 +545,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00108">108</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00085">85</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -587,7 +559,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00111">111</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00088">88</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -601,7 +573,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00114">114</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00091">91</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -615,7 +587,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00107">107</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00084">84</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -629,7 +601,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00110">110</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00087">87</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -643,7 +615,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00113">113</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00090">90</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -657,7 +629,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00101">101</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00078">78</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -671,7 +643,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00102">102</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00079">79</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -685,7 +657,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00105">105</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00082">82</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -699,7 +671,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00116">116</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00093">93</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -713,7 +685,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00103">103</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00080">80</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -727,7 +699,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00109">109</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00086">86</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -741,7 +713,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00112">112</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00089">89</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -755,7 +727,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00115">115</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00092">92</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -769,7 +741,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00104">104</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00081">81</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -783,7 +755,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00106">106</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00083">83</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -797,7 +769,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00069">69</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00046">46</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -811,7 +783,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00123">123</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00100">100</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -825,7 +797,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00124">124</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00101">101</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -840,7 +812,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00224">224</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00202">202</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -854,7 +826,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00221">221</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00198">198</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -868,63 +840,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00220">220</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00197">197</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="aeae63762713f3b5cbc50788fb6dca67a"></a>
+<a class="anchor" id="a4d1498b9c7a8b19ee7c657b006407f44"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  dumpHeaderPart_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr)</td>
+          <td class="memname">typedef struct <a class="el" href="structcompMsgWifiData.html">compMsgWifiData</a> <a class="el" href="compMsgMsgDesc_8h.html#a4d1498b9c7a8b19ee7c657b006407f44">compMsgWifiData_t</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00228">228</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="ad29d4306ec0b0f5424e5c1f44c0162a4"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef uint8_t(*  dumpMsgDescPart_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#abd0159d4db6e3e3b6ffc7512721320fb">msgDescPart_t</a> *<a class="el" href="structmsgDescPart.html">msgDescPart</a>)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00242">242</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a9e0f3c7828bbe7244ad0fc8afb824783"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef uint8_t(*  dumpMsgHeaderInfos_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00229">229</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="abd57f23ed87e3289571266b59474835f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef uint8_t(*  dumpMsgValPart_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#ae9daf2d9d93eff117588de5772033dad">msgValPart_t</a> *<a class="el" href="structmsgValPart.html">msgValPart</a>)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00243">243</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00199">199</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -950,7 +880,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00225">225</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00203">203</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -959,12 +889,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getFieldsToSave_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
+          <td class="memname">typedef uint8_t(*  getFieldsToSave_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00240">240</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00216">216</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -973,12 +903,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getHeaderFieldsFromLine_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx)</td>
+          <td class="memname">typedef uint8_t(*  getHeaderFieldsFromLine_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00232">232</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00208">208</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -987,12 +917,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getHeaderFromUniqueFields_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint16_t dst, uint16_t src, uint16_t cmdKey, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> **hdr)</td>
+          <td class="memname">typedef uint8_t(*  getHeaderFromUniqueFields_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint16_t dst, uint16_t src, uint16_t cmdKey, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> **hdr)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00237">237</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00213">213</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1006,7 +936,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00230">230</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00206">206</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1015,12 +945,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getMsgKeyValueDescParts_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
+          <td class="memname">typedef uint8_t(*  getMsgKeyValueDescParts_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00239">239</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00215">215</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1029,12 +959,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getMsgPartsFromHeaderPart_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr, uint8_t **handle)</td>
+          <td class="memname">typedef uint8_t(*  getMsgPartsFromHeaderPart_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr, uint8_t **handle)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00238">238</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00214">214</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1048,7 +978,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00231">231</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00207">207</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1057,12 +987,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getWifiKeyValueKeys_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgWifiData_8h.html#aed2dd7c8fb4f7712d1bf891b31102573">compMsgWifiData_t</a> *<a class="el" href="structcompMsgWifiData.html">compMsgWifiData</a>)</td>
+          <td class="memname">typedef uint8_t(*  getWifiKeyValueKeys_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a4d1498b9c7a8b19ee7c657b006407f44">compMsgWifiData_t</a> *<a class="el" href="structcompMsgWifiData.html">compMsgWifiData</a>)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00241">241</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00217">217</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1148,7 +1078,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00223">223</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00201">201</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1157,12 +1087,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(* readActions_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
+          <td class="memname">typedef uint8_t(* readActions_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00233">233</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00209">209</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1171,12 +1101,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  readHeadersAndSetFlags_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
+          <td class="memname">typedef uint8_t(*  readHeadersAndSetFlags_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00236">236</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00212">212</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1190,7 +1120,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00226">226</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00204">204</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1199,12 +1129,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(* readModuleValues_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
+          <td class="memname">typedef uint8_t(* readModuleValues_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00234">234</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00210">210</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1213,12 +1143,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(* readWifiValues_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
+          <td class="memname">typedef uint8_t(* readWifiValues_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00235">235</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00211">211</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1232,57 +1162,11 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00227">227</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00205">205</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
-<a class="anchor" id="a13fa7792530bf474da22811f08951573"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="compMsgMsgDesc_8h.html#a13fa7792530bf474da22811f08951573">compMsgDataErrorCode</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a16bffbec75f76af98dbb3441dff8c0a2"></a>COMP_MSG_DESC_ERR_OK&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a30c1d9086b423991d3ba6cdf65df1897"></a>COMP_MSG_DESC_ERR_VALUE_NOT_SET&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a2bac1d720f2208c1c20a6b1e3c341950"></a>COMP_MSG_DESC_ERR_VALUE_OUT_OF_RANGE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a7fa4d903f4f9da4aac9ea683dc6286d4"></a>COMP_MSG_DESC_ERR_BAD_VALUE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573ac7a68f8d760d44b2b01784bccbe49a5d"></a>COMP_MSG_DESC_ERR_BAD_FIELD_TYPE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a7d99ddf21acd3ecd7b9adb3655cd3e46"></a>COMP_MSG_DESC_ERR_FIELD_TYPE_NOT_FOUND&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573af4aed715dad0261a7adfed4e008d88a3"></a>COMP_MSG_DESC_ERR_VALUE_TOO_BIG&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a8c473434692571c64ad9ff827df644f3"></a>COMP_MSG_DESC_ERR_OUT_OF_MEMORY&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a17260f50d92768d02eb1b3e408919273"></a>COMP_MSG_DESC_ERR_OUT_OF_RANGE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a6e43d071d9098d3ffbd90040e86f9fc3"></a>COMP_MSG_DESC_ERR_OPEN_FILE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a802bb0dd1a7ce07f599c9f3d8260268b"></a>COMP_MSG_DESC_ERR_FILE_NOT_OPENED&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573ab33985a501288204008a32c8da3ba6d7"></a>COMP_MSG_DESC_ERR_FLUSH_FILE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573ae8ba34cca7075c1500afb1fca4a8019b"></a>COMP_MSG_DESC_ERR_WRITE_FILE&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a981f6884cd7b6a6be608ee3fcb04093d"></a>COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><a class="anchor" id="a13fa7792530bf474da22811f08951573a77d3cc483977aacfef6b802f642dfcca"></a>COMP_MSG_DESC_ERR_FIELD_TOO_LONG&#160;</td><td class="fielddoc">
-</td></tr>
-</table>
-
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00046">46</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="a4dbff354e43b39a35fbf281ca450cbab"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1303,7 +1187,7 @@ Functions</h2></td></tr>
 </td></tr>
 </table>
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00082">82</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8h_source.html#l00059">59</a> of file <a class="el" href="compMsgMsgDesc_8h_source.html">compMsgMsgDesc.h</a>.</p>
 
 </div>
 </div>
@@ -1322,7 +1206,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01651">1651</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01429">1429</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
 
 </div>
 </div>
@@ -1339,7 +1223,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01614">1614</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01398">1398</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
 
 </div>
 </div>

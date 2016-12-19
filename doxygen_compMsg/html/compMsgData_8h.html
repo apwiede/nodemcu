@@ -102,10 +102,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structbuildMsgInfos.html">buildMsgInfos</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwebsocketUserData.html">websocketUserData</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnetsocketUserData.html">netsocketUserData</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcompMsgData.html">compMsgData</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -149,7 +145,7 @@ Macros</h2></td></tr>
 <tr class="separator:a3f02e282bfa99f327251ab50681a5e2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb565066b8c9ffee6c604ed3193c2484"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#afb565066b8c9ffee6c604ed3193c2484">WEB_SOCKET_TYPE_ACCESS_POINT</a>&#160;&#160;&#160;0x04</td></tr>
 <tr class="separator:afb565066b8c9ffee6c604ed3193c2484"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a480a9aedc9fc311b7073fe1a9e3a400b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a480a9aedc9fc311b7073fe1a9e3a400b">checkHandleOK</a>(addr)&#160;&#160;&#160;if(addr == NULL) return <a class="el" href="compMsgTypesAndNames_8h.html#a40f1232847e1b82dc19a68bdce0c3652aaec1469554144c2f13baee088d87243b">COMP_MSG_ERR_BAD_HANDLE</a></td></tr>
+<tr class="memitem:a480a9aedc9fc311b7073fe1a9e3a400b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a480a9aedc9fc311b7073fe1a9e3a400b">checkHandleOK</a>(addr)&#160;&#160;&#160;if(addr == NULL) return <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2aaec1469554144c2f13baee088d87243b">COMP_MSG_ERR_BAD_HANDLE</a></td></tr>
 <tr class="separator:a480a9aedc9fc311b7073fe1a9e3a400b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
@@ -158,48 +154,44 @@ Typedefs</h2></td></tr>
 <tr class="separator:a0f0db42938db12e05703debcec154dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6330882bdd23d341aee8eddfc608f7c1"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structbuildMsgInfos.html">buildMsgInfos</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a6330882bdd23d341aee8eddfc608f7c1">buildMsgInfos_t</a></td></tr>
 <tr class="separator:a6330882bdd23d341aee8eddfc608f7c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c7aaeafc742fa5a195142db2450bac0"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structwebsocketUserData.html">websocketUserData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a></td></tr>
-<tr class="separator:a7c7aaeafc742fa5a195142db2450bac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6592c7355e2c84ed0b26f62b46b8c370"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structnetsocketUserData.html">netsocketUserData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a6592c7355e2c84ed0b26f62b46b8c370">netsocketUserData_t</a></td></tr>
-<tr class="separator:a6592c7355e2c84ed0b26f62b46b8c370"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59cc79ddc334e86d8d542d1febedcbf5"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a59cc79ddc334e86d8d542d1febedcbf5">createMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int numFields, uint8_t **handle)</td></tr>
+<tr class="memitem:a59cc79ddc334e86d8d542d1febedcbf5"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a59cc79ddc334e86d8d542d1febedcbf5">createMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int numFields, uint8_t **handle)</td></tr>
 <tr class="separator:a59cc79ddc334e86d8d542d1febedcbf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83aaea2eefa1ca32ef7e1ae7ff7c783a"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a83aaea2eefa1ca32ef7e1ae7ff7c783a">addField_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth)</td></tr>
+<tr class="memitem:a83aaea2eefa1ca32ef7e1ae7ff7c783a"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a83aaea2eefa1ca32ef7e1ae7ff7c783a">addField_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth)</td></tr>
 <tr class="separator:a83aaea2eefa1ca32ef7e1ae7ff7c783a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad76b6d6a40124e09e73f0f3d14cb9da7"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad76b6d6a40124e09e73f0f3d14cb9da7">getFieldValue_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="memitem:ad76b6d6a40124e09e73f0f3d14cb9da7"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad76b6d6a40124e09e73f0f3d14cb9da7">getFieldValue_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:ad76b6d6a40124e09e73f0f3d14cb9da7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3f75cb86b380ea3d6ac156d26a84fda"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad3f75cb86b380ea3d6ac156d26a84fda">setFieldValue_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue)</td></tr>
+<tr class="memitem:ad3f75cb86b380ea3d6ac156d26a84fda"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad3f75cb86b380ea3d6ac156d26a84fda">setFieldValue_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue)</td></tr>
 <tr class="separator:ad3f75cb86b380ea3d6ac156d26a84fda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36bdcd9c028fec4a0e65269e3bdb8090"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a36bdcd9c028fec4a0e65269e3bdb8090">dumpFieldValue_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo, const uint8_t *indent2)</td></tr>
+<tr class="memitem:a36bdcd9c028fec4a0e65269e3bdb8090"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a36bdcd9c028fec4a0e65269e3bdb8090">dumpFieldValue_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo, const uint8_t *indent2)</td></tr>
 <tr class="separator:a36bdcd9c028fec4a0e65269e3bdb8090"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7332180d655159e925044a1958a408e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ab7332180d655159e925044a1958a408e">dumpKeyValueFields_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, size_t offset)</td></tr>
+<tr class="memitem:ab7332180d655159e925044a1958a408e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ab7332180d655159e925044a1958a408e">dumpKeyValueFields_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, size_t offset)</td></tr>
 <tr class="separator:ab7332180d655159e925044a1958a408e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad38cdd1871c2a9a42067fd58e388eb1"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#aad38cdd1871c2a9a42067fd58e388eb1">dumpFieldInfo_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo)</td></tr>
+<tr class="memitem:aad38cdd1871c2a9a42067fd58e388eb1"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#aad38cdd1871c2a9a42067fd58e388eb1">dumpFieldInfo_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo)</td></tr>
 <tr class="separator:aad38cdd1871c2a9a42067fd58e388eb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad95a22749faaa2872c4afcd36c7bbe2e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad95a22749faaa2872c4afcd36c7bbe2e">dumpMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:ad95a22749faaa2872c4afcd36c7bbe2e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad95a22749faaa2872c4afcd36c7bbe2e">dumpMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:ad95a22749faaa2872c4afcd36c7bbe2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a47c36f983f85297b2aaef068ec3c7389"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a47c36f983f85297b2aaef068ec3c7389">initMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a47c36f983f85297b2aaef068ec3c7389"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a47c36f983f85297b2aaef068ec3c7389">initMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a47c36f983f85297b2aaef068ec3c7389"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9017cb850869906124c355883348cafc"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a9017cb850869906124c355883348cafc">initReceivedMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a9017cb850869906124c355883348cafc"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a9017cb850869906124c355883348cafc">initReceivedMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a9017cb850869906124c355883348cafc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a016fc7d36e9d34571eac3c1a3715f780"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a016fc7d36e9d34571eac3c1a3715f780">prepareMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a016fc7d36e9d34571eac3c1a3715f780"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a016fc7d36e9d34571eac3c1a3715f780">prepareMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a016fc7d36e9d34571eac3c1a3715f780"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf10b50b47ca665f74876984fdbe9e12"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#aaf10b50b47ca665f74876984fdbe9e12">getMsgData_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *<a class="el" href="structcompMsgData.html">compMsgData</a>, uint8_t **data, int *lgth)</td></tr>
+<tr class="memitem:aaf10b50b47ca665f74876984fdbe9e12"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#aaf10b50b47ca665f74876984fdbe9e12">getMsgData_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *<a class="el" href="structcompMsgData.html">compMsgData</a>, uint8_t **data, int *lgth)</td></tr>
 <tr class="separator:aaf10b50b47ca665f74876984fdbe9e12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58b5c425f436e5e742a14e589f979140"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a58b5c425f436e5e742a14e589f979140">deleteMsgDescParts_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a58b5c425f436e5e742a14e589f979140"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a58b5c425f436e5e742a14e589f979140">deleteMsgDescParts_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a58b5c425f436e5e742a14e589f979140"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2af7e7209e12735fcfe1107dbab7e501"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a2af7e7209e12735fcfe1107dbab7e501">deleteMsgValParts_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:a2af7e7209e12735fcfe1107dbab7e501"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#a2af7e7209e12735fcfe1107dbab7e501">deleteMsgValParts_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a2af7e7209e12735fcfe1107dbab7e501"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6ff6a8c3d307471ba362655178374b4"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad6ff6a8c3d307471ba362655178374b4">deleteMsg_t</a> )(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="memitem:ad6ff6a8c3d307471ba362655178374b4"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad6ff6a8c3d307471ba362655178374b4">deleteMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:ad6ff6a8c3d307471ba362655178374b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa53523d8b28fd08b96afcac111f7582"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#afa53523d8b28fd08b96afcac111f7582">setDispatcher_t</a> )(<a class="el" href="compMsgData_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData_t</a> *self, <a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *dispatcher)</td></tr>
+<tr class="memitem:afa53523d8b28fd08b96afcac111f7582"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#afa53523d8b28fd08b96afcac111f7582">setDispatcher_t</a> )(<a class="el" href="compMsgData_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData_t</a> *self, <a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *dispatcher)</td></tr>
 <tr class="separator:afa53523d8b28fd08b96afcac111f7582"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ade6fee7082f3f67c3483447c4197bd1d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgData_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ade6fee7082f3f67c3483447c4197bd1d">newCompMsgData</a> (void)</td></tr>
 <tr class="separator:ade6fee7082f3f67c3483447c4197bd1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad5f7480fbf10954d117ef9cce659f120"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad5f7480fbf10954d117ef9cce659f120">compMsgGetPtrFromHandle</a> (const char *handle, <a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> **<a class="el" href="structcompMsgDispatcher.html">compMsgDispatcher</a>)</td></tr>
+<tr class="memitem:ad5f7480fbf10954d117ef9cce659f120"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgData_8h.html#ad5f7480fbf10954d117ef9cce659f120">compMsgGetPtrFromHandle</a> (const char *handle, <a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> **<a class="el" href="structcompMsgDispatcher.html">compMsgDispatcher</a>)</td></tr>
 <tr class="separator:ad5f7480fbf10954d117ef9cce659f120"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
@@ -212,7 +204,7 @@ Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">addr</td><td>)</td>
-          <td>&#160;&#160;&#160;if(addr == NULL) return <a class="el" href="compMsgTypesAndNames_8h.html#a40f1232847e1b82dc19a68bdce0c3652aaec1469554144c2f13baee088d87243b">COMP_MSG_ERR_BAD_HANDLE</a></td>
+          <td>&#160;&#160;&#160;if(addr == NULL) return <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2aaec1469554144c2f13baee088d87243b">COMP_MSG_ERR_BAD_HANDLE</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -493,12 +485,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  addField_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth)</td>
+          <td class="memname">typedef uint8_t(*  addField_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00118">118</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00090">90</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -533,12 +525,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  createMsg_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int numFields, uint8_t **handle)</td>
+          <td class="memname">typedef uint8_t(*  createMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int numFields, uint8_t **handle)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00117">117</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00089">89</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -547,12 +539,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  deleteMsg_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+          <td class="memname">typedef uint8_t(*  deleteMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00132">132</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00104">104</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -561,12 +553,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  deleteMsgDescParts_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+          <td class="memname">typedef uint8_t(*  deleteMsgDescParts_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00130">130</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00102">102</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -575,12 +567,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  deleteMsgValParts_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+          <td class="memname">typedef uint8_t(*  deleteMsgValParts_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00131">131</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00103">103</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -589,12 +581,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  dumpFieldInfo_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo)</td>
+          <td class="memname">typedef uint8_t(*  dumpFieldInfo_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00124">124</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00096">96</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -603,12 +595,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  dumpFieldValue_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo, const uint8_t *indent2)</td>
+          <td class="memname">typedef uint8_t(*  dumpFieldValue_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgDataView_8h.html#a753a64e743691c20d9b63a5a7af93f91">compMsgField_t</a> *fieldInfo, const uint8_t *indent2)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00122">122</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00094">94</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -617,12 +609,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  dumpKeyValueFields_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, size_t offset)</td>
+          <td class="memname">typedef uint8_t(*  dumpKeyValueFields_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, size_t offset)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00123">123</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00095">95</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -631,12 +623,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  dumpMsg_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+          <td class="memname">typedef uint8_t(*  dumpMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00125">125</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00097">97</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -645,12 +637,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getFieldValue_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue)</td>
+          <td class="memname">typedef uint8_t(*  getFieldValue_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00119">119</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00091">91</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -659,12 +651,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getMsgData_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *<a class="el" href="structcompMsgData.html">compMsgData</a>, uint8_t **data, int *lgth)</td>
+          <td class="memname">typedef uint8_t(*  getMsgData_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *<a class="el" href="structcompMsgData.html">compMsgData</a>, uint8_t **data, int *lgth)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00129">129</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00101">101</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -673,12 +665,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  initMsg_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+          <td class="memname">typedef uint8_t(*  initMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00126">126</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00098">98</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -687,24 +679,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  initReceivedMsg_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+          <td class="memname">typedef uint8_t(*  initReceivedMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00127">127</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a6592c7355e2c84ed0b26f62b46b8c370"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef struct <a class="el" href="structnetsocketUserData.html">netsocketUserData</a>  <a class="el" href="compMsgData_8h.html#a6592c7355e2c84ed0b26f62b46b8c370">netsocketUserData_t</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00099">99</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -713,12 +693,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  prepareMsg_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+          <td class="memname">typedef uint8_t(*  prepareMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00128">128</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00100">100</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -727,12 +707,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t( * setDispatcher_t)(<a class="el" href="compMsgData_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData_t</a> *self, <a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *dispatcher)</td>
+          <td class="memname">typedef uint8_t( * setDispatcher_t)(<a class="el" href="compMsgData_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData_t</a> *self, <a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *dispatcher)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00133">133</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00105">105</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -741,24 +721,12 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  setFieldValue_t)(<a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue)</td>
+          <td class="memname">typedef uint8_t(*  setFieldValue_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00120">120</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a7c7aaeafc742fa5a195142db2450bac0"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef struct <a class="el" href="structwebsocketUserData.html">websocketUserData</a>  <a class="el" href="compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0">websocketUserData_t</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Definition at line <a class="el" href="compMsgData_8h_source.html#l00092">92</a> of file <a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>.</p>
 
 </div>
 </div>
@@ -776,7 +744,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> **&#160;</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> **&#160;</td>
           <td class="paramname"><em>compMsgDispatcher</em>&#160;</td>
         </tr>
         <tr>
@@ -787,7 +755,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l00382">382</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l00386">386</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
 
 </div>
 </div>
@@ -805,7 +773,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l01084">1084</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgData_8c_source.html#l01088">1088</a> of file <a class="el" href="compMsgData_8c_source.html">compMsgData.c</a>.</p>
 
 </div>
 </div>
