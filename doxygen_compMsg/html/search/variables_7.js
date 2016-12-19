@@ -1,11 +1,11 @@
 var searchData=
 [
   ['handle',['handle',['../structhandle2Header.html#a656a9b89148f39366b4a0325251c516b',1,'handle2Header::handle()'],['../structcompMsgData.html#af3925b86dc7b8e17a1c8a268206a04d4',1,'compMsgData::handle()'],['../structhandle2Dispatcher.html#ace5f67738b26e66c363d3957f38d5f52',1,'handle2Dispatcher::handle()'],['../structcompMsgDispatcher.html#a72eb2f19b4dfdc6dd15dd0e2a3871ac3',1,'compMsgDispatcher::handle()']]],
-  ['handlereceivedheader',['handleReceivedHeader',['../structcompMsgDispatcher.html#aa749d732d109d0f773e901f2709c9905',1,'compMsgDispatcher']]],
-  ['handlereceivedmsg',['handleReceivedMsg',['../structcompMsgDispatcher.html#a4d2aae7a44dc927af177ef11a5e765c1',1,'compMsgDispatcher']]],
-  ['handlereceivedpart',['handleReceivedPart',['../structcompMsgDispatcher.html#ac385f8b688903ad369d937e9c1d948f8',1,'compMsgDispatcher']]],
+  ['handlereceivedheader',['handleReceivedHeader',['../structcompMsgIdentify.html#ab8cf1d70d061c652bdcee46b843119da',1,'compMsgIdentify']]],
+  ['handlereceivedmsg',['handleReceivedMsg',['../structcompMsgIdentify.html#a8b2af142f4695de8bb642e619199bd0a',1,'compMsgIdentify']]],
+  ['handlereceivedpart',['handleReceivedPart',['../structcompMsgIdentify.html#a7a63c5aedbfc54043f9d8893711eaba2',1,'compMsgIdentify']]],
   ['handles',['handles',['../structcompMsgHandles.html#a92e0bff89cf2cf97f278d8b397658925',1,'compMsgHandles::handles()'],['../structcompMsgDispatcherHandles.html#acd700171c469a1c2c780373aa084cf16',1,'compMsgDispatcherHandles::handles()']]],
-  ['handletosendpart',['handleToSendPart',['../structcompMsgDispatcher.html#ac18f0570100ad8c28368185dcff072c8',1,'compMsgDispatcher']]],
+  ['handletosendpart',['handleToSendPart',['../structcompMsgIdentify.html#ae1cbdd730a8d30bb4008f9e3bee80051',1,'compMsgIdentify']]],
   ['hdrencryption',['hdrEncryption',['../structheaderPart.html#ab459ead5b1b4130c0dfd38374ff3b5f9',1,'headerPart']]],
   ['hdrfiller',['hdrFiller',['../structheaderPart.html#abf3577234b0fc232c87ff2b43c47c329',1,'headerPart::hdrFiller()'],['../structmsgParts.html#a66ece012dfc4f5793e2b66e31e7330a6',1,'msgParts::hdrFiller()']]],
   ['hdrflags',['hdrFlags',['../structheaderPart.html#ab746bcf945135c5476d59a91c46712a9',1,'headerPart']]],
@@ -36,5 +36,12 @@ var searchData=
   ['headerlgth',['headerLgth',['../structcompMsgData.html#a0cd8756146a047dff58829178f88255d',1,'compMsgData::headerLgth()'],['../structmsgHeaderInfos.html#a96fbd091e2a97ce7dee97772c12adc1e',1,'msgHeaderInfos::headerLgth()']]],
   ['headerparts',['headerParts',['../structmsgHeaderInfos.html#a423a1900d24108dce6a2e5a05afb14a9',1,'msgHeaderInfos']]],
   ['headersequence',['headerSequence',['../structmsgHeaderInfos.html#a8b7cfe4497c8202549db3f757edf5827',1,'msgHeaderInfos']]],
-  ['host_5fip',['host_ip',['../compMsgNetSocket_8c.html#a7719e5c60a31493fd7f1c4e3deec4d92',1,'compMsgNetSocket.c']]]
+  ['host_5fip',['host_ip',['../compMsgNetSocket_8c.html#a7719e5c60a31493fd7f1c4e3deec4d92',1,'compMsgNetSocket.c']]],
+  ['httpheaderid',['httpHeaderId',['../structhttpHeaderPart.html#a78846045aa608d4f66079a7c1a940530',1,'httpHeaderPart']]],
+  ['httpheaderkeyinfos',['httpHeaderKeyInfos',['../compMsgHttp_8c.html#a57d33de079d87f9f68ed10e25e8140e7',1,'compMsgHttp.c']]],
+  ['httpheadername',['httpHeaderName',['../structhttpHeaderPart.html#a1c0c306dd495c20c5128ef22b28374b2',1,'httpHeaderPart']]],
+  ['httpheadervalue',['httpHeaderValue',['../structhttpHeaderPart.html#ad26a17b9f040a5fa767ea3efad39954c',1,'httpHeaderPart']]],
+  ['httpmsginfos',['httpMsgInfos',['../structsocketUserData.html#a53f2950986dd468365ca0484fcda6433',1,'socketUserData']]],
+  ['httpparse',['httpParse',['../structcompMsgHttp.html#ab869484caed99864758187e5c48d963d',1,'compMsgHttp']]],
+  ['httprequestcode',['httpRequestCode',['../structhttpMsgInfo.html#aa43a8d71341029d6efea89a8e415a175',1,'httpMsgInfo']]]
 ];

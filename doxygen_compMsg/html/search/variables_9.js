@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['key',['key',['../structhttpHeaderKeyInfo.html#a4e895d3ed392100fd6862eaca46853b2',1,'httpHeaderKeyInfo']]],
   ['key_5fauthmode',['key_authmode',['../structcompMsgWifiData.html#a475d4e80bfa24ab788d92fb6c5fd72f8',1,'compMsgWifiData']]],
   ['key_5fbssid',['key_bssid',['../structcompMsgWifiData.html#af75ec30d3877ea271eee2ef1a35fb938',1,'compMsgWifiData']]],
   ['key_5fchannel',['key_channel',['../structcompMsgWifiData.html#a27635219fdc55393a8dbd84944975830',1,'compMsgWifiData']]],

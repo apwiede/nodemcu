@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['opmode_5fnull',['OPMODE_NULL',['../compMsgWifiData_8h.html#aaeb4bb73421206cc8f94883495d7710f',1,'compMsgWifiData.h']]],
-  ['opmode_5fsoftap',['OPMODE_SOFTAP',['../compMsgWifiData_8h.html#a17e22b505e2524dbdfa61c12abee69f6',1,'compMsgWifiData.h']]],
-  ['opmode_5fstation',['OPMODE_STATION',['../compMsgWifiData_8h.html#a9239eacbd0544c97592c441d6d0c48e5',1,'compMsgWifiData.h']]],
-  ['opmode_5fstationap',['OPMODE_STATIONAP',['../compMsgWifiData_8h.html#ae0a21408f0677a8052d0a63066a769d7',1,'compMsgWifiData.h']]]
+  ['net_5fsocket_5ftype_5fclient',['NET_SOCKET_TYPE_CLIENT',['../compMsgData_8h.html#a3f02e282bfa99f327251ab50681a5e2d',1,'compMsgData.h']]],
+  ['net_5fsocket_5ftype_5fsocket',['NET_SOCKET_TYPE_SOCKET',['../compMsgData_8h.html#ad7c9e139bf786e53035a37ce7a9ba8da',1,'compMsgData.h']]]
 ];

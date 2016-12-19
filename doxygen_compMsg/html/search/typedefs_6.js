@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['getactioncallback_5ft',['getActionCallback_t',['../compMsgDispatcher_8h.html#aecf70cf1cc4b546695433ac7336fa0ba',1,'compMsgDispatcher.h']]],
-  ['getactioncallbackname_5ft',['getActionCallbackName_t',['../compMsgDispatcher_8h.html#a1bc5526841c7fdfed901f9ea0bc9a7ab',1,'compMsgDispatcher.h']]],
-  ['getactionmode_5ft',['getActionMode_t',['../compMsgDispatcher_8h.html#ae2a0b92b17ea91d5008061af412bb738',1,'compMsgDispatcher.h']]],
-  ['getbssscaninfo_5ft',['getBssScanInfo_t',['../compMsgDispatcher_8h.html#a3c7169c1b63517e11c2d8663b5ab2abc',1,'compMsgDispatcher.h']]],
+  ['getactioncallback_5ft',['getActionCallback_t',['../compMsgAction_8h.html#aecf70cf1cc4b546695433ac7336fa0ba',1,'compMsgAction.h']]],
+  ['getactioncallbackname_5ft',['getActionCallbackName_t',['../compMsgAction_8h.html#a1bc5526841c7fdfed901f9ea0bc9a7ab',1,'compMsgAction.h']]],
+  ['getactionmode_5ft',['getActionMode_t',['../compMsgAction_8h.html#ae2a0b92b17ea91d5008061af412bb738',1,'compMsgAction.h']]],
+  ['getbssscaninfo_5ft',['getBssScanInfo_t',['../compMsgWifiData_8h.html#a3c7169c1b63517e11c2d8663b5ab2abc',1,'compMsgWifiData.h']]],
   ['getcrc_5ft',['getCrc_t',['../compMsgDataView_8h.html#ae5dfd90401f4c0b6800f2e31b8506d6a',1,'compMsgDataView.h']]],
   ['getdataviewdata_5ft',['getDataViewData_t',['../dataView_8h.html#a5e0d8c44bf08a710ab511930d6dfb6a4',1,'dataView.h']]],
   ['getfieldnameidfromstr_5ft',['getFieldNameIdFromStr_t',['../compMsgTypesAndNames_8h.html#a1ea3b81b30620ed4564f34e3fb3f9510',1,'compMsgTypesAndNames.h']]],
@@ -13,11 +13,15 @@ var searchData=
   ['getfieldtypeidfromstr_5ft',['getFieldTypeIdFromStr_t',['../compMsgTypesAndNames_8h.html#a24ec5a886e6c891faedc4dd1d565b805',1,'compMsgTypesAndNames.h']]],
   ['getfieldtypestrfromid_5ft',['getFieldTypeStrFromId_t',['../compMsgTypesAndNames_8h.html#ad8841a083ca3b430c9d91925648be803',1,'compMsgTypesAndNames.h']]],
   ['getfieldvalue_5ft',['getFieldValue_t',['../compMsgData_8h.html#ad76b6d6a40124e09e73f0f3d14cb9da7',1,'compMsgData.h']]],
-  ['getfieldvaluecallback_5ft',['getFieldValueCallback_t',['../compMsgDispatcher_8h.html#acbe6e3dfd75547d07c17c6721ea586cb',1,'compMsgDispatcher.h']]],
-  ['getfieldvaluecallbackname_5ft',['getFieldValueCallbackName_t',['../compMsgDispatcher_8h.html#a40ab014db34ad6d1dc0d755001a7a825',1,'compMsgDispatcher.h']]],
+  ['getfieldvaluecallback_5ft',['getFieldValueCallback_t',['../compMsgUtil_8h.html#a4bb64850ba8f1f05cc2da0a2b30c8bc2',1,'compMsgUtil.h']]],
+  ['getfieldvaluecallbackname_5ft',['getFieldValueCallbackName_t',['../compMsgUtil_8h.html#a19a35d9490c74a5a6710774a2cbeaf53',1,'compMsgUtil.h']]],
   ['getfiller_5ft',['getFiller_t',['../compMsgDataView_8h.html#aeab8560d97bc476ab3cae7c736110bc9',1,'compMsgDataView.h']]],
   ['getheaderfieldsfromline_5ft',['getHeaderFieldsFromLine_t',['../compMsgMsgDesc_8h.html#ac1216d2a01882298083dbc817cacc936',1,'compMsgMsgDesc.h']]],
   ['getheaderfromuniquefields_5ft',['getHeaderFromUniqueFields_t',['../compMsgMsgDesc_8h.html#ae2c210e1a96ae24e6a03b5809a73bc64',1,'compMsgMsgDesc.h']]],
+  ['gethttpgetheadervalueforid_5ft',['getHttpGetHeaderValueForId_t',['../compMsgHttp_8h.html#a0fcebd98e2511cef4d310859cb4cb4de',1,'compMsgHttp.h']]],
+  ['gethttpheaderkeyfromid_5ft',['getHttpHeaderKeyFromId_t',['../compMsgHttp_8h.html#a8c62029bcef9c8a08c8b30e3d1d90b2e',1,'compMsgHttp.h']]],
+  ['gethttpheaderkeyidfromkey_5ft',['getHttpHeaderKeyIdFromKey_t',['../compMsgHttp_8h.html#a50aa767383aaaceb802d499feb8bde44',1,'compMsgHttp.h']]],
+  ['gethttpheaderkeyidfromlowerkey_5ft',['getHttpHeaderKeyIdFromLowerKey_t',['../compMsgHttp_8h.html#af8215f69e9410078a0c4b0dd6b0263ab',1,'compMsgHttp.h']]],
   ['getint16_5ft',['getInt16_t',['../dataView_8h.html#ae0a46fdcd64d82cd5bd0e1003cf4bffb',1,'dataView.h']]],
   ['getint16vector_5ft',['getInt16Vector_t',['../dataView_8h.html#a275f53cceaad4f45402b2b09958afbef',1,'dataView.h']]],
   ['getint32_5ft',['getInt32_t',['../dataView_8h.html#a085618f9b360f6fb7691fef0f2bbe6d6',1,'dataView.h']]],
@@ -39,8 +43,8 @@ var searchData=
   ['getuint32vector_5ft',['getUint32Vector_t',['../dataView_8h.html#a99797eaeebe26afdd8648d7b141e4924',1,'dataView.h']]],
   ['getuint8_5ft',['getUint8_t',['../dataView_8h.html#ac08f7874c251c1ff399d475d3c9a8238',1,'dataView.h']]],
   ['getuint8vector_5ft',['getUint8Vector_t',['../dataView_8h.html#a642fbc8b056f3fc0004fda2cfbc32723',1,'dataView.h']]],
-  ['getwificonfig_5ft',['getWifiConfig_t',['../compMsgDispatcher_8h.html#a1c9b3c51be3f3e79f525684993f07d3b',1,'compMsgDispatcher.h']]],
+  ['getwificonfig_5ft',['getWifiConfig_t',['../compMsgWifiData_8h.html#a1c9b3c51be3f3e79f525684993f07d3b',1,'compMsgWifiData.h']]],
   ['getwifikeyvaluekeys_5ft',['getWifiKeyValueKeys_t',['../compMsgMsgDesc_8h.html#ab1134ab2b2dcf2ee74d8380a7a1e8748',1,'compMsgMsgDesc.h']]],
-  ['getwifiremoteport_5ft',['getWifiRemotePort_t',['../compMsgDispatcher_8h.html#a2bfb8aaf504182fc5a5cb373af1f7d8f',1,'compMsgDispatcher.h']]],
-  ['getwifivalue_5ft',['getWifiValue_t',['../compMsgDispatcher_8h.html#a6770b4c3642e5b4e5182227b3e48b0d2',1,'compMsgDispatcher.h']]]
+  ['getwifiremoteport_5ft',['getWifiRemotePort_t',['../compMsgWifiData_8h.html#a2bfb8aaf504182fc5a5cb373af1f7d8f',1,'compMsgWifiData.h']]],
+  ['getwifivalue_5ft',['getWifiValue_t',['../compMsgWifiData_8h.html#a6770b4c3642e5b4e5182227b3e48b0d2',1,'compMsgWifiData.h']]]
 ];

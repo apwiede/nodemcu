@@ -1,13 +1,12 @@
 var searchData=
 [
-  ['netsocketbinaryreceived_5ft',['netsocketBinaryReceived_t',['../compMsgNetSocket_8c.html#a2cc8eae51d8ef68435cdbf6310d50351',1,'compMsgNetSocket.c']]],
-  ['netsocketreceived_5ft',['netsocketReceived_t',['../compMsgWifiData_8h.html#a8f23808e193409366ef188b88bc2df2a',1,'compMsgWifiData.h']]],
-  ['netsocketrunclientmode_5ft',['netsocketRunClientMode_t',['../compMsgDispatcher_8h.html#a6671a1b5dc7c81f8059ea609743178a7',1,'compMsgDispatcher.h']]],
-  ['netsocketsendconnecterror_5ft',['netsocketSendConnectError_t',['../compMsgDispatcher_8h.html#a3a84e629657941326c45ed2cc77ccddb',1,'compMsgDispatcher.h']]],
-  ['netsocketsenddata_5ft',['netsocketSendData_t',['../compMsgDispatcher_8h.html#a96f634eeed39c63bf4275307d72ce7c3',1,'compMsgDispatcher.h']]],
-  ['netsocketstartcloudsocket_5ft',['netsocketStartCloudSocket_t',['../compMsgDispatcher_8h.html#aa3b0775fe0ea62f186e94f0531489e06',1,'compMsgDispatcher.h']]],
-  ['netsockettextreceived_5ft',['netsocketTextReceived_t',['../compMsgNetSocket_8c.html#afca6473328670f501a05e8e24a9528ff',1,'compMsgNetSocket.c']]],
-  ['netsockettosend_5ft',['netsocketToSend_t',['../compMsgWifiData_8h.html#ac52f9bd3e6e6ab4022c48f7f807a7aa0',1,'compMsgWifiData.h']]],
-  ['netsocketuserdata_5ft',['netsocketUserData_t',['../compMsgData_8h.html#a6592c7355e2c84ed0b26f62b46b8c370',1,'compMsgData.h']]],
-  ['nextfittingentry_5ft',['nextFittingEntry_t',['../compMsgDispatcher_8h.html#ace68f9c9a070fbe5a8d5895034956afe',1,'compMsgDispatcher.h']]]
+  ['netsocketbinaryreceived_5ft',['netSocketBinaryReceived_t',['../compMsgNetSocket_8c.html#ae6d8d04a67501a8fdec49b0982ecf980',1,'compMsgNetSocket.c']]],
+  ['netsocketreceived_5ft',['netSocketReceived_t',['../compMsgSocket_8h.html#a0f7eac8934c0749de7387e7280ba481f',1,'compMsgSocket.h']]],
+  ['netsocketrunclientmode_5ft',['netSocketRunClientMode_t',['../compMsgSocket_8h.html#a3b2b66eb7baff97e1fc6512155c58fa8',1,'compMsgSocket.h']]],
+  ['netsocketsendconnecterror_5ft',['netSocketSendConnectError_t',['../compMsgWifiData_8h.html#ad5cdfd139f9a9b3482a1ca868f63dbf8',1,'compMsgWifiData.h']]],
+  ['netsocketsenddata_5ft',['netSocketSendData_t',['../compMsgSocket_8h.html#a856bf5331edb0ece6dd350ae43d963d0',1,'compMsgSocket.h']]],
+  ['netsocketstartcloudsocket_5ft',['netSocketStartCloudSocket_t',['../compMsgSocket_8h.html#a54392b3d15389f2ad80604e01e64f142',1,'compMsgSocket.h']]],
+  ['netsockettextreceived_5ft',['netSocketTextReceived_t',['../compMsgNetSocket_8c.html#ab8035101950ba3447e0c3df108784309',1,'compMsgNetSocket.c']]],
+  ['netsockettosend_5ft',['netSocketToSend_t',['../compMsgSocket_8h.html#a834ec4ca726f2d96610e2e44da357ddc',1,'compMsgSocket.h']]],
+  ['nextfittingentry_5ft',['nextFittingEntry_t',['../compMsgIdentify_8h.html#ace68f9c9a070fbe5a8d5895034956afe',1,'compMsgIdentify.h']]]
 ];

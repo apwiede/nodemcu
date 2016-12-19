@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['websocket_5fopcode',['websocket_opcode',['../compMsgWifiData_8h.html#a207402575311103c75906143724e8c35',1,'compMsgWifiData.h']]]
+  ['websocket_5fopcode',['webSocket_opcode',['../compMsgWifiData_8h.html#a7dcdd2f95c41d9a27cf495f13366a641',1,'compMsgWifiData.h']]]
 ];

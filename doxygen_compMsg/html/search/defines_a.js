@@ -1,10 +1,9 @@
 var searchData=
 [
-  ['ssl_5fbuffer_5fsize',['SSL_BUFFER_SIZE',['../compMsgNetSocket_8c.html#af0079ed47c49b847e1e1ba813e848b0b',1,'SSL_BUFFER_SIZE():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#af0079ed47c49b847e1e1ba813e848b0b',1,'SSL_BUFFER_SIZE():&#160;compMsgWebSocket.c']]],
-  ['station_5fstatus_5fconnect_5ffail',['STATION_STATUS_CONNECT_FAIL',['../compMsgWifiData_8h.html#ac980553f8d62f5f8425c27e5a1203f66',1,'compMsgWifiData.h']]],
-  ['station_5fstatus_5fconnecting',['STATION_STATUS_CONNECTING',['../compMsgWifiData_8h.html#a8545a23a81e897ef271d581d44b561d9',1,'compMsgWifiData.h']]],
-  ['station_5fstatus_5fgot_5fip',['STATION_STATUS_GOT_IP',['../compMsgWifiData_8h.html#ab2187c124362a96e546520dd80e8eec1',1,'compMsgWifiData.h']]],
-  ['station_5fstatus_5fidle',['STATION_STATUS_IDLE',['../compMsgWifiData_8h.html#af29358e75cde0726de13d8aa5c0dbb1e',1,'compMsgWifiData.h']]],
-  ['station_5fstatus_5fno_5fap_5ffound',['STATION_STATUS_NO_AP_FOUND',['../compMsgWifiData_8h.html#ae96eb5726f72d2811aaae76d49483172',1,'compMsgWifiData.h']]],
-  ['station_5fstatus_5fwrong_5fpassword',['STATION_STATUS_WRONG_PASSWORD',['../compMsgWifiData_8h.html#ab77315577a18f1beda7102d2b08124fa',1,'compMsgWifiData.h']]]
+  ['received_5fcheck_5fcmd_5fkey_5fsize',['RECEIVED_CHECK_CMD_KEY_SIZE',['../compMsgIdentify_8c.html#a82d36a5660f04d0254151358bdfcf12b',1,'compMsgIdentify.c']]],
+  ['received_5fcheck_5fcmd_5flgth_5fsize',['RECEIVED_CHECK_CMD_LGTH_SIZE',['../compMsgIdentify_8c.html#a415a00ef5ac1a99e66c4c5fe19cc6490',1,'compMsgIdentify.c']]],
+  ['received_5fcheck_5ffrom_5fsize',['RECEIVED_CHECK_FROM_SIZE',['../compMsgIdentify_8c.html#ad852924495cbf8ad0d95d1aa11f5eef2',1,'compMsgIdentify.c']]],
+  ['received_5fcheck_5fshort_5fcmd_5fkey_5fsize',['RECEIVED_CHECK_SHORT_CMD_KEY_SIZE',['../compMsgIdentify_8c.html#ade21167c1b0a31de281282c9b868a2dd',1,'compMsgIdentify.c']]],
+  ['received_5fcheck_5fto_5fsize',['RECEIVED_CHECK_TO_SIZE',['../compMsgIdentify_8c.html#a3bf7f9d34a3af06be5379ea8d4516b4b',1,'compMsgIdentify.c']]],
+  ['received_5fcheck_5ftotal_5flgth_5fsize',['RECEIVED_CHECK_TOTAL_LGTH_SIZE',['../compMsgIdentify_8c.html#af7a9e7230e89355512427968476f2827',1,'compMsgIdentify.c']]]
 ];

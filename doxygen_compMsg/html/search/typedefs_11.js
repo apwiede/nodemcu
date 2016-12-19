@@ -1,11 +1,10 @@
 var searchData=
 [
-  ['websocketbinaryreceived_5ft',['websocketBinaryReceived_t',['../compMsgWebSocket_8c.html#a0783d2a8b1f554ad45bc6df2cce675e8',1,'websocketBinaryReceived_t():&#160;compMsgWebSocket.c'],['../compMsgWifiData_8h.html#a0783d2a8b1f554ad45bc6df2cce675e8',1,'websocketBinaryReceived_t():&#160;compMsgWifiData.h']]],
-  ['websocketrunapmode_5ft',['websocketRunAPMode_t',['../compMsgDispatcher_8h.html#ad6637a18a5820a2aacb11d9d2cd8d7fa',1,'compMsgDispatcher.h']]],
-  ['websocketrunclientmode_5ft',['websocketRunClientMode_t',['../compMsgDispatcher_8h.html#a0c5795a9f90c8f9511504d8932b95a12',1,'compMsgDispatcher.h']]],
-  ['websocketsendconnecterror_5ft',['websocketSendConnectError_t',['../compMsgDispatcher_8h.html#a2b0359bb94e618eafd5b05c955845186',1,'compMsgDispatcher.h']]],
-  ['websocketsenddata_5ft',['websocketSendData_t',['../compMsgDispatcher_8h.html#a28d58df133bf12e51da5f82ac6592f41',1,'compMsgDispatcher.h']]],
-  ['websockettextreceived_5ft',['websocketTextReceived_t',['../compMsgWebSocket_8c.html#ab06228407b982e22f1b00024f1501d77',1,'websocketTextReceived_t():&#160;compMsgWebSocket.c'],['../compMsgWifiData_8h.html#ab06228407b982e22f1b00024f1501d77',1,'websocketTextReceived_t():&#160;compMsgWifiData.h']]],
-  ['websocketuserdata_5ft',['websocketUserData_t',['../compMsgData_8h.html#a7c7aaeafc742fa5a195142db2450bac0',1,'compMsgData.h']]],
+  ['websocketbinaryreceived_5ft',['webSocketBinaryReceived_t',['../compMsgSocket_8h.html#a7e39104e38c0f4c9764203062f2051b6',1,'compMsgSocket.h']]],
+  ['websocketrunapmode_5ft',['webSocketRunAPMode_t',['../compMsgSocket_8h.html#a381fc1d2ad8215c5daf6ac2b0124808c',1,'compMsgSocket.h']]],
+  ['websocketrunclientmode_5ft',['webSocketRunClientMode_t',['../compMsgSocket_8h.html#ad554aa0a16b9c30ead188754801390a4',1,'compMsgSocket.h']]],
+  ['websocketsendconnecterror_5ft',['webSocketSendConnectError_t',['../compMsgWifiData_8h.html#af27a0aa2c54ef2a8acca34c5d8f8dc84',1,'compMsgWifiData.h']]],
+  ['websocketsenddata_5ft',['webSocketSendData_t',['../compMsgSocket_8h.html#ae01e515b8fba2b5d673357462864dcd6',1,'compMsgSocket.h']]],
+  ['websockettextreceived_5ft',['webSocketTextReceived_t',['../compMsgSocket_8h.html#ab1c2d2b23bf91dc860809b55065eed95',1,'compMsgSocket.h']]],
   ['writeline_5ft',['writeLine_t',['../compMsgMsgDesc_8h.html#a63fe844451aa07825f1064642be5b798',1,'compMsgMsgDesc.h']]]
 ];

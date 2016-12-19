@@ -5,6 +5,6 @@ var searchData=
   ['msgheaderinfos_5ft',['msgHeaderInfos_t',['../compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6',1,'compMsgMsgDesc.h']]],
   ['msgkeyvaluedescpart_5ft',['msgKeyValueDescPart_t',['../compMsgMsgDesc_8h.html#a1b42f0ad2de2c3d2dd8522434d75d560',1,'compMsgMsgDesc.h']]],
   ['msgparts_5ft',['msgParts_t',['../compMsgMsgDesc_8h.html#affc812285d230ef0b2550ddd9030cbdd',1,'compMsgMsgDesc.h']]],
-  ['msgrequestinfos_5ft',['msgRequestInfos_t',['../compMsgDispatcher_8h.html#a56d1c764781c736d6de641c3d5917919',1,'compMsgDispatcher.h']]],
+  ['msgrequestinfos_5ft',['msgRequestInfos_t',['../compMsgRequest_8h.html#a56d1c764781c736d6de641c3d5917919',1,'compMsgRequest.h']]],
   ['msgvalpart_5ft',['msgValPart_t',['../compMsgMsgDesc_8h.html#ae9daf2d9d93eff117588de5772033dad',1,'compMsgMsgDesc.h']]]
 ];

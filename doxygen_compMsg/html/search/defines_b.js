@@ -1,9 +1,10 @@
 var searchData=
 [
-  ['tcp',['TCP',['../compMsgNetSocket_8c.html#a383cc726612c3f31cc235472be55516b',1,'TCP():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a383cc726612c3f31cc235472be55516b',1,'TCP():&#160;compMsgWebSocket.c']]],
-  ['timer_5fidle_5fflag',['TIMER_IDLE_FLAG',['../compMsgNetSocket_8c.html#a925ac437d521e71e11c025ddb3180fa4',1,'TIMER_IDLE_FLAG():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a925ac437d521e71e11c025ddb3180fa4',1,'TIMER_IDLE_FLAG():&#160;compMsgWebSocket.c']]],
-  ['timer_5fmode_5fauto',['TIMER_MODE_AUTO',['../compMsgNetSocket_8c.html#ad7119c4096ebe710c684afe19cf6c46f',1,'TIMER_MODE_AUTO():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#ad7119c4096ebe710c684afe19cf6c46f',1,'TIMER_MODE_AUTO():&#160;compMsgWebSocket.c']]],
-  ['timer_5fmode_5foff',['TIMER_MODE_OFF',['../compMsgNetSocket_8c.html#a20817a864658161f1c9077899729a98a',1,'TIMER_MODE_OFF():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a20817a864658161f1c9077899729a98a',1,'TIMER_MODE_OFF():&#160;compMsgWebSocket.c']]],
-  ['timer_5fmode_5fsemi',['TIMER_MODE_SEMI',['../compMsgNetSocket_8c.html#a20fd95e103e626373c239de06ecdc15f',1,'TIMER_MODE_SEMI():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a20fd95e103e626373c239de06ecdc15f',1,'TIMER_MODE_SEMI():&#160;compMsgWebSocket.c']]],
-  ['timer_5fmode_5fsingle',['TIMER_MODE_SINGLE',['../compMsgNetSocket_8c.html#a7ac7b5af7a0bfcae1dd2f1f6fce7103e',1,'TIMER_MODE_SINGLE():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a7ac7b5af7a0bfcae1dd2f1f6fce7103e',1,'TIMER_MODE_SINGLE():&#160;compMsgWebSocket.c']]]
+  ['ssl_5fbuffer_5fsize',['SSL_BUFFER_SIZE',['../compMsgNetSocket_8c.html#af0079ed47c49b847e1e1ba813e848b0b',1,'SSL_BUFFER_SIZE():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#af0079ed47c49b847e1e1ba813e848b0b',1,'SSL_BUFFER_SIZE():&#160;compMsgWebSocket.c']]],
+  ['station_5fstatus_5fconnect_5ffail',['STATION_STATUS_CONNECT_FAIL',['../compMsgWifiData_8h.html#ac980553f8d62f5f8425c27e5a1203f66',1,'compMsgWifiData.h']]],
+  ['station_5fstatus_5fconnecting',['STATION_STATUS_CONNECTING',['../compMsgWifiData_8h.html#a8545a23a81e897ef271d581d44b561d9',1,'compMsgWifiData.h']]],
+  ['station_5fstatus_5fgot_5fip',['STATION_STATUS_GOT_IP',['../compMsgWifiData_8h.html#ab2187c124362a96e546520dd80e8eec1',1,'compMsgWifiData.h']]],
+  ['station_5fstatus_5fidle',['STATION_STATUS_IDLE',['../compMsgWifiData_8h.html#af29358e75cde0726de13d8aa5c0dbb1e',1,'compMsgWifiData.h']]],
+  ['station_5fstatus_5fno_5fap_5ffound',['STATION_STATUS_NO_AP_FOUND',['../compMsgWifiData_8h.html#ae96eb5726f72d2811aaae76d49483172',1,'compMsgWifiData.h']]],
+  ['station_5fstatus_5fwrong_5fpassword',['STATION_STATUS_WRONG_PASSWORD',['../compMsgWifiData_8h.html#ab77315577a18f1beda7102d2b08124fa',1,'compMsgWifiData.h']]]
 ];

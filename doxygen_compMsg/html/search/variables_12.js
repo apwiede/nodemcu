@@ -4,8 +4,8 @@ var searchData=
   ['u16cmdlgth',['u16CmdLgth',['../structmsgParts.html#a961ad7e7ec899d88a66b6101dc1af0a0',1,'msgParts']]],
   ['u8cmdkey',['u8CmdKey',['../structactionName2Action.html#a5b0fd45a8541726fd92975a02b866702',1,'actionName2Action']]],
   ['u8cmdlgth',['u8CmdLgth',['../structmsgParts.html#a9389b836a9476f5b794022b3abd1730b',1,'msgParts']]],
-  ['uartreceivecb',['uartReceiveCb',['../structcompMsgDispatcher.html#a6e63412687034a51570c2cfcd2a4874a',1,'compMsgDispatcher']]],
-  ['uartsetup',['uartSetup',['../structcompMsgDispatcher.html#a6452239010de19d6e71886027e2b76c7',1,'compMsgDispatcher']]],
-  ['updatemodulevalues',['updateModuleValues',['../structcompMsgDispatcher.html#a956e7e1e195d2348627c44af58698af8',1,'compMsgDispatcher']]],
-  ['urls',['urls',['../structwebsocketUserData.html#a6a0efc924174732731f5b7aa4e768777',1,'websocketUserData']]]
+  ['uartreceivecb',['uartReceiveCb',['../structcompMsgSendReceive.html#a61e1db7590445a4505558dc348fcc953',1,'compMsgSendReceive']]],
+  ['uartsetup',['uartSetup',['../structcompMsgSendReceive.html#ae8ccb0ac8c8c1628b93961790ec51815',1,'compMsgSendReceive']]],
+  ['updatemodulevalues',['updateModuleValues',['../structcompMsgModuleData.html#a4ea8eccfbcfb1e8262ad6b9218486580',1,'compMsgModuleData']]],
+  ['urls',['urls',['../structsocketUserData.html#a011f222d5bb8be45f3def37028dba9ea',1,'socketUserData']]]
 ];
