@@ -84,8 +84,6 @@ compMsgTimer_t *newCompMsgTimer() {
     return NULL;
   }
 
-//  compMsgTimer->xx = &xx;
-
   return compMsgTimer;
 }
 

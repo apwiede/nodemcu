@@ -71,7 +71,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     idx++;
   }
 
-//ets_printf("§heap4: %d§\n", system_get_free_heap_size());
+ets_printf("§heap4: %d§\n", system_get_free_heap_size());
   // runAction calls at the end buildMsg
 //  self->resetBuildMsgInfos(self);
 //  self->buildMsgInfos.u16CmdKey = hdr->hdrU16CmdKey; // used in buildMsg -> setMsgValues!!

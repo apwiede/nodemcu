@@ -290,6 +290,8 @@ result = compMsgRequestInit(self);
   checkErrOK(result);
   result = compMsgHttpInit(self);
   checkErrOK(result);
+  result = compMsgOTAInit(self);
+  checkErrOK(result);
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
   if (typelen > 0) {

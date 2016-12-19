@@ -65,6 +65,7 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgData.h"
 #include "compMsgHttp.h"
 #include "compMsgDebug.h"
+#include "compMsgOTA.h"
 
 //#define CLOUD_1
 #define CLOUD_2
@@ -131,46 +132,49 @@ typedef struct compMsgDispatcher {
 
   msgHeaderInfos_t msgHeaderInfos;
 
-  // compMsgTypesAndNames info
+  // compMsgTypesAndNames
   compMsgTypesAndNames_t *compMsgTypesAndNames;
 
-  // compMsgMsgDesc info
+  // compMsgMsgDesc
   compMsgMsgDesc_t *compMsgMsgDesc;
 
-  // compMsgTimer info
+  // compMsgTimer
   compMsgTimer_t *compMsgTimer;
 
   // compMsgHttp info
   compMsgHttp_t *compMsgHttp;
 
-  // compMsgAction info
+  // compMsgAction
   compMsgAction_t *compMsgAction;
 
-  // compMsgWifiData info
+  // compMsgWifiData
   compMsgWifiData_t *compMsgWifiData;
 
-  // compMsgModuleData info
+  // compMsgModuleData
   compMsgModuleData_t *compMsgModuleData;
 
-  // compMsgIdentify info
+  // compMsgIdentify
   compMsgIdentify_t *compMsgIdentify;
 
-  // compMsgBuildMsg info
+  // compMsgBuildMsg
   compMsgBuildMsg_t *compMsgBuildMsg;
 
-  // compMsgSendReceive info
+  // compMsgSendReceive
   compMsgSendReceive_t *compMsgSendReceive;
 
-  // compMsgSocket info
+  // compMsgSocket
   compMsgSocket_t *compMsgSocket;
 
-  // compMsgDebug info
+  // compMsgDebug
   compMsgDebug_t *compMsgDebug;
 
-  // compMsgUtil info
+  // compMsgUtil
   compMsgUtil_t *compMsgUtil;
 
-  // compMsgRequest info
+  // compMsgRequest
+  compMsgOTA_t *compMsgOTA;
+
+  // compMsgRequest
   compMsgRequest_t *compMsgRequest;
 
   // Dispatcher function pointers
