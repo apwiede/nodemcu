@@ -1,22 +1,22 @@
 digraph G26 {
   sendMsg[style="filled", color="green", label=<<u>sendMsg</u>> URL="\ref sendMsg"];
   checkClientMode[style="filled", color="green", label=<<u>checkClientMode</u>> URL="\ref checkClientMode"];
-  netsocketRunClientMode[style="filled", color="green", label=<<u>netSocketRunClientMode</u>> URL="\ref netsocketRunClientMode"];
-  netsocketStartCloudSocket[style="filled", color="green", label=<<u>netsocketStartCloudSocket</u>> URL="\ref netsocketStartCloudSocket"];
+  runClientMode[style="filled", color="green", label=<<u>runClientMode</u>> URL="\ref runClientMode"];
+  netSocketStartCloudSocket[style="filled", color="green", label=<<u>netSocketStartCloudSocket</u>> URL="\ref netSocketStartCloudSocket"];
   prepareCloudMsg[style="filled", color="green", label=<<u>prepareCloudMsg</u>> URL="\ref prepareCloudMsg"];
   sendCloudMsg[style="filled", color="green", label=<<u>sendCloudMsg</u>> URL="\ref sendCloudMsg"];
   toBase64[style="filled", color="green", label=<<u>toBase64</u>> URL="\ref toBase64"];
   sendMsg -> checkClientMode;
-  checkClientMode ->netsocketRunClientMode;
-  netsocketRunClientMode -> netsocketStartCloudSocket;
-  netsocketStartCloudSocket -> prepareCloudMsg;
-  checkClientMode ->netsocketStartCloudSocket;
+  checkClientMode -> runClientMode;
+  runClientMode -> netSocketStartCloudSocket;
+  netSocketStartCloudSocket -> prepareCloudMsg;
+  checkClientMode ->netSocketStartCloudSocket;
   prepareCloudMsg -> toBase64;
   getWifiValue[style="filled", color="green", label=<<u>getWifiValue</u>> URL="\ref getWifiValue"];
   toBase64 -> getWifiValue;
   getWifiValue -> getWifiValue;
-  netsocketSendData[style="filled", color="green", label=<<u>netsocketSendData</u>> URL="\ref netsocketSendData"];
+  netSocketSendData[style="filled", color="green", label=<<u>netSocketSendData</u>> URL="\ref netSocketSendData"];
   sendCloudMsg[style="filled", color="green", label=<<u>sendCloudMsg</u>> URL="\ref sendCloudMsg"];
   getWifiValue -> sendCloudMsg;
-  sendCloudMsg -> netsocketSendData;
+  sendCloudMsg -> netSocketSendData;
 }

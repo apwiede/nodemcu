@@ -12,8 +12,8 @@ digraph G24 {
   compMsgWifiInit[label=<<u>compMsgWifiInit</u>>, style="filled", color="green" URL="\ref compMsgWifiInit"];
   compMsgWifiInit -> compMsgModuleDataInit;
   compMsgModuleDataInit[style="filled", color="green"];
-  compMsgModuleDataInit -> compMsgWebsocketInit;
-  compMsgWebsocketInit[style="filled", color="green"];
-  compMsgWebsocketInit -> compMsgNetsocketInit;
-  compMsgNetsocketInit[style="filled", color="green"];
+  compMsgModuleDataInit -> compMsgWebSocketInit;
+  compMsgWebSocketInit[style="filled", color="green"];
+  compMsgWebSocketInit -> compMsgNetSocketInit;
+  compMsgNetSocketInit[style="filled", color="green"];
 }
