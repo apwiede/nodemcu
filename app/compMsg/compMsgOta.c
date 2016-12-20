@@ -356,7 +356,6 @@ static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callbac
   rboot_config bootconf;
   err_t espconnResult;
 
-ets_printf("§otaStart1: cb: %p\n§", callback);
   // check not already updating
   if (system_upgrade_flag_check() == UPGRADE_FLAG_START) {
     return COMP_MSG_ERR_ALREADY_UPDATING;
@@ -383,7 +382,6 @@ ets_printf("§otaStart1: cb: %p\n§", callback);
   }
   uud->rom_slot = slot;
 
-ets_printf("§otaStart2: flashfs: %d\n§", flashfs);
   if (flashfs) {
     // flash spiffs
     uud->write_status = rboot_write_init((bootconf.roms[uud->rom_slot] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);
@@ -393,7 +391,6 @@ ets_printf("§otaStart2: flashfs: %d\n§", flashfs);
     uud->write_status = rboot_write_init(bootconf.roms[uud->rom_slot]);
   }
 
-ets_printf("§otaStart3: write_status: start_addr 0x%08x start_sector: 0x%08x\n§", uud->write_status.start_addr, uud->write_status.start_sector);
   // create connection
   uud->conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
   if (uud->conn == NULL) {
@@ -415,15 +412,11 @@ ets_printf("§otaStart3: write_status: start_addr 0x%08x start_sector: 0x%08x\n�
   system_upgrade_flag_set(UPGRADE_FLAG_START);
 
   // dns lookup
-otaHost = NULL;
   result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numericValue, &otaHost);
-ets_printf("§otaHost: %s result: %d\n§", otaHost, result);
   espconnResult = espconn_gethostbyname(uud->conn, otaHost, &uud->ip, upgradeResolved);
-ets_printf("§espconnResult: %d\n§", espconnResult);
   if (espconnResult == ESPCONN_OK) {
     // hostname is already cached or is actually a dotted decimal ip address
     upgradeResolved(0, &uud->ip, uud->conn);
-ets_printf("§upgradeResolved: 0x%08x\n§", uud->ip.addr);
   } else {
     if (espconnResult == ESPCONN_INPROGRESS) {
       // lookup taking place, will call upgrade_resolved on completion
@@ -446,10 +439,10 @@ static void otaUpdateCallback(bool result, uint8 rom_slot) {
   if (result == true) {
     // success
     if (rom_slot == FLASH_BY_ADDR) {
-      ets_printf("§rBoot: FS update successful.\n§");
+      ets_printf("§rBoot: Spiffs update successful.\n§");
     } else {
       // set to boot new rom and then reboot
-      ets_printf("§rBoot: Firmware updated, rebooting to rom %d...\n§", rom_slot);
+      ets_printf("§rBoot: Firmware update successful, rebooting to rom: %d...\n§", rom_slot);
       rboot_set_current_rom(rom_slot);
 ets_printf("§call system_restart\n§");
       system_restart();
@@ -467,7 +460,6 @@ ets_printf("§after call system_restart\n§");
 static uint8_t updateFirmware(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("§updateFirmware\n§");
   result = otaStart(self, otaUpdateCallback, false);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
@@ -478,7 +470,6 @@ ets_printf("§updateFirmware\n§");
 static uint8_t updateSpiffs(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("§updateSpiffs\n§");
   result = otaStart(self, otaUpdateCallback, true);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
@@ -495,7 +486,6 @@ ets_printf("§updateSpiffs\n§");
 static uint8_t checkClientMode(compMsgDispatcher_t *self, bool isSpiffs) {
   uint8_t result;
 
-ets_printf("§ota checkClientMode:\n§");
 
   if (isSpiffs) {
     self->compMsgSendReceive->startSendMsg = self->compMsgOta->updateSpiffs;
@@ -503,13 +493,9 @@ ets_printf("§ota checkClientMode:\n§");
     self->compMsgSendReceive->startSendMsg = self->compMsgOta->updateFirmware;
   }
   if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
-// FIXME !!! TEMPORARY
-ets_printf("§call netSocketRunClientMode: cb: %p\n§", self->compMsgSendReceive->startSendMsg);
     result = self->compMsgSocket->netSocketRunClientMode(self);
     checkErrOK(result);
-// FIXME !!! TEMPORARY END
   } else {
-ets_printf("§call startSend><Msg:%p\n§", self->compMsgSendReceive->startSendMsg);
     result = self->compMsgSendReceive->startSendMsg(self);
     checkErrOK(result);
   }
@@ -535,7 +521,6 @@ compMsgOta_t *newCompMsgOta() {
   if (compMsgOta == NULL) {
     return NULL;
   }
-
   return compMsgOta;
 }
 
