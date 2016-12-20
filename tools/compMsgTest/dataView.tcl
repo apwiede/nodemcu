@@ -305,6 +305,10 @@ puts stderr "getInt16 OUT_OF_RANGE!$offset!$lgth!"
       if {[expr {$offset + 1}] > $lgth} {
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
+      if {![string is integer $value]} {
+        set val $value
+        binary scan $val S value
+      }
       set sh [binary format S $value]
       set data [string replace $data $offset [expr {$offset +1}] $sh]
       incr offset
@@ -406,6 +410,8 @@ puts stderr "getInt32 OUT_OF_RANGE!$offset!$lgth!"
       if {[expr {$offset + 3}] > $lgth} {
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
+      set val $value
+      binary scan $val I value
       set data [string replace $data $offset $offset [binary format c [expr {($value >> 24) & 0xFF}]]]
       incr offset
       set data [string replace $data $offset $offset [binary format c [expr {($value >> 16) & 0xFF}]]]

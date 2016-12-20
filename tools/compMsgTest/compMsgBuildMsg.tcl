@@ -67,6 +67,7 @@ namespace eval compMsg {
     proc fixOffsetsForKeyValues {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
+#puts stderr "==fixOffsetsForKeyValues!"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set fieldIdx 0
       set msgDescPartIdx 0
@@ -78,13 +79,15 @@ namespace eval compMsg {
 #puts stderr "msgDescPart: $fieldIdx!"
         dict set compMsgDispatcher msgDescPart $msgDescPart
         set msgKeyValueDescPart [list]
-        if {[string range [dict get $msgDescPart fieldNameStr] 0 0] eq "#"} {
+        set fieldNameStr [dict get $msgDescPart fieldNameStr]
+        if {[string range $fieldNameStr 0 0] eq "#"} {
           # get the corresponding msgKeyValueDescPart
           set found false
           set keyValueIdx 0
           while {$keyValueIdx < [dict get $compMsgDispatcher numMsgKeyValueDescParts]} {
             set msgKeyValueDescPart [lindex [dict get $compMsgDispatcher msgKeyValueDescParts] $keyValueIdx]
-            if {[dict get $msgKeyValueDescPart keyNameStr] eq [dict get $msgDescPart fieldNameStr]} {
+            set keyNameStr [dict get $msgKeyValueDescPart keyNameStr]
+            if {$keyNameStr eq $fieldNameStr} {
               set found true
               break
             }
@@ -94,12 +97,12 @@ namespace eval compMsg {
             set msgKeyValueDescPart [list]
           }
         }
-        if {[dict get $msgDescPart fieldSizeCallback] ne [list]} {
+        set callback [dict get $msgDescPart fieldSizeCallback]
+        if {$callback ne [list]} {
           # the key name must have the prefix: "#key_"!
-          if {[string range [dict get $msgDescPart fieldNameStr] 0 0] ne "#"} {
+          if {[string range $fieldNameStr 0 0] ne "#"} {
             checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
           }
-          set callback [dict get $msgDescPart fieldSizeCallback]
           set callback [string range $callback 1 end] ; # strip off '@' character
           set result [::$callback compMsgDispatcher]
           checkErrOK $result
@@ -125,9 +128,11 @@ namespace eval compMsg {
             set fields [dict get $compMsgData fields]
             set fieldInfo [lindex $fields $fieldIdx]
             set msgDescPart [dict get $compMsgDispatcher msgDescPart]
+            dict set msgDescPart fieldSize [dict get $fieldInfo fieldLgth]
             dict set fieldInfo fieldKey [dict get $msgKeyValueDescPart keyId]
-            dict set msgDescPart fieldSize [dict get $msgKeyValueDescPart keyLgth]
+            dict set msgDescPart fieldSize [dict get $fieldInfo fieldLgth]
             dict incr msgDescPart fieldSize [expr {2 +1 + 2}] ; # for key, type and lgth in front of value!!
+            dict set fieldInfo fieldLgth [dict get $msgDescPart fieldSize]
             set fields [lreplace $fields $fieldIdx $fieldIdx $fieldInfo]
             set msgDescParts [dict get $compMsgData msgDescParts]
             set msgDescParts [lreplace $msgDescParts $msgDescPartIdx $msgDescPartIdx $msgDescPart]

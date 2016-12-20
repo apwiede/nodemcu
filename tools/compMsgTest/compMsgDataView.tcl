@@ -490,31 +490,33 @@ namespace eval ::compMsg {
       set lgth [dict get $fieldInfo fieldLgth]
       set offset [dict get $fieldInfo fieldOffset]
       set idx 0
-      set value ""
       while {$lgth >= 4} {
+        set value ""
         set myVal [expr {[getRandom] &0xFFFFFFFF}]
         append value [binary format c [expr {($myVal >> 24) & 0xFF}]]
         append value [binary format c [expr {($myVal >> 16) & 0xFF}]]
         append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
         append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-        set result [::compMsg dataView setUint32 $offset $myVal]
+        set result [::compMsg dataView setUint32 $offset $value]
         checkErrOK $result
         incr offset 4
         incr lgth -4
       }
       while {$lgth >= 2} {
+        set value ""
         set myVal [expr {[getRandom] & 0xFFFF}]
         append value [binary format c [expr {($myVal >> 8) & 0xFF}]]
         append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-        set result [::compMsg dataView setUint16 $offset $myVal]
+        set result [::compMsg dataView setUint16 $offset $value]
         checkErrOK $result
         incr offset 2
         incr lgth -2
       }
       while {$lgth >= 1} {
+        set value ""
         set myVal [expr {[getRandom] & 0xFF}]
         append value [binary format c [expr {($myVal >> 0) & 0xFF}]]
-        set result [::compMsg dataView setUint8 $offset $myVal]
+        set result [::compMsg dataView setUint8 $offset $value]
         checkErrOK $result
         incr offset 1
         incr lgth -1

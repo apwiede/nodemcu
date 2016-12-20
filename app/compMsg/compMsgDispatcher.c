@@ -266,7 +266,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   checkErrOK(result);
   result = compMsgUtilInit(self);
   checkErrOK(result);
-result = compMsgRequestInit(self);
+  result = compMsgRequestInit(self);
   checkErrOK(result);
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
@@ -410,6 +410,9 @@ ets_printf("newCompMsgDispatcher\n");
 
   // Request
   compMsgDispatcher->compMsgRequest = newCompMsgRequest();
+
+  // OTA
+  compMsgDispatcher->compMsgOTA = newCompMsgOTA();
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

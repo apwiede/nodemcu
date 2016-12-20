@@ -525,7 +525,17 @@ puts stderr "compMsgData2 setData"
             set result [::compMsg dataView setUint16 $offset [expr {[dict get $msgDescPart fieldSize] - (2 + 1 + 2)}]]
             checkErrOK $result
             incr offset 2
-            set result [::compMsg dataView setUint8Vector $offset $value [string length $value]]
+            switch [dict get $msgDescPart fieldTypeId] {
+              DATA_VIEW_FIELD_UINT8_VECTOR {
+                set result [::compMsg dataView setUint8Vector $offset $value [string length $value]]
+              }
+              DATA_VIEW_FIELD_UINT32_T {
+                set result [::compMsg dataView setUint32 $offset $value]
+              }
+              default {
+puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId]!"
+              }
+            }
           } else {
             set result [::compMsg compMsgDataView setFieldValue $fieldInfo $value 0]
           }
@@ -570,7 +580,11 @@ puts stderr "compMsgData2 setData"
             checkErrOK $result
             dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }
-          COMP_MSG_SPEC_FIELD_HDR_FILLER -
+          COMP_MSG_SPEC_FIELD_HDR_FILLER {
+            set result [::compMsg compMsgDataView setFiller $fieldInfo]
+            checkErrOK $result
+            dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
           COMP_MSG_SPEC_FIELD_FILLER {
             set result [::compMsg compMsgDataView setFiller $fieldInfo]
             checkErrOK $result
