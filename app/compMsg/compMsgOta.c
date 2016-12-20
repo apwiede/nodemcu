@@ -234,7 +234,7 @@ static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg) {
   // http request string
   request = (uint8 *)os_malloc(512);
   if (!request) {
-    c_printf("No ram!\n");
+    ets_printf("§No ram!\n§");
     compMsgOtaDeinit();
     return;
   }
@@ -246,7 +246,7 @@ static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg) {
     result = uud->compMsgDispatcher->compMsgModuleData->getOtaRomPath(uud->compMsgDispatcher, &numericValue, &otaRomPath);
     os_sprintf((char*)request, "GET %s HTTP/1.1\r\nHost: %s \r\n%s", otaRomPath, otaHost, HTTP_HEADER);
   }
-ets_printf("§otaRequest: %s§", request);
+ets_printf("§otaRequest: %s\n§", request);
 
   // send the http request, with timeout for reply
   os_timer_setfn(&ota_timer, (os_timer_func_t *)compMsgOtaDeinit, 0);
@@ -259,7 +259,7 @@ ets_printf("§otaRequest: %s§", request);
 
 // connection attempt timed out
 static void ICACHE_FLASH_ATTR connectTimeoutCb() {
-  c_printf("Connect timeout.\n");
+  ets_printf("§Connect timeout.\n§");
   // not connected so don't call disconnect on the connection
   // but call our own disconnect callback to do the cleanup
   upgradeDisconCb(uud->conn);
@@ -298,7 +298,7 @@ static const char* ICACHE_FLASH_ATTR espErrStr(sint8 err) {
 
 // call back for lost connection
 static void ICACHE_FLASH_ATTR upgradeReconCb(void *arg, sint8 errType) {
-  c_printf("Connection error: %s\n", espErrStr(errType));
+  ets_printf("§Connection error: %s\n§", espErrStr(errType));
   // not connected so don't call disconnect on the connection
   // but call our own disconnect callback to do the cleanup
   upgradeDisconCb(uud->conn);
@@ -310,10 +310,12 @@ static void ICACHE_FLASH_ATTR upgradeReconCb(void *arg, sint8 errType) {
 static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, void *arg) {
   uint8_t result;
   uint8_t *otaHost;
+  uint8_t *dummy;
   int port;
+  int numeric;
 
   if (ip == 0) {
-    result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &port, &otaHost);
+    result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numeric, &otaHost);
     ets_printf("DNS lookup failed for: %s\n", otaHost);
     // not connected so don't call disconnect on the connection
     // but call our own disconnect callback to do the cleanup
@@ -326,9 +328,9 @@ static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, v
   uud->conn->state = ESPCONN_NONE;
   uud->conn->proto.tcp->local_port = espconn_port();
 //FIXME!! get port from configuration data here!!
-  result = uud->compMsgDispatcher->compMsgModuleData->getOtaPort(uud->compMsgDispatcher, &port, &otaHost);
+  result = uud->compMsgDispatcher->compMsgModuleData->getOtaPort(uud->compMsgDispatcher, &port, &dummy);
   uud->conn->proto.tcp->remote_port = port;
-ets_printf("§host: %s port: %d\n§", name, port);
+ets_printf("§host: %s port: %d\n§", otaHost, port);
   *(ip_addr_t*)uud->conn->proto.tcp->remote_ip = *ip;
   // set connection call backs
   espconn_regist_connectcb(uud->conn, upgradeConnectCb);
@@ -363,7 +365,7 @@ ets_printf("§otaStart1: cb: %p\n§", callback);
   // create upgrade status structure
   uud = (userUpgradeData_t *)os_zalloc(sizeof(userUpgradeData_t));
   if (uud == NULL) {
-    c_printf("No ram!\n");
+    ets_printf("§No ram!\n§");
     return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
   uud->compMsgDispatcher = self;
@@ -395,14 +397,14 @@ ets_printf("§otaStart3: write_status: start_addr 0x%08x start_sector: 0x%08x\n�
   // create connection
   uud->conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
   if (uud->conn == NULL) {
-    c_printf("No ram!\n");
+    ets_printf("§No ram!\n§");
     os_free(uud);
     uud = NULL;
     return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
   uud->conn->proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
   if (uud->conn->proto.tcp == NULL) {
-    c_printf("No ram!\n");
+    ets_printf("§No ram!\n§");
     os_free(uud->conn);
     os_free(uud);
     uud = NULL;
@@ -444,16 +446,18 @@ static void otaUpdateCallback(bool result, uint8 rom_slot) {
   if (result == true) {
     // success
     if (rom_slot == FLASH_BY_ADDR) {
-      ets_printf("rBoot: FS update successful.\n");
+      ets_printf("§rBoot: FS update successful.\n§");
     } else {
       // set to boot new rom and then reboot
-      ets_printf("rBoot: Firmware updated, rebooting to rom %d...\n", rom_slot);
-//      rboot_set_current_rom(rom_slot);
-//      system_restart();
+      ets_printf("§rBoot: Firmware updated, rebooting to rom %d...\n§", rom_slot);
+      rboot_set_current_rom(rom_slot);
+ets_printf("§call system_restart\n§");
+      system_restart();
     }
+ets_printf("§after call system_restart\n§");
   } else {
     // fail
-    ets_printf("rBoot: Firmware update failed!\n");
+    ets_printf("§rBoot: Firmware update failed!\n§");
   }
 }
 
