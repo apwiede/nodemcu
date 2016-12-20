@@ -9,7 +9,22 @@ var searchData=
   ['uartreceivecb_5ft',['uartReceiveCb_t',['../compMsgSendReceive_8h.html#a60c652ecf161809d004c578ac614e5ca',1,'compMsgSendReceive.h']]],
   ['uartsetup',['uartSetup',['../structcompMsgSendReceive.html#ae8ccb0ac8c8c1628b93961790ec51815',1,'compMsgSendReceive::uartSetup()'],['../compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387',1,'uartSetup():&#160;compMsgSendReceive.c']]],
   ['uartsetup_5ft',['uartSetup_t',['../compMsgSendReceive_8h.html#a93d508a0b980ad6b95ae3d2fe447ce16',1,'compMsgSendReceive.h']]],
+  ['updatefirmware',['updateFirmware',['../structcompMsgOta.html#a1c7e88ca2b9c2982eb87e61776cede10',1,'compMsgOta::updateFirmware()'],['../compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55',1,'updateFirmware():&#160;compMsgOta.c']]],
+  ['updatefirmware_5ft',['updateFirmware_t',['../compMsgOta_8h.html#aa504533ac227ba8d53cb93a3c93f6345',1,'compMsgOta.h']]],
   ['updatemodulevalues',['updateModuleValues',['../structcompMsgModuleData.html#a4ea8eccfbcfb1e8262ad6b9218486580',1,'compMsgModuleData::updateModuleValues()'],['../compMsgModuleData_8c.html#a295a8eda9b3f59f6f32233691f1a8056',1,'updateModuleValues():&#160;compMsgModuleData.c']]],
   ['updatemodulevalues_5ft',['updateModuleValues_t',['../compMsgModuleData_8h.html#a6ad8fc75409a2be9ee96d47bb3362e78',1,'compMsgModuleData.h']]],
-  ['urls',['urls',['../structsocketUserData.html#a011f222d5bb8be45f3def37028dba9ea',1,'socketUserData']]]
+  ['updatespiffs',['updateSpiffs',['../structcompMsgOta.html#ad7e778a3de1776b8a72573b126629957',1,'compMsgOta::updateSpiffs()'],['../compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da',1,'updateSpiffs():&#160;compMsgOta.c']]],
+  ['updatespiffs_5ft',['updateSpiffs_t',['../compMsgOta_8h.html#a21a09d6f2ad7f2461dff914192824390',1,'compMsgOta.h']]],
+  ['upgrade_5fflag_5ffinish',['UPGRADE_FLAG_FINISH',['../compMsgOta_8c.html#a568d84b95c752e811a27a337830c3a54',1,'compMsgOta.c']]],
+  ['upgrade_5fflag_5fidle',['UPGRADE_FLAG_IDLE',['../compMsgOta_8c.html#ae9af3da1e7d88b1e0f353d45059f6f1b',1,'compMsgOta.c']]],
+  ['upgrade_5fflag_5fstart',['UPGRADE_FLAG_START',['../compMsgOta_8c.html#aa45c4c3f3b5ed0d3070af7cf0fe151a9',1,'compMsgOta.c']]],
+  ['upgradeconnectcb',['upgradeConnectCb',['../compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f',1,'compMsgOta.c']]],
+  ['upgradedisconcb',['upgradeDisconCb',['../compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7',1,'compMsgOta.c']]],
+  ['upgradereconcb',['upgradeReconCb',['../compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49',1,'compMsgOta.c']]],
+  ['upgraderecvcb',['upgradeRecvCb',['../compMsgOta_8c.html#a0403274e6e19b5ff0774855d8ae29067',1,'compMsgOta.c']]],
+  ['upgraderesolved',['upgradeResolved',['../compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe',1,'compMsgOta.c']]],
+  ['urls',['urls',['../structsocketUserData.html#a011f222d5bb8be45f3def37028dba9ea',1,'socketUserData']]],
+  ['userupgradedata',['userUpgradeData',['../structuserUpgradeData.html',1,'']]],
+  ['userupgradedata_5ft',['userUpgradeData_t',['../compMsgOta_8c.html#a0d7a3bf9821d166e271cf95472df532f',1,'compMsgOta.c']]],
+  ['uud',['uud',['../compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb',1,'compMsgOta.c']]]
 ];

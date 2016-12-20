@@ -7,6 +7,7 @@ var searchData=
   ['initreceivedmsg',['initReceivedMsg',['../structcompMsgData.html#a0295f624d173dd4771328375c90b7338',1,'compMsgData']]],
   ['inittimers',['initTimers',['../structcompMsgTimer.html#aed652826535a0ac552cfe969be1dfc26',1,'compMsgTimer']]],
   ['interval',['interval',['../structcompMsgTimerSlot.html#a7b03d7919659c59a86beb4fbb95baf33',1,'compMsgTimerSlot']]],
+  ['ip',['ip',['../structuserUpgradeData.html#a57399150590506aca9d99abe8100db43',1,'userUpgradeData']]],
   ['ip_5faddr',['ip_addr',['../structcompMsgTimerSlot.html#a79cc7ee91b3684dc331a88a61e841d21',1,'compMsgTimerSlot']]],
   ['ipaddr',['IPAddr',['../structcompMsgModuleData.html#a8a0a5576ec0edf02afb69c37e089c49e',1,'compMsgModuleData']]],
   ['ipprotocol',['IPProtocol',['../structcompMsgModuleData.html#a2b2f1919f347f2c627dd810f9d44adac',1,'compMsgModuleData']]],

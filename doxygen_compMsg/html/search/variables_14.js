@@ -9,6 +9,7 @@ var searchData=
   ['websockettextreceived',['webSocketTextReceived',['../structsocketUserData.html#a993d9c0db33be09800038821bfd6638a',1,'socketUserData::webSocketTextReceived()'],['../structcompMsgWifiData.html#aa1b6f67139fda6f08fa05943f66ce5be',1,'compMsgWifiData::webSocketTextReceived()']]],
   ['where',['where',['../structdataView.html#afdc01cf74e230ce4e601e70ca64b5dea',1,'dataView']]],
   ['wifiopmode',['wifiOpMode',['../structcompMsgWifiData.html#a267ceccdae521be8a4785878e716b067',1,'compMsgWifiData']]],
+  ['write_5fstatus',['write_status',['../structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3',1,'userUpgradeData']]],
   ['writeline',['writeLine',['../structcompMsgMsgDesc.html#ad16cf492c3118eb080126212e1d78731',1,'compMsgMsgDesc']]],
   ['ws_5fuuid',['ws_uuid',['../compMsgWebSocket_8c.html#a89e54a9d680b9cf9a22ef824931a1a4b',1,'compMsgWebSocket.c']]]
 ];

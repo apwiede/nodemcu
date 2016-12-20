@@ -94,6 +94,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;platform.h&quot;</code><br />
+<code>#include &quot;../rboot/rboot-ota.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="dataView_8h_source.html">dataView.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="compMsgErrorCodes_8h_source.html">compMsgErrorCodes.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="compMsgTypesAndNames_8h_source.html">compMsgTypesAndNames.h</a>&quot;</code><br />
@@ -112,6 +113,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <code>#include &quot;<a class="el" href="compMsgData_8h_source.html">compMsgData.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="compMsgHttp_8h_source.html">compMsgHttp.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="compMsgDebug_8h_source.html">compMsgDebug.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="compMsgOta_8h_source.html">compMsgOta.h</a>&quot;</code><br />
 </div>
 <p><a href="compMsgDispatcher_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -180,7 +182,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00070">70</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00072">72</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -194,7 +196,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00079">79</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00081">81</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -208,7 +210,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00076">76</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00078">78</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -222,7 +224,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00077">77</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00079">79</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -236,7 +238,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00078">78</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00080">80</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -250,7 +252,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00073">73</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00075">75</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -264,7 +266,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00074">74</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00076">76</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -279,7 +281,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00081">81</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00083">83</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -307,7 +309,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00089">89</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00091">91</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -321,7 +323,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00092">92</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00094">94</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -335,7 +337,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00093">93</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00095">95</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -349,7 +351,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00090">90</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00092">92</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -375,7 +377,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00091">91</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00093">93</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -389,7 +391,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00094">94</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8h_source.html#l00096">96</a> of file <a class="el" href="compMsgDispatcher_8h_source.html">compMsgDispatcher.h</a>.</p>
 
 </div>
 </div>
@@ -436,7 +438,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00452">452</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00469">469</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>
@@ -453,7 +455,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00360">360</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDispatcher_8c_source.html#l00374">374</a> of file <a class="el" href="compMsgDispatcher_8c_source.html">compMsgDispatcher.c</a>.</p>
 
 </div>
 </div>

@@ -13,6 +13,7 @@ var searchData=
   ['inittimers',['initTimers',['../structcompMsgTimer.html#aed652826535a0ac552cfe969be1dfc26',1,'compMsgTimer::initTimers()'],['../compMsgTimer_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a',1,'initTimers():&#160;compMsgTimer.c']]],
   ['inittimers_5ft',['initTimers_t',['../compMsgTimer_8h.html#a3864a60b4c0e5c02c2fa233648c0304e',1,'compMsgTimer.h']]],
   ['interval',['interval',['../structcompMsgTimerSlot.html#a7b03d7919659c59a86beb4fbb95baf33',1,'compMsgTimerSlot']]],
+  ['ip',['ip',['../structuserUpgradeData.html#a57399150590506aca9d99abe8100db43',1,'userUpgradeData']]],
   ['ip_5faddr',['ip_addr',['../structcompMsgTimerSlot.html#a79cc7ee91b3684dc331a88a61e841d21',1,'compMsgTimerSlot']]],
   ['ipaddr',['IPAddr',['../structcompMsgModuleData.html#a8a0a5576ec0edf02afb69c37e089c49e',1,'compMsgModuleData']]],
   ['ipprotocol',['IPProtocol',['../structcompMsgModuleData.html#a2b2f1919f347f2c627dd810f9d44adac',1,'compMsgModuleData']]],

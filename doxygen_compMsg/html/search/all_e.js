@@ -12,5 +12,13 @@ var searchData=
   ['opmode_5fnull',['OPMODE_NULL',['../compMsgWifiData_8h.html#aaeb4bb73421206cc8f94883495d7710f',1,'compMsgWifiData.h']]],
   ['opmode_5fsoftap',['OPMODE_SOFTAP',['../compMsgWifiData_8h.html#a17e22b505e2524dbdfa61c12abee69f6',1,'compMsgWifiData.h']]],
   ['opmode_5fstation',['OPMODE_STATION',['../compMsgWifiData_8h.html#a9239eacbd0544c97592c441d6d0c48e5',1,'compMsgWifiData.h']]],
-  ['opmode_5fstationap',['OPMODE_STATIONAP',['../compMsgWifiData_8h.html#ae0a21408f0677a8052d0a63066a769d7',1,'compMsgWifiData.h']]]
+  ['opmode_5fstationap',['OPMODE_STATIONAP',['../compMsgWifiData_8h.html#ae0a21408f0677a8052d0a63066a769d7',1,'compMsgWifiData.h']]],
+  ['ota_5ftimer',['ota_timer',['../compMsgOta_8c.html#ad3a984495f9bafd63452727f8807376c',1,'compMsgOta.c']]],
+  ['otafspath',['otaFsPath',['../structcompMsgModuleData.html#a0ae32ab2785a2613f66a7eaa79de2aed',1,'compMsgModuleData']]],
+  ['otahost',['otaHost',['../structcompMsgModuleData.html#a2360dbf5289dd8893cd0e28e5a180c5a',1,'compMsgModuleData']]],
+  ['otaport',['otaPort',['../structcompMsgModuleData.html#a2c8aa8af6558bc02fb014072bfa1313d',1,'compMsgModuleData']]],
+  ['otarompath',['otaRomPath',['../structcompMsgModuleData.html#a278958ce7c89d2762bf6fbc751ff3104',1,'compMsgModuleData']]],
+  ['otastart',['otaStart',['../structcompMsgOta.html#aa0419f653e61b2c2d22253adcaa6f1b2',1,'compMsgOta::otaStart()'],['../compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4',1,'otaStart():&#160;compMsgOta.c']]],
+  ['otastart_5ft',['otaStart_t',['../compMsgOta_8h.html#a87cc520499ec5420dd9d15c6c3d98536',1,'compMsgOta.h']]],
+  ['otaupdatecallback',['otaUpdateCallback',['../compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe',1,'compMsgOta.c']]]
 ];

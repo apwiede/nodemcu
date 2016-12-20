@@ -6,6 +6,9 @@ var searchData=
   ['u8cmdlgth',['u8CmdLgth',['../structmsgParts.html#a9389b836a9476f5b794022b3abd1730b',1,'msgParts']]],
   ['uartreceivecb',['uartReceiveCb',['../structcompMsgSendReceive.html#a61e1db7590445a4505558dc348fcc953',1,'compMsgSendReceive']]],
   ['uartsetup',['uartSetup',['../structcompMsgSendReceive.html#ae8ccb0ac8c8c1628b93961790ec51815',1,'compMsgSendReceive']]],
+  ['updatefirmware',['updateFirmware',['../structcompMsgOta.html#a1c7e88ca2b9c2982eb87e61776cede10',1,'compMsgOta']]],
   ['updatemodulevalues',['updateModuleValues',['../structcompMsgModuleData.html#a4ea8eccfbcfb1e8262ad6b9218486580',1,'compMsgModuleData']]],
-  ['urls',['urls',['../structsocketUserData.html#a011f222d5bb8be45f3def37028dba9ea',1,'socketUserData']]]
+  ['updatespiffs',['updateSpiffs',['../structcompMsgOta.html#ad7e778a3de1776b8a72573b126629957',1,'compMsgOta']]],
+  ['urls',['urls',['../structsocketUserData.html#a011f222d5bb8be45f3def37028dba9ea',1,'socketUserData']]],
+  ['uud',['uud',['../compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb',1,'compMsgOta.c']]]
 ];

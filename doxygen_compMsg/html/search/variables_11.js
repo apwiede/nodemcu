@@ -10,6 +10,7 @@ var searchData=
   ['tosend',['toSend',['../structcompMsgData.html#a5922a1b4eb9bd2627e5c9fded3e8b20b',1,'compMsgData']]],
   ['tosenddata',['toSendData',['../structcompMsgData.html#a454d4076bca4478dc1b33be14563d458',1,'compMsgData']]],
   ['tosendlgth',['toSendLgth',['../structcompMsgData.html#a01f95c9f5a5aee2185411b149a17d797',1,'compMsgData']]],
+  ['total_5flen',['total_len',['../structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944',1,'userUpgradeData']]],
   ['totallgth',['totalLgth',['../structcompMsgData.html#afb785997035bfff95dfbd79e399175cc',1,'compMsgData::totalLgth()'],['../structmsgParts.html#a34e09294bdb396923cc3f047ad8d59a9',1,'msgParts::totalLgth()']]],
   ['typersendanswer',['typeRSendAnswer',['../structcompMsgSendReceive.html#aa35a5837c6161bdbe085b187de98e9c8',1,'compMsgSendReceive']]]
 ];

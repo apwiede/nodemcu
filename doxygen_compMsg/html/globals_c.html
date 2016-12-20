@@ -123,7 +123,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="dataView_8h.html#a7b5e4ae473672cdbec87956b3a0fe668">dataView.h</a>
 </li>
 <li>checkClientMode()
-: <a class="el" href="compMsgSendReceive_8c.html#a80405511244d585196c9636f9ce0ec07">compMsgSendReceive.c</a>
+: <a class="el" href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">compMsgOta.c</a>
+, <a class="el" href="compMsgSendReceive_8c.html#a80405511244d585196c9636f9ce0ec07">compMsgSendReceive.c</a>
+</li>
+<li>checkClientMode_t
+: <a class="el" href="compMsgOta_8h.html#a81897f2b8a70dbcbcfa5c9321c7c5b0c">compMsgOta.h</a>
 </li>
 <li>checkConnectionStatus()
 : <a class="el" href="compMsgSocket_8c.html#a3fa7941f6b3d35fd0bf93aa7862167ae">compMsgSocket.c</a>
@@ -156,8 +160,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="compMsgDispatcher_8h.html#ae01ba2a895845b6abb7be476441ba618">compMsgDispatcher.h</a>
 </li>
 <li>cnt
-: <a class="el" href="compMsgWebSocket_8c.html#a9cfbb269728dc4185236d28be58d9eab">compMsgWebSocket.c</a>
-, <a class="el" href="compMsgNetSocket_8c.html#a9cfbb269728dc4185236d28be58d9eab">compMsgNetSocket.c</a>
+: <a class="el" href="compMsgNetSocket_8c.html#a9cfbb269728dc4185236d28be58d9eab">compMsgNetSocket.c</a>
+, <a class="el" href="compMsgWebSocket_8c.html#a9cfbb269728dc4185236d28be58d9eab">compMsgWebSocket.c</a>
 </li>
 <li>COMP_DISP_CALLBACK_TYPE_MODULE
 : <a class="el" href="compMsgDispatcher_8h.html#a58728f4468bd3d0dcb28b34d4e17b1eb">compMsgDispatcher.h</a>
@@ -339,6 +343,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>COMP_MSG_ERR_ALREADY_INITTED
 : <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2abea512dbe93028ff5c5cba207f690b86">compMsgErrorCodes.h</a>
 </li>
+<li>COMP_MSG_ERR_ALREADY_UPDATING
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a8d305bd1e7c95e58083c7c1e43018f55">compMsgErrorCodes.h</a>
+</li>
 <li>COMP_MSG_ERR_BAD_CRC_VALUE
 : <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a74875321386a055a34cbd8ca5464f801">compMsgErrorCodes.h</a>
 </li>
@@ -429,6 +436,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>COMP_MSG_ERR_DEFINITION_TOO_MANY_FIELDS
 : <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a1fb1714f53912b9018e512800b194f9b">compMsgErrorCodes.h</a>
 </li>
+<li>COMP_MSG_ERR_DNS_ERROR
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a077528dcb2e28a615eb658dc9bcab5ab">compMsgErrorCodes.h</a>
+</li>
 <li>COMP_MSG_ERR_DUPLICATE_ENTRY
 : <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a11571a0a1479b1c29f4f87831a9c1df7">compMsgErrorCodes.h</a>
 </li>
@@ -437,6 +447,33 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 <li>COMP_MSG_ERR_ENCODE_ERROR
 : <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a2f48881be82cd7aab2d049b3211c07e1">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_ABRT
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a7ca380daf8a2b768cd7fb979bc89ad53">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_ARG
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a4228a748ce4ae132f1f8d99dea28ac58">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_CLSD
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a0878639a224bdf072dc90923ad11db41">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_CONN
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2ac5676009cdb11030d004ffe72df14372">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_INPROGRESS
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2ad221c11edf073a1935be39d58ac1f18f">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_ISCONN
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a74c92be902088fd6511555a818f60751">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_RST
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2ac096959dc7aea03be73567ffd0db81ef">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_RTE
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2ada52d86691537286c810a40770621a0c">compMsgErrorCodes.h</a>
+</li>
+<li>COMP_MSG_ERR_ESPCONN_TIMEOUT
+: <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a9ab872122e1dd7428016089f97dac4bd">compMsgErrorCodes.h</a>
 </li>
 <li>COMP_MSG_ERR_FIELD_CANNOT_BE_SET
 : <a class="el" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2ab97840b0f9597ce3e3f15770df9126ed">compMsgErrorCodes.h</a>
@@ -847,9 +884,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="compMsgBuildMsg_8c.html#ac71f5e0e0e60b48a930cdb274efe7a41">compMsgBuildMsg.c</a>
 </li>
 <li>compMsgData_t
-: <a class="el" href="compMsgData_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData.h</a>
+: <a class="el" href="compMsgDispatcher_8h.html#a0f0db42938db12e05703debcec154dde">compMsgDispatcher.h</a>
 , <a class="el" href="compMsgMsgDesc_8h.html#a0f0db42938db12e05703debcec154dde">compMsgMsgDesc.h</a>
-, <a class="el" href="compMsgDispatcher_8h.html#a0f0db42938db12e05703debcec154dde">compMsgDispatcher.h</a>
+, <a class="el" href="compMsgData_8h.html#a0f0db42938db12e05703debcec154dde">compMsgData.h</a>
 </li>
 <li>compMsgDataView_t
 : <a class="el" href="compMsgDataView_8h.html#a1f2d8aa85064a3b4781234ff77e06ad6">compMsgDataView.h</a>
@@ -861,24 +898,25 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="compMsgDebug_8h.html#a5b0a8342d5a561c29d6741dbef6ab82d">compMsgDebug.h</a>
 </li>
 <li>compMsgDebugInit()
-: <a class="el" href="compMsgDebug_8c.html#ad3090d321ae15d33289379ccdf0f39a0">compMsgDebug.c</a>
-, <a class="el" href="compMsgDebug_8h.html#ad3090d321ae15d33289379ccdf0f39a0">compMsgDebug.h</a>
+: <a class="el" href="compMsgDebug_8h.html#ad3090d321ae15d33289379ccdf0f39a0">compMsgDebug.h</a>
+, <a class="el" href="compMsgDebug_8c.html#ad3090d321ae15d33289379ccdf0f39a0">compMsgDebug.c</a>
 </li>
 <li>compMsgDispatcher_t
-: <a class="el" href="compMsgSocket_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgSocket.h</a>
-, <a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgAction.h</a>
-, <a class="el" href="compMsgDispatcher_8h.html#a8186d38172d4f85b714c47973e2b9fcc">compMsgDispatcher.h</a>
-, <a class="el" href="compMsgRequest_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgRequest.h</a>
+: <a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDataView.h</a>
 , <a class="el" href="compMsgTimer_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgTimer.h</a>
-, <a class="el" href="compMsgUtil_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgUtil.h</a>
-, <a class="el" href="compMsgIdentify_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgIdentify.h</a>
-, <a class="el" href="compMsgBuildMsg_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgBuildMsg.h</a>
-, <a class="el" href="compMsgModuleData_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgModuleData.h</a>
-, <a class="el" href="compMsgDataView_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDataView.h</a>
-, <a class="el" href="compMsgHttp_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgHttp.h</a>
 , <a class="el" href="compMsgDebug_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDebug.h</a>
+, <a class="el" href="compMsgHttp_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgHttp.h</a>
+, <a class="el" href="compMsgModuleData_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgModuleData.h</a>
 , <a class="el" href="compMsgSendReceive_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgSendReceive.h</a>
+, <a class="el" href="compMsgSocket_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgSocket.h</a>
+, <a class="el" href="compMsgUtil_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgUtil.h</a>
 , <a class="el" href="compMsgWifiData_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgWifiData.h</a>
+, <a class="el" href="compMsgOta_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgOta.h</a>
+, <a class="el" href="compMsgRequest_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgRequest.h</a>
+, <a class="el" href="compMsgDispatcher_8h.html#a8186d38172d4f85b714c47973e2b9fcc">compMsgDispatcher.h</a>
+, <a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgAction.h</a>
+, <a class="el" href="compMsgBuildMsg_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgBuildMsg.h</a>
+, <a class="el" href="compMsgIdentify_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgIdentify.h</a>
 </li>
 <li>compMsgDispatcherGetPtrFromHandle()
 : <a class="el" href="compMsgDispatcher_8h.html#ac908215051f3c7f5f73fded0ab49debf">compMsgDispatcher.h</a>
@@ -909,8 +947,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="compMsgTypesAndNames_8h.html#ae28f1384ab76bc941dc5650306d2bcd8">compMsgTypesAndNames.h</a>
 </li>
 <li>compMsgGetPtrFromHandle()
-: <a class="el" href="compMsgData_8c.html#ad5f7480fbf10954d117ef9cce659f120">compMsgData.c</a>
-, <a class="el" href="compMsgData_8h.html#ad5f7480fbf10954d117ef9cce659f120">compMsgData.h</a>
+: <a class="el" href="compMsgData_8h.html#ad5f7480fbf10954d117ef9cce659f120">compMsgData.h</a>
+, <a class="el" href="compMsgData_8c.html#ad5f7480fbf10954d117ef9cce659f120">compMsgData.c</a>
 </li>
 <li>compMsgHandles
 : <a class="el" href="compMsgData_8c.html#ab480f743ba8f02806e32926ec53d584e">compMsgData.c</a>
@@ -932,8 +970,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="compMsgIdentify_8h.html#a6b6de2370bd2ad91345da7b631fb69ef">compMsgIdentify.h</a>
 </li>
 <li>compMsgIdentifyInit()
-: <a class="el" href="compMsgIdentify_8c.html#a80cbeb64dc6d71352ac6f4bb534557f5">compMsgIdentify.c</a>
-, <a class="el" href="compMsgIdentify_8h.html#a80cbeb64dc6d71352ac6f4bb534557f5">compMsgIdentify.h</a>
+: <a class="el" href="compMsgIdentify_8h.html#a80cbeb64dc6d71352ac6f4bb534557f5">compMsgIdentify.h</a>
+, <a class="el" href="compMsgIdentify_8c.html#a80cbeb64dc6d71352ac6f4bb534557f5">compMsgIdentify.c</a>
 </li>
 <li>compMsgModuleData
 : <a class="el" href="compMsgModuleData_8c.html#a9a66120843110528c807800d72f3f97d">compMsgModuleData.c</a>
@@ -955,8 +993,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="compMsgMsgDesc_8c.html#aac5361ecceee675ecc7e5a7122e50881">compMsgMsgDesc.c</a>
 </li>
 <li>compMsgNetSocketInit()
-: <a class="el" href="compMsgNetSocket_8c.html#aabd4f65053a6bfc3434ede1afc2ded9a">compMsgNetSocket.c</a>
-, <a class="el" href="compMsgSocket_8h.html#aabd4f65053a6bfc3434ede1afc2ded9a">compMsgSocket.h</a>
+: <a class="el" href="compMsgSocket_8h.html#aabd4f65053a6bfc3434ede1afc2ded9a">compMsgSocket.h</a>
+, <a class="el" href="compMsgNetSocket_8c.html#aabd4f65053a6bfc3434ede1afc2ded9a">compMsgNetSocket.c</a>
+</li>
+<li>compMsgOta_t
+: <a class="el" href="compMsgOta_8h.html#a9445877c718085cf2c3a9181176b3f36">compMsgOta.h</a>
+</li>
+<li>compMsgOtaDeinit()
+: <a class="el" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOta.c</a>
+</li>
+<li>compMsgOtaInit()
+: <a class="el" href="compMsgOta_8c.html#ab0382bf06f7904fe99e935aa6b2ba640">compMsgOta.c</a>
+, <a class="el" href="compMsgOta_8h.html#ab0382bf06f7904fe99e935aa6b2ba640">compMsgOta.h</a>
 </li>
 <li>compMsgRequest_t
 : <a class="el" href="compMsgRequest_8h.html#af7f848b05f63ce0be7b133aad76a3ae4">compMsgRequest.h</a>
@@ -969,8 +1017,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="compMsgSendReceive_8h.html#a47cd247bc61ca97f03f7c2888d24d609">compMsgSendReceive.h</a>
 </li>
 <li>compMsgSendReceiveInit()
-: <a class="el" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceive.c</a>
-, <a class="el" href="compMsgSendReceive_8h.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceive.h</a>
+: <a class="el" href="compMsgSendReceive_8h.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceive.h</a>
+, <a class="el" href="compMsgSendReceive_8c.html#a99b03f94b6f850e76216c1f23da16b39">compMsgSendReceive.c</a>
 </li>
 <li>compMsgSocket_t
 : <a class="el" href="compMsgSocket_8h.html#a7c40a73c352148811e28b63485e16d7c">compMsgSocket.h</a>
@@ -1018,6 +1066,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>compMsgWifiInit()
 : <a class="el" href="compMsgWifiData_8c.html#a38170c84d595710c71d129f96e8ee513">compMsgWifiData.c</a>
 , <a class="el" href="compMsgWifiData_8h.html#a38170c84d595710c71d129f96e8ee513">compMsgWifiData.h</a>
+</li>
+<li>connectTimeoutCb()
+: <a class="el" href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">compMsgOta.c</a>
 </li>
 <li>connectToAP()
 : <a class="el" href="compMsgWifiData_8c.html#a1b3b2a1bc2aa07af9609cd97568f6ef9">compMsgWifiData.c</a>

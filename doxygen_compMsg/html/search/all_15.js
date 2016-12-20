@@ -51,6 +51,7 @@ var searchData=
   ['wifi_5finfo_5fwifi',['WIFI_INFO_WIFI',['../compMsgWifiData_8h.html#a78c5f12817b51f3965734b2d6634da75',1,'compMsgWifiData.h']]],
   ['wifi_5finfo_5fwifi_5fopmode',['WIFI_INFO_WIFI_OPMODE',['../compMsgWifiData_8h.html#a4d3a4b8fb0f9fd8b8473421172f9c479',1,'compMsgWifiData.h']]],
   ['wifiopmode',['wifiOpMode',['../structcompMsgWifiData.html#a267ceccdae521be8a4785878e716b067',1,'compMsgWifiData']]],
+  ['write_5fstatus',['write_status',['../structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3',1,'userUpgradeData']]],
   ['writeline',['writeLine',['../structcompMsgMsgDesc.html#ad16cf492c3118eb080126212e1d78731',1,'compMsgMsgDesc::writeLine()'],['../compMsgMsgDesc_8c.html#acf2deae07a07bd4901d494e12c99882d',1,'writeLine():&#160;compMsgMsgDesc.c']]],
   ['writeline_5ft',['writeLine_t',['../compMsgMsgDesc_8h.html#a63fe844451aa07825f1064642be5b798',1,'compMsgMsgDesc.h']]],
   ['ws_5fuuid',['ws_uuid',['../compMsgWebSocket_8c.html#a89e54a9d680b9cf9a22ef824931a1a4b',1,'compMsgWebSocket.c']]]
