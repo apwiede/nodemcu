@@ -127,6 +127,12 @@ puts stderr "sendMsg S: Wifi -> Mcudone!"
           puts -nonewline $fd $msgData
           flush $fd
           close $fd
+          set b64Msg [binary encode base64 $msgData]
+          set fd [open CDTelegrambase64.txt w]
+          fconfigure $fd -translation binary
+          puts -nonewline $fd $b64Msg
+          flush $fd
+          close $fd
 puts stderr "\nhandleType U (Mcu Simulation) done!"
         }
         "W" {
