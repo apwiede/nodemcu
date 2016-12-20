@@ -241,7 +241,11 @@ puts stderr "getInt8 OUT_OF_RANGE!$offset!$lgth!"
       if {$offset > $lgth} {
         checkErrOK $::DATA_VIEW_ERR_OUT_OF_RANGE
       }
-      set ch [binary format c $value]
+      set pch $value
+      if {![string is integer $value]} {
+        binary scan $value c pch
+      }
+      set ch [binary format c $pch]
       set data [string replace $data $offset $offset $ch]
       return $::DATA_VIEW_ERR_OK
     }
