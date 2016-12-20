@@ -76,6 +76,10 @@
 #define MODULE_INFO_srcId                29
 #define MODULE_INFO_PASSWDC              30
 #define MODULE_INFO_operatingMode        31
+#define MODULE_INFO_OTA_HOST             32
+#define MODULE_INFO_OTA_ROM_PATH         33
+#define MODULE_INFO_OTA_FS_PATH          34
+#define MODULE_INFO_OTA_PORT             35
 
 #define MODULE_OPERATING_MODE_CLIENT             1
 #define MODULE_OPERATING_MODE_AP                 2
@@ -92,6 +96,10 @@ typedef struct compMsgModuleDataName2Value {
   uint8_t *value;
 } compMsgModuleDataName2Value_t;
 
+typedef uint8_t (* getOtaHost_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getOtaRomPath_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getOtaFsPath_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getOtaPort_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
@@ -127,7 +135,15 @@ typedef struct compMsgModuleData {
   uint16_t srcId;
   uint8_t passwdC[17];
   uint8_t operatingMode;
+  uint8_t otaHost[64];
+  uint8_t otaRomPath[128];
+  uint8_t otaFsPath[128];
+  uint16_t otaPort;
 
+  getOtaHost_t getOtaHost;
+  getOtaRomPath_t getOtaRomPath;
+  getOtaFsPath_t getOtaFsPath;
+  getOtaPort_t getOtaPort;
   setModuleValue_t setModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;

@@ -290,7 +290,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   checkErrOK(result);
   result = compMsgHttpInit(self);
   checkErrOK(result);
-  result = compMsgOTAInit(self);
+  result = compMsgOtaInit(self);
   checkErrOK(result);
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
@@ -316,7 +316,19 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
       checkErrOK(result);
       result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
-      ets_printf("handle: %s result: %d\n", handle, result);
+      ets_printf("§handle: %s result: %d\n§", handle, result);
+      checkErrOK(result);
+      break;
+    case 'O':
+ets_printf("§start ota firmware update\n§");
+      result = self->compMsgOta->checkClientMode(self, false);
+      ets_printf("§checkClientMode1: result: %d\n§", result);
+      checkErrOK(result);
+      break;
+    case 'o':
+ets_printf("§start ota spiffs update\n§");
+      result = self->compMsgOta->checkClientMode(self, true);
+      ets_printf("§echkClientMode2 result: %d\n§", result);
       checkErrOK(result);
       break;
     case 'U':
@@ -411,8 +423,8 @@ ets_printf("newCompMsgDispatcher\n");
   // Request
   compMsgDispatcher->compMsgRequest = newCompMsgRequest();
 
-  // OTA
-  compMsgDispatcher->compMsgOTA = newCompMsgOTA();
+  // Ota
+  compMsgDispatcher->compMsgOta = newCompMsgOta();
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;

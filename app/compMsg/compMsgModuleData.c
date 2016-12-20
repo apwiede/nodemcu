@@ -51,7 +51,7 @@
 
 static compMsgModuleData_t compMsgModuleData;
 
-static str2id_t modeluFieldName2Ids[] = {
+static str2id_t moduleFieldName2Ids[] = {
   { "MACAddr",                MODULE_INFO_MACAddr },
   { "IPAddr",                 MODULE_INFO_IPAddr },
   { "FirmwareVersion",        MODULE_INFO_FirmwareVersion },
@@ -82,6 +82,10 @@ static str2id_t modeluFieldName2Ids[] = {
   { "srcId",                  MODULE_INFO_srcId },
   { "passwdC",                MODULE_INFO_PASSWDC },
   { "operatingMode",          MODULE_INFO_operatingMode },
+  { "otaHost",                MODULE_INFO_OTA_HOST },
+  { "otaRomPath",             MODULE_INFO_OTA_ROM_PATH },
+  { "otaFsPath",              MODULE_INFO_OTA_FS_PATH },
+  { "otaPort",                MODULE_INFO_OTA_PORT },
   {NULL, -1},
 };
   
@@ -373,6 +377,43 @@ static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= getOtaHost ====================================
+
+static uint8_t getOtaHost(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+//  self->compMsgData->msgValPart->fieldValueStr = compMsgModuleData.otaHost;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.otaHost;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getOtaRomPath ====================================
+
+static uint8_t getOtaRomPath(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+//  self->compMsgData->msgValPart->fieldValueStr = compMsgModuleData.otaRomPath;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.otaRomPath;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getOtaFsPath ====================================
+
+static uint8_t getOtaFsPath(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+//  self->compMsgData->msgValPart->fieldValueStr = compMsgModuleData.otaFsPath;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.otaFsPath;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getOtaPort ====================================
+
+static uint8_t getOtaPort(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+//  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+//  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.otaPort;
+  *numericValue = compMsgModuleData.otaPort;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= setOperatingMode ====================================
 
 static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
@@ -503,6 +544,21 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
   case MODULE_INFO_operatingMode:
     compMsgModuleData.operatingMode = numericValue;
     break;
+  case MODULE_INFO_OTA_HOST:
+    c_memcpy(compMsgModuleData.otaHost, stringValue, c_strlen(stringValue));
+    compMsgModuleData.otaHost[c_strlen(stringValue)] = '\0';
+    break;
+  case MODULE_INFO_OTA_ROM_PATH:
+    c_memcpy(compMsgModuleData.otaRomPath, stringValue, c_strlen(stringValue));
+    compMsgModuleData.otaRomPath[c_strlen(stringValue)] = '\0';
+    break;
+  case MODULE_INFO_OTA_FS_PATH:
+    c_memcpy(compMsgModuleData.otaFsPath, stringValue, c_strlen(stringValue));
+    compMsgModuleData.otaFsPath[c_strlen(stringValue)] = '\0';
+    break;
+  case MODULE_INFO_OTA_PORT:
+    compMsgModuleData.otaPort = numericValue;
+    break;
   default:
     return COMP_MSG_ERR_BAD_MODULE_VALUE_WHICH;
     break;
@@ -581,6 +637,10 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.srcId = 12312;
   c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2\0", 17);
   compMsgModuleData.operatingMode = 0xE0;
+  c_memcpy(compMsgModuleData.otaHost, "192.168.178.31\0", 17);
+  c_memcpy(compMsgModuleData.otaRomPath, "/nodemcu-rboot.bin\0", 19);
+  c_memcpy(compMsgModuleData.otaFsPath, "/nodemcu-spiffs.bin\0", 20);
+  compMsgModuleData.otaPort = 80;
 //ets_printf("§setModuleVaues done\n§");
   return COMP_MSG_ERR_OK;
 }
@@ -593,6 +653,10 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgModuleData->setModuleValue = &setModuleValue;
   self->compMsgModuleData->setModuleValues = &setModuleValues;
   self->compMsgModuleData->updateModuleValues = &updateModuleValues;
+  self->compMsgModuleData->getOtaHost = &getOtaHost;
+  self->compMsgModuleData->getOtaRomPath = &getOtaRomPath;
+  self->compMsgModuleData->getOtaFsPath = &getOtaFsPath;
+  self->compMsgModuleData->getOtaPort = &getOtaPort;
 
   self->compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
@@ -625,6 +689,10 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getPasswdC", &getPasswdC, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@setOperatingMode", &setOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getOperatingMode", &getOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaHost", &getOtaHost, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaRomPath", &getOtaRomPath, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaFsPath", &getOtaFsPath, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaPort", &getOtaPort, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgModuleData->setModuleValues(self);
   return COMP_MSG_ERR_OK;
 }

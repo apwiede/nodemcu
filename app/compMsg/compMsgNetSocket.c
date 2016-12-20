@@ -645,7 +645,7 @@ static  void startClientMode(void *arg) {
 
 //ets_printf("§startClientMode\n§");
   compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
-//ets_printf("§startClientMode timerInfo:%p\n§", compMsgTimerSlot);
+ets_printf("§startClientMode timerInfo:%p\n§", compMsgTimerSlot);
   compMsgTimerSlot->connectionMode = STATION_IF;
   self = compMsgTimerSlot->compMsgDispatcher;
   pesp_conn = NULL;
@@ -663,7 +663,7 @@ static  void startClientMode(void *arg) {
 
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
-ets_printf("§IP: %s port: %d result: %d§", temp, port, result);
+ets_printf("§IP: %s port: %d result: %d\n§", temp, port, result);
 
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
 //   checkAllocOK(sud);
@@ -729,6 +729,7 @@ ets_printf("§regist_accept err result: %d§", result);
 ets_printf("§regist_time err result: %d§", result);
   }
   if (self->compMsgSendReceive->startSendMsg != NULL) {
+ets_printf("§call startSendMsg: %p\n§", self->compMsgSendReceive->startSendMsg);
     result = self->compMsgSendReceive->startSendMsg(self);
 //ets_printf("§startSendMsg result: %d§", result);
   }
@@ -744,7 +745,7 @@ static uint8_t netSocketRunClientMode(compMsgDispatcher_t *self) {
   uint8_t *stringValue;
   uint8_t opmode;
 
-//ets_printf("§netSocketRunClientMode called§\n");
+ets_printf("§netSocketRunClientMode called\n§");
   
   opmode = wifi_get_opmode();
 //ets_printf("§opmode: %d§", opmode);
@@ -762,7 +763,7 @@ static uint8_t netSocketRunClientMode(compMsgDispatcher_t *self) {
   checkErrOK(result);
 //ets_printf("len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
-ets_printf("§netSocketRunClientMode: ssid: %s password: %s!§\n", station_config.ssid, station_config.password);
+ets_printf("§netSocketRunClientMode: ssid: %s password: %s!\n§", station_config.ssid, station_config.password);
 
   boolResult = wifi_station_set_config(&station_config);
   if (!boolResult) {
@@ -774,7 +775,7 @@ ets_printf("§netSocketRunClientMode: ssid: %s password: %s!§\n", station_confi
     return COMP_MSG_ERR_CANNOT_CONNECT;
   }
   boolResult = wifi_station_set_hostname("testDeviceClient");
-ets_printf("§wifi is in mode: %d status: %d hostname: %s!§\n", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
+ets_printf("§wifi is in mode: %d status: %d hostname: %s!\n§", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
 
   return self->compMsgSocket->startConnectionTimer(self, 2, self->compMsgSocket->startClientMode);
 }

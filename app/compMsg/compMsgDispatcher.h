@@ -46,6 +46,7 @@
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 #include "platform.h"
+#include "../rboot/rboot-ota.h"
 
 #include "dataView.h"
 #include "compMsgErrorCodes.h"
@@ -65,7 +66,7 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgData.h"
 #include "compMsgHttp.h"
 #include "compMsgDebug.h"
-#include "compMsgOTA.h"
+#include "compMsgOta.h"
 
 //#define CLOUD_1
 #define CLOUD_2
@@ -172,7 +173,7 @@ typedef struct compMsgDispatcher {
   compMsgUtil_t *compMsgUtil;
 
   // compMsgRequest
-  compMsgOTA_t *compMsgOTA;
+  compMsgOta_t *compMsgOta;
 
   // compMsgRequest
   compMsgRequest_t *compMsgRequest;

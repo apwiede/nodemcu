@@ -50,15 +50,19 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef uint8_t (* updateFirmware_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateSpiffs_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* otaStart_t)(compMsgDispatcher_t *self, ota_callback callback, bool flashfs);
+typedef uint8_t (* checkClientMode_t)(compMsgDispatcher_t *self, bool isSpiffs);
 
-typedef struct compMsgOTA {
+typedef struct compMsgOta {
 
   updateFirmware_t updateFirmware;
   updateSpiffs_t updateSpiffs;
-} compMsgOTA_t;
+  otaStart_t otaStart;
+  checkClientMode_t checkClientMode;
+} compMsgOta_t;
 
-compMsgOTA_t *newCompMsgOTA();
-uint8_t compMsgOTAInit(compMsgDispatcher_t *self);
+compMsgOta_t *newCompMsgOta();
+uint8_t compMsgOtaInit(compMsgDispatcher_t *self);
 
 #ifdef  __cplusplus
 }

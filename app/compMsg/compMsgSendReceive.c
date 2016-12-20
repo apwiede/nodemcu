@@ -262,29 +262,13 @@ ets_printf("§request: %d %s§", c_strlen(payload), payload);
 // ================================= checkClientMode ====================================
 
 /**
- * \brief start the connection with the router
+ * \brief start the connection with the router for sending a cloud message
  * \param self The dispatcher struct
  * \return Error code or ErrorOK
  *
  */
 static uint8_t checkClientMode(compMsgDispatcher_t *self) {
   uint8_t result;
-  uint8_t *b64Msg;
-  uint8_t *host;
-  uint8_t *subUrl;
-  uint8_t *nodeToken;
-  uint8_t *hostPart;
-  uint8_t *alive;
-  uint8_t *contentType;
-  uint8_t *contentLgth;
-  uint8_t *accept;
-  int numericValue;
-  size_t payloadLgth;
-  uint8_t *msgData;
-  size_t msgLgth;
-  char lgthBuf[20];
-uint8_t *ssid;
-uint8_t *passwd;
 
 //ets_printf("§checkClientMode: §");
 

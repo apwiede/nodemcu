@@ -1,11 +1,11 @@
 //////////////////////////////////////////////////
 // This is a modified version of the code in nodemcu-firmware/app/rboot.c!!
 //
-// rBoot OTA sample code for ESP8266 C API.
+// rBoot Ota sample code for ESP8266 C API.
 // Copyright 2015 Richard A Burton
 // richardaburton@gmail.com
 // See license.txt for license terms.
-// OTA code based on SDK sample from Espressif.
+// Ota code based on SDK sample from Espressif.
 //////////////////////////////////////////////////
 
 /*
@@ -42,7 +42,7 @@
 */
 
 /* 
- * File:   compMsgOTA.c
+ * File:   compMsgOta.c
  * Author: Arnulf P. Wiedemann
  *
  * Created on December 19th, 2016
@@ -54,7 +54,7 @@
 #include "c_types.h"
 #include "mem.h"
 #include "flash_fs.h"
-#include "../rboot/rboot-ota.h"
+//#include "../rboot/rboot-ota.h"
 
 #include "c_string.h"
 #include "c_stdio.h"
@@ -70,7 +70,7 @@ extern "C" {
 #define UPGRADE_FLAG_START    0x01
 #define UPGRADE_FLAG_FINISH    0x02
 
-typedef struct {
+typedef struct userUpgradeData {
   uint8 rom_slot;         // rom slot to update, or FLASH_BY_ADDR
   ota_callback callback;  // user callback when completed
   uint32 total_len;
@@ -78,16 +78,17 @@ typedef struct {
   struct espconn *conn;
   ip_addr_t ip;
   rboot_write_status write_status;
-} upgrade_status;
+  compMsgDispatcher_t *compMsgDispatcher;
+} userUpgradeData_t;
 
-static upgrade_status *upgrade;
+static userUpgradeData_t *uud;
 static os_timer_t ota_timer;
 
-// ================================= compMsgOTADeinit ====================================
+// ================================= compMsgOtaDeinit ====================================
 
 // clean up at the end of the update
 // will call the user call back to indicate completion
-void ICACHE_FLASH_ATTR compMsgOTADeinit() {
+void ICACHE_FLASH_ATTR compMsgOtaDeinit() {
   bool result;
   uint8 rom_slot;
   ota_callback callback;
@@ -99,13 +100,13 @@ void ICACHE_FLASH_ATTR compMsgOTADeinit() {
   // then we can clean it up early, so disconnect callback
   // can distinguish between us calling it after update finished
   // or being called earlier in the update process
-  conn = upgrade->conn;
-  rom_slot = upgrade->rom_slot;
-  callback = upgrade->callback;
+  conn = uud->conn;
+  rom_slot = uud->rom_slot;
+  callback = uud->callback;
 
   // clean up
-  os_free(upgrade);
-  upgrade = 0;
+  os_free(uud);
+  uud = NULL;
 
   // if connected, disconnect and clean up connection
   if (conn) espconn_disconnect(conn);
@@ -137,7 +138,7 @@ static void ICACHE_FLASH_ATTR upgradeRecvCb(void *arg, char *pusrdata, unsigned 
   os_timer_disarm(&ota_timer);
 
   // first reply?
-  if (upgrade->content_len == 0) {
+  if (uud->content_len == 0) {
     // valid http response?
     if ((ptrLen = (char*)os_strstr(pusrdata, "Content-Length: "))
       && (ptrData = (char*)os_strstr(ptrLen, "\r\n\r\n"))
@@ -148,36 +149,36 @@ static void ICACHE_FLASH_ATTR upgradeRecvCb(void *arg, char *pusrdata, unsigned 
       // length of data after header in this chunk
       length -= (ptrData - pusrdata);
       // running total of download length
-      upgrade->total_len += length;
+      uud->total_len += length;
       // process current chunk
-      rboot_write_flash(&upgrade->write_status, (uint8*)ptrData, length);
+      rboot_write_flash(&uud->write_status, (uint8*)ptrData, length);
       // work out total download size
       ptrLen += 16;
       ptr = (char *)os_strstr(ptrLen, "\r\n");
       *ptr = '\0'; // destructive
-      upgrade->content_len = atoi(ptrLen);
+      uud->content_len = atoi(ptrLen);
     } else {
       // fail, not a valid http header/non-200 response/etc.
-      compMsgOTADeinit();
+      compMsgOtaDeinit();
       return;
     }
   } else {
     // not the first chunk, process it
-    upgrade->total_len += length;
-    rboot_write_flash(&upgrade->write_status, (uint8*)pusrdata, length);
+    uud->total_len += length;
+    rboot_write_flash(&uud->write_status, (uint8*)pusrdata, length);
   }
 
   // check if we are finished
-  if (upgrade->total_len == upgrade->content_len) {
+  if (uud->total_len == uud->content_len) {
     system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
     // clean up and call user callback
-    compMsgOTADeinit();
-  } else if (upgrade->conn->state != ESPCONN_READ) {
+    compMsgOtaDeinit();
+  } else if (uud->conn->state != ESPCONN_READ) {
     // fail, but how do we get here? premature end of stream?
-    compMsgOTADeinit();
+    compMsgOtaDeinit();
   } else {
     // timer for next recv
-    os_timer_setfn(&ota_timer, (os_timer_func_t *)compMsgOTADeinit, 0);
+    os_timer_setfn(&ota_timer, (os_timer_func_t *)compMsgOtaDeinit, 0);
     os_timer_arm(&ota_timer, OTA_NETWORK_TIMEOUT, 0);
   }
 }
@@ -204,11 +205,11 @@ static void ICACHE_FLASH_ATTR upgradeDisconCb(void *arg) {
   // must ensure disconnect was for this upgrade attempt,
   // not a previous one! this call back is async so another
   // upgrade struct may have been created already
-  if (upgrade && (upgrade->conn == conn)) {
+  if (uud && (uud->conn == conn)) {
     // mark connection as gone
-    upgrade->conn = 0;
+    uud->conn = 0;
     // end the update process
-    compMsgOTADeinit();
+    compMsgOtaDeinit();
   }
 }
 
@@ -216,31 +217,41 @@ static void ICACHE_FLASH_ATTR upgradeDisconCb(void *arg) {
 
 // successfully connected to update server, send the request
 static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg) {
+  uint8_t result;
   uint8_t *request;
+  uint8_t *otaHost;
+  uint8_t *otaRomPath;
+  uint8_t *otaFsPath;
+  int numericValue;
 
   // disable the timeout
   os_timer_disarm(&ota_timer);
 
   // register connection callbacks
-  espconn_regist_disconcb(upgrade->conn, upgradeDisconCb);
-  espconn_regist_recvcb(upgrade->conn, upgradeRecvCb);
+  espconn_regist_disconcb(uud->conn, upgradeDisconCb);
+  espconn_regist_recvcb(uud->conn, upgradeRecvCb);
 
   // http request string
   request = (uint8 *)os_malloc(512);
   if (!request) {
     c_printf("No ram!\n");
-    compMsgOTADeinit();
+    compMsgOtaDeinit();
     return;
   }
-  os_sprintf((char*)request,
-    "GET %s HTTP/1.1\r\nHost: " OTA_HOST "\r\n" HTTP_HEADER,
-    (upgrade->rom_slot == FLASH_BY_ADDR ? OTA_FS_PATH : OTA_ROM_PATH)
-    );
+  result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numericValue, &otaHost);
+  if (uud->rom_slot == FLASH_BY_ADDR) {
+    result = uud->compMsgDispatcher->compMsgModuleData->getOtaFsPath(uud->compMsgDispatcher, &numericValue, &otaFsPath);
+    os_sprintf((char*)request, "GET %s HTTP/1.1\r\nHost: %s \r\n%s", otaFsPath, otaHost, HTTP_HEADER);
+  } else {
+    result = uud->compMsgDispatcher->compMsgModuleData->getOtaRomPath(uud->compMsgDispatcher, &numericValue, &otaRomPath);
+    os_sprintf((char*)request, "GET %s HTTP/1.1\r\nHost: %s \r\n%s", otaRomPath, otaHost, HTTP_HEADER);
+  }
+ets_printf("§otaRequest: %s§", request);
 
   // send the http request, with timeout for reply
-  os_timer_setfn(&ota_timer, (os_timer_func_t *)compMsgOTADeinit, 0);
+  os_timer_setfn(&ota_timer, (os_timer_func_t *)compMsgOtaDeinit, 0);
   os_timer_arm(&ota_timer, OTA_NETWORK_TIMEOUT, 0);
-  espconn_sent(upgrade->conn, request, os_strlen((char*)request));
+  espconn_sent(uud->conn, request, os_strlen((char*)request));
   os_free(request);
 }
 
@@ -251,7 +262,7 @@ static void ICACHE_FLASH_ATTR connectTimeoutCb() {
   c_printf("Connect timeout.\n");
   // not connected so don't call disconnect on the connection
   // but call our own disconnect callback to do the cleanup
-  upgradeDisconCb(upgrade->conn);
+  upgradeDisconCb(uud->conn);
 }
 
 // ================================= espErrStr ====================================
@@ -290,34 +301,41 @@ static void ICACHE_FLASH_ATTR upgradeReconCb(void *arg, sint8 errType) {
   c_printf("Connection error: %s\n", espErrStr(errType));
   // not connected so don't call disconnect on the connection
   // but call our own disconnect callback to do the cleanup
-  upgradeDisconCb(upgrade->conn);
+  upgradeDisconCb(uud->conn);
 }
 
 // ================================= upgradeResolved ====================================
 
 // call back for dns lookup
 static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, void *arg) {
+  uint8_t result;
+  uint8_t *otaHost;
+  int port;
 
   if (ip == 0) {
-    c_printf("DNS lookup failed for: %s\n", OTA_HOST);
+    result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &port, &otaHost);
+    ets_printf("DNS lookup failed for: %s\n", otaHost);
     // not connected so don't call disconnect on the connection
     // but call our own disconnect callback to do the cleanup
-    upgradeDisconCb(upgrade->conn);
+    upgradeDisconCb(uud->conn);
     return;
   }
 
   // set up connection
-  upgrade->conn->type = ESPCONN_TCP;
-  upgrade->conn->state = ESPCONN_NONE;
-  upgrade->conn->proto.tcp->local_port = espconn_port();
-  upgrade->conn->proto.tcp->remote_port = OTA_PORT;
-  *(ip_addr_t*)upgrade->conn->proto.tcp->remote_ip = *ip;
+  uud->conn->type = ESPCONN_TCP;
+  uud->conn->state = ESPCONN_NONE;
+  uud->conn->proto.tcp->local_port = espconn_port();
+//FIXME!! get port from configuration data here!!
+  result = uud->compMsgDispatcher->compMsgModuleData->getOtaPort(uud->compMsgDispatcher, &port, &otaHost);
+  uud->conn->proto.tcp->remote_port = port;
+ets_printf("§host: %s port: %d\n§", name, port);
+  *(ip_addr_t*)uud->conn->proto.tcp->remote_ip = *ip;
   // set connection call backs
-  espconn_regist_connectcb(upgrade->conn, upgradeConnectCb);
-  espconn_regist_reconcb(upgrade->conn, upgradeReconCb);
+  espconn_regist_connectcb(uud->conn, upgradeConnectCb);
+  espconn_regist_reconcb(uud->conn, upgradeReconCb);
 
   // try to connect
-  espconn_connect(upgrade->conn);
+  espconn_connect(uud->conn);
 
   // set connection timeout timer
   os_timer_disarm(&ota_timer);
@@ -328,83 +346,126 @@ static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, v
 // ================================= otaStart ====================================
 
 // start the ota process, with user supplied options
-static bool ICACHE_FLASH_ATTR otaStart(ota_callback callback, bool flashfs) {
+static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callback callback, bool flashfs) {
   uint8_t slot;
+  uint8_t result;
+  uint8_t *otaHost;
+  int numericValue;
   rboot_config bootconf;
-  err_t result;
+  err_t espconnResult;
 
+ets_printf("§otaStart1: cb: %p\n§", callback);
   // check not already updating
   if (system_upgrade_flag_check() == UPGRADE_FLAG_START) {
-    return false;
+    return COMP_MSG_ERR_ALREADY_UPDATING;
   }
 
   // create upgrade status structure
-  upgrade = (upgrade_status*)os_zalloc(sizeof(upgrade_status));
-  if (!upgrade) {
+  uud = (userUpgradeData_t *)os_zalloc(sizeof(userUpgradeData_t));
+  if (uud == NULL) {
     c_printf("No ram!\n");
-    return false;
+    return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
+  uud->compMsgDispatcher = self;
 
   // store the callback
-  upgrade->callback = callback;
+  uud->callback = callback;
 
   // get details of rom slot to update
   bootconf = rboot_get_config();
   slot = bootconf.current_rom;
-  if (slot == 0) slot = 1; else slot = 0;
-  upgrade->rom_slot = slot;
+  if (slot == 0) {
+    slot = 1;
+  }  else {
+    slot = 0;
+  }
+  uud->rom_slot = slot;
 
+ets_printf("§otaStart2: flashfs: %d\n§", flashfs);
   if (flashfs) {
     // flash spiffs
-//    upgrade->write_status = rboot_write_init((bootconf.roms[upgrade->rom_slot] - 0x2000) + SPIFFS_FIXED_OFFSET_RBOOT);
-    upgrade->write_status = rboot_write_init((bootconf.roms[upgrade->rom_slot] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);
-    upgrade->rom_slot = FLASH_BY_ADDR;
+    uud->write_status = rboot_write_init((bootconf.roms[uud->rom_slot] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);
+    uud->rom_slot = FLASH_BY_ADDR;
   } else {
     // flash to rom slot
-    upgrade->write_status = rboot_write_init(bootconf.roms[upgrade->rom_slot]);
+    uud->write_status = rboot_write_init(bootconf.roms[uud->rom_slot]);
   }
 
+ets_printf("§otaStart3: write_status: start_addr 0x%08x start_sector: 0x%08x\n§", uud->write_status.start_addr, uud->write_status.start_sector);
   // create connection
-  upgrade->conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
-  if (!upgrade->conn) {
+  uud->conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
+  if (uud->conn == NULL) {
     c_printf("No ram!\n");
-    os_free(upgrade);
-    return false;
+    os_free(uud);
+    uud = NULL;
+    return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
-  upgrade->conn->proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
-  if (!upgrade->conn->proto.tcp) {
+  uud->conn->proto.tcp = (esp_tcp *)os_zalloc(sizeof(esp_tcp));
+  if (uud->conn->proto.tcp == NULL) {
     c_printf("No ram!\n");
-    os_free(upgrade->conn);
-    os_free(upgrade);
-    return false;
+    os_free(uud->conn);
+    os_free(uud);
+    uud = NULL;
+    return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
 
   // set update flag
   system_upgrade_flag_set(UPGRADE_FLAG_START);
 
   // dns lookup
-  result = espconn_gethostbyname(upgrade->conn, OTA_HOST, &upgrade->ip, upgradeResolved);
-  if (result == ESPCONN_OK) {
+otaHost = NULL;
+  result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numericValue, &otaHost);
+ets_printf("§otaHost: %s result: %d\n§", otaHost, result);
+  espconnResult = espconn_gethostbyname(uud->conn, otaHost, &uud->ip, upgradeResolved);
+ets_printf("§espconnResult: %d\n§", espconnResult);
+  if (espconnResult == ESPCONN_OK) {
     // hostname is already cached or is actually a dotted decimal ip address
-    upgradeResolved(0, &upgrade->ip, upgrade->conn);
-  } else if (result == ESPCONN_INPROGRESS) {
-    // lookup taking place, will call upgrade_resolved on completion
+    upgradeResolved(0, &uud->ip, uud->conn);
+ets_printf("§upgradeResolved: 0x%08x\n§", uud->ip.addr);
   } else {
-    c_printf("DNS error!\n");
-    os_free(upgrade->conn->proto.tcp);
-    os_free(upgrade->conn);
-    os_free(upgrade);
-    return false;
+    if (espconnResult == ESPCONN_INPROGRESS) {
+      // lookup taking place, will call upgrade_resolved on completion
+    } else {
+      ets_printf("§DNS error!\n§");
+      os_free(uud->conn->proto.tcp);
+      os_free(uud->conn);
+      os_free(uud);
+      uud = NULL;
+      return COMP_MSG_ERR_DNS_ERROR;
+    }
   }
 
-  return true;
+  return COMP_MSG_ERR_OK;
 }
+
+// ================================= otaUpdatCallback ====================================
+
+static void otaUpdateCallback(bool result, uint8 rom_slot) {
+  if (result == true) {
+    // success
+    if (rom_slot == FLASH_BY_ADDR) {
+      ets_printf("rBoot: FS update successful.\n");
+    } else {
+      // set to boot new rom and then reboot
+      ets_printf("rBoot: Firmware updated, rebooting to rom %d...\n", rom_slot);
+//      rboot_set_current_rom(rom_slot);
+//      system_restart();
+    }
+  } else {
+    // fail
+    ets_printf("rBoot: Firmware update failed!\n");
+  }
+}
+
 
 // ================================= updateFirmware ====================================
 
 static uint8_t updateFirmware(compMsgDispatcher_t *self) {
   uint8_t result;
 
+ets_printf("§updateFirmware\n§");
+  result = otaStart(self, otaUpdateCallback, false);
+  checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
 
@@ -413,28 +474,65 @@ static uint8_t updateFirmware(compMsgDispatcher_t *self) {
 static uint8_t updateSpiffs(compMsgDispatcher_t *self) {
   uint8_t result;
 
+ets_printf("§updateSpiffs\n§");
+  result = otaStart(self, otaUpdateCallback, true);
+  checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= compMsgOTAInit ====================================
+// ================================= checkClientMode ====================================
 
-uint8_t compMsgOTAInit(compMsgDispatcher_t *self) {
+/**
+ * \brief start the connection with the router for doing ota updates
+ * \param self The dispatcher struct
+ * \return Error code or ErrorOK
+ *
+ */
+static uint8_t checkClientMode(compMsgDispatcher_t *self, bool isSpiffs) {
   uint8_t result;
 
-  self->compMsgOTA->updateFirmware = &updateFirmware;
-  self->compMsgOTA->updateSpiffs = &updateSpiffs;
+ets_printf("§ota checkClientMode:\n§");
+
+  if (isSpiffs) {
+    self->compMsgSendReceive->startSendMsg = self->compMsgOta->updateSpiffs;
+  } else {
+    self->compMsgSendReceive->startSendMsg = self->compMsgOta->updateFirmware;
+  }
+  if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
+// FIXME !!! TEMPORARY
+ets_printf("§call netSocketRunClientMode: cb: %p\n§", self->compMsgSendReceive->startSendMsg);
+    result = self->compMsgSocket->netSocketRunClientMode(self);
+    checkErrOK(result);
+// FIXME !!! TEMPORARY END
+  } else {
+ets_printf("§call startSend><Msg:%p\n§", self->compMsgSendReceive->startSendMsg);
+    result = self->compMsgSendReceive->startSendMsg(self);
+    checkErrOK(result);
+  }
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= newCompMsgOTA ====================================
+// ================================= compMsgOtaInit ====================================
 
-compMsgOTA_t *newCompMsgOTA() {
-  compMsgOTA_t *compMsgOTA = os_zalloc(sizeof(compMsgOTA_t));
-  if (compMsgOTA == NULL) {
+uint8_t compMsgOtaInit(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+  self->compMsgOta->updateFirmware = &updateFirmware;
+  self->compMsgOta->updateSpiffs = &updateSpiffs;
+  self->compMsgOta->checkClientMode = &checkClientMode;
+  self->compMsgOta->otaStart = &otaStart;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= newCompMsgOta ====================================
+
+compMsgOta_t *newCompMsgOta() {
+  compMsgOta_t *compMsgOta = os_zalloc(sizeof(compMsgOta_t));
+  if (compMsgOta == NULL) {
     return NULL;
   }
 
-  return compMsgOTA;
+  return compMsgOta;
 }
 
 #ifdef __cplusplus
