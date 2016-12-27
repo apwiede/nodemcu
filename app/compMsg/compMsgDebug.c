@@ -48,6 +48,11 @@
 #include "c_stdlib.h"
 #include "compMsgDispatcher.h"
 
+#define MAX_BUFFER_SIZE 1024
+
+int ets_vsprintf(char *str, const char *format, va_list argptr);
+int ets_vsnprintf(char *buffer, size_t sizeOfBuffer,  const char *format, va_list argptr);
+
 typedef struct debugCh2Id {
   uint8_t ch;
   uint32_t id;
@@ -108,145 +113,48 @@ static uint32_t getDebugFlags(compMsgDispatcher_t *self, uint8_t *dbgChars) {
   return flags;
 }
 
-void ets_vprintf(int stream, const char* fmt, va_list arglist );  
-
-
 // ================================= dbgPrintf ====================================
 
 static void dbgPrintf(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...) {
   uint32_t flags;
   va_list arglist;
-  int id;
-  char buf[30];
-  char outbuf[30];
+  int idx;
+  int uartId;
+  char buffer[MAX_BUFFER_SIZE];
   uint8_t *cp;
-  uint8_t *cp2;
-  uint8_t *cp3;
-  uint8_t *ep;
-  char chval;
-  int val;
-  int dval;
-  void *pval;
-  char *strval;
-  bool found;
+  size_t lgth;
 
-  id = 0;
-  ep = format + c_strlen(format) - 1;
+  uartId = self->compMsgDebug->debugUartId;
   flags = self->compMsgDebug->getDebugFlags(self, dbgChars);
   if (flags && (debugLevel >= self->compMsgDebug->debugLevel)) {
-    cp3 = "%==DBG: ";
-    while (*cp3 != '\0') {
-      platform_uart_send(id, *cp3);
-      cp3++;
-    }
-    va_start(arglist, format);
-    cp = format;
-    while (*cp) {
-      switch (*cp) {
-      case '\n':
-        if (cp < ep) {
-          platform_uart_send(id, '\n');
-        }
-        break;
-      case '%':
-        cp3 = cp;
-        cp2 = buf;
-        *cp2++ = *cp;
-        cp++;
-        found = false;
-        while (*cp != '\0') {
-          switch (*cp) {
-          case 'c':
-          case 'd':
-          case 'u':
-          case 's':
-          case 'x':
-          case 'p':
-          case '%':
-            *cp2 = *cp;
-            cp2++;
-            found = true;
-            break;
-          default:
-            *cp2 = *cp;
-            cp2++;
-            cp++;
-            break;
-          }
-          if (found) {
-            break;
-          }
-        }
-        *cp2 = '\0';
-        switch (*cp) {
-        case '%':
-          platform_uart_send(id, *cp);
-          break;
-        case 'c':
-          chval = (char)va_arg(arglist, int);
-          ets_sprintf(outbuf, buf, chval);
-          cp3 = outbuf;
-          while (*cp3 != '\0') {
-            platform_uart_send(id, *cp3);
-            cp3++;
-          }
-          break;
-        case 'd':
-          dval = va_arg(arglist, int);
-          ets_sprintf(outbuf, buf, dval);
-          cp3 = outbuf;
-          while (*cp3 != '\0') {
-            platform_uart_send(id, *cp3);
-            cp3++;
-          }
-          break;
-        case 's':
-          strval = va_arg(arglist, char*);
-          ets_sprintf(outbuf, buf, strval);
-          cp3 = outbuf;
-          while (*cp3 != '\0') {
-            platform_uart_send(id, *cp3);
-            cp3++;
-          }
-          break;
-        case 'u':
-        case 'x':
-          dval = va_arg(arglist, int);
-          ets_sprintf(outbuf, buf, dval);
-          cp3 = outbuf;
-          while (*cp3 != '\0') {
-            platform_uart_send(id, *cp3);
-            cp3++;
-          }
-          break;
-        case 'p':
-          pval = va_arg(arglist, void*);
-          ets_sprintf(outbuf, buf, pval);
-          cp3 = outbuf;
-          while (*cp3 != '\0') {
-            platform_uart_send(id, *cp3);
-            cp3++;
-          }
-          break;
-        default:
-          platform_uart_send(id, *cp);
-        }
-        break;
-      default:
-        platform_uart_send(id, *cp);
-        break;
-      }
+    cp = "%==DBG: ";
+    while (*cp != '\0') {
+      platform_uart_send(uartId, *cp);
       cp++;
     }
-    cp3 = "%";
-    while (*cp3 != '\0') {
-      platform_uart_send(id, *cp3);
-      cp3++;
+    va_start(arglist, format);
+    lgth = ets_vsnprintf(buffer, MAX_BUFFER_SIZE-1, format, arglist);
+    if (lgth < 0) {
+ets_printf("ERROR DBG_STR too long\n");
+    } else {
+      cp = buffer;
+      if (cp[lgth - 1] == '\n') {
+        lgth--;
+      }
+      idx = 0;
+      while (idx < lgth) {
+        platform_uart_send(uartId, *cp++);
+        idx++;
+      }
+      va_end(arglist);
+      cp = "%";
+      while (*cp != '\0') {
+        platform_uart_send(uartId, *cp++);
+      }
+      if (self->compMsgDebug->addEol) {
+        platform_uart_send(uartId, '\n');
+      }
     }
-    if (self->compMsgDebug->addEol) {
-      platform_uart_send(id, '\n');
-    }
-    va_end(arglist);
   }
 }
 
@@ -510,6 +418,7 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   self->compMsgDebug->currDebugFlags = DEBUG_COMP_MSG_WEB_SOCKET;
   self->compMsgDebug->addEol = true;
   self->compMsgDebug->debugLevel = 1;
+  self->compMsgDebug->debugUartId = 0;
 
   self->compMsgDebug->dbgPrintf = &dbgPrintf;
   self->compMsgDebug->getDebugFlags = &getDebugFlags;

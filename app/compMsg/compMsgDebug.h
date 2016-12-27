@@ -90,6 +90,7 @@ typedef struct compMsgDebug {
   uint32_t currDebugFlags;
   bool addEol;
   uint8_t debugLevel;
+  uint8_t debugUartId;
 
   dbgPrintf_t dbgPrintf;
   getDebugFlags_t getDebugFlags;
