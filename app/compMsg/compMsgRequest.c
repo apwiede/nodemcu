@@ -113,17 +113,18 @@ ets_printf("§COMP_MSG_ERR_TOO_MANY_REQUESTS§");
   self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestData;
 //ets_printf("addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
 //FIXME TEMPORARY last if clause!!
+//ets_printf("addRequest 2 %d %p\n", self->compMsgRequest->msgRequestInfos.currRequestIdx, requestData);
   if ((self->compMsgRequest->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->compMsgRequest->msgRequestInfos.currRequestIdx++;
     checkErrOK(result);
     compMsgData = self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.currRequestIdx];
     switch (compMsgData->direction) {
     case COMP_MSG_TO_SEND_DATA:
-//ets_printf("addRequest: toSendData: %p\n", compMsgData->toSendData);
+//ets_printf("addRequest: toSendData: %p %d\n", compMsgData->toSendData, compMsgData->toSendLgth);
       result = self->compMsgIdentify->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
       break;
     case COMP_MSG_RECEIVED_DATA:
-//ets_printf("addRequest: receivedData: %p\n", compMsgData->receivedData);
+//ets_printf("addRequest: receivedData: %p %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
       result = self->compMsgIdentify->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
       break;
     default:

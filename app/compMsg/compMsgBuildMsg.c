@@ -406,7 +406,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   COMP_MSG_DBG(self, "B", 2, "totalCrc: %d\n", self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC);
   if (self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
     fieldInfo = &self->compMsgData->fields[self->compMsgData->numFields - 1];
-    result = self->compMsgData->compMsgDataView->setTotalCrc(self->compMsgData->compMsgDataView, fieldInfo);
+    result = self->compMsgData->compMsgDataView->setTotalCrc(self, self->compMsgData->compMsgDataView->dataView, fieldInfo);
     COMP_MSG_DBG(self, "B", 2, "setTotalCrc: result: %d fieldOffset: %d\n", result, fieldInfo->fieldOffset);
     checkErrOK(result);
   }

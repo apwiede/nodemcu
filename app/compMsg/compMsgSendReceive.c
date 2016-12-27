@@ -372,6 +372,5 @@ compMsgSendReceive_t *newCompMsgSendReceive() {
   if (compMsgSendReceive == NULL) {
     return NULL;
   }
-
   return compMsgSendReceive;
 }

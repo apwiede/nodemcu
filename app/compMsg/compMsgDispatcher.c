@@ -74,17 +74,17 @@ static compMsgDispatcher_t *compMsgDispatcherSingleton = NULL;
 
 // ============================= addHandle ========================
 
-static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
+static int addHandle(uint8_t *handle, compMsgDispatcher_t *self) {
   int idx;
 
-//ets_printf("§dispatcher addHandle: %s!§\n", handle);
+  COMP_MSG_DBG(self, "D", 2, "dispatcher addHandle: %s!\n", handle);
   if (compMsgDispatcherHandles.handles == NULL) {
     compMsgDispatcherHandles.handles = os_zalloc(sizeof(handle2Dispatcher_t));
     if (compMsgDispatcherHandles.handles == NULL) {
       return COMP_MSG_ERR_OUT_OF_MEMORY;
     } else {
       compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].handle = handle;
-      compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].compMsgDispatcher = compMsgDispatcher;
+      compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].compMsgDispatcher = self;
       compMsgDispatcherHandles.numHandles++;
       return COMP_MSG_ERR_OK;
     }
@@ -94,7 +94,7 @@ static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
     while (idx < compMsgDispatcherHandles.numHandles) {
       if (compMsgDispatcherHandles.handles[idx].handle == NULL) {
         compMsgDispatcherHandles.handles[idx].handle = handle;
-        compMsgDispatcherHandles.handles[idx].compMsgDispatcher = compMsgDispatcher;
+        compMsgDispatcherHandles.handles[idx].compMsgDispatcher = self;
         return COMP_MSG_ERR_OK;
       }
       idx++;
@@ -102,7 +102,7 @@ static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
     compMsgDispatcherHandles.handles = os_realloc(compMsgDispatcherHandles.handles, sizeof(handle2Dispatcher_t)*(compMsgDispatcherHandles.numHandles+1));
     checkAllocOK(compMsgDispatcherHandles.handles);
     compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].handle = handle;
-    compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].compMsgDispatcher = compMsgDispatcher;
+    compMsgDispatcherHandles.handles[compMsgDispatcherHandles.numHandles].compMsgDispatcher = self;
     compMsgDispatcherHandles.numHandles++;
   }
   return COMP_MSG_ERR_OK;
@@ -110,14 +110,16 @@ static int addHandle(uint8_t *handle, compMsgDispatcher_t *compMsgDispatcher) {
 
 // ============================= deleteHandle ========================
 
-static int deleteHandle(const uint8_t *handle) {
+static int deleteHandle(compMsgDispatcher_t *self) {
   int idx;
   int numUsed;
   int found;
+  const uint8_t *handle;
 
-ets_printf("§dispatcher deleteHandle: %s!§\n", handle);
+  handle = self->handle;
+  COMP_MSG_DBG(self, "D", 1, "dispatcher deleteHandle: %s!\n", handle);
   if (compMsgDispatcherHandles.handles == NULL) {
-ets_printf("dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
+    COMP_MSG_DBG(self, "Y", 0, "dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   found = 0;
@@ -144,7 +146,7 @@ ets_printf("dispatcher deleteHandle 1 HANLDE_NOT_FOUND\n");
   if (found) {
       return COMP_MSG_ERR_OK;
   }
-ets_printf("deleteHandle 2 HANLDE_NOT_FOUND\n");
+  COMP_MSG_DBG(self, "Y", 0, "deleteHandle 2 HANLDE_NOT_FOUND\n");
   return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -154,7 +156,7 @@ static int checkHandle(const char *handle, compMsgDispatcher_t **compMsgDispatch
   int idx;
 
   if (compMsgDispatcherHandles.handles == NULL) {
-ets_printf("checkHandle 1 HANLDE_NOT_FOUND\n");
+    ets_printf("dispatcher checkHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   idx = 0;
@@ -165,7 +167,7 @@ ets_printf("checkHandle 1 HANLDE_NOT_FOUND\n");
     }
     idx++;
   }
-ets_printf("checkHandle 2 HANDLE_NOT_FOUND\n");
+  ets_printf("dispatcher checkHandle 2 HANDLE_NOT_FOUND\n");
   return COMP_MSG_ERR_HANDLE_NOT_FOUND;
 }
 
@@ -244,7 +246,7 @@ static uint8_t resetMsgInfo(compMsgDispatcher_t *self, msgParts_t *parts) {
 uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher) {
 
   if (checkHandle(handle, compMsgDispatcher) != COMP_MSG_ERR_OK) {
-ets_printf("compMsgDispatcherGetPtrFromHandle 1 HANLDE_NOT_FOUND\n");
+    ets_printf("compMsgDispatcherGetPtrFromHandle 1 HANLDE_NOT_FOUND\n");
     return COMP_MSG_ERR_HANDLE_NOT_FOUND;
   }
   return COMP_MSG_ERR_OK;
@@ -262,7 +264,8 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   int databits;
   uint32_t baud;
 
-  result = compMsgDebugInit(self);
+ets_printf("initDispatcher 1\n");
+  result = compMsgMsgDescInit(self);
   checkErrOK(result);
   result = compMsgUtilInit(self);
   checkErrOK(result);
@@ -272,8 +275,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
   checkErrOK(result);
-  result = compMsgBuildMsgInit(self);
-  checkErrOK(result);
+ets_printf("initDispatcher 2\n");
   result = compMsgSendReceiveInit(self);
   checkErrOK(result);
   result = compMsgActionInit(self);
@@ -288,12 +290,14 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   checkErrOK(result);
   result = compMsgNetSocketInit(self);
   checkErrOK(result);
+ets_printf("initDispatcher 3\n");
   result = compMsgHttpInit(self);
   checkErrOK(result);
   result = compMsgOtaInit(self);
   checkErrOK(result);
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
+ets_printf("initDispatcher 4\n");
   if (typelen > 0) {
     switch(type[0]) {
     case 'W':
@@ -355,29 +359,41 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
 static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
   uint8_t result;
 
+ets_printf("createDispatcher 1\n");
   os_sprintf(self->handle, "%s%p", DISP_HANDLE_PREFIX, self);
-//ets_printf("§os createDispatcher: %s!\n§", self->handle);
+  COMP_MSG_DBG(self, "D", 2, "os createDispatcher: %s!\n", self->handle);
   result = addHandle(self->handle, self);
   if (result != COMP_MSG_ERR_OK) {
-    deleteHandle(self->handle);
+    deleteHandle(self);
     os_free(self);
     return result;
   }
 //  resetMsgInfo(self, &self->received);
 //  resetMsgInfo(self, &self->toSend);
   *handle = self->handle;
-//ets_printf("§createDispatcher: done\n§");
+  COMP_MSG_DBG(self, "D", 2, "createDispatcher: done\n");
+ets_printf("createDispatcher 2\n");
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= newCompMsgDispatcher ====================================
 
 compMsgDispatcher_t *newCompMsgDispatcher() {
+  uint8_t result;
+
+ets_printf("newCompMsgDispatcher 1\n");
   if (compMsgDispatcherSingleton != NULL) {
     return compMsgDispatcherSingleton;
   }
   compMsgDispatcher_t *compMsgDispatcher = os_zalloc(sizeof(compMsgDispatcher_t));
   if (compMsgDispatcher == NULL) {
+    return NULL;
+  }
+
+  // Debug needs to be initialized here for being able to do debug output !!
+  compMsgDispatcher->compMsgDebug = newCompMsgDebug();
+  result = compMsgDebugInit(compMsgDispatcher);
+  if (result != COMP_MSG_ERR_OK) {
     return NULL;
   }
 
@@ -413,9 +429,6 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
 
   // Socket
   compMsgDispatcher->compMsgSocket = newCompMsgSocket();
-
-  // Debug
-  compMsgDispatcher->compMsgDebug = newCompMsgDebug();
 
   // Util
   compMsgDispatcher->compMsgUtil = newCompMsgUtil();
@@ -461,6 +474,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
 
   compMsgDispatcher->getFieldType = &getFieldType;
   compMsgDispatcherSingleton = compMsgDispatcher;
+ets_printf("newCompMsgDispatcher 2\n");
   return compMsgDispatcher;
 }
 

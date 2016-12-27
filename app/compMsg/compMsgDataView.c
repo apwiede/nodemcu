@@ -50,48 +50,48 @@ static uint8_t compMsgDataViewId;
 
 // ================================= getRandomNum ====================================
 
-static uint8_t getRandomNum(compMsgDataView_t *self, compMsgField_t *fieldInfo, uint32_t *value) {
-  return self->dataView->getUint32(self->dataView, fieldInfo->fieldOffset, value);
+static uint8_t getRandomNum(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint32_t *value) {
+  return dataView->getUint32(dataView, fieldInfo->fieldOffset, value);
 }
 
 // ================================= setRandomNum ====================================
 
-static uint8_t setRandomNum(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+static uint8_t setRandomNum(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
   uint32_t val;
 
   val = (uint32_t)(rand() & RAND_MAX);
-  return self->dataView->setUint32(self->dataView, fieldInfo->fieldOffset, val);
+  return dataView->setUint32(dataView, fieldInfo->fieldOffset, val);
 }
 
 
 // ================================= getSequenceNum ====================================
 
-static uint8_t getSequenceNum(compMsgDataView_t *self, compMsgField_t *fieldInfo, uint32_t *value) {
-  return self->dataView->getUint32(self->dataView, fieldInfo->fieldOffset, value);
+static uint8_t getSequenceNum(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint32_t *value) {
+  return dataView->getUint32(dataView, fieldInfo->fieldOffset, value);
 }
 
 // ================================= setSequenceNum ====================================
 
-static uint8_t setSequenceNum(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
-  return self->dataView->setUint32(self->dataView, fieldInfo->fieldOffset, sequenceNum++);
+static uint8_t setSequenceNum(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
+  return dataView->setUint32(dataView, fieldInfo->fieldOffset, sequenceNum++);
 }
 
 
 // ================================= getFiller ====================================
 
-static uint8_t getFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo, uint8_t **value) {
+static uint8_t getFiller(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint8_t **value) {
   size_t lgth;
 
   lgth = fieldInfo->fieldLgth;
-  if (fieldInfo->fieldOffset + lgth > self->dataView->lgth) {
+  if (fieldInfo->fieldOffset + lgth > dataView->lgth) {
     return DATA_VIEW_ERR_OUT_OF_RANGE;
   }
-  c_memcpy(*value, self->dataView->data + fieldInfo->fieldOffset,lgth);
+  c_memcpy(*value, dataView->data + fieldInfo->fieldOffset,lgth);
 }
 
 // ================================= setFiller ====================================
 
-static uint8_t setFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+static uint8_t setFiller(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
   uint32_t val;
   int idx;
   int lgth;
@@ -103,21 +103,21 @@ static uint8_t setFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
   idx = 0;
   while (lgth >= 4) {
     val = (uint32_t)(rand() & RAND_MAX);
-    result = self->dataView->setUint32(self->dataView, offset, val);
+    result = dataView->setUint32(dataView, offset, val);
     checkErrOK(result);
     offset += 4;
     lgth -= 4;
   }
   while (lgth >= 2) {
     val = (uint16_t)((rand() & RAND_MAX) & 0xFFFF);
-    result = self->dataView->setUint16(self->dataView, offset, val);
+    result = dataView->setUint16(dataView, offset, val);
     checkErrOK(result);
     offset += 2;
     lgth -= 2;
   }
   while (lgth >= 1) {
     val = (uint8_t)((rand() & RAND_MAX) & 0xFF);
-    result = self->dataView->setUint8(self->dataView, offset, val);
+    result = dataView->setUint8(dataView, offset, val);
     checkErrOK(result);
     offset++;
     lgth -= 1;
@@ -127,7 +127,7 @@ static uint8_t setFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
 
 // ================================= setZeroFiller ====================================
 
-static uint8_t setZeroFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+static uint8_t setZeroFiller(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
   uint8_t val;
   int idx;
   int lgth;
@@ -139,7 +139,7 @@ static uint8_t setZeroFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo)
   val = 0;
   idx = 0;
   while (idx < lgth) {
-    result = self->dataView->setUint8(self->dataView, offset, val);
+    result = dataView->setUint8(dataView, offset, val);
     checkErrOK(result);
     offset += 1;
     idx++;
@@ -150,7 +150,7 @@ static uint8_t setZeroFiller(compMsgDataView_t *self, compMsgField_t *fieldInfo)
 
 // ================================= getCrc ====================================
 
-static uint8_t getCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth) {
+static uint8_t getCrc(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth) {
   uint16_t crcVal;
   uint16_t crc;
   uint8_t uint8_crc;
@@ -158,33 +158,33 @@ static uint8_t getCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t
   int idx;
   int result;
 
-//ets_printf("getCrc: startOffset: %d lgth: %d\n", startOffset, lgth);
+  COMP_MSG_DBG(self, "v", 2, "getCrc: startOffset: %d lgth: %d\n", startOffset, lgth);
   crcLgth = fieldInfo->fieldLgth;
   crcVal = 0;
   idx = startOffset;
   while (idx < lgth) {
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crcVal);
-    crcVal += self->dataView->data[idx++];
+    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx - startOffset, dataView->data[idx], crcVal);
+    crcVal += dataView->data[idx++];
   }
-//ets_printf("crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx-startOffset, self->dataView->data[idx], crcVal);
-//ets_printf("§crcVal00: 0x%04x§\n", crcVal);
+  COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx - startOffset, dataView->data[idx], crcVal);
+  COMP_MSG_DBG(self, "v", 2, "crcVal00: 0x%04x\n", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
-//ets_printf("§crcVal10: 0x%04x§\n", crcVal);
+    COMP_MSG_DBG(self, "v", 2, "crcVal10: 0x%04x\n", crcVal);
     crcVal = crcVal & 0xFF;
-    result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
+    result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-//ets_printf("§crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
+    COMP_MSG_DBG(self, "v", 2, "crcVal1: 0x%02x crc: 0x%02x\n", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
-ets_printf("§bad crcVal1: 0x%02x crc: 0x%02x§\n", crcVal, uint8_crc);
+      COMP_MSG_DBG(self, "v", 1, "bad crcVal1: 0x%02x crc: 0x%02x\n", crcVal, uint8_crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
-    result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
+    result = dataView->getUint16(dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-//ets_printf("§crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
+    COMP_MSG_DBG(self, "v", 2, "crcVal2: 0x%04x crc: 0x%04x\n", crcVal, crc);
     if (crcVal != crc) {
-ets_printf("§bad crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
+      COMP_MSG_DBG(self, "v", 1, "bad crcVal2: 0x%04x crc: 0x%04x\n", crcVal, crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   }
@@ -193,31 +193,31 @@ ets_printf("§bad crcVal2: 0x%04x crc: 0x%04x§\n", crcVal, crc);
 
 // ================================= setCrc ====================================
 
-static uint8_t setCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth) {
+static uint8_t setCrc(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth) {
   int idx;
   uint16_t crc;
 
   crc = 0;
   idx = startOffset;
-//ets_printf("§setCrc startOffset: %d ch: 0x%02x crc: 0x%04x lgth: %d§\n", startOffset, self->dataView->data[idx], crc, lgth);
+  COMP_MSG_DBG(self, "v", 2, "setCrc startOffset: %d ch: 0x%02x crc: 0x%04x lgth: %d\n", startOffset, dataView->data[idx], crc, lgth);
   while (idx < lgth) {
-//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x§\n", idx-startOffset, self->dataView->data[idx], crc);
-    crc += self->dataView->data[idx++];
+  COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx - startOffset, dataView->data[idx], crc);
+    crc += dataView->data[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
-//ets_printf("§crc8: 0x%04x 0x%02x§\n", crc, (uint8_t)(crc & 0xFF));
-    self->dataView->setUint8(self->dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
+    COMP_MSG_DBG(self, "v", 2, "crc8: 0x%04x 0x%02x\n", crc, (uint8_t)(crc & 0xFF));
+    dataView->setUint8(dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
   } else {
-    self->dataView->setUint16(self->dataView,fieldInfo->fieldOffset,crc);
+    dataView->setUint16(dataView,fieldInfo->fieldOffset,crc);
   }
-//ets_printf("§crc: 0x%04x§\n", crc);
+  COMP_MSG_DBG(self, "v", 2, "crc: 0x%04x\n", crc);
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= getTotalCrc ====================================
 
-static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+static uint8_t getTotalCrc(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
   uint16_t crcVal;
   uint16_t crc;
   uint8_t uint8_crc;
@@ -228,29 +228,29 @@ static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
   crcLgth = fieldInfo->fieldLgth;
   crcVal = 0;
   idx = 0;
-//ets_printf("§getTotalCrc§");
+  COMP_MSG_DBG(self, "v", 2, "getTotalCrc");
   while (idx < fieldInfo->fieldOffset) {
-//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x§", idx, self->dataView->data[idx], crcVal);
-    crcVal += self->dataView->data[idx++];
+    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x", idx, dataView->data[idx], crcVal);
+    crcVal += dataView->data[idx++];
   }
-//ets_printf("§crcVal00: 0x%04x§", crcVal);
+  COMP_MSG_DBG(self, "v", 2, "crcVal00: 0x%04x", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
-//ets_printf("§crcVal10: 0x%04x§", crcVal);
+    COMP_MSG_DBG(self, "v", 2, "crcVal10: 0x%04x", crcVal);
     crcVal = crcVal & 0xFF;
-    result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &uint8_crc);
+    result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-//ets_printf("§totalCrcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
+    COMP_MSG_DBG(self, "v", 2, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
-//ets_printf("§totalCrcVal1: 0x%02x crc: 0x%02x§", crcVal, uint8_crc);
+      COMP_MSG_DBG(self, "v", 2, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
-    result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &crc);
+    result = dataView->getUint16(dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-//ets_printf("§totalCrcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
+    COMP_MSG_DBG(self, "v", 2, "totalCrcVal2: 0x%04x crc: 0x%04x", crcVal, crc);
     if (crcVal != crc) {
-//ets_printf("§totalCrcVal2: 0x%04x crc: 0x%04x§", crcVal, crc);
+      COMP_MSG_DBG(self, "v", 2, "totalCrcVal2: 0x%04x crc: 0x%04x", crcVal, crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   }
@@ -259,31 +259,31 @@ static uint8_t getTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
 
 // ================================= setTotalCrc ====================================
 
-static uint8_t setTotalCrc(compMsgDataView_t *self, compMsgField_t *fieldInfo) {
+static uint8_t setTotalCrc(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
   int idx;
   uint16_t crc;
 
   crc = 0;
   idx = 0;
-//ets_printf("§setTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d\n§", idx, self->dataView->data[idx], crc, fieldInfo->fieldOffset);
+  COMP_MSG_DBG(self, "v", 2, "setTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d\n", idx, dataView->data[idx], crc, fieldInfo->fieldOffset);
   while (idx < fieldInfo->fieldOffset) {
-//ets_printf("§crc idx: %d ch: 0x%02x crc: 0x%04x\n§", idx, self->dataView->data[idx], crc);
-    crc += self->dataView->data[idx++];
+    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx, dataView->data[idx], crc);
+    crc += dataView->data[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
-//ets_printf("§crc8: 0x%04x 0x%02x§\n", crc, (uint8_t)(crc & 0xFF));
-    self->dataView->setUint8(self->dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
+    COMP_MSG_DBG(self, "v", 2, "crc8: 0x%04x 0x%02x\n", crc, (uint8_t)(crc & 0xFF));
+    dataView->setUint8(dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
   } else {
-    self->dataView->setUint16(self->dataView,fieldInfo->fieldOffset,crc);
+    dataView->setUint16(dataView,fieldInfo->fieldOffset,crc);
   }
-//ets_printf("crc: 0x%04x\n", crc);
+  COMP_MSG_DBG(self, "v", 2, "crc: 0x%04x\n", crc);
   return DATA_VIEW_ERR_OK;
 }
 
 // ================================= getFieldValue ====================================
 
-static uint8_t getFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx) {
+static uint8_t getFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx) {
   int idx;
   int result;
   int numEntries;
@@ -298,32 +298,32 @@ static uint8_t getFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
   *numericValue = 0;
   switch (fieldInfo->fieldTypeId) {
     case DATA_VIEW_FIELD_INT8_T:
-      result = self->dataView->getInt8(self->dataView, fieldInfo->fieldOffset, &i8);
+      result = dataView->getInt8(dataView, fieldInfo->fieldOffset, &i8);
       checkErrOK(result);
       *numericValue = (int)i8;
       break;
     case DATA_VIEW_FIELD_UINT8_T:
-      result = self->dataView->getUint8(self->dataView, fieldInfo->fieldOffset, &ui8);
+      result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &ui8);
       checkErrOK(result);
       *numericValue = (int)ui8;
       break;
     case DATA_VIEW_FIELD_INT16_T:
-      result = self->dataView->getInt16(self->dataView, fieldInfo->fieldOffset, &i16);
+      result = dataView->getInt16(dataView, fieldInfo->fieldOffset, &i16);
       checkErrOK(result);
       *numericValue = (int)i16;
       break;
     case DATA_VIEW_FIELD_UINT16_T:
-      result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset, &ui16);
+      result = dataView->getUint16(dataView, fieldInfo->fieldOffset, &ui16);
       checkErrOK(result);
       *numericValue = (int)ui16;
       break;
     case DATA_VIEW_FIELD_INT32_T:
-      result = self->dataView->getInt32(self->dataView, fieldInfo->fieldOffset, &i32);
+      result = dataView->getInt32(dataView, fieldInfo->fieldOffset, &i32);
       checkErrOK(result);
       *numericValue = (int)i32;
       break;
     case DATA_VIEW_FIELD_UINT32_T:
-      result = self->dataView->getUint32(self->dataView, fieldInfo->fieldOffset, &ui32);
+      result = dataView->getUint32(dataView, fieldInfo->fieldOffset, &ui32);
       checkErrOK(result);
       *numericValue = (int)ui32;
       break;
@@ -332,18 +332,18 @@ static uint8_t getFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
       *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
       checkAllocOK(stringValue);
       (*stringValue)[fieldInfo->fieldLgth] = 0;
-      os_memcpy(*stringValue, self->dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      os_memcpy(*stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
     case DATA_VIEW_FIELD_UINT8_VECTOR:
       *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
       checkAllocOK(stringValue);
       (*stringValue)[fieldInfo->fieldLgth] = 0;
-      os_memcpy(*stringValue, self->dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      os_memcpy(*stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
     case DATA_VIEW_FIELD_INT16_VECTOR:
       if (*stringValue == NULL) {
         // check for length needed!!
-        result = self->dataView->getInt16(self->dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(int16_t), &i16);
+        result = dataView->getInt16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(int16_t), &i16);
         checkErrOK(result);
         *numericValue = (int)i16;
       } else {
@@ -353,7 +353,7 @@ static uint8_t getFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_UINT16_VECTOR:
       if (*stringValue == NULL) {
         // check for length needed!!
-        result = self->dataView->getUint16(self->dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(uint16_t), &ui16);
+        result = dataView->getUint16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(uint16_t), &ui16);
         checkErrOK(result);
         *numericValue = (int)ui16;
       } else {
@@ -387,17 +387,17 @@ static uint8_t getFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
 
 // ================================= setFieldValue ====================================
 
-static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx) {
+static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx) {
   int idx;
   int result;
   int numEntries;
 
-//ets_printf("§compMsgDataView setFieldValue: data: %p lgth: %d§", self->dataView->data, self->dataView->lgth);
+  COMP_MSG_DBG(self, "v", 2, "compMsgDataView setFieldValue: data: %p lgth: %d", dataView->data, dataView->lgth);
   switch (fieldInfo->fieldTypeId) {
     case DATA_VIEW_FIELD_INT8_T:
       if (stringValue == NULL) {
         if ((numericValue > -128) && (numericValue < 128)) {
-          result= self->dataView->setInt8(self->dataView, fieldInfo->fieldOffset, (int8_t)numericValue);
+          result= dataView->setInt8(dataView, fieldInfo->fieldOffset, (int8_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -409,7 +409,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_UINT8_T:
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 256)) {
-          result= self->dataView->setUint8(self->dataView, fieldInfo->fieldOffset, (uint8_t)numericValue);
+          result= dataView->setUint8(dataView, fieldInfo->fieldOffset, (uint8_t)numericValue);
           checkErrOK(result);
         }
       } else {
@@ -419,7 +419,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_INT16_T:
       if (stringValue == NULL) {
         if ((numericValue > -32767) && (numericValue < 32767)) {
-          result= self->dataView->setInt16(self->dataView, fieldInfo->fieldOffset, (int16_t)numericValue);
+          result= dataView->setInt16(dataView, fieldInfo->fieldOffset, (int16_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -431,7 +431,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_UINT16_T:
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 65535)) {
-          result= self->dataView->setUint16(self->dataView, fieldInfo->fieldOffset, (uint16_t)numericValue);
+          result= dataView->setUint16(dataView, fieldInfo->fieldOffset, (uint16_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -443,7 +443,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_INT32_T:
       if (stringValue == NULL) {
         if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
-          result= self->dataView->setInt32(self->dataView, fieldInfo->fieldOffset, (int32_t)numericValue);
+          result= dataView->setInt32(dataView, fieldInfo->fieldOffset, (int32_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -456,7 +456,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
       if (stringValue == NULL) {
         // we have to do the signed check as numericValue is a signed integer!!
         if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
-          result= self->dataView->setUint32(self->dataView, fieldInfo->fieldOffset, (uint32_t)numericValue);
+          result= dataView->setUint32(dataView, fieldInfo->fieldOffset, (uint32_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -468,21 +468,21 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_INT8_VECTOR:
       if (stringValue != NULL) {
         // check for length needed!!
-        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
+        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > dataView->lgth) {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
         }
-        os_memcpy(self->dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
+        os_memcpy(dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
       }
       break;
     case DATA_VIEW_FIELD_UINT8_VECTOR:
       if (stringValue != NULL) {
-        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > self->dataView->lgth) {
+        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > dataView->lgth) {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
         }
-//ets_printf("§compMsgDataView: u8vector: offset: %d lgth: %d val: %s§", fieldInfo->fieldOffset + fieldIdx, fieldInfo->fieldLgth, stringValue);
-        os_memcpy(self->dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
+        COMP_MSG_DBG(self, "v", 2, "compMsgDataView: u8vector: offset: %d lgth: %d val: %s", fieldInfo->fieldOffset + fieldIdx, fieldInfo->fieldLgth, stringValue);
+        os_memcpy(dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
       }
@@ -490,7 +490,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_INT16_VECTOR:
       if (stringValue == NULL) {
         // check for length needed!!
-        result= self->dataView->setInt16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(int16_t), (int16_t)numericValue);
+        result= dataView->setInt16(dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(int16_t), (int16_t)numericValue);
         checkErrOK(result);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
@@ -499,7 +499,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
     case DATA_VIEW_FIELD_UINT16_VECTOR:
       if (stringValue == NULL) {
         // check for length needed!!
-        result= self->dataView->setUint16(self->dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), (uint16_t)numericValue);
+        result= dataView->setUint16(dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), (uint16_t)numericValue);
         checkErrOK(result);
       } else {
         return COMP_MSG_ERR_BAD_VALUE;
@@ -524,7 +524,7 @@ static uint8_t setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo,
       break;
 #endif
     default:
-ets_printf("bad type in setFieldValue. %d\n", fieldInfo->fieldTypeId);
+COMP_MSG_DBG(self, "v", 1, "bad type in setFieldValue. %d\n", fieldInfo->fieldTypeId);
       return COMP_MSG_ERR_BAD_FIELD_TYPE;
       break;
   }
@@ -538,7 +538,7 @@ compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
   if (compMsgDataView == NULL) {
     return NULL;
   }
-//ets_printf("§newCompMsgDataView: newDataView: %p!§", compMsgDataView);
+  ets_printf("newCompMsgDataView: newDataView: %p!", compMsgDataView);
   compMsgDataView->dataView = newDataView(data, lgth);
   if (compMsgDataView->dataView == NULL) {
     return NULL;

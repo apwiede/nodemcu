@@ -61,26 +61,27 @@ typedef struct compMsgField {
   fieldSizeCallback_t fieldSizeCallback;
 } compMsgField_t;
 
+typedef struct compMsgDispatcher compMsgDispatcher_t;
 typedef struct compMsgDataView compMsgDataView_t;
 
-typedef uint8_t (* getRandomNum_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, uint32_t *value);
-typedef uint8_t (* setRandomNum_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
+typedef uint8_t (* getRandomNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint32_t *value);
+typedef uint8_t (* setRandomNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
 
-typedef uint8_t (* getSequenceNum_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, uint32_t *value);
-typedef uint8_t (* setSequenceNum_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
+typedef uint8_t (* getSequenceNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint32_t *value);
+typedef uint8_t (* setSequenceNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
 
-typedef uint8_t (* getFiller_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, uint8_t **value);
-typedef uint8_t (* setFiller_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
-typedef uint8_t (* setZeroFiller_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
+typedef uint8_t (* getFiller_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint8_t **value);
+typedef uint8_t (* setFiller_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
+typedef uint8_t (* setZeroFiller_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
 
-typedef uint8_t (* getCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
-typedef uint8_t (* setCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
+typedef uint8_t (* getCrc_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
+typedef uint8_t (* setCrc_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, size_t startOffset, size_t lgth);
 
-typedef uint8_t (* getTotalCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
-typedef uint8_t (* setTotalCrc_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo);
+typedef uint8_t (* getTotalCrc_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
+typedef uint8_t (* setTotalCrc_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
 
-typedef uint8_t (* dvGetFieldValue_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx);
-typedef uint8_t (* dvSetFieldValue_t)(compMsgDataView_t *self, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx);
+typedef uint8_t (* dvGetFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx);
+typedef uint8_t (* dvSetFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx);
 
 typedef struct compMsgDataView {
   dataView_t *dataView;

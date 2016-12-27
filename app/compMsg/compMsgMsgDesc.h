@@ -203,8 +203,8 @@ typedef uint8_t (* closeFile_t)(compMsgMsgDesc_t *self);
 typedef uint8_t (* flushFile_t)(compMsgMsgDesc_t *self);
 typedef uint8_t (* readLine_t)(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t *lgth);
 typedef uint8_t (* writeLine_t)(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t lgth);
-typedef uint8_t (* getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd);
-typedef uint8_t (* getStrFromLine_t)(uint8_t *myStr, uint8_t **ep, bool *isEnd);
+typedef uint8_t (* getIntFromLine_t)(compMsgDispatcher_t *self, uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd);
+typedef uint8_t (* getStrFromLine_t)(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
 typedef uint8_t (*readActions_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (*readModuleValues_t)(compMsgDispatcher_t *self, uint8_t *fileName);
@@ -242,6 +242,7 @@ typedef struct compMsgMsgDesc {
 
 } compMsgMsgDesc_t;
 
+uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self);
 compMsgMsgDesc_t *newCompMsgMsgDesc();
 void freeCompMsgMsgDesc(compMsgMsgDesc_t *compMsgMsgDesc);
 

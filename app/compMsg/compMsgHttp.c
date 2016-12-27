@@ -141,7 +141,7 @@ static uint8_t getHttpHeaderKeyFromId(compMsgDispatcher_t *self, uint8_t httpHea
 
 // ============================ getContentAndNumHeaders =========================================
 
-static uint8_t getContentAndNumHeaders(char *data, size_t size, socketUserData_t *sud) {
+static uint8_t getContentAndNumHeaders(compMsgDispatcher_t *self, char *data, size_t size, socketUserData_t *sud) {
   uint8_t result;
   httpMsgInfo_t *httpMsgInfo;
   size_t idx;
@@ -158,7 +158,7 @@ static uint8_t getContentAndNumHeaders(char *data, size_t size, socketUserData_t
     if ((*cp == '\n')) {
       // check for end of http header
       if ((cp - lastNewLine) < 3) {
-//ets_printf("§cp-data: %d\n§", cp - data);
+         COMP_MSG_DBG(self, "H", 2, "cp-data: %d\n", cp - data);
          *cp = '\0';
          httpMsgInfo->content = cp + 1;
          httpMsgInfo->currLgth = c_strlen(cp + 1);
@@ -175,7 +175,7 @@ static uint8_t getContentAndNumHeaders(char *data, size_t size, socketUserData_t
 
 // ============================ getHttpRequestCode =========================================
 
-static uint8_t getHttpRequestCode(char * data, socketUserData_t *sud) {
+static uint8_t getHttpRequestCode(compMsgDispatcher_t *self, char * data, socketUserData_t *sud) {
   uint8_t result;
   httpMsgInfo_t *httpMsgInfo;
   size_t idx;
@@ -188,30 +188,30 @@ static uint8_t getHttpRequestCode(char * data, socketUserData_t *sud) {
   httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
   idx = 0;
   httpHeaderIdx = 0;
-//ets_printf("§get RequestCode: httpMsgInfo->receivedHeaders: %p\n§", httpMsgInfo->receivedHeaders);
+  COMP_MSG_DBG(self, "H", 2, "get RequestCode: httpMsgInfo->receivedHeaders: %p\n", httpMsgInfo->receivedHeaders);
   httpHeaderPart = &httpMsgInfo->receivedHeaders[httpHeaderIdx];
-//ets_printf("§httpHeaderPart: %p\n§", httpHeaderPart);
+  COMP_MSG_DBG(self, "H", 2, "httpHeaderPart: %p\n", httpHeaderPart);
   httpHeaderPart->httpHeaderId = COMP_MSG_HTTP_CODE;
   httpHeaderPart->httpHeaderName = "Code";
   httpHeaderPart->httpHeaderValue = data ;
   // get result code
   cp = data;
   while (*cp != '\n') {
-     if (*cp == ' ') {
-       uval = c_strtoul(cp+1, &endPtr, 10);
-//ets_printf("§uval: %d\n§", uval);
-       httpMsgInfo->httpRequestCode = (int)uval;
-ets_printf("§CODE: %d!\n§", httpMsgInfo->httpRequestCode);
-       break;
-     }
-     cp++;
+    if (*cp == ' ') {
+      uval = c_strtoul(cp+1, &endPtr, 10);
+      COMP_MSG_DBG(self, "H", 2, "uval: %d\n", uval);
+      httpMsgInfo->httpRequestCode = (int)uval;
+      COMP_MSG_DBG(self, "H", 1, "CODE: %d!\n", httpMsgInfo->httpRequestCode);
+      break;
+    }
+    cp++;
   }
   return COMP_MSG_ERR_OK;
 }
 
 // ============================ getHttpHeaders =========================================
 
-static uint8_t getHttpHeaders(char * data, size_t size, socketUserData_t *sud) {
+static uint8_t getHttpHeaders(compMsgDispatcher_t *self, char * data, size_t size, socketUserData_t *sud) {
   uint8_t result;
   char *cp;
   bool hadColon;
@@ -237,8 +237,8 @@ static uint8_t getHttpHeaders(char * data, size_t size, socketUserData_t *sud) {
   while (idx < headerLgth) {
     if ((*cp == '\n')) {
       if (httpHeaderIdx > 0) {
-//ets_printf("§dp: %d cp: %d§", dp-(char *)lowerHeaderStr, cp-(char *)headerStr);
-//ets_printf("§id: %d name: %s value: %s!§", httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
+        COMP_MSG_DBG(self, "H", 2, "dp: %d cp: %d", dp-(char *)lowerHeaderStr, cp-(char *)headerStr);
+        COMP_MSG_DBG(self, "H", 2, "id: %d name: %s value: %s!", httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
       }
       cp[-1] = '\0'; // ignore \r
       cp++;
@@ -249,7 +249,7 @@ static uint8_t getHttpHeaders(char * data, size_t size, socketUserData_t *sud) {
       dp = lowerData + (cp - data);
       lowerHeaderStr = dp;
       headerStr = cp;
-//ets_printf("§lh: %s!hs: %s!§", lowerHeaderStr, headerStr);
+      COMP_MSG_DBG(self, "H", 2, "lh: %s!hs: %s!", lowerHeaderStr, headerStr);
     }
     if (httpHeaderIdx > 0) {
       if (!hadColon && (*cp == ':')) {
@@ -291,37 +291,39 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
   httpMsgInfo_t *httpMsgInfo;
   char *endPtr;
   long uval;
+  compMsgDispatcher_t *self;
 
-//ets_printf("§httpParse\n§");
-//ets_printf("§===\nSUD: %p\n§", sud);
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "H", 2, "httpParse\n");
+  COMP_MSG_DBG(self, "H", 2, "===\nSUD: %p\n", sud);
 
   httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
   httpMsgInfo->data = os_zalloc(size + 1);
   checkAllocOK(httpMsgInfo->data);
   c_memcpy(httpMsgInfo->data, data, size);
-  result = getContentAndNumHeaders(httpMsgInfo->data, size, sud);
+  result = getContentAndNumHeaders(self, httpMsgInfo->data, size, sud);
   checkErrOK(result);
 
-//ets_printf("§numHeaders: %d sud->content: %s!len: %d!\n§", httpMsgInfo->numHeaders, httpMsgInfo->content, c_strlen(httpMsgInfo->content));  
-//ets_printf("§receivedHeadersSize: %d\n§", httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
+  COMP_MSG_DBG(self, "H", 2, "numHeaders: %d sud->content: %s!len: %d!\n", httpMsgInfo->numHeaders, httpMsgInfo->content, c_strlen(httpMsgInfo->content));  
+  COMP_MSG_DBG(self, "H", 2, "receivedHeadersSize: %d\n", httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
   httpMsgInfo->receivedHeaders = os_zalloc(httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
   checkAllocOK(httpMsgInfo->receivedHeaders);
-//ets_printf("§httpMsgInfo->receivedHeaders: %p\n§", httpMsgInfo->receivedHeaders);
+  COMP_MSG_DBG(self, "H", 2, "httpMsgInfo->receivedHeaders: %p\n", httpMsgInfo->receivedHeaders);
 
-  result = getHttpRequestCode(httpMsgInfo->data, sud);
+  result = getHttpRequestCode(self, httpMsgInfo->data, sud);
   checkErrOK(result);
 
-  result = getHttpHeaders(httpMsgInfo->data, size, sud);
+  result = getHttpHeaders(self, httpMsgInfo->data, size, sud);
   checkErrOK(result);
 
   idx = 0;
   while (idx < httpMsgInfo->numHeaders) {
     httpHeaderPart = &httpMsgInfo->receivedHeaders[idx];
-ets_printf("§idx: %d id: %d name: %s value: %s!\n§", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
+    COMP_MSG_DBG(self, "H", 1, "idx: %d id: %d name: %s value: %s!\n", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
     if (httpHeaderPart->httpHeaderId == COMP_MSG_HTTP_CONTENT_LENGTH) {
       if (httpMsgInfo->expectedLgth == 0) {
         uval = c_strtoul(httpHeaderPart->httpHeaderValue, &endPtr, 10);
-ets_printf("§expectedLgth: %d§", uval);
+        COMP_MSG_DBG(self, "H", 1, "expectedLgth: %d", uval);
         httpMsgInfo->expectedLgth = (size_t)uval;
       }
     }
@@ -364,7 +366,6 @@ uint8_t compMsgHttpInit(compMsgDispatcher_t *self) {
   self->compMsgHttp->getHttpHeaderKeyFromId = &getHttpHeaderKeyFromId;
   self->compMsgHttp->httpParse = &httpParse;
   self->compMsgHttp->getHttpGetHeaderValueForId = &getHttpGetHeaderValueForId;
-
   return COMP_MSG_ERR_OK;
 }
 
@@ -375,6 +376,5 @@ compMsgHttp_t *newCompMsgHttp() {
   if (compMsgHttp == NULL) {
     return NULL;
   }
-
   return compMsgHttp;
 }

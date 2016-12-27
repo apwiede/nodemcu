@@ -65,45 +65,6 @@
 #define RECEIVED_CHECK_CMD_KEY_SIZE       8
 #define RECEIVED_CHECK_CMD_LGTH_SIZE      10
 
-typedef struct flag2Str {
-  uint32_t flagVal;
-  uint8_t *flagStr;
-} flag2Str_t;
-
-static flag2Str_t flag2Strs [] = {
-  { COMP_DISP_U16_DST,           "COMP_DISP_U16_DST" },
-  { COMP_DISP_U16_SRC,           "COMP_DISP_U16_SRC" },
-  { COMP_DISP_U16_TOTAL_LGTH,    "COMP_DISP_U16_TOTAL_LGTH" },
-  { COMP_DISP_U8_VECTOR_GUID,    "COMP_DISP_U8_VECTOR_GUID" },
-  { COMP_DISP_U16_SRC_ID,        "COMP_DISP_U16_SRC_ID" },
-  { COMP_DISP_IS_ENCRYPTED,      "COMP_DISP_IS_ENCRYPTED" },
-  { COMP_DISP_IS_NOT_ENCRYPTED,  "COMP_DISP_IS_NOT_ENCRYPTED" },
-  { COMP_DISP_U16_CMD_KEY,       "COMP_DISP_U16_CMD_KEY" },
-  { COMP_DISP_U0_CMD_LGTH,       "COMP_DISP_U0_CMD_LGTH" },
-  { COMP_DISP_U8_CMD_LGTH,       "COMP_DISP_U8_CMD_LGTH" },
-  { COMP_DISP_U16_CMD_LGTH,      "COMP_DISP_U16_CMD_LGTH" },
-  { 0,                             NULL },
-};
-
-// ================================= getFlagStr ====================================
-
-static uint8_t *getFlagStr(uint32_t flags) {
-  flag2Str_t *entry;
-  int idx;
-  
-  idx = 0;
-  while (1) {
-    entry = &flag2Strs[idx];
-    if (entry->flagStr == NULL) {
-      return "??";
-    }
-    if (flags & entry->flagVal) {
-      return entry->flagStr;
-    }
-    idx++;
-  }
-}
-
 // ================================= resetHeaderInfos ====================================
 
 static uint8_t resetHeaderInfos(compMsgDispatcher_t *self) {
@@ -129,19 +90,19 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("§HEAD:!to:0x%04x!from:0x%04x!totalLgth:0x%04x!seqIdx!%d!§\n", received->toPart, received->fromPart, received->totalLgth, hdrInfos->seqIdx);
+  COMP_MSG_DBG(self, "I", 2, "HEAD:!to:0x%04x!from:0x%04x!totalLgth:0x%04x!seqIdx!%d!\n", received->toPart, received->fromPart, received->totalLgth, hdrInfos->seqIdx);
   // and now search in the headers to find the appropriate message
   hdrInfos->seqIdx = hdrInfos->seqIdxAfterHeader;
   found = 0;
   while (hdrIdx < hdrInfos->numHeaderParts) {
     hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("hdrIdx: %d to: %d %d\n", hdrIdx, hdr->hdrToPart, received->toPart);
+    COMP_MSG_DBG(self, "I", 2, "hdrIdx: %d to: %d %d\n", hdrIdx, hdr->hdrToPart, received->toPart);
     if (hdr->hdrToPart == received->toPart) {
-//ets_printf("to: %d from: %d %d\n", hdr->hdrToPart, hdr->hdrFromPart, received->fromPart);
+      COMP_MSG_DBG(self, "I", 2, "to: %d from: %d %d\n", hdr->hdrToPart, hdr->hdrFromPart, received->fromPart);
       if (hdr->hdrFromPart == received->fromPart) {
-//ets_printf("lgth: hdr: %d received: %d\n", hdr->hdrTotalLgth, received->totalLgth);
+        COMP_MSG_DBG(self, "I", 2, "lgth: hdr: %d received: %d\n", hdr->hdrTotalLgth, received->totalLgth);
         if ((hdr->hdrTotalLgth == received->totalLgth) || (hdr->hdrTotalLgth == 0)) {
-//ets_printf("§cmdKey: 0x%04x 0x%04x§", u16CmdKey, received->u16CmdKey);
+          COMP_MSG_DBG(self, "I", 2, "cmdKey: 0x%04x 0x%04x", u16CmdKey, received->u16CmdKey);
           if (u16CmdKey != 0) {
             if (u16CmdKey == received->u16CmdKey) {
               found = 1;
@@ -157,13 +118,13 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
     hdrIdx++;
   }
   if (!found) {
-ets_printf("§nextFitting HEADER_NOT_FOUND§\n");
+    COMP_MSG_DBG(self, "Y", 0, "nextFitting HEADER_NOT_FOUND\n");
     return COMP_MSG_ERR_HEADER_NOT_FOUND;
   }
   hdrInfos->currPartIdx = hdrIdx;
-//ets_printf("§encryption: %c handleType: %c§", hdr->hdrEncryption, hdr->hdrHandleType);
+  COMP_MSG_DBG(self, "I", 2, "encryption: %c handleType: %c", hdr->hdrEncryption, hdr->hdrHandleType);
   received->encryption = hdr->hdrEncryption;
-//ets_printf("§nextFitting!found!%d!hdrIdx!%d!hdr->cmdKey:0x%04x!received->cmdKey: 0x%04x§", found, hdrIdx, hdr->hdrU16CmdKey, received->u16CmdKey);
+  COMP_MSG_DBG(self, "I", 2, "nextFitting!found!%d!hdrIdx!%d!hdr->cmdKey:0x%04x!received->cmdKey: 0x%04x", found, hdrIdx, hdr->hdrU16CmdKey, received->u16CmdKey);
   return COMP_MSG_ERR_OK;
 }
 
@@ -182,11 +143,11 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
   uint8_t lgth;
 
   received = &self->compMsgData->received;
-//ets_printf("§getHeaderIndexFromHeaderFields newCompMsgDataView§");
+  COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields newCompMsgDataView");
   received->compMsgDataView = newCompMsgDataView(received->buf, received->lgth);
   checkAllocOK(received->compMsgDataView);
   dataView = received->compMsgDataView->dataView;
-//ets_printf("§reclgth: %d§", received->lgth);
+  COMP_MSG_DBG(self, "I", 2, "reclgth: %d", received->lgth);
   received->fieldOffset = 0;
   myHeaderLgth = 0;
   hdrInfos->seqIdx = 0;
@@ -196,32 +157,32 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
     case COMP_DISP_U16_DST:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->toPart);
       checkErrOK(result);
-//ets_printf("§to: 0x%04x§\n", received->toPart);
+      COMP_MSG_DBG(self, "I", 2, "to: 0x%04x\n", received->toPart);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U16_SRC:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->fromPart);
       checkErrOK(result);
-//ets_printf("§from: 0x%04x§\n", received->fromPart);
+      COMP_MSG_DBG(self, "I", 2, "from: 0x%04x\n", received->fromPart);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U16_TOTAL_LGTH:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->totalLgth);
       checkErrOK(result);
-//ets_printf("§total: 0x%04x§\n", received->totalLgth);
+      COMP_MSG_DBG(self, "I", 2, "total: 0x%04x\n", received->totalLgth);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U16_SRC_ID:
       result = dataView->getUint16(dataView, received->fieldOffset, &received->srcId);
       checkErrOK(result);
-//ets_printf("§srcId: 0x%04x§", received->srcId);
+      COMP_MSG_DBG(self, "I", 2, "srcId: 0x%04x", received->srcId);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U8_VECTOR_GUID:
       cp = received->GUID;
       result = dataView->getUint8Vector(dataView, received->fieldOffset, &cp, sizeof(received->GUID));
       checkErrOK(result);
-//ets_printf("§GUID: %s§", received->GUID);
+      COMP_MSG_DBG(self, "I", 2, "GUID: %s", received->GUID);
       received->fieldOffset += sizeof(received->GUID);
       break;
     case COMP_DISP_U8_VECTOR_HDR_FILLER:
@@ -235,13 +196,13 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
     hdrInfos->seqIdx++;
     seqVal = hdrInfos->headerSequence[hdrInfos->seqIdx];
   }
-//ets_printf("§seqIdx: %d§", hdrInfos->seqIdx);
+  COMP_MSG_DBG(self, "I", 2, "seqIdx: %d", hdrInfos->seqIdx);
   hdrInfos->seqIdxAfterHeader = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
-//ets_printf("§getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!§", result, hdrInfos->currPartIdx);
+  COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!", result, hdrInfos->currPartIdx);
   if (received->compMsgDataView != NULL) {
-//ets_printf("§os getHeaderIndexFromHeaderFields: free dataView: %p compMsgDataView: %p§", received->compMsgDataView->dataView, received->compMsgDataView);
+    COMP_MSG_DBG(self, "I", 2, "os getHeaderIndexFromHeaderFields: free dataView: %p compMsgDataView: %p", received->compMsgDataView->dataView, received->compMsgDataView);
     os_free(received->compMsgDataView->dataView);
     os_free(received->compMsgDataView);
     received->compMsgDataView = NULL;
@@ -257,7 +218,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   msgHeaderInfos_t *hdrInfos;
   int hdrIdx;
 
-//ets_printf("§prepareAnswerMsg\n§");
+  COMP_MSG_DBG(self, "I", 2, "prepareAnswerMsg\n");
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   switch (type) {
@@ -269,9 +230,9 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
     break;
   }
   hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("hdrCmdKey: 0x%04x\n§", hdr->hdrU16CmdKey);
+  COMP_MSG_DBG(self, "I", 2, "hdrCmdKey: 0x%04x\n", hdr->hdrU16CmdKey);
   result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, handle);
-//ets_printf("§createMsgFromHeaderPart result: %d\n§", result);
+  COMP_MSG_DBG(self, "I", 2, "createMsgFromHeaderPart result: %d\n", result);
   checkErrOK(result);
   return result;
 }
@@ -293,19 +254,17 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
   size_t startOffset;
   size_t idx;
 
-//ets_printf("§handleReceivedHeader§\n");
+  COMP_MSG_DBG(self, "I", 2, "handleReceivedHeader\n");
   hdrInfos = &self->msgHeaderInfos;
   received = &self->compMsgData->received;
   u8TotalCrc = false;
   u16TotalCrc = false;
-//ets_printf("§handleReceivedHeader newCompMsgDataView§");
+  COMP_MSG_DBG(self, "I", 2, "handleReceivedHeader newCompMsgDataView");
   received->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
   checkAllocOK(received->compMsgDataView);
-//ets_printf("§");
 //received->compMsgDataView->dataView->dumpBinary(received->buf+30, 10, "Received->buf");
-//ets_printf("§");
   hdrIdx = hdrInfos->currPartIdx;
-//ets_printf("§handleReceivedHeader: currPartIdx: %d totalLgth: %d§\n", hdrInfos->currPartIdx, received->totalLgth);
+  COMP_MSG_DBG(self, "I", 2, "handleReceivedHeader: currPartIdx: %d totalLgth: %d\n", hdrInfos->currPartIdx, received->totalLgth);
   hdr = &hdrInfos->headerParts[hdrIdx];
 
   // set received->lgth to end of the header
@@ -327,13 +286,13 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
   }
   while (hdr->fieldSequence[hdrInfos->seqIdx] != 0) {
     sequenceEntry = hdr->fieldSequence[hdrInfos->seqIdx];
-//ets_printf("§sequenceEntry: 0x%04x seqIdx:%d§", sequenceEntry, hdrInfos->seqIdx);
+    COMP_MSG_DBG(self, "I", 2, "sequenceEntry: 0x%04x seqIdx:%d", sequenceEntry, hdrInfos->seqIdx);
     received->fieldOffset = hdrInfos->headerLgth;
     switch (sequenceEntry) {
     case COMP_DISP_U16_CMD_KEY:
       result = received->compMsgDataView->dataView->getUint16(received->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdKey = u16;
-//ets_printf("§1 u16CmdKey: 0x%04x!hdr: 0x%04x!offset: %d§", received->u16CmdKey, hdr->hdrU16CmdKey, received->fieldOffset);
+      COMP_MSG_DBG(self, "I", 2, "1 u16CmdKey: 0x%04x!hdr: 0x%04x!offset: %d", received->u16CmdKey, hdr->hdrU16CmdKey, received->fieldOffset);
       received->fieldOffset += 2;
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
@@ -341,22 +300,22 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
         result = self->compMsgIdentify->nextFittingEntry(self, 0, received->u16CmdKey);
         checkErrOK(result);
         hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
-//ets_printf("§2 u16CmdKey: 0x%04x!hdr: 0x%04x§", received->u16CmdKey, hdr->hdrU16CmdKey);
+        COMP_MSG_DBG(self, "I", 2, "2 u16CmdKey: 0x%04x!hdr: 0x%04x", received->u16CmdKey, hdr->hdrU16CmdKey);
       }
-//ets_printf("§found: currPartIdx: %d§", hdrInfos->currPartIdx);
+      COMP_MSG_DBG(self, "I", 2, "found: currPartIdx: %d", hdrInfos->currPartIdx);
       break;
     case COMP_DISP_U0_CMD_LGTH:
       received->fieldOffset += 2;
-//ets_printf("§u0CmdLgth!0!§");
+      COMP_MSG_DBG(self, "I", 2, "u0CmdLgth!0!");
       break;
     case COMP_DISP_U16_CMD_LGTH:
       result = received->compMsgDataView->dataView->getUint16(received->compMsgDataView->dataView, received->fieldOffset, &u16);
       received->u16CmdLgth = u16;
       received->fieldOffset += 2;
-//ets_printf("§u16CmdLgth!0x%04x!§", received->u16CmdLgth);
+      COMP_MSG_DBG(self, "I", 2, "u16CmdLgth!0x%04x!", received->u16CmdLgth);
       break;
     case COMP_DISP_U0_CRC:
-//ets_printf("§u0Crc!0!§");
+      COMP_MSG_DBG(self, "I", 2, "u0Crc!0!");
       result = COMP_MSG_ERR_OK;
       break;
     case COMP_DISP_U8_CRC:
@@ -370,8 +329,8 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
         }
       }
       startOffset = hdrInfos->headerLgth;
-      result = received->compMsgDataView->getCrc(received->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
-//ets_printf("§u8Crc!res!%d!§", result);
+      result = received->compMsgDataView->getCrc(self, received->compMsgDataView->dataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
+      COMP_MSG_DBG(self, "I", 2, "u8Crc!res!%d!", result);
       break;
     case COMP_DISP_U16_CRC:
       fieldInfo.fieldLgth = 2;
@@ -384,34 +343,34 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
         }
       }
       startOffset = hdrInfos->headerLgth;
-      result = received->compMsgDataView->getCrc(received->compMsgDataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
-//ets_printf("§u16Crc!res!%d!§", result);
+      result = received->compMsgDataView->getCrc(self, received->compMsgDataView->dataView, &fieldInfo, startOffset, fieldInfo.fieldOffset);
+      COMP_MSG_DBG(self, "I", 2, "u16Crc!res!%d!", result);
       break;
     case COMP_DISP_U0_TOTAL_CRC:
-//ets_printf("§u0TotalCrc!0!§");
+      COMP_MSG_DBG(self, "I", 2, "u0TotalCrc!0!");
       result = COMP_MSG_ERR_OK;
       break;
     case COMP_DISP_U8_TOTAL_CRC:
       fieldInfo.fieldLgth = 1;
       fieldInfo.fieldOffset = received->totalLgth - 1;
-//ets_printf("§u8TotalCrc!fieldOffset: %d§", fieldInfo.fieldOffset);
-      result = received->compMsgDataView->getTotalCrc(received->compMsgDataView, &fieldInfo);
-//ets_printf("§u8totalCrc!res!%d!§", result);
+      COMP_MSG_DBG(self, "I", 2, "u8TotalCrc!fieldOffset: %d", fieldInfo.fieldOffset);
+      result = received->compMsgDataView->getTotalCrc(self, received->compMsgDataView->dataView, &fieldInfo);
+      COMP_MSG_DBG(self, "I", 2, "u8totalCrc!res!%d!", result);
       break;
     case COMP_DISP_U16_TOTAL_CRC:
       fieldInfo.fieldLgth = 2;
       fieldInfo.fieldOffset = received->totalLgth - 2;
-      result = received->compMsgDataView->getTotalCrc(received->compMsgDataView, &fieldInfo);
-//ets_printf("§u16TotalCrc!res!%d!§", result);
+      result = received->compMsgDataView->getTotalCrc(self, received->compMsgDataView->dataView, &fieldInfo);
+      COMP_MSG_DBG(self, "I", 2, "u16TotalCrc!res!%d!", result);
       break;
     }
     checkErrOK(result);
     hdrInfos->seqIdx++;
   }
   // free all space of received message
-//ets_printf("call deleteMsg\n");
+  COMP_MSG_DBG(self, "I", 2, "call deleteMsg\n");
   self->compMsgData->deleteMsg(self);
-//ets_printf("§received msg deleted§");
+  COMP_MSG_DBG(self, "I", 2, "received msg deleted");
   return COMP_MSG_ERR_OK;
 }
 
@@ -423,15 +382,15 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self) {
   uint8_t answerType;
   uint8_t *handle;
 
-//ets_printf("§handleReceivedMsg\n§");
+  COMP_MSG_DBG(self, "I", 2, "handleReceivedMsg\n");
   received = &self->compMsgData->received;
   result = self->compMsgIdentify->handleReceivedHeader(self);
-//ets_printf("§call prepareAnswerMsg\n§");
+  COMP_MSG_DBG(self, "I", 2, "call prepareAnswerMsg\n");
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
   checkErrOK(result);
-//ets_printf("§handleReceivedMsg done\n§");
+  COMP_MSG_DBG(self, "I", 2, "handleReceivedMsg done\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -455,16 +414,16 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   uint8_t *handle;
   bool hadActionCb;
 
-//ets_printf("§storeReceivedMsg\n§");
+  COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg\n");
   received = &self->compMsgData->received;
-//ets_printf("§handleReceivedHeader\n§");
+  COMP_MSG_DBG(self, "I", 2, "handleReceivedHeader\n");
   // next line deletes compMsgData !!
   result = self->compMsgIdentify->handleReceivedHeader(self);
   checkErrOK(result);
   hdrInfos = &self->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("§getMsgPartsFromHeaderPart\n§");
+  COMP_MSG_DBG(self, "I", 2, "getMsgPartsFromHeaderPart\n");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, &handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, &handle);
@@ -488,7 +447,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
       if (c_strcmp(msgDescPart->fieldNameStr, fieldsToSave->fieldNameStr) == 0) {
         result = self->compMsgData->getFieldValue(self, fieldsToSave->fieldNameStr, &numericValue, &stringValue);
         checkErrOK(result);
-//ets_printf("§found fieldToSave: %s %s§\n", fieldsToSave->fieldNameStr, stringValue);
+        COMP_MSG_DBG(self, "I", 2, "found fieldToSave: %s %s\n", fieldsToSave->fieldNameStr, stringValue);
         fieldsToSave->fieldValueStr = stringValue;
         fieldsToSave->fieldValue = numericValue;
       }
@@ -501,7 +460,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   while (idx < self->compMsgData->numMsgValParts) {
     msgValPart = &self->compMsgData->msgValParts[idx];
     if (msgValPart->fieldValueActionCb != NULL) {
-//ets_printf("§have actionCb: %s\n§", msgValPart->fieldValueActionCb);
+      COMP_MSG_DBG(self, "I", 2, "have actionCb: %s\n", msgValPart->fieldValueActionCb);
       hadActionCb = true;
       result = self->compMsgAction->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
       checkErrOK(result);
@@ -516,7 +475,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
     result = self->resetMsgInfo(self, received);
     checkErrOK(result);
   }
-//ets_printf("§storeReceivedMsg done\n§");
+  COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg done\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -532,7 +491,7 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   uint8_t *handle;
   msgParts_t *received;
 
-//ets_printf("§sendClientIPMsg§\n");
+  COMP_MSG_DBG(self, "I", 2, "sendClientIPMsg\n");
   self->compMsgSendReceive->startSendMsg = NULL;
   self->stopAccessPoint = true;
   received = &self->compMsgData->received;
@@ -541,14 +500,14 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
   checkErrOK(result);
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
-//ets_printf("§IP: %s port: %d§\n", temp, port);
+  COMP_MSG_DBG(self, "I", 2, "IP: %s port: %d\n", temp, port);
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
-//ets_printf("§prepareAnswerMsg: result: %d§\n", result);
+  COMP_MSG_DBG(self, "I", 2, "prepareAnswerMsg: result: %d\n", result);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
-//ets_printf("§resetMsgInfo: result: %d§\n", result);
+  COMP_MSG_DBG(self, "I", 2, "resetMsgInfo: result: %d\n", result);
   checkErrOK(result);
-//ets_printf("§sendClientIPMsg done§\n");
+  COMP_MSG_DBG(self, "I", 2, "sendClientIPMsg done\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -577,35 +536,34 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
   bool u16TotalCrc;
   size_t seqIdx;
 
-//ets_printf("§handleReceivedPart: %c 0x%02x§", buffer[0], buffer[0]);
 if (buffer == NULL) {
-//ets_printf("§++++handleReceivedPart: buffer == NULL lgth: %d§", lgth);
+  COMP_MSG_DBG(self, "I", 2, "++++handleReceivedPart: buffer == NULL lgth: %d", lgth);
 } else {
-//ets_printf("§++++handleReceivedPart: 0x%02x lgth: %d§", buffer[0], lgth);
+  COMP_MSG_DBG(self, "I", 2, "++++handleReceivedPart: 0x%02x lgth: %d", buffer[0], lgth);
 }
   hdrInfos = &self->msgHeaderInfos;
   compMsgData = self->compMsgData;
   received = &compMsgData->received;
 //FIXME need to free at end of message handling !!!
-//ets_printf("§handleReceivedPart: !received->buf: %p!§", received->buf);
-//ets_printf("§receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!§", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
+  COMP_MSG_DBG(self, "I", 2, "handleReceivedPart: !received->buf: %p!", received->buf);
+  COMP_MSG_DBG(self, "I", 2, "receivedLgth: %d lgth: %d fieldOffset: %d headerLgth: %d!", received->lgth, lgth, received->fieldOffset, hdrInfos->headerLgth);
   idx = 0;
   while (idx < lgth) {
     received->buf[received->lgth++] = buffer[idx];
     received->realLgth++;
     if (received->lgth == hdrInfos->headerLgth) {
-//ets_printf("§received lgth: %d lgth: %d idx: %d§", received->lgth, lgth, idx);
-//ets_printf("§receveived->lgth: %d§", received->lgth);
+      COMP_MSG_DBG(self, "I", 2, "received lgth: %d lgth: %d idx: %d", received->lgth, lgth, idx);
+      COMP_MSG_DBG(self, "I", 2, "receveived->lgth: %d", received->lgth);
       result = getHeaderIndexFromHeaderFields(self, hdrInfos);
-//ets_printf("§getHeaderIndexFromHeaderFields result: %d currPartIdx: %d§\n", result, hdrInfos->currPartIdx);
+      COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields result: %d currPartIdx: %d\n", result, hdrInfos->currPartIdx);
     }
     // loop until we have full message then decrypt if necessary and then handle the message
-//ets_printf("§totalLgth: %d§", received->totalLgth);
+    COMP_MSG_DBG(self, "I", 2, "totalLgth: %d", received->totalLgth);
     if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
-//ets_printf("§hdrIdx: %d\n§", hdrIdx);
-//ets_printf("§receveived->totalLgth: %d\n§", received->totalLgth);
+      COMP_MSG_DBG(self, "I", 2, "hdrIdx: %d\n", hdrIdx);
+      COMP_MSG_DBG(self, "I", 2, "receveived->totalLgth: %d\n", received->totalLgth);
       // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
       seqIdx = 0;
       u8TotalCrc = false;
@@ -619,7 +577,7 @@ if (buffer == NULL) {
         }
         seqIdx++;
       }
-//ets_printf("§hdr->hdrHandleType: %c\n§", hdr->hdrHandleType);
+      COMP_MSG_DBG(self, "I", 2, "hdr->hdrHandleType: %c\n", hdr->hdrHandleType);
       switch (hdr->hdrHandleType) {
       case 'G':
       case 'R':
@@ -647,20 +605,20 @@ cryptKey = "a1b2c3d4e5f6g7h8";
           cryptedPtr = received->buf + hdrInfos->headerLgth;
           result = self->compMsgUtil->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
           checkErrOK(result);
-//ets_printf("§mlen: %d decryptedLgth: %d\n§", mlen, decryptedLgth);
+          COMP_MSG_DBG(self, "I", 2, "mlen: %d decryptedLgth: %d\n", mlen, decryptedLgth);
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
         }
         result = self->compMsgIdentify->storeReceivedMsg(self);
-//ets_printf("§handleReceivedMsg end buffer idx: %d result: %d\n§", idx, result);
+        COMP_MSG_DBG(self, "I", 2, "handleReceivedMsg end buffer idx: %d result: %d\n", idx, result);
         return result;
       case 'U':
       case 'W':
         self->compMsgData->currHdr = hdr;
         result = self->compMsgBuildMsg->forwardMsg(self);
-//ets_printf("§forwardMsg result: %d\n§", result);
+        COMP_MSG_DBG(self, "I", 2, "forwardMsg result: %d\n", result);
         return result;
       default:
-ets_printf("§handleReceivedPart: funny handleType: %c 0x%02x\n§", hdr->hdrHandleType, hdr->hdrHandleType);
+        COMP_MSG_DBG(self, "Y", 0, "handleReceivedPart: funny handleType: %c 0x%02x\n", hdr->hdrHandleType, hdr->hdrHandleType);
         return COMP_MSG_ERR_FUNNY_HANDLE_TYPE;
       }
     }
@@ -686,7 +644,7 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
   int numericValue;
   uint8_t *stringValue;
 
-//ets_printf("handleToSendPart lgth: %d buffer: %s\n", lgth, buffer);
+  COMP_MSG_DBG(self, "I", 2, "handleToSendPart lgth: %d buffer: %s\n", lgth, buffer);
   uint8_t *iv;
   uint8_t *cryptedPtr;
   uint8_t *cryptKey;
@@ -708,7 +666,7 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
   result = self->compMsgUtil->encryptMsg(cryptedPtr, mlen, cryptKey, klen, iv, ivlen, &encrypted, &encryptedLgth);
   checkErrOK(result);
   msgLgth = encryptedLgth;
-//ets_printf("encryptedLgth: %d %d\n", encryptedLgth, result);
+  COMP_MSG_DBG(self, "I", 2, "encryptedLgth: %d %d\n", encryptedLgth, result);
 
   self->cloudMsgData = encrypted;
   self->cloudMsgDataLgth = encryptedLgth;
@@ -746,6 +704,5 @@ compMsgIdentify_t *newCompMsgIdentify() {
   if (compMsgIdentify == NULL) {
     return NULL;
   }
-
   return compMsgIdentify;
 }
