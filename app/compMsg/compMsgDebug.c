@@ -164,103 +164,100 @@ ets_printf("ERROR DBG_STR too long\n");
 static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
   int idx;
 
-  ets_printf("§dumpHeaderPart:§");
-  ets_printf("§headerPart: from: 0x%04x to: 0x%04x totalLgth: %d§", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth);
-  ets_printf("§            GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c§", hdr->hdrGUID, hdr->hdrSrcId, hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
-  ets_printf("§            u16CmdLgth: 0x%04x u16Crc: 0x%04x u16TotalCrc: 0x%04x§", hdr->hdrU16CmdLgth, hdr->hdrU16Crc, hdr->hdrU16TotalCrc);
-  ets_printf("§            u8CmdLgth: %d u8Crc: 0x%02x u8TotalCrc: 0x%02x§", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrU8TotalCrc);
-  ets_printf("§            enc: %c handleType: %c offset: %d§", hdr->hdrEncryption, hdr->hdrHandleType, hdr->hdrOffset);
-  ets_printf("§hdrFlags: 0x%04x", hdr->hdrFlags);
+  COMP_MSG_DBG(self, "E", 1, "dumpHeaderPart:");
+  COMP_MSG_DBG(self, "E", 1, "headerPart: from: 0x%04x to: 0x%04x totalLgth: %d", hdr->hdrFromPart, hdr->hdrToPart, hdr->hdrTotalLgth);
+  COMP_MSG_DBG(self, "E", 1, "            GUID: %s srcId: %d u16CmdKey: 0x%04x %c%c", hdr->hdrGUID, hdr->hdrSrcId, hdr->hdrU16CmdKey, (hdr->hdrU16CmdKey>>8)&0xFF, hdr->hdrU16CmdKey&0xFF);
+  COMP_MSG_DBG(self, "E", 1, "            u16CmdLgth: 0x%04x u16Crc: 0x%04x u16TotalCrc: 0x%04x", hdr->hdrU16CmdLgth, hdr->hdrU16Crc, hdr->hdrU16TotalCrc);
+  COMP_MSG_DBG(self, "E", 1, "            u8CmdLgth: %d u8Crc: 0x%02x u8TotalCrc: 0x%02x", hdr->hdrU8CmdLgth, hdr->hdrU8Crc, hdr->hdrU8TotalCrc);
+  COMP_MSG_DBG(self, "E", 1, "            enc: %c handleType: %c offset: %d", hdr->hdrEncryption, hdr->hdrHandleType, hdr->hdrOffset);
+  COMP_MSG_DBG(self, "E", 1, "hdrFlags: 0x%04x", hdr->hdrFlags);
   if (hdr->hdrFlags & COMP_DISP_HDR_DST) {
-    ets_printf(" COMP_DISP_HDR_DST");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_HDR_DST");
   }
   if (hdr->hdrFlags & COMP_DISP_HDR_SRC) {
-    ets_printf(" COMP_DISP_HDR_SRC");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_HDR_SRC");
   }
   if (hdr->hdrFlags & COMP_DISP_HDR_TOTAL_LGTH) {
-    ets_printf(" COMP_DISP_HDR_TOTAL_LGTH");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_HDR_TOTAL_LGTH");
   }
   if (hdr->hdrFlags & COMP_DISP_HDR_GUID) {
-    ets_printf(" COMP_DISP_HDR_GUID");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_HDR_GUID");
   }
   if (hdr->hdrFlags & COMP_DISP_HDR_SRC_ID) {
-    ets_printf(" COMP_DISP_HDR_SRC_ID");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_HDR_SRC_ID");
   }
   if (hdr->hdrFlags & COMP_DISP_HDR_FILLER) {
-    ets_printf(" COMP_DISP_HDR_FILLER");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_HDR_FILLER");
   }
   if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CMD_KEY) {
-    ets_printf(" COMP_DISP_PAYLOAD_CMD_KEY");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_PAYLOAD_CMD_KEY");
   }
   if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CMD_LGTH) {
-    ets_printf(" COMP_DISP_PAYLOAD_CMD_LGTH");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_PAYLOAD_CMD_LGTH");
   }
   if (hdr->hdrFlags & COMP_DISP_PAYLOAD_CRC) {
-    ets_printf(" COMP_DISP_PAYLOAD_CRC");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_PAYLOAD_CRC");
   }
   if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
-    ets_printf(" COMP_DISP_TOTAL_CRC");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_TOTAL_CRC");
   }
-  ets_printf("§");
-  ets_printf("§hdr fieldSequence§");
+  COMP_MSG_DBG(self, "E", 1, "hdr fieldSequence");
   idx = 0;
   while (idx < COMP_DISP_MAX_SEQUENCE) {
     if (hdr->fieldSequence[idx] == 0) {
       break;
     }
-    ets_printf("§ %d 0x%04x", idx, hdr->fieldSequence[idx]);
+    COMP_MSG_DBG(self, "E", 1, "%d 0x%04x", idx, hdr->fieldSequence[idx]);
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_DST) {
-      ets_printf(" COMP_DISP_U16_DST");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_DST");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC) {
-      ets_printf(" COMP_DISP_U16_SRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_SRC");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
-      ets_printf(" COMP_DISP_HDR_U16_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_HDR_U16_LGTH");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
-      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_VECTOR_GUID");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_SRC_ID) {
-      ets_printf(" COMP_DISP_U16_SRC_ID");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_SRC_ID");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
-      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_VECTOR_HDR_FILLER");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_KEY) {
-      ets_printf(" COMP_DISP_U16_CMD_KEY");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_CMD_KEY");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U0_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_CMD_LGTH");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U8_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_CMD_LGTH");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_CMD_LGTH");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U0_CRC) {
-      ets_printf(" COMP_DISP_U0_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_CRC");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U8_CRC) {
-      ets_printf(" COMP_DISP_U8_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_CRC");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_CRC) {
-      ets_printf(" COMP_DISP_U16_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_CRC");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U0_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U0_TOTAL_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_TOTAL_CRC");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U8_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U8_TOTAL_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_TOTAL_CRC");
     }
     if (hdr->fieldSequence[idx] & COMP_DISP_U16_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U16_TOTAL_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_TOTAL_CRC");
     }
-    ets_printf("§");
     idx++;
   }
-//  ets_printf("§");
   return COMP_MSG_ERR_OK;
 }
 
@@ -269,75 +266,75 @@ static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
 static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos) {
   int idx;
 
-  ets_printf("dumpMsgHeaderInfos:\n");
-  ets_printf("headerFlags: ");
+  COMP_MSG_DBG(self, "E", 1, "dumpMsgHeaderInfos:\n");
+  COMP_MSG_DBG(self, "E", 1, "headerFlags: ");
   if (hdrInfos->headerFlags & COMP_DISP_U16_SRC) {
-    ets_printf(" COMP_DISP_U16_SRC");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_SRC");
   }
   if (hdrInfos->headerFlags & COMP_DISP_U16_DST) {
-    ets_printf(" COMP_DISP_U16_DST");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_DST");
   }
   if (hdrInfos->headerFlags & COMP_DISP_U16_TOTAL_LGTH) {
-    ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_TOTAL_LGTH");
   }
-  ets_printf("\n");
-  ets_printf("hdrInfos headerSequence\n");
+  COMP_MSG_DBG(self, "E", 1, "\n");
+  COMP_MSG_DBG(self, "E", 1, "hdrInfos headerSequence\n");
   idx = 0;
   while (idx < COMP_DISP_MAX_SEQUENCE) {
     if (hdrInfos->headerSequence[idx] == 0) {
       break;
     }
-    ets_printf(" %d 0x%04x", idx, hdrInfos->headerSequence[idx]);
+    COMP_MSG_DBG(self, "E", 1, " %d 0x%04x", idx, hdrInfos->headerSequence[idx]);
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_DST) {
-      ets_printf(" COMP_DISP_U16_DST");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_DST");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_SRC) {
-      ets_printf(" COMP_DISP_U16_SRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_SRC");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_TOTAL_LGTH) {
-      ets_printf(" COMP_DISP_U16_TOTAL_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_TOTAL_LGTH");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_VECTOR_GUID) {
-      ets_printf(" COMP_DISP_U8_VECTOR_GUID");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_VECTOR_GUID");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_SRC_ID) {
-      ets_printf(" COMP_DISP_U16_SRC_ID");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_SRC_ID");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_VECTOR_HDR_FILLER) {
-      ets_printf(" COMP_DISP_U8_VECTOR_HDR_FILLER");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_VECTOR_HDR_FILLER");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U0_CMD_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_CMD_LGTH");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U8_CMD_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_CMD_LGTH");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_CMD_LGTH) {
-      ets_printf(" COMP_DISP_U16_CMD_LGTH");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_CMD_LGTH");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_CRC) {
-      ets_printf(" COMP_DISP_U0_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_CRC");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_CRC) {
-      ets_printf(" COMP_DISP_U8_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_CRC");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_CRC) {
-      ets_printf(" COMP_DISP_U16_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_CRC");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U0_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U0_TOTAL_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U0_TOTAL_CRC");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U8_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U8_TOTAL_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_TOTAL_CRC");
     }
     if (hdrInfos->headerSequence[idx] & COMP_DISP_U16_TOTAL_CRC) {
-      ets_printf(" COMP_DISP_U16_TOTAL_CRC");
+      COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_TOTAL_CRC");
     }
-    ets_printf("\n");
+    COMP_MSG_DBG(self, "E", 1, "\n");
     idx++;
   }
-  ets_printf("\n");
-  ets_printf("headerLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterHeader: %d\n", hdrInfos->headerLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterHeader);
+  COMP_MSG_DBG(self, "E", 1, "\n");
+  COMP_MSG_DBG(self, "E", 1, "headerLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterHeader: %d\n", hdrInfos->headerLgth, hdrInfos->numHeaderParts, hdrInfos->maxHeaderParts, hdrInfos->currPartIdx, hdrInfos->seqIdx, hdrInfos->seqIdxAfterHeader);
   return COMP_MSG_ERR_OK;
 }
 
@@ -346,31 +343,29 @@ static uint8_t dumpMsgHeaderInfos(compMsgDispatcher_t *self, msgHeaderInfos_t *h
 static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
   int idx;
 
-  ets_printf("dumpMsgParts:\n");
-  ets_printf("MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d GUID: %d srcId: %d u16_cmdKey: %d\n", msgParts->fromPart, msgParts->toPart, msgParts->totalLgth, msgParts->GUID, msgParts->srcId, msgParts->u16CmdKey);
+  COMP_MSG_DBG(self, "E", 1, "dumpMsgParts:\n");
+  COMP_MSG_DBG(self, "E", 1, "MsgParts1 form: 0x%04x to: 0x%04x totalLgth: %d GUID: %d srcId: %d u16_cmdKey: %d\n", msgParts->fromPart, msgParts->toPart, msgParts->totalLgth, msgParts->GUID, msgParts->srcId, msgParts->u16CmdKey);
 
-  ets_printf("MsgParts2 lgth: %d fieldOffset: %d\n", msgParts->lgth, msgParts->fieldOffset);
-  ets_printf("buf");
+  COMP_MSG_DBG(self, "E", 1, "MsgParts2 lgth: %d fieldOffset: %d\n", msgParts->lgth, msgParts->fieldOffset);
+  COMP_MSG_DBG(self, "E", 1, "buf");
   idx = 0;
   while (idx < msgParts->realLgth - 1) {
-    ets_printf(" %d 0x%02x", idx, msgParts->buf[idx]);
+    COMP_MSG_DBG(self, "E", 1, " %d 0x%02x", idx, msgParts->buf[idx]);
     idx++;
   }
-  ets_printf("\n");
-  ets_printf("partFlags: ");
+  COMP_MSG_DBG(self, "E", 1, "partFlags: ");
   if (msgParts->partsFlags & COMP_DISP_U16_CMD_KEY) {
-    ets_printf(" COMP_DISP_U16_CMD_KEY");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_CMD_KEY");
   }
   if (msgParts->partsFlags & COMP_DISP_U8_VECTOR_GUID) {
-    ets_printf(" COMP_DISP_U8_VECTOR_GUID");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U8_VECTOR_GUID");
   }
   if (msgParts->partsFlags & COMP_DISP_U16_SRC_ID) {
-    ets_printf(" COMP_DISP_U16_SRC_ID");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_SRC_ID");
   }
   if (msgParts->partsFlags & COMP_DISP_U16_CMD_KEY) {
-    ets_printf(" COMP_DISP_U16_CMD_KEY");
+    COMP_MSG_DBG(self, "E", 1, " COMP_DISP_U16_CMD_KEY");
   }
-  ets_printf("\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -386,7 +381,7 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
     result = self->compMsgUtil->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
     checkErrOK(result);
   }
-  ets_printf("msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
+  COMP_MSG_DBG(self, "E", 1, "msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
   return COMP_MSG_ERR_OK;
 }
 
@@ -402,11 +397,10 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
     result = self->compMsgUtil->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName, msgValPart->fieldValueCallbackType);
     checkErrOK(result);
   }
-  ets_printf("msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
+  COMP_MSG_DBG(self, "E", 1, "msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
   if (msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {
-     ets_printf(" COMP_DISP_DESC_VALUE_IS_NUMBER");
+     COMP_MSG_DBG(self, "E", 1, " COMP_DISP_DESC_VALUE_IS_NUMBER");
   }
-  ets_printf("\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -439,7 +433,6 @@ compMsgDebug_t *newCompMsgDebug() {
   if (compMsgDebug == NULL) {
     return NULL;
   }
-
   return compMsgDebug;
 }
 
