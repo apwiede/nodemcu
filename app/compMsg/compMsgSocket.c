@@ -72,7 +72,7 @@ static uint8_t checkConnectionStatus(compMsgTimerSlot_t *compMsgTimerSlot) {
 //ets_printf("§checkConnectionStatus: tmr: %p compMsgTimerSlot: %p\n§", tmr, compMsgTimerSlot);
 //ets_printf("§checkConnectionStatus: timerId: %d self: %p§\n", timerId, self);
   status = wifi_station_get_connect_status();
-ets_printf("§checkConnectionStatus:wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n§", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+  COMP_MSG_DBG(self, "W", 1, "checkConnectionStatus:wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
   switch (status) {
   case STATION_IDLE:
 //ets_printf("§STATION_IDLE\n§");
@@ -114,7 +114,11 @@ ets_printf("§checkConnectionStatus:wifi is in mode: %d status: %d ap_id: %d hos
   tmr->ip_addr = pTempIp.ip.addr;
   ets_timer_disarm(&tmr->timer);
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
-ets_printf("§IP: %s\n§", temp);
+  COMP_MSG_DBG(self, "W", 1, "IP: %s\n", temp);
+int numericValue;
+uint8_t *stringValue;
+  COMP_MSG_DBG(self, "W", 1, "getMACAddr\n");
+result = self->compMsgModuleData->getMACAddr(self, &numericValue, &stringValue);
   return COMP_MSG_ERR_OK;
 }
 

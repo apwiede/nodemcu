@@ -93,8 +93,38 @@ static str2id_t moduleFieldName2Ids[] = {
 
 static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   int result;
+  bool boolResult;
+  uint8_t MACAddr[7];
 
-  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
+ets_printf("MACAddr[0]: 0x%02x\n", compMsgModuleData.MACAddr[0]);
+  if (compMsgModuleData.MACAddr[0] == '\0') {
+    boolResult = wifi_get_macaddr(STATION_IF, MACAddr);
+ets_printf("getMacAddr STA: boolResult: %d\n", boolResult);
+    if (!boolResult) {
+      return COMP_MSG_ERR_CANNOT_GET_MAC_ADDR;
+    }
+    os_memcpy(compMsgModuleData.MACAddr, MACAddr, 6);
+    compMsgModuleData.MACAddr[6] = '\0';
+  } else {
+    boolResult = wifi_get_macaddr(SOFTAP_IF, MACAddr);
+ets_printf("getMacAddr AP: boolResult: %d\n", boolResult);
+    if (!boolResult) {
+      return COMP_MSG_ERR_CANNOT_GET_MAC_ADDR;
+    }
+    os_memcpy(compMsgModuleData.MACAddr, MACAddr, 6);
+    compMsgModuleData.MACAddr[6] = '\0';
+  }
+int i;
+i = 0;
+ets_printf("§MACaddr: ");
+while (i < 6) {
+  ets_printf(" 0x%02x", compMsgModuleData.MACAddr[i]);
+  i++;
+}
+ets_printf("\n§");
+//  if (self->compMsgData != NULL) {
+//    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
+//  }
   *numericValue = 0;
   *stringValue = compMsgModuleData.MACAddr;
   return COMP_MSG_ERR_OK;
@@ -581,6 +611,8 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   int result;
 
 //ets_printf("§setModuleValues\n§");
+  compMsgModuleData.MACAddr[0] = '\0';
+#ifdef NOTDEF
   compMsgModuleData.MACAddr[0] = 0xAB;
   compMsgModuleData.MACAddr[1] = 0xCD;
   compMsgModuleData.MACAddr[2] = 0xEF;
@@ -588,6 +620,7 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   compMsgModuleData.MACAddr[4] = 0x34;
   compMsgModuleData.MACAddr[5] = 0x56;
   compMsgModuleData.MACAddr[6] = 0;
+#endif
   compMsgModuleData.IPAddr[0] = 0xD4;
   compMsgModuleData.IPAddr[1] = 0xC3;
   compMsgModuleData.IPAddr[2] = 0x12;
@@ -657,6 +690,7 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgModuleData->getOtaRomPath = &getOtaRomPath;
   self->compMsgModuleData->getOtaFsPath = &getOtaFsPath;
   self->compMsgModuleData->getOtaPort = &getOtaPort;
+  self->compMsgModuleData->getMACAddr = &getMACAddr;
 
   self->compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);

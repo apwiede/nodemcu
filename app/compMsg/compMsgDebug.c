@@ -48,6 +48,209 @@
 #include "c_stdlib.h"
 #include "compMsgDispatcher.h"
 
+typedef struct debugCh2Id {
+  uint8_t ch;
+  uint32_t id;
+} debugCh2Id_t;
+
+debugCh2Id_t debugCh2Id[] = {
+ { 'A', DEBUG_COMP_MSG_ACTION},
+ { 'B', DEBUG_COMP_MSG_BUILD_MSG},
+ { 'D', DEBUG_COMP_MSG_DISPATCHER},
+ { 'd', DEBUG_COMP_MSG_DATA},
+ { 'V', DEBUG_DATA_VIEW},
+ { 'v', DEBUG_COMP_MSG_DATA_VIEW},
+ { 'H', DEBUG_COMP_MSG_HTTP},
+ { 'I', DEBUG_COMP_MSG_IDENTIFY},
+ { 'E', DEBUG_COMP_MSG_MSG_DESC},
+ { 'M', DEBUG_COMP_MSG_MODULE_DATA},
+ { 'N', DEBUG_COMP_MSG_NET_SOCKET},
+ { 'O', DEBUG_COMP_MSG_OTA},
+ { 'R', DEBUG_COMP_MSG_REQUEST},
+ { 'S', DEBUG_COMP_MSG_SOCKET},
+ { 's', DEBUG_COMP_MSG_SEND_RECEIVE},
+ { 'T', DEBUG_COMP_MSG_TYPES_AND_NAMES},
+ { 't', DEBUG_COMP_MSG_TIMER},
+ { 'U', DEBUG_COMP_MSG_UTIL},
+ { 'W', DEBUG_COMP_MSG_WEB_SOCKET},
+ { 'w', DEBUG_COMP_MSG_WIFI_DATA},
+ { 'Y', DEBUG_COMP_MSG_ALWAYS},
+ { '\0', 0},
+};
+
+// ================================= getDebugFlags ====================================
+
+static uint32_t getDebugFlags(compMsgDispatcher_t *self, uint8_t *dbgChars) {
+  int idx;
+  uint8_t *cp;
+  bool found;
+  debugCh2Id_t *dp;
+  uint32_t flags;
+
+  found = false;
+  cp = dbgChars;
+  flags = 0;
+  while (*cp != '\0') {
+    dp = &debugCh2Id[0];
+    while (dp->ch != '\0') {
+      if (dp->ch == *cp) {
+        flags |= dp->id;
+        break;
+      }
+      dp++;
+    } 
+    cp++;
+  }
+  flags &= self->compMsgDebug->currDebugFlags;
+  if (os_strstr(dbgChars, "Y") != NULL) {
+    flags |= DEBUG_COMP_MSG_ALWAYS;
+  }
+  return flags;
+}
+
+void ets_vprintf(int stream, const char* fmt, va_list arglist );  
+
+
+// ================================= dbgPrintf ====================================
+
+static void dbgPrintf(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...) {
+  uint32_t flags;
+  va_list arglist;
+  int id;
+  char buf[30];
+  char outbuf[30];
+  uint8_t *cp;
+  uint8_t *cp2;
+  uint8_t *cp3;
+  uint8_t *ep;
+  char chval;
+  int val;
+  int dval;
+  void *pval;
+  char *strval;
+  bool found;
+
+  id = 0;
+  ep = format + c_strlen(format) - 1;
+  flags = self->compMsgDebug->getDebugFlags(self, dbgChars);
+  if (flags && (debugLevel >= self->compMsgDebug->debugLevel)) {
+    cp3 = "%==DBG: ";
+    while (*cp3 != '\0') {
+      platform_uart_send(id, *cp3);
+      cp3++;
+    }
+    va_start(arglist, format);
+    cp = format;
+    while (*cp) {
+      switch (*cp) {
+      case '\n':
+        if (cp < ep) {
+          platform_uart_send(id, '\n');
+        }
+        break;
+      case '%':
+        cp3 = cp;
+        cp2 = buf;
+        *cp2++ = *cp;
+        cp++;
+        found = false;
+        while (*cp != '\0') {
+          switch (*cp) {
+          case 'c':
+          case 'd':
+          case 'u':
+          case 's':
+          case 'x':
+          case 'p':
+          case '%':
+            *cp2 = *cp;
+            cp2++;
+            found = true;
+            break;
+          default:
+            *cp2 = *cp;
+            cp2++;
+            cp++;
+            break;
+          }
+          if (found) {
+            break;
+          }
+        }
+        *cp2 = '\0';
+        switch (*cp) {
+        case '%':
+          platform_uart_send(id, *cp);
+          break;
+        case 'c':
+          chval = (char)va_arg(arglist, int);
+          ets_sprintf(outbuf, buf, chval);
+          cp3 = outbuf;
+          while (*cp3 != '\0') {
+            platform_uart_send(id, *cp3);
+            cp3++;
+          }
+          break;
+        case 'd':
+          dval = va_arg(arglist, int);
+          ets_sprintf(outbuf, buf, dval);
+          cp3 = outbuf;
+          while (*cp3 != '\0') {
+            platform_uart_send(id, *cp3);
+            cp3++;
+          }
+          break;
+        case 's':
+          strval = va_arg(arglist, char*);
+          ets_sprintf(outbuf, buf, strval);
+          cp3 = outbuf;
+          while (*cp3 != '\0') {
+            platform_uart_send(id, *cp3);
+            cp3++;
+          }
+          break;
+        case 'u':
+        case 'x':
+          dval = va_arg(arglist, int);
+          ets_sprintf(outbuf, buf, dval);
+          cp3 = outbuf;
+          while (*cp3 != '\0') {
+            platform_uart_send(id, *cp3);
+            cp3++;
+          }
+          break;
+        case 'p':
+          pval = va_arg(arglist, void*);
+          ets_sprintf(outbuf, buf, pval);
+          cp3 = outbuf;
+          while (*cp3 != '\0') {
+            platform_uart_send(id, *cp3);
+            cp3++;
+          }
+          break;
+        default:
+          platform_uart_send(id, *cp);
+        }
+        break;
+      default:
+        platform_uart_send(id, *cp);
+        break;
+      }
+      cp++;
+    }
+    cp3 = "%";
+    while (*cp3 != '\0') {
+      platform_uart_send(id, *cp3);
+      cp3++;
+    }
+    if (self->compMsgDebug->addEol) {
+      platform_uart_send(id, '\n');
+    }
+    va_end(arglist);
+  }
+}
+
+
 // ================================= dumpHeaderPart ====================================
 
 static uint8_t dumpHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr) {
@@ -304,6 +507,12 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
 uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
+  self->compMsgDebug->currDebugFlags = DEBUG_COMP_MSG_WEB_SOCKET;
+  self->compMsgDebug->addEol = true;
+  self->compMsgDebug->debugLevel = 1;
+
+  self->compMsgDebug->dbgPrintf = &dbgPrintf;
+  self->compMsgDebug->getDebugFlags = &getDebugFlags;
   self->compMsgDebug->dumpMsgParts = &dumpMsgParts;
   self->compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
   self->compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;

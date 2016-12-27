@@ -518,11 +518,10 @@ static void startAccessPoint(void *arg) {
   socketUserData_t *sud;
   compMsgTimerSlot_t *compMsgTimerSlot;
 
-//ets_printf("§startAccessPoint\n§");
   compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
-ets_printf("§startAccessPoint timerInfo:%p\n§", compMsgTimerSlot);
-  compMsgTimerSlot->connectionMode = SOFTAP_IF;
   self = compMsgTimerSlot->compMsgDispatcher;
+  COMP_MSG_DBG(self, "W", 1, "startAccessPoint timerInfo: %p\n", compMsgTimerSlot);
+  compMsgTimerSlot->connectionMode = SOFTAP_IF;
   pesp_conn = NULL;
 
   result = self->compMsgSocket->checkConnectionStatus(compMsgTimerSlot);
@@ -640,7 +639,7 @@ ets_printf("§webSocketRunAPMode COMP_MSG_ERR_CANNOT_SET_OPMODE\n§");
     return COMP_MSG_ERR_CANNOT_SET_OPMODE;
   }
   status = wifi_station_get_connect_status();
-ets_printf("§wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n§", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
+  COMP_MSG_DBG(self, "W", 1, "wifi is in mode: %d status: %d ap_id: %d hostname: %s!\n", wifi_get_opmode(), status, wifi_station_get_current_ap_id(), wifi_station_get_hostname());
   switch (status) {
   case STATION_IDLE:
     break;

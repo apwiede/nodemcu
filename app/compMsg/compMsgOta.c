@@ -314,8 +314,8 @@ static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, v
   int port;
   int numeric;
 
+  result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numeric, &otaHost);
   if (ip == 0) {
-    result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numeric, &otaHost);
     ets_printf("DNS lookup failed for: %s\n", otaHost);
     // not connected so don't call disconnect on the connection
     // but call our own disconnect callback to do the cleanup
@@ -381,6 +381,12 @@ static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callbac
     slot = 0;
   }
   uud->rom_slot = slot;
+  // save user data
+  bootconf.user_rom_save_data_flag = 1;
+ets_printf("current slot: %d\n", slot);
+  os_sprintf(bootconf.user_rom_save_data, "Hello Arnulf slot: %d\n", slot);
+  bootconf.user_rom_save_data_size = c_strlen(bootconf.user_rom_save_data);
+  rboot_set_config(&bootconf);
 
   if (flashfs) {
     // flash spiffs

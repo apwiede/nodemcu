@@ -265,7 +265,7 @@ static uint8_t getHttpHeaders(char * data, size_t size, socketUserData_t *sud) {
         }
         httpHeaderPart->httpHeaderValue = cp + 1;
       } else {
-        if ((*cp > 0x40) && (*cp < 0x60)) {
+        if ((*cp >= 'A') && (*cp <= 'Z')) {
           *dp = _tolower(*cp);
         } else {
           *dp = *cp;

@@ -135,6 +135,7 @@ enum CompMsgErrorCodes {
   COMP_MSG_ERR_REGIST_TIME                    = 144,
   COMP_MSG_ERR_BAD_WIFI_VALUE_WHICH           = 143,
   COMP_MSG_ERR_BAD_ROW                        = 142,
+  COMP_MSG_ERR_CANNOT_GET_MAC_ADDR            = 141,
 
   COMP_MSG_ERR_CANNOT_CONNECT                 = 99,
 

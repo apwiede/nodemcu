@@ -297,42 +297,43 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   if (typelen > 0) {
     switch(type[0]) {
     case 'W':
-//ets_printf("§start RunAPMode\n§");
+      COMP_MSG_DBG(self, "DY", 1, "start RunAPMode\n");
       result = self->compMsgSocket->webSocketRunAPMode(self);
       checkErrOK(result);
       break;
     case 'N':
-//ets_printf("§start RunClientMode§");
+      COMP_MSG_DBG(self, "N",1,  "start RunClientMode");
       result = self->compMsgSocket->netSocketRunClientMode(self);
       checkErrOK(result);
       break;
     case 'C':
-//ets_printf("§start startCloudSocket§");
+      COMP_MSG_DBG(self, "H", 1, "start startCloudSocket");
       result = self->compMsgSocket->netSocketStartCloudSocket(self);
       checkErrOK(result);
       break;
     case 'A':
-//ets_printf("§start send AA message§");
+      COMP_MSG_DBG(self, "B", 1, "start send AA message");
       result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
       checkErrOK(result);
       result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
-      ets_printf("§handle: %s result: %d\n§", handle, result);
+      COMP_MSG_DBG(self, "B", 1, "handle: %s result: %d\n", handle, result);
       checkErrOK(result);
       break;
     case 'O':
-ets_printf("§start ota firmware update\n§");
+      COMP_MSG_DBG(self, "O", 1, "start ota firmware update\n");
       result = self->compMsgOta->checkClientMode(self, false);
-      ets_printf("§checkClientMode1: result: %d\n§", result);
+      COMP_MSG_DBG(self, "O", 1, "checkClientMode1: result: %d\n", result);
       checkErrOK(result);
       break;
     case 'o':
-ets_printf("§start ota spiffs update\n§");
+      COMP_MSG_DBG(self, "O", 1, "start ota spiffs update\n");
       result = self->compMsgOta->checkClientMode(self, true);
-      ets_printf("§echkClientMode2 result: %d\n§", result);
+      COMP_MSG_DBG(self, "O", 1, "chechkClientMode2 result: %d\n", result);
       checkErrOK(result);
       break;
     case 'U':
-//ets_printf("§start Uart input§");
+      self->compMsgDebug->addEol = false;
+      COMP_MSG_DBG(self, "U", 1, "start Uart input");
       id = 0;
       stopbits = PLATFORM_UART_STOPBITS_1;
       parity = PLATFORM_UART_PARITY_NONE;
@@ -342,7 +343,7 @@ ets_printf("§start ota spiffs update\n§");
       checkErrOK(result);
       break;
     default:
-ets_printf("§initDispatcher: funny type: %s§", type);
+      COMP_MSG_DBG(self, "Y", 1, "initDispatcher: funny type: %s", type);
       break;
     }
   }
@@ -372,7 +373,6 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
 // ================================= newCompMsgDispatcher ====================================
 
 compMsgDispatcher_t *newCompMsgDispatcher() {
-ets_printf("newCompMsgDispatcher\n");
   if (compMsgDispatcherSingleton != NULL) {
     return compMsgDispatcherSingleton;
   }
