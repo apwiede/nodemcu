@@ -126,7 +126,7 @@ static void dbgPrintf(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debu
 
   uartId = self->compMsgDebug->debugUartId;
   flags = self->compMsgDebug->getDebugFlags(self, dbgChars);
-  if (flags && (debugLevel >= self->compMsgDebug->debugLevel)) {
+  if (flags && (debugLevel <= self->compMsgDebug->debugLevel)) {
     cp = "%==DBG: ";
     while (*cp != '\0') {
       platform_uart_send(uartId, *cp);

@@ -603,7 +603,7 @@ cryptKey = "a1b2c3d4e5f6g7h8";
           ivlen = 16;
           klen = 16;
           cryptedPtr = received->buf + hdrInfos->headerLgth;
-          result = self->compMsgUtil->decryptMsg(cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
+          result = self->compMsgUtil->decryptMsg(self, cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
           checkErrOK(result);
           COMP_MSG_DBG(self, "I", 2, "mlen: %d decryptedLgth: %d\n", mlen, decryptedLgth);
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
@@ -663,7 +663,7 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffe
   klen = 16;
   c_memcpy(buf, buffer, lgth);
   cryptedPtr = buf;
-  result = self->compMsgUtil->encryptMsg(cryptedPtr, mlen, cryptKey, klen, iv, ivlen, &encrypted, &encryptedLgth);
+  result = self->compMsgUtil->encryptMsg(self, cryptedPtr, mlen, cryptKey, klen, iv, ivlen, &encrypted, &encryptedLgth);
   checkErrOK(result);
   msgLgth = encryptedLgth;
   COMP_MSG_DBG(self, "I", 2, "encryptedLgth: %d %d\n", encryptedLgth, result);

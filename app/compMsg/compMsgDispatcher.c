@@ -264,7 +264,6 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   int databits;
   uint32_t baud;
 
-ets_printf("initDispatcher 1\n");
   result = compMsgMsgDescInit(self);
   checkErrOK(result);
   result = compMsgUtilInit(self);
@@ -275,7 +274,6 @@ ets_printf("initDispatcher 1\n");
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
   checkErrOK(result);
-ets_printf("initDispatcher 2\n");
   result = compMsgSendReceiveInit(self);
   checkErrOK(result);
   result = compMsgActionInit(self);
@@ -290,14 +288,12 @@ ets_printf("initDispatcher 2\n");
   checkErrOK(result);
   result = compMsgNetSocketInit(self);
   checkErrOK(result);
-ets_printf("initDispatcher 3\n");
   result = compMsgHttpInit(self);
   checkErrOK(result);
   result = compMsgOtaInit(self);
   checkErrOK(result);
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
-ets_printf("initDispatcher 4\n");
   if (typelen > 0) {
     switch(type[0]) {
     case 'W':
@@ -359,7 +355,6 @@ ets_printf("initDispatcher 4\n");
 static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
   uint8_t result;
 
-ets_printf("createDispatcher 1\n");
   os_sprintf(self->handle, "%s%p", DISP_HANDLE_PREFIX, self);
   COMP_MSG_DBG(self, "D", 2, "os createDispatcher: %s!\n", self->handle);
   result = addHandle(self->handle, self);
@@ -372,7 +367,6 @@ ets_printf("createDispatcher 1\n");
 //  resetMsgInfo(self, &self->toSend);
   *handle = self->handle;
   COMP_MSG_DBG(self, "D", 2, "createDispatcher: done\n");
-ets_printf("createDispatcher 2\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -381,7 +375,6 @@ ets_printf("createDispatcher 2\n");
 compMsgDispatcher_t *newCompMsgDispatcher() {
   uint8_t result;
 
-ets_printf("newCompMsgDispatcher 1\n");
   if (compMsgDispatcherSingleton != NULL) {
     return compMsgDispatcherSingleton;
   }
@@ -474,7 +467,6 @@ ets_printf("newCompMsgDispatcher 1\n");
 
   compMsgDispatcher->getFieldType = &getFieldType;
   compMsgDispatcherSingleton = compMsgDispatcher;
-ets_printf("newCompMsgDispatcher 2\n");
   return compMsgDispatcher;
 }
 

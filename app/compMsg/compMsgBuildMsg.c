@@ -394,7 +394,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
     }
     COMP_MSG_DBG(self, "B", 2, "msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
     toCryptPtr = msgData + self->compMsgData->headerLgth;
-    result = self->compMsgUtil->encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
+    result = self->compMsgUtil->encryptMsg(self, toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
     checkErrOK(result);
     if (encryptedMsgDataLgth != mlen) {
       COMP_MSG_DBG(self, "B", 1, "WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n", mlen, encryptedMsgDataLgth);

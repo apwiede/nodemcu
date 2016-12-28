@@ -538,7 +538,7 @@ compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
   if (compMsgDataView == NULL) {
     return NULL;
   }
-  ets_printf("newCompMsgDataView: newDataView: %p!", compMsgDataView);
+//ets_printf("newCompMsgDataView: newDataView: %p!\n", compMsgDataView);
   compMsgDataView->dataView = newDataView(data, lgth);
   if (compMsgDataView->dataView == NULL) {
     return NULL;

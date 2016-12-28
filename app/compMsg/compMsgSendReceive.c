@@ -183,7 +183,7 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   msgData = self->cloudMsgData;
   msgLgth = self->cloudMsgDataLgth;
   COMP_MSG_DBG(self, "s", 2, "prepareCloudMsg: msgLgth: %d", msgLgth);
-  result = self->compMsgUtil->toBase64(msgData, &msgLgth, &b64Msg);
+  result = self->compMsgUtil->toBase64(self, msgData, &msgLgth, &b64Msg);
   checkErrOK(result);
   COMP_MSG_DBG(self, "s", 2, "prepareCloudMsg: b64msgLgth: %d", msgLgth);
 

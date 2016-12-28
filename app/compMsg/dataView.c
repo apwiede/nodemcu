@@ -401,7 +401,7 @@ static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) 
 
 dataView_t *newDataView(uint8_t *data, size_t lgth) {
   dataView_t *dataView = os_zalloc(sizeof(dataView_t));
-//ets_printf("§newDataView: %p!lgth: %d!§", dataView, lgth);
+//ets_printf("newDataView: %p!lgth: %d!", dataView, lgth);
   if (dataView == NULL) {
     return NULL;
   }

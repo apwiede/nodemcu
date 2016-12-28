@@ -66,7 +66,7 @@ static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
  * \return Error code or ErrorOK
  *
  */
-static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
+static uint8_t toBase64(compMsgDispatcher_t *self, const uint8_t *msg, size_t *len, uint8_t **encoded) {
   size_t i;
   size_t n;
   uint8_t *q;
@@ -92,7 +92,7 @@ static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
   }
   *q = '\0';
   *len = q - out;
-//ets_printf("§b64Len: %d *len: %d§", ((n + 2) / 3 * 4) + 1, *len);
+  COMP_MSG_DBG(self, "U", 2, "b64Len: %d *len: %d", ((n + 2) / 3 * 4) + 1, *len);
   // ATTENTION the caller has to free *encoded!!
   *encoded = out;
   return COMP_MSG_ERR_OK;
@@ -100,7 +100,7 @@ static uint8_t toBase64(const uint8_t *msg, size_t *len, uint8_t **encoded) {
 
 // ============================= fromBase64 ========================
 
-static uint8_t fromBase64(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg) {
+static uint8_t fromBase64(compMsgDispatcher_t *self, const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg) {
   int i;
   int n;
   int blocks;
@@ -159,7 +159,7 @@ static uint8_t fromBase64(const uint8_t *encodedMsg, size_t *len, uint8_t **deco
 
 // ============================= encryptMsg ========================
 
-static uint8_t encryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth) {
+static uint8_t encryptMsg(compMsgDispatcher_t *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth) {
   const crypto_mech_t *mech;
   size_t bs;
   size_t clen;
@@ -174,7 +174,7 @@ static uint8_t encryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, s
   bs = mech->block_size;
   clen = ((mlen + bs - 1) / bs) * bs;
   *lgth = clen;
-//ets_printf("dlen: %d lgth: %d clen: %d data: %p\n", dlen, *lgth, clen, data);
+  COMP_MSG_DBG(self, "U", 2, "mlen: %d lgth: %d clen: %d data: %p\n", mlen, *lgth, clen, msg);
   crypted = (uint8_t *)os_zalloc (clen);
   if (!crypted) {
     return COMP_MSG_ERR_CRYPTO_INIT_FAILED;
@@ -197,7 +197,7 @@ static uint8_t encryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, s
 
 // ============================= decryptMsg ========================
 
-static uint8_t decryptMsg(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth) {
+static uint8_t decryptMsg(compMsgDispatcher_t *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth) {
   const crypto_mech_t *mech;
   size_t bs;
   size_t clen;
@@ -284,21 +284,21 @@ static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
   fieldValueCallbackInfos_t *fieldValueCallbackInfo;
   int idx;
 
-//ets_printf("§getFieldValueCallback: %s 0x%02x§\n", callbackName, callbackType);
+  COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback: %s 0x%02x\n", callbackName, callbackType);
   idx = 0;
   while (idx < self->compMsgUtil->numFieldValueCallbackInfos) {
     fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[idx];
-//ets_printf("§getFieldValueCallback: %s %s§", fieldValueCallbackInfo->callbackName, callbackName);
+    COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback: %s %s", fieldValueCallbackInfo->callbackName, callbackName);
     if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
       if ((callbackType == 0) || (fieldValueCallbackInfo->callbackType == callbackType)) {
         *callback = fieldValueCallbackInfo->callback;
-//ets_printf("§getFieldValueCallback found: %s 0x%02x§\n", callbackName, callbackType);
+        COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback found: %s 0x%02x\n", callbackName, callbackType);
         return COMP_MSG_ERR_OK;
       }
     }
     idx++;
   }
-//ets_printf("§getFieldValueCallback NOT found: %s 0x%02x§\n", callbackName, callbackType);
+  COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback NOT found: %s 0x%02x\n", callbackName, callbackType);
   return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
@@ -320,7 +320,7 @@ static uint8_t getFieldValueCallbackName(compMsgDispatcher_t *self, fieldValueCa
     }
     idx++;
   }
-ets_printf("§getFieldValueCallbackName NOT found: 0x%02x§\n", callbackType);
+  COMP_MSG_DBG(self, "U", 1, "getFieldValueCallbackName NOT found: 0x%02x\n", callbackType);
   return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
