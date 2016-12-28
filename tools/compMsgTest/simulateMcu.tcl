@@ -250,8 +250,8 @@ puts stderr "got '>'"
     set ::lastCh $ch
     return -code return
   }
-  if {$ch eq "§"} {
-#puts stderr "  ==handleInput0 2: got §!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
+  if {$ch eq "%"} {
+#puts stderr "  ==handleInput0 2: got %!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
     if {$::inDebug} {
       set ::inDebug false
 # puts stderr "  ==handleInput0: DBG: $::debugBuf!"
@@ -332,7 +332,7 @@ proc readByte0 {fd bufVar lgthVar} {
   set ::afterId [after 500 [list handleAnswer ::dev0Buf ::dev0Lgth]]
   set pch 0
   binary scan $ch c pch
-if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
+if {!$::inDebug && ($ch ne "%") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
 #puts stderr "=readByte0: read: $ch!lgth: $lgth!inDebug: $::inDebug!"
 }
   set result [handleInput0 $ch buf lgth]

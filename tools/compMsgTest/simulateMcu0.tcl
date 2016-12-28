@@ -168,8 +168,8 @@ puts stderr "reset ::isStart"
       return $::COMP_MSG_ERR_OK
     }
     append ::startTxt $ch
-    if {$ch eq "§"} {
-puts stderr "  ==handleInput0 2: got §!startTxt: $::startTxt!"
+    if {$ch eq "%"} {
+puts stderr "  ==handleInput0 2: got %!startTxt: $::startTxt!"
       set ::startBuf ""
       set ::startTxt ""
 #      set ::isStart false
@@ -186,7 +186,7 @@ puts stderr "  ==handleInput0 2: got §!startTxt: $::startTxt!"
     return -code return
   }
 #puts stderr "  ==handleInput0 3!"
-  if {$ch eq "§"} {
+  if {$ch eq "%"} {
 #puts stderr "  ==handleInput0: inDebug rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!inDebug: $::inDebug!"
     if {$::inDebug} {
       set ::inDebug false

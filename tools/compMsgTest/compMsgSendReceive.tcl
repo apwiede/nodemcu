@@ -49,7 +49,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
       received = &self->received
-    #ets_printf{"§%c§", buffer[0]&0xFF}
+    #ets_printf{"%c", buffer[0]&0xFF}
       myBuffer = buffer
       if {lgth == 0} {
         # simulate a '0' char!!

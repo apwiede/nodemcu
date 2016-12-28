@@ -201,8 +201,8 @@ puts stderr "handleInput0 return 12"
 #puts stderr "handleInput0 return 6"
     return -code return
   }
-  if {$ch eq "§"} {
-#puts stderr "  ==handleInput0 2a: got §!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
+  if {$ch eq "%"} {
+#puts stderr "  ==handleInput0 2a: got %!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
     if {$::inDebug} {
       set ::inDebug false
 # puts stderr "  ==handleInput0: DBG: $::debugBuf!"
@@ -296,7 +296,7 @@ incr ::cnt0
 if {!$::inStart} {
 #puts stderr "=readByte0: read: cnt: $::cnt0 0 ch: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
 }
-if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
+if {!$::inDebug && ($ch ne "%") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
 #puts stderr "=readByte0: read: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
 }
 

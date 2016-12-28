@@ -118,7 +118,7 @@ namespace eval compMsg {
     proc runDeletePasswdCMode {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-puts stderr "§runDeletePasswdC§"
+puts stderr "runDeletePasswdC"
       return $::COMP_DISP_ERR_OK
     }
     
@@ -259,9 +259,9 @@ if {0} {
         idx = 0;
         actionEntry = &actionName2Actions[idx];
         while {actionEntry->actionName != NULL} { 
-    #ets_printf{"§runActionBu8!%s!%c!%c!%c!§", actionEntry->actionName, {received->u16CmdKey>>8}&0xFF, received->u16CmdKey&0xFF, actionMode};
+    #ets_printf{"runActionBu8!%s!%c!%c!%c!", actionEntry->actionName, {received->u16CmdKey>>8}&0xFF, received->u16CmdKey&0xFF, actionMode};
           if {{actionEntry->u16CmdKey == received->u16CmdKey} && {actionMode == actionEntry->mode}} {
-    ets_printf{"§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode};
+    ets_printf{"runAction!%s!%d!", actionEntry->actionName, actionEntry->mode};
             set result [::compMsg actionEntry->action{compMsgDispatcher};
             checkErrOK{result};
             return $::COMP_DISP_ERR_OK
@@ -271,7 +271,7 @@ if {0} {
         }
         checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
       } else {
-    #ets_printf{"§runAction u16!%c%c!%c!§\n", {received->u16CmdKey>>8}&0xFF, received->u16CmdKey&0xFF, *answerType};
+    #ets_printf{"runAction u16!%c%c!%c!\n", {received->u16CmdKey>>8}&0xFF, received->u16CmdKey&0xFF, *answerType};
         dataView = compMsgDispatcher compMsgDataView->dataView;
         switch {compMsgDispatcher actionMode} {
         case 8:
@@ -281,8 +281,8 @@ if {0} {
           while {actionEntry->actionName != NULL} { 
     #ets_printf{"an2: %s am: %d %d\n", actionEntry->actionName, actionMode, actionEntry->mode};
             if {compMsgDispatcher actionMode == actionEntry->mode} {
-    #ets_printf{"§runAction2 G!%d!%c!§\n", compMsgDispatcher actionMode, *answerType};
-    ets_printf{"§runAction!%s!%d!§", actionEntry->actionName, actionEntry->mode};
+    #ets_printf{"runAction2 G!%d!%c!\n", compMsgDispatcher actionMode, *answerType};
+    ets_printf{"runAction!%s!%d!", actionEntry->actionName, actionEntry->mode};
               set result [::compMsg actionEntry->action{compMsgDispatcher};
               checkErrOK{result};
               return $::COMP_DISP_ERR_OK

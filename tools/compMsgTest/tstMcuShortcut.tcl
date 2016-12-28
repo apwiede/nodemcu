@@ -175,8 +175,8 @@ puts stderr "===got '>'"
     set ::lastCh $ch
     return -code return
   }
-  if {$ch eq "§"} {
-#puts stderr "  ==handleInput0 2: got §!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
+  if {$ch eq "%"} {
+#puts stderr "  ==handleInput0 2: got %!startTxt: $::startTxt!debugTxt: $::debugTxt!inDebug: $::inDebug!"
     if {$::inDebug} {
       set ::inDebug false
 # puts stderr "  ==handleInput0: DBG: $::debugBuf!"
@@ -270,7 +270,7 @@ puts stderr "=readByte0: read: $::cnt0 0 ch: $ch![format 0x%02x [expr {$pch & 0x
   flush $::fd1
   return $::COMP_MSG_ERR_OK
   
-if {!$::inDebug && ($ch ne "§") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
+if {!$::inDebug && ($ch ne "%") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
 #puts stderr "=readByte0: read: $ch![format 0x%02x [expr {$pch & 0xff}]]!lgth: $lgth!inDebug: $::inDebug!"
 }
 

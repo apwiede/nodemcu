@@ -534,7 +534,7 @@ puts stderr "compMsgDispatcher3 setData"
       variable maxMsgHeaders
       upvar $handleVar handle
 
-    #ets_printf{"§createMsgFromLines:%d!%d! \n§" $numMsgHeaders $maxMsgHeaders};
+    #ets_printf{"createMsgFromLines:%d!%d! \n" $numMsgHeaders $maxMsgHeaders};
       dict set compMsgDispatcher received $parts
       set result [getMsgPtrFromMsgParts $parts $::COMP_MSG_INCR]
       checkErrOK $result
