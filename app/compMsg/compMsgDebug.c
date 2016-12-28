@@ -86,7 +86,6 @@ debugCh2Id_t debugCh2Id[] = {
 // ================================= getDebugFlags ====================================
 
 static uint32_t getDebugFlags(compMsgDispatcher_t *self, uint8_t *dbgChars) {
-  int idx;
   uint8_t *cp;
   bool found;
   debugCh2Id_t *dp;
@@ -111,6 +110,30 @@ static uint32_t getDebugFlags(compMsgDispatcher_t *self, uint8_t *dbgChars) {
     flags |= DEBUG_COMP_MSG_ALWAYS;
   }
   return flags;
+}
+
+// ================================= setDebugFlags ====================================
+
+static uint8_t setDebugFlags(compMsgDispatcher_t *self, uint8_t *dbgChars) {
+  uint8_t *cp;
+  debugCh2Id_t *dp;
+  uint32_t flags;
+
+  cp = dbgChars;
+  flags = 0;
+  while (*cp != '\0') {
+    dp = &debugCh2Id[0];
+    while (dp->ch != '\0') {
+      if (dp->ch == *cp) {
+        flags |= dp->id;
+        break;
+      }
+      dp++;
+    } 
+    cp++;
+  }
+  self->compMsgDebug->currDebugFlags = flags;
+  return COMP_MSG_ERR_OK;
 }
 
 // ================================= dbgPrintf ====================================
@@ -414,8 +437,9 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   self->compMsgDebug->debugLevel = 1;
   self->compMsgDebug->debugUartId = 0;
 
-  self->compMsgDebug->dbgPrintf = &dbgPrintf;
   self->compMsgDebug->getDebugFlags = &getDebugFlags;
+  self->compMsgDebug->setDebugFlags = &setDebugFlags;
+  self->compMsgDebug->dbgPrintf = &dbgPrintf;
   self->compMsgDebug->dumpMsgParts = &dumpMsgParts;
   self->compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
   self->compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;

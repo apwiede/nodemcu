@@ -78,6 +78,7 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef void (* dbgPrintf_t)(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);
 typedef uint32_t (* getDebugFlags_t)(compMsgDispatcher_t *self, uint8_t *dbgChars);
+typedef uint8_t (* setDebugFlags_t)(compMsgDispatcher_t *self, uint8_t *dbgChars);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
 typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
@@ -92,6 +93,7 @@ typedef struct compMsgDebug {
 
   dbgPrintf_t dbgPrintf;
   getDebugFlags_t getDebugFlags;
+  setDebugFlags_t setDebugFlags;
   dumpMsgParts_t dumpMsgParts;
   dumpMsgHeaderInfos_t dumpMsgHeaderInfos;
   dumpHeaderPart_t dumpHeaderPart;

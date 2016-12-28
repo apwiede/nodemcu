@@ -297,6 +297,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   if (typelen > 0) {
     switch(type[0]) {
     case 'W':
+      self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
       COMP_MSG_DBG(self, "DY", 1, "start RunAPMode\n");
       result = self->compMsgSocket->webSocketRunAPMode(self);
       checkErrOK(result);
@@ -320,12 +321,14 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       checkErrOK(result);
       break;
     case 'O':
+      self->compMsgDebug->setDebugFlags(self, "BHIOWsSw");
       COMP_MSG_DBG(self, "O", 1, "start ota firmware update\n");
       result = self->compMsgOta->checkClientMode(self, false);
       COMP_MSG_DBG(self, "O", 1, "checkClientMode1: result: %d\n", result);
       checkErrOK(result);
       break;
     case 'o':
+      self->compMsgDebug->setDebugFlags(self, "BHIOWsSw");
       COMP_MSG_DBG(self, "O", 1, "start ota spiffs update\n");
       result = self->compMsgOta->checkClientMode(self, true);
       COMP_MSG_DBG(self, "O", 1, "chechkClientMode2 result: %d\n", result);
@@ -333,6 +336,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       break;
     case 'U':
       self->compMsgDebug->addEol = false;
+      self->compMsgDebug->setDebugFlags(self, "BHINsSw");
       COMP_MSG_DBG(self, "U", 1, "start Uart input");
       id = 0;
       stopbits = PLATFORM_UART_STOPBITS_1;
