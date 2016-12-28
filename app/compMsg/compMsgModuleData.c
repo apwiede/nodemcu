@@ -609,17 +609,8 @@ static uint8_t updateModuleValues(compMsgDispatcher_t *self) {
 static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   int result;
 
-//ets_printf("§setModuleValues\n§");
+  COMP_MSG_DBG(self, "M", 2, "setModuleValues\n");
   compMsgModuleData.MACAddr[0] = '\0';
-#ifdef NOTDEF
-  compMsgModuleData.MACAddr[0] = 0xAB;
-  compMsgModuleData.MACAddr[1] = 0xCD;
-  compMsgModuleData.MACAddr[2] = 0xEF;
-  compMsgModuleData.MACAddr[3] = 0x12;
-  compMsgModuleData.MACAddr[4] = 0x34;
-  compMsgModuleData.MACAddr[5] = 0x56;
-  compMsgModuleData.MACAddr[6] = 0;
-#endif
   compMsgModuleData.IPAddr[0] = 0xD4;
   compMsgModuleData.IPAddr[1] = 0xC3;
   compMsgModuleData.IPAddr[2] = 0x12;
@@ -673,7 +664,7 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   c_memcpy(compMsgModuleData.otaRomPath, "/nodemcu-rboot.bin\0", 19);
   c_memcpy(compMsgModuleData.otaFsPath, "/nodemcu-spiffs.bin\0", 20);
   compMsgModuleData.otaPort = 80;
-//ets_printf("§setModuleVaues done\n§");
+  COMP_MSG_DBG(self, "M", 2, "setModuleVaues done\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -737,6 +728,5 @@ compMsgModuleData_t *newCompMsgModuleData() {
   if (compMsgModuleData == NULL) {
     return NULL;
   }
-
   return compMsgModuleData;
 }

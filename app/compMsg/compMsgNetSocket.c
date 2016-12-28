@@ -105,11 +105,12 @@ static int dns_reconn_count = 0;
  * \return Error code or ErrorOK
  *
  */
-static uint8_t netSocketSendData(socketUserData_t *sud, const char *payload, int size)
-{
+static uint8_t netSocketSendData(socketUserData_t *sud, const char *payload, int size) {
   uint8_t result;
+  compMsgDispatcher_t *self;
 
-ets_printf("§netSocketSendData: size: %d§", size);
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "netSocketSendData: size: %d", size);
 #ifdef CLIENT_SSL_ENABLE
   if (sud->secure) {
     result = espconn_secure_sent(sud->pesp_conn, (unsigned char *)payload, size);
@@ -119,7 +120,7 @@ ets_printf("§netSocketSendData: size: %d§", size);
     result = espconn_sent(sud->pesp_conn, (unsigned char *)payload, size);
   }
 
-ets_printf("§netSocketSendData: result: %d§", result);
+  COMP_MSG_DBG(self, "N", 1, "netSocketSendData: result: %d", result);
   checkErrOK(result);
   return NETSOCKET_ERR_OK;
 }
@@ -130,15 +131,16 @@ static uint8_t netSocketRecv(char *payload, socketUserData_t *sud, char **data, 
   char *key = NULL;
   int idx;
   int found;
+  compMsgDispatcher_t *self;
 
+  self = sud->compMsgDispatcher;
   idx = 0;
-ets_printf("§netSocketRecv:remote_port: %d§\n", sud->remote_port);
+  COMP_MSG_DBG(self, "N", 1, "netSocketRecv:remote_port: %d\n", sud->remote_port);
 
 //FIXME need to handle data!!
 //  sud->netSocketReceived(sud->compMsgDispatcher, sud, data, lgth);
 //  netSocketParse(string, os_strlen(string), data, lgth, sud);
   return NETSOCKET_ERR_OK;
-
 }
 
 static uint16_t tcp_server_timeover = 30;
@@ -147,20 +149,26 @@ static uint16_t tcp_server_timeover = 30;
 
 static void serverDisconnected(void *arg) {
   struct espconn *pesp_conn;
+  compMsgDispatcher_t *self;
+  socketUserData_t *sud;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("serverDisconnected: arg: %p\n", arg);
-
+  sud = (socketUserData_t *)pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "serverDisconnected: arg: %p\n", arg);
 }
 
 // ================================= serverReconnected  ====================================
 
 static void serverReconnected(void *arg, int8_t err) {
   struct espconn *pesp_conn;
+  compMsgDispatcher_t *self;
+  socketUserData_t *sud;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("serverReconnected: arg: %p\n", arg);
-
+  sud = (socketUserData_t *)pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "serverReconnected: arg: %p\n", arg);
 }
 
 // ================================= socketReceived  ====================================
@@ -171,26 +179,22 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   char *data = "";
   int lgth = 0;
   int result;
+  char temp[20] = {0};
+  compMsgDispatcher_t *self;
 
   pesp_conn = (struct espconn *)arg;
-//ets_printf("§socketReceived: arg: %p len: %d§"\n, arg, len);
-ets_printf("§socketReceived: arg: %p pdata: %s len: %d§", arg, pdata, len);
-  char temp[20] = {0};
-  c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
-  ets_printf("§remote ");
-  ets_printf(temp);
-  ets_printf(":");
-  ets_printf("%d",pesp_conn->proto.tcp->remote_port);
-  ets_printf(" received§\n");
-
   sud = (socketUserData_t *)pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "socketReceived: arg: %p len: %d\n", arg, len);
+  COMP_MSG_DBG(self, "N", 2, "socketReceived: arg: %p pdata: %s len: %d", arg, pdata, len);
+  c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
+  COMP_MSG_DBG(self, "N", 1, "remote %s:%d received\n", temp, pesp_conn->proto.tcp->remote_port);
   sud->remote_ip[0] = pesp_conn->proto.tcp->remote_ip[0];
   sud->remote_ip[1] = pesp_conn->proto.tcp->remote_ip[1];
   sud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
   sud->remote_ip[3] = pesp_conn->proto.tcp->remote_ip[3];
   sud->remote_port = pesp_conn->proto.tcp->remote_port;
-//ets_printf("==received remote_port: %d\n", sud->remote_port);
-
+  COMP_MSG_DBG(self, "N", 2, "==received remote_port: %d\n", sud->remote_port);
   result = netSocketRecv(pdata, sud, &data, &lgth);
 //  checkErrOK(gL,result,"netSocketRecv");
 }
@@ -199,9 +203,13 @@ ets_printf("§socketReceived: arg: %p pdata: %s len: %d§", arg, pdata, len);
 
 static void socketSent(void *arg) {
   struct espconn *pesp_conn;
+  socketUserData_t *sud;
+  compMsgDispatcher_t *self;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("§socketSent: arg: %p§", arg);
+  sud = (socketUserData_t *)pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "socketSent: arg: %p", arg);
   pesp_conn = arg;
 
 }
@@ -211,9 +219,10 @@ ets_printf("§socketSent: arg: %p§", arg);
 static void netDelete(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
 
-ets_printf("§netDelete§");
+  COMP_MSG_DBG(self, "N", 1, "netDelete");
   pesp_conn = (struct espconn *)arg;
   if (pesp_conn == NULL) {
     return;
@@ -222,6 +231,7 @@ ets_printf("§netDelete§");
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
   if(sud->pesp_conn) {     // for client connected to tcp server, this should set NULL in disconnect cb
     sud->pesp_conn->reverse = NULL;
     if (sud->pesp_conn->proto.tcp) {
@@ -239,8 +249,8 @@ static void netSocketDisconnected(void *arg) {  // tcp only
   struct espconn *pesp_conn;
   socketUserData_t *sud;
   int result;
+  compMsgDispatcher_t *self;
 
-ets_printf("§netSocketDisconnected is called§");
   pesp_conn = (struct espconn *)arg;
   if (pesp_conn == NULL) {
     return;
@@ -249,6 +259,8 @@ ets_printf("§netSocketDisconnected is called§");
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "netSocketDisconnected is called");
   switch (sud->connectionType) {
   case NET_SOCKET_TYPE_CLIENT:
     sud->compMsgDispatcher->runningModeFlags &= ~COMP_DISP_RUNNING_MODE_CLIENT;
@@ -257,7 +269,7 @@ ets_printf("§netSocketDisconnected is called§");
     sud->compMsgDispatcher->runningModeFlags &= ~COMP_DISP_RUNNING_MODE_CLOUD;
     break;
   default:
-ets_printf("§netSocketDisconnected bad connectionType: 0x%02x§", sud->connectionType);
+    COMP_MSG_DBG(self, "N", 1, "netSocketDisconnected bad connectionType: 0x%02x", sud->connectionType);
     break;
   }
   if (pesp_conn->proto.tcp) {
@@ -273,7 +285,14 @@ ets_printf("§netSocketDisconnected bad connectionType: 0x%02x§", sud->connecti
 // ================================= netSocketReconnected  ====================================
 
 static void netSocketReconnected (void *arg, sint8_t err) {
-ets_printf("§net_socket_reconnected is called err: %d§", err);
+  struct espconn *pesp_conn;
+  compMsgDispatcher_t *self;
+  socketUserData_t *sud;
+
+  pesp_conn = (struct espconn *)arg;
+  sud = (socketUserData_t *)pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "net_socket_reconnected is called err: %d", err);
   netSocketDisconnected (arg);
 }
 
@@ -283,19 +302,21 @@ static void netSocketReceived(void *arg, char *pdata, unsigned short len) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
   int result;
+  compMsgDispatcher_t *self;
 
   pesp_conn = (struct espconn *)arg;
-ets_printf("§netSocketReceived is called. %d %s§", len, pdata);
-ets_printf("§pesp_conn: %p§", pesp_conn);
   if (pesp_conn == NULL) {
     return;
   }
   sud = (socketUserData_t *)pesp_conn->reverse;
-ets_printf("§sud: %p§", sud);
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "sud: %p", sud);
   if(sud == NULL) {
     return;
   }
-ets_printf("§call httpParse§");
+  COMP_MSG_DBG(self, "N", 1, "netSocketReceived is called. %d %s", len, pdata);
+  COMP_MSG_DBG(self, "N", 1, "pesp_conn: %p", pesp_conn);
+  COMP_MSG_DBG(self, "N", 1, "call httpParse");
   result = sud->compMsgDispatcher->compMsgHttp->httpParse(sud, pdata, len);
   if (result != NETSOCKET_ERR_OK) {
     // FIXME
@@ -308,10 +329,10 @@ ets_printf("§call httpParse§");
 static void netSocketSent(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
   bool boolResult;
 
-ets_printf("§netSocketSent is called§");
   pesp_conn = (struct espconn *)arg;
   if (pesp_conn == NULL) {
     return;
@@ -320,6 +341,8 @@ ets_printf("§netSocketSent is called§");
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "netSocketSent is called");
 }
 
 // ================================= netSocketConnected  ====================================
@@ -327,9 +350,9 @@ ets_printf("§netSocketSent is called§");
 static void netSocketConnected(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
 
-//ets_printf("§netSocketConnected§\n");
   pesp_conn = arg;
   if (pesp_conn == NULL) {
     return;
@@ -338,26 +361,28 @@ static void netSocketConnected(void *arg) {
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 2, "netSocketConnected\n");
   // can receive and send data
   result = espconn_regist_recvcb (pesp_conn, netSocketReceived);
 if (result != COMP_MSG_ERR_OK) {
-ets_printf("§espconn_regist_recvcb: result: %d§\n", result);
+  COMP_MSG_DBG(self, "N", 1, "espconn_regist_recvcb: result: %d\n", result);
 }
   result = espconn_regist_sentcb (pesp_conn, netSocketSent);
 if (result != COMP_MSG_ERR_OK) {
-ets_printf("§espconn_regist_sentcb: result: %d§\n", result);
+  COMP_MSG_DBG(self, "N", 1, "espconn_regist_sentcb: result: %d\n", result);
 }
   result = espconn_regist_disconcb (pesp_conn, netSocketDisconnected);
 if (result != COMP_MSG_ERR_OK) {
-ets_printf("§espconn_regist_disconcb: result: %d§\n", result);
+  COMP_MSG_DBG(self, "N", 1, "espconn_regist_disconcb: result: %d\n", result);
 }
   sud->compMsgDispatcher->compMsgData->sud = sud;
-//ets_printf("§startSendMsg2: %p§\n", sud->compMsgDispatcher->startSendMsg2);
+  COMP_MSG_DBG(self, "N", 2, "startSendMsg2: %p\n", sud->compMsgDispatcher->compMsgSendReceive->startSendMsg2);
   sud->compMsgDispatcher->runningModeFlags |= COMP_DISP_RUNNING_MODE_CLOUD;
   if (sud->compMsgDispatcher->compMsgSendReceive->startSendMsg2 != NULL) {
     result = sud->compMsgDispatcher->compMsgSendReceive->startSendMsg2(sud->compMsgDispatcher);
   } else {
-ets_printf("§sud->compMsgDispatcher->startSendMsg2 is NULL§");
+    COMP_MSG_DBG(self, "N", 1, "sud->compMsgDispatcher->startSendMsg2 is NULL");
   }
 }
 
@@ -366,9 +391,10 @@ ets_printf("§sud->compMsgDispatcher->startSendMsg2 is NULL§");
 static void socketConnect(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
+  int espconn_status;
 
-//ets_printf("§socketConnect§");
   pesp_conn = arg;
   if (pesp_conn == NULL) {
     return;
@@ -377,19 +403,21 @@ static void socketConnect(void *arg) {
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 2, "socketConnect");
 #ifdef CLIENT_SSL_ENABLE
   if (sud->secure){
     espconn_secure_set_size(ESPCONN_CLIENT, 5120); /* set SSL buffer size */
-//ets_printf("§call espconn_secure_connect§");
-    int espconn_status = espconn_secure_connect(pesp_conn);
-//ets_printf("§after call espconn_secure_connect status: %d§", espconn_status);
+    COMP_MSG_DBG(self, "N", 2, "call espconn_secure_connect");
+    espconn_status = espconn_secure_connect(pesp_conn);
+    COMP_MSG_DBG(self, "N", 2, "after call espconn_secure_connect status: %d", espconn_status);
 
   } else
 #endif
   {
-//ets_printf("§socketConnect called§");
+    COMP_MSG_DBG(self, "N", 2, "socketConnect called");
     result = espconn_connect(pesp_conn);
-//ets_printf("§espconn_connect: result: %d§", result);
+    COMP_MSG_DBG(self, "N", 2, "espconn_connect: result: %d", result);
   }
 }
 
@@ -398,15 +426,17 @@ static void socketConnect(void *arg) {
 static void serverConnected(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
   int i;
 
-//ets_printf("§serverConnected: arg: %p§", arg);
   pesp_conn = arg;
   sud = (socketUserData_t *)pesp_conn->reverse;
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 2, "serverConnected: arg: %p", arg);
   for(i = 0; i < MAX_SOCKET; i++) {
     if (socket[i] == NULL) { // found empty slot
       break;
@@ -429,22 +459,22 @@ static void serverConnected(void *arg) {
     pesp_conn->reverse = NULL;    // not accept this conn
     return;
   }
-//ets_printf("registstart\n");
+  COMP_MSG_DBG(self, "N", 2, "registstart\n");
   result = espconn_regist_recvcb(pesp_conn, socketReceived);
   if (result != COMP_MSG_ERR_OK) {
-ets_printf("§regist socketReceived err: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist socketReceived err: %d", result);
   }
   result = espconn_regist_sentcb(pesp_conn, socketSent);
   if (result != COMP_MSG_ERR_OK) {
-ets_printf("§regist socketSent err: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist socketSent err: %d", result);
   }
   result = espconn_regist_disconcb(pesp_conn, serverDisconnected);
   if (result != COMP_MSG_ERR_OK) {
-ets_printf("§regist serverDisconnected err: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist serverDisconnected err: %d", result);
   }
   result = espconn_regist_reconcb(pesp_conn, serverReconnected);
   if (result != COMP_MSG_ERR_OK) {
-ets_printf("§regist serverReconnected err: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist serverReconnected err: %d", result);
   }
 }
 
@@ -453,9 +483,9 @@ ets_printf("§regist serverReconnected err: %d§", result);
 static void netSocketStart(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
 
-ets_printf("§netSocketStart§");
   if (pesp_conn == NULL) {
     return;
   }
@@ -463,31 +493,36 @@ ets_printf("§netSocketStart§");
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 1, "netSocketStart");
 
 }
 
 // ================================= socketDnsFound ====================================
 
 static void socketDnsFound(const char *name, ip_addr_t *ipaddr, void *arg) {
-//ets_printf("§socket_dns_found is called§");
-  struct espconn *pesp_conn = arg;
+  struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
+
+  pesp_conn = arg;
   if (pesp_conn == NULL) {
-    ets_printf("§pesp_conn null§");
     return;
   }
   sud = (socketUserData_t *)pesp_conn->reverse;
   if (sud == NULL) {
     return;
   }
-//ets_printf("§ip: %p§", ipaddr);
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 2, "socket_dns_found is called");
+  COMP_MSG_DBG(self, "N", 2, "ip: %p", ipaddr);
   if (ipaddr == NULL) {
     dns_reconn_count++;
     if (dns_reconn_count >= 5) {
-      ets_printf( "§DNS Fail!§" );
+      COMP_MSG_DBG(self, "N", 1,  "DNS Fail!" );
       return;
     }
-    ets_printf("§DNS retry %d!§", dns_reconn_count);
+    COMP_MSG_DBG(self, "N", 1, "DNS retry %d!", dns_reconn_count);
     host_ip.addr = 0;
     espconn_gethostbyname(pesp_conn, name, &host_ip, socketDnsFound);
     return;
@@ -498,15 +533,13 @@ static void socketDnsFound(const char *name, ip_addr_t *ipaddr, void *arg) {
     dns_reconn_count = 0;
     if( pesp_conn->type == ESPCONN_TCP ) {
       c_memcpy(pesp_conn->proto.tcp->remote_ip, &(ipaddr->addr), 4);
-      ets_printf("§TCP ip is set: ");
-      ets_printf(IPSTR, IP2STR(&(ipaddr->addr)));
-      ets_printf("§");
+      COMP_MSG_DBG(self, "N", 1, "TCP ip is set: ");
+      COMP_MSG_DBG(self, "N", 1, IPSTR, IP2STR(&(ipaddr->addr)));
     } else {
       if (pesp_conn->type == ESPCONN_UDP) {
         c_memcpy(pesp_conn->proto.udp->remote_ip, &(ipaddr->addr), 4);
-        ets_printf("§UDP ip is set: ");
-        ets_printf(IPSTR, IP2STR(&(ipaddr->addr)));
-        ets_printf("§");
+        COMP_MSG_DBG(self, "N", 1, "UDP ip is set: ");
+        COMP_MSG_DBG(self, "N", 1, IPSTR, IP2STR(&(ipaddr->addr)));
       }
     }
     socketConnect(pesp_conn);
@@ -533,7 +566,7 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
 
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
 //   checkAllocOK(sud);
-//ets_printf("§sud0: %p§", sud);
+  COMP_MSG_DBG(self, "N", 2, "sud0: %p", sud);
 //  checkAllocgLOK(sud->urls);
   sud->maxHttpMsgInfos = 5;
   sud->numHttpMsgInfos = 0;
@@ -548,12 +581,12 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_TO_SEND_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
-//ets_printf("§netSocketReceived: %p netSocketToSend: %p§", sud->netSocketReceived, sud->netSocketToSend);
+  COMP_MSG_DBG(self, "N", 2, "netSocketReceived: %p netSocketToSend: %p", sud->netSocketReceived, sud->netSocketToSend);
 
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
 
-//ets_printf("§port: %d§", port);
+  COMP_MSG_DBG(self, "N", 2, "port: %d", port);
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
   sud->pesp_conn = pesp_conn;
 //  checkAllocOK(pesp_conn);
@@ -582,14 +615,13 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_DOMAIN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
 #endif
   domain = stringValue;
-//ets_printf("§domain: %s§", domain);
+  COMP_MSG_DBG(self, "N", 2, "domain: %s", domain);
   ipaddr.addr = ipaddr_addr(domain);
   c_memcpy(pesp_conn->proto.tcp->remote_ip, &ipaddr.addr, 4);
-  ets_printf("§TCP ip is set: ");
-  ets_printf(IPSTR, IP2STR(&ipaddr.addr));
-  ets_printf("§");
+  COMP_MSG_DBG(self, "N", 1, "TCP ip is set: ");
+  COMP_MSG_DBG(self, "N", 1, IPSTR, IP2STR(&ipaddr.addr));
 
-//ets_printf("call regist connectcb\n");
+  COMP_MSG_DBG(self, "N", 2, "call regist connectcb\n");
   result = espconn_regist_connectcb(pesp_conn, netSocketConnected);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_REGIST_CONNECT_CB;
@@ -600,10 +632,10 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   }
   result = espconn_regist_sentcb(pesp_conn, socketSent);
   if (result != COMP_MSG_ERR_OK) {
-ets_printf("§regist socketSent err: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist socketSent err: %d", result);
   }
 #ifdef CLIENT_SSL_ENABLE
-//ets_printf("§socket: secure: %d§", sud->secure);
+  COMP_MSG_DBG(self, "N", 2, "socket: secure: %d", sud->secure);
   if (sud->secure){
     if (pesp_conn->proto.tcp->remote_port || pesp_conn->proto.tcp->local_port)
       espconn_secure_disconnect(pesp_conn);
@@ -617,7 +649,7 @@ ets_printf("§regist socketSent err: %d§", result);
   host_ip.addr = 0;
   dns_reconn_count = 0;
   if (ESPCONN_OK == espconn_gethostbyname(pesp_conn, domain, &host_ip, socketDnsFound)) {
-//ets_printf("§call gethostbyname: found ip for %s 0x%08x§", domain, host_ip);
+    COMP_MSG_DBG(self, "N", 2, "call gethostbyname: found ip for %s 0x%08x", domain, host_ip);
     socketDnsFound(domain, &host_ip, pesp_conn);  // ip is returned in host_ip.
   }
   return COMP_MSG_ERR_OK;
@@ -643,11 +675,11 @@ static  void startClientMode(void *arg) {
   char temp[64];
   compMsgTimerSlot_t *compMsgTimerSlot;
 
-//ets_printf("§startClientMode\n§");
   compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
-ets_printf("§startClientMode timerInfo:%p\n§", compMsgTimerSlot);
-  compMsgTimerSlot->connectionMode = STATION_IF;
   self = compMsgTimerSlot->compMsgDispatcher;
+  COMP_MSG_DBG(self, "N", 2, "startClientMode\n");
+  COMP_MSG_DBG(self, "N", 1, "startClientMode timerInfo:%p\n", compMsgTimerSlot);
+  compMsgTimerSlot->connectionMode = STATION_IF;
   pesp_conn = NULL;
 
   result = self->compMsgSocket->checkConnectionStatus(compMsgTimerSlot);
@@ -658,16 +690,16 @@ ets_printf("§startClientMode timerInfo:%p\n§", compMsgTimerSlot);
   self->runningModeFlags |= COMP_DISP_RUNNING_MODE_CLIENT;
   result = self->compMsgWifiData->setWifiValue(self, "@clientIPAddr", compMsgTimerSlot->ip_addr, NULL);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-//ets_printf("§ip2: 0x%08x§\n", numericValue);
+  COMP_MSG_DBG(self, "N", 2, "ip2: 0x%08x\n", numericValue);
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&numericValue));
 
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
-ets_printf("§IP: %s port: %d result: %d\n§", temp, port, result);
+  COMP_MSG_DBG(self, "N", 1, "IP: %s port: %d result: %d\n", temp, port, result);
 
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
 //   checkAllocOK(sud);
-//ets_printf("sud0: %p\n", sud);
+  COMP_MSG_DBG(self, "N", 2, "sud0: %p\n", sud);
 //  checkAllocgLOK(sud->urls);
   sud->connectionType = NET_SOCKET_TYPE_CLIENT;
 #ifdef CLIENT_SSL_ENABLE
@@ -675,10 +707,10 @@ ets_printf("§IP: %s port: %d result: %d\n§", temp, port, result);
   sud->secure = numericValue;
 #endif
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-//ets_printf("§netReceivedCallback: %p!%d!§\n", numericValue, result);
+  COMP_MSG_DBG(self, "N", 2, "netReceivedCallback: %p!%d!\n", numericValue, result);
   sud->netSocketReceived = (netSocketReceived_t)numericValue;
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-//ets_printf("§netToSendCallback: %p!%d!§\n", numericValue, result);
+  COMP_MSG_DBG(self, "N", 2, "netToSendCallback: %p!%d!\n", numericValue, result);
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
 
@@ -702,36 +734,36 @@ ets_printf("§IP: %s port: %d result: %d\n§", temp, port, result);
 //    checkErrOK(COMP_MSG_ERR_OUT_OF_MEMORY);
   }
   pesp_conn->proto.tcp->local_port = port;
-//ets_printf("§port: %d§\n", port);
+  COMP_MSG_DBG(self, "N", 2, "port: %d\n", port);
 
-//ets_printf("§call regist connectcb§\n");
+  COMP_MSG_DBG(self, "N", 2, "call regist connectcb\n");
   result = espconn_regist_connectcb(pesp_conn, serverConnected);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_REGIST_CONNECT_CB;
   }
-//ets_printf("§regist connectcb result: %d§\n", result);
+  COMP_MSG_DBG(self, "N", 2, "regist connectcb result: %d\n", result);
   result = espconn_regist_recvcb(pesp_conn, socketReceived);
   if (result != COMP_MSG_ERR_OK) {
-ets_printf("§regist socketReceived err: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist socketReceived err: %d", result);
   }
   result = espconn_regist_sentcb(pesp_conn, socketSent);
   if (result != COMP_MSG_ERR_OK) {
-ets_printf("§regist socketSent err: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist socketSent err: %d", result);
   }
   result = espconn_accept(pesp_conn);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_TCP_ACCEPT;
-ets_printf("§regist_accept err result: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist_accept err result: %d", result);
   }
   result = espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_REGIST_TIME;
-ets_printf("§regist_time err result: %d§", result);
+    COMP_MSG_DBG(self, "N", 1, "regist_time err result: %d", result);
   }
   if (self->compMsgSendReceive->startSendMsg != NULL) {
-ets_printf("§call startSendMsg: %p\n§", self->compMsgSendReceive->startSendMsg);
+    COMP_MSG_DBG(self, "N", 1, "call startSendMsg: %p\n", self->compMsgSendReceive->startSendMsg);
     result = self->compMsgSendReceive->startSendMsg(self);
-//ets_printf("§startSendMsg result: %d§", result);
+    COMP_MSG_DBG(self, "N", 2, "startSendMsg result: %d", result);
   }
 }
 
@@ -744,26 +776,27 @@ static uint8_t netSocketRunClientMode(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t *stringValue;
   uint8_t opmode;
+  int status;
+  char *hostName;
 
-ets_printf("§netSocketRunClientMode called\n§");
-  
+  COMP_MSG_DBG(self, "N", 1, "netSocketRunClientMode called\n");
   opmode = wifi_get_opmode();
-//ets_printf("§opmode: %d§", opmode);
+  COMP_MSG_DBG(self, "N", 2, "opmode: %d", opmode);
   boolResult = wifi_station_disconnect();
-//ets_printf("§wifi_station_disconnect: boolResult: %d§", boolResult);
+  COMP_MSG_DBG(self, "N", 2, "wifi_station_disconnect: boolResult: %d", boolResult);
   c_memset(station_config.ssid,0,sizeof(station_config.ssid));
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
-//ets_printf("§getSsid: result: %d§\n", result);
+  COMP_MSG_DBG(self, "N", 2, "getSsid: result: %d\n", result);
   checkErrOK(result);
   c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
 
   c_memset(station_config.password,0,sizeof(station_config.password));
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
-//ets_printf("§getPasswd: result: %d§\n", result);
+  COMP_MSG_DBG(self, "N", 2, "getPasswd: result: %d\n", result);
   checkErrOK(result);
-//ets_printf("len password: %d\n", c_strlen(stringValue));
+  COMP_MSG_DBG(self, "N", 2, "len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
-ets_printf("§netSocketRunClientMode: ssid: %s password: %s!\n§", station_config.ssid, station_config.password);
+  COMP_MSG_DBG(self, "N", 1, "netSocketRunClientMode: ssid: %s password: %s!\n", station_config.ssid, station_config.password);
 
   boolResult = wifi_station_set_config(&station_config);
   if (!boolResult) {
@@ -775,7 +808,10 @@ ets_printf("§netSocketRunClientMode: ssid: %s password: %s!\n§", station_confi
     return COMP_MSG_ERR_CANNOT_CONNECT;
   }
   boolResult = wifi_station_set_hostname("testDeviceClient");
-ets_printf("§wifi is in mode: %d status: %d hostname: %s!\n§", wifi_get_opmode(), wifi_station_get_connect_status(), wifi_station_get_hostname());
+  opmode = wifi_get_opmode();
+  status = wifi_station_get_connect_status();
+  hostName = wifi_station_get_hostname();
+  COMP_MSG_DBG(self, "N", 1, "wifi is in mode: %d status: %d hostname: %s!\n", opmode, status, hostName);
 
   return self->compMsgSocket->startConnectionTimer(self, 2, self->compMsgSocket->startClientMode);
 }
@@ -785,7 +821,7 @@ ets_printf("§wifi is in mode: %d status: %d hostname: %s!\n§", wifi_get_opmode
 static uint8_t netSocketStartCloudSocket (compMsgDispatcher_t *self) {
   int result;
 
-//ets_printf("§netSocketStartCloudSocket called§");
+  COMP_MSG_DBG(self, "N", 2, "netSocketStartCloudSocket called");
   self->compMsgSendReceive->startSendMsg = NULL;
   result = openCloudSocket( self);
   checkErrOK(result);

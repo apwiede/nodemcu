@@ -223,7 +223,7 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
       return COMP_MSG_ERR_OK; // just ignore silently
     } else {
       if (incrRefCnt == 0) {
-//ets_printf("DataView FIELD_NOT_FOUND 1\n");
+ets_printf("DataView FIELD_NOT_FOUND 1\n");
         return COMP_MSG_ERR_FIELD_NOT_FOUND;
       } else {
         if (firstFreeEntry != NULL) {
@@ -276,7 +276,7 @@ static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t field
     fieldNameEntry++;
     idx++;
   }
-//ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
+ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
@@ -308,7 +308,6 @@ static uint8_t freeCompMsgTypesAndNames(compMsgTypesAndNames_t *compMsgTypesAndN
 
 compMsgTypesAndNames_t *newCompMsgTypesAndNames() {
   compMsgTypesAndNames_t *compMsgTypesAndNames = os_zalloc(sizeof(compMsgTypesAndNames_t));
-//ets_printf("§newCompMsgTypesAndNames: %p!§", compMsgTypesAndNames);
   if (compMsgTypesAndNames == NULL) {
     return NULL;
   }

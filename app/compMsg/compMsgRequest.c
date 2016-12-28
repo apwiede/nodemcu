@@ -53,7 +53,7 @@
 static uint8_t startRequest(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("should start request: %d\n", self->compMsgRequest->msgRequestInfos.currRequestIdx);
+  COMP_MSG_DBG(self, "R", 1, "should start request: %d\n", self->compMsgRequest->msgRequestInfos.currRequestIdx);
   return COMP_MSG_ERR_OK;
 }
 
@@ -90,7 +90,7 @@ static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size
   }
   compMsgData = self->compMsgRequest->msgRequestInfos.requestData[0];
   compMsgData->direction = COMP_MSG_RECEIVED_DATA;
-//ets_printf("§call handleReceivePart: lgth: %d§", lgth);
+  COMP_MSG_DBG(self, "R", 2, "call handleReceivePart: lgth: %d", lgth);
   self->compMsgData = compMsgData;
   result = self->compMsgIdentify->handleReceivedPart(self, data, lgth);
   checkErrOK(result);
@@ -104,35 +104,35 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   compMsgData_t *compMsgData;
 
   if (self->compMsgRequest->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
-ets_printf("§COMP_MSG_ERR_TOO_MANY_REQUESTS§");
+    COMP_MSG_DBG(self, "Y", 0, "COMP_MSG_ERR_TOO_MANY_REQUESTS");
     return COMP_MSG_ERR_TOO_MANY_REQUESTS;
   }
   self->compMsgRequest->msgRequestInfos.lastRequestIdx++;
   self->compMsgRequest->msgRequestInfos.requestTypes[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestType;
   self->compMsgRequest->msgRequestInfos.requestHandles[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestHandle;
   self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestData;
-//ets_printf("addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->msgRequestInfos.lastRequestIdx, requestType, requestData);
+  COMP_MSG_DBG(self, "R", 2, "addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->compMsgRequest->msgRequestInfos.lastRequestIdx, requestType, requestData);
 //FIXME TEMPORARY last if clause!!
-//ets_printf("addRequest 2 %d %p\n", self->compMsgRequest->msgRequestInfos.currRequestIdx, requestData);
+  COMP_MSG_DBG(self, "R", 2, "addRequest 2 %d %p\n", self->compMsgRequest->msgRequestInfos.currRequestIdx, requestData);
   if ((self->compMsgRequest->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->compMsgRequest->msgRequestInfos.currRequestIdx++;
     checkErrOK(result);
     compMsgData = self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.currRequestIdx];
     switch (compMsgData->direction) {
     case COMP_MSG_TO_SEND_DATA:
-//ets_printf("addRequest: toSendData: %p %d\n", compMsgData->toSendData, compMsgData->toSendLgth);
+      COMP_MSG_DBG(self, "R", 2, "addRequest: toSendData: %p %d\n", compMsgData->toSendData, compMsgData->toSendLgth);
       result = self->compMsgIdentify->handleToSendPart(self, compMsgData->toSendData, compMsgData->toSendLgth);
       break;
     case COMP_MSG_RECEIVED_DATA:
-//ets_printf("addRequest: receivedData: %p %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
+      COMP_MSG_DBG(self, "R", 2, "addRequest: receivedData: %p %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
       result = self->compMsgIdentify->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
       break;
     default:
-ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
+      COMP_MSG_DBG(self, "R", 2, "bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
       return COMP_MSG_ERR_BAD_VALUE;
     }
   } else {
-//ets_printf("direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA);
+      COMP_MSG_DBG(self, "R", 2, "direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA);
     self->compMsgRequest->msgRequestInfos.currRequestIdx = self->compMsgRequest->msgRequestInfos.lastRequestIdx;
     compMsgData = self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.currRequestIdx];
     requestData = compMsgData;
@@ -142,12 +142,12 @@ ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData
       case COMP_MSG_TO_SEND_DATA:
         break;
       case COMP_MSG_RECEIVED_DATA:
-//ets_printf("COMP_MSG_RECEIVED_DATA: compMsgData: %p\n", compMsgData);
-//ets_printf("received: %p lgth: %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
+        COMP_MSG_DBG(self, "R", 2, "COMP_MSG_RECEIVED_DATA: compMsgData: %p\n", compMsgData);
+        COMP_MSG_DBG(self, "R", 2, "received: %p lgth: %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
         result = self->compMsgIdentify->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
         break;
       default:
-ets_printf("bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
+        COMP_MSG_DBG(self, "Y", 0, "bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
         return COMP_MSG_ERR_BAD_VALUE;
       }
     }

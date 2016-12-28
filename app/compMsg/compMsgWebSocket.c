@@ -135,8 +135,10 @@ static uint8_t webSocketSendData(socketUserData_t *sud, const char *payload, int
   uint8_t*buff;
   uint8_t result;
   int i;
+  compMsgDispatcher_t *self;
 
-//ets_printf("webSocketSendData: size: %d\n", size);
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "W", 2, "webSocketSendData: size: %d\n", size);
   hdrLgth = 2;
   hdrBytes[0] = 0x80; //set first bit
   hdrBytes[0] |= opcode; //frame->opcode; //set op code
@@ -163,9 +165,9 @@ static uint8_t webSocketSendData(socketUserData_t *sud, const char *payload, int
 
   os_memcpy(&buff[hdrLgth], (uint8_t *)payload, size);
   result = espconn_sent(sud->pesp_conn, (unsigned char *)buff, fsize);
-//ets_printf("espconn_sent: result: %d\n", result);
+  COMP_MSG_DBG(self, "W", 2, "espconn_sent: result: %d\n", result);
   os_free(buff);
-//ets_printf("espconn_sent: done\n");
+  COMP_MSG_DBG(self, "W", 2, "espconn_sent: done\n");
   return WEBSOCKET_ERR_OK;
 }
 
@@ -175,7 +177,9 @@ static int ICACHE_FLASH_ATTR webSocketParse(char * data, size_t dataLenb, char *
   uint8_t byte = data[0];
   uint8_t FIN = byte & 0x80;
   uint8_t opcode = byte & 0x0F;
+  compMsgDispatcher_t *self;
 
+  self = sud->compMsgDispatcher;
   if ((opcode > 0x03 && opcode < 0x08) || opcode > 0x0B) {
     ets_sprintf(err_opcode, "%d", opcode);
     checkErrOK(WEBSOCKET_ERR_INVALID_FRAME_OPCODE);
@@ -184,10 +188,10 @@ static int ICACHE_FLASH_ATTR webSocketParse(char * data, size_t dataLenb, char *
   //   opcodes: {1 text 2 binary 8 close 9 ping 10 pong}
   switch (opcode) {
   case OPCODE_TEXT:
-//ets_printf("parse text\n");
+    COMP_MSG_DBG(self, "W", 2, "parse text\n");
     break;
   case OPCODE_BINARY:
-//ets_printf("parse binary\n");
+    COMP_MSG_DBG(self, "W", 2, "parse binary\n");
     break;
   case OPCODE_CLOSE:
     break;
@@ -240,16 +244,16 @@ static int ICACHE_FLASH_ATTR webSocketParse(char * data, size_t dataLenb, char *
   }
   recv_data = &data[offset];
 //for (int i = 0; i < size; i++) {
-//  ets_printf("i: %d 0x%02x\n", i, recv_data[i]&0xFF);
+//  COMP_MSG_DBG(self, "W", 2, "i: %d 0x%02x\n", i, recv_data[i]&0xFF);
 //}
   switch (opcode) {
   case OPCODE_TEXT:
-//ets_printf("cb text\n");
+    COMP_MSG_DBG(self, "W", 2, "cb text\n");
     sud->webSocketTextReceived(sud->compMsgDispatcher, sud, recv_data, size);
     break;
   case OPCODE_BINARY:
-//ets_printf("cb binary\n");
-//ets_printf("parse binary: size: %d\n", size);
+    COMP_MSG_DBG(self, "W", 2, "cb binary\n");
+    COMP_MSG_DBG(self, "W", 2, "parse binary: size: %d\n", size);
     sud->webSocketBinaryReceived(sud->compMsgDispatcher, sud, recv_data, size);
     break;
   }
@@ -270,10 +274,12 @@ static uint8_t webSocketRecv(char *string, socketUserData_t *sud, char **data, i
   int idx;
   int found;
   uint8_t result;
+  compMsgDispatcher_t *self;
 
+  self = sud->compMsgDispatcher;
   idx = 0;
-//ets_printf("webSocketRecv: %s!remote_port: %d\n", sud->curr_url, sud->remote_port);
-//ets_printf("webSocketRecv: %s!%s!remote_port: %d\n",string,  sud->curr_url, sud->remote_port);
+  COMP_MSG_DBG(self, "W", 2, "webSocketRecv: %s!remote_port: %d\n", sud->curr_url, sud->remote_port);
+  COMP_MSG_DBG(self, "W", 2, "webSocketRecv: %s!%s!remote_port: %d\n",string,  sud->curr_url, sud->remote_port);
   if ((sud->curr_url != NULL) && (strstr(string, sud->curr_url) != NULL)) {
     if (strstr(string, header_key) != NULL) {
       char *begin = strstr(string, header_key) + os_strlen(header_key);
@@ -283,7 +289,7 @@ static uint8_t webSocketRecv(char *string, socketUserData_t *sud, char **data, i
       os_memcpy(key, begin, end - begin);
       key[end - begin] = 0;
     }
-//ets_printf("webSocketRecv2: key: %s\n", key);
+    COMP_MSG_DBG(self, "W", 2, "webSocketRecv2: key: %s\n", key);
     const char *trailer;
     trailer = "\r\n\r\n";
     int trailerLen;
@@ -308,7 +314,7 @@ static uint8_t webSocketRecv(char *string, socketUserData_t *sud, char **data, i
     payload = os_malloc(payloadLen + 1); // +1 for trailing '\0' character
     checkAllocOK(payload);
     os_sprintf(payload, "%s%s%s%s%s\0", HEADER_WEBSOCKET_START, HEADER_WEBSOCKET_URL, HEADER_WEBSOCKET_END, base64Digest, trailer);
-//ets_printf("§payloadLen: %d payload: %d§\n", payloadLen, c_strlen(payload));
+    COMP_MSG_DBG(self, "W", 2, "payloadLen: %d payload: %d\n", payloadLen, c_strlen(payload));
     os_free(base64Digest);
     struct espconn *pesp_conn = NULL;
     pesp_conn = sud->pesp_conn;
@@ -318,13 +324,13 @@ static uint8_t webSocketRecv(char *string, socketUserData_t *sud, char **data, i
       sud->isWebsocket = 1;
     }
 
-//ets_printf("payload: %d!%s!\n", payloadLen, payload);
+    COMP_MSG_DBG(self, "W", 2, "payload: %d!%s!\n", payloadLen, payload);
     result = espconn_sent(sud->pesp_conn, (unsigned char *)payload, payloadLen);
     os_free(key);
-//ets_printf("espconn_sent: result: %d\n", result);
+    COMP_MSG_DBG(self, "W", 2, "espconn_sent: result: %d\n", result);
     checkErrOK(result);
   } else if (sud->isWebsocket == 1) {
-//ets_printf("webSocketParse: %d!curr_url: %s!\n", os_strlen(string), sud->curr_url);
+    COMP_MSG_DBG(self, "W", 2, "webSocketParse: %d!curr_url: %s!\n", os_strlen(string), sud->curr_url);
     webSocketParse(string, os_strlen(string), data, lgth, sud);
   }
   return WEBSOCKET_ERR_OK;
@@ -342,9 +348,13 @@ static uint8_t webSocketRunClientMode(compMsgDispatcher_t *self, uint8_t mode) {
 
 static void serverDisconnected(void *arg) {
   struct espconn *pesp_conn;
+  socketUserData_t *sud;
+  compMsgDispatcher_t *self;
 
   pesp_conn = (struct espconn *)arg;
-//ets_printf("serverDisconnected: arg: %p\n", arg);
+  sud = pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "W", 2, "serverDisconnected: arg: %p\n", arg);
 
 }
 
@@ -352,9 +362,13 @@ static void serverDisconnected(void *arg) {
 
 static void serverReconnected(void *arg, int8_t err) {
   struct espconn *pesp_conn;
+  socketUserData_t *sud;
+  compMsgDispatcher_t *self;
 
   pesp_conn = (struct espconn *)arg;
-//ets_printf("serverReconnected: arg: %p\n", arg);
+  sud = pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "W", 2, "serverReconnected: arg: %p\n", arg);
 
 }
 
@@ -365,53 +379,51 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   char url[50] = { 0 };
   int idx;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   const uint8_t *connection;
   const uint8_t *upgrade;
   uint8_t result;
   uint8_t result1;
   uint8_t result2;
+  char temp[20] = {0};
 
   pesp_conn = (struct espconn *)arg;
-//ets_printf("§webSocketReceived: arg: %p len: %d§\n", arg, len);
-//ets_printf("socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
-  char temp[20] = {0};
-  c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
-  ets_printf("§remote ");
-  ets_printf(temp);
-  ets_printf(":");
-  ets_printf("%d",pesp_conn->proto.tcp->remote_port);
-  ets_printf(" received.\n§");
-
   sud = (socketUserData_t *)pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "W", 2, "webSocketReceived: arg: %p len: %d\n", arg, len);
+  COMP_MSG_DBG(self, "W", 2, "socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
+  c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
+  COMP_MSG_DBG(self, "W", 1, "remote %s:%d received.\n", temp, pesp_conn->proto.tcp->remote_port);
+
   sud->remote_ip[0] = pesp_conn->proto.tcp->remote_ip[0];
   sud->remote_ip[1] = pesp_conn->proto.tcp->remote_ip[1];
   sud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
   sud->remote_ip[3] = pesp_conn->proto.tcp->remote_ip[3];
   sud->remote_port = pesp_conn->proto.tcp->remote_port;
-//ets_printf("§==received remote_port: %d\n§", sud->remote_port);
+  COMP_MSG_DBG(self, "W", 2, "==received remote_port: %d\n", sud->remote_port);
   if (strstr(pdata, "GET /") != 0) {
     char *begin = strstr(pdata, "GET /") + 4;
     char *end = strstr(begin, " ");
     os_memcpy(url, begin, end - begin);
     url[end - begin] = 0;
-ets_printf("url: %s\n", url);
+    COMP_MSG_DBG(self, "W", 1, "url: %s\n", url);
   }
-ets_printf("pdata: %s!\n", pdata);
+  COMP_MSG_DBG(self, "W", 2, "pdata: %s!\n", pdata);
 //  if ((url[0] != 0) && (strstr(pdata, HEADER_WEBSOCKETLINE) != 0))
   if (url[0] != 0) {
     result = sud->compMsgDispatcher->compMsgHttp->httpParse(sud, pdata, len);
-ets_printf("httpParse: result: %d!\n", result);
+    COMP_MSG_DBG(self, "W", 2, "httpParse: result: %d!\n", result);
     if (result == COMP_MSG_ERR_OK) {
       result1 = sud->compMsgDispatcher->compMsgHttp->getHttpGetHeaderValueForId(sud, COMP_MSG_HTTP_CONNECTION, &connection);
-ets_printf("value connection: %s result: %d\n", connection, result);
+      COMP_MSG_DBG(self, "W", 2, "value connection: %s result: %d\n", connection, result);
       result2 = sud->compMsgDispatcher->compMsgHttp->getHttpGetHeaderValueForId(sud, COMP_MSG_HTTP_UPGRADE, &upgrade);
-ets_printf("value upgrade: %s result: %d\n", upgrade, result);
+      COMP_MSG_DBG(self, "W", 2, "value upgrade: %s result: %d\n", upgrade, result);
       if ((result1 == COMP_MSG_ERR_OK) && (result1 == COMP_MSG_ERR_OK) && (c_strcmp(connection, "Upgrade") == 0) && (c_strcmp(upgrade, "websocket") == 0)) {
         idx = 0;
         sud->curr_url = NULL;
-//ets_printf("num_urls: %d\n", sud->num_urls);
+        COMP_MSG_DBG(self, "W", 2, "num_urls: %d\n", sud->num_urls);
         while (idx < sud->num_urls) {
-//ets_printf("url: idx: %d %s %s\n", idx, url, sud->urls[idx]);
+          COMP_MSG_DBG(self, "W", 2, "url: idx: %d %s %s\n", idx, url, sud->urls[idx]);
           if (c_strcmp(url, sud->urls[idx]) == 0) {
             sud->curr_url = sud->urls[idx];
             sud->isWebsocket = 1;
@@ -422,7 +434,7 @@ ets_printf("value upgrade: %s result: %d\n", upgrade, result);
       }
     }
   }
-//ets_printf("iswebSocket: %d %s\n", sud->isWebsocket, sud->curr_url);
+  COMP_MSG_DBG(self, "W", 2, "iswebSocket: %d %s\n", sud->isWebsocket, sud->curr_url);
 
   if(sud->isWebsocket == 1) {
     char *data = "";
@@ -439,11 +451,10 @@ ets_printf("value upgrade: %s result: %d\n", upgrade, result);
 static void socketSent(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
   bool boolResult;
 
-  pesp_conn = (struct espconn *)arg;
-//ets_printf("webSocketSent: arg: %p\n", arg);
   pesp_conn = (struct espconn *)arg;
   if (pesp_conn == NULL) {
     return;
@@ -452,12 +463,14 @@ static void socketSent(void *arg) {
   if(sud == NULL) {
     return;
   }
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "W", 2, "webSocketSent: arg: %p\n", arg);
   if (sud->compMsgDispatcher->stopAccessPoint) {
-//ets_printf("§stopAccessPoint§\n");
+    COMP_MSG_DBG(self, "W", 2, "stopAccessPoint\n");
     sud->compMsgDispatcher->stopAccessPoint = false;
     boolResult = wifi_set_opmode(OPMODE_STATION);
     if (!boolResult) {
-ets_printf("§webSocketSent: COMP_MSG_ERR_CANNOT_SET_OPMODE§");
+      COMP_MSG_DBG(self, "W", 1, "webSocketSent: COMP_MSG_ERR_CANNOT_SET_OPMODE");
 //      return COMP_MSG_ERR_CANNOT_SET_OPMODE;
     }
   }
@@ -467,11 +480,15 @@ ets_printf("§webSocketSent: COMP_MSG_ERR_CANNOT_SET_OPMODE§");
 
 static void serverConnected(void *arg) {
   struct espconn *pesp_conn;
+  socketUserData_t *sud;
+  compMsgDispatcher_t *self;
   int result;
   int i;
 
-//ets_printf("serverConnected: arg: %p\n", arg);
   pesp_conn = arg;
+  sud = (socketUserData_t *)pesp_conn->reverse;
+  self = sud->compMsgDispatcher;
+  COMP_MSG_DBG(self, "W", 2, "serverConnected: arg: %p\n", arg);
   for(i = 0; i < MAX_SOCKET; i++) {
     if (socket[i] == NULL) { // found empty slot
       break;
@@ -485,22 +502,22 @@ static void serverConnected(void *arg) {
 //    checkErrOK(gL, WEBSOCKET_ERR_MAX_SOCKET_REACHED, "webSocketServerConnected");
     return;
   }
-//ets_printf("registstart\n");
+  COMP_MSG_DBG(self, "W", 2, "registstart\n");
   result = espconn_regist_recvcb(pesp_conn, socketReceived);
   if (result != COMP_MSG_ERR_OK) {
-//ets_printf("regist socketReceived err: %d\n", result);
+    COMP_MSG_DBG(self, "Y", 0, "regist socketReceived err: %d\n", result);
   }
   result = espconn_regist_sentcb(pesp_conn, socketSent);
   if (result != COMP_MSG_ERR_OK) {
-//ets_printf("regist socketSent err: %d\n", result);
+    COMP_MSG_DBG(self, "Y", 0, "regist socketSent err: %d\n", result);
   }
   result = espconn_regist_disconcb(pesp_conn, serverDisconnected);
   if (result != COMP_MSG_ERR_OK) {
-//ets_printf("regist serverDisconnected err: %d\n", result);
+    COMP_MSG_DBG(self, "Y", 0, "regist serverDisconnected err: %d\n", result);
   }
   result = espconn_regist_reconcb(pesp_conn, serverReconnected);
   if (result != COMP_MSG_ERR_OK) {
-//ets_printf("regist serverReconnected err: %d\n", result);
+    COMP_MSG_DBG(self, "Y", 0, "regist serverReconnected err: %d\n", result);
   }
 
 }
@@ -531,7 +548,7 @@ static void startAccessPoint(void *arg) {
 
   self->runningModeFlags |= COMP_DISP_RUNNING_MODE_ACCESS_POINT;
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
-//ets_printf("port: %d!%p!%d!\n", numericValue, stringValue, result);
+  COMP_MSG_DBG(self, "W", 2, "port: %d!%p!%d!\n", numericValue, stringValue, result);
 //  checkErrOK(result);
   port = numericValue;
 //  result = self->getWifiValue(self, WIFI_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
@@ -539,7 +556,7 @@ static void startAccessPoint(void *arg) {
 
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
 //   checkAllocOK(sud);
-//ets_printf("sud0: %p\n", sud);
+  COMP_MSG_DBG(self, "W", 2, "sud0: %p\n", sud);
   sud->maxHttpMsgInfos = 5;
   sud->numHttpMsgInfos = 0;
   sud->httpMsgInfos = os_zalloc(sud->maxHttpMsgInfos * sizeof(httpMsgInfo_t));
@@ -554,10 +571,10 @@ sud->urls[0] = "/getaplist";
 sud->urls[1] = "/getapdeflist";
 sud->num_urls = 2;
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-//ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
+  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)numericValue;
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
-//ets_printf("binaryCallback: %p!%d!\n", numericValue, result);
+  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketTextReceived = (webSocketTextReceived_t)numericValue;
   sud->compMsgDispatcher = self;
 
@@ -581,24 +598,24 @@ sud->num_urls = 2;
 //    checkErrOK(COMP_MSG_ERR_OUT_OF_MEMORY);
   }
   pesp_conn->proto.tcp->local_port = port;
-//ets_printf("port: %d\n", port);
+  COMP_MSG_DBG(self, "W", 2, "port: %d\n", port);
 
-//ets_printf("§call regist connectcb\n§");
-    result = espconn_regist_connectcb(pesp_conn, serverConnected);
-    if (result != COMP_MSG_ERR_OK) {
-//      return COMP_MSG_ERR_REGIST_CONNECT_CB;
-    }
-//ets_printf("regist connectcb result: %d\n", result);
-    result = espconn_accept(pesp_conn);    // if it's a server, no need to dns.
-    if (result != COMP_MSG_ERR_OK) {
-//      return COMP_MSG_ERR_TCP_ACCEPT;
-    }
-//ets_printf("regist_accept result: %d\n", result);
-    result =espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
-    if (result != COMP_MSG_ERR_OK) {
-//      return COMP_MSG_ERR_REGIST_TIME;
-    }
-//ets_printf("regist_time result: %d\n", result);
+  COMP_MSG_DBG(self, "W", 2, "call regist connectcb\n");
+  result = espconn_regist_connectcb(pesp_conn, serverConnected);
+  if (result != COMP_MSG_ERR_OK) {
+//    return COMP_MSG_ERR_REGIST_CONNECT_CB;
+  }
+  COMP_MSG_DBG(self, "W", 2, "regist connectcb result: %d\n", result);
+  result = espconn_accept(pesp_conn);    // if it's a server, no need to dns.
+  if (result != COMP_MSG_ERR_OK) {
+//    return COMP_MSG_ERR_TCP_ACCEPT;
+  }
+  COMP_MSG_DBG(self, "W", 2, "regist_accept result: %d\n", result);
+  result =espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
+  if (result != COMP_MSG_ERR_OK) {
+//    return COMP_MSG_ERR_REGIST_TIME;
+  }
+  COMP_MSG_DBG(self, "W", 2, "regist_time result: %d\n", result);
 }
 
 // ================================= webSocketRunAPMode ====================================
@@ -611,20 +628,20 @@ static uint8_t webSocketRunAPMode(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t *stringValue;
   
-//ets_printf("§webSocketRunAPMode§\n");
+  COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode\n");
   boolResult = wifi_station_disconnect();
   if (!boolResult) {
-ets_printf("§webSocketRunAPMode COMP_MSG_ERR_CANNOT_DISCONNECT\n§");
+    COMP_MSG_DBG(self, "Y", 0, "webSocketRunAPMode COMP_MSG_ERR_CANNOT_DISCONNECT\n");
     return COMP_MSG_ERR_CANNOT_DISCONNECT;
   }
   boolResult = wifi_set_opmode(OPMODE_STATIONAP);
   if (!boolResult) {
-ets_printf("§webSocketRunAPMode COMP_MSG_ERR_CANNOT_SET_OPMODE\n§");
+    COMP_MSG_DBG(self, "Y", 0, "webSocketRunAPMode COMP_MSG_ERR_CANNOT_SET_OPMODE\n");
     return COMP_MSG_ERR_CANNOT_SET_OPMODE;
   }
   c_memset(softap_config.ssid,0,sizeof(softap_config.ssid));
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_PROVISIONING_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
-//ets_printf("§webSocketRunAPMode get_PROVISIONING_SSID result: %d§\n", result);
+  COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode get_PROVISIONING_SSID result: %d\n", result);
   checkErrOK(result);
   c_memcpy(softap_config.ssid, stringValue, c_strlen(stringValue));
   softap_config.ssid_len = c_strlen(stringValue);
@@ -633,7 +650,7 @@ ets_printf("§webSocketRunAPMode COMP_MSG_ERR_CANNOT_SET_OPMODE\n§");
   softap_config.channel = 6;
   softap_config.max_connection = 4;
   softap_config.beacon_interval = 100;
-//ets_printf("§webSocketRunAPMode wifi_softap_set_config§\n");
+  COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode wifi_softap_set_config\n");
   boolResult = wifi_softap_set_config(&softap_config);
   if (!boolResult) {
     return COMP_MSG_ERR_CANNOT_SET_OPMODE;
@@ -654,7 +671,6 @@ ets_printf("§webSocketRunAPMode COMP_MSG_ERR_CANNOT_SET_OPMODE\n§");
   case STATION_GOT_IP:
     break;
   }
-
   return self->compMsgSocket->startConnectionTimer(self, 0, self->compMsgSocket->startAccessPoint);
 }
 

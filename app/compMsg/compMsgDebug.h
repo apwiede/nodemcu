@@ -68,8 +68,6 @@ extern "C" {
 #define DEBUG_COMP_MSG_WIFI_DATA       0x80000
 #define DEBUG_COMP_MSG_ALWAYS          0x100000
 
-#define COMP_MSG_DEBUG
-
 #ifdef COMP_MSG_DEBUG
 #define COMP_MSG_DBG self->compMsgDebug->dbgPrintf
 #else

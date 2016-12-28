@@ -46,6 +46,8 @@
 extern "C" {
 #endif
 
+#define COMP_MSG_DEBUG
+
 enum DataViewErrorCode
 {
   DATA_VIEW_ERR_OK                    = 0,
