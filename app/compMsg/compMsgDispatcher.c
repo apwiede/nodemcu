@@ -263,6 +263,8 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   int parity;
   int databits;
   uint32_t baud;
+  size_t msgLgth;
+  uint8_t *msgData;
 
   result = compMsgMsgDescInit(self);
   checkErrOK(result);
@@ -296,15 +298,12 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
 
   if (typelen > 0) {
     switch(type[0]) {
-    case 'W':
-      self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
-      COMP_MSG_DBG(self, "DY", 1, "start RunAPMode\n");
-      result = self->compMsgSocket->webSocketRunAPMode(self);
+    case 'A':
+      COMP_MSG_DBG(self, "B", 1, "start send AA message");
+      result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
       checkErrOK(result);
-      break;
-    case 'N':
-      COMP_MSG_DBG(self, "N",1,  "start RunClientMode");
-      result = self->compMsgSocket->netSocketRunClientMode(self);
+      result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
+      COMP_MSG_DBG(self, "B", 1, "handle: %s result: %d", handle, result);
       checkErrOK(result);
       break;
     case 'C':
@@ -312,12 +311,20 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       result = self->compMsgSocket->netSocketStartCloudSocket(self);
       checkErrOK(result);
       break;
-    case 'A':
-      COMP_MSG_DBG(self, "B", 1, "start send AA message");
-      result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
+    case 'D':
+      self->compMsgDebug->setDebugFlags(self, "BdDEHIOSvw");
+      COMP_MSG_DBG(self, "O", 1, "save user data");
+      result = self->compMsgOta->saveUserData(self);
       checkErrOK(result);
-      result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
-      COMP_MSG_DBG(self, "B", 1, "handle: %s result: %d\n", handle, result);
+      result = self->compMsgOta->getUserData(self, &msgData, &msgLgth);
+      COMP_MSG_DBG(self, "O", 1, "get user data msgLgth: %d", msgLgth);
+      checkErrOK(result);
+      result = self->compMsgIdentify->handleReceivedPart(self, msgData, msgLgth);
+      checkErrOK(result);
+      break;
+    case 'N':
+      COMP_MSG_DBG(self, "N",1,  "start RunClientMode");
+      result = self->compMsgSocket->netSocketRunClientMode(self);
       checkErrOK(result);
       break;
     case 'O':
@@ -344,6 +351,12 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       databits = 8;
       baud = BIT_RATE_115200;
       result = self->compMsgSendReceive->uartSetup(self, id, baud, databits, parity, stopbits);
+      checkErrOK(result);
+      break;
+    case 'W':
+      self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
+      COMP_MSG_DBG(self, "DY", 1, "start RunAPMode\n");
+      result = self->compMsgSocket->webSocketRunAPMode(self);
       checkErrOK(result);
       break;
     default:
@@ -456,14 +469,13 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
 
   compMsgDispatcher->operatingMode = MODULE_OPERATING_MODE_AP;
 
-  compMsgDispatcher->createDispatcher = &createDispatcher;
-  compMsgDispatcher->initDispatcher = &initDispatcher;
-
   compMsgDispatcher->cloudMsgData = NULL;
   compMsgDispatcher->cloudMsgDataLgth = 0;
   compMsgDispatcher->cloudPayload = NULL;
   compMsgDispatcher->cloudPayloadLgth = 0;
 
+  compMsgDispatcher->createDispatcher = &createDispatcher;
+  compMsgDispatcher->initDispatcher = &initDispatcher;
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
   compMsgDispatcher->getNewCompMsgDataPtr = &getNewCompMsgDataPtr;
 

@@ -49,7 +49,7 @@ extern "C" {
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef uint8_t (* uartSetup_t)(compMsgDispatcher_t *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits);
-typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth);
+typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, size_t lgth);
 typedef uint8_t (* typeRSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 typedef uint8_t (* prepareCloudMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startSendMsg_t)(compMsgDispatcher_t *self);

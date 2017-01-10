@@ -427,7 +427,6 @@ static uint8_t getOtaRomPath(compMsgDispatcher_t *self, int *numericValue, uint8
 // ================================= getOtaFsPath ====================================
 
 static uint8_t getOtaFsPath(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-//  self->compMsgData->msgValPart->fieldValueStr = compMsgModuleData.otaFsPath;
   *numericValue = 0;
   *stringValue = compMsgModuleData.otaFsPath;
   return COMP_MSG_ERR_OK;
@@ -436,10 +435,16 @@ static uint8_t getOtaFsPath(compMsgDispatcher_t *self, int *numericValue, uint8_
 // ================================= getOtaPort ====================================
 
 static uint8_t getOtaPort(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-//  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-//  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.otaPort;
   *numericValue = compMsgModuleData.otaPort;
   *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCryptKey ====================================
+
+static uint8_t getCryptKey(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.cryptKey;
   return COMP_MSG_ERR_OK;
 }
 
@@ -588,6 +593,10 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
   case MODULE_INFO_OTA_PORT:
     compMsgModuleData.otaPort = numericValue;
     break;
+  case MODULE_INFO_CRYPT_KEY:
+    c_memcpy(compMsgModuleData.cryptKey, stringValue, c_strlen(stringValue));
+    compMsgModuleData.cryptKey[c_strlen(stringValue)] = '\0';
+    break;
   default:
     return COMP_MSG_ERR_BAD_MODULE_VALUE_WHICH;
     break;
@@ -664,6 +673,7 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   c_memcpy(compMsgModuleData.otaRomPath, "/nodemcu-rboot.bin\0", 19);
   c_memcpy(compMsgModuleData.otaFsPath, "/nodemcu-spiffs.bin\0", 20);
   compMsgModuleData.otaPort = 80;
+  c_memcpy(compMsgModuleData.cryptKey, "a1b2c3d4e5f6g7h8\0", 17);
   COMP_MSG_DBG(self, "M", 2, "setModuleVaues done\n");
   return COMP_MSG_ERR_OK;
 }
@@ -681,6 +691,7 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgModuleData->getOtaFsPath = &getOtaFsPath;
   self->compMsgModuleData->getOtaPort = &getOtaPort;
   self->compMsgModuleData->getMACAddr = &getMACAddr;
+  self->compMsgModuleData->getCryptKey = &getCryptKey;
 
   self->compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
@@ -717,6 +728,7 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaRomPath", &getOtaRomPath, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaFsPath", &getOtaFsPath, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaPort", &getOtaPort, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCryptKey", &getCryptKey, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgModuleData->setModuleValues(self);
   return COMP_MSG_ERR_OK;
 }

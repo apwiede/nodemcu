@@ -150,11 +150,13 @@ static void dbgPrintf(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debu
   uartId = self->compMsgDebug->debugUartId;
   flags = self->compMsgDebug->getDebugFlags(self, dbgChars);
   if (flags && (debugLevel <= self->compMsgDebug->debugLevel)) {
+#ifdef NOTDEF
     cp = "%==DBG: ";
     while (*cp != '\0') {
       platform_uart_send(uartId, *cp);
       cp++;
     }
+#endif
     va_start(arglist, format);
     lgth = ets_vsnprintf(buffer, MAX_BUFFER_SIZE-1, format, arglist);
     if (lgth < 0) {
@@ -164,18 +166,25 @@ ets_printf("ERROR DBG_STR too long\n");
       if (cp[lgth - 1] == '\n') {
         lgth--;
       }
+ets_printf("%s\n", buffer);
+#ifdef NOTDEF
       idx = 0;
       while (idx < lgth) {
         platform_uart_send(uartId, *cp++);
         idx++;
       }
+#endif
       va_end(arglist);
+#ifdef NOTDEF
       cp = "%";
       while (*cp != '\0') {
         platform_uart_send(uartId, *cp++);
       }
+#endif
       if (self->compMsgDebug->addEol) {
+#ifdef NOTDEF
         platform_uart_send(uartId, '\n');
+#endif
       }
     }
   }
@@ -447,6 +456,7 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   self->compMsgDebug->dumpMsgValPart = &dumpMsgValPart;
   self->compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
   self->compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
+self->compMsgDebug->setDebugFlags(self, "BdDEHISw");
   return COMP_MSG_ERR_OK;
 }
 

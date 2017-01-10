@@ -112,6 +112,10 @@ static str2id_t specialFieldNames[] = {
   {"@cloudNodeToken1",    COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1},
   {"@cloudNodeToken2",    COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2},
   {"@totalCrc",           COMP_MSG_SPEC_FIELD_TOTAL_CRC},
+  {"@otaPort",            COMP_MSG_SPEC_FIELD_OTA_PORT},
+  {"@otaRomPath",         COMP_MSG_SPEC_FIELD_OTA_ROM_PATH},
+  {"@otaFsPath",          COMP_MSG_SPEC_FIELD_OTA_FS_PATH},
+  {"@otaHost",            COMP_MSG_SPEC_FIELD_OTA_HOST},
   {NULL, -1},
 };
 
@@ -158,7 +162,7 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
   fieldName2id_t *nameEntry;
   fieldName2id_t *firstFreeEntry;
 
-//ets_printf("getFieldNameIdFromStr: %p\n", fieldName);
+//ets_printf("getFieldNameIdFromStr: %s\n", fieldName);
   if (fieldName[0] == '@') {
     // find special field name
     entry = &specialFieldNames[0];

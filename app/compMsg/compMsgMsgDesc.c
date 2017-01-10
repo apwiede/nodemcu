@@ -469,7 +469,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     hdr->hdrEncryption = cp[0];
     checkIsEnd(isEnd);
     cp = ep;
-    // handleType A/G/S/R/U/W/N
+    // handleType A/G/S/R/U/W/D/N
     result = compMsgMsgDesc->getStrFromLine(self, cp, &ep, &isEnd);
     checkErrOK(result);
     hdr->hdrHandleType = cp[0];
@@ -480,6 +480,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
     case 'R':
     case 'U':
     case 'W':
+    case 'D':
     case 'N':
       break;
     default:

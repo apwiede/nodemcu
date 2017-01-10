@@ -62,7 +62,7 @@ static uint8_t uartSetup(compMsgDispatcher_t *self, unsigned id, uint32_t baud, 
 
 // ================================= uartReceiveCb ====================================
 
-static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
+static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, size_t lgth) {
   int result;
   int idx;
   msgParts_t *received;
@@ -168,6 +168,7 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   uint8_t *b64Msg;
   uint8_t *host;
   uint8_t *subUrl;
+  uint8_t *xNodeToken;
   uint8_t *nodeToken;
   uint8_t *hostPart;
   uint8_t *alive;
@@ -199,6 +200,8 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   payloadLgth += c_strlen(host);
   alive="\r\nConnection: keep-alive\r\n";
   payloadLgth += c_strlen(alive);
+  xNodeToken="X-Node-Token: ";
+  payloadLgth += c_strlen(xNodeToken);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
@@ -223,6 +226,8 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   payloadLgth += c_strlen(host);
   alive="\r\n";
   payloadLgth += c_strlen(alive);
+  xNodeToken="X-Node-Token: ";
+  payloadLgth += c_strlen(xNodeToken);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
@@ -241,10 +246,10 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   char *payload = os_zalloc(payloadLgth);
   COMP_MSG_DBG(self, "s", 2, "payloadLgth1: %d payload: %p", payloadLgth, payload);
 #ifdef CLOUD_1
-  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, xNodeToken, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
   COMP_MSG_DBG(self, "s", 2, "payloadLgth2: %d %d", c_strlen(payload), payloadLgth);
 #else
-  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, xNodeToken, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
   COMP_MSG_DBG(self, "s", 2, "payloadLgth3: %d %d", c_strlen(payload), payloadLgth);
 #endif
   COMP_MSG_DBG(self, "s", 1, "request: %d %s", c_strlen(payload), payload);
@@ -301,6 +306,11 @@ static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLg
     }
     COMP_MSG_DBG(self, "s", 1, "remote_ip: %d %d %d %d port: %d\n", self->compMsgData->sud->remote_ip[0], self->compMsgData->sud->remote_ip[1], self->compMsgData->sud->remote_ip[2], self->compMsgData->sud->remote_ip[3], self->compMsgData->sud->remote_port);
     result = self->compMsgSocket->webSocketSendData(self->compMsgData->sud, msgData, msgLgth, OPCODE_BINARY);
+    checkErrOK(result);
+    break;
+  case 'D':
+    result = self->compMsgOta->storeUserData(self, msgLgth, msgData);
+    COMP_MSG_DBG(self, "Y", 0, "sendMsg D result: %d", result);
     checkErrOK(result);
     break;
   case 'G':

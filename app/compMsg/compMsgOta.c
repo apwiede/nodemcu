@@ -355,6 +355,55 @@ static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, v
   os_timer_arm(&ota_timer, OTA_NETWORK_TIMEOUT, 0);
 }
 
+// ================================= storeUserData ====================================
+
+// store user data
+static uint8_t ICACHE_FLASH_ATTR storeUserData(compMsgDispatcher_t *self, size_t msgLgth, uint8_t *msgData) {
+  rboot_config bootconf;
+
+  bootconf = rboot_get_config();
+  bootconf.user_rom_save_data_flag = 1;
+  COMP_MSG_DBG(self, "O", 1, "storeUserData: msgLgth %d", msgLgth);
+  bootconf.user_rom_save_data[0] = '\0';
+  c_memcpy(bootconf.user_rom_save_data, msgData, msgLgth);
+  bootconf.user_rom_save_data_size = msgLgth;
+  rboot_set_config(&bootconf);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= saveUserData ====================================
+
+// save user data
+static uint8_t ICACHE_FLASH_ATTR saveUserData(compMsgDispatcher_t *self) {
+  uint8_t result;
+  headerPart_t *hdr;
+  uint8_t *handle;
+
+  COMP_MSG_DBG(self, "O", 1, "saveUserData called");
+//FIXME get src dst and cmdKey with a call!!
+  result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 22272,22272, 0x5544, &hdr);
+  checkErrOK(result);
+  result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
+  COMP_MSG_DBG(self, "O", 1, "handle: %s result: %d", handle, result);
+  checkErrOK(result);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getUserData ====================================
+
+// get user data
+static uint8_t ICACHE_FLASH_ATTR getUserData(compMsgDispatcher_t *self, uint8_t **msgData, size_t *msgLgth) {
+  rboot_config bootconf;
+
+  bootconf = rboot_get_config();
+  COMP_MSG_DBG(self, "O", 1, "getUserData");
+  *msgLgth = bootconf.user_rom_save_data_size;
+  *msgData = os_zalloc(*msgLgth);
+  checkAllocOK(*msgData);
+  c_memcpy(*msgData, bootconf.user_rom_save_data, *msgLgth);
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= otaStart ====================================
 
 // start the ota process, with user supplied options
@@ -391,12 +440,8 @@ static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callbac
     slot = 0;
   }
   uud->rom_slot = slot;
-  // save user data
-  bootconf.user_rom_save_data_flag = 1;
-  COMP_MSG_DBG(self, "O", 1, "current slot: %d\n", slot);
-  os_sprintf(bootconf.user_rom_save_data, "Hello Arnulf slot: %d\n", slot);
-  bootconf.user_rom_save_data_size = c_strlen(bootconf.user_rom_save_data);
-  rboot_set_config(&bootconf);
+  result = self->compMsgOta->saveUserData(self);
+  checkErrOK(result);
 
   if (flashfs) {
     // flash spiffs
@@ -530,6 +575,9 @@ uint8_t compMsgOtaInit(compMsgDispatcher_t *self) {
   self->compMsgOta->updateSpiffs = &updateSpiffs;
   self->compMsgOta->checkClientMode = &checkClientMode;
   self->compMsgOta->otaStart = &otaStart;
+  self->compMsgOta->storeUserData = &storeUserData;
+  self->compMsgOta->saveUserData = &saveUserData;
+  self->compMsgOta->getUserData = &getUserData;
   return COMP_MSG_ERR_OK;
 }
 

@@ -111,8 +111,12 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1   = 212,
   COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2   = 211,
   COMP_MSG_SPEC_FIELD_TOTAL_CRC            = 210,
+  COMP_MSG_SPEC_FIELD_OTA_PORT             = 209,
+  COMP_MSG_SPEC_FIELD_OTA_ROM_PATH         = 208,
+  COMP_MSG_SPEC_FIELD_OTA_FS_PATH          = 207,
+  COMP_MSG_SPEC_FIELD_OTA_HOST             = 206,
 
-  COMP_MSG_SPEC_FIELD_LOW                  = 209,         // this must be the last entry!!
+  COMP_MSG_SPEC_FIELD_LOW                  = 205,         // this must be the last entry!!
 };
 
 #define COMP_MSG_NO_INCR 0

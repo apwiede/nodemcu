@@ -386,15 +386,40 @@ static uint8_t getDataViewData(dataView_t *self, uint8_t **data, size_t *lgth) {
 
 // ============================= dumpBinary ========================
 
-static void dumpBinary(const uint8_t *data, uint8_t lgth, const uint8_t *where) {
+static void dumpBinary(const uint8_t *data, size_t lgth, const uint8_t *where) {
   int idx;
 
   ets_printf("%s\n", where);
   idx = 0;
   while (idx < lgth) {
-     ets_printf("idx: %d ch: %c 0x%02x\n", idx, data[idx], data[idx] & 0xFF);
+    ets_printf("idx: %d ch: %c 0x%02x\n", idx, data[idx], data[idx] & 0xFF);
     idx++;
   }
+}
+
+// ============================= dumpBinaryWide ========================
+
+static void dumpBinaryWide(const uint8_t *data, size_t lgth, const uint8_t *where) {
+  int idx;
+  char buf[512];
+  char buf2[20];
+
+  ets_printf("%s\n", where);
+  idx = 0;
+  buf[0] = '\0';
+  while (idx < lgth) {
+    if ((idx % 10) == 0) {
+      if (buf[0] != '\0') {
+        ets_printf("%s\n", buf);
+      }
+      buf[0] = '\0';
+      ets_sprintf(buf, "idx: %d ", idx);
+    }
+    ets_sprintf(buf2, " 0x%02x", data[idx] & 0xFF);
+    c_strcat(buf, buf2);
+    idx++;
+  }
+  ets_printf("%s\n", buf);
 }
 
 // ================================= newDataView ====================================
@@ -443,5 +468,6 @@ dataView_t *newDataView(uint8_t *data, size_t lgth) {
 
   dataView->getDataViewData = &getDataViewData;
   dataView->dumpBinary = &dumpBinary;
+  dataView->dumpBinaryWide = &dumpBinaryWide;
   return dataView;
 }

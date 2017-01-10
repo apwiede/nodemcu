@@ -158,33 +158,35 @@ static uint8_t getCrc(compMsgDispatcher_t *self, dataView_t *dataView, compMsgFi
   int idx;
   int result;
 
-  COMP_MSG_DBG(self, "v", 2, "getCrc: startOffset: %d lgth: %d\n", startOffset, lgth);
+  COMP_MSG_DBG(self, "v", 2, "getCrc: startOffset: %d lgth: %d", startOffset, lgth);
   crcLgth = fieldInfo->fieldLgth;
   crcVal = 0;
   idx = startOffset;
   while (idx < lgth) {
-    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx - startOffset, dataView->data[idx], crcVal);
+if ((idx % 10) == 0) {
+    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x", idx - startOffset, dataView->data[idx], crcVal);
+}
     crcVal += dataView->data[idx++];
   }
-  COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx - startOffset, dataView->data[idx], crcVal);
+  COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x", idx - startOffset, dataView->data[idx], crcVal);
   COMP_MSG_DBG(self, "v", 2, "crcVal00: 0x%04x\n", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
-    COMP_MSG_DBG(self, "v", 2, "crcVal10: 0x%04x\n", crcVal);
+    COMP_MSG_DBG(self, "v", 2, "crcVal10: 0x%04x", crcVal);
     crcVal = crcVal & 0xFF;
     result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-    COMP_MSG_DBG(self, "v", 2, "crcVal1: 0x%02x crc: 0x%02x\n", crcVal, uint8_crc);
+    COMP_MSG_DBG(self, "v", 2, "crcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
-      COMP_MSG_DBG(self, "v", 1, "bad crcVal1: 0x%02x crc: 0x%02x\n", crcVal, uint8_crc);
+      COMP_MSG_DBG(self, "v", 2, "bad crcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
     result = dataView->getUint16(dataView, fieldInfo->fieldOffset, &crc);
     checkErrOK(result);
-    COMP_MSG_DBG(self, "v", 2, "crcVal2: 0x%04x crc: 0x%04x\n", crcVal, crc);
+    COMP_MSG_DBG(self, "v", 2, "crcVal2: 0x%04x crc: 0x%04x", crcVal, crc);
     if (crcVal != crc) {
-      COMP_MSG_DBG(self, "v", 1, "bad crcVal2: 0x%04x crc: 0x%04x\n", crcVal, crc);
+      COMP_MSG_DBG(self, "v", 2, "bad crcVal2: 0x%04x crc: 0x%04x", crcVal, crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   }
@@ -199,19 +201,21 @@ static uint8_t setCrc(compMsgDispatcher_t *self, dataView_t *dataView, compMsgFi
 
   crc = 0;
   idx = startOffset;
-  COMP_MSG_DBG(self, "v", 2, "setCrc startOffset: %d ch: 0x%02x crc: 0x%04x lgth: %d\n", startOffset, dataView->data[idx], crc, lgth);
+  COMP_MSG_DBG(self, "v", 2, "setCrc startOffset: %d ch: 0x%02x crc: 0x%04x lgth: %d", startOffset, dataView->data[idx], crc, lgth);
   while (idx < lgth) {
-  COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx - startOffset, dataView->data[idx], crc);
+if ((idx % 10) == 0) {
+    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x", idx - startOffset, dataView->data[idx], crc);
+}
     crc += dataView->data[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
-    COMP_MSG_DBG(self, "v", 2, "crc8: 0x%04x 0x%02x\n", crc, (uint8_t)(crc & 0xFF));
+    COMP_MSG_DBG(self, "v", 2, "crc8: 0x%04x 0x%02x", crc, (uint8_t)(crc & 0xFF));
     dataView->setUint8(dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
   } else {
     dataView->setUint16(dataView,fieldInfo->fieldOffset,crc);
   }
-  COMP_MSG_DBG(self, "v", 2, "crc: 0x%04x\n", crc);
+  COMP_MSG_DBG(self, "v", 2, "crc: 0x%04x", crc);
   return DATA_VIEW_ERR_OK;
 }
 
@@ -229,20 +233,23 @@ static uint8_t getTotalCrc(compMsgDispatcher_t *self, dataView_t *dataView, comp
   crcVal = 0;
   idx = 0;
   COMP_MSG_DBG(self, "v", 2, "getTotalCrc");
+  COMP_MSG_DBG(self, "v", 2, "getTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d", idx, dataView->data[idx], crc, fieldInfo->fieldOffset);
   while (idx < fieldInfo->fieldOffset) {
-    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x", idx, dataView->data[idx], crcVal);
+if ((idx % 10) == 0) {
+    COMP_MSG_DBG(self, "v", 2, "totalCrc idx: %d ch: 0x%02x crc: 0x%04x", idx, dataView->data[idx], crcVal);
+}
     crcVal += dataView->data[idx++];
   }
-  COMP_MSG_DBG(self, "v", 2, "crcVal00: 0x%04x", crcVal);
+  COMP_MSG_DBG(self, "v", 2, "totalCrcVal00: 0x%04x", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
-    COMP_MSG_DBG(self, "v", 2, "crcVal10: 0x%04x", crcVal);
+    COMP_MSG_DBG(self, "v", 2, "totalCrcVal10: 0x%04x", crcVal);
     crcVal = crcVal & 0xFF;
     result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
     COMP_MSG_DBG(self, "v", 2, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
-      COMP_MSG_DBG(self, "v", 2, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
+      COMP_MSG_DBG(self, "v", 1, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   } else {
@@ -250,7 +257,7 @@ static uint8_t getTotalCrc(compMsgDispatcher_t *self, dataView_t *dataView, comp
     checkErrOK(result);
     COMP_MSG_DBG(self, "v", 2, "totalCrcVal2: 0x%04x crc: 0x%04x", crcVal, crc);
     if (crcVal != crc) {
-      COMP_MSG_DBG(self, "v", 2, "totalCrcVal2: 0x%04x crc: 0x%04x", crcVal, crc);
+      COMP_MSG_DBG(self, "v", 1, "totalCrcVal2: 0x%04x crc: 0x%04x", crcVal, crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
     }
   }
@@ -265,19 +272,21 @@ static uint8_t setTotalCrc(compMsgDispatcher_t *self, dataView_t *dataView, comp
 
   crc = 0;
   idx = 0;
-  COMP_MSG_DBG(self, "v", 2, "setTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d\n", idx, dataView->data[idx], crc, fieldInfo->fieldOffset);
+  COMP_MSG_DBG(self, "v", 2, "setTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d", idx, dataView->data[idx], crc, fieldInfo->fieldOffset);
   while (idx < fieldInfo->fieldOffset) {
-    COMP_MSG_DBG(self, "v", 2, "crc idx: %d ch: 0x%02x crc: 0x%04x\n", idx, dataView->data[idx], crc);
+if ((idx % 10) == 0) {
+    COMP_MSG_DBG(self, "v", 2, "totalCrc idx: %d ch: 0x%02x crc: 0x%04x", idx, dataView->data[idx], crc);
+}
     crc += dataView->data[idx++];
   }
   crc = ~(crc);
   if (fieldInfo->fieldLgth == 1) {
-    COMP_MSG_DBG(self, "v", 2, "crc8: 0x%04x 0x%02x\n", crc, (uint8_t)(crc & 0xFF));
+    COMP_MSG_DBG(self, "v", 2, "totalCrc8: 0x%04x 0x%02x", crc, (uint8_t)(crc & 0xFF));
     dataView->setUint8(dataView,fieldInfo->fieldOffset,(uint8_t)(crc & 0xFF));
   } else {
     dataView->setUint16(dataView,fieldInfo->fieldOffset,crc);
   }
-  COMP_MSG_DBG(self, "v", 2, "crc: 0x%04x\n", crc);
+  COMP_MSG_DBG(self, "v", 2, "totalCrc: 0x%04x", crc);
   return DATA_VIEW_ERR_OK;
 }
 

@@ -80,6 +80,7 @@
 #define MODULE_INFO_OTA_ROM_PATH         33
 #define MODULE_INFO_OTA_FS_PATH          34
 #define MODULE_INFO_OTA_PORT             35
+#define MODULE_INFO_CRYPT_KEY            36
 
 #define MODULE_OPERATING_MODE_CLIENT             1
 #define MODULE_OPERATING_MODE_AP                 2
@@ -101,6 +102,7 @@ typedef uint8_t (* getOtaRomPath_t)(compMsgDispatcher_t *self, int *numericValue
 typedef uint8_t (* getOtaFsPath_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getOtaPort_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getMACAddr_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getCryptKey_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
@@ -140,12 +142,14 @@ typedef struct compMsgModuleData {
   uint8_t otaRomPath[128];
   uint8_t otaFsPath[128];
   uint16_t otaPort;
+  uint8_t cryptKey[17];
 
   getOtaHost_t getOtaHost;
   getOtaRomPath_t getOtaRomPath;
   getOtaFsPath_t getOtaFsPath;
   getOtaPort_t getOtaPort;
   getMACAddr_t getMACAddr;
+  getCryptKey_t getCryptKey;
   setModuleValue_t setModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;

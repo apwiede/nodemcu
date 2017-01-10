@@ -97,7 +97,8 @@ typedef uint8_t (* setUint32Vector_t)(dataView_t *self, int offset, uint32_t *va
 typedef uint8_t (* setInt32Vector_t)(dataView_t *self, int offset, int32_t *value, size_t lgth);
 
 typedef uint8_t (* getDataViewData_t)(dataView_t *self, uint8_t **data, size_t *lgth);
-typedef void (* dumpBinary_t)(const uint8_t *data, uint8_t lgth, const uint8_t *where);
+typedef void (* dumpBinary_t)(const uint8_t *data, size_t lgth, const uint8_t *where);
+typedef void (* dumpBinaryWide_t)(const uint8_t *data, size_t lgth, const uint8_t *where);
 
 typedef struct dataView {
   uint8_t *data;
@@ -137,6 +138,7 @@ typedef struct dataView {
 
   getDataViewData_t getDataViewData;
   dumpBinary_t dumpBinary;
+  dumpBinaryWide_t dumpBinaryWide;
 } dataView_t;
 
 dataView_t *newDataView(uint8_t *data, size_t lgth);

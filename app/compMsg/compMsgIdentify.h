@@ -56,7 +56,7 @@ typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* sendClientIPMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
+typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, size_t lgth);
 
 typedef struct compMsgIdentify {
   resetHeaderInfos_t resetHeaderInfos;

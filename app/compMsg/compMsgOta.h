@@ -52,6 +52,9 @@ typedef uint8_t (* updateFirmware_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateSpiffs_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* otaStart_t)(compMsgDispatcher_t *self, ota_callback callback, bool flashfs);
 typedef uint8_t (* checkClientMode_t)(compMsgDispatcher_t *self, bool isSpiffs);
+typedef uint8_t (* storeUserData_t)(compMsgDispatcher_t *self, size_t msgLgth, uint8_t *msgData);
+typedef uint8_t (* saveUserData_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getUserData_t)(compMsgDispatcher_t *self, uint8_t **msgData, size_t *msgLgth);
 
 typedef struct compMsgOta {
 
@@ -59,6 +62,9 @@ typedef struct compMsgOta {
   updateSpiffs_t updateSpiffs;
   otaStart_t otaStart;
   checkClientMode_t checkClientMode;
+  storeUserData_t storeUserData;
+  saveUserData_t saveUserData;
+  getUserData_t getUserData;
 } compMsgOta_t;
 
 compMsgOta_t *newCompMsgOta();

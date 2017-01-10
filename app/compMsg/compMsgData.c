@@ -104,6 +104,7 @@ static uint8_t dumpFieldValue(compMsgDispatcher_t *self, compMsgField_t *fieldIn
     break;
   case DATA_VIEW_FIELD_UINT8_VECTOR:
     valueIdx = 0;
+  COMP_MSG_DBG(self, "d", 1, "heap5: %d", system_get_free_heap_size());
     COMP_MSG_DBG(self, "d", 1, "      values:\n");
     while (valueIdx < fieldInfo->fieldLgth) {
       uch = stringValue[valueIdx];
@@ -143,16 +144,16 @@ static uint8_t dumpFieldValue(compMsgDispatcher_t *self, compMsgField_t *fieldIn
     break;
   case DATA_VIEW_FIELD_UINT32_VECTOR:
     valueIdx = 0;
-    COMP_MSG_DBG(self, "d", 1, "      values:\n");
-    while (valueIdx < fieldInfo->fieldLgth) {
-      uval = fieldInfo->value.uint32Vector[valueIdx];
-      COMP_MSG_DBG(self, "d", 1, "        idx: %d value: 0x%08x\n", indent2, valueIdx, (uint32_t)(uval & 0xFFFFFFFF));
-      valueIdx++;
-    }
-    break;
+COMP_MSG_DBG(self, "d", 1, "      values:\n");
+while (valueIdx < fieldInfo->fieldLgth) {
+uval = fieldInfo->value.uint32Vector[valueIdx];
+COMP_MSG_DBG(self, "d", 1, "        idx: %d value: 0x%08x\n", indent2, valueIdx, (uint32_t)(uval & 0xFFFFFFFF));
+valueIdx++;
+}
+break;
 #endif
-  }
-  return DATA_VIEW_ERR_OK;
+}
+return DATA_VIEW_ERR_OK;
 }
 
 // ============================= dumpKeyValueFields ========================
@@ -180,21 +181,23 @@ static uint8_t dumpFieldInfo(compMsgDispatcher_t *self, compMsgField_t *fieldInf
   uint8_t *fieldTypeStr;
   uint8_t *fieldNameStr;
   compMsgData_t *compMsgData;
+  char buf[512];
 
   compMsgData = self->compMsgData;
   result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldTypeId, &fieldTypeStr);
   checkErrOK(result);
   result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
   checkErrOK(result);
-  COMP_MSG_DBG(self, "d", 1, " fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d flags: ", fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+  ets_sprintf(buf, " fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %d flags: ", fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
   if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_FIELD_IS_SET");
+    c_strcat(buf, " COMP_MSG_FIELD_IS_SET");
   }
   if (fieldInfo->fieldFlags & COMP_MSG_KEY_VALUE_FIELD) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_KEY_VALUE_FIELD");
+    c_strcat(buf, " COMP_MSG_KEY_VALUE_FIELD");
   }
-  COMP_MSG_DBG(self, "d", 1, "\r\n");
-  COMP_MSG_DBG(self, "d", 1, " fieldNameId: %.5d fieldTypeId: %.5d fieldKey: 0x%04x %d\r\n", fieldInfo->fieldNameId, fieldInfo->fieldTypeId, fieldInfo->fieldKey, fieldInfo->fieldKey);
+  COMP_MSG_DBG(self, "d", 1, "%s", buf);
+  ets_sprintf(buf, " fieldNameId: %5d fieldTypeId: %5d fieldKey: 0x%04x %d\r\n", fieldInfo->fieldNameId, fieldInfo->fieldTypeId, fieldInfo->fieldKey, fieldInfo->fieldKey);
+  COMP_MSG_DBG(self, "d", 1, "%s", buf);
   return COMP_MSG_ERR_OK;
 }
 
@@ -209,34 +212,36 @@ static uint8_t dumpMsg(compMsgDispatcher_t *self) {
   uint8_t *fieldNameStr;
   compMsgField_t *fieldInfo;
   compMsgData_t *compMsgData;
+  char buf[512];
 
   compMsgData = self->compMsgData;
-  COMP_MSG_DBG(self, "d", 1, "handle: %s\r\n", compMsgData->handle);
+  COMP_MSG_DBG(self, "d", 1, "handle: %s", compMsgData->handle);
   numEntries = compMsgData->numFields;
-  COMP_MSG_DBG(self, "d", 1, "  numFields: %d maxFields: %d\r\n", numEntries, (int)compMsgData->maxFields);
-  COMP_MSG_DBG(self, "d", 1, "  headerLgth: %d cmdLgth: %d totalLgth: %d\r\n", compMsgData->headerLgth, compMsgData->cmdLgth, compMsgData->totalLgth);
-  COMP_MSG_DBG(self, "d", 1, "  flags:");
+  COMP_MSG_DBG(self, "d", 1, "  numFields: %d maxFields: %d", numEntries, (int)compMsgData->maxFields);
+  COMP_MSG_DBG(self, "d", 1, "  headerLgth: %d cmdLgth: %d totalLgth: %d", compMsgData->headerLgth, compMsgData->cmdLgth, compMsgData->totalLgth);
+  ets_sprintf(buf, "  flags:");
   if ((compMsgData->flags & COMP_MSG_HAS_CRC) != 0) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_HAS_CRC");
+    c_strcat(buf, " COMP_MSG_HAS_CRC");
   }
   if ((compMsgData->flags & COMP_MSG_UINT8_CRC) != 0) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_UNIT8_CRC");
+    c_strcat(buf, " COMP_MSG_UINT8_CRC");
   }
   if ((compMsgData->flags & COMP_MSG_HAS_FILLER) != 0) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_HAS_FILLER");
+    c_strcat(buf, " COMP_MSG_HAS_FILLER");
   }
   if ((compMsgData->flags & COMP_MSG_U8_CMD_KEY) != 0) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_U8_CMD_KEY");
+    c_strcat(buf, " COMP_MSG_U8_CMD_KEY");
   }
   if ((compMsgData->flags & COMP_MSG_HAS_TABLE_ROWS) != 0) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_HAS_TABLE_ROWS");
+    c_strcat(buf, " COMP_MSG_HAS_TABLE_ROWS");
   }
   if ((compMsgData->flags & COMP_MSG_IS_INITTED) != 0) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_IS_INITTED");
+    c_strcat(buf, " COMP_MSG_IS_INITTED");
   }
   if ((compMsgData->flags & COMP_MSG_IS_PREPARED) != 0) {
-    COMP_MSG_DBG(self, "d", 1, " COMP_MSG_IS_PREPARED");
+    c_strcat(buf, " COMP_MSG_IS_PREPARED");
   }
+  COMP_MSG_DBG(self, "d", 1, "%s", buf);
   idx = 0;
   while (idx < numEntries) {
     fieldInfo = &compMsgData->fields[idx];
@@ -245,29 +250,31 @@ static uint8_t dumpMsg(compMsgDispatcher_t *self) {
     result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
     checkErrOK(result);
     if (c_strcmp(fieldNameStr, "@numKeyValues") == 0) {
-      COMP_MSG_DBG(self, "d", 1, "    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %.5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+      ets_sprintf(buf, "    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
       if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
-        COMP_MSG_DBG(self, "d", 1, " COMP_MSG_FIELD_IS_SET");
+        c_strcat(buf, " COMP_MSG_FIELD_IS_SET");
       }
       if (fieldInfo->fieldFlags & COMP_MSG_KEY_VALUE_FIELD) {
-        COMP_MSG_DBG(self, "d", 1, " COMP_MSG_KEY_VALUE_FIELD");
+        c_strcat(buf, " COMP_MSG_KEY_VALUE_FIELD");
       }
       if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
         result = dumpFieldValue(self, fieldInfo, "");
         checkErrOK(result);
       }
+      COMP_MSG_DBG(self, "d", 1, "%s", buf);
       result = dumpKeyValueFields(self, fieldInfo->fieldOffset + fieldInfo->fieldLgth);
       checkErrOK(result);
       idx++;
       continue;
     }
-    COMP_MSG_DBG(self, "d", 1, "    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %.5d offset: %d key: %.5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset, fieldInfo->fieldKey);
+    ets_sprintf(buf, "    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %d key: %5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset, fieldInfo->fieldKey);
     if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
-      COMP_MSG_DBG(self, "d", 1, " COMP_MSG_FIELD_IS_SET");
+      c_strcat(buf, " COMP_MSG_FIELD_IS_SET");
     }
     if (fieldInfo->fieldFlags & COMP_MSG_KEY_VALUE_FIELD) {
-      COMP_MSG_DBG(self, "d", 1, " COMP_MSG_KEY_VALUE_FIELD");
+      c_strcat(buf, " COMP_MSG_KEY_VALUE_FIELD");
     }
+    COMP_MSG_DBG(self, "d", 1, "%s", buf);
     if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
       result = dumpFieldValue(self, fieldInfo, "");
       checkErrOK(result);
@@ -282,7 +289,7 @@ static uint8_t dumpMsg(compMsgDispatcher_t *self) {
 static int addHandle(compMsgDispatcher_t *self, uint8_t *handle) {
   int idx;
 
-  COMP_MSG_DBG(self, "d", 2, "compMsgData addHandle: handles: %p numHandles: %d!handle: %s!\n", compMsgHandles.handles, compMsgHandles.numHandles, handle);
+  COMP_MSG_DBG(self, "d", 2, "compMsgData addHandle: handles: %p numHandles: %d!handle: %s!", compMsgHandles.handles, compMsgHandles.numHandles, handle);
   if (compMsgHandles.handles == NULL) {
     compMsgHandles.handles = os_zalloc(sizeof(handle2Header_t));
     if (compMsgHandles.handles == NULL) {
@@ -592,7 +599,7 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
   int idx;
   int result;
   uint8_t headerLgth;
-  uint8_t lgth;
+  size_t lgth;
   compMsgField_t *fieldInfo;
   compMsgData_t *compMsgData;
 
@@ -644,6 +651,7 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
             lgth -= 2;
           }
         }
+//compMsgData->compMsgDataView->dataView->dumpBinaryWide(compMsgData->compMsgDataView->dataView->data, lgth, "beforecrc");
         result = compMsgData->compMsgDataView->setCrc(self, compMsgData->compMsgDataView->dataView, fieldInfo, headerLgth, lgth);
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
@@ -729,7 +737,7 @@ static uint8_t initMsg(compMsgDispatcher_t *self) {
       default:
         compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
         compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
-        COMP_MSG_DBG(self, "d", 2, "initMsg2b idx: %d", idx);
+        COMP_MSG_DBG(self, "d", 2, "initMsg2b idx: %d totalLgth: %d", idx, compMsgData->totalLgth);
         break;
     }
     compMsgData->fieldOffset += fieldInfo->fieldLgth;

@@ -136,6 +136,16 @@ static uint8_t runAPConnect(compMsgDispatcher_t *self) {
   return result;
 }
 
+// ================================= runRestoreUserData ====================================
+
+static uint8_t runRestoreUserData(compMsgDispatcher_t *self) {
+  uint8_t result;
+
+ets_printf("runRestoreUserData called\n");
+//  result = self->compMsgWifiData->connectToAP(self);
+  return result;
+}
+
 // ================================= getAPList ====================================
 
 static uint8_t getAPList(compMsgDispatcher_t *self) {
@@ -165,6 +175,7 @@ static actionName2Action_t actionName2Actions [] = {
   { "runDeletePasswdCMode",      (action_t)(&runDeletePasswdCMode),      0, 0, 0 },
   { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
   { "runAPConnect",              (action_t)(&runAPConnect),              0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
+  { "runRestoreUserData",        (action_t)(&runRestoreUserData),        0, 0, 0 },
   { "getWifiSrcId",              (action_t)(&getWifiSrcId),              0x4141, 0, 8 },
   { NULL,                        NULL,                                   0, 0, 0 },
 };

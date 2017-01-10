@@ -58,7 +58,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
 
-  COMP_MSG_DBG(self, "B", 2, "createMsgFromHeaderPart1\n");
+  COMP_MSG_DBG(self, "B", 2, "createMsgFromHeaderPart1");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);
@@ -71,14 +71,14 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     idx++;
   }
 
-  COMP_MSG_DBG(self, "B", 1, "heap4: %d\n", system_get_free_heap_size());
+  COMP_MSG_DBG(self, "B", 1, "heap4: %d", system_get_free_heap_size());
   // runAction calls at the end buildMsg
   if (self->compMsgData->prepareValuesCbName != NULL) {
     uint8_t actionMode;
     action_t actionCallback;
     uint8_t type;
 
-    COMP_MSG_DBG(self, "B", 2, "call prepareValuesCbName: %s\n", self->compMsgData->prepareValuesCbName);
+    COMP_MSG_DBG(self, "B", 2, "call prepareValuesCbName: %s", self->compMsgData->prepareValuesCbName);
     result = self->compMsgAction->getActionCallback(self, self->compMsgData->prepareValuesCbName+1, &actionCallback);
     checkErrOK(result);
     result = actionCallback(self);
@@ -89,11 +89,10 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
     result  = self->compMsgAction->runAction(self, &type);
     // actionCallback starts a call with eventually a callback and returns here before the callback has been running!!
     // when coming here we are finished and the callback will do the work later on!
-    return result;
   } else {
     result = self->compMsgBuildMsg->buildMsg(self);
   }
-  return COMP_MSG_ERR_OK;
+  return result;
 }
 
 // ================================= fixOffsetsForKeyValues ====================================
@@ -200,7 +199,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
       result = self->compMsgData->msgValPart->fieldValueCallback(self, &numericValue, &stringValue);
       COMP_MSG_DBG(self, "B", 2, "fieldValueCallback: result: %d\n", result);
       checkErrOK(result);
-      COMP_MSG_DBG(self, "B", 2, "cb field1: %s!value: 0x%04x %p!", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+      COMP_MSG_DBG(self, "B", 2, "cb field1: %s!value: 0x%04x %s!", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
       self->compMsgData->msgValPart->fieldValue = numericValue;
     }
     COMP_MSG_DBG(self, "B", 2, "isNumber: %d\n", self->compMsgData->msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER);
@@ -209,7 +208,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
       stringValue = NULL;
       numericValue = self->compMsgData->msgValPart->fieldValue;
     } else {
-      stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
+//      stringValue = self->compMsgData->msgValPart->fieldKeyValueStr;
       numericValue = 0;
     }
     COMP_MSG_DBG(self, "B", 2, "cb field2: %s!value: 0x%04x %s!", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
@@ -238,7 +237,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
         result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
       default:
-        COMP_MSG_DBG(self, "B", 1, "fieldName: %s!value: 0x%04x %s", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+        COMP_MSG_DBG(self, "B", 2, "fieldName: %s!value: 0x%04x %s", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
         result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
         break;
     }
@@ -293,7 +292,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
     self->compMsgData->msgDescPart = msgDescPart;
     msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
     self->compMsgData->msgValPart = msgValPart;
-    COMP_MSG_DBG(self, "B", 2, "setMsgValues: %s", msgDescPart->fieldNameStr);
+    COMP_MSG_DBG(self, "B", 2, "setMsgValues: %s descIdx: %d valIdx: %d", msgDescPart->fieldNameStr, msgDescPartIdx, msgValPartIdx);
     fieldInfo = &compMsgData->fields[msgDescPartIdx++];
     COMP_MSG_DBG(self, "B", 2, "default fieldNameId: %d\n", fieldInfo->fieldNameId);
     if (fieldInfo->fieldNameId == msgValPart->fieldNameId) {
@@ -308,9 +307,9 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   result = compMsgData->setFieldValue(self, "@cmdKey", numericValue, stringValue);
   COMP_MSG_DBG(self, "B", 2, "cmdKey result: %d", result);
   checkErrOK(result);
-  COMP_MSG_DBG(self, "B", 2, "setMsgvalues done");
   compMsgData->prepareMsg(self);
   checkErrOK(result);
+  COMP_MSG_DBG(self, "B", 2, "setMsgValues done");
 //  compMsgData->dumpMsg(self);
   return COMP_MSG_ERR_OK;
 }
@@ -353,35 +352,39 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
   // this could if needed also be an array of uint16_t etc. depending on the key
   // the receiver must know how the value is built depending on the key!!
   
-  COMP_MSG_DBG(self, "B", 2, "buildMsg\n");
+  COMP_MSG_DBG(self, "B", 2, "buildMsg");
   result = self->compMsgBuildMsg->fixOffsetsForKeyValues(self);
   checkErrOK(result);
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
-  result = self->compMsgData->initMsg(self);
   COMP_MSG_DBG(self, "B", 2, "heap2: %d", system_get_free_heap_size());
+  result = self->compMsgData->initMsg(self);
+  checkErrOK(result);
   result = setMsgValues(self);
   checkErrOK(result);
 
   result = self->compMsgData->getMsgData(self, &msgData, &msgLgth);
-  COMP_MSG_DBG(self, "B", 2, "getMsgData res: %d!msgLgth: %d!\n", result, msgLgth);
+  COMP_MSG_DBG(self, "B", 2, "getMsgData res: %d!msgLgth: %d!", result, msgLgth);
   checkErrOK(result);
 //self->compMsgData->dumpMsg(self);
 //self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "dumpMsg");
-  COMP_MSG_DBG(self, "B", 2, "encryption: %c\n", self->compMsgData->currHdr->hdrEncryption);
+  COMP_MSG_DBG(self, "B", 2, "encryption: %c", self->compMsgData->currHdr->hdrEncryption);
+//self->compMsgData->compMsgDataView->dataView->dumpBinaryWide(msgData, msgLgth, "beforeencrypt");
   if (self->compMsgData->currHdr->hdrEncryption == 'E') {
     uint8_t *toCryptPtr;
     uint8_t *encryptedMsgData;
     size_t encryptedMsgDataLgth;
-    uint16_t mlen;
-    uint8_t headerLgth;
+    size_t mlen;
+    size_t headerLgth;
     size_t totalCrcOffset;
+    int numericValue;
 
-    cryptKey = "a1b2c3d4e5f6g7h8";
+    result = self->compMsgModuleData->getCryptKey(self, &numericValue, &cryptKey);
+    checkErrOK(result);
     ivlen = 16;
     klen = 16;
 
 //self->compMsgData->compMsgDataView->dataView->dumpBinary(self->compMsgData->compMsgDataView->dataView->data, self->compMsgData->compMsgDataView->dataView->lgth, "MSG_AA");
-    COMP_MSG_DBG(self, "B", 2, "need to encrypt message!\n");
+    COMP_MSG_DBG(self, "B", 2, "need to encrypt message!");
     headerLgth = self->compMsgData->headerLgth;
     totalCrcOffset = 0;
     mlen = self->compMsgData->totalLgth - headerLgth;
@@ -392,27 +395,28 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
       totalCrcOffset = 2;
       mlen -= 2;
     }
-    COMP_MSG_DBG(self, "B", 2, "msglen!%d!mlen: %d, headerLgth!%d\n", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
+    COMP_MSG_DBG(self, "B", 2, "msglen!%d!mlen: %d, headerLgth!%d", self->compMsgData->totalLgth, mlen, self->compMsgData->headerLgth);
     toCryptPtr = msgData + self->compMsgData->headerLgth;
     result = self->compMsgUtil->encryptMsg(self, toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &encryptedMsgData, &encryptedMsgDataLgth);
     checkErrOK(result);
     if (encryptedMsgDataLgth != mlen) {
-      COMP_MSG_DBG(self, "B", 1, "WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n", mlen, encryptedMsgDataLgth);
+      COMP_MSG_DBG(self, "B", 1, "WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!", mlen, encryptedMsgDataLgth);
     }
     c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);
-    COMP_MSG_DBG(self, "B", 2, "crypted: len: %d!mlen: %d!\n", encryptedMsgDataLgth, mlen);
+    COMP_MSG_DBG(self, "B", 2, "crypted: len: %d!mlen: %d!", encryptedMsgDataLgth, mlen);
   }
   // if we have a @totalCrc we need to set it here
   COMP_MSG_DBG(self, "B", 2, "totalCrc: %d\n", self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC);
   if (self->compMsgData->currHdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
     fieldInfo = &self->compMsgData->fields[self->compMsgData->numFields - 1];
     result = self->compMsgData->compMsgDataView->setTotalCrc(self, self->compMsgData->compMsgDataView->dataView, fieldInfo);
-    COMP_MSG_DBG(self, "B", 2, "setTotalCrc: result: %d fieldOffset: %d\n", result, fieldInfo->fieldOffset);
+    COMP_MSG_DBG(self, "B", 2, "setTotalCrc: result: %d fieldOffset: %d", result, fieldInfo->fieldOffset);
     checkErrOK(result);
   }
   // here we need to decide where and how to send the message!!
   // from currHdr we can see the handle type and - if needed - the @dst
   COMP_MSG_DBG(self, "B", 2, "transferType: %c dst: 0x%04x msgLgth: %d", self->compMsgData->currHdr->hdrHandleType, self->compMsgData->currHdr->hdrToPart, msgLgth);
+//self->compMsgData->compMsgDataView->dataView->dumpBinaryWide(msgData, msgLgth, "afterencrypt");
   result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
   COMP_MSG_DBG(self, "B", 2, "buildMsg sendMsg has been called result: %d", result);
   checkErrOK(result);

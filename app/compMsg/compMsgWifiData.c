@@ -691,6 +691,94 @@ static uint8_t xgetWifiKeyValue(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
+// ================================= getCloudPort ====================================
+
+static uint8_t getCloudPort(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.cloudPort;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudHost1 ====================================
+
+static uint8_t getCloudHost1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudHost1;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudHost2 ====================================
+
+static uint8_t getCloudHost2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudHost2;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudSubUrl1 ====================================
+
+static uint8_t getCloudSubUrl1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudSubUrl1;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudSubUrl2 ====================================
+
+static uint8_t getCloudSubUrl2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudSubUrl2;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudNodeToken1 ====================================
+
+static uint8_t getCloudNodeToken1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudNodeToken1;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudNodeToken2 ====================================
+
+static uint8_t getCloudNodeToken2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudNodeToken2;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientSsid ====================================
+
+static uint8_t getClientSsid(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.clientSsid;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientPasswd ====================================
+
+static uint8_t getClientPasswd(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.clientPasswd;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getProvisioningPort ====================================
+
+static uint8_t getProvisioningPort(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.provisioningPort;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getProvisioningSsid ====================================
+
+static uint8_t getProvisioningSsid(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.provisioningSsid;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= getWifiValue ====================================
 
 /**
@@ -817,7 +905,7 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
   uint8_t result;
   uint8_t fieldNameId;
 
-  COMP_MSG_DBG(self, "w", 2, "setWifValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+  COMP_MSG_DBG(self, "w", 2, "setWifiValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR); 
   switch (fieldNameId) {
   case COMP_MSG_SPEC_FIELD_PROVISIONING_SSID:
@@ -933,6 +1021,18 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientIPAddr", &getClientIPAddr, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientStatus", &getClientStatus, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudPort", &getCloudPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost1", &getCloudHost1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost2", &getCloudHost2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudSubUrl1", &getCloudSubUrl1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudSubUrl2", &getCloudSubUrl2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudNodeToken1", &getCloudNodeToken1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudNodeToken2", &getCloudNodeToken2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getProvisioningSsid", &getProvisioningSsid, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getProvisioningPort", &getProvisioningPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientSsid", &getClientSsid, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPasswd", &getClientPasswd, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
 
   self->compMsgWifiData->getBssScanInfo = &getBssScanInfo;
   self->compMsgWifiData->getWifiValue = &getWifiValue;

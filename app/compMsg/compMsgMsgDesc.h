@@ -128,7 +128,7 @@ typedef struct msgHeaderInfos {
   uint32_t headerFlags;        // these are the flags for the 2nd line in the heads file!!
   uint16_t headerSequence[COMP_DISP_MAX_SEQUENCE];  // this is the sequence of the 2nd line in the heads file!!
   uint8_t headerLgth;
-  uint8_t lgth;
+  size_t lgth;
   headerPart_t *headerParts;
   uint8_t numHeaderParts;
   uint8_t maxHeaderParts;
@@ -148,7 +148,7 @@ typedef struct msgParts {
   uint16_t u16CmdKey;
   uint8_t u8CmdLgth;
   uint16_t u16CmdLgth;
-  uint8_t lgth;
+  size_t lgth;
   uint8_t encryption;
   uint8_t realLgth;
   size_t fieldOffset;
