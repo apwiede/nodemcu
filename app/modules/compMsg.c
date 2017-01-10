@@ -67,7 +67,7 @@ static int checkOKOrErr( lua_State* L, int result, const uint8_t *where, const u
     lua_pushfstring(L, "OK");
     return 1;
   }
-ets_printf("§error result: %d\n§", result);
+ets_printf("%error result: %d\n%", result);
   errStr = "ERROR";
   switch (result) {
   case COMP_MSG_ERR_VALUE_NOT_SET:
