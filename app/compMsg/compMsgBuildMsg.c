@@ -256,15 +256,9 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
  *
  */
 static uint8_t setMsgValues(compMsgDispatcher_t *self) {
-  uint8_t startEntryIdx;
-  uint8_t fieldLgth;
-  uint8_t *flagStr;
-  uint8_t flag;
-  uint8_t type;
-  unsigned long uval;
-  compMsgDataView_t *dataView;
   uint8_t result;
-  int msgCmdKey;
+  uint8_t type;
+  compMsgDataView_t *dataView;
   uint8_t msgDescPartIdx;
   uint8_t msgValPartIdx;
   compMsgField_t *fieldInfo;
@@ -272,20 +266,18 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
   msgValPart_t *msgValPart;
   compMsgData_t *compMsgData;
   uint8_t *handle;
-  char *endPtr;
   int numericValue;
   uint8_t *stringValue;
 
   COMP_MSG_DBG(self, "B", 2, "setMsgValues\n");
-  compMsgData = self->compMsgData;
   handle = self->msgHandle;
   type = 'A';
+  compMsgData = self->compMsgData;
   dataView = compMsgData->compMsgDataView;
   // loop over MSG Fields, to check if we eventually have table rows!!
   msgDescPartIdx = 0;
   msgValPartIdx = 0;
   msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
-  compMsgData = self->compMsgData;
   COMP_MSG_DBG(self, "B", 2, "numFields: %d numMsgValParts: %d", compMsgData->numFields, self->compMsgData->numMsgValParts);
   while ((msgDescPartIdx < compMsgData->numFields) && (msgValPartIdx <= self->compMsgData->numMsgValParts)) {
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];

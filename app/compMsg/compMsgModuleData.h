@@ -103,6 +103,7 @@ typedef uint8_t (* getOtaFsPath_t)(compMsgDispatcher_t *self, int *numericValue,
 typedef uint8_t (* getOtaPort_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getMACAddr_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getCryptKey_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* restoreUserData_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
@@ -150,6 +151,7 @@ typedef struct compMsgModuleData {
   getOtaPort_t getOtaPort;
   getMACAddr_t getMACAddr;
   getCryptKey_t getCryptKey;
+  restoreUserData_t restoreUserData;
   setModuleValue_t setModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;

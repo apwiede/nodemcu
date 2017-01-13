@@ -461,7 +461,60 @@ static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
 
 static uint8_t moduleFieldName2Id(compMsgDispatcher_t *self, uint8_t *fieldNameStr, uint8_t *id) {
   int result;
+  str2id_t *entry;
 
+  entry = &moduleFieldName2Ids[0];
+  while (entry->str != NULL) {
+    if (c_strcmp(fieldNameStr, entry->str) == 0) {
+      *id = entry->id;
+      return COMP_MSG_ERR_OK;
+    }
+    entry++;
+  }
+  return COMP_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ================================= restoreUserData ====================================
+
+static uint8_t restoreUserData(compMsgDispatcher_t *self) {
+  int result;
+  compMsgDataView_t *dataView;
+  uint8_t msgDescPartIdx;
+  compMsgField_t *fieldInfo;
+  msgDescPart_t *msgDescPart;
+  compMsgData_t *compMsgData;
+  int numericValue;
+  uint8_t *stringValue;
+  bool userFieldsStarted;
+
+ets_printf("moduleData: restoreUserData called\n");
+  userFieldsStarted = false;
+  compMsgData = self->compMsgData;
+  dataView = compMsgData->compMsgDataView;
+  msgDescPartIdx = 0;
+  while (msgDescPartIdx < compMsgData->numFields) {
+    msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
+    fieldInfo = &compMsgData->fields[msgDescPartIdx++];
+    // check for stop handling fields
+    if ((fieldInfo->fieldNameId == COMP_MSG_SPEC_FIELD_FILLER) || (msgDescPart->fieldNameStr[0] != '@')) {
+      userFieldsStarted = false;
+    }
+    if (userFieldsStarted) {
+      result = self->compMsgData->getFieldValue(self, msgDescPart->fieldNameStr, &numericValue, &stringValue);
+      checkErrOK(result);
+ets_printf("handle field: %s: %d %s\n", msgDescPart->fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+      result = self->compMsgModuleData->setModuleValue(self, msgDescPart->fieldNameStr + 1, numericValue, stringValue);
+      if (result != COMP_MSG_ERR_OK) {
+        // seem to be a wifi value so try that
+        result = self->compMsgWifiData->setWifiValue(self, msgDescPart->fieldNameStr, numericValue, stringValue);
+      }
+      checkErrOK(result);
+    }
+    // check for start handling fields
+    if (fieldInfo->fieldNameId == COMP_MSG_SPEC_FIELD_CMD_KEY) {
+      userFieldsStarted = true;
+    }
+  }
   return COMP_MSG_ERR_OK;
 }
 
@@ -692,6 +745,7 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgModuleData->getOtaPort = &getOtaPort;
   self->compMsgModuleData->getMACAddr = &getMACAddr;
   self->compMsgModuleData->getCryptKey = &getCryptKey;
+  self->compMsgModuleData->restoreUserData = &restoreUserData;
 
   self->compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);

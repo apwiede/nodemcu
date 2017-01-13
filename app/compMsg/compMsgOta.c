@@ -78,10 +78,10 @@ typedef struct userUpgradeData {
   struct espconn *conn;
   ip_addr_t ip;
   rboot_write_status write_status;
-  compMsgDispatcher_t *compMsgDispatcher;
 } userUpgradeData_t;
 
 static userUpgradeData_t *uud;
+static compMsgDispatcher_t *compMsgDispatcher;
 static os_timer_t ota_timer;
 
 // ================================= compMsgOtaDeinit ====================================
@@ -134,10 +134,12 @@ static void ICACHE_FLASH_ATTR upgradeRecvCb(void *arg, char *pusrdata, unsigned 
   char *ptrLen;
   char *ptr;
 
+//ets_printf("upgradeRecvCb: arg: %d length: %d content_len: %d total_len: %d\n", arg, length, uud->content_len, uud->total_len);
   // disarm the timer
   os_timer_disarm(&ota_timer);
 
   // first reply?
+//ets_printf("write_status: start_addr: %p start_sector: %d last_sector_erased: %d\n", uud->write_status.start_addr, uud->write_status.start_sector, uud->write_status.last_sector_erased);
   if (uud->content_len == 0) {
     // valid http response?
     if ((ptrLen = (char*)os_strstr(pusrdata, "Content-Length: "))
@@ -151,6 +153,7 @@ static void ICACHE_FLASH_ATTR upgradeRecvCb(void *arg, char *pusrdata, unsigned 
       // running total of download length
       uud->total_len += length;
       // process current chunk
+ets_printf("write_status: start_addr: %p start_sector: %d last_sector_erased: %d\n", uud->write_status.start_addr, uud->write_status.start_sector, uud->write_status.last_sector_erased);
       rboot_write_flash(&uud->write_status, (uint8*)ptrData, length);
       // work out total download size
       ptrLen += 16;
@@ -225,7 +228,7 @@ static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg) {
   int numericValue;
   compMsgDispatcher_t *self;
 
-  self = uud->compMsgDispatcher;
+  self = compMsgDispatcher;
   // disable the timeout
   os_timer_disarm(&ota_timer);
 
@@ -240,12 +243,12 @@ static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg) {
     compMsgOtaDeinit();
     return;
   }
-  result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numericValue, &otaHost);
+  result = self->compMsgModuleData->getOtaHost(self, &numericValue, &otaHost);
   if (uud->rom_slot == FLASH_BY_ADDR) {
-    result = uud->compMsgDispatcher->compMsgModuleData->getOtaFsPath(uud->compMsgDispatcher, &numericValue, &otaFsPath);
+    result = self->compMsgModuleData->getOtaFsPath(self, &numericValue, &otaFsPath);
     os_sprintf((char*)request, "GET %s HTTP/1.1\r\nHost: %s \r\n%s", otaFsPath, otaHost, HTTP_HEADER);
   } else {
-    result = uud->compMsgDispatcher->compMsgModuleData->getOtaRomPath(uud->compMsgDispatcher, &numericValue, &otaRomPath);
+    result = self->compMsgModuleData->getOtaRomPath(self, &numericValue, &otaRomPath);
     os_sprintf((char*)request, "GET %s HTTP/1.1\r\nHost: %s \r\n%s", otaRomPath, otaHost, HTTP_HEADER);
   }
   COMP_MSG_DBG(self, "O", 1, "otaRequest: %s\n", request);
@@ -263,7 +266,7 @@ static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg) {
 static void ICACHE_FLASH_ATTR connectTimeoutCb() {
   compMsgDispatcher_t *self;
 
-  self = uud->compMsgDispatcher;
+  self = compMsgDispatcher;
   COMP_MSG_DBG(self, "O", 1, "Connect timeout.\n");
   // not connected so don't call disconnect on the connection
   // but call our own disconnect callback to do the cleanup
@@ -305,7 +308,7 @@ static const char* ICACHE_FLASH_ATTR espErrStr(sint8 err) {
 static void ICACHE_FLASH_ATTR upgradeReconCb(void *arg, sint8 errType) {
   compMsgDispatcher_t *self;
 
-  self = uud->compMsgDispatcher;
+  self = compMsgDispatcher;
   COMP_MSG_DBG(self, "O", 1, "Connection error: %s\n", espErrStr(errType));
   // not connected so don't call disconnect on the connection
   // but call our own disconnect callback to do the cleanup
@@ -323,8 +326,8 @@ static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, v
   int numeric;
   compMsgDispatcher_t *self;
 
-  self = uud->compMsgDispatcher;
-  result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numeric, &otaHost);
+  self = compMsgDispatcher;
+  result = self->compMsgModuleData->getOtaHost(self, &numeric, &otaHost);
   if (ip == 0) {
     COMP_MSG_DBG(self, "O", 1, "DNS lookup failed for: %s\n", otaHost);
     // not connected so don't call disconnect on the connection
@@ -338,7 +341,7 @@ static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, v
   uud->conn->state = ESPCONN_NONE;
   uud->conn->proto.tcp->local_port = espconn_port();
 //FIXME!! get port from configuration data here!!
-  result = uud->compMsgDispatcher->compMsgModuleData->getOtaPort(uud->compMsgDispatcher, &port, &dummy);
+  result = self->compMsgModuleData->getOtaPort(self, &port, &dummy);
   uud->conn->proto.tcp->remote_port = port;
   COMP_MSG_DBG(self, "O", 1, "host: %s port: %d\n", otaHost, port);
   *(ip_addr_t*)uud->conn->proto.tcp->remote_ip = *ip;
@@ -362,7 +365,7 @@ static uint8_t ICACHE_FLASH_ATTR storeUserData(compMsgDispatcher_t *self, size_t
   rboot_config bootconf;
 
   bootconf = rboot_get_config();
-  bootconf.user_rom_save_data_flag = 1;
+  bootconf.user_rom_save_data_flag = BOOT_USER_ROM_DATA_SAVED;
   COMP_MSG_DBG(self, "O", 1, "storeUserData: msgLgth %d", msgLgth);
   bootconf.user_rom_save_data[0] = '\0';
   c_memcpy(bootconf.user_rom_save_data, msgData, msgLgth);
@@ -378,10 +381,15 @@ static uint8_t ICACHE_FLASH_ATTR saveUserData(compMsgDispatcher_t *self) {
   uint8_t result;
   headerPart_t *hdr;
   uint8_t *handle;
+  rboot_config bootconf;
 
+  bootconf = rboot_get_config();
+  bootconf.user_rom_save_data_flag = BOOT_USER_ROM_DO_SAVE_DATA;
+  rboot_set_config(&bootconf);
   COMP_MSG_DBG(self, "O", 1, "saveUserData called");
-//FIXME get src dst and cmdKey with a call!!
+//FIXME get src dst and cmdKey with an appropriate function call!!
   result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 22272,22272, 0x5544, &hdr);
+  COMP_MSG_DBG(self, "O", 1, "saveUserData getHeaderFromUniqueFields result: %d", result);
   checkErrOK(result);
   result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
   COMP_MSG_DBG(self, "O", 1, "handle: %s result: %d", handle, result);
@@ -396,6 +404,25 @@ static uint8_t ICACHE_FLASH_ATTR getUserData(compMsgDispatcher_t *self, uint8_t 
   rboot_config bootconf;
 
   bootconf = rboot_get_config();
+  switch (bootconf.user_rom_save_data_flag) {
+  case BOOT_USER_ROM_NO_DATA_SET:
+    break;
+  case BOOT_USER_ROM_DATA_SET:
+    break;
+  case BOOT_USER_ROM_DO_SAVE_DATA:
+    break;
+  case BOOT_USER_ROM_NO_SAVE_DATA:
+    break;
+  case BOOT_USER_ROM_RESET_DATA:
+    break;
+  case BOOT_USER_ROM_DATA_RESETTED:
+    bootconf.user_rom_save_data_flag = 0;
+    break;
+  case BOOT_USER_ROM_DATA_SAVED:
+    break;
+  default:
+    break;
+  }
   COMP_MSG_DBG(self, "O", 1, "getUserData");
   *msgLgth = bootconf.user_rom_save_data_size;
   *msgData = os_zalloc(*msgLgth);
@@ -426,7 +453,7 @@ static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callbac
     COMP_MSG_DBG(self, "O", 1, "No ram!\n");
     return COMP_MSG_ERR_OUT_OF_MEMORY;
   }
-  uud->compMsgDispatcher = self;
+  compMsgDispatcher = self;
 
   // store the callback
   uud->callback = callback;
@@ -445,10 +472,13 @@ static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callbac
 
   if (flashfs) {
     // flash spiffs
+ets_printf("ota write flash1: %p\n", (bootconf.roms[uud->rom_slot] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);
+ets_printf("ota write flash2: %p sector: %d setcorSize: %d offset: 0x%08x\n", bootconf.roms[uud->rom_slot], (BOOT_CONFIG_SECTOR + 1), SECTOR_SIZE, SPIFFS_FIXED_OFFSET_RBOOT);
     uud->write_status = rboot_write_init((bootconf.roms[uud->rom_slot] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);
     uud->rom_slot = FLASH_BY_ADDR;
   } else {
     // flash to rom slot
+ets_printf("ota write rom: %d %p\n", uud->rom_slot, bootconf.roms[uud->rom_slot]);
     uud->write_status = rboot_write_init(bootconf.roms[uud->rom_slot]);
   }
 
@@ -473,7 +503,7 @@ static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callbac
   system_upgrade_flag_set(UPGRADE_FLAG_START);
 
   // dns lookup
-  result = uud->compMsgDispatcher->compMsgModuleData->getOtaHost(uud->compMsgDispatcher, &numericValue, &otaHost);
+  result = compMsgDispatcher->compMsgModuleData->getOtaHost(compMsgDispatcher, &numericValue, &otaHost);
   espconnResult = espconn_gethostbyname(uud->conn, otaHost, &uud->ip, upgradeResolved);
   if (espconnResult == ESPCONN_OK) {
     // hostname is already cached or is actually a dotted decimal ip address
@@ -499,7 +529,7 @@ static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callbac
 static void otaUpdateCallback(bool result, uint8 rom_slot) {
   compMsgDispatcher_t *self;
 
-  self = uud->compMsgDispatcher;
+  self = compMsgDispatcher;
   if (result == true) {
     // success
     if (rom_slot == FLASH_BY_ADDR) {

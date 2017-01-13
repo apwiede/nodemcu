@@ -342,6 +342,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       checkErrOK(result);
       break;
     case 'U':
+      self->compMsgDebug->debugLevel = 1;
       self->compMsgDebug->addEol = false;
       self->compMsgDebug->setDebugFlags(self, "BHINsSw");
       COMP_MSG_DBG(self, "U", 1, "start Uart input");

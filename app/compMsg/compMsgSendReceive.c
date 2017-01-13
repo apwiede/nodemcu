@@ -231,7 +231,8 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
-  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+//  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+  contentType="\r\nContent-Type: application/json\r\n";
   payloadLgth += c_strlen(contentType);
   contentLgth="Content-length: ";
   payloadLgth += c_strlen(contentLgth);

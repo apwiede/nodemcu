@@ -88,6 +88,7 @@ typedef uint8_t (* dumpMsgValPart_t)(compMsgDispatcher_t *self, msgValPart_t *ms
 typedef struct compMsgDebug {
   uint32_t currDebugFlags;
   bool addEol;
+  bool useUart;
   uint8_t debugLevel;
   uint8_t debugUartId;
 

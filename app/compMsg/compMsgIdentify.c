@@ -456,7 +456,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   while (idx < self->compMsgData->numMsgValParts) {
     msgValPart = &self->compMsgData->msgValParts[idx];
     if (msgValPart->fieldValueActionCb != NULL) {
-      COMP_MSG_DBG(self, "I", 1, "have actionCb: %s", msgValPart->fieldValueActionCb);
+      COMP_MSG_DBG(self, "I", 2, "have actionCb: %s", msgValPart->fieldValueActionCb);
       hadActionCb = true;
       result = self->compMsgAction->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
       checkErrOK(result);
@@ -503,6 +503,9 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   result = self->resetMsgInfo(self, received);
   COMP_MSG_DBG(self, "I", 2, "resetMsgInfo: result: %d", result);
   checkErrOK(result);
+  // saveUserData here (clientSsid, clientPasswd (evtually IP Addr and port?)!!!
+  result = self->compMsgOta->saveUserData(self);
+  checkErrOK(result);
   COMP_MSG_DBG(self, "I", 2, "sendClientIPMsg done");
   return COMP_MSG_ERR_OK;
 }
@@ -533,6 +536,7 @@ static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buf
   size_t seqIdx;
   uint8_t *saveData;
   size_t saveLgth;
+  bool haveDataView;
 
 if (buffer == NULL) {
   COMP_MSG_DBG(self, "I", 2, "++++handleReceivedPart: buffer == NULL lgth: %d", lgth);
@@ -589,15 +593,23 @@ if (buffer == NULL) {
           fieldInfo.fieldLgth = 2;
           fieldInfo.fieldOffset = received->totalLgth - 2;
         }
-        saveData = compMsgData->compMsgDataView->dataView->data;
-        saveLgth = compMsgData->compMsgDataView->dataView->lgth;
-        compMsgData->compMsgDataView->dataView->data = received->buf;
-        compMsgData->compMsgDataView->dataView->lgth = received->totalLgth;
+        if (compMsgData->compMsgDataView == NULL) {
+          compMsgData->compMsgDataView = newCompMsgDataView(received->buf, received->lgth);
+          haveDataView = false;
+        } else {
+          haveDataView = true;
+          saveData = compMsgData->compMsgDataView->dataView->data;
+          saveLgth = compMsgData->compMsgDataView->dataView->lgth;
+          compMsgData->compMsgDataView->dataView->data = received->buf;
+          compMsgData->compMsgDataView->dataView->lgth = received->totalLgth;
+        }
         result = compMsgData->compMsgDataView->getTotalCrc(self, compMsgData->compMsgDataView->dataView, &fieldInfo);
-        COMP_MSG_DBG(self, "I", 2, "getTotalCrc!res!%d!", result);
+        COMP_MSG_DBG(self, "I", 1, "getTotalCrc!res!%d!", result);
         checkErrOK(result);
-        compMsgData->compMsgDataView->dataView->data = saveData;
-        compMsgData->compMsgDataView->dataView->lgth = saveLgth;
+        if (haveDataView) {
+          compMsgData->compMsgDataView->dataView->data = saveData;
+          compMsgData->compMsgDataView->dataView->lgth = saveLgth;
+        }
         if (hdr->hdrEncryption == 'E') {
           int numericValue;
           uint8_t *cryptedPtr;

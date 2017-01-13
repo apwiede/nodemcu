@@ -141,8 +141,7 @@ static uint8_t runAPConnect(compMsgDispatcher_t *self) {
 static uint8_t runRestoreUserData(compMsgDispatcher_t *self) {
   uint8_t result;
 
-ets_printf("runRestoreUserData called\n");
-//  result = self->compMsgWifiData->connectToAP(self);
+  result = self->compMsgModuleData->restoreUserData(self);
   return result;
 }
 

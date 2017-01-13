@@ -146,17 +146,19 @@ static void dbgPrintf(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debu
   char buffer[MAX_BUFFER_SIZE];
   uint8_t *cp;
   size_t lgth;
+  bool useUart;
 
   uartId = self->compMsgDebug->debugUartId;
+  useUart = self->compMsgDebug->useUart;
   flags = self->compMsgDebug->getDebugFlags(self, dbgChars);
   if (flags && (debugLevel <= self->compMsgDebug->debugLevel)) {
-#ifdef NOTDEF
-    cp = "%==DBG: ";
-    while (*cp != '\0') {
-      platform_uart_send(uartId, *cp);
-      cp++;
+    if (useUart) {
+      cp = "%==DBG: ";
+      while (*cp != '\0') {
+        platform_uart_send(uartId, *cp);
+        cp++;
+      }
     }
-#endif
     va_start(arglist, format);
     lgth = ets_vsnprintf(buffer, MAX_BUFFER_SIZE-1, format, arglist);
     if (lgth < 0) {
@@ -166,25 +168,30 @@ ets_printf("ERROR DBG_STR too long\n");
       if (cp[lgth - 1] == '\n') {
         lgth--;
       }
-ets_printf("%s\n", buffer);
-#ifdef NOTDEF
-      idx = 0;
-      while (idx < lgth) {
-        platform_uart_send(uartId, *cp++);
-        idx++;
+      if (!useUart) {
+        ets_printf("%s\n", buffer);
+      } else {
+        idx = 0;
+        while (idx < lgth) {
+          if (*cp == '%') {
+            // escape % char
+            platform_uart_send(uartId, *cp);
+          }
+          platform_uart_send(uartId, *cp++);
+          idx++;
+        }
       }
-#endif
       va_end(arglist);
-#ifdef NOTDEF
-      cp = "%";
-      while (*cp != '\0') {
-        platform_uart_send(uartId, *cp++);
+      if (useUart) {
+        cp = "%";
+        while (*cp != '\0') {
+          platform_uart_send(uartId, *cp++);
+        }
       }
-#endif
       if (self->compMsgDebug->addEol) {
-#ifdef NOTDEF
-        platform_uart_send(uartId, '\n');
-#endif
+        if (useUart) {
+          platform_uart_send(uartId, '\n');
+        }
       }
     }
   }
@@ -443,6 +450,7 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
 
   self->compMsgDebug->currDebugFlags = DEBUG_COMP_MSG_WEB_SOCKET;
   self->compMsgDebug->addEol = true;
+  self->compMsgDebug->useUart = true;
   self->compMsgDebug->debugLevel = 1;
   self->compMsgDebug->debugUartId = 0;
 
