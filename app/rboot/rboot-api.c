@@ -116,7 +116,8 @@ bool ICACHE_FLASH_ATTR rboot_write_flash(rboot_write_status *status, uint8 *data
   // get a buffer
   buffer = (uint8 *)os_malloc(len + status->extra_count);
   if (!buffer) {
-    //os_printf("No ram!\r\n");
+    ets_printf("rboot_write_flash: out of memory\n");
+    //ets_printf("No ram!\r\n");
     return false;
   }
 
@@ -143,7 +144,7 @@ bool ICACHE_FLASH_ATTR rboot_write_flash(rboot_write_status *status, uint8 *data
     }
 
     // write current chunk
-    //os_printf("write addr: 0x%08x, len: 0x%04x\r\n", status->start_addr, len);
+    //ets_printf("write addr: 0x%08x, len: 0x%04x\r\n", status->start_addr, len);
     if (spi_flash_write(status->start_addr, (uint32 *)((void*)buffer), len) == SPI_FLASH_RESULT_OK) {
       ret = true;
       status->start_addr += len;
