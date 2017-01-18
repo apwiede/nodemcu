@@ -715,19 +715,51 @@ static uint8_t getCloudHost2(compMsgDispatcher_t *self, int* numericValue, uint8
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= getCloudSubUrl1 ====================================
+// ================================= getCloudUrl1Part1 ====================================
 
-static uint8_t getCloudSubUrl1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+static uint8_t getCloudUrl1Part1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
   *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudSubUrl1;
+  *stringValue = compMsgWifiData.cloudUrl1Part1;
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= getCloudSubUrl2 ====================================
+// ================================= getCloudUrl1Part2 ====================================
 
-static uint8_t getCloudSubUrl2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+static uint8_t getCloudUrl1Part2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
   *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudSubUrl2;
+  *stringValue = compMsgWifiData.cloudUrl1Part2;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudUrlTenantId1 ====================================
+
+static uint8_t getCloudUrlTenantId1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudUrlTenantId1;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudUrl2Part1 ====================================
+
+static uint8_t getCloudUrl2Part1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudUrl2Part1;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudUrl2Part2 ====================================
+
+static uint8_t getCloudUrl2Part2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudUrl2Part2;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getCloudUrlTenantId2 ====================================
+
+static uint8_t getCloudUrlTenantId2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgWifiData.cloudUrlTenantId2;
   return COMP_MSG_ERR_OK;
 }
 
@@ -836,23 +868,29 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_CLOUD_PORT:
     *numericValue = compMsgWifiData.cloudPort;
     break;
-  case WIFI_INFO_CLOUD_DOMAIN_1:
-    *stringValue = compMsgWifiData.cloudDomain1;
-    break;
-  case WIFI_INFO_CLOUD_DOMAIN_2:
-    *stringValue = compMsgWifiData.cloudDomain2;
-    break;
   case WIFI_INFO_CLOUD_HOST_1:
     *stringValue = compMsgWifiData.cloudHost1;
     break;
   case WIFI_INFO_CLOUD_HOST_2:
     *stringValue = compMsgWifiData.cloudHost2;
     break;
-  case WIFI_INFO_CLOUD_SUB_URL_1:
-    *stringValue = compMsgWifiData.cloudSubUrl1;
+  case WIFI_INFO_CLOUD_URL_1_PART_1:
+    *stringValue = compMsgWifiData.cloudUrl1Part1;
     break;
-  case WIFI_INFO_CLOUD_SUB_URL_2:
-    *stringValue = compMsgWifiData.cloudSubUrl2;
+  case WIFI_INFO_CLOUD_URL_1_PART_2:
+    *stringValue = compMsgWifiData.cloudUrl1Part2;
+    break;
+  case WIFI_INFO_CLOUD_URL_TENANT_ID_1:
+    *stringValue = compMsgWifiData.cloudUrlTenantId1;
+    break;
+  case WIFI_INFO_CLOUD_URL_2_PART_1:
+    *stringValue = compMsgWifiData.cloudUrl2Part1;
+    break;
+  case WIFI_INFO_CLOUD_URL_2_PART_2:
+    *stringValue = compMsgWifiData.cloudUrl2Part2;
+    break;
+  case WIFI_INFO_CLOUD_URL_TENANT_ID_2:
+    *stringValue = compMsgWifiData.cloudUrlTenantId2;
     break;
   case WIFI_INFO_CLOUD_NODE_TOKEN_1:
     *stringValue = compMsgWifiData.cloudNodeToken1;
@@ -935,16 +973,6 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
   case COMP_MSG_SPEC_FIELD_CLOUD_PORT:
     compMsgWifiData.cloudPort = numericValue;
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN_1:
-    compMsgWifiData.cloudDomain1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudDomain1);
-    c_memcpy(compMsgWifiData.cloudDomain1, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN_2:
-    compMsgWifiData.cloudDomain2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudDomain2);
-    c_memcpy(compMsgWifiData.cloudDomain2, stringValue, c_strlen(stringValue));
-    break;
   case COMP_MSG_SPEC_FIELD_CLOUD_HOST_1:
     compMsgWifiData.cloudHost1 = os_zalloc(c_strlen(stringValue) + 1);
     checkAllocOK(compMsgWifiData.cloudHost1);
@@ -955,15 +983,35 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
     checkAllocOK(compMsgWifiData.cloudHost2);
     c_memcpy(compMsgWifiData.cloudHost2, stringValue, c_strlen(stringValue));
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL_1:
-    compMsgWifiData.cloudSubUrl1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudSubUrl1);
-    c_memcpy(compMsgWifiData.cloudSubUrl1, stringValue, c_strlen(stringValue));
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1:
+    compMsgWifiData.cloudUrl1Part1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrl1Part1);
+    c_memcpy(compMsgWifiData.cloudUrl1Part1, stringValue, c_strlen(stringValue));
     break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL_2:
-    compMsgWifiData.cloudSubUrl2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudSubUrl2);
-    c_memcpy(compMsgWifiData.cloudSubUrl2, stringValue, c_strlen(stringValue));
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2:
+    compMsgWifiData.cloudUrl1Part2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrl1Part2);
+    c_memcpy(compMsgWifiData.cloudUrl1Part2, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1:
+    compMsgWifiData.cloudUrlTenantId1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrlTenantId1);
+    c_memcpy(compMsgWifiData.cloudUrlTenantId1, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1:
+    compMsgWifiData.cloudUrl2Part1 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrl2Part1);
+    c_memcpy(compMsgWifiData.cloudUrl2Part1, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2:
+    compMsgWifiData.cloudUrl2Part2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrl2Part2);
+    c_memcpy(compMsgWifiData.cloudUrl2Part2, stringValue, c_strlen(stringValue));
+    break;
+  case COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2:
+    compMsgWifiData.cloudUrlTenantId2 = os_zalloc(c_strlen(stringValue) + 1);
+    checkAllocOK(compMsgWifiData.cloudUrlTenantId2);
+    c_memcpy(compMsgWifiData.cloudUrlTenantId2, stringValue, c_strlen(stringValue));
     break;
   case COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1:
     compMsgWifiData.cloudNodeToken1 = os_zalloc(c_strlen(stringValue) + 1);
@@ -1024,8 +1072,12 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudPort", &getCloudPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost1", &getCloudHost1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost2", &getCloudHost2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudSubUrl1", &getCloudSubUrl1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudSubUrl2", &getCloudSubUrl2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudUrl1Part1", &getCloudUrl1Part1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudUrl1Part2", &getCloudUrl1Part2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudUrlTenantId1", &getCloudUrlTenantId1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudl2Part1", &getCloudUrl2Part1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudl2Part2", &getCloudUrl2Part2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudlTenantId2", &getCloudUrlTenantId2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudNodeToken1", &getCloudNodeToken1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudNodeToken2", &getCloudNodeToken2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getProvisioningSsid", &getProvisioningSsid, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);

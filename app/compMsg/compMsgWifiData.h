@@ -74,14 +74,16 @@
 #define WIFI_INFO_CLIENT_STATUS          32
 #define WIFI_INFO_CLOUD_SECURE_CONNECT   33
 #define WIFI_INFO_CLOUD_PORT             34
-#define WIFI_INFO_CLOUD_DOMAIN_1         35
-#define WIFI_INFO_CLOUD_DOMAIN_2         36
-#define WIFI_INFO_CLOUD_HOST_1           37
-#define WIFI_INFO_CLOUD_HOST_2           38
-#define WIFI_INFO_CLOUD_SUB_URL_1        39
-#define WIFI_INFO_CLOUD_SUB_URL_2        40
-#define WIFI_INFO_CLOUD_NODE_TOKEN_1     41
-#define WIFI_INFO_CLOUD_NODE_TOKEN_2     42
+#define WIFI_INFO_CLOUD_HOST_1           35
+#define WIFI_INFO_CLOUD_HOST_2           36
+#define WIFI_INFO_CLOUD_URL_1_PART_1     37
+#define WIFI_INFO_CLOUD_URL_1_PART_2     38
+#define WIFI_INFO_CLOUD_URL_TENANT_ID_1  39
+#define WIFI_INFO_CLOUD_URL_2_PART_1     40
+#define WIFI_INFO_CLOUD_URL_2_PART_2     41
+#define WIFI_INFO_CLOUD_URL_TENANT_ID_2  42
+#define WIFI_INFO_CLOUD_NODE_TOKEN_1     43
+#define WIFI_INFO_CLOUD_NODE_TOKEN_2     44
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -209,12 +211,14 @@ typedef struct compMsgWifiData {
   uint8_t cloudSecureConnect;
 #endif
   uint16_t cloudPort;
-  uint8_t *cloudDomain1;
-  uint8_t *cloudDomain2;
   uint8_t *cloudHost1;
   uint8_t *cloudHost2;
-  uint8_t *cloudSubUrl1;
-  uint8_t *cloudSubUrl2;
+  uint8_t *cloudUrl1Part1;
+  uint8_t *cloudUrl1Part2;
+  uint8_t *cloudUrlTenantId1;
+  uint8_t *cloudUrl2Part1;
+  uint8_t *cloudUrl2Part2;
+  uint8_t *cloudUrlTenantId2;
   uint8_t *cloudNodeToken1;
   uint8_t *cloudNodeToken2;
   bssScanSizes_t bssScanSizes;

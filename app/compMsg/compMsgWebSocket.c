@@ -630,10 +630,11 @@ static uint8_t webSocketRunAPMode(compMsgDispatcher_t *self) {
   
   COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode\n");
   boolResult = wifi_station_disconnect();
-  if (!boolResult) {
-    COMP_MSG_DBG(self, "Y", 0, "webSocketRunAPMode COMP_MSG_ERR_CANNOT_DISCONNECT\n");
-    return COMP_MSG_ERR_CANNOT_DISCONNECT;
-  }
+// checking result makes problems with some modules, so do not check.
+//  if (!boolResult) {
+//    COMP_MSG_DBG(self, "Y", 0, "webSocketRunAPMode COMP_MSG_ERR_CANNOT_DISCONNECT\n");
+//    return COMP_MSG_ERR_CANNOT_DISCONNECT;
+//  }
   boolResult = wifi_set_opmode(OPMODE_STATIONAP);
   if (!boolResult) {
     COMP_MSG_DBG(self, "Y", 0, "webSocketRunAPMode COMP_MSG_ERR_CANNOT_SET_OPMODE\n");

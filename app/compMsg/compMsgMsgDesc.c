@@ -714,7 +714,7 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   int idx;
   bool isEnd;
   uint8_t lgth;
-  uint8_t buf[100];
+  uint8_t buf[256];
   uint8_t *buffer;
   uint8_t *myStr;
   uint8_t *fieldNameStr;
@@ -725,7 +725,7 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
-  COMP_MSG_DBG(self, "E", 2, "readWifiValues: %s\n", fileName);
+  COMP_MSG_DBG(self, "E", 0, "readWifiValues: %s\n", fileName);
   checkErrOK(result);
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
@@ -758,16 +758,21 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
     fieldValueStr = cp;
     result = compMsgMsgDesc->getStrFromLine(self, cp, &ep, &isEnd);
     checkErrOK(result);
-    uval = c_strtoul(fieldValueStr, &endPtr, 10);
-    if ((endPtr - (char *)fieldValueStr) == c_strlen(fieldValueStr)) {
-      if (c_strlen(fieldValueStr) > 10) {
-        // seems to be a password key, so use the stringValue
-        result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
-      } else {
-        result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, uval, NULL);
-      }
+    if (ep == cp + 1) {
+      // empty value
+      result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, "");
     } else {
-      result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+      uval = c_strtoul(fieldValueStr, &endPtr, 10);
+      if ((endPtr - (char *)fieldValueStr) == c_strlen(fieldValueStr)) {
+        if (c_strlen(fieldValueStr) > 10) {
+          // seems to be a password key, so use the stringValue
+          result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+        } else {
+          result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, uval, NULL);
+        }
+      } else {
+        result = self->compMsgWifiData->setWifiValue(self, fieldNameStr, 0, fieldValueStr);
+      }
     }
     if (!isEnd) {
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;

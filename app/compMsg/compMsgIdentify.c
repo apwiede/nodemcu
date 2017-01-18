@@ -604,7 +604,7 @@ if (buffer == NULL) {
           compMsgData->compMsgDataView->dataView->lgth = received->totalLgth;
         }
         result = compMsgData->compMsgDataView->getTotalCrc(self, compMsgData->compMsgDataView->dataView, &fieldInfo);
-        COMP_MSG_DBG(self, "I", 1, "getTotalCrc!res!%d!", result);
+        COMP_MSG_DBG(self, "I", 2, "getTotalCrc!res!%d!", result);
         checkErrOK(result);
         if (haveDataView) {
           compMsgData->compMsgDataView->dataView->data = saveData;

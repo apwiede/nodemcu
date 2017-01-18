@@ -68,8 +68,8 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgDebug.h"
 #include "compMsgOta.h"
 
-//#define CLOUD_1
-#define CLOUD_2
+#define CLOUD_1
+//#define CLOUD_2
 
 // answer message types
 #define COMP_MSG_ACK_MSG 0x01

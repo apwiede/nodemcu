@@ -87,6 +87,7 @@ static httpHeaderKeyInfo_t httpHeaderKeyInfos[] = {
   {"accept",                           "Accept",                           COMP_MSG_HTTP_ACCEPT},
   {"accept-encoding",                  "Accept-Encoding",                  COMP_MSG_HTTP_ACCEPT_ENCODING},
   {"host",                             "Host",                             COMP_MSG_HTTP_HOST},
+  {"x-aspnet-version",                 "X-Aspnet-Version",                 COMP_MSG_HTTP_X_ASPNET_VERSION},
 
   {NULL, NULL, -1},
 };
@@ -120,7 +121,8 @@ static uint8_t getHttpHeaderKeyIdFromLowerKey(compMsgDispatcher_t *self, const u
     }
     entry++;
   }
-  return DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND;
+COMP_MSG_DBG(self, "Y", 1, "getHttpHeaderKeyIdFromLowerKey: %s not found", httpHeaderKey);
+  return COMP_MSG_ERR_HEADER_NOT_FOUND;
 }
 
 // ================================= getHttpHeaderKeyFromId ====================================
@@ -292,10 +294,12 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
   char *endPtr;
   long uval;
   compMsgDispatcher_t *self;
+  size_t msgLgth;
+  uint8_t *msgData;
 
   self = sud->compMsgDispatcher;
-  COMP_MSG_DBG(self, "H", 2, "httpParse\n");
-  COMP_MSG_DBG(self, "H", 2, "===\nSUD: %p\n", sud);
+  COMP_MSG_DBG(self, "H", 2, "httpParse");
+  COMP_MSG_DBG(self, "H", 2, "SUD: %p", sud);
 
   httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
   httpMsgInfo->data = os_zalloc(size + 1);
@@ -304,11 +308,11 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
   result = getContentAndNumHeaders(self, httpMsgInfo->data, size, sud);
   checkErrOK(result);
 
-  COMP_MSG_DBG(self, "H", 2, "numHeaders: %d sud->content: %s!len: %d!\n", httpMsgInfo->numHeaders, httpMsgInfo->content, c_strlen(httpMsgInfo->content));  
-  COMP_MSG_DBG(self, "H", 2, "receivedHeadersSize: %d\n", httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
+  COMP_MSG_DBG(self, "H", 2, "httpParse: numHeaders: %d sud->content: %s!len: %d!", httpMsgInfo->numHeaders, httpMsgInfo->content, httpMsgInfo->currLgth);  
+  COMP_MSG_DBG(self, "H", 2, "receivedHeadersSize: %d", httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
   httpMsgInfo->receivedHeaders = os_zalloc(httpMsgInfo->numHeaders * sizeof(httpHeaderPart_t));
   checkAllocOK(httpMsgInfo->receivedHeaders);
-  COMP_MSG_DBG(self, "H", 2, "httpMsgInfo->receivedHeaders: %p\n", httpMsgInfo->receivedHeaders);
+  COMP_MSG_DBG(self, "H", 2, "httpMsgInfo->receivedHeaders: %p", httpMsgInfo->receivedHeaders);
 
   result = getHttpRequestCode(self, httpMsgInfo->data, sud);
   checkErrOK(result);
@@ -329,7 +333,21 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
     }
     idx++;
   }
-//FIXME handle message here need code!!
+  COMP_MSG_DBG(self, "Y", 1, "content: %s lgth: %d", httpMsgInfo->content, httpMsgInfo->currLgth);
+  switch (httpMsgInfo->httpRequestCode) {
+  case 200:
+    COMP_MSG_DBG(self, "H", 1, "httpRequestCode: 200 OK");
+    //FIXME handle message here need code!!
+    msgLgth = httpMsgInfo->currLgth;
+    result = self->compMsgUtil->fromBase64(self, httpMsgInfo->content, &msgLgth, &msgData);
+    checkErrOK(result);
+    self->compMsgData->currHdr->hdrHandleType = 'W';
+COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
+    result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
+COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
+    checkErrOK(result);
+    break;
+  }
   httpMsgInfo->expectedLgth = 0;
   return COMP_MSG_ERR_OK;
 }

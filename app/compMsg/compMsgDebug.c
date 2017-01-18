@@ -453,6 +453,7 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   self->compMsgDebug->useUart = true;
   self->compMsgDebug->debugLevel = 1;
   self->compMsgDebug->debugUartId = 0;
+//  self->compMsgDebug->setDebugFlags(self, "BEHINsSw");
 
   self->compMsgDebug->getDebugFlags = &getDebugFlags;
   self->compMsgDebug->setDebugFlags = &setDebugFlags;

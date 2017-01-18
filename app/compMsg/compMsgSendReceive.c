@@ -86,7 +86,7 @@ if (result != COMP_MSG_ERR_OK) {
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= typeRSendAnswer ====================================
+// ================================= uartSendAnswer ====================================
 
 /**
  * \brief send a message via Uart to Mcu
@@ -96,17 +96,17 @@ if (result != COMP_MSG_ERR_OK) {
  * \return Error code or ErrorOK
  *
  */
-static uint8_t typeRSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth) {
+static uint8_t uartSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth) {
   int result;
   int idx;
 
-  COMP_MSG_DBG(self, "s", 2, "typeRSendAnswer start: lgth: %d!", msgLgth);
+  COMP_MSG_DBG(self, "s", 2, "uartSendAnswer start: lgth: %d!", msgLgth);
   idx = 0;
   while (idx < msgLgth) {
     platform_uart_send(0, data[idx]);
     idx++;
   }
-  COMP_MSG_DBG(self, "s", 2, "typeRSendAnswer done");
+  COMP_MSG_DBG(self, "s", 2, "uartSendAnswer done");
   return COMP_MSG_ERR_OK;
 }
 
@@ -167,7 +167,9 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t *b64Msg;
   uint8_t *host;
-  uint8_t *subUrl;
+  uint8_t *UrlPart1;
+  uint8_t *UrlPart2;
+  uint8_t *UrlTenantId;
   uint8_t *xNodeToken;
   uint8_t *nodeToken;
   uint8_t *hostPart;
@@ -190,68 +192,121 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
 
 #ifdef CLOUD_1
   payloadLgth = c_strlen("POST ");
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
+
+  //url part 1
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_1_PART_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart1);
   checkErrOK(result);
-  payloadLgth += c_strlen(subUrl);
+  payloadLgth += c_strlen(UrlPart1);
+
+  //url tenantId 
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_TENANT_ID_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlTenantId);
+  checkErrOK(result);
+  payloadLgth += c_strlen(UrlTenantId);
+
+  //url part 2 
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_1_PART_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart2);
+  checkErrOK(result);
+  payloadLgth += c_strlen(UrlPart2);
+
+  // host
   hostPart=" HTTP/1.1\r\nHost: ";
   payloadLgth += c_strlen(hostPart);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
   checkErrOK(result);
   payloadLgth += c_strlen(host);
-  alive="\r\nConnection: keep-alive\r\n";
+
+  // alive
+  alive="\r\n";
   payloadLgth += c_strlen(alive);
+
+  // xNodeToken
   xNodeToken="X-Node-Token: ";
   payloadLgth += c_strlen(xNodeToken);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
-  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+
+  // contentType
+//  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+  contentType="\r\nContent-Type: application/json\r\n";
   payloadLgth += c_strlen(contentType);
+
+  // contentLgth
   contentLgth="Content-length: ";
   payloadLgth += c_strlen(contentLgth);
-  os_sprintf(lgthBuf, "%d\0", msgLgth);
+  os_sprintf(lgthBuf, "%d\0", msgLgth + 2); // " ... "
   payloadLgth += c_strlen(lgthBuf); // for contentLgth value
-  accept="\r\nAccept: */*\r\n\r\n";
+
+  // accept
+  accept="\r\n\r\n";
   payloadLgth += c_strlen(accept);
-  payloadLgth += (msgLgth + 3);  // \r\n\0
+
+  // msg
+  payloadLgth += (msgLgth + 2 + 3);  // " ... " + \r\n\0
 #else
   payloadLgth = c_strlen("POST ");
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_SUB_URL_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &subUrl);
+
+  //url part 1
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_2_PART_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart1);
   checkErrOK(result);
-  payloadLgth += c_strlen(subUrl);
+  payloadLgth += c_strlen(UrlPart1);
+
+  //url tenantId 
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_TENANT_ID_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlTenantId);
+  checkErrOK(result);
+  payloadLgth += c_strlen(UrlTenantId);
+
+  //url part 2 
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_2_PART_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart2);
+  checkErrOK(result);
+  payloadLgth += c_strlen(UrlPart2);
+
+  // host
   hostPart=" HTTP/1.1\r\nHost: ";
   payloadLgth += c_strlen(hostPart);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
   checkErrOK(result);
   payloadLgth += c_strlen(host);
+
+  // alive
   alive="\r\n";
   payloadLgth += c_strlen(alive);
+
+  // xNodeToken
   xNodeToken="X-Node-Token: ";
   payloadLgth += c_strlen(xNodeToken);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
+
+  // contentType
 //  contentType="\r\nContent-Type: application/x-www-form-urlencoded\r\n";
   contentType="\r\nContent-Type: application/json\r\n";
   payloadLgth += c_strlen(contentType);
+
+  // contentLgth
   contentLgth="Content-length: ";
   payloadLgth += c_strlen(contentLgth);
-  os_sprintf(lgthBuf, "%d\0", msgLgth);
+  os_sprintf(lgthBuf, "%d\0", msgLgth + 2); // " ... "
   payloadLgth += c_strlen(lgthBuf); // for contentLgth value
+
+  // accept
   accept="\r\n\r\n";
   payloadLgth += c_strlen(accept);
-  payloadLgth += (msgLgth + 3);  // \r\n\0
+
+  // msg
+  payloadLgth += (msgLgth + 2 + 3);  // " ... " + \r\n\0
 #endif
   
   // FIXME need to free this somehwere!!!
   char *payload = os_zalloc(payloadLgth);
-  COMP_MSG_DBG(self, "s", 2, "payloadLgth1: %d payload: %p", payloadLgth, payload);
+  COMP_MSG_DBG(self, "s", 1, "payloadLgth1: %d payload: %p", payloadLgth, payload);
 #ifdef CLOUD_1
-  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, xNodeToken, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s%s%s\"%s\"\r\n", UrlPart1, UrlTenantId, UrlPart2, hostPart, host, alive, xNodeToken, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
   COMP_MSG_DBG(self, "s", 2, "payloadLgth2: %d %d", c_strlen(payload), payloadLgth);
 #else
-  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s%s\r\n", subUrl, hostPart, host, alive, xNodeToken, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
-  COMP_MSG_DBG(self, "s", 2, "payloadLgth3: %d %d", c_strlen(payload), payloadLgth);
+  os_sprintf(payload, "POST %s%s%s%s%s%s%s%s%s%s%s%s\"%s\"\r\n", UrlPart1, UrlTenantId, UrlPart2, hostPart, host, alive, xNodeToken, nodeToken, contentType, contentLgth, lgthBuf, accept, b64Msg);
+  COMP_MSG_DBG(self, "s", 1, "payloadLgth3: %d %d", c_strlen(payload), payloadLgth);
 #endif
   COMP_MSG_DBG(self, "s", 1, "request: %d %s", c_strlen(payload), payload);
   os_free(b64Msg);
@@ -298,7 +353,7 @@ static uint8_t checkClientMode(compMsgDispatcher_t *self) {
 static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth) {
   uint8_t result;
 
-  COMP_MSG_DBG(self, "s", 1, "sendMsg: %c\n", self->compMsgData->currHdr->hdrHandleType);
+  COMP_MSG_DBG(self, "s", 2, "sendMsg: %c\n", self->compMsgData->currHdr->hdrHandleType);
   switch (self->compMsgData->currHdr->hdrHandleType) {
   case 'A':
     COMP_MSG_DBG(self, "s", 2, "sud: %p\n", self->compMsgData->sud);
@@ -318,7 +373,7 @@ static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLg
     COMP_MSG_DBG(self, "Y", 0, "sendMsg G not yet implemented");
     break;
   case 'S':
-    result = typeRSendAnswer(self, msgData, msgLgth);
+    result = uartSendAnswer(self, msgData, msgLgth);
     checkErrOK(result);
     result = self->compMsgData->deleteMsg(self);
     checkErrOK(result);
@@ -336,7 +391,9 @@ checkErrOK(result);
 // FIXME TEMPORARY!!!
     break;
   case 'W':
-    COMP_MSG_DBG(self, "Y", 0, "sendMsg W not yet implemented");
+    COMP_MSG_DBG(self, "Y", 0, "sendMsg msgLgth: %d", msgLgth);
+    result = uartSendAnswer(self, msgData, msgLgth);
+    checkErrOK(result);
     break;
   case 'N':
     // just ignore
@@ -368,7 +425,7 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
 
   self->compMsgSendReceive->uartSetup = &uartSetup;
   self->compMsgSendReceive->uartReceiveCb = &uartReceiveCb;
-  self->compMsgSendReceive->typeRSendAnswer = &typeRSendAnswer;
+  self->compMsgSendReceive->uartSendAnswer = &uartSendAnswer;
   self->compMsgSendReceive->prepareCloudMsg = &prepareCloudMsg;
   self->compMsgSendReceive->checkClientMode = &checkClientMode;
   self->compMsgSendReceive->sendCloudMsg = &sendCloudMsg;

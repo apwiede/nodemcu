@@ -266,12 +266,14 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   size_t msgLgth;
   uint8_t *msgData;
 
+COMP_MSG_DBG(self, "Y", 0, "call DescInit");
   result = compMsgMsgDescInit(self);
   checkErrOK(result);
   result = compMsgUtilInit(self);
   checkErrOK(result);
   result = compMsgRequestInit(self);
   checkErrOK(result);
+COMP_MSG_DBG(self, "Y", 0, "call IdentifyInit");
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
@@ -280,6 +282,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   checkErrOK(result);
   result = compMsgActionInit(self);
   checkErrOK(result);
+COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
   result = compMsgWifiInit(self);
   checkErrOK(result);
   result = compMsgModuleDataInit(self);
@@ -292,6 +295,7 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   checkErrOK(result);
   result = compMsgHttpInit(self);
   checkErrOK(result);
+COMP_MSG_DBG(self, "Y", 0, "call OtaInit");
   result = compMsgOtaInit(self);
   checkErrOK(result);
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
@@ -342,9 +346,10 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       checkErrOK(result);
       break;
     case 'U':
+COMP_MSG_DBG(self, "Y", 0, "init type U");
       self->compMsgDebug->debugLevel = 1;
       self->compMsgDebug->addEol = false;
-      self->compMsgDebug->setDebugFlags(self, "BHINsSw");
+      self->compMsgDebug->setDebugFlags(self, "BEHINsSw");
       COMP_MSG_DBG(self, "U", 1, "start Uart input");
       id = 0;
       stopbits = PLATFORM_UART_STOPBITS_1;

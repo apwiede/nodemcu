@@ -98,7 +98,7 @@ static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t 
 
   if (compMsgModuleData.MACAddr[0] == '\0') {
     boolResult = wifi_get_macaddr(STATION_IF, MACAddr);
-    COMP_MSG_DBG(self, "MY", 1, "getMacAddr STA: boolResult: %d\n", boolResult);
+    COMP_MSG_DBG(self, "MY", 2, "getMacAddr STA: boolResult: %d\n", boolResult);
     if (!boolResult) {
       return COMP_MSG_ERR_CANNOT_GET_MAC_ADDR;
     }
@@ -106,7 +106,7 @@ static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t 
     compMsgModuleData.MACAddr[6] = '\0';
   } else {
     boolResult = wifi_get_macaddr(SOFTAP_IF, MACAddr);
-    COMP_MSG_DBG(self, "MY", 1, "getMacAddr AP: boolResult: %d\n", boolResult);
+    COMP_MSG_DBG(self, "MY", 2, "getMacAddr AP: boolResult: %d\n", boolResult);
     if (!boolResult) {
       return COMP_MSG_ERR_CANNOT_GET_MAC_ADDR;
     }
@@ -115,12 +115,12 @@ static uint8_t getMACAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t 
   }
 int i;
 i = 0;
-COMP_MSG_DBG(self, "MY", 1, "MACaddr: ");
+COMP_MSG_DBG(self, "MY", 2, "MACAddr: ");
 while (i < 6) {
-  COMP_MSG_DBG(self, "MY", 1, " 0x%02x", compMsgModuleData.MACAddr[i]);
+  COMP_MSG_DBG(self, "MY", 2, " 0x%02x", compMsgModuleData.MACAddr[i]);
   i++;
 }
-COMP_MSG_DBG(self, "MY", 1, "\n");
+COMP_MSG_DBG(self, "MY", 2, "\n");
 //  if (self->compMsgData != NULL) {
 //    self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.MACAddr;
 //  }

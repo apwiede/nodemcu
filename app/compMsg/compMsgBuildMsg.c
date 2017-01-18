@@ -425,9 +425,9 @@ static uint8_t forwardMsg(compMsgDispatcher_t *self) {
   msgParts_t *received;
   msgHeaderInfos_t *hdrInfos;
 
-  COMP_MSG_DBG(self, "B", 1, "forwardMsg called handleType: %c!", self->compMsgData->currHdr->hdrHandleType);
+  COMP_MSG_DBG(self, "B", 2, "forwardMsg called handleType: %c!", self->compMsgData->currHdr->hdrHandleType);
   received = &self->compMsgData->received;
-  COMP_MSG_DBG(self, "B", 1, "handleType: %c msgLgth: %d", self->compMsgData->currHdr->hdrHandleType, received->lgth);
+  COMP_MSG_DBG(self, "B", 2, "handleType: %c msgLgth: %d", self->compMsgData->currHdr->hdrHandleType, received->lgth);
   self->compMsgSendReceive->sendMsg(self, received->buf, received->totalLgth);
   return COMP_MSG_ERR_OK;
 }

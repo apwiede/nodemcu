@@ -610,16 +610,16 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   pesp_conn->proto.tcp->local_port = espconn_port();
 
 #ifdef CLOUD_1
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_DOMAIN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
 #else
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_DOMAIN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
 #endif
   domain = stringValue;
   COMP_MSG_DBG(self, "N", 2, "domain: %s", domain);
   ipaddr.addr = ipaddr_addr(domain);
   c_memcpy(pesp_conn->proto.tcp->remote_ip, &ipaddr.addr, 4);
-  COMP_MSG_DBG(self, "N", 1, "TCP ip is set: ");
-  COMP_MSG_DBG(self, "N", 1, IPSTR, IP2STR(&ipaddr.addr));
+//  COMP_MSG_DBG(self, "N", 1, "TCP ip is set: ");
+//  COMP_MSG_DBG(self, "N", 1, IPSTR, IP2STR(&ipaddr.addr));
 
   COMP_MSG_DBG(self, "N", 2, "call regist connectcb\n");
   result = espconn_regist_connectcb(pesp_conn, netSocketConnected);
