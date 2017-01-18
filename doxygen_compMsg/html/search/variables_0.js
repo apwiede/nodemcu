@@ -6,6 +6,7 @@ var searchData=
   ['actionname',['actionName',['../structactionName2Action.html#aad07d7190b25287e90141b13d0eb6c0c',1,'actionName2Action::actionName()'],['../structbuildMsgInfos.html#a5679f7098e47ee738769e8284d374986',1,'buildMsgInfos::actionName()']]],
   ['actionname2actions',['actionName2Actions',['../compMsgAction_8c.html#a31ae0941cc178ce899f111870d7fba47',1,'compMsgAction.c']]],
   ['actions',['actions',['../structcompMsgActions.html#a95534c00cf88e1d8ccc313524a6ec43c',1,'compMsgActions']]],
+  ['addeol',['addEol',['../structcompMsgDebug.html#a3454c5019339b981788e235f608ad5db',1,'compMsgDebug']]],
   ['addfield',['addField',['../structcompMsgData.html#a0ff0aad8649441a04517b19fc8c98f80',1,'compMsgData']]],
   ['addfieldvaluecallbackname',['addFieldValueCallbackName',['../structcompMsgUtil.html#a7bbc0e4dc172b7efd0e78621c5a2a58c',1,'compMsgUtil']]],
   ['addrequest',['addRequest',['../structcompMsgRequest.html#af586234fb0d1be711b419e6c4a55b222',1,'compMsgRequest']]],

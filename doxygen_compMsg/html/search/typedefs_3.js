@@ -1,12 +1,15 @@
 var searchData=
 [
   ['dataview_5ft',['dataView_t',['../dataView_8h.html#a542dd71d6cf9dd1be9bfab2e2fe0fe3e',1,'dataView.h']]],
-  ['decryptmsg_5ft',['decryptMsg_t',['../compMsgUtil_8h.html#a1ce57c871f3e450c3d6624468efff129',1,'compMsgUtil.h']]],
+  ['dbgprintf_5ft',['dbgPrintf_t',['../compMsgDebug_8h.html#a6ee6851a963238600e17f99b86a27e37',1,'compMsgDebug.h']]],
+  ['debugch2id_5ft',['debugCh2Id_t',['../compMsgDebug_8c.html#a5e87a88e6e03f811056327394548f96e',1,'compMsgDebug.c']]],
+  ['decryptmsg_5ft',['decryptMsg_t',['../compMsgUtil_8h.html#af3acbf503b592157419430c0531b9784',1,'compMsgUtil.h']]],
   ['deletemsg_5ft',['deleteMsg_t',['../compMsgData_8h.html#ad6ff6a8c3d307471ba362655178374b4',1,'compMsgData.h']]],
   ['deletemsgdescparts_5ft',['deleteMsgDescParts_t',['../compMsgData_8h.html#a58b5c425f436e5e742a14e589f979140',1,'compMsgData.h']]],
   ['deletemsgvalparts_5ft',['deleteMsgValParts_t',['../compMsgData_8h.html#a2af7e7209e12735fcfe1107dbab7e501',1,'compMsgData.h']]],
   ['deleterequest_5ft',['deleteRequest_t',['../compMsgRequest_8h.html#a2a45069803e0299bd3e912a37ff3770e',1,'compMsgRequest.h']]],
-  ['dumpbinary_5ft',['dumpBinary_t',['../dataView_8h.html#a5e8ad9382ea31d72cf2d93bb865d993a',1,'dataView.h']]],
+  ['dumpbinary_5ft',['dumpBinary_t',['../dataView_8h.html#a0435481930e49614df841fadbba04a17',1,'dataView.h']]],
+  ['dumpbinarywide_5ft',['dumpBinaryWide_t',['../dataView_8h.html#ac6f9d7fd7eab0c8ec76b34f7da2ccb41',1,'dataView.h']]],
   ['dumpfieldinfo_5ft',['dumpFieldInfo_t',['../compMsgData_8h.html#aad38cdd1871c2a9a42067fd58e388eb1',1,'compMsgData.h']]],
   ['dumpfieldvalue_5ft',['dumpFieldValue_t',['../compMsgData_8h.html#a36bdcd9c028fec4a0e65269e3bdb8090',1,'compMsgData.h']]],
   ['dumpheaderpart_5ft',['dumpHeaderPart_t',['../compMsgDebug_8h.html#aeae63762713f3b5cbc50788fb6dca67a',1,'compMsgDebug.h']]],
@@ -16,6 +19,6 @@ var searchData=
   ['dumpmsgheaderinfos_5ft',['dumpMsgHeaderInfos_t',['../compMsgDebug_8h.html#a9e0f3c7828bbe7244ad0fc8afb824783',1,'compMsgDebug.h']]],
   ['dumpmsgparts_5ft',['dumpMsgParts_t',['../compMsgDebug_8h.html#a6bdf5e709805eb597dfe1d4d5a32983a',1,'compMsgDebug.h']]],
   ['dumpmsgvalpart_5ft',['dumpMsgValPart_t',['../compMsgDebug_8h.html#abd57f23ed87e3289571266b59474835f',1,'compMsgDebug.h']]],
-  ['dvgetfieldvalue_5ft',['dvGetFieldValue_t',['../compMsgDataView_8h.html#a4e4d4caa3b3867089ef0c0222885d76b',1,'compMsgDataView.h']]],
-  ['dvsetfieldvalue_5ft',['dvSetFieldValue_t',['../compMsgDataView_8h.html#a2dcd7ed77e0db5c3f4d9c1f009abc52c',1,'compMsgDataView.h']]]
+  ['dvgetfieldvalue_5ft',['dvGetFieldValue_t',['../compMsgDataView_8h.html#a121472cdc115efc9ef0d7b181b9108ee',1,'compMsgDataView.h']]],
+  ['dvsetfieldvalue_5ft',['dvSetFieldValue_t',['../compMsgDataView_8h.html#ac0e2551477c747f6966bad55ddb1fce4',1,'compMsgDataView.h']]]
 ];

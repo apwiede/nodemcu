@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['saveuserdata',['saveUserData',['../structcompMsgOta.html#a3d5c28c34cb435470dc8f593f353208d',1,'compMsgOta']]],
   ['scaninfocomplete',['scanInfoComplete',['../structbssScanInfos.html#a49d8b949bff9abf8173e61084f7b8c25',1,'bssScanInfos']]],
   ['sendclientipmsg',['sendClientIPMsg',['../structcompMsgIdentify.html#a382affb26d5e2997943ece8da114468c',1,'compMsgIdentify']]],
   ['sendcloudmsg',['sendCloudMsg',['../structcompMsgSendReceive.html#aaa23955207865d46f0da32fa8ef7fcd2',1,'compMsgSendReceive']]],
@@ -10,6 +11,7 @@ var searchData=
   ['serienumber',['SerieNumber',['../structcompMsgModuleData.html#a335d1c42b07a2e51fcd7d684e2414e2b',1,'compMsgModuleData']]],
   ['setactionentry',['setActionEntry',['../structcompMsgAction.html#a082c1b04c1979d68241f81c2a97f0dd1',1,'compMsgAction']]],
   ['setcrc',['setCrc',['../structcompMsgDataView.html#ad9f640b2c30af10c036e83f3fd7a9083',1,'compMsgDataView']]],
+  ['setdebugflags',['setDebugFlags',['../structcompMsgDebug.html#af5a5005b13350ea67b50c6701ad0ee91',1,'compMsgDebug']]],
   ['setdispatcher',['setDispatcher',['../structcompMsgData.html#a33523dde7489ee88311378dbab2a9327',1,'compMsgData']]],
   ['setfieldvalue',['setFieldValue',['../structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042',1,'compMsgData::setFieldValue()'],['../structcompMsgDataView.html#ae46c07a95670d2f89618709b453c3cf6',1,'compMsgDataView::setFieldValue()']]],
   ['setfieldvaluecallback',['setFieldValueCallback',['../structcompMsgUtil.html#ab08c1dc3be6752149fdfdbd8287b0f44',1,'compMsgUtil']]],
@@ -59,6 +61,7 @@ var searchData=
   ['status',['status',['../structstationConfig.html#a44451b1ec51d0d28e69d5fe524c9f614',1,'stationConfig']]],
   ['stopaccesspoint',['stopAccessPoint',['../structcompMsgDispatcher.html#a9c7c8aabcc9c4190780397a25d709178',1,'compMsgDispatcher']]],
   ['storereceivedmsg',['storeReceivedMsg',['../structcompMsgIdentify.html#a03aae39a52964c774291b8b20c9106bd',1,'compMsgIdentify']]],
+  ['storeuserdata',['storeUserData',['../structcompMsgOta.html#ab007b26a79bfe25fc272d5313ce90f44',1,'compMsgOta']]],
   ['str',['str',['../structstr2id.html#a612d758fdba83470d69915cb3bcae3a5',1,'str2id']]],
   ['stringvalue',['stringValue',['../structbuildMsgInfos.html#aa4971e563fefba5dc5d8ff8d81b98ea5',1,'buildMsgInfos::stringValue()'],['../structcompMsgDispatcher.html#aad895849d5df2017dca6c0cce6f37135',1,'compMsgDispatcher::stringValue()']]],
   ['sud',['sud',['../structcompMsgData.html#a0f41a70927e71ee5b60be7f2c1f4e668',1,'compMsgData']]]

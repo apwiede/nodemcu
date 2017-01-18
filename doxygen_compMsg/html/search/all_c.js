@@ -2,6 +2,7 @@ var searchData=
 [
   ['macaddr',['MACAddr',['../structcompMsgModuleData.html#adcac06ae6b812d9474c4e64790a28f80',1,'compMsgModuleData']]],
   ['mainpage_2edoxy',['mainpage.doxy',['../mainpage_8doxy.html',1,'']]],
+  ['max_5fbuffer_5fsize',['MAX_BUFFER_SIZE',['../compMsgDebug_8c.html#ad4d796b98c583d49e83adabd74a63bf6',1,'compMsgDebug.c']]],
   ['max_5fsocket',['MAX_SOCKET',['../compMsgNetSocket_8c.html#ac0ab6f439d003d912087974e24160b68',1,'MAX_SOCKET():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#ac0ab6f439d003d912087974e24160b68',1,'MAX_SOCKET():&#160;compMsgWebSocket.c']]],
   ['max_5furls',['max_urls',['../structsocketUserData.html#adc4b0a48d96875091a0d578300f933f7',1,'socketUserData']]],
   ['maxactionentries',['maxActionEntries',['../structcompMsgActionEntries.html#a688c044649be2eb3dcc641ed472b5eca',1,'compMsgActionEntries']]],
@@ -21,6 +22,7 @@ var searchData=
   ['module_5finfo_5fap_5flist_5fcall_5fback',['MODULE_INFO_AP_LIST_CALL_BACK',['../compMsgModuleData_8h.html#ac06da662002237d5d1f1a454f5cbc9b2',1,'compMsgModuleData.h']]],
   ['module_5finfo_5fconnectedusers',['MODULE_INFO_ConnectedUsers',['../compMsgModuleData_8h.html#a895d2a24efc291b45a4cf364c9f94338',1,'compMsgModuleData.h']]],
   ['module_5finfo_5fconnectionstate',['MODULE_INFO_ConnectionState',['../compMsgModuleData_8h.html#a294bac2644c368be496f9f2083939ca8',1,'compMsgModuleData.h']]],
+  ['module_5finfo_5fcrypt_5fkey',['MODULE_INFO_CRYPT_KEY',['../compMsgModuleData_8h.html#a19229fb478cee2fd9714055915a65db1',1,'compMsgModuleData.h']]],
   ['module_5finfo_5fcurrentrunningmode',['MODULE_INFO_CurrentRunningMode',['../compMsgModuleData_8h.html#a48e691b9f8ea1764a27a8998d5afbb48',1,'compMsgModuleData.h']]],
   ['module_5finfo_5fdateandtime',['MODULE_INFO_DateAndTime',['../compMsgModuleData_8h.html#a8cc2098648095ba922149858cd76d1b4',1,'compMsgModuleData.h']]],
   ['module_5finfo_5fdevicesecurity',['MODULE_INFO_DeviceSecurity',['../compMsgModuleData_8h.html#a9b263d711b380e086f996bf4e1cb29f3',1,'compMsgModuleData.h']]],

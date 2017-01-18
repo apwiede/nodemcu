@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['saveuserdata',['saveUserData',['../compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149',1,'compMsgOta.c']]],
   ['sendclientipmsg',['sendClientIPMsg',['../compMsgIdentify_8c.html#a2f57fe53479477d40bc5f0bf71b4f618',1,'compMsgIdentify.c']]],
   ['sendcloudmsg',['sendCloudMsg',['../compMsgSendReceive_8c.html#afd13038c64d91617febba63c221ec4ed',1,'compMsgSendReceive.c']]],
   ['sendmsg',['sendMsg',['../compMsgSendReceive_8c.html#a71d792ff835ac5e58d69a9267dc184bc',1,'compMsgSendReceive.c']]],
@@ -7,11 +8,12 @@ var searchData=
   ['serverdisconnected',['serverDisconnected',['../compMsgNetSocket_8c.html#abe5b7a821a95df9ef50b651e13221391',1,'serverDisconnected(void *arg):&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#abe5b7a821a95df9ef50b651e13221391',1,'serverDisconnected(void *arg):&#160;compMsgWebSocket.c']]],
   ['serverreconnected',['serverReconnected',['../compMsgNetSocket_8c.html#add14ab070bc8bc84593024915206e278',1,'serverReconnected(void *arg, int8_t err):&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#add14ab070bc8bc84593024915206e278',1,'serverReconnected(void *arg, int8_t err):&#160;compMsgWebSocket.c']]],
   ['setactionentry',['setActionEntry',['../compMsgAction_8c.html#a79425d06556277948b7835ce1fef6dcc',1,'compMsgAction.c']]],
-  ['setcrc',['setCrc',['../compMsgDataView_8c.html#a6addae6ae7e8a65a2692396bdb44a525',1,'compMsgDataView.c']]],
+  ['setcrc',['setCrc',['../compMsgDataView_8c.html#afe4cf4d652f769f1517a4a8b51b65f24',1,'compMsgDataView.c']]],
+  ['setdebugflags',['setDebugFlags',['../compMsgDebug_8c.html#ab04462f663f279253f08f9392d87979d',1,'compMsgDebug.c']]],
   ['setdispatcher',['setDispatcher',['../compMsgData_8c.html#a8522a1fcc1c0180706b4dd0ad7e4364f',1,'compMsgData.c']]],
-  ['setfieldvalue',['setFieldValue',['../compMsgData_8c.html#a76753e78621a0064e3b10cf813159158',1,'setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue):&#160;compMsgData.c'],['../compMsgDataView_8c.html#a39a641fb356c4b70e55ec623be7216ff',1,'setFieldValue(compMsgDataView_t *self, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx):&#160;compMsgDataView.c']]],
+  ['setfieldvalue',['setFieldValue',['../compMsgData_8c.html#a76753e78621a0064e3b10cf813159158',1,'setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue):&#160;compMsgData.c'],['../compMsgDataView_8c.html#a992646309d1049f5cc49cab3b2702878',1,'setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx):&#160;compMsgDataView.c']]],
   ['setfieldvaluecallback',['setFieldValueCallback',['../compMsgUtil_8c.html#a7bf7577d1a73e7ee0d5f3491295e867c',1,'compMsgUtil.c']]],
-  ['setfiller',['setFiller',['../compMsgDataView_8c.html#a2790078a45df19d0d6195753a3977ca6',1,'compMsgDataView.c']]],
+  ['setfiller',['setFiller',['../compMsgDataView_8c.html#a9a14021f8994ecc584bb124b8662f770',1,'compMsgDataView.c']]],
   ['setint16',['setInt16',['../dataView_8c.html#a02757b63099bf823a2c28cb678f83e3b',1,'dataView.c']]],
   ['setint16vector',['setInt16Vector',['../dataView_8c.html#aed9139d0f2c80f62ff8dcd1957a3c39e',1,'dataView.c']]],
   ['setint32',['setInt32',['../dataView_8c.html#a4e208b3b61e0913ca4a8374f7593bb3b',1,'dataView.c']]],
@@ -23,9 +25,9 @@ var searchData=
   ['setmsgfieldvalue',['setMsgFieldValue',['../compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0',1,'compMsgBuildMsg.c']]],
   ['setmsgvalues',['setMsgValues',['../compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08',1,'compMsgBuildMsg.c']]],
   ['setoperatingmode',['setOperatingMode',['../compMsgModuleData_8c.html#a4b33c6c8a9d84ccd84e16e9b5b3390b8',1,'compMsgModuleData.c']]],
-  ['setrandomnum',['setRandomNum',['../compMsgDataView_8c.html#a4156f2b5cb2e300f5c9146e2636630d1',1,'compMsgDataView.c']]],
-  ['setsequencenum',['setSequenceNum',['../compMsgDataView_8c.html#a1fc753689e52447dbfc8b544fc836de4',1,'compMsgDataView.c']]],
-  ['settotalcrc',['setTotalCrc',['../compMsgDataView_8c.html#a0bb0eec46d0ef5e5ea153fe57a144ef7',1,'compMsgDataView.c']]],
+  ['setrandomnum',['setRandomNum',['../compMsgDataView_8c.html#a8a158a14c6a4d25870a44d9070c3dca0',1,'compMsgDataView.c']]],
+  ['setsequencenum',['setSequenceNum',['../compMsgDataView_8c.html#a574471d49211fc32cece7aab9fdf0f14',1,'compMsgDataView.c']]],
+  ['settotalcrc',['setTotalCrc',['../compMsgDataView_8c.html#aed040841af21cb36d93ca2c76e7981d3',1,'compMsgDataView.c']]],
   ['setuint16',['setUint16',['../dataView_8c.html#ac141e63160abcbf23f03e7f723d8770a',1,'dataView.c']]],
   ['setuint16vector',['setUint16Vector',['../dataView_8c.html#ab251dd856ce14a5bc54e451d6f743992',1,'dataView.c']]],
   ['setuint32',['setUint32',['../dataView_8c.html#a1daf2d577761f54c6693fe168c568351',1,'dataView.c']]],
@@ -33,7 +35,7 @@ var searchData=
   ['setuint8',['setUint8',['../dataView_8c.html#a597300f875a562de1b7e89e64bf42d3b',1,'dataView.c']]],
   ['setuint8vector',['setUint8Vector',['../dataView_8c.html#a34bd7a9a77b978125ba125ff4750fcae',1,'dataView.c']]],
   ['setwifivalue',['setWifiValue',['../compMsgWifiData_8c.html#a2be7edc78f3c25086aec73e522937c4a',1,'compMsgWifiData.c']]],
-  ['setzerofiller',['setZeroFiller',['../compMsgDataView_8c.html#ab3310078e8ca4fd2292d50903a21a5e8',1,'compMsgDataView.c']]],
+  ['setzerofiller',['setZeroFiller',['../compMsgDataView_8c.html#ab7e7e60a6709511f3fd5d33e84f647f6',1,'compMsgDataView.c']]],
   ['socketconnect',['socketConnect',['../compMsgNetSocket_8c.html#a980f2c5b8c5840b43d47ad6fc7feaa25',1,'compMsgNetSocket.c']]],
   ['socketdnsfound',['socketDnsFound',['../compMsgNetSocket_8c.html#a5a585f116978fce5891187c7703a5d67',1,'compMsgNetSocket.c']]],
   ['socketreceived',['socketReceived',['../compMsgNetSocket_8c.html#a618ff1663a47d6b48f113de058b211b5',1,'socketReceived(void *arg, char *pdata, unsigned short len):&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a618ff1663a47d6b48f113de058b211b5',1,'socketReceived(void *arg, char *pdata, unsigned short len):&#160;compMsgWebSocket.c']]],
@@ -44,5 +46,6 @@ var searchData=
   ['startnextrequest',['startNextRequest',['../compMsgRequest_8c.html#aad5151dde08653635d7f5b6483c1f066',1,'compMsgRequest.c']]],
   ['startrequest',['startRequest',['../compMsgRequest_8c.html#abddd63cd01a9e440fe850f97ad42cf7a',1,'compMsgRequest.c']]],
   ['startstationcb',['startStationCb',['../compMsgWifiData_8c.html#af4a43120fae8d04758fe0cc25ae7c61c',1,'compMsgWifiData.c']]],
-  ['storereceivedmsg',['storeReceivedMsg',['../compMsgIdentify_8c.html#afd30989db9be5f14c75bd5f2eec0558b',1,'compMsgIdentify.c']]]
+  ['storereceivedmsg',['storeReceivedMsg',['../compMsgIdentify_8c.html#afd30989db9be5f14c75bd5f2eec0558b',1,'compMsgIdentify.c']]],
+  ['storeuserdata',['storeUserData',['../compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f',1,'compMsgOta.c']]]
 ];

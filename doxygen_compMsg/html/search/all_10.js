@@ -57,5 +57,6 @@ var searchData=
   ['runlightsleepwakeupmode',['runLightSleepWakeupMode',['../compMsgAction_8c.html#a3a91028a6c6aa818010cfa104c701fe1',1,'compMsgAction.c']]],
   ['runmodultestmode',['runModulTestMode',['../compMsgAction_8c.html#a7ba018f583d7a2b37257dd99fec2dbff',1,'compMsgAction.c']]],
   ['runningmodeflags',['runningModeFlags',['../structcompMsgDispatcher.html#a56bd558d2c868b90a42c1f002dad76dc',1,'compMsgDispatcher']]],
+  ['runrestoreuserdata',['runRestoreUserData',['../compMsgAction_8c.html#a286e4b45674a9d4eddf424952e289836',1,'compMsgAction.c']]],
   ['runwpsmode',['runWpsMode',['../compMsgAction_8c.html#a8bf8162323711ab66fce8dcc9520c8ab',1,'compMsgAction.c']]]
 ];
