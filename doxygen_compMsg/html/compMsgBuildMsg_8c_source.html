@@ -148,7 +148,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <a class="code" href="structmsgDescPart.html">msgDescPart_t</a> *<a class="code" href="structmsgDescPart.html">msgDescPart</a>;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="structmsgValPart.html">msgValPart_t</a> *<a class="code" href="structmsgValPart.html">msgValPart</a>;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">//ets_printf(&quot;§createMsgFromHeaderPart1§\n&quot;);</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;createMsgFromHeaderPart1&quot;</span>);</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgMsgDesc-&gt;getMsgPartsFromHeaderPart(<span class="keyword">self</span>, hdr, handle);</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgData-&gt;createMsg(<span class="keyword">self</span>, self-&gt;compMsgData-&gt;numMsgDescParts, handle);</div>
@@ -161,410 +161,399 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    idx++;</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  }</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;ets_printf(<span class="stringliteral">&quot;§heap4: %d§\n&quot;</span>, system_get_free_heap_size());</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 1, <span class="stringliteral">&quot;heap4: %d&quot;</span>, system_get_free_heap_size());</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="comment">// runAction calls at the end buildMsg</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">//  self-&gt;resetBuildMsgInfos(self);</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">//  self-&gt;buildMsgInfos.u16CmdKey = hdr-&gt;hdrU16CmdKey; // used in buildMsg -&gt; setMsgValues!!</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;prepareValuesCbName != NULL) {</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    uint8_t actionMode;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    <a class="code" href="compMsgAction_8h.html#aeeb0f22e59792bd6726d068030d7baf6">action_t</a> actionCallback;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    uint8_t type;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">//ets_printf(&quot;§call prepareValuesCbName: %s\n§&quot;, self-&gt;compMsgData-&gt;prepareValuesCbName);</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgAction-&gt;getActionCallback(<span class="keyword">self</span>, self-&gt;compMsgData-&gt;prepareValuesCbName+1, &amp;actionCallback);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;prepareValuesCbName != NULL) {</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    uint8_t actionMode;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <a class="code" href="compMsgAction_8h.html#aeeb0f22e59792bd6726d068030d7baf6">action_t</a> actionCallback;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    uint8_t type;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;call prepareValuesCbName: %s&quot;</span>, self-&gt;compMsgData-&gt;prepareValuesCbName);</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgAction-&gt;getActionCallback(<span class="keyword">self</span>, self-&gt;compMsgData-&gt;prepareValuesCbName+1, &amp;actionCallback);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    result = actionCallback(<span class="keyword">self</span>);</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    result = actionCallback(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgAction-&gt;getActionMode(<span class="keyword">self</span>, self-&gt;compMsgData-&gt;prepareValuesCbName+1, &amp;actionMode);</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keyword">self</span>-&gt;actionMode = actionMode;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    result  = <span class="keyword">self</span>-&gt;compMsgAction-&gt;runAction(<span class="keyword">self</span>, &amp;type);</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="comment">// actionCallback starts a call with eventually a callback and returns here before the callback has been running!!</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="comment">// when coming here we are finished and the callback will do the work later on!</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keywordflow">return</span> result;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;buildMsg(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  }</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;}</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="comment">// ================================= fixOffsetsForKeyValues ====================================</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment">/**</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="comment"> * \brief fix the field offsets of all if we have key/value fields after calling the callbacks for these fields.</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">  109</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">fixOffsetsForKeyValues</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  uint8_t msgDescPartIdx;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  uint8_t fieldIdx;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;  uint8_t keyValueIdx;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  uint8_t type;</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  uint8_t *stringValue;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  <a class="code" href="structcompMsgField.html">compMsgField_t</a> *fieldInfo;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <a class="code" href="structmsgDescPart.html">msgDescPart_t</a> *<a class="code" href="structmsgDescPart.html">msgDescPart</a>;</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  <a class="code" href="structcompMsgData.html">compMsgData_t</a> *<a class="code" href="structcompMsgData.html">compMsgData</a>;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <a class="code" href="structmsgKeyValueDescPart.html">msgKeyValueDescPart_t</a> *<a class="code" href="structmsgKeyValueDescPart.html">msgKeyValueDescPart</a>;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <span class="keywordtype">bool</span> found;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  fieldIdx = 0;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  msgDescPartIdx = 0;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="comment">//ets_printf(&quot;§fixOffsetsForKeyValues: numFields: %d!§&quot;, compMsgData-&gt;numFields);</span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="keywordflow">while</span> (fieldIdx &lt; compMsgData-&gt;numFields) {</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    fieldInfo = &amp;compMsgData-&gt;<a class="code" href="structcompMsgData.html#a4e22843d568b2cc9a1319c08b6d70b75">fields</a>[fieldIdx];</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    msgDescPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescParts[msgDescPartIdx];</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    <span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescPart = msgDescPart;</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    msgKeyValueDescPart = NULL;</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="keywordflow">if</span> (msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>[0] == <span class="charliteral">&#39;#&#39;</span>) {</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      <span class="comment">// get the corresponding msgKeyValueDescPart</span></div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;      found = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;      keyValueIdx = 0;</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;      <span class="keywordflow">while</span> (keyValueIdx &lt; self-&gt;numMsgKeyValueDescParts) {</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        msgKeyValueDescPart = &amp;<span class="keyword">self</span>-&gt;msgKeyValueDescParts[keyValueIdx];</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        <span class="keywordflow">if</span> (c_strcmp(msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#acedbbd811d568c4520c95e7928154bec">keyNameStr</a>, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>) == 0) {</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;          found = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;          <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;        }</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        keyValueIdx++;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgAction-&gt;getActionMode(<span class="keyword">self</span>, self-&gt;compMsgData-&gt;prepareValuesCbName+1, &amp;actionMode);</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keyword">self</span>-&gt;actionMode = actionMode;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    result  = <span class="keyword">self</span>-&gt;compMsgAction-&gt;runAction(<span class="keyword">self</span>, &amp;type);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="comment">// actionCallback starts a call with eventually a callback and returns here before the callback has been running!!</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="comment">// when coming here we are finished and the callback will do the work later on!</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;buildMsg(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  }</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="comment">// ================================= fixOffsetsForKeyValues ====================================</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment">/**</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="comment"> * \brief fix the field offsets of all if we have key/value fields after calling the callbacks for these fields.</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">  106</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">fixOffsetsForKeyValues</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  uint8_t msgDescPartIdx;</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  uint8_t fieldIdx;</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  uint8_t keyValueIdx;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  uint8_t type;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  uint8_t *stringValue;</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <a class="code" href="structcompMsgField.html">compMsgField_t</a> *fieldInfo;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <a class="code" href="structmsgDescPart.html">msgDescPart_t</a> *<a class="code" href="structmsgDescPart.html">msgDescPart</a>;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  <a class="code" href="structcompMsgData.html">compMsgData_t</a> *<a class="code" href="structcompMsgData.html">compMsgData</a>;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  <a class="code" href="structmsgKeyValueDescPart.html">msgKeyValueDescPart_t</a> *<a class="code" href="structmsgKeyValueDescPart.html">msgKeyValueDescPart</a>;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <span class="keywordtype">bool</span> found;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  fieldIdx = 0;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  msgDescPartIdx = 0;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fixOffsetsForKeyValues: numFields: %d!&quot;</span>, compMsgData-&gt;<a class="code" href="structcompMsgData.html#a1466fd5b9f071f871a4f5b808052e239">numFields</a>);</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  <span class="keywordflow">while</span> (fieldIdx &lt; compMsgData-&gt;numFields) {</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    fieldInfo = &amp;compMsgData-&gt;<a class="code" href="structcompMsgData.html#a4e22843d568b2cc9a1319c08b6d70b75">fields</a>[fieldIdx];</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    msgDescPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescParts[msgDescPartIdx];</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescPart = msgDescPart;</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    msgKeyValueDescPart = NULL;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    <span class="keywordflow">if</span> (msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>[0] == <span class="charliteral">&#39;#&#39;</span>) {</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;      <span class="comment">// get the corresponding msgKeyValueDescPart</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;      found = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;      keyValueIdx = 0;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      <span class="keywordflow">while</span> (keyValueIdx &lt; self-&gt;numMsgKeyValueDescParts) {</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        msgKeyValueDescPart = &amp;<span class="keyword">self</span>-&gt;msgKeyValueDescParts[keyValueIdx];</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        <span class="keywordflow">if</span> (c_strcmp(msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#acedbbd811d568c4520c95e7928154bec">keyNameStr</a>, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>) == 0) {</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;          found = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;          <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        }</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        keyValueIdx++;</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;      }</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;      <span class="keywordflow">if</span> (!found) {</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        msgKeyValueDescPart = NULL;</div>
 <div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;      }</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;      <span class="keywordflow">if</span> (!found) {</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        msgKeyValueDescPart = NULL;</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;      }</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    }</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="comment">//ets_printf(&quot;§fixOffsetsForKeyValues: idx: %d!%p!%s!\n§&quot;, fieldIdx, msgDescPart-&gt;fieldSizeCallback, msgDescPart-&gt;fieldNameStr);</span></div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    <span class="keywordflow">if</span> (msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a04ac3105fb3f1d7c91d5d9809c4331d0">fieldSizeCallback</a> != NULL) {</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;      <span class="comment">// the key name must have the prefix: &quot;#key_&quot;!</span></div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;      <span class="keywordflow">if</span> (msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>[0] != <span class="charliteral">&#39;#&#39;</span>) {</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a83eae14296335e715cd55228be60b8f8">COMP_MSG_ERR_FIELD_NOT_FOUND</a>;</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;      }</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;      result = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a04ac3105fb3f1d7c91d5d9809c4331d0">fieldSizeCallback</a>(<span class="keyword">self</span>, &amp;numericValue, &amp;stringValue);</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;<span class="comment">//ets_printf(&quot;§fieldSizeCallback for: %s numericValue: %d stringValue: %p\n§&quot;, msgDescPart-&gt;fieldNameStr, numericValue, stringValue);</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;      <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;      <span class="keywordflow">if</span> (msgKeyValueDescPart != NULL) {</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a70be0b0a81774c03ef2d02431c730a70">fieldKey</a> = msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#a8aa393f8eb9bb31b61bdc07140511d02">keyId</a>;</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="comment">//ets_printf(&quot;fieldKey: %d\n&quot;, msgKeyValueDescPart-&gt;keyId);</span></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;      } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a70be0b0a81774c03ef2d02431c730a70">fieldKey</a> = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ad534c011312d083c7d29671bff425667">fieldKey</a>;</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      }</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a731b87b441be3e3c85211326d4ac4306">fieldLgth</a> = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">fieldSize</a> + 2 * <span class="keyword">sizeof</span>(uint16_t) + <span class="keyword">sizeof</span>(uint8_t); <span class="comment">// for key, type and lgth in front of value!!</span></div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">//ets_printf(&quot;§fixOffsetsForKeyValues: %s size: %d lgth: %d\n§&quot;, msgDescPart-&gt;fieldNameStr, msgDescPart-&gt;fieldSize, fieldInfo-&gt;fieldLgth);</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;      <span class="keywordflow">if</span> (msgKeyValueDescPart != NULL) {</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a70be0b0a81774c03ef2d02431c730a70">fieldKey</a> = msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#a8aa393f8eb9bb31b61bdc07140511d02">keyId</a>;</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;        msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">fieldSize</a> = msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#a6319221f530dddb3cf18443daed55da0">keyLgth</a>;</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a731b87b441be3e3c85211326d4ac4306">fieldLgth</a> = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">fieldSize</a> + 2 * <span class="keyword">sizeof</span>(uint16_t) + <span class="keyword">sizeof</span>(uint8_t); <span class="comment">// for key, type and lgth in front of value!!</span></div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;      }</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    }</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    msgDescPartIdx++;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    fieldIdx++;</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  }</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment">//ets_printf(&quot;§fixOffsetsForKeyValues: done!\n§&quot;);</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;}</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="comment">// ================================= setMsgFieldValue ====================================</span></div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;<span class="comment">/**</span></div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="comment"> * \brief the value of a message field</span></div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;<span class="comment"> * \param type The type of the answer</span></div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00188"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">  188</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">setMsgFieldValue</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, uint8_t type) {</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  uint8_t *fieldNameStr;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  uint8_t *stringValue;</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  <a class="code" href="structcompMsgData.html">compMsgData_t</a> *<a class="code" href="structcompMsgData.html">compMsgData</a>;</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="comment">//ets_printf(&quot;§setMsgFieldValue: %s %s§\n&quot;, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr);</span></div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  <span class="keywordflow">if</span> (ets_strncmp(self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr, <span class="stringliteral">&quot;@get&quot;</span>, 4) == 0) {</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="comment">// call the callback function for the field!!</span></div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="comment">//ets_printf(&quot;§setMsgFieldValue:cb %s!%p!size: %d§&quot;, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueCallback, self-&gt;compMsgData-&gt;msgDescPart-&gt;fieldSize);</span></div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    fieldNameStr = <span class="keyword">self</span>-&gt;compMsgData-&gt;<a class="code" href="structcompMsgData.html#acdc7c8a4f6cee5048990a390fe10ebd3">msgValPart</a>-&gt;<a class="code" href="structmsgValPart.html#ab4bdc398b109fb79e36696585c225666">fieldNameStr</a>;</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueCallback != NULL) {</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;      result = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueCallback(<span class="keyword">self</span>, &amp;numericValue, &amp;stringValue);</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;<span class="comment">//ets_printf(&quot;§fieldValueCallback: result: %d§\n&quot;, result);</span></div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;      <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="comment">//ets_printf(&quot;§cb field1: %s!value: 0x%04x %p!§&quot;, fieldNameStr, numericValue, stringValue == NULL ? &quot;nil&quot; : (char *)stringValue);</span></div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;      <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValue = numericValue;</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    }</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;<span class="comment">//ets_printf(&quot;§isNumber: %d§\n&quot;, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldFlags &amp; COMP_DISP_DESC_VALUE_IS_NUMBER);</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="comment">//ets_printf(&quot;§cb field1a: %s!valueStr: %p!§&quot;, fieldNameStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldKeyValueStr);</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    <span class="keywordflow">if</span> ((self-&gt;compMsgData-&gt;msgValPart-&gt;fieldFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aa532f1310d64f8107d7f6794de8b1db4">COMP_DISP_DESC_VALUE_IS_NUMBER</a>) || (stringValue == NULL)) {</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;      stringValue = NULL;</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;      numericValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValue;</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;      stringValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldKeyValueStr;</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;      numericValue = 0;</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;    }</div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;<span class="comment">//ets_printf(&quot;§cb field2: %s!value: 0x%04x %s!§&quot;, fieldNameStr, numericValue, stringValue == NULL ? &quot;nil&quot; : (char *)stringValue);</span></div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgData-&gt;setFieldValue(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    fieldNameStr = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameStr;</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="comment">//ets_printf(&quot;§fieldName: %s!id: %d!§&quot;, fieldNameStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameId);</span></div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;msgValPart-&gt;fieldFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aa532f1310d64f8107d7f6794de8b1db4">COMP_DISP_DESC_VALUE_IS_NUMBER</a>) {</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;      stringValue = NULL;</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;      numericValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValue;</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;      stringValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr;</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;      numericValue = 0;</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    }</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    <span class="keywordflow">switch</span> (self-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameId) {</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;      <span class="keywordflow">case</span> <a class="code" href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a842087320c2d41a74dcf297a26585b2f">COMP_MSG_SPEC_FIELD_DST</a>:</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    }</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fixOffsetsForKeyValues: idx: %d!%p!%s!\n&quot;</span>, fieldIdx, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a04ac3105fb3f1d7c91d5d9809c4331d0">fieldSizeCallback</a>, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>);</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="keywordflow">if</span> (msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a04ac3105fb3f1d7c91d5d9809c4331d0">fieldSizeCallback</a> != NULL) {</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;      <span class="comment">// the key name must have the prefix: &quot;#key_&quot;!</span></div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;      <span class="keywordflow">if</span> (msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>[0] != <span class="charliteral">&#39;#&#39;</span>) {</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a83eae14296335e715cd55228be60b8f8">COMP_MSG_ERR_FIELD_NOT_FOUND</a>;</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;      }</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;      result = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a04ac3105fb3f1d7c91d5d9809c4331d0">fieldSizeCallback</a>(<span class="keyword">self</span>, &amp;numericValue, &amp;stringValue);</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fieldSizeCallback for: %s numericValue: %d stringValue: %p\n&quot;</span>, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>, numericValue, stringValue);</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;      <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;      <span class="keywordflow">if</span> (msgKeyValueDescPart != NULL) {</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a70be0b0a81774c03ef2d02431c730a70">fieldKey</a> = msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#a8aa393f8eb9bb31b61bdc07140511d02">keyId</a>;</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;        <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fieldKey: %d\n&quot;</span>, msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#a8aa393f8eb9bb31b61bdc07140511d02">keyId</a>);</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;      } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a70be0b0a81774c03ef2d02431c730a70">fieldKey</a> = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ad534c011312d083c7d29671bff425667">fieldKey</a>;</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;      }</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;      fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a731b87b441be3e3c85211326d4ac4306">fieldLgth</a> = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">fieldSize</a> + 2 * <span class="keyword">sizeof</span>(uint16_t) + <span class="keyword">sizeof</span>(uint8_t); <span class="comment">// for key, type and lgth in front of value!!</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fixOffsetsForKeyValues: %s size: %d lgth: %d\n&quot;</span>, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">fieldSize</a>, fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a731b87b441be3e3c85211326d4ac4306">fieldLgth</a>);</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      <span class="keywordflow">if</span> (msgKeyValueDescPart != NULL) {</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a70be0b0a81774c03ef2d02431c730a70">fieldKey</a> = msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#a8aa393f8eb9bb31b61bdc07140511d02">keyId</a>;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;        msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">fieldSize</a> = msgKeyValueDescPart-&gt;<a class="code" href="structmsgKeyValueDescPart.html#a6319221f530dddb3cf18443daed55da0">keyLgth</a>;</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;        fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a731b87b441be3e3c85211326d4ac4306">fieldLgth</a> = msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">fieldSize</a> + 2 * <span class="keyword">sizeof</span>(uint16_t) + <span class="keyword">sizeof</span>(uint8_t); <span class="comment">// for key, type and lgth in front of value!!</span></div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;      }</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;    }</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;    msgDescPartIdx++;</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    fieldIdx++;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  }</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fixOffsetsForKeyValues: done!\n&quot;</span>);</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;}</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="comment">// ================================= setMsgFieldValue ====================================</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="comment">/**</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="comment"> * \brief the value of a message field</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;<span class="comment"> * \param type The type of the answer</span></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00185"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">  185</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">setMsgFieldValue</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, uint8_t type) {</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  uint8_t *fieldNameStr;</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  uint8_t *stringValue;</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <a class="code" href="structcompMsgData.html">compMsgData_t</a> *<a class="code" href="structcompMsgData.html">compMsgData</a>;</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;setMsgFieldValue: %s %s\n&quot;</span>, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr);</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  <span class="keywordflow">if</span> (ets_strncmp(self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr, <span class="stringliteral">&quot;@get&quot;</span>, 4) == 0) {</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    <span class="comment">// call the callback function for the field!!</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;setMsgFieldValue:cb %s!%p!size: %d&quot;</span>, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueCallback, self-&gt;compMsgData-&gt;msgDescPart-&gt;fieldSize);</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    fieldNameStr = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameStr;</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueCallback != NULL) {</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;      result = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueCallback(<span class="keyword">self</span>, &amp;numericValue, &amp;stringValue);</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fieldValueCallback: result: %d\n&quot;</span>, result);</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;      <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;cb field1: %s!value: 0x%04x %s!&quot;</span>, fieldNameStr, numericValue, stringValue == NULL ? <span class="stringliteral">&quot;nil&quot;</span> : (<span class="keywordtype">char</span> *)stringValue);</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;      <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValue = numericValue;</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    }</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;isNumber: %d\n&quot;</span>, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aa532f1310d64f8107d7f6794de8b1db4">COMP_DISP_DESC_VALUE_IS_NUMBER</a>);</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;cb field1a: %s!valueStr: %p!&quot;</span>, fieldNameStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldKeyValueStr);</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    <span class="keywordflow">if</span> ((self-&gt;compMsgData-&gt;msgValPart-&gt;fieldFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aa532f1310d64f8107d7f6794de8b1db4">COMP_DISP_DESC_VALUE_IS_NUMBER</a>) || (stringValue == NULL)) {</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;      stringValue = NULL;</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;      numericValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValue;</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;<span class="comment">//      stringValue = self-&gt;compMsgData-&gt;msgValPart-&gt;fieldKeyValueStr;</span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;      numericValue = 0;</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    }</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;cb field2: %s!value: 0x%04x %s!&quot;</span>, fieldNameStr, numericValue, stringValue == NULL ? <span class="stringliteral">&quot;nil&quot;</span> : (<span class="keywordtype">char</span> *)stringValue);</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgData-&gt;setFieldValue(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;    fieldNameStr = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameStr;</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fieldName: %s!id: %d!&quot;</span>, fieldNameStr, self-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameId);</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;msgValPart-&gt;fieldFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aa532f1310d64f8107d7f6794de8b1db4">COMP_DISP_DESC_VALUE_IS_NUMBER</a>) {</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;      stringValue = NULL;</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;      numericValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValue;</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;      stringValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart-&gt;fieldValueStr;</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;      numericValue = 0;</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    }</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    <span class="keywordflow">switch</span> (self-&gt;compMsgData-&gt;msgValPart-&gt;fieldNameId) {</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;      <span class="keywordflow">case</span> <a class="code" href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a842087320c2d41a74dcf297a26585b2f">COMP_MSG_SPEC_FIELD_DST</a>:</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;        result = compMsgData-&gt;<a class="code" href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">setFieldValue</a>(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;      <span class="keywordflow">case</span> <a class="code" href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a4591307161b92fa204980856a7fc591d">COMP_MSG_SPEC_FIELD_SRC</a>:</div>
 <div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        result = compMsgData-&gt;<a class="code" href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">setFieldValue</a>(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
 <div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;      <span class="keywordflow">case</span> <a class="code" href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a4591307161b92fa204980856a7fc591d">COMP_MSG_SPEC_FIELD_SRC</a>:</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        result = compMsgData-&gt;<a class="code" href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">setFieldValue</a>(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;      <span class="keywordflow">case</span> <a class="code" href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a04b6e7c41e421df92ede77030d547f8f">COMP_MSG_SPEC_FIELD_CMD_KEY</a>:</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;        numericValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;currHdr-&gt;hdrU16CmdKey;</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;        stringValue = NULL;</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;<span class="comment">//ets_printf(&quot;§cmdKey value: 0x%04x§&quot;, numericValue);</span></div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        result = compMsgData-&gt;<a class="code" href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">setFieldValue</a>(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;      <span class="keywordflow">default</span>:</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;<span class="comment">//ets_printf(&quot;§fieldName: %s!value: 0x%04x %s§&quot;, fieldNameStr, numericValue, stringValue == NULL ? &quot;nil&quot; : (char *)stringValue);</span></div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        result = <span class="keyword">self</span>-&gt;compMsgData-&gt;setFieldValue(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    }</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  }</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;<span class="comment">//ets_printf(&quot;§setMsgFieldValue: done§&quot;);</span></div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;}</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="comment">// ================================= setMsgValues ====================================</span></div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;<span class="comment">/**</span></div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="comment"> * \brief set the field values of a message</span></div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00261"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">  261</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  uint8_t startEntryIdx;</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  <span class="keywordtype">int</span> tableFieldIdx;</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  uint8_t fieldLgth;</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;  uint8_t *flagStr;</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  uint8_t flag;</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  uint8_t type;</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> uval;</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <a class="code" href="structcompMsgDataView.html">compMsgDataView_t</a> *<a class="code" href="structdataView.html">dataView</a>;</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  uint8_t numTableRows;</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  uint8_t numTableRowFields;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  <span class="keywordtype">int</span> msgCmdKey;</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  uint8_t msgDescPartIdx;</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  uint8_t msgValPartIdx;</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;  <a class="code" href="structcompMsgField.html">compMsgField_t</a> *fieldInfo;</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;  <a class="code" href="structmsgDescPart.html">msgDescPart_t</a> *<a class="code" href="structmsgDescPart.html">msgDescPart</a>;</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  <a class="code" href="structmsgValPart.html">msgValPart_t</a> *<a class="code" href="structmsgValPart.html">msgValPart</a>;</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <a class="code" href="structcompMsgData.html">compMsgData_t</a> *<a class="code" href="structcompMsgData.html">compMsgData</a>;</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  uint8_t *handle;</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  <span class="keywordtype">char</span> *endPtr;</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  uint8_t *stringValue;</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;<span class="comment">//ets_printf(&quot;§setMsgValues§\n&quot;);</span></div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;  handle = <span class="keyword">self</span>-&gt;msgHandle;</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  type = <span class="charliteral">&#39;A&#39;</span>;</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  dataView = compMsgData-&gt;<a class="code" href="structcompMsgData.html#a21e5f866f7eb06bbcfeeb680d5f37a1d">compMsgDataView</a>;</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;  <span class="comment">// loop over MSG Fields, to check if we eventually have table rows!!</span></div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;  msgDescPartIdx = 0;</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;  msgValPartIdx = 0;</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;  msgValPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgValParts[msgValPartIdx];</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  tableFieldIdx = 0;</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;<span class="comment">//ets_printf(&quot;§numFields: %d numMsgValParts: %d§&quot;, compMsgData-&gt;numFields, self-&gt;compMsgData-&gt;numMsgValParts);</span></div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  <span class="keywordflow">while</span> ((msgDescPartIdx &lt; compMsgData-&gt;numFields) &amp;&amp; (msgValPartIdx &lt;= self-&gt;compMsgData-&gt;<a class="code" href="structcompMsgData.html#afec7e580fe4ae8b07f7ae83404555d43">numMsgValParts</a>)) {</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    msgDescPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescParts[msgDescPartIdx];</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;    <span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescPart = msgDescPart;</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;    msgValPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgValParts[msgValPartIdx];</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;    <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart = msgValPart;</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;<span class="comment">//ets_printf(&quot;§setMsgValues: %s§&quot;, msgDescPart-&gt;fieldNameStr);</span></div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;<span class="comment">//ets_printf(&quot;setMsgValuesFromLines2: fieldIdx: %d tableFieldIdx: %d entryIdx: %d numFields:%d \n&quot;, fieldIdx, tableFieldIdx, entryIdx, compMsgData-&gt;numFields);</span></div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;<span class="comment">//ets_printf(&quot;fieldIdx: %d entryIdx: %d numtableRows: %d\n&quot;, fieldIdx, entryIdx, numTableRows);</span></div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;    fieldInfo = &amp;compMsgData-&gt;<a class="code" href="structcompMsgData.html#a4e22843d568b2cc9a1319c08b6d70b75">fields</a>[msgDescPartIdx++];</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;<span class="comment">//ets_printf(&quot;fieldNameId: %d numtabrows: %d\n&quot;, fieldInfo-&gt;fieldNameId, numTableRows);</span></div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;<span class="comment">//ets_printf(&quot;default fieldNameId: %d buildMsgInfo fieldNameId: %d\n&quot;, fieldInfo-&gt;fieldNameId, self-&gt;buildMsgInfos.fieldNameId);</span></div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    <span class="keywordflow">if</span> (fieldInfo-&gt;<a class="code" href="structcompMsgField.html#ac5a60307d69ae4f0026c7dd34d6afdc1">fieldNameId</a> == msgValPart-&gt;<a class="code" href="structmsgValPart.html#a5366041d83419bd9048269944399b41d">fieldNameId</a>) {</div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;      result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;setMsgFieldValue(<span class="keyword">self</span>, type);</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;      <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;      msgValPartIdx++;</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;    }</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  }</div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;  numericValue = compMsgData-&gt;<a class="code" href="structcompMsgData.html#a77e03211ef64c457f680dab1671131ab">currHdr</a>-&gt;<a class="code" href="structheaderPart.html#a3a1afcedcb944eb0102bbc1eb7f4ea82">hdrU16CmdKey</a>;</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  stringValue = NULL;</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;<span class="comment">//ets_printf(&quot;§cmdKey value: 0x%04x§&quot;, numericValue);</span></div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;  result = compMsgData-&gt;<a class="code" href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">setFieldValue</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;@cmdKey&quot;</span>, numericValue, stringValue);</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;<span class="comment">//ets_printf(&quot;§cmdKey result: %d§&quot;, result);</span></div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;<span class="comment">//ets_printf(&quot;§setMsgvalues done§&quot;);</span></div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;  compMsgData-&gt;<a class="code" href="structcompMsgData.html#a3d08ceb9b4a20c7d30b89fb72858ef99">prepareMsg</a>(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;<span class="comment">//ets_printf(&quot;§&quot;);</span></div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;<span class="comment">//compMsgData-&gt;dumpMsg(self);</span></div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;<span class="comment">//ets_printf(&quot;§&quot;);</span></div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;}</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;<span class="comment">// ================================= buildMsg ====================================</span></div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;<span class="comment">/**</span></div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;<span class="comment"> * \brief Build a message for sending to Uart or socket</span></div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;<span class="comment"> * </span></div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00338"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">  338</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">buildMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;  <span class="keywordtype">size_t</span> msgLgth;</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;  uint8_t *msgData;</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;  <span class="keywordtype">size_t</span> defLgth;</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  uint8_t *defData;</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  uint8_t *cryptKey;</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;  uint8_t klen;</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  uint8_t ivlen;</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;  uint8_t *stringValue;</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;  <a class="code" href="structcompMsgField.html">compMsgField_t</a> *fieldInfo;</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;  <span class="keywordtype">int</span> src;</div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;  <span class="keywordtype">int</span> dst;</div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;  <span class="comment">// at this point an eventual callback for getting the values </span></div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;  <span class="comment">// has been already done using runAction in createMsgFromHeaderPart</span></div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;  <span class="comment">// so now we can fix the offsets if needed for key value list entries</span></div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;  <span class="comment">// we can do that in looking for a special key entry @numKeyValues in msgDescParts</span></div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;  <span class="comment">// could be also done in looking in compMsgData-&gt;fields</span></div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;  <span class="comment">// to get the desired keys we look in msgValParts for fieldNames starting with &#39;#&#39;</span></div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;  <span class="comment">// the fieldValueStr ther is a callBackFunction for building the key value entries</span></div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;  <span class="comment">// the entry @numKeyValues in msgValParts tells us how many different keys follow</span></div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;  <span class="comment">// a key value entry is built like so:</span></div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;  <span class="comment">// uint16_t key</span></div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;  <span class="comment">// uint16_t length o value</span></div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;  <span class="comment">// uint8_t* the bytes of the value</span></div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;  <span class="comment">// this could if needed also be an array of uint16_t etc. depending on the key</span></div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  <span class="comment">// the receiver must know how the value is built depending on the key!!</span></div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  </div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;<span class="comment">//ets_printf(&quot;§buildMsg\n§&quot;);</span></div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;fixOffsetsForKeyValues(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;direction = <a class="code" href="compMsgData_8h.html#a041155c79fa175c9bfb41c3006a761e0">COMP_MSG_TO_SEND_DATA</a>;</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgData-&gt;initMsg(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;<span class="comment">//ets_printf(&quot;§heap2: %d§&quot;, system_get_free_heap_size());</span></div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;  result = <a class="code" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a>(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgData-&gt;getMsgData(<span class="keyword">self</span>, &amp;msgData, &amp;msgLgth);</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;<span class="comment">//ets_printf(&quot;§getMsgData res: %d!msgLgth: %d!\n§&quot;, result, msgLgth);</span></div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;<span class="comment">//ets_printf(&quot;§&quot;);</span></div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;dumpMsg(self);</span></div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;<span class="comment">//ets_printf(&quot;§&quot;);</span></div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;<span class="comment">//ets_printf(&quot;§&quot;);</span></div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;dumpBinary(msgData, msgLgth, &quot;dumpMsg&quot;);</span></div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;<span class="comment">//ets_printf(&quot;§&quot;);</span></div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;<span class="comment">//ets_printf(&quot;§encryption: %c\n§&quot;, self-&gt;compMsgData-&gt;currHdr-&gt;hdrEncryption);</span></div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;  <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrEncryption == <span class="charliteral">&#39;E&#39;</span>) {</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;    uint8_t *toCryptPtr;</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;    uint8_t *encryptedMsgData;</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;    <span class="keywordtype">size_t</span> encryptedMsgDataLgth;</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;    uint16_t mlen;</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    uint8_t headerLgth;</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    <span class="keywordtype">size_t</span> totalCrcOffset;</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;    cryptKey = <span class="stringliteral">&quot;a1b2c3d4e5f6g7h8&quot;</span>;</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;    ivlen = 16;</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;    klen = 16;</div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;</div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;dumpBinary(self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;data, self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;lgth, &quot;MSG_AA&quot;);</span></div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;<span class="comment">//ets_printf(&quot;need to encrypt message!\n&quot;);</span></div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;    headerLgth = <span class="keyword">self</span>-&gt;compMsgData-&gt;headerLgth;</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;    totalCrcOffset = 0;</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    mlen = <span class="keyword">self</span>-&gt;compMsgData-&gt;totalLgth - headerLgth;</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aad5d810a5ccaa3cfe155bebcd5b111f4">COMP_DISP_TOTAL_CRC</a>) {</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;      totalCrcOffset = 1;</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;      mlen -= 1;</div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;      totalCrcOffset = 2;</div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;      mlen -= 2;</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    }</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;<span class="comment">//ets_printf(&quot;§msglen!%d!mlen: %d, headerLgth!%d\n§&quot;, self-&gt;compMsgData-&gt;totalLgth, mlen, self-&gt;compMsgData-&gt;headerLgth);</span></div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    toCryptPtr = msgData + <span class="keyword">self</span>-&gt;compMsgData-&gt;headerLgth;</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgUtil-&gt;encryptMsg(toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &amp;encryptedMsgData, &amp;encryptedMsgDataLgth);</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    <span class="keywordflow">if</span> (encryptedMsgDataLgth != mlen) {</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;ets_printf(<span class="stringliteral">&quot;WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!\n&quot;</span>, mlen, encryptedMsgDataLgth);</div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;    }</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;<span class="comment">//ets_printf(&quot;§crypted: len: %d!mlen: %d!\n§&quot;, encryptedMsgDataLgth, mlen);</span></div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;  }</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;  <span class="comment">// if we have a @totalCrc we need to set it here</span></div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;<span class="comment">//ets_printf(&quot;§totalCrc: %d\n§&quot;, self-&gt;compMsgData-&gt;currHdr-&gt;hdrFlags &amp; COMP_DISP_TOTAL_CRC);</span></div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;  <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aad5d810a5ccaa3cfe155bebcd5b111f4">COMP_DISP_TOTAL_CRC</a>) {</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    fieldInfo = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;fields[<span class="keyword">self</span>-&gt;compMsgData-&gt;numFields - 1];</div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgData-&gt;compMsgDataView-&gt;setTotalCrc(self-&gt;compMsgData-&gt;compMsgDataView, fieldInfo);</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;<span class="comment">//ets_printf(&quot;§setTotalCrc: result: %d fieldOffset: %d\n§&quot;, result, fieldInfo-&gt;fieldOffset);</span></div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;  }</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;  <span class="comment">// here we need to decide where and how to send the message!!</span></div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;  <span class="comment">// from currHdr we can see the handle type and - if needed - the @dst</span></div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;<span class="comment">//ets_printf(&quot;§transferType: %c dst: 0x%04x msgLgth: %d§&quot;, self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType, self-&gt;compMsgData-&gt;currHdr-&gt;hdrToPart, msgLgth);</span></div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;sendMsg(<span class="keyword">self</span>, msgData, msgLgth);</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;<span class="comment">//ets_printf(&quot;§buildMsg sendMsg has been called result: %d§&quot;, result);</span></div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;<span class="comment">//  result = self-&gt;resetMsgInfo(self, self-&gt;buildMsgInfos.parts);</span></div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;  <span class="keywordflow">return</span> result;</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;}</div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;<span class="comment">// ================================= forwardMsg ====================================</span></div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;</div>
-<div class="line"><a name="l00440"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">  440</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">forwardMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;  <a class="code" href="structheaderPart.html">headerPart_t</a> *hdr;</div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;  <span class="keywordtype">int</span> hdrIdx;</div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;  <a class="code" href="structmsgParts.html">msgParts_t</a> *received;</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <a class="code" href="structmsgHeaderInfos.html">msgHeaderInfos_t</a> *hdrInfos;</div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;</div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;ets_printf(<span class="stringliteral">&quot;§forwardMsg called handleType: %c!§&quot;</span>, self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType);</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  received = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;received;</div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;ets_printf(<span class="stringliteral">&quot;§handleType: %c msgLgth: %d§&quot;</span>, self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType, received-&gt;<a class="code" href="structmsgParts.html#a1ce339cd6d8b4c803320d11721267790">lgth</a>);</div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;  <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;sendMsg(<span class="keyword">self</span>, received-&gt;<a class="code" href="structmsgParts.html#a646fec2419212dab015477b4ffcfc35b">buf</a>, received-&gt;<a class="code" href="structmsgParts.html#a34e09294bdb396923cc3f047ad8d59a9">totalLgth</a>);</div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;}</div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;</div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;<span class="comment">// ================================= compMsgBuildMsgInit ====================================</span></div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;      <span class="keywordflow">case</span> <a class="code" href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a04b6e7c41e421df92ede77030d547f8f">COMP_MSG_SPEC_FIELD_CMD_KEY</a>:</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        numericValue = <span class="keyword">self</span>-&gt;compMsgData-&gt;currHdr-&gt;hdrU16CmdKey;</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        stringValue = NULL;</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;        <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;cmdKey value: 0x%04x&quot;</span>, numericValue);</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;        result = compMsgData-&gt;<a class="code" href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">setFieldValue</a>(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;      <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;fieldName: %s!value: 0x%04x %s&quot;</span>, fieldNameStr, numericValue, stringValue == NULL ? <span class="stringliteral">&quot;nil&quot;</span> : (<span class="keywordtype">char</span> *)stringValue);</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        result = <span class="keyword">self</span>-&gt;compMsgData-&gt;setFieldValue(<span class="keyword">self</span>, fieldNameStr, numericValue, stringValue);</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    }</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;  }</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;setMsgFieldValue: done&quot;</span>);</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;}</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;<span class="comment">// ================================= setMsgValues ====================================</span></div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;<span class="comment">/**</span></div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="comment"> * \brief set the field values of a message</span></div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00258"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">  258</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  uint8_t startEntryIdx;</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  uint8_t fieldLgth;</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;  uint8_t *flagStr;</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  uint8_t flag;</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;  uint8_t type;</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> uval;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;  <a class="code" href="structcompMsgDataView.html">compMsgDataView_t</a> *<a class="code" href="structdataView.html">dataView</a>;</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <span class="keywordtype">int</span> msgCmdKey;</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;  uint8_t msgDescPartIdx;</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  uint8_t msgValPartIdx;</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <a class="code" href="structcompMsgField.html">compMsgField_t</a> *fieldInfo;</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <a class="code" href="structmsgDescPart.html">msgDescPart_t</a> *<a class="code" href="structmsgDescPart.html">msgDescPart</a>;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  <a class="code" href="structmsgValPart.html">msgValPart_t</a> *<a class="code" href="structmsgValPart.html">msgValPart</a>;</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  <a class="code" href="structcompMsgData.html">compMsgData_t</a> *<a class="code" href="structcompMsgData.html">compMsgData</a>;</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  uint8_t *handle;</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;  <span class="keywordtype">char</span> *endPtr;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;  uint8_t *stringValue;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;setMsgValues\n&quot;</span>);</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;  handle = <span class="keyword">self</span>-&gt;msgHandle;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  type = <span class="charliteral">&#39;A&#39;</span>;</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  dataView = compMsgData-&gt;<a class="code" href="structcompMsgData.html#a21e5f866f7eb06bbcfeeb680d5f37a1d">compMsgDataView</a>;</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;  <span class="comment">// loop over MSG Fields, to check if we eventually have table rows!!</span></div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;  msgDescPartIdx = 0;</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;  msgValPartIdx = 0;</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;  msgValPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgValParts[msgValPartIdx];</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  compMsgData = <span class="keyword">self</span>-&gt;compMsgData;</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;numFields: %d numMsgValParts: %d&quot;</span>, compMsgData-&gt;<a class="code" href="structcompMsgData.html#a1466fd5b9f071f871a4f5b808052e239">numFields</a>, self-&gt;compMsgData-&gt;numMsgValParts);</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;  <span class="keywordflow">while</span> ((msgDescPartIdx &lt; compMsgData-&gt;numFields) &amp;&amp; (msgValPartIdx &lt;= self-&gt;compMsgData-&gt;<a class="code" href="structcompMsgData.html#afec7e580fe4ae8b07f7ae83404555d43">numMsgValParts</a>)) {</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;    msgDescPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescParts[msgDescPartIdx];</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    <span class="keyword">self</span>-&gt;compMsgData-&gt;msgDescPart = msgDescPart;</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;    msgValPart = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;msgValParts[msgValPartIdx];</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    <span class="keyword">self</span>-&gt;compMsgData-&gt;msgValPart = msgValPart;</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;setMsgValues: %s descIdx: %d valIdx: %d&quot;</span>, msgDescPart-&gt;<a class="code" href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">fieldNameStr</a>, msgDescPartIdx, msgValPartIdx);</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;    fieldInfo = &amp;compMsgData-&gt;<a class="code" href="structcompMsgData.html#a4e22843d568b2cc9a1319c08b6d70b75">fields</a>[msgDescPartIdx++];</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;default fieldNameId: %d\n&quot;</span>, fieldInfo-&gt;<a class="code" href="structcompMsgField.html#ac5a60307d69ae4f0026c7dd34d6afdc1">fieldNameId</a>);</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    <span class="keywordflow">if</span> (fieldInfo-&gt;<a class="code" href="structcompMsgField.html#ac5a60307d69ae4f0026c7dd34d6afdc1">fieldNameId</a> == msgValPart-&gt;<a class="code" href="structmsgValPart.html#a5366041d83419bd9048269944399b41d">fieldNameId</a>) {</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;      result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;setMsgFieldValue(<span class="keyword">self</span>, type);</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;      <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;      msgValPartIdx++;</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;    }</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;  }</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;  numericValue = compMsgData-&gt;<a class="code" href="structcompMsgData.html#a77e03211ef64c457f680dab1671131ab">currHdr</a>-&gt;<a class="code" href="structheaderPart.html#a3a1afcedcb944eb0102bbc1eb7f4ea82">hdrU16CmdKey</a>;</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;  stringValue = NULL;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;cmdKey value: 0x%04x&quot;</span>, numericValue);</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;  result = compMsgData-&gt;<a class="code" href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">setFieldValue</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;@cmdKey&quot;</span>, numericValue, stringValue);</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;cmdKey result: %d&quot;</span>, result);</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  compMsgData-&gt;<a class="code" href="structcompMsgData.html#a3d08ceb9b4a20c7d30b89fb72858ef99">prepareMsg</a>(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;setMsgValues done&quot;</span>);</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;<span class="comment">//  compMsgData-&gt;dumpMsg(self);</span></div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;}</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;<span class="comment">// ================================= buildMsg ====================================</span></div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;<span class="comment">/**</span></div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;<span class="comment"> * \brief Build a message for sending to Uart or socket</span></div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;<span class="comment"> * </span></div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00326"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">  326</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">buildMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;  <span class="keywordtype">size_t</span> msgLgth;</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;  uint8_t *msgData;</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;  <span class="keywordtype">size_t</span> defLgth;</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  uint8_t *defData;</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;  uint8_t *cryptKey;</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;  uint8_t klen;</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;  uint8_t ivlen;</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;  uint8_t *stringValue;</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;  <a class="code" href="structcompMsgField.html">compMsgField_t</a> *fieldInfo;</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;  <span class="keywordtype">int</span> src;</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;  <span class="keywordtype">int</span> dst;</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;  <span class="comment">// at this point an eventual callback for getting the values </span></div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;  <span class="comment">// has been already done using runAction in createMsgFromHeaderPart</span></div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;  <span class="comment">// so now we can fix the offsets if needed for key value list entries</span></div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  <span class="comment">// we can do that in looking for a special key entry @numKeyValues in msgDescParts</span></div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  <span class="comment">// could be also done in looking in compMsgData-&gt;fields</span></div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;  <span class="comment">// to get the desired keys we look in msgValParts for fieldNames starting with &#39;#&#39;</span></div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  <span class="comment">// the fieldValueStr ther is a callBackFunction for building the key value entries</span></div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;  <span class="comment">// the entry @numKeyValues in msgValParts tells us how many different keys follow</span></div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;  <span class="comment">// a key value entry is built like so:</span></div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;  <span class="comment">// uint16_t key</span></div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;  <span class="comment">// uint16_t length o value</span></div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;  <span class="comment">// uint8_t* the bytes of the value</span></div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;  <span class="comment">// this could if needed also be an array of uint16_t etc. depending on the key</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;  <span class="comment">// the receiver must know how the value is built depending on the key!!</span></div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;  </div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;buildMsg&quot;</span>);</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;fixOffsetsForKeyValues(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;  <span class="keyword">self</span>-&gt;compMsgData-&gt;direction = <a class="code" href="compMsgData_8h.html#a041155c79fa175c9bfb41c3006a761e0">COMP_MSG_TO_SEND_DATA</a>;</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;heap2: %d&quot;</span>, system_get_free_heap_size());</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgData-&gt;initMsg(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;  result = <a class="code" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a>(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgData-&gt;getMsgData(<span class="keyword">self</span>, &amp;msgData, &amp;msgLgth);</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;getMsgData res: %d!msgLgth: %d!&quot;</span>, result, msgLgth);</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;dumpMsg(self);</span></div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;dumpBinary(msgData, msgLgth, &quot;dumpMsg&quot;);</span></div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;encryption: %c&quot;</span>, self-&gt;compMsgData-&gt;currHdr-&gt;hdrEncryption);</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;dumpBinaryWide(msgData, msgLgth, &quot;beforeencrypt&quot;);</span></div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;  <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrEncryption == <span class="charliteral">&#39;E&#39;</span>) {</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    uint8_t *toCryptPtr;</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    uint8_t *encryptedMsgData;</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;    <span class="keywordtype">size_t</span> encryptedMsgDataLgth;</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;    <span class="keywordtype">size_t</span> mlen;</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;    <span class="keywordtype">size_t</span> headerLgth;</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;    <span class="keywordtype">size_t</span> totalCrcOffset;</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;    <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgModuleData-&gt;getCryptKey(<span class="keyword">self</span>, &amp;numericValue, &amp;cryptKey);</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    ivlen = 16;</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;    klen = 16;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;dumpBinary(self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;data, self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;lgth, &quot;MSG_AA&quot;);</span></div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;need to encrypt message!&quot;</span>);</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;    headerLgth = <span class="keyword">self</span>-&gt;compMsgData-&gt;headerLgth;</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;    totalCrcOffset = 0;</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;    mlen = <span class="keyword">self</span>-&gt;compMsgData-&gt;totalLgth - headerLgth;</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aad5d810a5ccaa3cfe155bebcd5b111f4">COMP_DISP_TOTAL_CRC</a>) {</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;      totalCrcOffset = 1;</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;      mlen -= 1;</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;      totalCrcOffset = 2;</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;      mlen -= 2;</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;    }</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;msglen!%d!mlen: %d, headerLgth!%d&quot;</span>, self-&gt;compMsgData-&gt;totalLgth, mlen, self-&gt;compMsgData-&gt;headerLgth);</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;    toCryptPtr = msgData + <span class="keyword">self</span>-&gt;compMsgData-&gt;headerLgth;</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgUtil-&gt;encryptMsg(<span class="keyword">self</span>, toCryptPtr, mlen, cryptKey, klen, cryptKey, ivlen, &amp;encryptedMsgData, &amp;encryptedMsgDataLgth);</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    <span class="keywordflow">if</span> (encryptedMsgDataLgth != mlen) {</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 1, <span class="stringliteral">&quot;WARNING! mlen: %d encryptedMsgDataLgth: %d overwrites eventually totalCrc!&quot;</span>, mlen, encryptedMsgDataLgth);</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    }</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    c_memcpy(toCryptPtr, encryptedMsgData, encryptedMsgDataLgth);</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;crypted: len: %d!mlen: %d!&quot;</span>, encryptedMsgDataLgth, mlen);</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;  }</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;  <span class="comment">// if we have a @totalCrc we need to set it here</span></div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;totalCrc: %d\n&quot;</span>, self-&gt;compMsgData-&gt;currHdr-&gt;hdrFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aad5d810a5ccaa3cfe155bebcd5b111f4">COMP_DISP_TOTAL_CRC</a>);</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;  <span class="keywordflow">if</span> (self-&gt;compMsgData-&gt;currHdr-&gt;hdrFlags &amp; <a class="code" href="compMsgMsgDesc_8h.html#aad5d810a5ccaa3cfe155bebcd5b111f4">COMP_DISP_TOTAL_CRC</a>) {</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    fieldInfo = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;fields[<span class="keyword">self</span>-&gt;compMsgData-&gt;numFields - 1];</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgData-&gt;compMsgDataView-&gt;setTotalCrc(<span class="keyword">self</span>, self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView, fieldInfo);</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;setTotalCrc: result: %d fieldOffset: %d&quot;</span>, result, fieldInfo-&gt;<a class="code" href="structcompMsgField.html#a5d7a4e518a92a9fbd4900075b48cd7cf">fieldOffset</a>);</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;  }</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;  <span class="comment">// here we need to decide where and how to send the message!!</span></div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;  <span class="comment">// from currHdr we can see the handle type and - if needed - the @dst</span></div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;transferType: %c dst: 0x%04x msgLgth: %d&quot;</span>, self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType, self-&gt;compMsgData-&gt;currHdr-&gt;hdrToPart, msgLgth);</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;<span class="comment">//self-&gt;compMsgData-&gt;compMsgDataView-&gt;dataView-&gt;dumpBinaryWide(msgData, msgLgth, &quot;afterencrypt&quot;);</span></div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;sendMsg(<span class="keyword">self</span>, msgData, msgLgth);</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 2, <span class="stringliteral">&quot;buildMsg sendMsg has been called result: %d&quot;</span>, result);</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;<span class="comment">//  result = self-&gt;resetMsgInfo(self, self-&gt;buildMsgInfos.parts);</span></div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;  <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;}</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;<span class="comment">// ================================= forwardMsg ====================================</span></div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;</div>
+<div class="line"><a name="l00429"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">  429</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">forwardMsg</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  <a class="code" href="structheaderPart.html">headerPart_t</a> *hdr;</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;  <span class="keywordtype">int</span> hdrIdx;</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;  <a class="code" href="structmsgParts.html">msgParts_t</a> *received;</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;  <a class="code" href="structmsgHeaderInfos.html">msgHeaderInfos_t</a> *hdrInfos;</div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 1, <span class="stringliteral">&quot;forwardMsg called handleType: %c!&quot;</span>, self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType);</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;  received = &amp;<span class="keyword">self</span>-&gt;compMsgData-&gt;received;</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;B&quot;</span>, 1, <span class="stringliteral">&quot;handleType: %c msgLgth: %d&quot;</span>, self-&gt;compMsgData-&gt;currHdr-&gt;hdrHandleType, received-&gt;<a class="code" href="structmsgParts.html#a0a3a7261e9b7126fa10139a84fa9463e">lgth</a>);</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;  <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;sendMsg(<span class="keyword">self</span>, received-&gt;<a class="code" href="structmsgParts.html#a646fec2419212dab015477b4ffcfc35b">buf</a>, received-&gt;<a class="code" href="structmsgParts.html#a34e09294bdb396923cc3f047ad8d59a9">totalLgth</a>);</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;}</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;<span class="comment">// ================================= compMsgBuildMsgInit ====================================</span></div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;</div>
+<div class="line"><a name="l00445"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8h.html#ac71f5e0e0e60b48a930cdb274efe7a41">  445</a></span>&#160;uint8_t <a class="code" href="compMsgBuildMsg_8c.html#ac71f5e0e0e60b48a930cdb274efe7a41">compMsgBuildMsgInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;createMsgFromHeaderPart = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a621a4668c3849ae3d28c20d9d67ad568">createMsgFromHeaderPart</a>;</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;fixOffsetsForKeyValues = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">fixOffsetsForKeyValues</a>;</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;setMsgFieldValue = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">setMsgFieldValue</a>;</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;buildMsg = &amp;<a class="code" href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">buildMsg</a>;</div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;setMsgValues = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a>;</div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;forwardMsg = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">forwardMsg</a>;</div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;}</div>
 <div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;</div>
-<div class="line"><a name="l00456"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8h.html#ac71f5e0e0e60b48a930cdb274efe7a41">  456</a></span>&#160;uint8_t <a class="code" href="compMsgBuildMsg_8c.html#ac71f5e0e0e60b48a930cdb274efe7a41">compMsgBuildMsgInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;createMsgFromHeaderPart = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a621a4668c3849ae3d28c20d9d67ad568">createMsgFromHeaderPart</a>;</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;fixOffsetsForKeyValues = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">fixOffsetsForKeyValues</a>;</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;setMsgFieldValue = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">setMsgFieldValue</a>;</div>
-<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;buildMsg = &amp;<a class="code" href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">buildMsg</a>;</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;setMsgValues = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a>;</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;  <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;forwardMsg = &amp;<a class="code" href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">forwardMsg</a>;</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;}</div>
-<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;</div>
-<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;<span class="comment">// ================================= newCompMsgBuildMsg ====================================</span></div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;</div>
-<div class="line"><a name="l00469"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8h.html#a0e08b22113adecdc44fc1f0c2f7e224f">  469</a></span>&#160;<a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg_t</a> *<a class="code" href="compMsgBuildMsg_8c.html#a0e08b22113adecdc44fc1f0c2f7e224f">newCompMsgBuildMsg</a>() {</div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;  <a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg_t</a> *<a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg</a> = os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg_t</a>));</div>
-<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;  <span class="keywordflow">if</span> (compMsgBuildMsg == NULL) {</div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;    <span class="keywordflow">return</span> NULL;</div>
-<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;  }</div>
-<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;  <span class="keywordflow">return</span> compMsgBuildMsg;</div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;}</div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;<span class="comment">// ================================= newCompMsgBuildMsg ====================================</span></div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;</div>
+<div class="line"><a name="l00458"></a><span class="lineno"><a class="line" href="compMsgBuildMsg_8h.html#a0e08b22113adecdc44fc1f0c2f7e224f">  458</a></span>&#160;<a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg_t</a> *<a class="code" href="compMsgBuildMsg_8c.html#a0e08b22113adecdc44fc1f0c2f7e224f">newCompMsgBuildMsg</a>() {</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;  <a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg_t</a> *<a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg</a> = os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structcompMsgBuildMsg.html">compMsgBuildMsg_t</a>));</div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;  <span class="keywordflow">if</span> (compMsgBuildMsg == NULL) {</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;    <span class="keywordflow">return</span> NULL;</div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;  }</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;  <span class="keywordflow">return</span> compMsgBuildMsg;</div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;}</div>
 <div class="ttc" id="structcompMsgDispatcher_html"><div class="ttname"><a href="structcompMsgDispatcher.html">compMsgDispatcher</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00098">compMsgDispatcher.h:98</a></div></div>
+<div class="ttc" id="structmsgParts_html_a0a3a7261e9b7126fa10139a84fa9463e"><div class="ttname"><a href="structmsgParts.html#a0a3a7261e9b7126fa10139a84fa9463e">msgParts::lgth</a></div><div class="ttdeci">size_t lgth</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00151">compMsgMsgDesc.h:151</a></div></div>
 <div class="ttc" id="structmsgDescPart_html_a34588b5d53d1f62b0e85f34e0104a1ff"><div class="ttname"><a href="structmsgDescPart.html#a34588b5d53d1f62b0e85f34e0104a1ff">msgDescPart::fieldLgth</a></div><div class="ttdeci">uint8_t fieldLgth</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00164">compMsgMsgDesc.h:164</a></div></div>
 <div class="ttc" id="structcompMsgBuildMsg_html"><div class="ttname"><a href="structcompMsgBuildMsg.html">compMsgBuildMsg</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8h_source.html#l00058">compMsgBuildMsg.h:58</a></div></div>
 <div class="ttc" id="structmsgDescPart_html_ab8d0eedbc06adbdbaadaa0bff15fe5f5"><div class="ttname"><a href="structmsgDescPart.html#ab8d0eedbc06adbdbaadaa0bff15fe5f5">msgDescPart::fieldNameStr</a></div><div class="ttdeci">uint8_t * fieldNameStr</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00160">compMsgMsgDesc.h:160</a></div></div>
@@ -572,18 +561,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="compMsgErrorCodes_8h_html_a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0"><div class="ttname"><a href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgErrorCodes_8h_source.html#l00050">compMsgErrorCodes.h:50</a></div></div>
 <div class="ttc" id="structmsgDescPart_html"><div class="ttname"><a href="structmsgDescPart.html">msgDescPart</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00159">compMsgMsgDesc.h:159</a></div></div>
 <div class="ttc" id="structcompMsgData_html_a9584c786692f60c699371dd5337bf545"><div class="ttname"><a href="structcompMsgData.html#a9584c786692f60c699371dd5337bf545">compMsgData::numMsgDescParts</a></div><div class="ttdeci">size_t numMsgDescParts</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00132">compMsgData.h:132</a></div></div>
-<div class="ttc" id="compMsgBuildMsg_8c_html_a8bb7ca81c9605ad70dcb33e4ff4ffd08"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a></div><div class="ttdeci">static uint8_t setMsgValues(compMsgDispatcher_t *self)</div><div class="ttdoc">set the field values of a message </div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00261">compMsgBuildMsg.c:261</a></div></div>
+<div class="ttc" id="compMsgBuildMsg_8c_html_a8bb7ca81c9605ad70dcb33e4ff4ffd08"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a8bb7ca81c9605ad70dcb33e4ff4ffd08">setMsgValues</a></div><div class="ttdeci">static uint8_t setMsgValues(compMsgDispatcher_t *self)</div><div class="ttdoc">set the field values of a message </div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00258">compMsgBuildMsg.c:258</a></div></div>
 <div class="ttc" id="structmsgDescPart_html_a990689362d28d1ff1d1c247977631e4e"><div class="ttname"><a href="structmsgDescPart.html#a990689362d28d1ff1d1c247977631e4e">msgDescPart::fieldSize</a></div><div class="ttdeci">uint16_t fieldSize</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00167">compMsgMsgDesc.h:167</a></div></div>
+<div class="ttc" id="structcompMsgField_html_a5d7a4e518a92a9fbd4900075b48cd7cf"><div class="ttname"><a href="structcompMsgField.html#a5d7a4e518a92a9fbd4900075b48cd7cf">compMsgField::fieldOffset</a></div><div class="ttdeci">size_t fieldOffset</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDataView_8h_source.html#l00060">compMsgDataView.h:60</a></div></div>
 <div class="ttc" id="structmsgDescPart_html_a4bce737fc7f270d344e7edae15ae1f82"><div class="ttname"><a href="structmsgDescPart.html#a4bce737fc7f270d344e7edae15ae1f82">msgDescPart::fieldTypeStr</a></div><div class="ttdeci">uint8_t * fieldTypeStr</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00162">compMsgMsgDesc.h:162</a></div></div>
 <div class="ttc" id="structmsgHeaderInfos_html"><div class="ttname"><a href="structmsgHeaderInfos.html">msgHeaderInfos</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00127">compMsgMsgDesc.h:127</a></div></div>
 <div class="ttc" id="structmsgKeyValueDescPart_html_a8aa393f8eb9bb31b61bdc07140511d02"><div class="ttname"><a href="structmsgKeyValueDescPart.html#a8aa393f8eb9bb31b61bdc07140511d02">msgKeyValueDescPart::keyId</a></div><div class="ttdeci">uint16_t keyId</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00185">compMsgMsgDesc.h:185</a></div></div>
 <div class="ttc" id="compMsgTypesAndNames_8h_html_adebde3389049a14312fc9bef3105fc47a04b6e7c41e421df92ede77030d547f8f"><div class="ttname"><a href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a04b6e7c41e421df92ede77030d547f8f">COMP_MSG_SPEC_FIELD_CMD_KEY</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgTypesAndNames_8h_source.html#l00072">compMsgTypesAndNames.h:72</a></div></div>
 <div class="ttc" id="structcompMsgField_html"><div class="ttname"><a href="structcompMsgField.html">compMsgField</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDataView_8h_source.html#l00054">compMsgDataView.h:54</a></div></div>
 <div class="ttc" id="structcompMsgData_html_ac6044e9eaf7b0346f9543bef886af042"><div class="ttname"><a href="structcompMsgData.html#ac6044e9eaf7b0346f9543bef886af042">compMsgData::setFieldValue</a></div><div class="ttdeci">setFieldValue_t setFieldValue</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00150">compMsgData.h:150</a></div></div>
-<div class="ttc" id="structmsgParts_html_a1ce339cd6d8b4c803320d11721267790"><div class="ttname"><a href="structmsgParts.html#a1ce339cd6d8b4c803320d11721267790">msgParts::lgth</a></div><div class="ttdeci">uint8_t lgth</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00151">compMsgMsgDesc.h:151</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_afa29dff5df7203ab96cec3eececcb484"><div class="ttname"><a href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a></div><div class="ttdeci">#define COMP_MSG_DBG</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00074">compMsgDebug.h:74</a></div></div>
 <div class="ttc" id="structmsgParts_html_a646fec2419212dab015477b4ffcfc35b"><div class="ttname"><a href="structmsgParts.html#a646fec2419212dab015477b4ffcfc35b">msgParts::buf</a></div><div class="ttdeci">uint8_t buf[DISP_BUF_LGTH]</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00155">compMsgMsgDesc.h:155</a></div></div>
 <div class="ttc" id="structcompMsgData_html_afec7e580fe4ae8b07f7ae83404555d43"><div class="ttname"><a href="structcompMsgData.html#afec7e580fe4ae8b07f7ae83404555d43">compMsgData::numMsgValParts</a></div><div class="ttdeci">size_t numMsgValParts</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00135">compMsgData.h:135</a></div></div>
-<div class="ttc" id="compMsgBuildMsg_8c_html_a445f9bd24f3159f5fca1e8107031271b"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">forwardMsg</a></div><div class="ttdeci">static uint8_t forwardMsg(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00440">compMsgBuildMsg.c:440</a></div></div>
+<div class="ttc" id="compMsgBuildMsg_8c_html_a445f9bd24f3159f5fca1e8107031271b"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a445f9bd24f3159f5fca1e8107031271b">forwardMsg</a></div><div class="ttdeci">static uint8_t forwardMsg(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00429">compMsgBuildMsg.c:429</a></div></div>
 <div class="ttc" id="structmsgValPart_html_a5366041d83419bd9048269944399b41d"><div class="ttname"><a href="structmsgValPart.html#a5366041d83419bd9048269944399b41d">msgValPart::fieldNameId</a></div><div class="ttdeci">uint8_t fieldNameId</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00173">compMsgMsgDesc.h:173</a></div></div>
 <div class="ttc" id="structmsgParts_html"><div class="ttname"><a href="structmsgParts.html">msgParts</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00140">compMsgMsgDesc.h:140</a></div></div>
 <div class="ttc" id="compMsgErrorCodes_8h_html_a8e5cc2b260d9b3f7a2ee3ed336275ed2a83eae14296335e715cd55228be60b8f8"><div class="ttname"><a href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a83eae14296335e715cd55228be60b8f8">COMP_MSG_ERR_FIELD_NOT_FOUND</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgErrorCodes_8h_source.html#l00063">compMsgErrorCodes.h:63</a></div></div>
@@ -593,32 +583,31 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="structmsgKeyValueDescPart_html_acedbbd811d568c4520c95e7928154bec"><div class="ttname"><a href="structmsgKeyValueDescPart.html#acedbbd811d568c4520c95e7928154bec">msgKeyValueDescPart::keyNameStr</a></div><div class="ttdeci">uint8_t * keyNameStr</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00184">compMsgMsgDesc.h:184</a></div></div>
 <div class="ttc" id="structcompMsgData_html"><div class="ttname"><a href="structcompMsgData.html">compMsgData</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00107">compMsgData.h:107</a></div></div>
 <div class="ttc" id="structmsgParts_html_a34e09294bdb396923cc3f047ad8d59a9"><div class="ttname"><a href="structmsgParts.html#a34e09294bdb396923cc3f047ad8d59a9">msgParts::totalLgth</a></div><div class="ttdeci">uint16_t totalLgth</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00143">compMsgMsgDesc.h:143</a></div></div>
-<div class="ttc" id="compMsgBuildMsg_8c_html_a0f91cd2a951d8614597aa7671aab638d"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">fixOffsetsForKeyValues</a></div><div class="ttdeci">static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self)</div><div class="ttdoc">fix the field offsets of all if we have key/value fields after calling the callbacks for these fields...</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00109">compMsgBuildMsg.c:109</a></div></div>
-<div class="ttc" id="compMsgBuildMsg_8c_html_a0e08b22113adecdc44fc1f0c2f7e224f"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a0e08b22113adecdc44fc1f0c2f7e224f">newCompMsgBuildMsg</a></div><div class="ttdeci">compMsgBuildMsg_t * newCompMsgBuildMsg()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00469">compMsgBuildMsg.c:469</a></div></div>
-<div class="ttc" id="structdataView_html"><div class="ttname"><a href="structdataView.html">dataView</a></div><div class="ttdef"><b>Definition:</b> <a href="dataView_8h_source.html#l00100">dataView.h:100</a></div></div>
-<div class="ttc" id="compMsgBuildMsg_8c_html_ab47ca7bd24db6b5b724a2c843e110e39"><div class="ttname"><a href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">buildMsg</a></div><div class="ttdeci">static uint8_t buildMsg(compMsgDispatcher_t *self)</div><div class="ttdoc">Build a message for sending to Uart or socket. </div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00338">compMsgBuildMsg.c:338</a></div></div>
+<div class="ttc" id="compMsgBuildMsg_8c_html_a0f91cd2a951d8614597aa7671aab638d"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a0f91cd2a951d8614597aa7671aab638d">fixOffsetsForKeyValues</a></div><div class="ttdeci">static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self)</div><div class="ttdoc">fix the field offsets of all if we have key/value fields after calling the callbacks for these fields...</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00106">compMsgBuildMsg.c:106</a></div></div>
+<div class="ttc" id="compMsgBuildMsg_8c_html_a0e08b22113adecdc44fc1f0c2f7e224f"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a0e08b22113adecdc44fc1f0c2f7e224f">newCompMsgBuildMsg</a></div><div class="ttdeci">compMsgBuildMsg_t * newCompMsgBuildMsg()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00458">compMsgBuildMsg.c:458</a></div></div>
+<div class="ttc" id="structdataView_html"><div class="ttname"><a href="structdataView.html">dataView</a></div><div class="ttdef"><b>Definition:</b> <a href="dataView_8h_source.html#l00103">dataView.h:103</a></div></div>
+<div class="ttc" id="compMsgBuildMsg_8c_html_ab47ca7bd24db6b5b724a2c843e110e39"><div class="ttname"><a href="compMsgBuildMsg_8c.html#ab47ca7bd24db6b5b724a2c843e110e39">buildMsg</a></div><div class="ttdeci">static uint8_t buildMsg(compMsgDispatcher_t *self)</div><div class="ttdoc">Build a message for sending to Uart or socket. </div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00326">compMsgBuildMsg.c:326</a></div></div>
 <div class="ttc" id="compMsgAction_8h_html_aeeb0f22e59792bd6726d068030d7baf6"><div class="ttname"><a href="compMsgAction_8h.html#aeeb0f22e59792bd6726d068030d7baf6">action_t</a></div><div class="ttdeci">uint8_t(* action_t)(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8h_source.html#l00051">compMsgAction.h:51</a></div></div>
 <div class="ttc" id="structmsgDescPart_html_a04ac3105fb3f1d7c91d5d9809c4331d0"><div class="ttname"><a href="structmsgDescPart.html#a04ac3105fb3f1d7c91d5d9809c4331d0">msgDescPart::fieldSizeCallback</a></div><div class="ttdeci">fieldValueCallback_t fieldSizeCallback</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00168">compMsgMsgDesc.h:168</a></div></div>
 <div class="ttc" id="compMsgTypesAndNames_8h_html_adebde3389049a14312fc9bef3105fc47a842087320c2d41a74dcf297a26585b2f"><div class="ttname"><a href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a842087320c2d41a74dcf297a26585b2f">COMP_MSG_SPEC_FIELD_DST</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgTypesAndNames_8h_source.html#l00069">compMsgTypesAndNames.h:69</a></div></div>
 <div class="ttc" id="compMsgTypesAndNames_8h_html_adebde3389049a14312fc9bef3105fc47a4591307161b92fa204980856a7fc591d"><div class="ttname"><a href="compMsgTypesAndNames_8h.html#adebde3389049a14312fc9bef3105fc47a4591307161b92fa204980856a7fc591d">COMP_MSG_SPEC_FIELD_SRC</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgTypesAndNames_8h_source.html#l00068">compMsgTypesAndNames.h:68</a></div></div>
 <div class="ttc" id="structmsgKeyValueDescPart_html"><div class="ttname"><a href="structmsgKeyValueDescPart.html">msgKeyValueDescPart</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00183">compMsgMsgDesc.h:183</a></div></div>
+<div class="ttc" id="structcompMsgData_html_a1466fd5b9f071f871a4f5b808052e239"><div class="ttname"><a href="structcompMsgData.html#a1466fd5b9f071f871a4f5b808052e239">compMsgData::numFields</a></div><div class="ttdeci">size_t numFields</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00114">compMsgData.h:114</a></div></div>
 <div class="ttc" id="structcompMsgData_html_a3d08ceb9b4a20c7d30b89fb72858ef99"><div class="ttname"><a href="structcompMsgData.html#a3d08ceb9b4a20c7d30b89fb72858ef99">compMsgData::prepareMsg</a></div><div class="ttdeci">prepareMsg_t prepareMsg</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00157">compMsgData.h:157</a></div></div>
 <div class="ttc" id="structcompMsgData_html_a4e22843d568b2cc9a1319c08b6d70b75"><div class="ttname"><a href="structcompMsgData.html#a4e22843d568b2cc9a1319c08b6d70b75">compMsgData::fields</a></div><div class="ttdeci">compMsgField_t * fields</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00111">compMsgData.h:111</a></div></div>
-<div class="ttc" id="structcompMsgDataView_html"><div class="ttname"><a href="structcompMsgDataView.html">compMsgDataView</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDataView_8h_source.html#l00085">compMsgDataView.h:85</a></div></div>
+<div class="ttc" id="structcompMsgDataView_html"><div class="ttname"><a href="structcompMsgDataView.html">compMsgDataView</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDataView_8h_source.html#l00086">compMsgDataView.h:86</a></div></div>
 <div class="ttc" id="compMsgMsgDesc_8h_html_aad5d810a5ccaa3cfe155bebcd5b111f4"><div class="ttname"><a href="compMsgMsgDesc_8h.html#aad5d810a5ccaa3cfe155bebcd5b111f4">COMP_DISP_TOTAL_CRC</a></div><div class="ttdeci">#define COMP_DISP_TOTAL_CRC</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00076">compMsgMsgDesc.h:76</a></div></div>
 <div class="ttc" id="compMsgBuildMsg_8c_html_a621a4668c3849ae3d28c20d9d67ad568"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a621a4668c3849ae3d28c20d9d67ad568">createMsgFromHeaderPart</a></div><div class="ttdeci">static uint8_t createMsgFromHeaderPart(compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00054">compMsgBuildMsg.c:54</a></div></div>
-<div class="ttc" id="structcompMsgData_html_acdc7c8a4f6cee5048990a390fe10ebd3"><div class="ttname"><a href="structcompMsgData.html#acdc7c8a4f6cee5048990a390fe10ebd3">compMsgData::msgValPart</a></div><div class="ttdeci">msgValPart_t * msgValPart</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00142">compMsgData.h:142</a></div></div>
 <div class="ttc" id="compMsgMsgDesc_8h_html_aa532f1310d64f8107d7f6794de8b1db4"><div class="ttname"><a href="compMsgMsgDesc_8h.html#aa532f1310d64f8107d7f6794de8b1db4">COMP_DISP_DESC_VALUE_IS_NUMBER</a></div><div class="ttdeci">#define COMP_DISP_DESC_VALUE_IS_NUMBER</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00098">compMsgMsgDesc.h:98</a></div></div>
-<div class="ttc" id="structmsgValPart_html_ab4bdc398b109fb79e36696585c225666"><div class="ttname"><a href="structmsgValPart.html#ab4bdc398b109fb79e36696585c225666">msgValPart::fieldNameStr</a></div><div class="ttdeci">uint8_t * fieldNameStr</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00172">compMsgMsgDesc.h:172</a></div></div>
 <div class="ttc" id="structheaderPart_html"><div class="ttname"><a href="structheaderPart.html">headerPart</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00103">compMsgMsgDesc.h:103</a></div></div>
 <div class="ttc" id="structcompMsgData_html_a21e5f866f7eb06bbcfeeb680d5f37a1d"><div class="ttname"><a href="structcompMsgData.html#a21e5f866f7eb06bbcfeeb680d5f37a1d">compMsgData::compMsgDataView</a></div><div class="ttdeci">compMsgDataView_t * compMsgDataView</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00108">compMsgData.h:108</a></div></div>
 <div class="ttc" id="structmsgDescPart_html_ad534c011312d083c7d29671bff425667"><div class="ttname"><a href="structmsgDescPart.html#ad534c011312d083c7d29671bff425667">msgDescPart::fieldKey</a></div><div class="ttdeci">uint16_t fieldKey</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00166">compMsgMsgDesc.h:166</a></div></div>
-<div class="ttc" id="compMsgBuildMsg_8c_html_a4651f93593d00dd072a76ce599928ef0"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">setMsgFieldValue</a></div><div class="ttdeci">static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type)</div><div class="ttdoc">the value of a message field </div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00188">compMsgBuildMsg.c:188</a></div></div>
+<div class="ttc" id="compMsgBuildMsg_8c_html_a4651f93593d00dd072a76ce599928ef0"><div class="ttname"><a href="compMsgBuildMsg_8c.html#a4651f93593d00dd072a76ce599928ef0">setMsgFieldValue</a></div><div class="ttdeci">static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type)</div><div class="ttdoc">the value of a message field </div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00185">compMsgBuildMsg.c:185</a></div></div>
 <div class="ttc" id="structcompMsgField_html_ac5a60307d69ae4f0026c7dd34d6afdc1"><div class="ttname"><a href="structcompMsgField.html#ac5a60307d69ae4f0026c7dd34d6afdc1">compMsgField::fieldNameId</a></div><div class="ttdeci">uint8_t fieldNameId</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDataView_8h_source.html#l00055">compMsgDataView.h:55</a></div></div>
-<div class="ttc" id="compMsgBuildMsg_8c_html_ac71f5e0e0e60b48a930cdb274efe7a41"><div class="ttname"><a href="compMsgBuildMsg_8c.html#ac71f5e0e0e60b48a930cdb274efe7a41">compMsgBuildMsgInit</a></div><div class="ttdeci">uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00456">compMsgBuildMsg.c:456</a></div></div>
+<div class="ttc" id="compMsgBuildMsg_8c_html_ac71f5e0e0e60b48a930cdb274efe7a41"><div class="ttname"><a href="compMsgBuildMsg_8c.html#ac71f5e0e0e60b48a930cdb274efe7a41">compMsgBuildMsgInit</a></div><div class="ttdeci">uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgBuildMsg_8c_source.html#l00445">compMsgBuildMsg.c:445</a></div></div>
 <div class="ttc" id="structheaderPart_html_a3a1afcedcb944eb0102bbc1eb7f4ea82"><div class="ttname"><a href="structheaderPart.html#a3a1afcedcb944eb0102bbc1eb7f4ea82">headerPart::hdrU16CmdKey</a></div><div class="ttdeci">uint16_t hdrU16CmdKey</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00110">compMsgMsgDesc.h:110</a></div></div>
 <div class="ttc" id="structmsgKeyValueDescPart_html_a6319221f530dddb3cf18443daed55da0"><div class="ttname"><a href="structmsgKeyValueDescPart.html#a6319221f530dddb3cf18443daed55da0">msgKeyValueDescPart::keyLgth</a></div><div class="ttdeci">uint8_t keyLgth</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00187">compMsgMsgDesc.h:187</a></div></div>
-<div class="ttc" id="compMsgMsgDesc_8c_html_adfac0f453f0aeb587f03d73855a998ae"><div class="ttname"><a href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a></div><div class="ttdeci">#define checkErrOK(result)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8c_source.html#l00563">compMsgMsgDesc.c:563</a></div></div>
+<div class="ttc" id="compMsgMsgDesc_8c_html_adfac0f453f0aeb587f03d73855a998ae"><div class="ttname"><a href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a></div><div class="ttdeci">#define checkErrOK(result)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8c_source.html#l00603">compMsgMsgDesc.c:603</a></div></div>
 <div class="ttc" id="compMsgData_8h_html_a041155c79fa175c9bfb41c3006a761e0"><div class="ttname"><a href="compMsgData_8h.html#a041155c79fa175c9bfb41c3006a761e0">COMP_MSG_TO_SEND_DATA</a></div><div class="ttdeci">#define COMP_MSG_TO_SEND_DATA</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00066">compMsgData.h:66</a></div></div>
 <div class="ttc" id="structcompMsgData_html_a77e03211ef64c457f680dab1671131ab"><div class="ttname"><a href="structcompMsgData.html#a77e03211ef64c457f680dab1671131ab">compMsgData::currHdr</a></div><div class="ttdeci">headerPart_t * currHdr</div><div class="ttdef"><b>Definition:</b> <a href="compMsgData_8h_source.html#l00143">compMsgData.h:143</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

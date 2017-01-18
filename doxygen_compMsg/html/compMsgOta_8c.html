@@ -145,6 +145,12 @@ Functions</h2></td></tr>
 <tr class="separator:af0e7bc36b7ce33a6e8953ff9fa62bf49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a972f4f243a582380ae2b978af3776cbe"><td class="memItemLeft" align="right" valign="top">static void ICACHE_FLASH_ATTR&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a> (const char *name, ip_addr_t *ip, void *arg)</td></tr>
 <tr class="separator:a972f4f243a582380ae2b978af3776cbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab83e0d3d19225e63ae9bb3a5d43b307f"><td class="memItemLeft" align="right" valign="top">static uint8_t ICACHE_FLASH_ATTR&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">storeUserData</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, size_t msgLgth, uint8_t *msgData)</td></tr>
+<tr class="separator:ab83e0d3d19225e63ae9bb3a5d43b307f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a877a4e208bf55a38f6628ecd67d44149"><td class="memItemLeft" align="right" valign="top">static uint8_t ICACHE_FLASH_ATTR&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">saveUserData</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a877a4e208bf55a38f6628ecd67d44149"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2db0cba8ad80cdab5fa5292e2a586fed"><td class="memItemLeft" align="right" valign="top">static uint8_t ICACHE_FLASH_ATTR&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">getUserData</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t **msgData, size_t *msgLgth)</td></tr>
+<tr class="separator:a2db0cba8ad80cdab5fa5292e2a586fed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12489959245f91d60f5aa090189d2eb4"><td class="memItemLeft" align="right" valign="top">static uint8_t ICACHE_FLASH_ATTR&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, ota_callback callback, bool flashfs)</td></tr>
 <tr class="separator:a12489959245f91d60f5aa090189d2eb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae24ba7875a8993c90f8132be5d904dbe"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a> (bool result, uint8 rom_slot)</td></tr>
@@ -266,7 +272,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Error code or ErrorOK </dd></dl>
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00486">486</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00550">550</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -301,7 +307,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00507">507</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00571">571</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -326,7 +332,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00261">261</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00263">263</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -352,7 +358,49 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00270">270</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00275">275</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a2db0cba8ad80cdab5fa5292e2a586fed"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t ICACHE_FLASH_ATTR getUserData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>msgData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>msgLgth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00395">395</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -369,7 +417,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00519">519</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00586">586</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -411,7 +459,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00351">351</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00410">410</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -447,7 +495,75 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00438">438</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00499">499</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a877a4e208bf55a38f6628ecd67d44149"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t ICACHE_FLASH_ATTR saveUserData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00377">377</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab83e0d3d19225e63ae9bb3a5d43b307f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t ICACHE_FLASH_ATTR storeUserData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>msgLgth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>msgData</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00361">361</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -473,7 +589,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00460">460</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00524">524</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -499,7 +615,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00470">470</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00534">534</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -587,7 +703,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00300">300</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00305">305</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>
@@ -671,7 +787,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00310">310</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgOta_8c_source.html#l00318">318</a> of file <a class="el" href="compMsgOta_8c_source.html">compMsgOta.c</a>.</p>
 
 </div>
 </div>

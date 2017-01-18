@@ -143,49 +143,43 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="compMsgTimer_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a">   53</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgTimer_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a">initTimers</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="keywordtype">int</span> result;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment">//ets_printf(&quot;§initTimers\n§&quot;);</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; NUM_TMR; i++) {</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">self</span>-&gt;compMsgTimer-&gt;compMsgTimers[i].compMsgDispatcher = <span class="keyword">self</span>;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keyword">self</span>-&gt;compMsgTimer-&gt;compMsgTimers[i].mode = <a class="code" href="compMsgTimer_8h.html#a20817a864658161f1c9077899729a98a">TIMER_MODE_OFF</a>;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">self</span>-&gt;compMsgTimer-&gt;compMsgTimers[i].timerId = i;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    ets_timer_disarm(&amp;self-&gt;compMsgTimer-&gt;compMsgTimers[i].timer);</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  }</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">//ets_printf(&quot;§initTimers end\n§&quot;);</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; NUM_TMR; i++) {</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">self</span>-&gt;compMsgTimer-&gt;compMsgTimers[i].compMsgDispatcher = <span class="keyword">self</span>;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">self</span>-&gt;compMsgTimer-&gt;compMsgTimers[i].mode = <a class="code" href="compMsgTimer_8h.html#a20817a864658161f1c9077899729a98a">TIMER_MODE_OFF</a>;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keyword">self</span>-&gt;compMsgTimer-&gt;compMsgTimers[i].timerId = i;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    ets_timer_disarm(&amp;self-&gt;compMsgTimer-&gt;compMsgTimers[i].timer);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;}</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment">// ================================= compMsgTimerInit ====================================</span></div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">// ================================= compMsgTimerInit ====================================</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="compMsgTimer_8h.html#a18dfffa6eb63527ad8a354a96c5e0ec2">   69</a></span>&#160;uint8_t <a class="code" href="compMsgTimer_8c.html#a18dfffa6eb63527ad8a354a96c5e0ec2">compMsgTimerInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keyword">self</span>-&gt;compMsgTimer-&gt;initTimers = &amp;<a class="code" href="compMsgTimer_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a">initTimers</a>;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgTimer-&gt;initTimers(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;}</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">// ================================= newCompMsgTimer ====================================</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
-<div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="compMsgTimer_8h.html#afe086afeb94bc2cd89397ef9e5046cd2">   81</a></span>&#160;<a class="code" href="structcompMsgTimer.html">compMsgTimer_t</a> *<a class="code" href="compMsgTimer_8c.html#afe086afeb94bc2cd89397ef9e5046cd2">newCompMsgTimer</a>() {</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <a class="code" href="structcompMsgTimer.html">compMsgTimer_t</a> *<a class="code" href="structcompMsgTimer.html">compMsgTimer</a> = os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structcompMsgTimer.html">compMsgTimer_t</a>));</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keywordflow">if</span> (compMsgTimer == NULL) {</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keywordflow">return</span> NULL;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  }</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  <span class="keywordflow">return</span> compMsgTimer;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;}</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="compMsgTimer_8h.html#a18dfffa6eb63527ad8a354a96c5e0ec2">   67</a></span>&#160;uint8_t <a class="code" href="compMsgTimer_8c.html#a18dfffa6eb63527ad8a354a96c5e0ec2">compMsgTimerInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <span class="keyword">self</span>-&gt;compMsgTimer-&gt;initTimers = &amp;<a class="code" href="compMsgTimer_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a">initTimers</a>;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgTimer-&gt;initTimers(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;}</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">// ================================= newCompMsgTimer ====================================</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
+<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="compMsgTimer_8h.html#afe086afeb94bc2cd89397ef9e5046cd2">   78</a></span>&#160;<a class="code" href="structcompMsgTimer.html">compMsgTimer_t</a> *<a class="code" href="compMsgTimer_8c.html#afe086afeb94bc2cd89397ef9e5046cd2">newCompMsgTimer</a>() {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <a class="code" href="structcompMsgTimer.html">compMsgTimer_t</a> *<a class="code" href="structcompMsgTimer.html">compMsgTimer</a> = os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structcompMsgTimer.html">compMsgTimer_t</a>));</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="keywordflow">if</span> (compMsgTimer == NULL) {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keywordflow">return</span> NULL;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  }</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keywordflow">return</span> compMsgTimer;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;}</div>
 <div class="ttc" id="structcompMsgDispatcher_html"><div class="ttname"><a href="structcompMsgDispatcher.html">compMsgDispatcher</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00098">compMsgDispatcher.h:98</a></div></div>
 <div class="ttc" id="compMsgDispatcher_8h_html"><div class="ttname"><a href="compMsgDispatcher_8h.html">compMsgDispatcher.h</a></div></div>
 <div class="ttc" id="compMsgErrorCodes_8h_html_a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0"><div class="ttname"><a href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgErrorCodes_8h_source.html#l00050">compMsgErrorCodes.h:50</a></div></div>
 <div class="ttc" id="compMsgTimer_8h_html_a20817a864658161f1c9077899729a98a"><div class="ttname"><a href="compMsgTimer_8h.html#a20817a864658161f1c9077899729a98a">TIMER_MODE_OFF</a></div><div class="ttdeci">#define TIMER_MODE_OFF</div><div class="ttdef"><b>Definition:</b> <a href="compMsgTimer_8h_source.html#l00049">compMsgTimer.h:49</a></div></div>
-<div class="ttc" id="compMsgTimer_8c_html_a18dfffa6eb63527ad8a354a96c5e0ec2"><div class="ttname"><a href="compMsgTimer_8c.html#a18dfffa6eb63527ad8a354a96c5e0ec2">compMsgTimerInit</a></div><div class="ttdeci">uint8_t compMsgTimerInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgTimer_8c_source.html#l00069">compMsgTimer.c:69</a></div></div>
+<div class="ttc" id="compMsgTimer_8c_html_a18dfffa6eb63527ad8a354a96c5e0ec2"><div class="ttname"><a href="compMsgTimer_8c.html#a18dfffa6eb63527ad8a354a96c5e0ec2">compMsgTimerInit</a></div><div class="ttdeci">uint8_t compMsgTimerInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgTimer_8c_source.html#l00067">compMsgTimer.c:67</a></div></div>
 <div class="ttc" id="structcompMsgTimer_html"><div class="ttname"><a href="structcompMsgTimer.html">compMsgTimer</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgTimer_8h_source.html#l00069">compMsgTimer.h:69</a></div></div>
-<div class="ttc" id="compMsgTimer_8c_html_afe086afeb94bc2cd89397ef9e5046cd2"><div class="ttname"><a href="compMsgTimer_8c.html#afe086afeb94bc2cd89397ef9e5046cd2">newCompMsgTimer</a></div><div class="ttdeci">compMsgTimer_t * newCompMsgTimer()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgTimer_8c_source.html#l00081">compMsgTimer.c:81</a></div></div>
-<div class="ttc" id="compMsgMsgDesc_8c_html_adfac0f453f0aeb587f03d73855a998ae"><div class="ttname"><a href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a></div><div class="ttdeci">#define checkErrOK(result)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8c_source.html#l00563">compMsgMsgDesc.c:563</a></div></div>
+<div class="ttc" id="compMsgTimer_8c_html_afe086afeb94bc2cd89397ef9e5046cd2"><div class="ttname"><a href="compMsgTimer_8c.html#afe086afeb94bc2cd89397ef9e5046cd2">newCompMsgTimer</a></div><div class="ttdeci">compMsgTimer_t * newCompMsgTimer()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgTimer_8c_source.html#l00078">compMsgTimer.c:78</a></div></div>
+<div class="ttc" id="compMsgMsgDesc_8c_html_adfac0f453f0aeb587f03d73855a998ae"><div class="ttname"><a href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a></div><div class="ttdeci">#define checkErrOK(result)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8c_source.html#l00603">compMsgMsgDesc.c:603</a></div></div>
 <div class="ttc" id="compMsgTimer_8c_html_a1a12217b1628dcb7287d7f66b9d3f97a"><div class="ttname"><a href="compMsgTimer_8c.html#a1a12217b1628dcb7287d7f66b9d3f97a">initTimers</a></div><div class="ttdeci">static uint8_t initTimers(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgTimer_8c_source.html#l00053">compMsgTimer.c:53</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

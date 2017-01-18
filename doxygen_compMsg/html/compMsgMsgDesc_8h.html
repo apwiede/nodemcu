@@ -227,10 +227,10 @@ Typedefs</h2></td></tr>
 <tr class="separator:a138debcfe66886ad0b9b692b4a5a3e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63fe844451aa07825f1064642be5b798"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a63fe844451aa07825f1064642be5b798">writeLine_t</a> )(<a class="el" href="compMsgMsgDesc_8h.html#a7f91f58c4f90dd90d4336bfa76dfe490">compMsgMsgDesc_t</a> *self, const uint8_t *buffer, uint8_t lgth)</td></tr>
 <tr class="separator:a63fe844451aa07825f1064642be5b798"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe7026706ff976340595bd4094fe5e82"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#afe7026706ff976340595bd4094fe5e82">getIntFromLine_t</a> )(uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd)</td></tr>
-<tr class="separator:afe7026706ff976340595bd4094fe5e82"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0652c7b4f16d69d02a2b8a84b201157f"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a0652c7b4f16d69d02a2b8a84b201157f">getStrFromLine_t</a> )(uint8_t *myStr, uint8_t **ep, bool *isEnd)</td></tr>
-<tr class="separator:a0652c7b4f16d69d02a2b8a84b201157f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f97e30d35062a34624c94c003c5191e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a8f97e30d35062a34624c94c003c5191e">getIntFromLine_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd)</td></tr>
+<tr class="separator:a8f97e30d35062a34624c94c003c5191e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca380314369d50a3bab343f937d78c2b"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#aca380314369d50a3bab343f937d78c2b">getStrFromLine_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *myStr, uint8_t **ep, bool *isEnd)</td></tr>
+<tr class="separator:aca380314369d50a3bab343f937d78c2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1216d2a01882298083dbc817cacc936"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ac1216d2a01882298083dbc817cacc936">getHeaderFieldsFromLine_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx)</td></tr>
 <tr class="separator:ac1216d2a01882298083dbc817cacc936"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad09dd9bf6db0a3323fd35d8f4d709490"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ad09dd9bf6db0a3323fd35d8f4d709490">readActions_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fileName)</td></tr>
@@ -263,6 +263,8 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ab7f422bed2bf989e8f3cfe5f5ed5edeb"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#ab7f422bed2bf989e8f3cfe5f5ed5edeb">compMsgMsgDescInit</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:ab7f422bed2bf989e8f3cfe5f5ed5edeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2feade549f707d795e9ad83193cabd46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgMsgDesc_8h.html#a7f91f58c4f90dd90d4336bfa76dfe490">compMsgMsgDesc_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a2feade549f707d795e9ad83193cabd46">newCompMsgMsgDesc</a> ()</td></tr>
 <tr class="separator:a2feade549f707d795e9ad83193cabd46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12547fbf12076f952f1d10d910f62223"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgMsgDesc_8h.html#a12547fbf12076f952f1d10d910f62223">freeCompMsgMsgDesc</a> (<a class="el" href="compMsgMsgDesc_8h.html#a7f91f58c4f90dd90d4336bfa76dfe490">compMsgMsgDesc_t</a> *<a class="el" href="structcompMsgMsgDesc.html">compMsgMsgDesc</a>)</td></tr>
@@ -926,12 +928,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="afe7026706ff976340595bd4094fe5e82"></a>
+<a class="anchor" id="a8f97e30d35062a34624c94c003c5191e"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getIntFromLine_t)(uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd)</td>
+          <td class="memname">typedef uint8_t(*  getIntFromLine_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -968,12 +970,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0652c7b4f16d69d02a2b8a84b201157f"></a>
+<a class="anchor" id="aca380314369d50a3bab343f937d78c2b"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  getStrFromLine_t)(uint8_t *myStr, uint8_t **ep, bool *isEnd)</td>
+          <td class="memname">typedef uint8_t(*  getStrFromLine_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *myStr, uint8_t **ep, bool *isEnd)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1192,6 +1194,24 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="ab7f422bed2bf989e8f3cfe5f5ed5edeb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t compMsgMsgDescInit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01438">1438</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a12547fbf12076f952f1d10d910f62223"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1206,7 +1226,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01429">1429</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01473">1473</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
 
 </div>
 </div>
@@ -1223,7 +1243,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01398">1398</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgMsgDesc_8c_source.html#l01461">1461</a> of file <a class="el" href="compMsgMsgDesc_8c_source.html">compMsgMsgDesc.c</a>.</p>
 
 </div>
 </div>

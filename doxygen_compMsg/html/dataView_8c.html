@@ -151,8 +151,10 @@ Functions</h2></td></tr>
 <tr class="separator:a0b787f768e2c7ce6f430cd7e39662437"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4adf63855ab787bdf7fa50fc924ffb7"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dataView_8c.html#ab4adf63855ab787bdf7fa50fc924ffb7">getDataViewData</a> (<a class="el" href="dataView_8h.html#a542dd71d6cf9dd1be9bfab2e2fe0fe3e">dataView_t</a> *self, uint8_t **data, size_t *lgth)</td></tr>
 <tr class="separator:ab4adf63855ab787bdf7fa50fc924ffb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac75aaf759db5711e9477a1a10286762b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dataView_8c.html#ac75aaf759db5711e9477a1a10286762b">dumpBinary</a> (const uint8_t *data, uint8_t lgth, const uint8_t *where)</td></tr>
-<tr class="separator:ac75aaf759db5711e9477a1a10286762b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a141107983f64e56d28ded84a8f20adef"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dataView_8c.html#a141107983f64e56d28ded84a8f20adef">dumpBinary</a> (const uint8_t *data, size_t lgth, const uint8_t *where)</td></tr>
+<tr class="separator:a141107983f64e56d28ded84a8f20adef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa275f40183b7342ea44fe2505d331c77"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dataView_8c.html#aa275f40183b7342ea44fe2505d331c77">dumpBinaryWide</a> (const uint8_t *data, size_t lgth, const uint8_t *where)</td></tr>
+<tr class="separator:aa275f40183b7342ea44fe2505d331c77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a777e3b5e9fc5dd6fe0fe6cad6432d6d1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="dataView_8h.html#a542dd71d6cf9dd1be9bfab2e2fe0fe3e">dataView_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dataView_8c.html#a777e3b5e9fc5dd6fe0fe6cad6432d6d1">newDataView</a> (uint8_t *data, size_t lgth)</td></tr>
 <tr class="separator:a777e3b5e9fc5dd6fe0fe6cad6432d6d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -162,7 +164,7 @@ Variables</h2></td></tr>
 <tr class="separator:a078c667437e3526ecfa8bf67050893d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="ac75aaf759db5711e9477a1a10286762b"></a>
+<a class="anchor" id="a141107983f64e56d28ded84a8f20adef"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -178,7 +180,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>lgth</em>, </td>
         </tr>
         <tr>
@@ -201,6 +203,48 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Definition at line <a class="el" href="dataView_8c_source.html#l00389">389</a> of file <a class="el" href="dataView_8c_source.html">dataView.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa275f40183b7342ea44fe2505d331c77"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void dumpBinaryWide </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>lgth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>where</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dataView_8c_source.html#l00402">402</a> of file <a class="el" href="dataView_8c_source.html">dataView.c</a>.</p>
 
 </div>
 </div>
@@ -810,7 +854,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dataView_8c_source.html#l00402">402</a> of file <a class="el" href="dataView_8c_source.html">dataView.c</a>.</p>
+<p>Definition at line <a class="el" href="dataView_8c_source.html#l00427">427</a> of file <a class="el" href="dataView_8c_source.html">dataView.c</a>.</p>
 
 </div>
 </div>

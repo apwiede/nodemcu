@@ -173,6 +173,8 @@ Functions</h2></td></tr>
 <tr class="separator:a1755eff734b6f60e484a3f26b1afa528"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c4ffc3673ce73968a0449e70333dfcc"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8c.html#a0c4ffc3673ce73968a0449e70333dfcc">getOtaPort</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:a0c4ffc3673ce73968a0449e70333dfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5207af031315abcdd790ea6b626b170e"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8c.html#a5207af031315abcdd790ea6b626b170e">getCryptKey</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:a5207af031315abcdd790ea6b626b170e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b33c6c8a9d84ccd84e16e9b5b3390b8"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8c.html#a4b33c6c8a9d84ccd84e16e9b5b3390b8">setOperatingMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:a4b33c6c8a9d84ccd84e16e9b5b3390b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d60204308f8e312dbe108d74c1a44a6"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8c.html#a4d60204308f8e312dbe108d74c1a44a6">moduleFieldName2Id</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fieldNameStr, uint8_t *id)</td></tr>
@@ -210,7 +212,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00650">650</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00683">683</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -252,7 +254,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00162">162</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00191">191</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -294,7 +296,49 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00152">152</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00181">181</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a5207af031315abcdd790ea6b626b170e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getCryptKey </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00445">445</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -336,7 +380,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00182">182</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00211">211</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -378,7 +422,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00242">242</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00271">271</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -420,7 +464,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00212">212</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00241">241</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -462,7 +506,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00222">222</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00251">251</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -504,7 +548,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00232">232</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00261">261</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -546,7 +590,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00114">114</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00143">143</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -588,7 +632,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00344">344</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00373">373</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -630,7 +674,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00105">105</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00134">134</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -672,7 +716,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00192">192</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00221">221</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -756,7 +800,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00372">372</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00401">401</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -798,7 +842,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00400">400</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00429">429</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -840,7 +884,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00382">382</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00411">411</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -882,7 +926,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00409">409</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00437">437</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -924,7 +968,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00391">391</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00420">420</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -966,7 +1010,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00353">353</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00382">382</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1008,7 +1052,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00261">261</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00290">290</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1050,7 +1094,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00172">172</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00201">201</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1092,7 +1136,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00202">202</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00231">231</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1134,7 +1178,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00271">271</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00300">300</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1176,7 +1220,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00281">281</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00310">310</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1218,7 +1262,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00290">290</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00319">319</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1260,7 +1304,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00299">299</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00328">328</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1302,7 +1346,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00308">308</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00337">337</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1344,7 +1388,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00317">317</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00346">346</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1386,7 +1430,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00326">326</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00355">355</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1428,7 +1472,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00335">335</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00364">364</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1470,7 +1514,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00132">132</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00161">161</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1512,7 +1556,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00142">142</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00171">171</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1554,7 +1598,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00123">123</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00152">152</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1596,7 +1640,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00362">362</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00391">391</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1638,7 +1682,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00251">251</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00280">280</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1680,7 +1724,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00428">428</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00462">462</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1697,7 +1741,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00702">702</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00738">738</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1745,7 +1789,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00436">436</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00470">470</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1771,7 +1815,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00580">580</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00618">618</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1813,7 +1857,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00419">419</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00453">453</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1839,7 +1883,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00571">571</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00609">609</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>

@@ -85,7 +85,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#nested-classes">Data Structures</a> &#124;
+<a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">compMsgDebug.c File Reference</div>  </div>
 </div><!--header-->
@@ -101,8 +105,33 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 <p><a href="compMsgDebug_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdebugCh2Id.html">debugCh2Id</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:ad4d796b98c583d49e83adabd74a63bf6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#ad4d796b98c583d49e83adabd74a63bf6">MAX_BUFFER_SIZE</a>&#160;&#160;&#160;1024</td></tr>
+<tr class="separator:ad4d796b98c583d49e83adabd74a63bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a5e87a88e6e03f811056327394548f96e"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structdebugCh2Id.html">debugCh2Id</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#a5e87a88e6e03f811056327394548f96e">debugCh2Id_t</a></td></tr>
+<tr class="separator:a5e87a88e6e03f811056327394548f96e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:afb71802adb71254a7ed2fcda9e42a3fb"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#afb71802adb71254a7ed2fcda9e42a3fb">ets_vsprintf</a> (char *str, const char *format, va_list argptr)</td></tr>
+<tr class="separator:afb71802adb71254a7ed2fcda9e42a3fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbcea1796d0a05b0643d368d942b7bd3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#acbcea1796d0a05b0643d368d942b7bd3">ets_vsnprintf</a> (char *buffer, size_t sizeOfBuffer, const char *format, va_list argptr)</td></tr>
+<tr class="separator:acbcea1796d0a05b0643d368d942b7bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1676cf3b3ea9b9b801a24e910b5ed61c"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#a1676cf3b3ea9b9b801a24e910b5ed61c">getDebugFlags</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *dbgChars)</td></tr>
+<tr class="separator:a1676cf3b3ea9b9b801a24e910b5ed61c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab04462f663f279253f08f9392d87979d"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#ab04462f663f279253f08f9392d87979d">setDebugFlags</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *dbgChars)</td></tr>
+<tr class="separator:ab04462f663f279253f08f9392d87979d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e4c48653694840d5ccd5262eaab6d29"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#a9e4c48653694840d5ccd5262eaab6d29">dbgPrintf</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format,...)</td></tr>
+<tr class="separator:a9e4c48653694840d5ccd5262eaab6d29"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a023bfd29a3131d701fa30b600e190a10"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#a023bfd29a3131d701fa30b600e190a10">dumpHeaderPart</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#aa60802910717144058bb4c20e59241e0">headerPart_t</a> *hdr)</td></tr>
 <tr class="separator:a023bfd29a3131d701fa30b600e190a10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:affd5c8070d67e6b4258525df6b08dd4d"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#affd5c8070d67e6b4258525df6b08dd4d">dumpMsgHeaderInfos</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">msgHeaderInfos_t</a> *hdrInfos)</td></tr>
@@ -117,7 +146,40 @@ Functions</h2></td></tr>
 <tr class="separator:ad3090d321ae15d33289379ccdf0f39a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a07a6d726c709dc653a2b54f7c31859"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgDebug_8h.html#a5b0a8342d5a561c29d6741dbef6ab82d">compMsgDebug_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#a9a07a6d726c709dc653a2b54f7c31859">newCompMsgDebug</a> ()</td></tr>
 <tr class="separator:a9a07a6d726c709dc653a2b54f7c31859"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a4441ad69a1397172765e7943c972e796"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgDebug_8c.html#a5e87a88e6e03f811056327394548f96e">debugCh2Id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgDebug_8c.html#a4441ad69a1397172765e7943c972e796">debugCh2Id</a> []</td></tr>
+<tr class="separator:a4441ad69a1397172765e7943c972e796"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a class="anchor" id="ad4d796b98c583d49e83adabd74a63bf6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX_BUFFER_SIZE&#160;&#160;&#160;1024</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00051">51</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Typedef Documentation</h2>
+<a class="anchor" id="a5e87a88e6e03f811056327394548f96e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structdebugCh2Id.html">debugCh2Id</a>  <a class="el" href="compMsgDebug_8c.html#a5e87a88e6e03f811056327394548f96e">debugCh2Id_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="ad3090d321ae15d33289379ccdf0f39a0"></a>
 <div class="memitem">
@@ -133,7 +195,61 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00304">304</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00441">441</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a9e4c48653694840d5ccd5262eaab6d29"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void dbgPrintf </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dbgChars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>debugLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00141">141</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
 
 </div>
 </div>
@@ -169,7 +285,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00053">53</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00196">196</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
 
 </div>
 </div>
@@ -205,7 +321,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00268">268</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00406">406</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
 
 </div>
 </div>
@@ -241,7 +357,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00158">158</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00298">298</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
 
 </div>
 </div>
@@ -277,7 +393,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00235">235</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00375">375</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
 
 </div>
 </div>
@@ -313,7 +429,113 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00284">284</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00422">422</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="acbcea1796d0a05b0643d368d942b7bd3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ets_vsnprintf </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>sizeOfBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">va_list&#160;</td>
+          <td class="paramname"><em>argptr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afb71802adb71254a7ed2fcda9e42a3fb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ets_vsprintf </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>str</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">va_list&#160;</td>
+          <td class="paramname"><em>argptr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a1676cf3b3ea9b9b801a24e910b5ed61c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint32_t getDebugFlags </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dbgChars</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00088">88</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
 
 </div>
 </div>
@@ -330,7 +552,103 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00319">319</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00465">465</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab04462f663f279253f08f9392d87979d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t setDebugFlags </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dbgChars</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00117">117</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a class="anchor" id="a4441ad69a1397172765e7943c972e796"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="compMsgDebug_8c.html#a5e87a88e6e03f811056327394548f96e">debugCh2Id_t</a> <a class="el" href="structdebugCh2Id.html">debugCh2Id</a>[]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
+<div class="line"> { <span class="charliteral">&#39;A&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a9128cd64c9c2ade4ca119e1d90658a39">DEBUG_COMP_MSG_ACTION</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;B&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a817f6c7605a019f038893b48f5be898a">DEBUG_COMP_MSG_BUILD_MSG</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;D&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a8bb838ab368ce54fd6e288fa955c9d27">DEBUG_COMP_MSG_DISPATCHER</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;d&#39;</span>, <a class="code" href="compMsgDebug_8h.html#ab271605da103cb3bb03dc8b0d3b1d8ea">DEBUG_COMP_MSG_DATA</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;V&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a9d4076e28cdab55942e32300cb1307b5">DEBUG_DATA_VIEW</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;v&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a04215a5918fa38f454aeeb18c5df5a77">DEBUG_COMP_MSG_DATA_VIEW</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;H&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a759b512205a534325c02be2a249a890a">DEBUG_COMP_MSG_HTTP</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;I&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a22bca3db0ca3739764589b12d05176bd">DEBUG_COMP_MSG_IDENTIFY</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;E&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a5de1cce16ea7e4bc4b5e95d191aaa064">DEBUG_COMP_MSG_MSG_DESC</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;M&#39;</span>, <a class="code" href="compMsgDebug_8h.html#ac9fde963e56f5bbd26a77a6e53b48fd1">DEBUG_COMP_MSG_MODULE_DATA</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;N&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a7b14f3a1a91520b723cc2cbe80f9ebef">DEBUG_COMP_MSG_NET_SOCKET</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;O&#39;</span>, <a class="code" href="compMsgDebug_8h.html#aa7328c6a0dc3c59ff8582741b4f94aac">DEBUG_COMP_MSG_OTA</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;R&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a0ac9d19201f1520d595e387de03b77ac">DEBUG_COMP_MSG_REQUEST</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;S&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a69e20bce6fecd4d46ee8fbab29939b80">DEBUG_COMP_MSG_SOCKET</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;s&#39;</span>, <a class="code" href="compMsgDebug_8h.html#abb7cac5d558feb0621b9627e3d45e97a">DEBUG_COMP_MSG_SEND_RECEIVE</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;T&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a8218cf110c4a3bf44e77bc51f37bf85a">DEBUG_COMP_MSG_TYPES_AND_NAMES</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;t&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a372687f3932bcfec35fdaa27d34d61e8">DEBUG_COMP_MSG_TIMER</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;U&#39;</span>, <a class="code" href="compMsgDebug_8h.html#af40650aefe2f720730d62a0038beeb87">DEBUG_COMP_MSG_UTIL</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;W&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a7162308241184a37e6a3530cac105228">DEBUG_COMP_MSG_WEB_SOCKET</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;w&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a0860ca3b27fbc3a0a641dde33ace7889">DEBUG_COMP_MSG_WIFI_DATA</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;Y&#39;</span>, <a class="code" href="compMsgDebug_8h.html#a6d0ceae8ed1da4afb8ea1701b48f294f">DEBUG_COMP_MSG_ALWAYS</a>},</div>
+<div class="line"> { <span class="charliteral">&#39;\0&#39;</span>, 0},</div>
+<div class="line">}</div>
+<div class="ttc" id="compMsgDebug_8h_html_a817f6c7605a019f038893b48f5be898a"><div class="ttname"><a href="compMsgDebug_8h.html#a817f6c7605a019f038893b48f5be898a">DEBUG_COMP_MSG_BUILD_MSG</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_BUILD_MSG</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00050">compMsgDebug.h:50</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a9128cd64c9c2ade4ca119e1d90658a39"><div class="ttname"><a href="compMsgDebug_8h.html#a9128cd64c9c2ade4ca119e1d90658a39">DEBUG_COMP_MSG_ACTION</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_ACTION</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00049">compMsgDebug.h:49</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_af40650aefe2f720730d62a0038beeb87"><div class="ttname"><a href="compMsgDebug_8h.html#af40650aefe2f720730d62a0038beeb87">DEBUG_COMP_MSG_UTIL</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_UTIL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00066">compMsgDebug.h:66</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a69e20bce6fecd4d46ee8fbab29939b80"><div class="ttname"><a href="compMsgDebug_8h.html#a69e20bce6fecd4d46ee8fbab29939b80">DEBUG_COMP_MSG_SOCKET</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_SOCKET</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00062">compMsgDebug.h:62</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a7b14f3a1a91520b723cc2cbe80f9ebef"><div class="ttname"><a href="compMsgDebug_8h.html#a7b14f3a1a91520b723cc2cbe80f9ebef">DEBUG_COMP_MSG_NET_SOCKET</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_NET_SOCKET</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00059">compMsgDebug.h:59</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a5de1cce16ea7e4bc4b5e95d191aaa064"><div class="ttname"><a href="compMsgDebug_8h.html#a5de1cce16ea7e4bc4b5e95d191aaa064">DEBUG_COMP_MSG_MSG_DESC</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_MSG_DESC</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00057">compMsgDebug.h:57</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_abb7cac5d558feb0621b9627e3d45e97a"><div class="ttname"><a href="compMsgDebug_8h.html#abb7cac5d558feb0621b9627e3d45e97a">DEBUG_COMP_MSG_SEND_RECEIVE</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_SEND_RECEIVE</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00063">compMsgDebug.h:63</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_ac9fde963e56f5bbd26a77a6e53b48fd1"><div class="ttname"><a href="compMsgDebug_8h.html#ac9fde963e56f5bbd26a77a6e53b48fd1">DEBUG_COMP_MSG_MODULE_DATA</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_MODULE_DATA</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00058">compMsgDebug.h:58</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a04215a5918fa38f454aeeb18c5df5a77"><div class="ttname"><a href="compMsgDebug_8h.html#a04215a5918fa38f454aeeb18c5df5a77">DEBUG_COMP_MSG_DATA_VIEW</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_DATA_VIEW</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00054">compMsgDebug.h:54</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a22bca3db0ca3739764589b12d05176bd"><div class="ttname"><a href="compMsgDebug_8h.html#a22bca3db0ca3739764589b12d05176bd">DEBUG_COMP_MSG_IDENTIFY</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_IDENTIFY</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00056">compMsgDebug.h:56</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a8bb838ab368ce54fd6e288fa955c9d27"><div class="ttname"><a href="compMsgDebug_8h.html#a8bb838ab368ce54fd6e288fa955c9d27">DEBUG_COMP_MSG_DISPATCHER</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_DISPATCHER</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00051">compMsgDebug.h:51</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a0860ca3b27fbc3a0a641dde33ace7889"><div class="ttname"><a href="compMsgDebug_8h.html#a0860ca3b27fbc3a0a641dde33ace7889">DEBUG_COMP_MSG_WIFI_DATA</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_WIFI_DATA</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00068">compMsgDebug.h:68</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a8218cf110c4a3bf44e77bc51f37bf85a"><div class="ttname"><a href="compMsgDebug_8h.html#a8218cf110c4a3bf44e77bc51f37bf85a">DEBUG_COMP_MSG_TYPES_AND_NAMES</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_TYPES_AND_NAMES</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00064">compMsgDebug.h:64</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a7162308241184a37e6a3530cac105228"><div class="ttname"><a href="compMsgDebug_8h.html#a7162308241184a37e6a3530cac105228">DEBUG_COMP_MSG_WEB_SOCKET</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_WEB_SOCKET</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00067">compMsgDebug.h:67</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a6d0ceae8ed1da4afb8ea1701b48f294f"><div class="ttname"><a href="compMsgDebug_8h.html#a6d0ceae8ed1da4afb8ea1701b48f294f">DEBUG_COMP_MSG_ALWAYS</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_ALWAYS</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00069">compMsgDebug.h:69</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a0ac9d19201f1520d595e387de03b77ac"><div class="ttname"><a href="compMsgDebug_8h.html#a0ac9d19201f1520d595e387de03b77ac">DEBUG_COMP_MSG_REQUEST</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_REQUEST</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00061">compMsgDebug.h:61</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a372687f3932bcfec35fdaa27d34d61e8"><div class="ttname"><a href="compMsgDebug_8h.html#a372687f3932bcfec35fdaa27d34d61e8">DEBUG_COMP_MSG_TIMER</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_TIMER</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00065">compMsgDebug.h:65</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a9d4076e28cdab55942e32300cb1307b5"><div class="ttname"><a href="compMsgDebug_8h.html#a9d4076e28cdab55942e32300cb1307b5">DEBUG_DATA_VIEW</a></div><div class="ttdeci">#define DEBUG_DATA_VIEW</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00053">compMsgDebug.h:53</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_a759b512205a534325c02be2a249a890a"><div class="ttname"><a href="compMsgDebug_8h.html#a759b512205a534325c02be2a249a890a">DEBUG_COMP_MSG_HTTP</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_HTTP</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00055">compMsgDebug.h:55</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_ab271605da103cb3bb03dc8b0d3b1d8ea"><div class="ttname"><a href="compMsgDebug_8h.html#ab271605da103cb3bb03dc8b0d3b1d8ea">DEBUG_COMP_MSG_DATA</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_DATA</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00052">compMsgDebug.h:52</a></div></div>
+<div class="ttc" id="compMsgDebug_8h_html_aa7328c6a0dc3c59ff8582741b4f94aac"><div class="ttname"><a href="compMsgDebug_8h.html#aa7328c6a0dc3c59ff8582741b4f94aac">DEBUG_COMP_MSG_OTA</a></div><div class="ttdeci">#define DEBUG_COMP_MSG_OTA</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00060">compMsgDebug.h:60</a></div></div>
+</div><!-- fragment -->
+<p>Definition at line <a class="el" href="compMsgDebug_8c_source.html#l00061">61</a> of file <a class="el" href="compMsgDebug_8c_source.html">compMsgDebug.c</a>.</p>
 
 </div>
 </div>

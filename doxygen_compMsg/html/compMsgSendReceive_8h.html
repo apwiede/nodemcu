@@ -107,8 +107,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:adfb000b3869f7ef899d0b4f76715184c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93d508a0b980ad6b95ae3d2fe447ce16"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a93d508a0b980ad6b95ae3d2fe447ce16">uartSetup_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits)</td></tr>
 <tr class="separator:a93d508a0b980ad6b95ae3d2fe447ce16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60c652ecf161809d004c578ac614e5ca"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a60c652ecf161809d004c578ac614e5ca">uartReceiveCb_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, uint8_t lgth)</td></tr>
-<tr class="separator:a60c652ecf161809d004c578ac614e5ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62c0b2e21ee772e85c947b97f57cdadf"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a62c0b2e21ee772e85c947b97f57cdadf">uartReceiveCb_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, size_t lgth)</td></tr>
+<tr class="separator:a62c0b2e21ee772e85c947b97f57cdadf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7764ffb81cffc7074512694660605cb8"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a7764ffb81cffc7074512694660605cb8">typeRSendAnswer_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *data, uint8_t msgLgth)</td></tr>
 <tr class="separator:a7764ffb81cffc7074512694660605cb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2f270c2337d5bdc0ab5fe9d5ada052e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#af2f270c2337d5bdc0ab5fe9d5ada052e">prepareCloudMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
@@ -226,12 +226,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a60c652ecf161809d004c578ac614e5ca"></a>
+<a class="anchor" id="a62c0b2e21ee772e85c947b97f57cdadf"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  uartReceiveCb_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, uint8_t lgth)</td>
+          <td class="memname">typedef uint8_t(*  uartReceiveCb_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, size_t lgth)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -269,7 +269,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00344">344</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00354">354</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
 
 </div>
 </div>
@@ -286,7 +286,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00370">370</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00380">380</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
 
 </div>
 </div>

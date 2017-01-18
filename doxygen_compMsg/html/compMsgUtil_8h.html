@@ -111,14 +111,14 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a21cc25f7bb91f65f1958efe1327069c7"><td class="memItemLeft" align="right" valign="top">typedef struct <br class="typebreak" />
 <a class="el" href="structfieldValueCallbackInfos.html">fieldValueCallbackInfos</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a21cc25f7bb91f65f1958efe1327069c7">fieldValueCallbackInfos_t</a></td></tr>
 <tr class="separator:a21cc25f7bb91f65f1958efe1327069c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a61cf8018b0a2ae259959473171b29912"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a61cf8018b0a2ae259959473171b29912">toBase64_t</a> )(const uint8_t *msg, size_t *len, uint8_t **encoded)</td></tr>
-<tr class="separator:a61cf8018b0a2ae259959473171b29912"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1677613fcf35786dba295924a7ced2e4"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a1677613fcf35786dba295924a7ced2e4">fromBase64_t</a> )(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg)</td></tr>
-<tr class="separator:a1677613fcf35786dba295924a7ced2e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d883232e0719ec953ce4449d6fa07e1"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a9d883232e0719ec953ce4449d6fa07e1">encryptMsg_t</a> )(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td></tr>
-<tr class="separator:a9d883232e0719ec953ce4449d6fa07e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ce57c871f3e450c3d6624468efff129"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a1ce57c871f3e450c3d6624468efff129">decryptMsg_t</a> )(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td></tr>
-<tr class="separator:a1ce57c871f3e450c3d6624468efff129"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90e4fe5c9b2179db3365fda7ab72eb98"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a90e4fe5c9b2179db3365fda7ab72eb98">toBase64_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *msg, size_t *len, uint8_t **encoded)</td></tr>
+<tr class="separator:a90e4fe5c9b2179db3365fda7ab72eb98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b0b2fc0437340fbb9ce91f4d97c27c0"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a2b0b2fc0437340fbb9ce91f4d97c27c0">fromBase64_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg)</td></tr>
+<tr class="separator:a2b0b2fc0437340fbb9ce91f4d97c27c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05ceee9376a25e5ed9731fa511576f39"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a05ceee9376a25e5ed9731fa511576f39">encryptMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td></tr>
+<tr class="separator:a05ceee9376a25e5ed9731fa511576f39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3acbf503b592157419430c0531b9784"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#af3acbf503b592157419430c0531b9784">decryptMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td></tr>
+<tr class="separator:af3acbf503b592157419430c0531b9784"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7641f9b1516ae860d928149747ecb19"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#ad7641f9b1516ae860d928149747ecb19">setFieldValueCallback_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *callbackName, <a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a> callback, uint8_t callbackType)</td></tr>
 <tr class="separator:ad7641f9b1516ae860d928149747ecb19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a95ee6dc3a3bb838f7d978f2452842529"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgUtil_8h.html#a95ee6dc3a3bb838f7d978f2452842529">addFieldValueCallbackName_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *callbackName, <a class="el" href="compMsgDataView_8h.html#a46808c6173b9e46077689d1eb71f0074">fieldValueCallback_t</a> callback, uint8_t callbackType)</td></tr>
@@ -178,12 +178,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1ce57c871f3e450c3d6624468efff129"></a>
+<a class="anchor" id="af3acbf503b592157419430c0531b9784"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  decryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td>
+          <td class="memname">typedef uint8_t(*  decryptMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -192,12 +192,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9d883232e0719ec953ce4449d6fa07e1"></a>
+<a class="anchor" id="a05ceee9376a25e5ed9731fa511576f39"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  encryptMsg_t)(const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td>
+          <td class="memname">typedef uint8_t(*  encryptMsg_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -218,12 +218,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1677613fcf35786dba295924a7ced2e4"></a>
+<a class="anchor" id="a2b0b2fc0437340fbb9ce91f4d97c27c0"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  fromBase64_t)(const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg)</td>
+          <td class="memname">typedef uint8_t(*  fromBase64_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -274,12 +274,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a61cf8018b0a2ae259959473171b29912"></a>
+<a class="anchor" id="a90e4fe5c9b2179db3365fda7ab72eb98"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  toBase64_t)(const uint8_t *msg, size_t *len, uint8_t **encoded)</td>
+          <td class="memname">typedef uint8_t(*  toBase64_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *msg, size_t *len, uint8_t **encoded)</td>
         </tr>
       </table>
 </div><div class="memdoc">
