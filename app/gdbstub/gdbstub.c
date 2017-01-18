@@ -507,7 +507,7 @@ static int ATTR_GDBFN gdbReadCommand() {
   sentchs[1] = gdbRecvChar();
   ptr = &sentchs[0];
   rchsum = gdbGetHexVal(&ptr, 8);
-//  os_printf("c %x r %x\n", chsum, rchsum);
+  os_printf("checksum c %x r %x\n", chsum, rchsum);
   if (rchsum != chsum) {
     gdbSendChar('-');
     return ST_ERR;
