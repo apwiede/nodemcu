@@ -1,8 +1,8 @@
 all: clean
-	critcl -keep -cache B -pkg dwarfdbg.tcl
-	critcl -keep -cache B -pkg dwarfdbgclass.tcl
+	critcl -keep -cache B -pkg dwarfDbg.tcl
+	critcl -keep -cache B -pkg dwarfDbgClass.tcl
 
 clean:
-	rm -f ./lib/dwarfdbg/inux-x86_64/dwarfdbg.so
-	rm -f ./lib/dwarfdbgclass/linux-x86_64/dwarfdbgclass.so
+	rm -f ./lib/dwarfDbg/linux-x86_64/dwarfDbg.so
+	rm -f ./lib/dwarfDbgClass/linux-x86_64/dwarfDbgClass.so
 	rm -rf B
