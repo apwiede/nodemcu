@@ -35,7 +35,7 @@
  * File:   compMsgAction.h
  * Author: Arnulf P. Wiedemann
  *
- * Created on Descmber 19, 2016
+ * Created on December 19, 2016
  */
 
 #ifndef COMP_MSG_OTA_H
