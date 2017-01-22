@@ -1,4 +1,4 @@
-# dwarfdbgclass.tcl --
+# dwarfDbgClass.tcl --
 #
 #       Implementation of an source level GUI debugger for Tcl.
 #       This code based on critcl v3.1, API compatible to the PTI [x].
@@ -26,9 +26,9 @@ critcl::buildrequirement {
 # # ## ### ##### ######## ############# #####################
 ## Administrivia
 
-critcl::license {Andreas Kupries} {BSD licensed}
+critcl::license {Arnulf Wiedemann} {BSD/MIT licensed}
 
-critcl::summary {dwarfdbg objects for Tcl.}
+critcl::summary {dwarfDbg objects for Tcl.}
 
 critcl::description {
     This package implements dwarf debug objects
@@ -37,7 +37,7 @@ critcl::description {
     storage and operations.
 }
 
-critcl::subject dwarfdbg
+critcl::subject dwarfDbg
 critcl::subject {source level GUI debugger}
 critcl::subject debugger
 critcl::subject {source level debugger}
@@ -45,37 +45,37 @@ critcl::subject {source level debugger}
 # # ## ### ##### ######## ############# #####################
 ## Configuration and implementation.
 
-critcl::api import dwarfdbg 1
+critcl::api import dwarfDbg 1
 
-critcl::cheaders dwarfdbgclass/*.h ; # Method declarations and implementation,
-critcl::csources dwarfdbgclass/*.c ; # outside of this main file.
+critcl::cheaders dwarfDbgClass/*.h ; # Method declarations and implementation,
+critcl::csources dwarfDbgClass/*.c ; # outside of this main file.
 
-critcl::class::define ::dwarfdbgclass {
-    include m.h                  ; # Method function declarations.
-    include dwarfdbg/dwarfdbgDecls.h ; # API of the generic dwarfDbgPtr_t we are binding to.
+critcl::class::define ::dwarfDbgClass {
+    include m.h                      ; # Method function declarations.
+    include dwarfDbg/dwarfDbgDecls.h ; # API of the generic dwarfDbgPtr_t we are binding to.
     type    dwarfDbgPtr_t
 
     constructor {
-	instance = dwarfdbgNew ();
+	instance = dwarfDbgNew ();
     } {
-	/* Set back reference from dwarfdbg_t instance to instance command */
+	/* Set back reference from dwarfDbgPtr_t instance to instance command */
 	dwarfdbg_clientdata_set (instance, (ClientData) cmd);
     }
 
     destructor {
 	/* Release the whole stack. */
-	dwarfdbgDel (instance);
+	dwarfDbgDel (instance);
     }
 
-    method clear   as stm_CLEAR
-    method destroy as stm_DESTROY
-    method openElf as stm_OPEN_ELF
-    method fcn1    as stm_FCN1
+    method clear       as stm_CLEAR
+    method destroy     as stm_DESTROY
+    method openElf     as stm_OPEN_ELF
+    method fcn1        as stm_FCN1
     method getErrorStr as stm_GET_ERROR_STR
 
     support {
 	static void
-	DwarfdbgFree (void* obj) {
+	DwarfDbgFree (void* obj) {
 	    /* Release the obj. */
 	    Tcl_DecrRefCount ((Tcl_Obj*) obj);
 	}
@@ -84,4 +84,4 @@ critcl::class::define ::dwarfdbgclass {
 
 # ### ### ### ######### ######### #########
 ## Ready
-package provide dwarfdbgclass 1
+package provide dwarfDbgClass 1

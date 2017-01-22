@@ -45,5 +45,5 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dwarfdbgInt.h"
+#include "dwarfDbgInt.h"
 

@@ -4,7 +4,7 @@ exec tclsh "$0" ${1+"$@"}
 set me [file normalize [info script]]
 # Order of building and installation: "cstack", then "stackc", as the
 # latter depends on the former. Not relevant for wrap4tea.
-set packages {cstack stackc}
+set packages {dwarfDbg dwarfDbgClass}
 proc main {} {
     global argv tcl_platform tag
     set tag {}

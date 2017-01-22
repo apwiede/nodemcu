@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   dwarfdbgInt.h
+ * File:   dwarfDbgInt.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
@@ -50,15 +50,16 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <tcl.h>
 
-#include "dwarfdbg.h"
-#include "dwarfdbgGlobals.h"
-#include "dwarfdbgEsb.h"
 #include "libdwarf.h"
 #include "dwarf.h"
-#include "dwarfdbg/dwarfdbgDecls.h"
-#include "dwarfdbgUtil.h"
-#include "dwarfdbgOpenElf.h"
+#include "dwarfDbg.h"
+#include "dwarfdbgGlobals.h"
+#include "dwarfDbgEsb.h"
+//#include "include/dwarfDbg/dwarfdbgDecls.h"
+#include "dwarfDbgUtil.h"
+#include "dwarfDbgElfInfo.h"
 
 typedef struct elfInfo {
 } elftInfo_t;
@@ -81,7 +82,7 @@ typedef struct _dwarfDbg {
 
     dwarfdbgEsb_t *dwarfdbgEsb;
     dwarfdbgUtil_t *dwarfdbgUtil;
-    dwarfdbgOpenElf_t *dwarfdbgOpenElf;
+    dwarfdbgOpenElf_t *dwarfDbgOpenElf;
 
 } _dwarfDbg_t;
 

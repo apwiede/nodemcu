@@ -1,4 +1,4 @@
-# dwarfdbg.tcl --
+# dwarfDbg.tcl --
 #
 #	basic Tcl interface for libdwarf
 #
@@ -17,7 +17,7 @@ package require critcl 3 ;# stubs management
 # # ## ### ##### ######## ############# #####################
 ## Administrivia
 
-critcl::license {Arnulf Wiedemann} BSD
+critcl::license {Arnulf Wiedemann} BSD/MIT
 
 critcl::summary {A C-level abstract datatype for libdwarf}
 
@@ -25,7 +25,7 @@ critcl::description {
     This package implements an abstract
     data type for libdwarf calls, at the C-level.
     No Tcl-binding is provided. See package
-    'dwarfdbgclass' for that.
+    'dwarfDbgClass' for that.
 }
 
 critcl::subject dwarfInfo
@@ -37,8 +37,8 @@ critcl::subject {generic data structure}
 # # ## ### ##### ######## ############# #####################
 ## Configuration
 
-critcl::api header dwarfdbg.h
-critcl::cheaders   dwarfdbgInt.h dwarfdbgEsb.h dwarfdbgUtil.h dwarfdbgDict.h libdwarf/*.h
+critcl::api header dwarfDbg.h
+critcl::cheaders   dwarfDbgInt.h dwarfDbgEsb.h dwarfDbgUtil.h dwarfDbgDict.h libdwarf/*.h
 
 # # ## ### ##### ######## ############# #####################
 ## Exported API
@@ -48,22 +48,22 @@ critcl::cheaders   dwarfdbgInt.h dwarfdbgEsb.h dwarfdbgUtil.h dwarfdbgDict.h lib
 #  - openElf -- open an elf object file for getting debugging info
 # 
 
-critcl::api function dwarfDbgPtr_t dwarfdbgNew  {}
-critcl::api function void          dwarfdbgDel  {dwarfDbgPtr_t dbg}
+critcl::api function dwarfDbgPtr_t dwarfDbgNew  {}
+critcl::api function void          dwarfDbgDel  {dwarfDbgPtr_t dbg}
 
 critcl::api function void          dwarfdbg_clientdata_set {dwarfDbgPtr_t dbg void* clientdata}
 critcl::api function void*         dwarfdbg_clientdata_get {dwarfDbgPtr_t dbg}
-critcl::api function int           dwarfdbgOpenElf {dwarfDbgPtr_t dbg char* fileName}
-critcl::api function void          dwarfdbg_fcn1 {dwarfDbgPtr_t dbg}
-critcl::api function char*         dwarfdbgGetErrorStr {dwarfDbgPtr_t dbg}
+critcl::api function int           dwarfDbgOpenElf {dwarfDbgPtr_t dbg char* fileName}
+critcl::api function void          dwarfDbg_fcn1 {dwarfDbgPtr_t dbg}
+critcl::api function char*         dwarfDbgGetErrorStr {dwarfDbgPtr_t dbg}
 
 # # ## ### ##### ######## ############# #####################
 ## Implementation.
 
-critcl::csources dwarfdbg.c dwarfdbgOpenElf.c dwarfdbgUtil.c dwarfdbgEsb.c dwarfdbgDict.c
+critcl::csources dwarfDbg.c dwarfDbgElfInfo.c dwarfDbgUtil.c dwarfDbgEsb.c dwarfDbgDict.c
 critcl::clibraries libdwarf/libdwarf.a /usr/lib64/libelf.so
 critcl::ccode {} ; # Fake the 'nothing to build detector'
 
 # ### ### ### ######### ######### #########
 ## Ready
-package provide dwarfdbg 1
+package provide dwarfDbg 1

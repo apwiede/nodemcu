@@ -32,13 +32,14 @@
 */
 
 /* 
- * File:   dwarfdbgOpenElf.c
+ * File:   dwarfDbgOpenElf.c
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
  */
 
-#include "dwarfdbgInt.h"
+#include <tcl.h>
+#include "dwarfDbgInt.h"
 
 static dwarfdbgEsb_t config_file_path;
 static dwarfdbgEsb_t config_file_tiedpath;
@@ -899,7 +900,7 @@ printf("dieprintCuGoffset: %d\n", dieprintCuGoffset);
       dwarfdbgEsb_t producername;
 
       self->dwarfdbgEsb->esbConstructor(self, &producername);
-      self->dwarfdbgOpenElf->getProducerName(self, dbg, cuDie, dieprintCuGoffset, &producername);
+      self->dwarfDbgOpenElf->getProducerName(self, dbg, cuDie, dieprintCuGoffset, &producername);
 //printf("producername: %s\n", self->dwarfdbgEsb->esbGetString(self, &producername));
 #ifdef NOTDEF
       update_compiler_target(self->dwarfdbgEsb->esbGetString(self, &producername));
@@ -909,7 +910,7 @@ printf("dieprintCuGoffset: %d\n", dieprintCuGoffset);
     /*  Once the compiler table has been updated, see
       if we need to generate the list of CU compiled
       by all the producers contained in the elf file */
-    self->dwarfdbgOpenElf->getCuName(self, dbg, cuDie, dieprintCuGoffset, &cuShortName, &cuLongName);
+    self->dwarfDbgOpenElf->getCuName(self, dbg, cuDie, dieprintCuGoffset, &cuShortName, &cuLongName);
 printf("cuShortName: %s\n", cuShortName);
     /* Add CU name to current compiler entry */
 //    add_cu_name_compiler_target(cuLongName);
@@ -968,9 +969,9 @@ printf("DIEOverallOffset: %d DIEOffset: %d \n", DIEOverallOffset, DIEOffset);
   }
 }
 
-// =================================== dwarfdbgOpenElf =========================== 
+// =================================== dwarfDbgOpenElf =========================== 
 
-int dwarfdbgOpenElf (dwarfDbgPtr_t self, char *fileName) {
+int dwarfDbgOpenElf (dwarfDbgPtr_t self, char *fileName) {
   int f = 0;
   Elf_Cmd cmd = 0;
   Elf *arf = 0;
@@ -980,7 +981,7 @@ int dwarfdbgOpenElf (dwarfDbgPtr_t self, char *fileName) {
   Dwarf_Error onef_err = 0;
   Dwarf_Error pod_err;
 
-printf("dwarfdbgOpenElf\n");
+printf("dwarfDbgOpenElf\n");
 fflush(stdout);
   self->dwarfdbgEsb->esbConstructor(self, &config_file_path);
   self->dwarfdbgEsb->esbConstructor(self, &config_file_tiedpath);
@@ -1028,7 +1029,7 @@ printf("cmd2: %d\n", cmd);
 int dwarfdbgOpenElfInit (dwarfDbgPtr_t self) {
 printf("dwarfdbgOpenElfInit\n");
   _self = self;
-  self->dwarfdbgOpenElf->getProducerName = getProducerName;
-  self->dwarfdbgOpenElf->getCuName = getCuName;
+  self->dwarfDbgOpenElf->getProducerName = getProducerName;
+  self->dwarfDbgOpenElf->getCuName = getCuName;
 }
 

@@ -46,7 +46,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "dwarfdbgInt.h"
+#include "dwarfDbgInt.h"
 
 /*  There is nothing magic about this size.
     It is just big enough to avoid most resizing. */
