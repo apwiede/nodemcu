@@ -1,4 +1,11 @@
-Example of critcl-based packages.
+A source level debugger with GUI for ESP8266 with critcl-based packages.
+The idea is to use the gdbstub modul from Espressif which has bin integrated 
+in a derived version from nodemcu firmware.
+The program is also based on libdwarf from SGI.
+The GUI will be built with a Tk GUI.
+
+This is WORK IN PROGRESS!!
+It is at the very beginnig!!
 
 A program written to demonstrate
 
@@ -19,7 +26,7 @@ Package "dwarfdbgclass" incidentially also demonstrates the use of companion
 .c and .h files in the implementation of a package.
 
 Sources
-	Package	"dwarfdbg":		dwarfdbg.tcl, dwarfdbg.c, dwarfdbg.h, dwarfdbgInt.h
+	Package	"dwarfdbg":		dwarfdbg.tcl, dwarfdbg.c, dwarfdbg.h, dwarfdbgInt.h ...
 	Package "dwrafdbgclass":	dwarfdbgclass.tcl, dwarfdbgclass/*.[ch]
 
 Notes:
