@@ -1,0 +1,7 @@
+new interface method:
+  - change dwarfdbg.tcl 
+  - change dwarfdbgclass/m.c
+  - change dwarfdbgclass/m.h
+  - change dwarfdbg.c
+  - change dwarfdbgclass.tcl 
+
