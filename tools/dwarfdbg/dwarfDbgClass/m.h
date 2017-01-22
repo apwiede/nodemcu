@@ -46,7 +46,7 @@
 #define _M_H 1
 
 #include "tcl.h"
-#include <dwarfdbg/dwarfdbgDecls.h>
+#include <dwarfDbg/dwarfDbgDecls.h>
 
 int stm_CLEAR         (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
 int stm_DESTROY       (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
@@ -62,3 +62,4 @@ int stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj*
  * fill-column: 78
  * End:
  */
+

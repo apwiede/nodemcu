@@ -38,10 +38,10 @@
  * Created on January 22, 2017
  */
 
-/* ::dwarfdbg - critcl - layer 3 definitions.
+/* ::dwarfDbg - critcl - layer 3 definitions.
  *
  * -> Method functions.
- *    Implementations for all dwarfdbg methods.
+ *    Implementations for all dwarfDbg methods.
  */
 
 #include "util.h"
@@ -68,7 +68,7 @@
 int
 stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
-    /* Syntax: dwarfdbg clear
+    /* Syntax: dwarfDbg clear
      *	       [0]      [1]
      */
 
@@ -86,7 +86,7 @@ stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv
  *
  * stm_DESTROY --
  *
- *	Destroys the whole dwarfdbg object.
+ *	Destroys the whole dwarfDbg object.
  *
  * Results:
  *	A standard Tcl result code.
@@ -100,7 +100,7 @@ stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv
 int
 stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
-    /* Syntax: dwarfdbg destroy
+    /* Syntax: dwarfDbg destroy
      *	       [0]      [1]
      */
 
@@ -182,9 +182,9 @@ stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* o
     }
 
 printf("stm_OPEN_ELF\n");
-    result = dwarfdbgOpenElf (dbg, Tcl_GetString(objv[2]));
+    result = dwarfDbgOpenElf (dbg, Tcl_GetString(objv[2]));
     if (result != TCL_OK) {
-      Tcl_SetResult  (interp, dwarfdbgGetErrorStr(dbg), TCL_STATIC);
+      Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
     } 
     return result;
 }
@@ -211,7 +211,7 @@ stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CON
   int result;
 
 printf("stm_GET_ERROR_STR\n");
-    Tcl_SetResult  (interp, dwarfdbgGetErrorStr(dbg), NULL);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), NULL);
     return TCL_OK;
 }
 /*
