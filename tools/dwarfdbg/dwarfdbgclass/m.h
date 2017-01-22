@@ -48,11 +48,11 @@
 #include "tcl.h"
 #include <dwarfdbg/dwarfdbgDecls.h>
 
-int stm_CLEAR         (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
-int stm_DESTROY       (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
-int stm_OPEN_ELF      (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
-int stm_FCN1          (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
-int stm_GET_ERROR_STR (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_CLEAR         (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_DESTROY       (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_OPEN_ELF      (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_FCN1          (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
 
 #endif /* _M_H */
 /*

@@ -51,8 +51,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "dwarfdbgGlobals.h"
 #include "dwarfdbg.h"
+#include "dwarfdbgGlobals.h"
 #include "dwarfdbgEsb.h"
 #include "libdwarf.h"
 #include "dwarf.h"
@@ -60,12 +60,15 @@
 #include "dwarfdbgUtil.h"
 #include "dwarfdbgOpenElf.h"
 
+typedef struct elfInfo {
+} elftInfo_t;
+
 /*
  * Actual type of the dwarfdbg data structure. Used only inside of the
  * package.
  */
 
-typedef struct DWARFDBG_ {
+typedef struct _dwarfDbg {
     int  maxDirNames;   /* Size of the dirNames array. */
     int  numDirName;    /* Index of the topmost _unused_ cell in the
                          * array === Index of the _next_ cell to use
@@ -80,7 +83,7 @@ typedef struct DWARFDBG_ {
     dwarfdbgUtil_t *dwarfdbgUtil;
     dwarfdbgOpenElf_t *dwarfdbgOpenElf;
 
-} DWARFDBG_;
+} _dwarfDbg_t;
 
 /*
  * Allocation macros for common situations.

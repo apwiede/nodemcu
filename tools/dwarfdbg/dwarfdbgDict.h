@@ -32,80 +32,17 @@
 */
 
 /* 
- * File:   dwarfdbg.c
+ * File:   dwarfdbgDict.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
  */
 
-#include "dwarfdbgInt.h"
+#ifndef DWARFDBG_DICT_H
+#define	DWARFDBG_DICT_H
 
-/*
- * = = == === ===== ======== ============= =====================
- */
+typedef struct dwarfdbgDict {
+} dwarfdbgDict_t;
 
-// =================================== dwarfdbgNew =========================== 
 
-dwarfDbgPtr_t dwarfdbgNew () {
-  int result;
-
-  _dwarfDbg_t *dbg = ALLOC (_dwarfDbg_t);
-  // dwarfdbgEsb module
-  dbg->dwarfdbgEsb = ALLOC(dwarfdbgEsb_t);
-  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgUtil module
-  dbg->dwarfdbgUtil = ALLOC(dwarfdbgUtil_t);
-//  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgOpenElf module
-  dbg->dwarfdbgOpenElf = ALLOC(dwarfdbgOpenElf_t);
-  result = dwarfdbgOpenElfInit(dbg);
-// add all other init parts for modules here !!
-  return dbg;
-}
-
-// =================================== dwarfdbgDel =========================== 
-
-void
-dwarfdbgDel (dwarfDbgPtr_t dbg) {
-  ckfree ((char*) dbg);
-}
-
-// =================================== dwarfdbg_clientdata_set =========================== 
-
-void
-dwarfdbg_clientdata_set (dwarfDbgPtr_t dbg, void* clientdata) {
-}
-
-// =================================== dwarfdbg_clientdata_get =========================== 
-
-void* dwarfdbg_clientdata_get (dwarfDbgPtr_t dbg) {
-return NULL;
-}
-
-// =================================== dwarfdbg_fcn1 =========================== 
-
-void dwarfdbg_fcn1 (dwarfDbgPtr_t dbg) {
-printf("dwarfdbg_fcn1\n");
-fflush(stdout);
-
-}
-
-// =================================== dwarfdbgGetErrorStr =========================== 
-
-char * dwarfdbgGetErrorStr (dwarfDbgPtr_t dbg) {
-printf("dwarfdbg_errorStr\n");
-fflush(stdout);
-  return dbg->errorStr;
-}
-
-/*
- * = = == === ===== ======== ============= =====================
- */
-
-/*
- * Local Variables:
- * mode: c
- * c-basic-offset: 2
- * fill-column: 78
- * End:
- */
+#endif  /* DWARFDBG_DICT_H */

@@ -41,11 +41,7 @@
 #ifndef DWARFDBG_H
 #define DWARFDBG_H 1
 
-/*
- * Forward declaration of stacks (opaque handle).
- */
-
-typedef struct DWARFDBG_* DWARFDBG;
+typedef struct _dwarfDbg* dwarfDbgPtr_t;
 
 /*
  * A source level debugger with GUI for ESP8266 microcontroller

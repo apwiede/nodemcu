@@ -66,7 +66,7 @@
  */
 
 int
-stm_CLEAR (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
     /* Syntax: dwarfdbg clear
      *	       [0]      [1]
@@ -98,7 +98,7 @@ stm_CLEAR (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
  */
 
 int
-stm_DESTROY (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
     /* Syntax: dwarfdbg destroy
      *	       [0]      [1]
@@ -130,7 +130,7 @@ stm_DESTROY (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
  */
 
 int
-stm_FCN1 (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+stm_FCN1 (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
     /* Syntax: dwardfdbg fcn1
      *	       [0]       [1]
@@ -164,7 +164,7 @@ fflush(stdout);
  */
 
 int
-stm_OPEN_ELF (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
   int result;
     /* Syntax: dwardfdbg fcn1 fileName
@@ -206,7 +206,7 @@ printf("stm_OPEN_ELF\n");
  */
 
 int
-stm_GET_ERROR_STR (DWARFDBG dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
   int result;
 

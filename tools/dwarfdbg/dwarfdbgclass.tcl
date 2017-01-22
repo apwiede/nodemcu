@@ -52,13 +52,13 @@ critcl::csources dwarfdbgclass/*.c ; # outside of this main file.
 
 critcl::class::define ::dwarfdbgclass {
     include m.h                  ; # Method function declarations.
-    include dwarfdbg/dwarfdbgDecls.h ; # API of the generic DWARFDBG we are binding to.
-    type    DWARFDBG
+    include dwarfdbg/dwarfdbgDecls.h ; # API of the generic dwarfDbgPtr_t we are binding to.
+    type    dwarfDbgPtr_t
 
     constructor {
-	instance = dwarfdbgNew (DwarfdbgFree, 0);
+	instance = dwarfdbgNew ();
     } {
-	/* Set back reference from DWARFDBG instance to instance command */
+	/* Set back reference from dwarfdbg_t instance to instance command */
 	dwarfdbg_clientdata_set (instance, (ClientData) cmd);
     }
 
