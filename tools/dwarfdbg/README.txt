@@ -1,8 +1,18 @@
-A source level debugger with GUI for ESP8266 with critcl-based packages.
+A TCL based source level debugger with GUI for ESP8266 with critcl-based packages.
 The idea is to use the gdbstub modul from Espressif which has bin integrated 
-in a derived version from nodemcu firmware.
-The program is also based on libdwarf from SGI.
-The GUI will be built with a Tk GUI.
+into a derived version of the nodemcu firmware.
+The program is also based on libdwarf from SGI for getting debugging information from
+the object file.
+The GUI will be built with Tk widgets.
+
+Right now there exists a very small Tcl module for interacting with the  gdbstub 
+Module via the Uart. A configuration option allows the nodemcu firmware to stop after booting.
+At that point the esp Module registers can be read out (seems to work).
+
+Dwarfdbg right now can open the firmware elf module and get some debug information like:
+  - Compile Units (CU)
+  - Source and include file names based on the CU's
+  - Source line numbers based on the CU's
 
 This is WORK IN PROGRESS!!
 It is at the very beginnig!!
