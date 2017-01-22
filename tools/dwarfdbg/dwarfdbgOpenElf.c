@@ -49,17 +49,16 @@ static dwarfdbgEsb_t dwarf_error_line;
 /*  Base Address is needed for range lists and must come from a CU.
     Low address is for information and can come from a function
     or something in the CU. */
-Dwarf_Addr CU_base_address = 0;       /* CU Base address */
-Dwarf_Addr CU_low_address = 0;        /* CU low address */
-Dwarf_Addr CU_high_address = 0;       /* CU High address */
+Dwarf_Addr CuBaseAddress = 0;       /* CU Base address */
+Dwarf_Addr CuLowAddress = 0;        /* CU low address */
+Dwarf_Addr CuHighAddress = 0;       /* CU High address */
 
-Dwarf_Off  DIE_offset = 0;            /* DIE offset in compile unit */
-Dwarf_Off  DIE_overall_offset = 0;    /* DIE offset in .debug_info */
+Dwarf_Off  DIEOffset = 0;            /* DIE offset in compile unit */
+Dwarf_Off  DIEOverallOffset = 0;    /* DIE offset in .debug_info */
 
 /*  These globals  enable better error reporting. */
-Dwarf_Off  DIE_CU_offset = 0;         /* CU DIE offset in compile unit */
-Dwarf_Off  DIE_CU_overall_offset = 0; /* CU DIE offset in .debug_info */
-int current_section_id = 0;           /* Section being process */
+Dwarf_Off  DIECuOffset = 0;         /* CU DIE offset in compile unit */
+Dwarf_Off  DIECuOverallOffset = 0; /* CU DIE offset in .debug_info */
 DWARFDBG _self;
 
 
@@ -74,7 +73,7 @@ DWARFDBG _self;
 
     We append to esbp's buffer.
 */
-void get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off dieprint_cu_goffset,
+void get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off dieprintCuGoffset,
     Dwarf_Attribute attrib, char **srcfiles, Dwarf_Signed cnt, dwarfdbgEsb_t *esbp, int show_form, int local_verbose) {
     Dwarf_Half theform = 0;
     char * temps = 0;
@@ -310,7 +309,7 @@ void get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off di
                         " cu off 0x%" DW_PR_XZEROS DW_PR_DUx
                         " local offset 0x%" DW_PR_XZEROS DW_PR_DUx
                         " tag 0x%x",
-                        goff,dieprint_cu_goffset,off,tag);
+                        goff,dieprintCuGoffset,off,tag);
                     DWARF_CHECK_ERROR(type_offset_result,small_buf);
                 } else {
                     int tres2 =
@@ -767,12 +766,11 @@ wres = 0;
     Caller must ensure producernameout is
     a valid, constructed, empty dwarfdbgEsb_t instance before calling.
     Never returns DW_DLV_ERROR.  */
-static int getProducerName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, dwarfdbgEsb_t *producernameout) {
+static int getProducerName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cuDie, Dwarf_Off dieprintCuOffset, dwarfdbgEsb_t *producernameout) {
     Dwarf_Attribute producer_attr = 0;
     Dwarf_Error pnerr = 0;
 
-    int ares = dwarf_attr(cu_die, DW_AT_producer,
-        &producer_attr, &pnerr);
+    int ares = dwarf_attr(cuDie, DW_AT_producer, &producer_attr, &pnerr);
     if (ares == DW_DLV_ERROR) {
         printf("hassattr on DW_AT_producer ares: %d pnerr: %d", ares, pnerr);
     }
@@ -787,7 +785,7 @@ static int getProducerName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwa
             function; so if the caller needs to keep the returned
             string, the string must be copied (makename()). */
         get_attr_value(dbg, DW_TAG_compile_unit,
-            cu_die, dieprint_cu_offset,
+            cuDie, dieprintCuOffset,
             producer_attr, NULL, 0, producernameout,
             0 /*show_form_used*/,0 /* verbose */);
     }
@@ -802,12 +800,12 @@ static int getProducerName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwa
 // =================================== getCuName =========================== 
 
 /* Returns the cu of the CU. In case of error, give up, do not return. */
-static int getCuName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, char * *short_name, char * *long_name) {
+static int getCuName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cuDie, Dwarf_Off dieprintCuOffset, char * *short_name, char * *long_name) {
     Dwarf_Attribute name_attr = 0;
     Dwarf_Error lerr = 0;
     int ares;
 
-    ares = dwarf_attr(cu_die, DW_AT_name, &name_attr, &lerr);
+    ares = dwarf_attr(cuDie, DW_AT_name, &name_attr, &lerr);
     if (ares == DW_DLV_ERROR) {
         printf("hassattr on DW_AT_name ares: %d lerr: %d", ares, lerr);
     } else {
@@ -823,7 +821,7 @@ static int getCuName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off
 
             self->dwarfdbgEsb->esbEmptyString(self, &esbLongCuName);
             get_attr_value(dbg, DW_TAG_compile_unit,
-                cu_die, dieprint_cu_offset,
+                cuDie, dieprintCuOffset,
                 name_attr, NULL, 0, &esbLongCuName,
                 0 /*show_form_used*/,0 /* verbose */);
             *long_name = self->dwarfdbgEsb->esbGetString(self, &esbLongCuName);
@@ -848,8 +846,8 @@ static int getCuName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off
 
 // =================================== handle_one_die_section =========================== 
 
-static int handle_one_die_section(DWARFDBG self, Dwarf_Debug dbg,Dwarf_Bool is_info, Dwarf_Error *pod_err) {
-    Dwarf_Unsigned cu_header_length = 0;
+static int handle_one_die_section(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Bool is_info, Dwarf_Error *pod_err) {
+    Dwarf_Unsigned cuHeaderLength = 0;
     Dwarf_Unsigned abbrev_offset = 0;
     Dwarf_Half version_stamp = 0;
     Dwarf_Half address_size = 0;
@@ -857,56 +855,51 @@ static int handle_one_die_section(DWARFDBG self, Dwarf_Debug dbg,Dwarf_Bool is_i
     Dwarf_Half length_size = 0;
     Dwarf_Sig8 signature;
     Dwarf_Unsigned typeoffset = 0;
-    Dwarf_Unsigned next_cu_offset = 0;
+    Dwarf_Unsigned nextCuOffset = 0;
     unsigned loop_count = 0;
     int nres = DW_DLV_OK;
-    int   cu_count = 0;
-    char * cu_short_name = NULL;
-    char * cu_long_name = NULL;
+    int   cuCount = 0;
+    char * cuShortName = NULL;
+    char * cuLongName = NULL;
     const char * section_name = 0;
     int res = 0;
-    Dwarf_Off dieprint_cu_goffset = 0;
+    Dwarf_Off dieprintCuGoffset = 0;
 
     /* Loop until it fails.  */
     for (;;++loop_count) {
         int sres = DW_DLV_OK;
-        Dwarf_Die cu_die = 0;
+        Dwarf_Die cuDie = 0;
         struct Dwarf_Debug_Fission_Per_CU_s fission_data;
         int fission_data_result = 0;
-        Dwarf_Half cu_type = 0;
+        Dwarf_Half cuType = 0;
 
         memset(&fission_data,0,sizeof(fission_data));
-        nres = dwarf_next_cu_header_d(dbg,
-            is_info,
-            &cu_header_length, &version_stamp,
-            &abbrev_offset, &address_size,
-            &length_size,&extension_size,
-            &signature, &typeoffset,
-            &next_cu_offset,
-            &cu_type, pod_err);
+        nres = dwarf_next_cu_header_d(dbg, is_info, &cuHeaderLength, &version_stamp,
+            &abbrev_offset, &address_size, &length_size,&extension_size, &signature, &typeoffset,
+            &nextCuOffset, &cuType, pod_err);
         if (nres != DW_DLV_OK) {
             return nres;
         }
-printf("next_cu_offset: %p cu_header_length: %d abbrev_offset: %d address_size: %d length_size: %d\n", next_cu_offset, cu_header_length, abbrev_offset, address_size, length_size);
+printf("nextCuOffset: %p cuHeaderLength: %d abbrev_offset: %d address_size: %d length_size: %d\n", nextCuOffset, cuHeaderLength, abbrev_offset, address_size, length_size);
 fflush(stdout);
         /*  get basic information about the current CU: producer, name */
-        sres = dwarf_siblingof_b(dbg, NULL,is_info, &cu_die, pod_err);
+        sres = dwarf_siblingof_b(dbg, NULL,is_info, &cuDie, pod_err);
         if (sres != DW_DLV_OK) {
-            dieprint_cu_goffset = 0;
+            dieprintCuGoffset = 0;
             printf("siblingof cu header sres: %d pod_err: %s", sres, *pod_err);
         }
         /* Get the CU offset for easy error reporting */
-        dwarf_die_offsets(cu_die,&DIE_overall_offset,&DIE_offset,pod_err);
-        DIE_CU_overall_offset = DIE_overall_offset;
-        DIE_CU_offset = DIE_offset;
-        dieprint_cu_goffset = DIE_overall_offset;
-printf("dieprint_cu_goffset: %d\n", dieprint_cu_goffset);
+        dwarf_die_offsets(cuDie, &DIEOverallOffset, &DIEOffset,pod_err);
+        DIECuOverallOffset = DIEOverallOffset;
+        DIECuOffset = DIEOffset;
+        dieprintCuGoffset = DIEOverallOffset;
+printf("dieprintCuGoffset: %d\n", dieprintCuGoffset);
         {
         /* Get producer name for this CU and update compiler list */
             dwarfdbgEsb_t producername;
 
             self->dwarfdbgEsb->esbConstructor(self, &producername);
-            self->dwarfdbgOpenElf->getProducerName(self, dbg,cu_die, dieprint_cu_goffset,&producername);
+            self->dwarfdbgOpenElf->getProducerName(self, dbg, cuDie, dieprintCuGoffset, &producername);
 //printf("producername: %s\n", self->dwarfdbgEsb->esbGetString(self, &producername));
 #ifdef NOTDEF
             update_compiler_target(self->dwarfdbgEsb->esbGetString(self, &producername));
@@ -918,34 +911,33 @@ printf("dieprint_cu_goffset: %d\n", dieprint_cu_goffset);
             by all the producers contained in the elf file */
 //printf("producer_children_flag: %d\n", producer_children_flag);
 //        if (producer_children_flag) {
-            self->dwarfdbgOpenElf->getCuName(self, dbg,cu_die, dieprint_cu_goffset,&cu_short_name,&cu_long_name);
-printf("cu_short_name: %s\n", cu_short_name);
+            self->dwarfdbgOpenElf->getCuName(self, dbg, cuDie, dieprintCuGoffset, &cuShortName, &cuLongName);
+printf("cuShortName: %s\n", cuShortName);
             /* Add CU name to current compiler entry */
-//            add_cu_name_compiler_target(cu_long_name);
+//            add_cu_name_compiler_target(cuLongName);
 //        }
         /*  Some prerelease gcc versions used ranges but seemingly
             assumed the lack of a base address in the CU was
             defined to be a zero base.
             Assuming a base address (and low and high) is sensible. */
-        CU_base_address = 0;
-        CU_high_address = 0;
-        CU_low_address = 0;
+        CuBaseAddress = 0;
+        CuHighAddress = 0;
+        CuLowAddress = 0;
 
-        /*  Release the 'cu_die' created by the call
+        /*  Release the 'cuDie' created by the call
             to 'dwarf_siblingof' at the top of the main loop. */
-        dwarf_dealloc(dbg, cu_die, DW_DLA_DIE);
-        cu_die = 0; /* For debugging, stale die should be NULL. */
+        dwarf_dealloc(dbg, cuDie, DW_DLA_DIE);
+        cuDie = 0; /* For debugging, stale die should be NULL. */
 
         /*  Process a single compilation unit in .debug_info or
             .debug_types. */
-        sres = dwarf_siblingof_b(dbg, NULL,is_info, &cu_die, pod_err);
+        sres = dwarf_siblingof_b(dbg, NULL,is_info, &cuDie, pod_err);
         if (sres == DW_DLV_OK) {
 //            if (print_as_info_or_cu()) {
                 Dwarf_Signed cnt = 0;
                 char **srcfiles = 0;
                 Dwarf_Error srcerr = 0;
-                int srcf = dwarf_srcfiles(cu_die,
-                    &srcfiles, &cnt, &srcerr);
+                int srcf = dwarf_srcfiles(cuDie, &srcfiles, &cnt, &srcerr);
 int i;
 for(i = 0; i < cnt; i++) {
 printf("src: %d %s\n", i, srcfiles[i]);
@@ -962,10 +954,10 @@ printf("src: %d %s\n", i, srcfiles[i]);
                     about statements in that case */
 
                 /* Get the CU offset for easy error reporting */
-                dwarf_die_offsets(cu_die,&DIE_overall_offset,&DIE_offset,pod_err);
-                DIE_CU_overall_offset = DIE_overall_offset;
-                DIE_CU_offset = DIE_offset;
-                dieprint_cu_goffset = DIE_overall_offset;
+                dwarf_die_offsets(cuDie, &DIEOverallOffset, &DIEOffset, pod_err);
+                DIECuOverallOffset = DIEOverallOffset;
+                DIECuOffset = DIEOffset;
+                dieprintCuGoffset = DIEOverallOffset;
                 if (srcf == DW_DLV_OK) {
                     int si = 0;
                     for (si = 0; si < cnt; ++si) {
@@ -992,8 +984,6 @@ int dwarfdbgOpenElf (DWARFDBG self, char *fileName) {
   Dwarf_Error pod_err;
 
 printf("dwarfdbgOpenElf\n");
-printf("self->dwarfdbgEsb: %p\n", self->dwarfdbgEsb);
-printf("self->dwarfdbgEsb->esbConstructor: %p\n", self->dwarfdbgEsb->esbConstructor);
 fflush(stdout);
   self->dwarfdbgEsb->esbConstructor(self, &config_file_path);
   self->dwarfdbgEsb->esbConstructor(self, &config_file_tiedpath);
