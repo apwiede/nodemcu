@@ -57,7 +57,7 @@
 #include "dwarfDbg.h"
 #include "dwarfdbgGlobals.h"
 #include "dwarfDbgEsb.h"
-//#include "include/dwarfDbg/dwarfdbgDecls.h"
+#include "dwarfDbg/dwarfDbgDecls.h"
 #include "dwarfDbgUtil.h"
 #include "dwarfDbgDict.h"
 #include "dwarfDbgElfInfo.h"

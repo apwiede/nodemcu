@@ -79,15 +79,15 @@ dwarfDbgDel (dwarfDbgPtr_t dbg) {
   ckfree ((char*) dbg);
 }
 
-// =================================== dwarfdbg_clientdata_set =========================== 
+// =================================== dwarfDbgClientData_set =========================== 
 
 void
-dwarfdbg_clientdata_set (dwarfDbgPtr_t dbg, void* clientdata) {
+dwarfDbgClientDataSet (dwarfDbgPtr_t dbg, void* clientdata) {
 }
 
-// =================================== dwarfdbg_clientdata_get =========================== 
+// =================================== dwarfDbgClientDataGet =========================== 
 
-void* dwarfdbg_clientdata_get (dwarfDbgPtr_t dbg) {
+void* dwarfDbgClientDataGet (dwarfDbgPtr_t dbg) {
 return NULL;
 }
 

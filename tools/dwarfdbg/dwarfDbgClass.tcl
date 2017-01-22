@@ -59,7 +59,7 @@ critcl::class::define ::dwarfDbgClass {
 	instance = dwarfDbgNew ();
     } {
 	/* Set back reference from dwarfDbgPtr_t instance to instance command */
-	dwarfdbg_clientdata_set (instance, (ClientData) cmd);
+	dwarfDbgClientDataSet (instance, (ClientData) cmd);
     }
 
     destructor {

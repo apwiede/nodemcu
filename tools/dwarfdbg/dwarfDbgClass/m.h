@@ -38,7 +38,7 @@
  * Created on January 22, 2017
  */
 
-/* ::dwarfdbg - critcl - layer 3 declarations
+/* ::dwarfDbg - critcl - layer 3 declarations
  * Method functions.
  */
 

@@ -51,8 +51,8 @@ critcl::cheaders   dwarfDbgInt.h dwarfDbgEsb.h dwarfDbgUtil.h dwarfDbgDict.h lib
 critcl::api function dwarfDbgPtr_t dwarfDbgNew  {}
 critcl::api function void          dwarfDbgDel  {dwarfDbgPtr_t dbg}
 
-critcl::api function void          dwarfdbg_clientdata_set {dwarfDbgPtr_t dbg void* clientdata}
-critcl::api function void*         dwarfdbg_clientdata_get {dwarfDbgPtr_t dbg}
+critcl::api function void          dwarfDbgClientDataSet {dwarfDbgPtr_t dbg void* clientdata}
+critcl::api function void*         dwarfDbgClientDataGet {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgOpenElf {dwarfDbgPtr_t dbg char* fileName}
 critcl::api function void          dwarfDbg_fcn1 {dwarfDbgPtr_t dbg}
 critcl::api function char*         dwarfDbgGetErrorStr {dwarfDbgPtr_t dbg}

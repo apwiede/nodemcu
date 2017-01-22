@@ -109,7 +109,7 @@ stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* ob
 	return TCL_ERROR;
     }
 
-//    Tcl_DeleteCommandFromToken(interp, (Tcl_Command) dwarfdbg_clientdata_get (dbg));
+    Tcl_DeleteCommandFromToken(interp, (Tcl_Command) dwarfDbgClientDataGet (dbg));
     return TCL_OK;
 }
 

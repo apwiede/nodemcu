@@ -38,7 +38,7 @@
  * Created on January 22, 2017
  */
 
-/* dwarfdbg - critcl - layer 0 declarations
+/* dwarfDbg - critcl - layer 0 declarations
  * API general utilities
  */
 
