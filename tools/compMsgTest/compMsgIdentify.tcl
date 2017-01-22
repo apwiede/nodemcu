@@ -248,7 +248,8 @@ puts stderr "Fitting header not found!"
       upvar $receivedVar received
      
       set headerInfos [dict get $compMsgDispatcher headerInfos]
-#puts stderr "handleReceivedHeader"
+puts stderr "+++handleReceivedHeader"
+puts stderr "totalLgth: [dict get $received totalLgth]!"
       set u8TotalCrc false
       set u16TotalCrc false
 #      set set received compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
@@ -260,7 +261,7 @@ puts stderr "Fitting header not found!"
 # we loop over the fieldSequence entries and handle them as needed
 # attention not all entries of the message are handled here, only some special entries!
  
-#self->compMsgMsgDesc->dumpHeaderPart(self, hdr);
+::compMsg compMsgMsgDesc dumpHeaderPart $hdr
       # check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
       set idx 0
       set fieldSequence [dict get $hdr fieldSequence]
@@ -279,23 +280,28 @@ puts stderr "Fitting header not found!"
       dict set headerInfos seqIdx 0
 #puts stderr "seqIdx: [dict get $headerInfos seqIdx]!"
       set sequenceEntry [lindex $fieldSequence [dict get $headerInfos seqIdx]]
-#puts stderr "sequenceEntry: $sequenceEntry!"
+puts stderr "sequenceEntry0: $sequenceEntry!"
       while {$sequenceEntry ne [list]} {
         dict set received fieldOffset [dict get $headerInfos headerLgth]
+puts stderr "sequenceEntry: $sequenceEntry!"
+        set hdr [lindex $headerParts $hdrIdx]
         switch $sequenceEntry {
           COMP_DISP_U16_CMD_KEY {
             set result [::compMsg dataView getUint16 [dict get $received fieldOffset] u16]
+puts stderr ">>u16: $u16!"
             dict set received u16CmdKey $u16
             dict incr received fieldOffset 2
             dict lappend received partsFlags COMP_DISP_U16_CMD_KEY
             set val [dict get $received u16CmdKey]
             set receivedCmdKey [format "%c%c" [expr {($val >> 8) & 0xFF}] [expr {$val & 0xFF}]]
+puts stderr "u16cmdkey: $receivedCmdKey![dict get $hdr hdrU16CmdKey]!"
             while {$receivedCmdKey ne [dict get $hdr hdrU16CmdKey]} {
               dict incr headerInfos currPartIdx
 #              set result [nextFittingEntry compMsgDispatcher received 0 $receivedCmdKey]
               set result [nextFittingEntry compMsgDispatcher received 0 $val]
               checkErrOK $result
-              set hdr [lindex $headerParts [dict get $headerInfos currPartIdx]]
+              set hdrIdx [dict get $headerInfos currPartIdx]
+              set hdr [lindex $headerParts $hdrIdx]
             }
           }
           COMP_DISP_U0_CMD_LGTH {
@@ -315,16 +321,20 @@ puts stderr "Fitting header not found!"
           COMP_DISP_U8_CRC {
             set fieldInfo [dict create]
             dict set fieldInfo fieldLgth 1
-            dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 1}]
+puts stderr "totalLgth: [dict get $received totalLgth]!"
+            dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth]}]
             if {[lsearch [dict get $hdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
               if {$u8TotalCrc} {
-                dict incr fieldInfo fieldOffset -1
-              } else {
                 dict incr fieldInfo fieldOffset -2
+              } else {
+                dict incr fieldInfo fieldOffset -1
               }
             }
             set startOffset [dict get $headerInfos headerLgth]
-            set result [::compMsg compMsgDataView getCrc $fieldInfo crcVal $startOffset [dict get $fieldInfo fieldOffset]]
+            set fieldOffset [dict get $fieldInfo fieldOffset]
+#            set size [expr {$fieldOffset - $startOffset}]
+            set size $fieldOffset
+            set result [::compMsg compMsgDataView getCrc $fieldInfo crcVal $startOffset $size]
 #puts stderr [format "u8Crc!res!%d!" $result]
           }
           COMP_DISP_U16_CRC {
@@ -385,6 +395,8 @@ puts stderr [format "u16TotalCrc!res!%d!" $result]
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $receivedVar received
      
+puts stderr "+++handleReceivedMsg!"
+puts stderr "totalLgth: [dict get $received totalLgth]!"
       set headerInfos [dict get $compMsgDispatcher headerInfos]
 #puts stderr "buf len: [string length [dict get $received buf]]!len: [dict get $received lgth]!"
 #puts stderr "compMsgIdentify1 setData hdrIdx: [dict get $headerInfos currPartIdx]"
@@ -427,6 +439,7 @@ puts stderr [format "u16TotalCrc!res!%d!" $result]
       variable received
       
       set idx 0
+puts stderr "+++handleReceivedPart: lgth: $lgth!"
       set headerInfos [dict get $compMsgDispatcher headerInfos]
 #puts stderr "==headerInfos![dict keys [dict get $compMsgDispatcher headerInfos]]!"
 #puts stderr "==compMsgDispatcher![dict keys $compMsgDispatcher]!"
@@ -450,6 +463,8 @@ puts stderr [format "u16TotalCrc!res!%d!" $result]
           set hdrIdx [dict get $headerInfos currPartIdx]
           set headerParts [dict get $headerInfos headerParts]
           set hdr [lindex $headerParts $hdrIdx]
+puts stderr "HDR0"
+pdict $hdr
           if {[dict get $hdr hdrEncryption] eq "E"} {
             set myHeaderLgth [dict get $headerInfos headerLgth]
             set myHeader [string range $buffer 0 [expr {$myHeaderLgth - 1}]]
@@ -479,7 +494,7 @@ puts stderr [format "u16TotalCrc!res!%d!" $result]
 puts stderr "decrypt error"
             }
             set buffer "${myHeader}${decrypted}${totalCrc}"
-#puts stderr "buffer ll: [string length $buffer]!lgth: $lgth!myh: [string length $myHeader]!decr: [string length $decrypted]!totalcrc: [string length $totalCrc]!"
+puts stderr "buffer ll: [string length $buffer]!lgth: $lgth!myh: [string length $myHeader]!decr: [string length $decrypted]!totalcrc: [string length $totalCrc]!"
             if {$lgth != [expr {$myHeaderLgth + $mlen + $totalCrcOffset}]} {
 error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen + $totalCrcOffset}]!"
             }

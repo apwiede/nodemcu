@@ -530,7 +530,7 @@ namespace eval ::compMsg {
     proc getCrc {fieldInfo valueVar startOffset size} {
       upvar $valueVar value
 
-#set ::crcDebug true
+set ::crcDebug true
       set crcLgth [dict get $fieldInfo fieldLgth]
       set value ""
       set lgth [expr {$size - $crcLgth}]

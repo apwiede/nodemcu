@@ -180,6 +180,28 @@ proc handleAnswer {bufVar lgthVar} {
   }
   set buf $::msg
   set lgth $::msgLgth
+puts stderr "+++handleAnswer: lgth: $lgth!"
+::compMsg dataView dumpBinary $buf $lgth "handleAnswer MSG"
+set header [string range $::msg 0 31]
+set payload [string range $::msg 32 end-1]
+set totalCrc [string range $::msg end end]
+puts stderr "+++HDRL: [string length $header] pl: [string length $payload] [string length $::msg]!"
+binary scan $::msg S src
+puts stderr "SRC: [format 0x%04x $src]!"
+if {$src == 0x4300} {
+  set cryptKey "a1b2c3d4e5f6g7h8"
+  set mlen [string length $payload]
+set decrypted [aes::aes -mode cbc -dir decrypt -key $cryptKey -iv $cryptKey $payload]
+#  set result [::compMsg compMsgDispatcher decryptMsg $payload $mlen $cryptKey 16 $cryptKey 16 decrypted decryptedLgth]
+puts stderr "decryptedLgth: lgth: mlen: $mlen!decryptedStrLgth: [string length $decrypted]"
+  set buf "${header}${decrypted}${totalCrc}"
+set lgth2 [string length $buf]
+set lgth $lgth2
+::compMsg dataView dumpBinary $buf $lgth2 "handleAnswer decrypted MSG"
+puts stderr "totalLgth: $lgth lgth2: $lgth2!"
+}
+  dict incr received realLgth $lgth
+  dict incr received totalLgth $lgth
   set ::receivedHeader false
   set ::receivedMsg false
   set myState $::currState
@@ -187,8 +209,6 @@ proc handleAnswer {bufVar lgthVar} {
   set received [dict create]
   dict set received buf $buf
   dict set received lgth $lgth
-  dict incr received realLgth $lgth
-  dict incr received totalLgth $lgth
   ::compMsg dataView setData $buf $lgth
   set result [::compMsg compMsgIdentify getHeaderIndexFromHeaderFields ::compMsgDispatcher received]
   checkErrOK $result
