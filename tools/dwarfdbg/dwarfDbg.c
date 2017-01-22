@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   dwarfdbg.c
+ * File:   dwarfDbg.c
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
@@ -51,15 +51,23 @@ dwarfDbgPtr_t dwarfDbgNew () {
 
   _dwarfDbg_t *dbg2 = (_dwarfDbg_t *) ckalloc(sizeof(_dwarfDbg_t));
   _dwarfDbg_t *dbg = ALLOC (_dwarfDbg_t);
-  // dwarfdbgEsb module
-  dbg->dwarfdbgEsb = ALLOC(dwarfdbgEsb_t);
-  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgUtil module
-  dbg->dwarfdbgUtil = ALLOC(dwarfdbgUtil_t);
-//  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgOpenElf module
-  dbg->dwarfDbgOpenElf = ALLOC(dwarfdbgOpenElf_t);
-  result = dwarfdbgOpenElfInit(dbg);
+
+  // dwarfDbgEsb module
+  dbg->dwarfDbgEsb = ALLOC(dwarfDbgEsb_t);
+  result = dwarfDbgEsbInit(dbg);
+
+  // dwarfDbgUtil module
+  dbg->dwarfDbgUtil = ALLOC(dwarfDbgUtil_t);
+//  result = dwarfDbgUtilInit(dbg);
+
+  // dwarfDbgDict module
+  dbg->dwarfDbgDict = ALLOC(dwarfDbgDict_t);
+//  result = dwarfDbgDictInit(dbg);
+
+  // dwarfDbgElfInfo module
+  dbg->dwarfDbgElfInfo = ALLOC(dwarfDbgElfInfo_t);
+  result = dwarfDbgElfInfoInit(dbg);
+
 // add all other init parts for modules here !!
   return dbg;
 }
@@ -86,7 +94,7 @@ return NULL;
 // =================================== dwarfDbg_fcn1 =========================== 
 
 void dwarfDbg_fcn1 (dwarfDbgPtr_t dbg) {
-printf("dwarfdbg_fcn1\n");
+printf("dwarfDbg_fcn1\n");
 fflush(stdout);
 
 }
@@ -94,7 +102,7 @@ fflush(stdout);
 // =================================== dwarfDbgGetErrorStr =========================== 
 
 char * dwarfDbgGetErrorStr (dwarfDbgPtr_t dbg) {
-printf("dwarfdbg_errorStr\n");
+printf("dwarfDbgGetErrorStr\n");
 fflush(stdout);
   return dbg->errorStr;
 }

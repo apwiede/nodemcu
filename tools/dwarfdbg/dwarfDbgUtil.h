@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   dwarfdbgUtil.h
+ * File:   dwarfDbgUtil.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
@@ -41,8 +41,8 @@
 #ifndef DWARFDBG_UTIL_H
 #define	DWARFDBG_UTIL_H
 
-typedef struct dwarfdbgUtil {
-} dwarfdbgUtil_t;
+typedef struct dwarfDbgUtil {
+} dwarfDbgUtil_t;
 
 
 #endif  /* DWARFDBG_UTIL_H */

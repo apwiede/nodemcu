@@ -21,11 +21,11 @@
     Franklin Street - Fifth Floor, Boston MA 02110-1301, USA.
 */
 
-/* this part is "stolen" from dwarfdump for use with dwarfdbg
+/* this part is "stolen" from dwarfdump for use with dwarfDbg
  * Arnulf Wiedemann <arnulf@wiedemann-pri.de>
  */
 
-/* dwarfdbgEsb.h
+/* dwarfDbgEsb.h
   Extensible string buffer.
   A simple vaguely  object oriented extensible string buffer.
 
@@ -40,60 +40,60 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct dwarfdbgEsb dwarfdbgEsb_t;
+typedef struct dwarfDbgEsb dwarfDbgEsb_t;
 
 /* string length taken from string itself. */
-typedef uint8_t (* esbAppend_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * in_string);
+typedef uint8_t (* esbAppend_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char * in_string);
 
 /* The 'len' is believed. Do not pass in strings < len bytes long. */
-typedef uint8_t (* esbAppendn_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * in_string, size_t len);
+typedef uint8_t (* esbAppendn_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char * in_string, size_t len);
 
 /* Always returns an empty string or a non-empty string. Never 0. */
-typedef char* (* esbGetString_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data);
+typedef char* (* esbGetString_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data);
 
 
 /* Sets esb_used_bytes to zero. The string is not freed and
    esb_allocated_size is unchanged.  */
-typedef uint8_t (* esbEmptyString_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data);
+typedef uint8_t (* esbEmptyString_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data);
 
 
 /* Return esb_used_bytes. */
-typedef size_t (* esbStringLen_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data);
+typedef size_t (* esbStringLen_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data);
 
 /* The following are for testing esb, not use by dwarfdump. */
 
 /* *data is presumed to contain garbage, not values, and is properly initialized. */
-typedef uint8_t (* esbConstructor_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data);
+typedef uint8_t (* esbConstructor_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data);
 
-typedef uint8_t (* esbForceAllocation_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t minlen);
+typedef uint8_t (* esbForceAllocation_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, size_t minlen);
 
 /*  The string is freed, contents of *data set to zeroes. */
-typedef uint8_t (* esbDestructor_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data);
+typedef uint8_t (* esbDestructor_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data);
 
 /* To get all paths in the code tested, this sets the
    allocation/reallocation to the given value, which can be quite small
    but must not be zero. */
 typedef uint8_t (* esbAllocSize_t)(dwarfDbgPtr_t self, size_t size);
-typedef size_t (* esbGetAllocatedSize_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data);
+typedef size_t (* esbGetAllocatedSize_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data);
 
 /* Append a formatted string */
-typedef uint8_t (* esbAppendPrintf_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char *format, ...);
+typedef uint8_t (* esbAppendPrintf_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char *format, ...);
 
 /*  Append a formatted string. The 'ap' must be just-setup with
     va_start(ap,format)  and
     when esb_append_printf_ap returns the ap is used up
     and should not be touched. */
-typedef uint8_t (* esbAppendPrintfAp_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char *format, va_list ap);
+typedef uint8_t (* esbAppendPrintfAp_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char *format, va_list ap);
 
 /* Get a copy of the internal data buffer */
-typedef char* (* esbGetCopy_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data);
+typedef char* (* esbGetCopy_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data);
 
-typedef uint8_t (* initEsbString_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t min_len);
-typedef uint8_t (* esbAllocateMore_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t len);
-typedef uint8_t (* esbAppendnInternal_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * in_string, size_t len);
-typedef uint8_t (* esbAllocateMoreIfNeeded_t)(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char *in_string,va_list ap);
+typedef uint8_t (* initEsbString_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, size_t min_len);
+typedef uint8_t (* esbAllocateMore_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, size_t len);
+typedef uint8_t (* esbAppendnInternal_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char * in_string, size_t len);
+typedef uint8_t (* esbAllocateMoreIfNeeded_t)(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char *in_string,va_list ap);
 
-typedef struct dwarfdbgEsb {
+typedef struct dwarfDbgEsb {
   char *  esbString;        /* pointer to the data itself, or  NULL. */
   size_t  esbAllocatedSize; /* Size of allocated data or 0 */
   size_t  esbUsedBytes;     /* Amount of space used  or 0 */
@@ -115,7 +115,7 @@ typedef struct dwarfdbgEsb {
   esbAppendPrintf_t esbAppendPrintf;
   esbAppendPrintfAp_t esbAppendPrintfAp;
   esbGetCopy_t esbGetCopy; 
-} dwarfdbgEsb_t;
+} dwarfDbgEsb_t;
 
 #ifdef __cplusplus
 }

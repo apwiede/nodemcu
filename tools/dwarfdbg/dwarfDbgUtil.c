@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   dwarfdbgUtil.c
+ * File:   dwarfDbgUtil.c
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017

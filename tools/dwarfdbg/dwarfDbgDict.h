@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   dwarfdbgDict.h
+ * File:   dwarfDbgDict.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
@@ -41,8 +41,8 @@
 #ifndef DWARFDBG_DICT_H
 #define	DWARFDBG_DICT_H
 
-typedef struct dwarfdbgDict {
-} dwarfdbgDict_t;
+typedef struct dwarfDbgDict {
+} dwarfDbgDict_t;
 
 
 #endif  /* DWARFDBG_DICT_H */

@@ -21,11 +21,11 @@
   Franklin Street - Fifth Floor, Boston MA 02110-1301, USA.
 */
 
-/* this part is "stolen" from dwarfdump for use with dwarfdbg
+/* this part is "stolen" from dwarfdump for use with dwarfDbg
  * Arnulf Wiedemann <arnulf@wiedemann-pri.de>
  */
 
-/*  dwarfdbgEsb.c
+/*  dwarfDbgEsb.c
     extensible string buffer.
 
     A simple means (vaguely like a C++ class) that
@@ -56,7 +56,7 @@ static size_t allocSize = INITIAL_ALLOC;
 
 // =============================== initEsbString ===========================
 
-static uint8_t initEsbString(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t min_len) {
+static uint8_t initEsbString(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, size_t min_len) {
   char* d;
 
   if (data->esbAllocatedSize > 0) {
@@ -85,7 +85,7 @@ static uint8_t initEsbString(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t min
 /*  Make more room. Leaving  contents unchanged, effectively.
   The NUL byte at end has room and this preserves that room.
 */
-static uint8_t esbAllocateMore(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t len) {
+static uint8_t esbAllocateMore(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, size_t len) {
   size_t new_size = data->esbAllocatedSize + len;
   char* newd = 0;
 
@@ -106,17 +106,17 @@ static uint8_t esbAllocateMore(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t l
 
 // =============================== esbForceAllocation ===========================
 
-static uint8_t esbForceAllocation(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, size_t minlen) {
+static uint8_t esbForceAllocation(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, size_t minlen) {
   if (data->esbAllocatedSize < minlen) {
     size_t increment = minlen - data->esbAllocatedSize;
-    self->dwarfdbgEsb->esbAllocateMore(self, data,increment);
+    self->dwarfDbgEsb->esbAllocateMore(self, data,increment);
   }
   return TCL_OK;
 }
 
 // =============================== esbAppendn ===========================
 
-static uint8_t esbAppendn(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * in_string, size_t len) {
+static uint8_t esbAppendn(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char * in_string, size_t len) {
   size_t full_len = strlen(in_string);
 
   if (full_len < len) {
@@ -126,19 +126,19 @@ static uint8_t esbAppendn(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * 
     len = full_len;
   }
 
-  self->dwarfdbgEsb->esbAppendnInternal(self, data, in_string, len);
+  self->dwarfDbgEsb->esbAppendnInternal(self, data, in_string, len);
   return TCL_OK;
 }
 
 // =============================== esbAppend ===========================
 
 /*  The length is gotten from the in_string itself. */
-static uint8_t esbAppend(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * in_string) {
+static uint8_t esbAppend(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char * in_string) {
   size_t len = 0;
   if(in_string) {
     len = strlen(in_string);
     if (len) {
-      self->dwarfdbgEsb->esbAppendnInternal(self, data, in_string, len);
+      self->dwarfDbgEsb->esbAppendnInternal(self, data, in_string, len);
     }
   }
   return TCL_OK;
@@ -147,19 +147,19 @@ static uint8_t esbAppend(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * i
 // =============================== esbAppendnInternal ===========================
 
 /*  The 'len' is believed. Do not pass in strings < len bytes long. */
-static uint8_t esbAppendnInternal(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char * in_string, size_t len) {
+static uint8_t esbAppendnInternal(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char * in_string, size_t len) {
   size_t remaining = 0;
   size_t needed = len;
 
   if (data->esbAllocatedSize == 0) {
     size_t maxlen = (len >= allocSize) ? (len) : allocSize;
 
-    self->dwarfdbgEsb->initEsbString(self, data, maxlen);
+    self->dwarfDbgEsb->initEsbString(self, data, maxlen);
   }
   /*  ASSERT: data->esbAllocatedSize > data->esbUsedBytes  */
   remaining = data->esbAllocatedSize - data->esbUsedBytes;
   if (remaining <= needed) {
-    self->dwarfdbgEsb->esbAllocateMore(self, data,len);
+    self->dwarfDbgEsb->esbAllocateMore(self, data,len);
   }
   strncpy(&data->esbString[data->esbUsedBytes], in_string, len);
   data->esbUsedBytes += len;
@@ -171,9 +171,9 @@ static uint8_t esbAppendnInternal(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const
 // =============================== esbGetString ===========================
 
 /*  Always returns an empty string or a non-empty string. Never 0. */
-static char* esbGetString(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
+static char* esbGetString(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
   if (data->esbAllocatedSize == 0) {
-    self->dwarfdbgEsb->initEsbString(self, data, allocSize);
+    self->dwarfDbgEsb->initEsbString(self, data, allocSize);
   }
   return data->esbString;
   return TCL_OK;
@@ -183,9 +183,9 @@ static char* esbGetString(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
 
 /*  Sets esbUsedBytes to zero. The string is not freed and
   esbAllocatedSize is unchanged.  */
-static uint8_t esbEmptyString(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
+static uint8_t esbEmptyString(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
   if (data->esbAllocatedSize == 0) {
-    self->dwarfdbgEsb->initEsbString(self, data, allocSize);
+    self->dwarfDbgEsb->initEsbString(self, data, allocSize);
   }
   data->esbUsedBytes = 0;
   data->esbString[0] = 0;
@@ -195,7 +195,7 @@ static uint8_t esbEmptyString(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
 // =============================== esbStringLen ===========================
 
 /*  Return esbUsed_bytes. */
-static size_t esbStringLen(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
+static size_t esbStringLen(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
   return data->esbUsedBytes;
 }
 
@@ -203,7 +203,7 @@ static size_t esbStringLen(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
 
 /*  *data is presumed to contain garbage, not values, and
   is properly initialized here. */
-static uint8_t esbConstructor(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
+static uint8_t esbConstructor(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
   memset(data, 0, sizeof(*data));
   return TCL_OK;
 }
@@ -211,12 +211,12 @@ static uint8_t esbConstructor(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
 // =============================== esbDestructor ===========================
 
 /*  The string is freed, contents of *data set to zeroes. */
-static uint8_t esbDestructor(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
+static uint8_t esbDestructor(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
   if (data->esbString) {
     free(data->esbString);
     data->esbString = NULL;
   }
-  self->dwarfdbgEsb->esbConstructor(self, data);
+  self->dwarfDbgEsb->esbConstructor(self, data);
   return TCL_OK;
 }
 
@@ -232,7 +232,7 @@ static uint8_t esbAllocSize(dwarfDbgPtr_t self, size_t size) {
 
 // =============================== esbGetAllocatedSize ===========================
 
-static size_t esbGetAllocatedSize(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
+static size_t esbGetAllocatedSize(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
   return data->esbAllocatedSize;
 }
 
@@ -241,7 +241,7 @@ static size_t esbGetAllocatedSize(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
 /*  Make more room. Leaving  contents unchanged, effectively.
   The NUL byte at end has room and this preserves that room.
 */
-static uint8_t esbAllocateMoreIfNeeded(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, const char *in_string,va_list ap) {
+static uint8_t esbAllocateMoreIfNeeded(dwarfDbgPtr_t self, dwarfDbgEsb_t *data, const char *in_string,va_list ap) {
 #ifndef _WIN32
   static char a_buffer[512];
 #endif /* _WIN32*/
@@ -263,19 +263,19 @@ static uint8_t esbAllocateMoreIfNeeded(dwarfDbgPtr_t self, dwarfdbgEsb_t *data, 
   va_end(ap_copy);
 
   /* Allocate enough space to hold the full text */
-  self->dwarfdbgEsb->esbForceAllocation(self, data,netlen + 1);
+  self->dwarfDbgEsb->esbForceAllocation(self, data,netlen + 1);
   return TCL_OK;
 }
 
 // =============================== esbAppendPrintfAp ===========================
 
 /*  Append a formatted string */
-static uint8_t esbAppendPrintfAp(dwarfDbgPtr_t self, dwarfdbgEsb_t *data,const char *in_string,va_list ap) {
+static uint8_t esbAppendPrintfAp(dwarfDbgPtr_t self, dwarfDbgEsb_t *data,const char *in_string,va_list ap) {
   int netlen = 0;
   int expandedlen = 0;
 
   /* Allocate enough space for the input string */
-  self->dwarfdbgEsb->esbAllocateMoreIfNeeded(self, data,in_string,ap);
+  self->dwarfDbgEsb->esbAllocateMoreIfNeeded(self, data,in_string,ap);
 
   netlen = data->esbAllocatedSize - data->esbUsedBytes;
   expandedlen = vsnprintf(&data->esbString[data->esbUsedBytes], netlen,in_string,ap);
@@ -297,10 +297,10 @@ static uint8_t esbAppendPrintfAp(dwarfDbgPtr_t self, dwarfdbgEsb_t *data,const c
 // =============================== esbAppendPrintf ===========================
 
 /*  Append a formatted string */
-static uint8_t esbAppendPrintf(dwarfDbgPtr_t self, dwarfdbgEsb_t *data,const char *in_string, ...) {
+static uint8_t esbAppendPrintf(dwarfDbgPtr_t self, dwarfDbgEsb_t *data,const char *in_string, ...) {
   va_list ap;
   va_start(ap,in_string);
-  self->dwarfdbgEsb->esbAppendPrintfAp(self, data,in_string,ap);
+  self->dwarfDbgEsb->esbAppendPrintfAp(self, data,in_string,ap);
   /*  "The object ap may be passed as an argument to another
     function; if that function invokes the va_arg()
     macro with parameter ap, the value of ap in the calling
@@ -317,34 +317,34 @@ static uint8_t esbAppendPrintf(dwarfDbgPtr_t self, dwarfdbgEsb_t *data,const cha
   It is up to the code calling this
   to free() the string using the
   pointer returned here. */
-static char* esbGetCopy(dwarfDbgPtr_t self, dwarfdbgEsb_t *data) {
+static char* esbGetCopy(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
   char* copy = NULL;
-  size_t len = self->dwarfdbgEsb->esbStringLen(self, data);
+  size_t len = self->dwarfDbgEsb->esbStringLen(self, data);
   if (len) {
     copy = (char*)malloc(len + 1);
-    strcpy(copy,self->dwarfdbgEsb->esbGetString(self, data));
+    strcpy(copy,self->dwarfDbgEsb->esbGetString(self, data));
   }
   return copy;
 }
 
-// =============================== dwarfdbgEsbInit ===========================
+// =============================== dwarfDbgEsbInit ===========================
 
-int dwarfdbgEsbInit(dwarfDbgPtr_t self) {
-  self->dwarfdbgEsb->initEsbString = &initEsbString;
-  self->dwarfdbgEsb->esbAllocateMore = &esbAllocateMore;
-  self->dwarfdbgEsb->esbAppendnInternal = &esbAppendnInternal;
-  self->dwarfdbgEsb->esbAllocateMoreIfNeeded = &esbAllocateMoreIfNeeded;
-  self->dwarfdbgEsb->esbAppend = &esbAppend;
-  self->dwarfdbgEsb->esbAppendn = &esbAppendn;
-  self->dwarfdbgEsb->esbGetString = &esbGetString;
-  self->dwarfdbgEsb->esbEmptyString = &esbEmptyString;
-  self->dwarfdbgEsb->esbStringLen = &esbStringLen;
-  self->dwarfdbgEsb->esbConstructor = &esbConstructor;
-  self->dwarfdbgEsb->esbForceAllocation = &esbForceAllocation;
-  self->dwarfdbgEsb->esbDestructor = &esbDestructor;
-  self->dwarfdbgEsb->esbAllocSize = &esbAllocSize;
-  self->dwarfdbgEsb->esbGetAllocatedSize = &esbGetAllocatedSize;
-  self->dwarfdbgEsb->esbAppendPrintf = &esbAppendPrintf;
-  self->dwarfdbgEsb->esbAppendPrintfAp = &esbAppendPrintfAp;
-  self->dwarfdbgEsb->esbGetCopy = &esbGetCopy; 
+int dwarfDbgEsbInit(dwarfDbgPtr_t self) {
+  self->dwarfDbgEsb->initEsbString = &initEsbString;
+  self->dwarfDbgEsb->esbAllocateMore = &esbAllocateMore;
+  self->dwarfDbgEsb->esbAppendnInternal = &esbAppendnInternal;
+  self->dwarfDbgEsb->esbAllocateMoreIfNeeded = &esbAllocateMoreIfNeeded;
+  self->dwarfDbgEsb->esbAppend = &esbAppend;
+  self->dwarfDbgEsb->esbAppendn = &esbAppendn;
+  self->dwarfDbgEsb->esbGetString = &esbGetString;
+  self->dwarfDbgEsb->esbEmptyString = &esbEmptyString;
+  self->dwarfDbgEsb->esbStringLen = &esbStringLen;
+  self->dwarfDbgEsb->esbConstructor = &esbConstructor;
+  self->dwarfDbgEsb->esbForceAllocation = &esbForceAllocation;
+  self->dwarfDbgEsb->esbDestructor = &esbDestructor;
+  self->dwarfDbgEsb->esbAllocSize = &esbAllocSize;
+  self->dwarfDbgEsb->esbGetAllocatedSize = &esbGetAllocatedSize;
+  self->dwarfDbgEsb->esbAppendPrintf = &esbAppendPrintf;
+  self->dwarfDbgEsb->esbAppendPrintfAp = &esbAppendPrintfAp;
+  self->dwarfDbgEsb->esbGetCopy = &esbGetCopy; 
 }
