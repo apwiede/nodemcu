@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   compMsgTypesAndNames.h
+ * File:   compMsgErrorCodes.h
  * Author: Arnulf P. Wiedemann
  *
  * Created on Descmber 16, 2016
