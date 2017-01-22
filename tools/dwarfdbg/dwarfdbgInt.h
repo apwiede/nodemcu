@@ -41,7 +41,24 @@
 #ifndef DWARFDBG_INT_H
 #define DWARFDBG_INT_H 1
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <libelf.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "dwarfdbgGlobals.h"
+#include "dwarfdbg.h"
+#include "dwarfdbgEsb.h"
+#include "libdwarf.h"
+#include "dwarf.h"
 #include "dwarfdbg/dwarfdbgDecls.h"
+#include "dwarfdbgUtil.h"
+#include "dwarfdbgOpenElf.h"
 
 /*
  * Actual type of the dwarfdbg data structure. Used only inside of the
@@ -58,6 +75,11 @@ typedef struct DWARFDBG_ {
 
     char *          errorStr; /* cause of error */
     char            errorBuf[256]; /* cause of error */
+
+    dwarfdbgEsb_t *dwarfdbgEsb;
+    dwarfdbgUtil_t *dwarfdbgUtil;
+    dwarfdbgOpenElf_t *dwarfdbgOpenElf;
+
 } DWARFDBG_;
 
 /*

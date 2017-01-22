@@ -38,24 +38,13 @@
  * Created on January 22, 2017
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <libelf.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "dwarfdbgGlobals.h"
 #include "dwarfdbgInt.h"
-#include "esb.h"
-#include "libdwarf.h"
-#include "dwarf.h"
 
-static struct esb_s config_file_path;
-static struct esb_s config_file_tiedpath;
-static struct esb_s esb_short_cu_name;
-static struct esb_s esb_long_cu_name;
-static struct esb_s dwarf_error_line;
+static dwarfdbgEsb_t config_file_path;
+static dwarfdbgEsb_t config_file_tiedpath;
+static dwarfdbgEsb_t esbShortCuName;
+static dwarfdbgEsb_t esbLongCuName;
+static dwarfdbgEsb_t dwarf_error_line;
 
 /*  Base Address is needed for range lists and must come from a CU.
     Low address is for information and can come from a function
@@ -71,7 +60,10 @@ Dwarf_Off  DIE_overall_offset = 0;    /* DIE offset in .debug_info */
 Dwarf_Off  DIE_CU_offset = 0;         /* CU DIE offset in compile unit */
 Dwarf_Off  DIE_CU_overall_offset = 0; /* CU DIE offset in .debug_info */
 int current_section_id = 0;           /* Section being process */
+DWARFDBG _self;
 
+
+// =================================== get_attr_value =========================== 
 
 /*  Fill buffer with attribute value.
     We pass in tag so we can try to do the right thing with
@@ -82,15 +74,8 @@ int current_section_id = 0;           /* Section being process */
 
     We append to esbp's buffer.
 */
-void
-get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag,
-    Dwarf_Die die,
-    Dwarf_Off dieprint_cu_goffset,
-    Dwarf_Attribute attrib,
-    char **srcfiles, Dwarf_Signed cnt, struct esb_s *esbp,
-    int show_form,
-    int local_verbose)
-{
+void get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off dieprint_cu_goffset,
+    Dwarf_Attribute attrib, char **srcfiles, Dwarf_Signed cnt, dwarfdbgEsb_t *esbp, int show_form, int local_verbose) {
     Dwarf_Half theform = 0;
     char * temps = 0;
     Dwarf_Block *tempb = 0;
@@ -109,6 +94,7 @@ get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag,
     char small_buf[COMPILE_UNIT_NAME_LEN];  /* Size to hold a filename */
     Dwarf_Bool is_info = TRUE;
     Dwarf_Error err = 0;
+    DWARFDBG self = _self;
 
 
     is_info = dwarf_get_die_infotypes_flag(die);
@@ -397,7 +383,7 @@ get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag,
             for (u = 0; u < tempb->bl_len; u++) {
                 snprintf(small_buf, sizeof(small_buf), "%02x",
                     *(u + (unsigned char *) tempb->bl_data));
-                esb_append(esbp, small_buf);
+                self->dwarfdbgEsb->esbAppend(self, esbp, small_buf);
             }
             dwarf_dealloc(dbg, tempb, DW_DLA_BLOCK);
             tempb = 0;
@@ -452,7 +438,7 @@ get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag,
                     attrib,
                     &tempud,
                     /* attrname */ (const char *) NULL,
-                    /* err_string */ ( struct esb_s *) NULL,
+                    /* err_string */ ( dwarfdbgEsb_t *) NULL,
 //                    (encoding_type_func) 0,
                     0,
                     &err,show_form_here);
@@ -479,8 +465,8 @@ wres = 0;
                                 index into srcfiles.  */
                             char *fname = srcfiles[tempud - 1];
 
-                            esb_append(esbp, " ");
-                            esb_append(esbp, fname);
+                            self->dwarfdbgEsb->esbAppend(self, esbp, " ");
+                            self->dwarfdbgEsb->esbAppend(self, esbp, fname);
                         }
 
                         /*  Validate integrity of files
@@ -538,17 +524,17 @@ wres = 0;
                 memset(&v,0,sizeof(v));
                 wres = dwarf_formsig8_const(attrib,&v,&err);
                 if (wres == DW_DLV_OK){
-                    struct esb_s t;
+                    dwarfdbgEsb_t t;
 
-                    esb_constructor(&t);
+                    self->dwarfdbgEsb->esbConstructor(self, &t);
 #ifdef NOTDEF
                     format_sig8_string(&v,&t);
 #endif
-                    esb_append(esbp,esb_get_string(&t));
-                    esb_destructor(&t);
+                    self->dwarfdbgEsb->esbAppend(self, esbp,self->dwarfdbgEsb->esbGetString(self, &t));
+                    self->dwarfdbgEsb->esbDestructor(self, &t);
                 } else if (wres == DW_DLV_NO_ENTRY) {
                     /* nothing? */
-                    esb_append(esbp,"Impossible: no entry for formsig8 dwo_id");
+                    self->dwarfdbgEsb->esbAppend(self, esbp,"Impossible: no entry for formsig8 dwo_id");
                 } else {
                     printf("Cannot get DW_AT_const_value wres: %d err: %d",wres,err);
                 }
@@ -638,30 +624,30 @@ wres = 0;
         if (sres == DW_DLV_OK) {
             if (theform == DW_FORM_strx ||
                 theform == DW_FORM_GNU_str_index) {
-                struct esb_s saver;
+                dwarfdbgEsb_t saver;
                 Dwarf_Unsigned index = 0;
 
-                esb_constructor(&saver);
+                self->dwarfdbgEsb->esbConstructor(self, &saver);
                 sres = dwarf_get_debug_str_index(attrib,&index,&err);
-                esb_append(&saver,temps);
+                self->dwarfdbgEsb->esbAppend(self, &saver,temps);
                 if(sres == DW_DLV_OK) {
 #ifdef NOTDEF
                     bracket_hex("(indexed string: ",index,")",esbp);
 #endif
                 } else {
-                    esb_append(esbp,"(indexed string:no string provided?)");
+                    self->dwarfdbgEsb->esbAppend(self, esbp,"(indexed string:no string provided?)");
                 }
-                esb_append(esbp, esb_get_string(&saver));
-                esb_destructor(&saver);
+                self->dwarfdbgEsb->esbAppend(self, esbp, self->dwarfdbgEsb->esbGetString(self, &saver));
+                self->dwarfdbgEsb->esbDestructor(self, &saver);
             } else {
-                esb_append(esbp,temps);
+                self->dwarfdbgEsb->esbAppend(self, esbp,temps);
             }
         } else if (sres == DW_DLV_NO_ENTRY) {
             if (theform == DW_FORM_strx ||
                 theform == DW_FORM_GNU_str_index) {
-                esb_append(esbp, "(indexed string,no string provided?)");
+                self->dwarfdbgEsb->esbAppend(self, esbp, "(indexed string,no string provided?)");
             } else {
-                esb_append(esbp, "<no string provided?>");
+                self->dwarfdbgEsb->esbAppend(self, esbp, "<no string provided?>");
             }
         } else {
             if (theform == DW_FORM_strx ||
@@ -679,10 +665,10 @@ wres = 0;
             if (tempbool) {
                 snprintf(small_buf, sizeof(small_buf), "yes(%d)",
                     tempbool);
-                esb_append(esbp, small_buf);
+                self->dwarfdbgEsb->esbAppend(self, esbp, small_buf);
             } else {
                 snprintf(small_buf, sizeof(small_buf), "no");
-                esb_append(esbp, small_buf);
+                self->dwarfdbgEsb->esbAppend(self, esbp, small_buf);
             }
         } else if (wres == DW_DLV_NO_ENTRY) {
             /* nothing? */
@@ -695,7 +681,7 @@ wres = 0;
             determined and direct_form has the DW_FORM_indirect if it is
             used here in this attr. */
 #ifdef NOTDEF
-        esb_append(esbp, get_FORM_name(theform,
+        self->dwarfdbgEsb->esbAppend(self, esbp, get_FORM_name(theform,
             pd_dwarf_names_print_on_error));
 #endif
         break;
@@ -733,7 +719,7 @@ wres = 0;
 
         break;
     case DW_FORM_flag_present: /* DWARF4 */
-        esb_append(esbp,"yes(1)");
+        self->dwarfdbgEsb->esbAppend(self, esbp,"yes(1)");
         break;
     case DW_FORM_ref_sig8: {  /* DWARF4 */
         Dwarf_Sig8 sig8data;
@@ -742,16 +728,16 @@ wres = 0;
             /* Show nothing? */
             printf("Cannot get a  DW_FORM_ref_sig8 ....wres: %d err: %d", wres, err);
         } else {
-            struct esb_s sig8str;
+            dwarfdbgEsb_t sig8str;
 
-            esb_constructor(&sig8str);
+            self->dwarfdbgEsb->esbConstructor(self, &sig8str);
 #ifdef NOTDEF
             format_sig8_string(&sig8data,&sig8str);
 #endif
-            esb_append(esbp,esb_get_string(&sig8str));
-            esb_destructor(&sig8str);
+            self->dwarfdbgEsb->esbAppend(self, esbp, self->dwarfdbgEsb->esbGetString(self, &sig8str));
+            self->dwarfdbgEsb->esbDestructor(self, &sig8str);
             if (!show_form) {
-                esb_append(esbp," <type signature>");
+                self->dwarfdbgEsb->esbAppend(self, esbp," <type signature>");
             }
         }
         }
@@ -775,15 +761,13 @@ wres = 0;
 #endif
 }
 
+// =================================== get_producer_name =========================== 
+
 /*  Returns the producer of the CU
     Caller must ensure producernameout is
-    a valid, constructed, empty esb_s instance before calling.
+    a valid, constructed, empty dwarfdbgEsb_t instance before calling.
     Never returns DW_DLV_ERROR.  */
-int
-get_producer_name(Dwarf_Debug dbg, Dwarf_Die cu_die,
-    Dwarf_Off dieprint_cu_offset,
-    struct esb_s *producernameout)
-{
+static int getProducerName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, dwarfdbgEsb_t *producernameout) {
     Dwarf_Attribute producer_attr = 0;
     Dwarf_Error pnerr = 0;
 
@@ -796,7 +780,7 @@ get_producer_name(Dwarf_Debug dbg, Dwarf_Die cu_die,
         /*  We add extra quotes so it looks more like
             the names for real producers that get_attr_value
             produces. */
-        esb_append(producernameout,"\"<CU-missing-DW_AT_producer>\"");
+        self->dwarfdbgEsb->esbAppend(self, producernameout,"\"<CU-missing-DW_AT_producer>\"");
     } else {
         /*  DW_DLV_OK */
         /*  The string return is valid until the next call to this
@@ -815,12 +799,10 @@ get_producer_name(Dwarf_Debug dbg, Dwarf_Die cu_die,
     return ares;
 }
 
+// =================================== getCuName =========================== 
+
 /* Returns the cu of the CU. In case of error, give up, do not return. */
-int
-get_cu_name(Dwarf_Debug dbg, Dwarf_Die cu_die,
-    Dwarf_Off dieprint_cu_offset,
-    char * *short_name, char * *long_name)
-{
+static int getCuName(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, char * *short_name, char * *long_name) {
     Dwarf_Attribute name_attr = 0;
     Dwarf_Error lerr = 0;
     int ares;
@@ -839,12 +821,12 @@ get_cu_name(Dwarf_Debug dbg, Dwarf_Die cu_die,
                 string, the string must be copied (makename()). */
             char *filename = 0;
 
-            esb_empty_string(&esb_long_cu_name);
+            self->dwarfdbgEsb->esbEmptyString(self, &esbLongCuName);
             get_attr_value(dbg, DW_TAG_compile_unit,
                 cu_die, dieprint_cu_offset,
-                name_attr, NULL, 0, &esb_long_cu_name,
+                name_attr, NULL, 0, &esbLongCuName,
                 0 /*show_form_used*/,0 /* verbose */);
-            *long_name = esb_get_string(&esb_long_cu_name);
+            *long_name = self->dwarfdbgEsb->esbGetString(self, &esbLongCuName);
             /* Generate the short name (filename) */
             filename = strrchr(*long_name,'/');
             if (!filename) {
@@ -855,18 +837,18 @@ get_cu_name(Dwarf_Debug dbg, Dwarf_Die cu_die,
             } else {
                 filename = *long_name;
             }
-            esb_empty_string(&esb_short_cu_name);
-            esb_append(&esb_short_cu_name,filename);
-            *short_name = esb_get_string(&esb_short_cu_name);
+            self->dwarfdbgEsb->esbEmptyString(self, &esbShortCuName);
+            self->dwarfdbgEsb->esbAppend(self, &esbShortCuName,filename);
+            *short_name = self->dwarfdbgEsb->esbGetString(self, &esbShortCuName);
         }
     }
     dwarf_dealloc(dbg, name_attr, DW_DLA_ATTR);
     return ares;
 }
 
-static int
-handle_one_die_section(Dwarf_Debug dbg,Dwarf_Bool is_info, Dwarf_Error *pod_err)
-{
+// =================================== handle_one_die_section =========================== 
+
+static int handle_one_die_section(DWARFDBG self, Dwarf_Debug dbg,Dwarf_Bool is_info, Dwarf_Error *pod_err) {
     Dwarf_Unsigned cu_header_length = 0;
     Dwarf_Unsigned abbrev_offset = 0;
     Dwarf_Half version_stamp = 0;
@@ -921,23 +903,22 @@ fflush(stdout);
 printf("dieprint_cu_goffset: %d\n", dieprint_cu_goffset);
         {
         /* Get producer name for this CU and update compiler list */
-            struct esb_s producername;
+            dwarfdbgEsb_t producername;
 
-            esb_constructor(&producername);
-            get_producer_name(dbg,cu_die,
-                dieprint_cu_goffset,&producername);
-//printf("producername: %s\n", esb_get_string(&producername));
+            self->dwarfdbgEsb->esbConstructor(self, &producername);
+            self->dwarfdbgOpenElf->getProducerName(self, dbg,cu_die, dieprint_cu_goffset,&producername);
+//printf("producername: %s\n", self->dwarfdbgEsb->esbGetString(self, &producername));
 #ifdef NOTDEF
-            update_compiler_target(esb_get_string(&producername));
+            update_compiler_target(self->dwarfdbgEsb->esbGetString(self, &producername));
 #endif
-            esb_destructor(&producername);
+            self->dwarfdbgEsb->esbDestructor(self, &producername);
         }
         /*  Once the compiler table has been updated, see
             if we need to generate the list of CU compiled
             by all the producers contained in the elf file */
 //printf("producer_children_flag: %d\n", producer_children_flag);
 //        if (producer_children_flag) {
-            get_cu_name(dbg,cu_die, dieprint_cu_goffset,&cu_short_name,&cu_long_name);
+            self->dwarfdbgOpenElf->getCuName(self, dbg,cu_die, dieprint_cu_goffset,&cu_short_name,&cu_long_name);
 printf("cu_short_name: %s\n", cu_short_name);
             /* Add CU name to current compiler entry */
 //            add_cu_name_compiler_target(cu_long_name);
@@ -998,9 +979,9 @@ printf("src: %d %s\n", i, srcfiles[i]);
     }
 }
 
-int
-dwarfdbgOpenElf (DWARFDBG dd, char *fileName)
-{
+// =================================== dwarfdbgOpenElf =========================== 
+
+int dwarfdbgOpenElf (DWARFDBG self, char *fileName) {
   int f = 0;
   Elf_Cmd cmd = 0;
   Elf *arf = 0;
@@ -1010,16 +991,18 @@ dwarfdbgOpenElf (DWARFDBG dd, char *fileName)
   Dwarf_Error onef_err = 0;
   Dwarf_Error pod_err;
 
-printf("dwarfdbgOpenElElff\n");
+printf("dwarfdbgOpenElf\n");
+printf("self->dwarfdbgEsb: %p\n", self->dwarfdbgEsb);
+printf("self->dwarfdbgEsb->esbConstructor: %p\n", self->dwarfdbgEsb->esbConstructor);
 fflush(stdout);
-  esb_constructor(&config_file_path);
-  esb_constructor(&config_file_tiedpath);
-  esb_constructor(&esb_short_cu_name);
-  esb_constructor(&esb_long_cu_name);
-  esb_constructor(&dwarf_error_line);
+  self->dwarfdbgEsb->esbConstructor(self, &config_file_path);
+  self->dwarfdbgEsb->esbConstructor(self, &config_file_tiedpath);
+  self->dwarfdbgEsb->esbConstructor(self, &esbShortCuName);
+  self->dwarfdbgEsb->esbConstructor(self, &esbLongCuName);
+  self->dwarfdbgEsb->esbConstructor(self, &dwarf_error_line);
   (void) elf_version(EV_NONE);
   if (elf_version(EV_CURRENT) == EV_NONE) {
-    dd->errorStr = "dwarfdbg: libelf.a out of date.";
+    self->errorStr = "dwarfdbg: libelf.a out of date.";
     return TCL_ERROR;
   }
   f = open(fileName, O_RDONLY);
@@ -1034,17 +1017,17 @@ printf("elf: %p\n", elf);
     dres = dwarf_elf_init(elf, DW_DLC_READ, NULL, NULL, &dbg, &onef_err);
 printf("dbg: %p dres: %d onef_err: %d\n", dbg, dres, onef_err);
     if (dres == DW_DLV_NO_ENTRY) {
-        sprintf(dd->errorBuf, "No DWARF information present in %s\n", fileName);
-        dd->errorStr = dd->errorBuf;
+        sprintf(self->errorBuf, "No DWARF information present in %s\n", fileName);
+        self->errorStr = self->errorBuf;
         return TCL_ERROR;
     }   
     printf("dwarf_elf_int ok for %p\n", elf);
-      handle_one_die_section(dbg,1, &pod_err);
+      handle_one_die_section(self, dbg,1, &pod_err);
     cmd = elf_next(elf);
 printf("cmd2: %d\n", cmd);
     if (cmd != 0) {
       // we cannot handle more than one elf part right now!!
-      dd->errorStr = "too many elf parts";
+      self->errorStr = "too many elf parts";
       return TCL_ERROR;
    }
     elf_end(elf);
@@ -1053,4 +1036,12 @@ printf("cmd2: %d\n", cmd);
   return TCL_OK;
 }
 
+// =================================== dwarfdbgOpenElfInit =========================== 
+
+int dwarfdbgOpenElfInit (DWARFDBG self) {
+printf("dwarfdbgOpenElfInit\n");
+  _self = self;
+  self->dwarfdbgOpenElf->getProducerName = getProducerName;
+  self->dwarfdbgOpenElf->getCuName = getCuName;
+}
 

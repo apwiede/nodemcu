@@ -32,80 +32,23 @@
 */
 
 /* 
- * File:   dwarfdbg.c
+ * File:   dwarfdbgOpenElf.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
  */
 
-#include "dwarfdbgInt.h"
+#ifndef DWARFDBG_OPEN_ELF_H
+#define	DWARFDBG_OPEN_ELF_H
 
-/*
- * = = == === ===== ======== ============= =====================
- */
+typedef int (* getProducerName_t)(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, dwarfdbgEsb_t *producernameout);
+typedef int (*getCuName_t)(DWARFDBG self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, char** short_name, char ** long_name);
 
-// =================================== dwarfdbgNew =========================== 
+typedef struct dwarfdbgOpenElf {
 
-DWARFDBG dwarfdbgNew (DWARFDBG_CELL_FREE freeCell, void* clientdata) {
-  int result;
+    getProducerName_t getProducerName;
+    getCuName_t getCuName;
 
-  DWARFDBG dbg = ALLOC (DWARFDBG_);
-  // dwarfdbgEsb module
-  dbg->dwarfdbgEsb = ALLOC(dwarfdbgEsb_t);
-  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgUtil module
-  dbg->dwarfdbgUtil = ALLOC(dwarfdbgUtil_t);
-//  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgOpenElf module
-  dbg->dwarfdbgOpenElf = ALLOC(dwarfdbgOpenElf_t);
-  result = dwarfdbgOpenElfInit(dbg);
-// add all other init parts for modules here !!
-  return dbg;
-}
+} dwarfdbgOpenElf_t;
 
-// =================================== dwarfdbgDel =========================== 
-
-void
-dwarfdbgDel (DWARFDBG dbg) {
-  ckfree ((char*) dbg);
-}
-
-// =================================== dwarfdbg_clientdata_set =========================== 
-
-void
-dwarfdbg_clientdata_set (DWARFDBG dbg, void* clientdata) {
-}
-
-// =================================== dwarfdbg_clientdata_get =========================== 
-
-void* dwarfdbg_clientdata_get (DWARFDBG dbg) {
-return NULL;
-}
-
-// =================================== dwarfdbg_fcn1 =========================== 
-
-void dwarfdbg_fcn1 (DWARFDBG dbg) {
-printf("dwarfdbg_fcn1\n");
-fflush(stdout);
-
-}
-
-// =================================== dwarfdbgGetErrorStr =========================== 
-
-char * dwarfdbgGetErrorStr (DWARFDBG dbg) {
-printf("dwarfdbg_errorStr\n");
-fflush(stdout);
-  return dbg->errorStr;
-}
-
-/*
- * = = == === ===== ======== ============= =====================
- */
-
-/*
- * Local Variables:
- * mode: c
- * c-basic-offset: 2
- * fill-column: 78
- * End:
- */
+#endif  /* DWARFDBG_OPEN_ELF_H */

@@ -32,80 +32,17 @@
 */
 
 /* 
- * File:   dwarfdbg.c
+ * File:   dwarfdbgUtil.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
  */
 
-#include "dwarfdbgInt.h"
+#ifndef DWARFDBG_UTIL_H
+#define	DWARFDBG_UTIL_H
 
-/*
- * = = == === ===== ======== ============= =====================
- */
+typedef struct dwarfdbgUtil {
+} dwarfdbgUtil_t;
 
-// =================================== dwarfdbgNew =========================== 
 
-DWARFDBG dwarfdbgNew (DWARFDBG_CELL_FREE freeCell, void* clientdata) {
-  int result;
-
-  DWARFDBG dbg = ALLOC (DWARFDBG_);
-  // dwarfdbgEsb module
-  dbg->dwarfdbgEsb = ALLOC(dwarfdbgEsb_t);
-  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgUtil module
-  dbg->dwarfdbgUtil = ALLOC(dwarfdbgUtil_t);
-//  result = dwarfdbgEsbInit(dbg);
-  // dwarfdbgOpenElf module
-  dbg->dwarfdbgOpenElf = ALLOC(dwarfdbgOpenElf_t);
-  result = dwarfdbgOpenElfInit(dbg);
-// add all other init parts for modules here !!
-  return dbg;
-}
-
-// =================================== dwarfdbgDel =========================== 
-
-void
-dwarfdbgDel (DWARFDBG dbg) {
-  ckfree ((char*) dbg);
-}
-
-// =================================== dwarfdbg_clientdata_set =========================== 
-
-void
-dwarfdbg_clientdata_set (DWARFDBG dbg, void* clientdata) {
-}
-
-// =================================== dwarfdbg_clientdata_get =========================== 
-
-void* dwarfdbg_clientdata_get (DWARFDBG dbg) {
-return NULL;
-}
-
-// =================================== dwarfdbg_fcn1 =========================== 
-
-void dwarfdbg_fcn1 (DWARFDBG dbg) {
-printf("dwarfdbg_fcn1\n");
-fflush(stdout);
-
-}
-
-// =================================== dwarfdbgGetErrorStr =========================== 
-
-char * dwarfdbgGetErrorStr (DWARFDBG dbg) {
-printf("dwarfdbg_errorStr\n");
-fflush(stdout);
-  return dbg->errorStr;
-}
-
-/*
- * = = == === ===== ======== ============= =====================
- */
-
-/*
- * Local Variables:
- * mode: c
- * c-basic-offset: 2
- * fill-column: 78
- * End:
- */
+#endif  /* DWARFDBG_UTIL_H */
