@@ -38,7 +38,7 @@ critcl::subject {generic data structure}
 ## Configuration
 
 critcl::api header dwarfdbg.h
-critcl::cheaders   dwarfdbgInt.h esb.h ../libdwarf/code/libdwarf/*.h
+critcl::cheaders   dwarfdbgInt.h esb.h libdwarf/*.h
 
 # # ## ### ##### ######## ############# #####################
 ## Exported API
@@ -61,7 +61,7 @@ critcl::api function char*      dwarfdbgGetErrorStr {DWARFDBG dbg}
 ## Implementation.
 
 critcl::csources dwarfdbg.c dwarfdbgOpenElf.c dwarfdbgUtil.c esb.c
-critcl::clibraries $::env(HOME)/libdwarf/code/libdwarf/libdwarf.a /usr/lib64/libelf.so
+critcl::clibraries libdwarf/libdwarf.a /usr/lib64/libelf.so
 critcl::ccode {} ; # Fake the 'nothing to build detector'
 
 # ### ### ### ######### ######### #########
