@@ -3,7 +3,10 @@
 lappend auto_path [pwd]/lib
 package require dwarfDbgClass
 dwarfDbgClass create dD
-catch {dD open /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out} MSG
-#puts stderr "MSG: $MSG!"
-dD fcn1
+if {[catch {
+  dD init
+  dD openElf /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out
+} MSG]} {
+  puts stderr "MSG: $MSG!"
+}
 

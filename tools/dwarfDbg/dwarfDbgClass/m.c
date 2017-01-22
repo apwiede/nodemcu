@@ -130,13 +130,13 @@ stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* ob
  */
 
 int
-stm_FCN1 (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+stm_INIT (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
-    /* Syntax: dwardfdbg fcn1
+    /* Syntax: dwardfDbg init
      *	       [0]       [1]
      */
 
-printf("stm_FCN1\n");
+printf("stm_INIT\n");
 fflush(stdout);
     if ((objc != 2)) {
 	Tcl_WrongNumArgs (interp, 2, objv, NULL);
@@ -167,8 +167,8 @@ int
 stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
   int result;
-    /* Syntax: dwardfdbg fcn1 fileName
-     *	       [0]       [1]  [2]
+    /* Syntax: dwardfdbg openElf fileName
+     *	       [0]       [1]     [2]
      */
 
     if ((objc < 3)) {

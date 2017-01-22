@@ -70,7 +70,7 @@ critcl::class::define ::dwarfDbgClass {
     method clear       as stm_CLEAR
     method destroy     as stm_DESTROY
     method openElf     as stm_OPEN_ELF
-    method fcn1        as stm_FCN1
+    method init        as stm_INIT
     method getErrorStr as stm_GET_ERROR_STR
 
     support {
