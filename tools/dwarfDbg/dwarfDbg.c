@@ -44,29 +44,36 @@
  * = = == === ===== ======== ============= =====================
  */
 
+#define checkErrOK2(result) if(result != DWARF_DBG_ERR_OK) return NULL
+
 // =================================== dwarfDbgNew =========================== 
 
 dwarfDbgPtr_t dwarfDbgNew () {
   int result;
 
+printf("dwarfDbgNew\n");
   _dwarfDbg_t *dbg2 = (_dwarfDbg_t *) ckalloc(sizeof(_dwarfDbg_t));
   _dwarfDbg_t *dbg = ALLOC (_dwarfDbg_t);
 
   // dwarfDbgEsb module
   dbg->dwarfDbgEsb = ALLOC(dwarfDbgEsb_t);
   result = dwarfDbgEsbInit(dbg);
+  checkErrOK2(result);
 
   // dwarfDbgUtil module
   dbg->dwarfDbgUtil = ALLOC(dwarfDbgUtil_t);
-//  result = dwarfDbgUtilInit(dbg);
+  result = dwarfDbgUtilInit(dbg);
+  checkErrOK2(result);
 
   // dwarfDbgDict module
   dbg->dwarfDbgDict = ALLOC(dwarfDbgDict_t);
-//  result = dwarfDbgDictInit(dbg);
+  result = dwarfDbgDictInit(dbg);
+  checkErrOK2(result);
 
   // dwarfDbgElfInfo module
   dbg->dwarfDbgElfInfo = ALLOC(dwarfDbgElfInfo_t);
   result = dwarfDbgElfInfoInit(dbg);
+  checkErrOK2(result);
 
 // add all other init parts for modules here !!
   return dbg;
@@ -91,10 +98,10 @@ void* dwarfDbgClientDataGet (dwarfDbgPtr_t dbg) {
 return NULL;
 }
 
-// =================================== dwarfDbg_fcn1 =========================== 
+// =================================== dwarfDbgInit =========================== 
 
-void dwarfDbg_fcn1 (dwarfDbgPtr_t dbg) {
-printf("dwarfDbg_fcn1\n");
+int dwarfDbgInit (dwarfDbgPtr_t dbg) {
+printf("dwarfDbgInit\n");
 fflush(stdout);
 
 }

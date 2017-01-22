@@ -32,27 +32,19 @@
 */
 
 /* 
- * File:   dwarfDbgDict.c
+ * File:   dwarfDbgErrorCodes.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 22, 2017
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <libelf.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef DWARFDBG_ERROR_CODES_H
+#define	DWARFDBG_ERROR_CODES_H
 
-#include "dwarfDbgInt.h"
+#define checkErrOK(result) if(result != DWARF_DBG_ERR_OK) return result
 
-// =================================== dwarfDbgDictInit =========================== 
+enum dwarfDbgErrorCodes {
+  DWARF_DBG_ERR_OK                             = 0,
+};
 
-int dwarfDbgDictInit (dwarfDbgPtr_t self) {
-printf("dwarfDbgDictInit\n");
-//  self->dwarfDbgDict->getProducerName = getProducerName;
-  return DWARF_DBG_ERR_OK;
-}
-
-
+#endif  /* DWARFDBG_ERROR_CODES_H */

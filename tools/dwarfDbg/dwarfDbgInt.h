@@ -55,6 +55,7 @@
 #include "libdwarf.h"
 #include "dwarf.h"
 #include "dwarfDbg.h"
+#include "dwarfDbgErrorCodes.h"
 #include "dwarfdbgGlobals.h"
 #include "dwarfDbgEsb.h"
 #include "dwarfDbg/dwarfDbgDecls.h"

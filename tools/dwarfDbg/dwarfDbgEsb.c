@@ -330,6 +330,7 @@ static char* esbGetCopy(dwarfDbgPtr_t self, dwarfDbgEsb_t *data) {
 // =============================== dwarfDbgEsbInit ===========================
 
 int dwarfDbgEsbInit(dwarfDbgPtr_t self) {
+printf("dwarfDbgEsbInit\n");
   self->dwarfDbgEsb->initEsbString = &initEsbString;
   self->dwarfDbgEsb->esbAllocateMore = &esbAllocateMore;
   self->dwarfDbgEsb->esbAppendnInternal = &esbAppendnInternal;
@@ -347,4 +348,5 @@ int dwarfDbgEsbInit(dwarfDbgPtr_t self) {
   self->dwarfDbgEsb->esbAppendPrintf = &esbAppendPrintf;
   self->dwarfDbgEsb->esbAppendPrintfAp = &esbAppendPrintfAp;
   self->dwarfDbgEsb->esbGetCopy = &esbGetCopy; 
+  return DWARF_DBG_ERR_OK;
 }

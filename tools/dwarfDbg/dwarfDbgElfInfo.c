@@ -1031,5 +1031,6 @@ printf("dwarfDbgElfInfoInit\n");
   _self = self;
   self->dwarfDbgElfInfo->getProducerName = getProducerName;
   self->dwarfDbgElfInfo->getCuName = getCuName;
+  return DWARF_DBG_ERR_OK;
 }
 
