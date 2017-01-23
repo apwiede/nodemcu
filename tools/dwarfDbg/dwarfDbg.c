@@ -45,6 +45,7 @@
  */
 
 #define checkErrOK2(result) if(result != DWARF_DBG_ERR_OK) return NULL
+#define checkAllocOK(var) if(var == NULL) return NULL
 
 // =================================== dwarfDbgNew =========================== 
 
@@ -57,25 +58,20 @@ printf("dwarfDbgNew\n");
 
   // dwarfDbgEsb module
   dbg->dwarfDbgEsb = ALLOC(dwarfDbgEsb_t);
-  result = dwarfDbgEsbInit(dbg);
-  checkErrOK2(result);
+  checkAllocOK(dbg->dwarfDbgEsb);
 
   // dwarfDbgUtil module
   dbg->dwarfDbgUtil = ALLOC(dwarfDbgUtil_t);
-  result = dwarfDbgUtilInit(dbg);
-  checkErrOK2(result);
+  checkAllocOK(dbg->dwarfDbgUtil);
 
   // dwarfDbgDict module
   dbg->dwarfDbgDict = ALLOC(dwarfDbgDict_t);
-  result = dwarfDbgDictInit(dbg);
-  checkErrOK2(result);
+  checkAllocOK(dbg->dwarfDbgDict);
 
   // dwarfDbgElfInfo module
   dbg->dwarfDbgElfInfo = ALLOC(dwarfDbgElfInfo_t);
-  result = dwarfDbgElfInfoInit(dbg);
-  checkErrOK2(result);
+  checkAllocOK(dbg->dwarfDbgElfInfo);
 
-// add all other init parts for modules here !!
   return dbg;
 }
 
@@ -86,24 +82,44 @@ dwarfDbgDel (dwarfDbgPtr_t dbg) {
   ckfree ((char*) dbg);
 }
 
-// =================================== dwarfDbgClientData_set =========================== 
+// =================================== dwarfDbgClientDataSet =========================== 
 
 void
 dwarfDbgClientDataSet (dwarfDbgPtr_t dbg, void* clientdata) {
+  dbg->clientData = clientdata;
 }
 
 // =================================== dwarfDbgClientDataGet =========================== 
 
 void* dwarfDbgClientDataGet (dwarfDbgPtr_t dbg) {
-return NULL;
+  return dbg->clientData;
 }
 
 // =================================== dwarfDbgInit =========================== 
 
 int dwarfDbgInit (dwarfDbgPtr_t dbg) {
+  int result;
+
 printf("dwarfDbgInit\n");
 fflush(stdout);
+  // dwarfDbgEsb module
+  result = dwarfDbgEsbInit(dbg);
+  checkErrOK(result);
 
+  // dwarfDbgUtil module
+  result = dwarfDbgUtilInit(dbg);
+  checkErrOK(result);
+
+  // dwarfDbgDict module
+  result = dwarfDbgDictInit(dbg);
+  checkErrOK(result);
+
+  // dwarfDbgElfInfo module
+  result = dwarfDbgElfInfoInit(dbg);
+  checkErrOK(result);
+
+// add all other init parts for modules here !!
+  return TCL_OK;
 }
 
 // =================================== dwarfDbgGetErrorStr =========================== 

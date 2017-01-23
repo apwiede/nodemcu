@@ -72,20 +72,21 @@ typedef struct elfInfo {
  */
 
 typedef struct _dwarfDbg {
-    int  maxDirNames;   /* Size of the dirNames array. */
-    int  numDirName;    /* Index of the topmost _unused_ cell in the
+  int  maxDirNames;   /* Size of the dirNames array. */
+  int  numDirName;    /* Index of the topmost _unused_ cell in the
                          * array === Index of the _next_ cell to use
                          * === Size of the stack. */
-    char *dirNames;
-    DWARFDBG_CELL_FREE freeCell; 
+  char *dirNames;
+  DWARFDBG_CELL_FREE freeCell; 
+  void*           clientData;
 
-    char *          errorStr; /* cause of error */
-    char            errorBuf[256]; /* cause of error */
+  char *          errorStr; /* cause of error */
+  char            errorBuf[256]; /* cause of error */
 
-    dwarfDbgEsb_t *dwarfDbgEsb;
-    dwarfDbgUtil_t *dwarfDbgUtil;
-    dwarfDbgDict_t *dwarfDbgDict;
-    dwarfDbgElfInfo_t *dwarfDbgElfInfo;
+  dwarfDbgEsb_t *dwarfDbgEsb;
+  dwarfDbgUtil_t *dwarfDbgUtil;
+  dwarfDbgDict_t *dwarfDbgDict;
+  dwarfDbgElfInfo_t *dwarfDbgElfInfo;
 
 } _dwarfDbg_t;
 
