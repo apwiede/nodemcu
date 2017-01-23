@@ -64,7 +64,11 @@
 #include "dwarfDbgElfInfo.h"
 
 typedef struct elfInfo {
-} elftInfo_t;
+  int fd;
+  Elf_Cmd cmd;
+  Elf *elf;
+  Dwarf_Debug dbg;
+} elfInfo_t;
 
 /*
  * Actual type of the dwarfDbg data structure. Used only inside of the
@@ -82,6 +86,8 @@ typedef struct _dwarfDbg {
 
   char *          errorStr; /* cause of error */
   char            errorBuf[256]; /* cause of error */
+
+  elfInfo_t elfInfo;
 
   dwarfDbgEsb_t *dwarfDbgEsb;
   dwarfDbgUtil_t *dwarfDbgUtil;

@@ -972,17 +972,15 @@ printf("DIEOverallOffset: %d DIEOffset: %d \n", DIEOverallOffset, DIEOffset);
 // =================================== dwarfDbgOpenElf =========================== 
 
 int dwarfDbgOpenElf (dwarfDbgPtr_t self, char *fileName) {
-  int f = 0;
-  Elf_Cmd cmd = 0;
-  Elf *arf = 0;
-  Elf *elf = 0;
-  Dwarf_Debug dbg = 0;
   int dres = 0;
   Dwarf_Error onef_err = 0;
-  Dwarf_Error pod_err;
 
 printf("dwarfDbgOpenElf\n");
 fflush(stdout);
+  self->elfInfo.fd = 0;
+  self->elfInfo.cmd = 0;
+  self->elfInfo.elf = 0;
+  self->elfInfo.dbg = 0;
   self->dwarfDbgEsb->esbConstructor(self, &config_file_path);
   self->dwarfDbgEsb->esbConstructor(self, &config_file_tiedpath);
   self->dwarfDbgEsb->esbConstructor(self, &esbShortCuName);
@@ -990,37 +988,48 @@ fflush(stdout);
   self->dwarfDbgEsb->esbConstructor(self, &dwarf_error_line);
   (void) elf_version(EV_NONE);
   if (elf_version(EV_CURRENT) == EV_NONE) {
-  self->errorStr = "dwarfDbg: libelf.a out of date.";
-  return TCL_ERROR;
+    self->errorStr = "dwarfDbg: libelf.a out of date.";
+    return TCL_ERROR;
   }
-  f = open(fileName, O_RDONLY);
-  cmd = ELF_C_READ;
-printf("cmd1: %d\n", cmd);
-  arf = elf_begin(f, cmd, (Elf *) 0);
-printf("fileName: %s f: %d arf: %p\n", fileName, f, arf);
+  self->elfInfo.fd = open(fileName, O_RDONLY);
+  self->elfInfo.cmd = ELF_C_READ;
+  self->elfInfo.elf = elf_begin(self->elfInfo.fd, self->elfInfo.cmd, (Elf *) 0);
+printf("fileName: %s fd: %d arf: %p\n", fileName, self->elfInfo.fd, self->elfInfo.elf);
 fflush(stdout);
   // we only handle one elf part in this version!!
-  while ((elf = elf_begin(f, cmd, arf)) != 0) {
-printf("elf: %p\n", elf);
-  dres = dwarf_elf_init(elf, DW_DLC_READ, NULL, NULL, &dbg, &onef_err);
-printf("dbg: %p dres: %d onef_err: %d\n", dbg, dres, onef_err);
+  if (self->elfInfo.elf == NULL) {
+    self->errorStr = "problem in elf_begin";
+    return TCL_ERROR;
+  }
+  dres = dwarf_elf_init(self->elfInfo.elf, DW_DLC_READ, NULL, NULL, &self->elfInfo.dbg, &onef_err);
+printf("dbg: %p dres: %d onef_err: %d\n", self->elfInfo.dbg, dres, onef_err);
   if (dres == DW_DLV_NO_ENTRY) {
     sprintf(self->errorBuf, "No DWARF information present in %s\n", fileName);
     self->errorStr = self->errorBuf;
     return TCL_ERROR;
   }   
-  printf("dwarf_elf_int ok for %p\n", elf);
-    handle_one_die_section(self, dbg,1, &pod_err);
-  cmd = elf_next(elf);
-printf("cmd2: %d\n", cmd);
-  if (cmd != 0) {
-    // we cannot handle more than one elf part right now!!
-    self->errorStr = "too many elf parts";
-    return TCL_ERROR;
-   }
-  elf_end(elf);
-  }
-  elf_end(arf);
+  printf("dwarf_elf_init ok for %p\n", self->elfInfo.elf);
+  return TCL_OK;
+}
+
+// =================================== dwarfDbgGetFiles =========================== 
+
+int dwarfDbgGetFiles (dwarfDbgPtr_t self) {
+  Dwarf_Error pod_err;
+
+printf("dwarfDbgGetFiles\n");
+  handle_one_die_section(self, self->elfInfo.dbg, 1, &pod_err);
+  return TCL_OK;
+}
+
+// =================================== dwarfDbgCloseElf =========================== 
+
+int dwarfDbgCloseElf (dwarfDbgPtr_t self) {
+printf("dwarfDbgCloseElf\n");
+printf("elf: %p\n", self->elfInfo.elf);
+  elf_end(self->elfInfo.elf);
+printf("fd: %d\n", self->elfInfo.fd);
+  close(self->elfInfo.fd);
   return TCL_OK;
 }
 
