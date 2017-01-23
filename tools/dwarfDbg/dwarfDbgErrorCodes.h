@@ -45,6 +45,7 @@
 
 enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_OK                             = 0,
+  DWARF_DBG_ERR_OUT_OF_MEMORY                  = 1,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

@@ -865,6 +865,8 @@ static int handle_one_die_section(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Boo
   const char * section_name = 0;
   int res = 0;
   Dwarf_Off dieprintCuGoffset = 0;
+  int result;
+  size_t cuIdx;
 
   /* Loop until it fails.  */
   for (;;++loop_count) {
@@ -953,13 +955,20 @@ printf("cuShortName: %s\n", cuShortName);
         DIECuOverallOffset = DIEOverallOffset;
         DIECuOffset = DIEOffset;
         dieprintCuGoffset = DIEOverallOffset;
-printf("DIEOverallOffset: %d DIEOffset: %d \n", DIEOverallOffset, DIEOffset);
+printf("uf: %p\n", self->dwarfDbgDict->addCompileUnitFile);
+        result = self->dwarfDbgDict->addCompileUnitFile(self, cuShortName, DIEOverallOffset, &cuIdx);
+        checkErrOK(result);
+printf("cuShortName: %s DIEOverallOffset: %d DIEOffset: %d cuIdx: %d\n", cuShortName, DIEOverallOffset, DIEOffset, cuIdx);
         if (srcf == DW_DLV_OK) {
           int si = 0;
 
           // handle source (*.c) and include files (*.h)
           for (si = 0; si < cnt; ++si) {
-            printf("src: %d %s\n", si, srcfiles[si]);
+            size_t fileIdx;
+
+            result = self->dwarfDbgDict->addSourceFile(self, srcfiles[si], cuIdx, &fileIdx);
+            checkErrOK(result);
+            printf("src: %d %s fileIdx: %d\n", si, srcfiles[si], fileIdx);
             dwarf_dealloc(dbg, srcfiles[si], DW_DLA_STRING);
           }
           dwarf_dealloc(dbg, srcfiles, DW_DLA_LIST);
@@ -1036,7 +1045,7 @@ printf("fd: %d\n", self->elfInfo.fd);
 // =================================== dwarfDbgElfInfoInit =========================== 
 
 int dwarfDbgElfInfoInit (dwarfDbgPtr_t self) {
-printf("dwarfDbgElfInfoInit\n");
+printf("dwarfDbgElfInfoInit self: %p\n", self);
   _self = self;
   self->dwarfDbgElfInfo->getProducerName = getProducerName;
   self->dwarfDbgElfInfo->getCuName = getCuName;

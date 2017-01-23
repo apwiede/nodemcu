@@ -76,14 +76,8 @@ typedef struct elfInfo {
  */
 
 typedef struct _dwarfDbg {
-  int  maxDirNames;   /* Size of the dirNames array. */
-  int  numDirName;    /* Index of the topmost _unused_ cell in the
-                         * array === Index of the _next_ cell to use
-                         * === Size of the stack. */
-  char *dirNames;
   DWARFDBG_CELL_FREE freeCell; 
   void*           clientData;
-
   char *          errorStr; /* cause of error */
   char            errorBuf[256]; /* cause of error */
 
