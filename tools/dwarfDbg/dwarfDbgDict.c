@@ -114,7 +114,7 @@ printf("addFileName: num: %d dirNameIdx: %d %s\n", self->dwarfDbgDict->fileNames
 
 // =================================== addSourceFile =========================== 
 
-static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, int *fileNameIdx) {
+static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx) {
   uint8_t result;
   char *cp;
   int i;
@@ -154,15 +154,72 @@ printf("found: fileName %d num: %d\n", i, self->dwarfDbgDict->fileNamesInfo.numF
     checkErrOK(result);
   }
   *fileNameIdx = fileIdx;
+  result = self->dwarfDbgDict->addFileInfo(self, compileUnitIdx, fileIdx, fileInfoIdx);
+  checkErrOK(result);
+  return result;
+}
+
+// =================================== addFileInfo =========================== 
+
+static uint8_t addFileInfo(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx) {
+  uint8_t result;
+  compileUnitInfo_t *compileUnitInfo;
+  fileInfo_t *fileInfo;
+
+  result = DWARF_DBG_ERR_OK;
+  compileUnitInfo = &self->dwarfDbgDict->compileUnitsInfo.compileUnitInfos[compileUnitIdx];
+  if (compileUnitInfo->maxFileInfo <= compileUnitInfo->numFileInfo) {
+    compileUnitInfo->maxFileInfo += 10;
+    if (compileUnitInfo->fileInfos == NULL) {
+      compileUnitInfo->fileInfos = (fileInfo_t *)ckalloc(sizeof(fileInfo_t) * compileUnitInfo->maxFileInfo);
+      if (compileUnitInfo->fileInfos == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    } else {
+      compileUnitInfo->fileInfos = (fileInfo_t *)ckrealloc((char *)compileUnitInfo->fileInfos, sizeof(fileInfo_t) * compileUnitInfo->maxFileInfo);
+      if (compileUnitInfo->fileInfos == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    }
+  }
+  fileInfo = &compileUnitInfo->fileInfos[compileUnitInfo->numFileInfo];
+  fileInfo->maxFileLine = 0;
+  fileInfo->numFileLine = 0;
+  fileInfo->fileLines = NULL;
+  fileInfo->fileNameIdx = fileNameIdx;
+  *fileInfoIdx = compileUnitInfo->numFileInfo;
+printf("addFileInfo: compileUnitIdx: %d fileNameIdx: %d fileInfoIdx: %d\n", compileUnitIdx, fileNameIdx, *fileInfoIdx);
+  compileUnitInfo->numFileInfo++;
   return result;
 }
 
 // =================================== addFileLine =========================== 
 
-static uint8_t addFileLine(dwarfDbgPtr_t self, size_t lineNo, size_t *compileUnitIdx, size_t *fileNameIdx) {
+static uint8_t addFileLine(dwarfDbgPtr_t self, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx) {
   uint8_t result;
+  compileUnitInfo_t *compileUnitInfo;
+  fileInfo_t *fileInfo;
 
   result = DWARF_DBG_ERR_OK;
+  compileUnitInfo = &self->dwarfDbgDict->compileUnitsInfo.compileUnitInfos[compileUnitIdx];
+  fileInfo = &compileUnitInfo->fileInfos[fileInfoIdx];
+  if (fileInfo->maxFileLine <= fileInfo->numFileLine) {
+    fileInfo->maxFileLine += 5;
+    if (fileInfo->fileLines == NULL) {
+      fileInfo->fileLines = (int *)ckalloc(sizeof(int*) * fileInfo->maxFileLine);
+      if (fileInfo->fileLines == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    } else {
+      fileInfo->fileLines = (int *)ckrealloc((char *)fileInfo->fileLines, sizeof(int *) * fileInfo->maxFileLine);
+      if (fileInfo->fileLines == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    }
+  }
+  fileInfo->fileLines[fileInfo->numFileLine] = lineNo;
+  *fileLineIdx = fileInfo->numFileLine;
+  fileInfo->numFileLine++;
   return result;
 }
 
@@ -194,6 +251,9 @@ printf("addCompileUnitFile\n");
     return DWARF_DBG_ERR_OUT_OF_MEMORY;
   }
   compileUnitInfo->fileName[strlen(fileName)] == '\0';
+  compileUnitInfo->maxFileInfo = 0;
+  compileUnitInfo->numFileInfo = 0;
+  compileUnitInfo->fileInfos = NULL;
   memcpy(compileUnitInfo->fileName, fileName, strlen(fileName));
   compileUnitInfo->overallOffset = overallOffset;
 printf("addCompileUnit: num: %d overallOffset: %d %s\n", self->dwarfDbgDict->compileUnitsInfo.numCompileUnit, overallOffset, fileName);
@@ -221,6 +281,7 @@ int dwarfDbgDictInit (dwarfDbgPtr_t self) {
   self->dwarfDbgDict->addFileName = addFileName;
   self->dwarfDbgDict->addSourceFile = addSourceFile;
   self->dwarfDbgDict->addFileLine = addFileLine;
+  self->dwarfDbgDict->addFileInfo = addFileInfo;
   self->dwarfDbgDict->addCompileUnitFile = addCompileUnitFile;
   return DWARF_DBG_ERR_OK;
 }

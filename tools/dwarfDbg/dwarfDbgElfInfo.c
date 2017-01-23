@@ -113,6 +113,7 @@ void get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off di
   dwarf_whatform_direct(attrib, &direct_form, &err);
   /*  Ignore errors in dwarf_whatform_direct() */
 
+printf("get_attr_value: theform: 0x%08x attrib: 0x%08x\n", theform, attrib);
   switch (theform) {
   case DW_FORM_GNU_addr_index:
   case DW_FORM_addrx:
@@ -311,7 +312,9 @@ void get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off di
             " local offset 0x%" DW_PR_XZEROS DW_PR_DUx
             " tag 0x%x",
             goff,dieprintCuGoffset,off,tag);
+#ifdef NOTDEF
           DWARF_CHECK_ERROR(type_offset_result,small_buf);
+#endif
         } else {
           int tres2 =
             dwarf_tag(die_for_check, &tag_for_check, &err);
@@ -356,15 +359,19 @@ void get_attr_value(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off di
                 tag_for_check,
                 get_TAG_name(tag_for_check,
                   pd_dwarf_names_print_on_error));
+#ifdef NOTDEF
                 DWARF_CHECK_ERROR(type_offset_result,small_buf);
+#endif
               }
               break;
             }
             dwarf_dealloc(dbg, die_for_check, DW_DLA_DIE);
             die_for_check = 0;
           } else {
+#ifdef NOTDEF
             DWARF_CHECK_ERROR(type_offset_result,
               "DW_AT_type offset does not exist");
+#endif
           }
         }
       }
@@ -490,10 +497,12 @@ wres = 0;
                     " filecount=%" DW_PR_DUu ".",
                     tempud,cnt);
                 }
+#ifdef NOTDEF
                 DWARF_CHECK_ERROR2(decl_file_result,
                   get_AT_name(attr,
                     pd_dwarf_names_print_on_error),
                   small_buf);
+#endif
               }
             }
 #endif
@@ -845,6 +854,721 @@ static int getCuName(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Die cuDie, Dwarf
   return ares;
 }
 
+
+static int die_stack_indent_level = 0;
+static int local_symbols_already_began = FALSE;
+int stop_indent_level = 0;
+typedef enum /* Dwarf_Check_Categories */ {
+    abbrev_code_result,
+    pubname_attr_result,
+    reloc_offset_result,
+    attr_tag_result,
+    tag_tree_result,
+    type_offset_result,
+    decl_file_result,
+    ranges_result,
+    lines_result,
+    aranges_result,
+    /*  Harmless errors are errors detected inside libdwarf but
+        not reported via DW_DLE_ERROR returns because the errors
+        won't really affect client code.  The 'harmless' errors
+        are reported and otherwise ignored.  It is difficult to report
+        the error when the error is noticed by libdwarf, the error
+        is reported at a later time.
+        The other errors dwarfdump reports are also generally harmless
+        but are detected by dwarfdump so it's possble to report the
+        error as soon as the error is discovered. */
+    harmless_result,
+    fde_duplication,
+    frames_result,
+    locations_result,
+    names_result,
+    abbreviations_result,
+    dwarf_constants_result,
+    di_gaps_result,
+    forward_decl_result,
+    self_references_result,
+    attr_encoding_result,
+    duplicated_attributes_result,
+    total_check_result,
+    LAST_CATEGORY  /* Must be last */
+} Dwarf_Check_Categories;
+
+print_die_stack(Dwarf_Debug dbg, char **srcfiles, Dwarf_Signed cnt) {
+printf("print_die_stack called\n");
+}
+static int pd_dwarf_names_print_on_error = 1;
+static Dwarf_Bool bSawLow = FALSE;
+static Dwarf_Bool bSawHigh = FALSE;
+
+#define TRIVIAL_NAMING
+static const char *
+ellipname(int res, int val_in, const char *v,const char *ty,int printonerr)
+{
+#ifndef TRIVIAL_NAMING
+    if (check_dwarf_constants && checking_this_compiler()) {
+        DWARF_CHECK_COUNT(dwarf_constants_result,1);
+    }
+#endif
+    if (res != DW_DLV_OK) {
+        char buf[100];
+        char *n;
+        snprintf(buf,sizeof(buf),"<Unknown %s value 0x%x>",ty,val_in);
+        /* Capture any name error in DWARF constants */
+#ifndef TRIVIAL_NAMING
+        if (printonerr && check_dwarf_constants && checking_this_compiler()) {
+            if (check_verbose_mode) {
+                fprintf(stderr,"%s of %d (0x%x) is unknown to dwarfdump. "
+                    "Continuing. \n",ty,val_in,val_in );
+            }
+            DWARF_ERROR_COUNT(dwarf_constants_result,1);
+            DWARF_CHECK_ERROR_PRINT_CU();
+        }
+#else
+        /* This is for the tree-generation, not dwarfdump itself. */
+        if (printonerr) {
+            fprintf(stderr,"%s of %d (0x%x) is unknown to dwarfdump. "
+                "Continuing. \n",ty,val_in,val_in );
+        }
+#endif
+#ifndef NOTEDEF
+        n = (char *)strdup(buf);
+#else
+        n = makename(buf);
+#endif
+        return n;
+    }
+#ifdef NOTDEF
+    if (ellipsis) {
+        return skipunder(v);
+    }
+#endif
+    return v;
+}
+
+const char * get_TAG_name(unsigned int val_in,int printonerr)
+{
+   const char *v = 0;
+   int res = dwarf_get_TAG_name(val_in,&v);
+printf("get_TAG_name: %d %s\n", val_in, v);
+   return v;
+//   return ellipname(res,val_in,v,"TAG",printonerr);
+}
+const char * get_AT_name(unsigned int val_in,int printonerr)
+{
+   const char *v = 0;
+   int res = dwarf_get_AT_name(val_in,&v);
+printf("get_AT_name: %d %s\n", val_in, v);
+   return v;
+//   return ellipname(res,val_in,v,"AT",printonerr);
+}
+// =================================== print_attribute =========================== 
+
+static int
+print_attribute(Dwarf_Debug dbg, Dwarf_Die die,
+    Dwarf_Off dieprint_cu_goffset,
+    Dwarf_Half attr,
+    Dwarf_Attribute attr_in,
+    int print_information,
+    int die_indent_level,
+    char **srcfiles, Dwarf_Signed cnt)
+{
+    Dwarf_Attribute attrib = 0;
+    Dwarf_Unsigned uval = 0;
+    const char * atname = 0;
+    dwarfDbgEsb_t valname;
+    dwarfDbgEsb_t esb_extra;
+    int tres = 0;
+    Dwarf_Half tag = 0;
+    int append_extra_string = 0;
+    int found_search_attr = FALSE;
+    int bTextFound = FALSE;
+    Dwarf_Bool is_info = FALSE;
+    Dwarf_Addr elf_max_address = 0;
+    Dwarf_Error paerr = 0;
+    
+printf("print_attribute attr: 0x%08x\n", attr_in);
+//    esb_constructor(&esb_extra);
+//    esb_constructor(&valname);
+//    is_info = dwarf_get_die_infotypes_flag(die);
+    atname = get_AT_name(attr,pd_dwarf_names_print_on_error);
+
+   return 1;
+}
+
+// =================================== print_one_die =========================== 
+
+/*  If print_information is FALSE, check the TAG and if it is a CU die
+    print the information anyway. */
+int
+print_one_die(Dwarf_Debug dbg, Dwarf_Die die,
+    Dwarf_Off dieprint_cu_goffset,
+    int print_information,
+    int die_indent_level,
+    char **srcfiles, Dwarf_Signed cnt,
+    int ignore_die_stack)
+{
+    Dwarf_Signed i = 0;
+    Dwarf_Signed j = 0;
+    Dwarf_Off offset = 0;
+    Dwarf_Off overall_offset = 0;
+    const char * tagname = 0;
+    Dwarf_Half tag = 0;
+    Dwarf_Signed atcnt = 0;
+    Dwarf_Attribute *atlist = 0;
+    int tres = 0;
+    int ores = 0;
+    int atres = 0;
+    int abbrev_code = dwarf_die_abbrev_code(die);
+    int attribute_matched = FALSE;
+    Dwarf_Error podie_err = 0;
+
+printf("print_one_die\n");
+    /* Print using indentation
+    < 1><0x000854ff GOFF=0x00546047>    DW_TAG_pointer_type -> 34
+    < 1><0x000854ff>    DW_TAG_pointer_type                 -> 18
+        DW_TAG_pointer_type                                 ->  2
+    */
+    /* Attribute indent. */
+    int nColumn = 18;
+
+#ifdef NOTDEF
+    if (check_abbreviations && checking_this_compiler()) {
+        validate_abbrev_code(dbg,abbrev_code);
+    }
+
+    if (!ignore_die_stack && die_stack[die_indent_level].already_printed_) {
+        /* FALSE seems like a safe return. */
+        return FALSE;
+    }
+
+    /* Reset indentation column if no offsets */
+    if (!display_offsets) {
+        nColumn = 2;
+    }
+#endif
+
+    tres = dwarf_tag(die, &tag, &podie_err);
+    if (tres != DW_DLV_OK) {
+        printf("accessing tag of die! tres: %d, podie_err: %d", tres, podie_err);
+    }
+    tagname = get_TAG_name(tag,pd_dwarf_names_print_on_error);
+
+#ifdef HAVE_USAGE_TAG_ATTR
+    /* Record usage of TAGs */
+    if (print_usage_tag_attr && tag < DW_TAG_last) {
+        ++tag_usage[tag];
+    }
+#endif /* HAVE_USAGE_TAG_ATTR */
+
+#ifdef NOTDEF
+    tag_specific_checks_setup(tag,die_indent_level);
+    ores = dwarf_dieoffset(die, &overall_offset, &podie_err);
+    if (ores != DW_DLV_OK) {
+        printf("dwarf_dieoffset ores: %d podie_err: %d", ores, podie_err);
+    }
+    ores = dwarf_die_CU_offset(die, &offset, &podie_err);
+    if (ores != DW_DLV_OK) {
+        printf("dwarf_die_CU_offset ores: %d podie_err: %d", ores, podie_err);
+    }
+#endif
+
+#ifdef NOTDEF
+    if (dump_visited_info && check_self_references) {
+        printf("<%2d><0x%" DW_PR_XZEROS DW_PR_DUx
+            " GOFF=0x%" DW_PR_XZEROS DW_PR_DUx "> ",
+            die_indent_level, (Dwarf_Unsigned)offset,
+            (Dwarf_Unsigned)overall_offset);
+        printf("%*s%s\n",die_indent_level * 2 + 2," ",tagname);
+    }
+
+    /* Print the die */
+    if (PRINTING_DIES && print_information) {
+        if (!ignore_die_stack) {
+            die_stack[die_indent_level].already_printed_ = TRUE;
+        }
+        if (die_indent_level == 0) {
+            print_cu_hdr_cudie(dbg,die, overall_offset, offset);
+        } else if (local_symbols_already_began == FALSE &&
+            die_indent_level == 1 && !dense) {
+
+            printf("\nLOCAL_SYMBOLS:\n");
+            local_symbols_already_began = TRUE;
+        }
+
+        /* Print just the Tags and Attributes */
+        if (!display_offsets) {
+            /* Print using indentation */
+            printf("%*s%s\n",die_stack_indent_level * 2 + 2," ",tagname);
+        } else {
+            if (dense) {
+                if (show_global_offsets) {
+                    if (die_indent_level == 0) {
+                        printf("<%d><0x%" DW_PR_DUx "+0x%" DW_PR_DUx " GOFF=0x%"
+                            DW_PR_DUx ">", die_indent_level,
+                            (Dwarf_Unsigned)(overall_offset - offset),
+                            (Dwarf_Unsigned)offset,
+                                (Dwarf_Unsigned)overall_offset);
+                        } else {
+                        printf("<%d><0x%" DW_PR_DUx " GOFF=0x%" DW_PR_DUx ">",
+                            die_indent_level,
+                            (Dwarf_Unsigned)offset,
+                            (Dwarf_Unsigned)overall_offset);
+                    }
+                } else {
+                    if (die_indent_level == 0) {
+                        printf("<%d><0x%" DW_PR_DUx "+0x%" DW_PR_DUx ">",
+                            die_indent_level,
+                            (Dwarf_Unsigned)(overall_offset - offset),
+                            (Dwarf_Unsigned)offset);
+                    } else {
+                        printf("<%d><0x%" DW_PR_DUx ">", die_indent_level,
+                            (Dwarf_Unsigned)offset);
+                    }
+                }
+                printf("<%s>",tagname);
+                if (verbose) {
+                    Dwarf_Off agoff = 0;
+                    Dwarf_Unsigned acount = 0;
+                    printf(" <abbrev %d",abbrev_code);
+                    if (show_global_offsets) {
+                        int agres = 0;
+
+                        agres = dwarf_die_abbrev_global_offset(die,
+                            &agoff, &acount,&podie_err);
+                        if(agres == DW_DLV_ERROR) {
+                            printf("dwarf_die_abbrev_global_offset agres: %d podie_err: %d", agres, podie_err);
+                        } else if (agres == DW_DLV_NO_ENTRY) {
+                            printf("dwarf_die_abbrev_global_offset no entry? agres: %d podie_err: %d", agres, podie_err);
+                        } else {
+                            printf(" ABGOFF = 0x%" DW_PR_XZEROS DW_PR_DUx
+                                " count = 0x%" DW_PR_XZEROS DW_PR_DUx,
+                                agoff, acount);
+                        }
+                    }
+                    printf(">");
+                }
+            } else {
+                if (show_global_offsets) {
+                    printf("<%2d><0x%" DW_PR_XZEROS DW_PR_DUx
+                        " GOFF=0x%" DW_PR_XZEROS DW_PR_DUx ">",
+                        die_indent_level, (Dwarf_Unsigned)offset,
+                        (Dwarf_Unsigned)overall_offset);
+                } else {
+                    printf("<%2d><0x%" DW_PR_XZEROS DW_PR_DUx ">",
+                        die_indent_level,
+                        (Dwarf_Unsigned)offset);
+                }
+
+                /* Print using indentation */
+                printf("%*s%s",die_indent_level * 2 + 2," ",tagname);
+                if (verbose) {
+                    Dwarf_Off agoff = 0;
+                    Dwarf_Unsigned acount = 0;
+                    printf(" <abbrev %d",abbrev_code);
+                    if (show_global_offsets) {
+                        int agres = 0;
+
+                        agres = dwarf_die_abbrev_global_offset(die,
+                            &agoff, &acount,&podie_err);
+                        if(agres == DW_DLV_ERROR) {
+                            printf("dwarf_die_abbrev_global_offset agres: %d podie_err: %d", agres, podie_err);
+                        } else if (agres == DW_DLV_NO_ENTRY) {
+                            printf("dwarf_die_abbrev_global_offset no entry? agres: %d podie_err: %d", agres, podie_err);
+                        } else {
+                            printf(" ABGOFF = 0x%" DW_PR_XZEROS DW_PR_DUx
+                                " count = 0x%" DW_PR_XZEROS DW_PR_DUx,
+                                agoff, acount);
+                        }
+                    }
+                    printf(">");
+                }
+                fputs("\n",stdout);
+            }
+        }
+    }
+#endif
+
+    atres = dwarf_attrlist(die, &atlist, &atcnt, &podie_err);
+    if (atres == DW_DLV_ERROR) {
+        printf("dwarf_attrlist atres: %d podie_err: %d", atres, podie_err);
+    } else if (atres == DW_DLV_NO_ENTRY) {
+        /* indicates there are no attrs.  It is not an error. */
+        atcnt = 0;
+    }
+
+    /* Reset any loose references to low or high PC */
+    bSawLow = FALSE;
+    bSawHigh = FALSE;
+
+    /* Get the offset for easy error reporting: This is not the CU die.  */
+    dwarf_die_offsets(die,&DIEOverallOffset,&DIEOffset,&podie_err);
+
+    for (i = 0; i < atcnt; i++) {
+        Dwarf_Half attr;
+        int ares;
+
+        ares = dwarf_whatattr(atlist[i], &attr, &podie_err);
+
+        if (ares == DW_DLV_OK) {
+            /*  Check duplicated attributes; use brute force as the number of
+                attributes is quite small; the problem was detected with the
+                LLVM toolchain, generating more than 12 repeated attributes */
+#ifdef NOTDEF
+            if (check_duplicated_attributes) {
+                Dwarf_Half attr_next;
+                DWARF_CHECK_COUNT(duplicated_attributes_result,1);
+                for (j = i + 1; j < atcnt; ++j) {
+                    ares = dwarf_whatattr(atlist[j], &attr_next, &podie_err);
+                    if (ares == DW_DLV_OK) {
+                        if (attr == attr_next) {
+                            DWARF_CHECK_ERROR2(duplicated_attributes_result,
+                                "Duplicated attribute ",
+                                get_AT_name(attr,pd_dwarf_names_print_on_error));
+                        }
+                    } else {
+                        printf("dwarf_whatattr entry missing ares: %d podie_err: %d", ares, podie_err);
+                    }
+                }
+            }
+
+            /* Print using indentation */
+            if (!dense && PRINTING_DIES && print_information) {
+                printf("%*s",die_indent_level * 2 + 2 + nColumn," ");
+            }
+#endif
+
+            {
+printf("call print_attribute\n");
+                int attr_match = print_attribute(dbg, die,
+                    dieprint_cu_goffset,
+                    attr,
+                    atlist[i],
+                    print_information, die_indent_level, srcfiles, cnt);
+#ifdef NOTDEF
+                if (print_information == FALSE && attr_match) {
+                    attribute_matched = TRUE;
+                }
+#endif
+            }
+
+#ifdef NOTDEF
+            if (record_dwarf_error && check_verbose_mode) {
+                record_dwarf_error = FALSE;
+            }
+#endif
+        } else {
+            printf("dwarf_whatattr entry missing ares: %d podie_err: %d", ares, podie_err);
+        }
+    }
+
+    for (i = 0; i < atcnt; i++) {
+        dwarf_dealloc(dbg, atlist[i], DW_DLA_ATTR);
+    }
+    if (atres == DW_DLV_OK) {
+        dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
+    }
+
+#ifdef NOTDEF
+    if (PRINTING_DIES && dense && print_information) {
+        printf("\n");
+    }
+#endif
+    return attribute_matched;
+}
+
+// =================================== print_die_and_children_internal =========================== 
+
+/* recursively follow the die tree */
+static void print_die_and_children_internal(Dwarf_Debug dbg, Dwarf_Die in_die_in, Dwarf_Off dieprint_cu_goffset,
+    Dwarf_Bool is_info, char **srcfiles, Dwarf_Signed cnt) {
+    Dwarf_Die child = 0;
+    Dwarf_Die sibling = 0;
+    Dwarf_Error dacerr = 0;
+    int tres = 0;
+    int cdres = 0;
+    Dwarf_Die in_die = in_die_in;
+
+    for (;;) {
+        /* Get the CU offset for easy error reporting */
+        dwarf_die_offsets(in_die,&DIEOverallOffset,&DIEOffset,&dacerr);
+
+printf("print_die_and_children_internal: DIE_overall_offset: %d DIE_offset: %d\n", DIEOverallOffset, DIEOffset);
+#ifdef NOTDEF
+        SET_DIE_STACK_ENTRY(die_stack_indent_level,in_die, dieprint_cu_goffset);
+
+//        if (check_tag_tree || print_usage_tag_attr) {
+            DWARF_CHECK_COUNT(tag_tree_result,1);
+            if (die_stack_indent_level == 0) {
+                Dwarf_Half tag = 0;
+
+                tres = dwarf_tag(in_die, &tag, &dacerr);
+                if (tres != DW_DLV_OK) {
+#ifdef NOTDEF
+                    DWARF_CHECK_ERROR(tag_tree_result,
+                        "Tag-tree root tag unavailable: "
+                        "is not DW_TAG_compile_unit");
+#endif
+                } else if (tag == DW_TAG_compile_unit) {
+                    /* OK */
+                } else if (tag == DW_TAG_partial_unit) {
+                    /* OK */
+                } else if (tag == DW_TAG_type_unit) {
+                    /* OK */
+                } else {
+#ifdef NOTDEF
+                    DWARF_CHECK_ERROR(tag_tree_result,
+                        "tag-tree root is not DW_TAG_compile_unit "
+                        "or DW_TAG_partial_unit or DW_TAG_type_unit");
+#endif
+                }
+            } else {
+                Dwarf_Half tag_parent = 0;
+                Dwarf_Half tag_child = 0;
+                Dwarf_Error dacerr2 = 0;
+                int pres = 0;
+                int cres = 0;
+                const char *ctagname = "<child tag invalid>";
+                const char *ptagname = "<parent tag invalid>";
+
+                pres = dwarf_tag(die_stack[die_stack_indent_level - 1].die_,
+                    &tag_parent, &dacerr);
+                cres = dwarf_tag(in_die, &tag_child, &dacerr2);
+                if (pres != DW_DLV_OK)
+                    tag_parent = 0;
+                if (cres != DW_DLV_OK)
+                    tag_child = 0;
+                DROP_ERROR_INSTANCE(dbg,pres,dacerr);
+                DROP_ERROR_INSTANCE(dbg,cres,dacerr2);
+
+#ifdef NOTDEF
+                /* Check for specific compiler */
+//                if (checking_this_compiler()) {
+                    /* Process specific TAGs. */
+                    tag_specific_checks_setup(tag_child,die_stack_indent_level);
+                    if (cres != DW_DLV_OK || pres != DW_DLV_OK) {
+                        if (cres == DW_DLV_OK) {
+                            ctagname = get_TAG_name(tag_child,
+                                pd_dwarf_names_print_on_error);
+                        }
+                        if (pres == DW_DLV_OK) {
+                            ptagname = get_TAG_name(tag_parent,
+                                pd_dwarf_names_print_on_error);
+                        }
+#ifdef NOTDEF
+                        DWARF_CHECK_ERROR3(tag_tree_result,ptagname,
+                            ctagname,
+                            "Tag-tree relation is not standard..");
+#endif
+                    } else if (legal_tag_tree_combination(tag_parent,
+                        tag_child)) {
+                        /* OK */
+                    } else {
+                        /* Report errors only if tag-tree check is on */
+                        if (check_tag_tree) {
+#ifdef NOTDEF
+                            DWARF_CHECK_ERROR3(tag_tree_result,
+                                get_TAG_name(tag_parent,
+                                    pd_dwarf_names_print_on_error),
+                                get_TAG_name(tag_child,
+                                    pd_dwarf_names_print_on_error),
+                                "tag-tree relation is not standard.");
+#endif
+                        }
+                    }
+//                }
+#endif
+            }
+//        }
+
+        if (record_dwarf_error && check_verbose_mode) {
+            record_dwarf_error = FALSE;
+        }
+#endif
+
+        /* Here do pre-descent processing of the die. */
+        {
+            int retry_print_on_match = FALSE;
+            int ignore_die_stack = FALSE;
+            retry_print_on_match = print_one_die(dbg, in_die, dieprint_cu_goffset,
+//                print_as_info_or_cu(), die_stack_indent_level, srcfiles, cnt,ignore_die_stack);
+                0, die_stack_indent_level, srcfiles, cnt,ignore_die_stack);
+#ifdef NOTDEF
+            validate_die_stack_siblings(dbg);
+#endif
+                    print_die_stack(dbg,srcfiles,cnt);
+                    stop_indent_level = die_stack_indent_level;
+//                    info_flag = TRUE;
+        }
+
+        cdres = dwarf_child(in_die, &child, &dacerr);
+        /* Check for specific compiler */
+//        if (check_abbreviations && checking_this_compiler()) {
+            Dwarf_Half ab_has_child;
+            Dwarf_Bool bError = FALSE;
+            Dwarf_Half tag = 0;
+            tres = dwarf_die_abbrev_children_flag(in_die,&ab_has_child);
+            if (tres == DW_DLV_OK) {
+#ifdef NOTDEF
+                DWARF_CHECK_COUNT(abbreviations_result,1);
+#endif
+                tres = dwarf_tag(in_die, &tag, &dacerr);
+                if (tres == DW_DLV_OK) {
+                    switch (tag) {
+                    case DW_TAG_array_type:
+                    case DW_TAG_class_type:
+                    case DW_TAG_compile_unit:
+                    case DW_TAG_type_unit:
+                    case DW_TAG_partial_unit:
+                    case DW_TAG_enumeration_type:
+                    case DW_TAG_lexical_block:
+                    case DW_TAG_namespace:
+                    case DW_TAG_structure_type:
+                    case DW_TAG_subprogram:
+                    case DW_TAG_subroutine_type:
+                    case DW_TAG_union_type:
+                    case DW_TAG_entry_point:
+                    case DW_TAG_inlined_subroutine:
+                        break;
+                    default:
+                        bError = (cdres == DW_DLV_OK && !ab_has_child) ||
+                            (cdres == DW_DLV_NO_ENTRY && ab_has_child);
+                        if (bError) {
+#ifdef NOTDEF
+                            DWARF_CHECK_ERROR(abbreviations_result,
+                                "check 'dw_children' flag combination.");
+#endif
+                        }
+                        break;
+                    }
+                }
+            }
+//        }
+
+
+        /* child first: we are doing depth-first walk */
+printf("cdres: %d\n", cdres);
+        if (cdres == DW_DLV_OK) {
+            /*  If the global offset of the (first) child is
+                <= the parent DW_AT_sibling global-offset-value
+                then the compiler has made a mistake, and
+                the DIE tree is corrupt.  */
+            Dwarf_Off child_overall_offset = 0;
+            int cores = dwarf_dieoffset(child, &child_overall_offset, &dacerr);
+            if (cores == DW_DLV_OK) {
+                char small_buf[200];
+#ifdef NOTDEF
+                Dwarf_Off parent_sib_val = get_die_stack_sibling();
+                if (parent_sib_val &&
+                    (parent_sib_val <= child_overall_offset )) {
+                    snprintf(small_buf,sizeof(small_buf),
+                        "A parent DW_AT_sibling of "
+                        "0x%" DW_PR_XZEROS  DW_PR_DUx
+                        " points %s the first child "
+                        "0x%"  DW_PR_XZEROS  DW_PR_DUx
+                        " so the die tree is corrupt "
+                        "(showing section, not CU, offsets). ",
+                        parent_sib_val,
+                        (parent_sib_val == child_overall_offset)?"at":"before",
+                        child_overall_offset);
+                    printf(small_buf,DW_DLV_OK,dacerr);
+                }
+#endif
+            }
+
+            die_stack_indent_level++;
+#ifdef NOTDEF
+            SET_DIE_STACK_ENTRY(die_stack_indent_level,0,dieprint_cu_goffset);
+            if (die_stack_indent_level >= DIE_STACK_SIZE ) {
+                printf("ERROR: compiled in DIE_STACK_SIZE limit exceeded %d dacerr: %d", DW_DLV_OK,dacerr);
+            }
+#endif
+            print_die_and_children_internal(dbg, child,
+                dieprint_cu_goffset,
+                is_info, srcfiles, cnt);
+#ifdef NOTDEF
+            EMPTY_DIE_STACK_ENTRY(die_stack_indent_level);
+#endif
+            die_stack_indent_level--;
+            if (die_stack_indent_level == 0) {
+                local_symbols_already_began = FALSE;
+            }
+            dwarf_dealloc(dbg, child, DW_DLA_DIE);
+            child = 0;
+        } else if (cdres == DW_DLV_ERROR) {
+            printf(dbg, "dwarf_child cdres: %d dacerr: %d", cdres, dacerr);
+        }
+
+#ifdef NOTDEF
+        /* Stop the display of all children */
+        if (display_children_tree && info_flag &&
+            stop_indent_level == die_stack_indent_level) {
+
+            info_flag = FALSE;
+        }
+#endif
+
+        cdres = dwarf_siblingof_b(dbg, in_die,is_info, &sibling, &dacerr);
+        if (cdres == DW_DLV_OK) {
+            /*  print_die_and_children(dbg, sibling, srcfiles, cnt); We
+                loop around to actually print this, rather than
+                recursing. Recursing is horribly wasteful of stack
+                space. */
+        } else if (cdres == DW_DLV_ERROR) {
+            printf("dwarf_siblingof cdres: %d dacerr: %d", cdres, dacerr);
+        }
+
+#ifdef NOTDEF
+        /*  If we have a sibling, verify that its offset
+            is next to the last processed DIE;
+            An incorrect sibling chain is a nasty bug.  */
+        if (cdres == DW_DLV_OK && sibling && check_di_gaps &&
+            checking_this_compiler()) {
+
+            Dwarf_Off glb_off;
+#ifdef NOTDEF
+            DWARF_CHECK_COUNT(di_gaps_result,1);
+#endif
+            if (dwarf_validate_die_sibling(sibling,&glb_off) == DW_DLV_ERROR) {
+                static char msg[128];
+                Dwarf_Off sib_off;
+                dwarf_dieoffset(sibling,&sib_off,&dacerr);
+                sprintf(msg,
+                    "GSIB = 0x%" DW_PR_XZEROS  DW_PR_DUx
+                    " GOFF = 0x%" DW_PR_XZEROS DW_PR_DUx
+                    " Gap = %" DW_PR_DUu " bytes",
+                    sib_off,glb_off,sib_off-glb_off);
+#ifdef NOTDEF
+                DWARF_CHECK_ERROR2(di_gaps_result,
+                    "Incorrect sibling chain",msg);
+#endif
+            }
+        }
+#endif
+
+        /*  Here do any post-descent (ie post-dwarf_child) processing of
+            the in_die. */
+
+#ifdef NOTDEF
+        EMPTY_DIE_STACK_ENTRY(die_stack_indent_level);
+#endif
+        if (in_die != in_die_in) {
+            /*  Dealloc our in_die, but not the argument die, it belongs
+                to our caller. Whether the siblingof call worked or not. */
+            dwarf_dealloc(dbg, in_die, DW_DLA_DIE);
+            in_die = 0;
+        }
+        if (cdres == DW_DLV_OK) {
+            /*  Set to process the sibling, loop again. */
+            in_die = sibling;
+        } else {
+            /*  We are done, no more siblings at this level. */
+            break;
+        }
+    }  /* end for loop on siblings */
+    return;
+}
+
 // =================================== handle_one_die_section =========================== 
 
 static int handle_one_die_section(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Bool is_info, Dwarf_Error *pod_err) {
@@ -959,14 +1683,18 @@ printf("uf: %p\n", self->dwarfDbgDict->addCompileUnitFile);
         result = self->dwarfDbgDict->addCompileUnitFile(self, cuShortName, DIEOverallOffset, &cuIdx);
         checkErrOK(result);
 printf("cuShortName: %s DIEOverallOffset: %d DIEOffset: %d cuIdx: %d\n", cuShortName, DIEOverallOffset, DIEOffset, cuIdx);
+printf("call print_die_and_children\n");
+        print_die_and_children_internal(dbg, cuDie, dieprintCuGoffset, is_info, srcfiles, cnt);
+ 
         if (srcf == DW_DLV_OK) {
           int si = 0;
 
           // handle source (*.c) and include files (*.h)
           for (si = 0; si < cnt; ++si) {
             size_t fileIdx;
+            size_t fileInfoIdx;
 
-            result = self->dwarfDbgDict->addSourceFile(self, srcfiles[si], cuIdx, &fileIdx);
+            result = self->dwarfDbgDict->addSourceFile(self, srcfiles[si], cuIdx, &fileIdx, &fileInfoIdx);
             checkErrOK(result);
             printf("src: %d %s fileIdx: %d\n", si, srcfiles[si], fileIdx);
             dwarf_dealloc(dbg, srcfiles[si], DW_DLA_STRING);
