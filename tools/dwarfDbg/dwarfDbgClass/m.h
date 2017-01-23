@@ -50,8 +50,10 @@
 
 int stm_CLEAR         (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
 int stm_DESTROY       (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_INIT          (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
 int stm_OPEN_ELF      (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
-int stm_FCN1          (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_GET_FILES     (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
+int stm_CLOSE_ELF     (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
 int stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv);
 
 #endif /* _M_H */

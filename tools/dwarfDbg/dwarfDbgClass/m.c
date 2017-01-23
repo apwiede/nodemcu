@@ -151,7 +151,7 @@ fflush(stdout);
   } 
   return result;
 }
-
+
 /*
  *---------------------------------------------------------------------------
  *
@@ -193,7 +193,81 @@ printf("stm_OPEN_ELF\n");
   } 
   return result;
 }
-
+
+/*
+ *---------------------------------------------------------------------------
+ *
+ * stm_GET_FILES --
+ *
+ *	just for testing
+ *
+ * Results:
+ *	A standard Tcl result code.
+ *
+ * Side effects:
+ *	None.
+ *
+ *---------------------------------------------------------------------------
+ */
+
+int
+stm_GET_FILES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+{
+  int result;
+  /* Syntax: dwardfdbg getFiles
+   *	       [0]       [1]
+   */
+
+  if ((objc != 2)) {
+    Tcl_WrongNumArgs (interp, objc, objv, NULL);
+    return TCL_ERROR;
+  }
+
+printf("stm_GET_FILES\n");
+  result = dwarfDbgGetFiles (dbg);
+  if (result != TCL_OK) {
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+  } 
+  return result;
+}
+
+/*
+ *---------------------------------------------------------------------------
+ *
+ * stm_CLOSE_ELF --
+ *
+ *	just for testing
+ *
+ * Results:
+ *	A standard Tcl result code.
+ *
+ * Side effects:
+ *	None.
+ *
+ *---------------------------------------------------------------------------
+ */
+
+int
+stm_CLOSE_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+{
+  int result;
+  /* Syntax: dwardfdbg closeElf
+   *	       [0]       [1]
+   */
+
+  if ((objc != 2)) {
+    Tcl_WrongNumArgs (interp, objc, objv, NULL);
+    return TCL_ERROR;
+  }
+
+printf("stm_CLOSE_ELF\n");
+  result = dwarfDbgCloseElf (dbg);
+  if (result != TCL_OK) {
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+  } 
+  return result;
+}
+
 /*
  *---------------------------------------------------------------------------
  *
