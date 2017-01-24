@@ -41,11 +41,25 @@
 #ifndef DWARFDBG_H
 #define DWARFDBG_H 1
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FAILED
+#define FAILED 1
+#endif
+
+#define COMPILE_UNIT_NAME_LEN 512
+
 typedef struct _dwarfDbg* dwarfDbgPtr_t;
+typedef int boolean;
 
 /*
  * A source level debugger with GUI for ESP8266 microcontroller
  * using the gdbstub interface module from Espressif
+ * and the libdwarf library from SGI
  *
  */
 

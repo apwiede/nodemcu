@@ -234,6 +234,43 @@ printf("stm_GET_FILES\n");
 /*
  *---------------------------------------------------------------------------
  *
+ * stm_GET_INFOS --
+ *
+ *	just for testing
+ *
+ * Results:
+ *	A standard Tcl result code.
+ *
+ * Side effects:
+ *	None.
+ *
+ *---------------------------------------------------------------------------
+ */
+
+int
+stm_GET_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+{
+  int result;
+  /* Syntax: dwardfdbg getInfos
+   *	       [0]       [1]
+   */
+
+  if ((objc != 2)) {
+    Tcl_WrongNumArgs (interp, objc, objv, NULL);
+    return TCL_ERROR;
+  }
+
+printf("stm_GET_INFOS\n");
+  result = dwarfDbgGetInfos (dbg);
+  if (result != TCL_OK) {
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+  } 
+  return result;
+}
+
+/*
+ *---------------------------------------------------------------------------
+ *
  * stm_CLOSE_ELF --
  *
  *	just for testing

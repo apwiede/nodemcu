@@ -56,12 +56,12 @@
 #include "dwarf.h"
 #include "dwarfDbg.h"
 #include "dwarfDbgErrorCodes.h"
-#include "dwarfdbgGlobals.h"
 #include "dwarfDbgEsb.h"
 #include "dwarfDbg/dwarfDbgDecls.h"
 #include "dwarfDbgUtil.h"
 #include "dwarfDbgDict.h"
 #include "dwarfDbgElfInfo.h"
+#include "dwarfDbgGetInfo.h"
 
 typedef struct elfInfo {
   int fd;
@@ -87,6 +87,7 @@ typedef struct _dwarfDbg {
   dwarfDbgUtil_t *dwarfDbgUtil;
   dwarfDbgDict_t *dwarfDbgDict;
   dwarfDbgElfInfo_t *dwarfDbgElfInfo;
+  dwarfDbgGetInfo_t *dwarfDbgGetInfo;
 
 } _dwarfDbg_t;
 

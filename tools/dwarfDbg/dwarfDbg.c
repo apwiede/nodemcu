@@ -118,6 +118,10 @@ fflush(stdout);
   result = dwarfDbgElfInfoInit(dbg);
   checkErrOK(result);
 
+  // dwarfDbgGetInfo module
+  result = dwarfDbgGetInfoInit(dbg);
+  checkErrOK(result);
+
 // add all other init parts for modules here !!
   return TCL_OK;
 }
