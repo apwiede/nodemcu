@@ -71,6 +71,7 @@ critcl::class::define ::dwarfDbgClass {
     method destroy     as stm_DESTROY
     method openElf     as stm_OPEN_ELF
     method getFiles    as stm_GET_FILES
+    method getInfos    as stm_GET_INFOS
     method closeElf    as stm_CLOSE_ELF
     method init        as stm_INIT
     method getErrorStr as stm_GET_ERROR_STR

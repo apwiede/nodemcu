@@ -54,6 +54,7 @@ critcl::api function void          dwarfDbgDel  {dwarfDbgPtr_t dbg}
 critcl::api function void          dwarfDbgClientDataSet {dwarfDbgPtr_t dbg void* clientdata}
 critcl::api function void*         dwarfDbgClientDataGet {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgOpenElf {dwarfDbgPtr_t dbg char* fileName}
+critcl::api function int           dwarfDbgGetInfos {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgGetFiles {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgCloseElf {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgInit {dwarfDbgPtr_t dbg}
@@ -62,7 +63,7 @@ critcl::api function char*         dwarfDbgGetErrorStr {dwarfDbgPtr_t dbg}
 # # ## ### ##### ######## ############# #####################
 ## Implementation.
 
-critcl::csources dwarfDbg.c dwarfDbgElfInfo.c dwarfDbgUtil.c dwarfDbgEsb.c dwarfDbgDict.c
+critcl::csources dwarfDbg.c dwarfDbgElfInfo.c dwarfDbgGetInfo.c dwarfDbgUtil.c dwarfDbgEsb.c dwarfDbgDict.c
 critcl::clibraries libdwarf/libdwarf.a /usr/lib64/libelf.so
 critcl::ccode {} ; # Fake the 'nothing to build detector'
 
