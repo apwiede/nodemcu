@@ -55,22 +55,32 @@ dwarfDbgPtr_t dwarfDbgNew () {
 printf("dwarfDbgNew\n");
   _dwarfDbg_t *dbg2 = (_dwarfDbg_t *) ckalloc(sizeof(_dwarfDbg_t));
   _dwarfDbg_t *dbg = ALLOC (_dwarfDbg_t);
+  memset(dbg, 0, sizeof(_dwarfDbg_t));
 
   // dwarfDbgEsb module
   dbg->dwarfDbgEsb = ALLOC(dwarfDbgEsb_t);
   checkAllocOK(dbg->dwarfDbgEsb);
+  memset(dbg->dwarfDbgEsb, 0, sizeof(dwarfDbgEsb_t));
 
   // dwarfDbgUtil module
   dbg->dwarfDbgUtil = ALLOC(dwarfDbgUtil_t);
   checkAllocOK(dbg->dwarfDbgUtil);
+  memset(dbg->dwarfDbgUtil, 0, sizeof(dwarfDbgUtil_t));
 
   // dwarfDbgDict module
   dbg->dwarfDbgDict = ALLOC(dwarfDbgDict_t);
   checkAllocOK(dbg->dwarfDbgDict);
+  memset(dbg->dwarfDbgDict, 0, sizeof(dwarfDbgDict_t));
 
   // dwarfDbgElfInfo module
   dbg->dwarfDbgElfInfo = ALLOC(dwarfDbgElfInfo_t);
   checkAllocOK(dbg->dwarfDbgElfInfo);
+  memset(dbg->dwarfDbgElfInfo, 0, sizeof(dwarfDbgElfInfo_t));
+
+  // dwarfDbgGetInfo module
+  dbg->dwarfDbgGetInfo = ALLOC(dwarfDbgGetInfo_t);
+  checkAllocOK(dbg->dwarfDbgGetInfo);
+  memset(dbg->dwarfDbgGetInfo, 0, sizeof(dwarfDbgGetInfo_t));
 
   return dbg;
 }

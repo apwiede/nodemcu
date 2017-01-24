@@ -82,6 +82,7 @@ typedef struct _dwarfDbg {
   char            errorBuf[256]; /* cause of error */
 
   elfInfo_t elfInfo;
+  compileUnit_t compileUnit;
 
   dwarfDbgEsb_t *dwarfDbgEsb;
   dwarfDbgUtil_t *dwarfDbgUtil;

@@ -44,9 +44,10 @@
 #define checkErrOK(result) if(result != DWARF_DBG_ERR_OK) return result
 
 enum dwarfDbgErrorCodes {
-  DWARF_DBG_ERR_OK                             = 0,
-  DWARF_DBG_ERR_OUT_OF_MEMORY                  = 1,
-  DWARF_DBG_ERR_CANNOT_GET_NEXT_COMPILE_UNIT   = 2,
+  DWARF_DBG_ERR_OK                                   = 0,
+  DWARF_DBG_ERR_OUT_OF_MEMORY                        = 1,
+  DWARF_DBG_ERR_CANNOT_GET_NEXT_COMPILE_UNIT         = 2,
+  DWARF_DBG_ERR_CANNOT_GET_SIBLING_OF_COMPILE_UNIT   = 3,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

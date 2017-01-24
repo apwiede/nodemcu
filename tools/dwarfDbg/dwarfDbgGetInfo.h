@@ -41,10 +41,28 @@
 #ifndef DWARFDBG_GET_INFO_H
 #define	DWARFDBG_GET_INFO_H
 
+typedef struct compileUnit {
+    Dwarf_Unsigned compileUnitHeaderLength;
+    Dwarf_Half versionStamp;
+    Dwarf_Off abbrevOffset;
+    Dwarf_Half addressSize;
+    Dwarf_Half lengthSize;
+    Dwarf_Half extensionSize;
+    Dwarf_Sig8 signature;
+    Dwarf_Unsigned typeOffset;
+    Dwarf_Unsigned nextCompileUnitOffset;
+    Dwarf_Half compileUnitType;
+} compileUnit_t;
+
+typedef uint8_t (* addCompileUnit_t)(dwarfDbgPtr_t self, size_t *compileUnitIdx);
 typedef uint8_t (* handleOneDieSection_t)(dwarfDbgPtr_t self);
 
 typedef struct dwarfDbgGetInfo {
+  size_t maxCompileUnit;
+  size_t numCompileUnit;
+  compileUnit_t *compileUnits;
 
+  addCompileUnit_t addCompileUnit;
   handleOneDieSection_t handleOneDieSection;
 } dwarfDbgGetInfo_t;
 
