@@ -266,14 +266,14 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   size_t msgLgth;
   uint8_t *msgData;
 
-COMP_MSG_DBG(self, "Y", 0, "call DescInit");
+//COMP_MSG_DBG(self, "Y", 0, "call DescInit");
   result = compMsgMsgDescInit(self);
   checkErrOK(result);
   result = compMsgUtilInit(self);
   checkErrOK(result);
   result = compMsgRequestInit(self);
   checkErrOK(result);
-COMP_MSG_DBG(self, "Y", 0, "call IdentifyInit");
+//COMP_MSG_DBG(self, "Y", 0, "call IdentifyInit");
   result = compMsgIdentifyInit(self);
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
@@ -282,7 +282,7 @@ COMP_MSG_DBG(self, "Y", 0, "call IdentifyInit");
   checkErrOK(result);
   result = compMsgActionInit(self);
   checkErrOK(result);
-COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
+//COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
   result = compMsgWifiInit(self);
   checkErrOK(result);
   result = compMsgModuleDataInit(self);
@@ -295,7 +295,7 @@ COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
   checkErrOK(result);
   result = compMsgHttpInit(self);
   checkErrOK(result);
-COMP_MSG_DBG(self, "Y", 0, "call OtaInit");
+//COMP_MSG_DBG(self, "Y", 0, "call OtaInit");
   result = compMsgOtaInit(self);
   checkErrOK(result);
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
@@ -324,6 +324,18 @@ COMP_MSG_DBG(self, "Y", 0, "call OtaInit");
       COMP_MSG_DBG(self, "O", 1, "get user data msgLgth: %d", msgLgth);
       checkErrOK(result);
       result = self->compMsgIdentify->handleReceivedPart(self, msgData, msgLgth);
+      checkErrOK(result);
+      break;
+    case 'I':
+      self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
+      COMP_MSG_DBG(self, "Y", 1, "start startTestInterrupt\n");
+      result = self->compMsgAction->startTestInterrupt(self);
+      checkErrOK(result);
+      break;
+    case 'L':
+      self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
+      COMP_MSG_DBG(self, "Y", 1, "start startLigthSleepWakeupMode\n");
+      result = self->compMsgAction->startLightSleepWakeupMode(self);
       checkErrOK(result);
       break;
     case 'N':
@@ -360,7 +372,7 @@ COMP_MSG_DBG(self, "Y", 0, "init type U");
       checkErrOK(result);
       break;
     case 'W':
-      self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
+      self->compMsgDebug->setDebugFlags(self, "BHIsSvWw");
       COMP_MSG_DBG(self, "DY", 1, "start RunAPMode\n");
       result = self->compMsgSocket->webSocketRunAPMode(self);
       checkErrOK(result);

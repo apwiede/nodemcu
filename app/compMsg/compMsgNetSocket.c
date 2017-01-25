@@ -196,6 +196,11 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   sud->remote_port = pesp_conn->proto.tcp->remote_port;
   COMP_MSG_DBG(self, "N", 2, "==received remote_port: %d\n", sud->remote_port);
   result = netSocketRecv(pdata, sud, &data, &lgth);
+COMP_MSG_DBG(self, "Y", 1, "==received remote_port: %d result: %d\n", sud->remote_port, result);
+// for testing!!
+result = self->compMsgAction->startLightSleepWakeupMode(self);
+COMP_MSG_DBG(self, "Y", 1, "==startLightSleepWakeupMode result: %d\n", result);
+
 //  checkErrOK(gL,result,"netSocketRecv");
 }
 

@@ -103,6 +103,7 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   uint8_t result;
   compMsgData_t *compMsgData;
 
+  result = COMP_MSG_ERR_OK;
   if (self->compMsgRequest->msgRequestInfos.lastRequestIdx >= COMP_DISP_MAX_REQUESTS) {
     COMP_MSG_DBG(self, "Y", 0, "COMP_MSG_ERR_TOO_MANY_REQUESTS");
     return COMP_MSG_ERR_TOO_MANY_REQUESTS;
@@ -152,7 +153,7 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
       }
     }
   }
-  return COMP_MSG_ERR_OK;
+  return result;
 }
 
 // ================================= deleteRequest ====================================

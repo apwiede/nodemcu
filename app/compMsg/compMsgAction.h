@@ -48,6 +48,8 @@ extern "C" {
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
+typedef uint8_t (* startLightSleepWakeupMode_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* startTestInterrupt_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* action_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setActionEntry_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t mode, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* runAction_t)(compMsgDispatcher_t *self, uint8_t *answerType);
@@ -56,6 +58,9 @@ typedef uint8_t (* getActionCallback_t)(compMsgDispatcher_t *self, uint8_t *acti
 typedef uint8_t (* getActionCallbackName_t)(compMsgDispatcher_t *self, action_t callback, uint8_t **actionName);
 
 typedef struct compMsgAction {
+
+  startTestInterrupt_t startTestInterrupt;
+  startLightSleepWakeupMode_t startLightSleepWakeupMode;
   setActionEntry_t setActionEntry;
   runAction_t runAction;
   getActionCallback_t getActionCallback;

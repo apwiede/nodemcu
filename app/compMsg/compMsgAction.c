@@ -49,6 +49,8 @@
 
 #define COMP_MSG_ACTIONS_FILE_NAME "CompMsgActions.txt"
 
+#define FPM_SLEEP_MAX_TIME  0xFFFFFFF
+
 typedef struct actionName2Action {
   uint8_t *actionName;
   action_t action;
@@ -71,6 +73,10 @@ typedef struct compMsgActions {
 
 static compMsgActionEntries_t compMsgActionEntries = { NULL, 0, 0 };
 static compMsgActions_t compMsgActions = { NULL, 0, 0 };
+// needed for espressif defined callbacks like lightSleepWakeupCallback!!
+static compMsgDispatcher_t *compMsgDispatcher;
+
+void wifi_fpm_set_wakeup_cb(void (*fcn)());
 
 // ================================= runClientMode ====================================
 
@@ -87,6 +93,78 @@ static uint8_t runAPMode(compMsgDispatcher_t *self) {
   int result;
 
   self->compMsgSocket->webSocketRunAPMode(self);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= lightSleepWakeupCallback ====================================
+
+static void lightSleepWakeupCallback(void) {
+ compMsgDispatcher_t *self;
+
+ets_printf(">>>>lSWC\n");
+ self = compMsgDispatcher;
+ COMP_MSG_DBG(self, "Y", 0, "lightSleepWakeupCallback\n");
+ wifi_fpm_close();      // disable force sleep function
+// wifi_set_opmode(STATION_MODE);         // set station mode
+// wifi_station_connect();            // connect to AP
+}
+
+// ================================= startLightSleepWakeupMode ====================================
+
+static uint8_t startLightSleepWakeupMode(compMsgDispatcher_t *self) {
+  int result;
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode1\n");
+  wifi_station_disconnect();
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode2\n");
+
+  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);    // light sleep
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode4\n");
+
+  wifi_set_opmode(NULL_MODE); // set WiFi mode to null mode.
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode3\n");
+
+  wifi_fpm_open();               // enable force sleep
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode5\n");
+
+//  PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U,FUNC_GPIO15);
+  PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO4_U,FUNC_GPIO4);
+  gpio_pin_wakeup_enable(PERIPHS_IO_MUX_FUNC, GPIO_PIN_INTR_LOLEVEL);
+  gpio_pin_wakeup_enable(PERIPHS_IO_MUX_FUNC, GPIO_PIN_INTR_HILEVEL);
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode6\n");
+
+  wifi_fpm_set_wakeup_cb(lightSleepWakeupCallback);   // Set wakeup callback
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode7\n");
+
+  wifi_fpm_do_sleep(FPM_SLEEP_MAX_TIME);
+//  wifi_fpm_do_sleep(5000*1000);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= tstInterruptCallback ====================================
+
+static void tstInterruptCallback(void *arg) {
+  compMsgDispatcher_t *self;
+
+  self = (compMsgDispatcher_t *)arg;
+ets_printf(">>>>tIC self: %p\n", self);
+ COMP_MSG_DBG(self, "Y", 0, "tstInterruptCallback\n");
+  ETS_GPIO_INTR_DISABLE();
+}
+
+// ================================= startTestInterrupt ====================================
+
+static uint8_t startTestInterrupt(compMsgDispatcher_t *self) {
+  int result;
+  COMP_MSG_DBG(self, "Y", 0, "startTestInterrupt1\n");
+
+  PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U,FUNC_GPIO12);
+  GPIO_DIS_OUTPUT(GPIO_ID_PIN(12));
+  ETS_GPIO_INTR_DISABLE();
+  ETS_GPIO_INTR_ATTACH(tstInterruptCallback, self);
+  gpio_pin_intr_state_set(GPIO_ID_PIN(12),GPIO_PIN_INTR_LOLEVEL);
+  ETS_GPIO_INTR_ENABLE();
+  COMP_MSG_DBG(self, "Y", 0, "startTestInterrupt2\n");
+
   return COMP_MSG_ERR_OK;
 }
 
@@ -371,6 +449,8 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
 uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
+  self->compMsgAction->startLightSleepWakeupMode = &startLightSleepWakeupMode;
+  self->compMsgAction->startTestInterrupt = &startTestInterrupt;
   self->compMsgAction->setActionEntry = &setActionEntry;
   self->compMsgAction->runAction = &runAction;
   self->compMsgAction->getActionCallback = &getActionCallback;
@@ -387,6 +467,7 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   compMsgActions.actions = (actionName2Action_t **)os_zalloc(compMsgActions.maxActions * sizeof(actionName2Action_t  **));
   checkAllocOK(compMsgActions.actions);
 
+  compMsgDispatcher = self;
   result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
   return result;
 }

@@ -196,11 +196,11 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
     hdrInfos->seqIdx++;
     seqVal = hdrInfos->headerSequence[hdrInfos->seqIdx];
   }
-  COMP_MSG_DBG(self, "I", 2, "seqIdx: %d", hdrInfos->seqIdx);
+  COMP_MSG_DBG(self, "I", 1, "seqIdx: %d", hdrInfos->seqIdx);
   hdrInfos->seqIdxAfterHeader = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
-  COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!", result, hdrInfos->currPartIdx);
+  COMP_MSG_DBG(self, "I", 1, "getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!", result, hdrInfos->currPartIdx);
   if (received->compMsgDataView != NULL) {
     COMP_MSG_DBG(self, "I", 1, "os getHeaderIndexFromHeaderFields: free dataView: %p compMsgDataView: %p", received->compMsgDataView->dataView, received->compMsgDataView);
     os_free(received->compMsgDataView->dataView);
@@ -580,7 +580,7 @@ if (buffer == NULL) {
         }
         seqIdx++;
       }
-      COMP_MSG_DBG(self, "I", 2, "hdr->hdrHandleType: %c", hdr->hdrHandleType);
+      COMP_MSG_DBG(self, "I", 1, "hdr->hdrHandleType: %c", hdr->hdrHandleType);
       switch (hdr->hdrHandleType) {
       case 'G':
       case 'R':
@@ -604,12 +604,13 @@ if (buffer == NULL) {
           compMsgData->compMsgDataView->dataView->lgth = received->totalLgth;
         }
         result = compMsgData->compMsgDataView->getTotalCrc(self, compMsgData->compMsgDataView->dataView, &fieldInfo);
-        COMP_MSG_DBG(self, "I", 2, "getTotalCrc!res!%d!", result);
+        COMP_MSG_DBG(self, "I", 1, "getTotalCrc: res!%d!", result);
         checkErrOK(result);
         if (haveDataView) {
           compMsgData->compMsgDataView->dataView->data = saveData;
           compMsgData->compMsgDataView->dataView->lgth = saveLgth;
         }
+        COMP_MSG_DBG(self, "I", 1, "hdrEncryption: %c!", hdr->hdrEncryption);
         if (hdr->hdrEncryption == 'E') {
           int numericValue;
           uint8_t *cryptedPtr;
@@ -637,18 +638,19 @@ if (buffer == NULL) {
           cryptedPtr = received->buf + hdrInfos->headerLgth;
           result = self->compMsgUtil->decryptMsg(self, cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
           checkErrOK(result);
-          COMP_MSG_DBG(self, "I", 2, "mlen: %d decryptedLgth: %d", mlen, decryptedLgth);
+          COMP_MSG_DBG(self, "I", 1, "mlen: %d decryptedLgth: %d", mlen, decryptedLgth);
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
 //compMsgData->compMsgDataView->dataView->dumpBinaryWide(received->buf, received->totalLgth, "afterdecrypt");
         }
+        COMP_MSG_DBG(self, "I", 1, "call storeReceivedMsg");
         result = self->compMsgIdentify->storeReceivedMsg(self);
-        COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg end buffer idx: %d result: %d", idx, result);
+        COMP_MSG_DBG(self, "I", 1, "storeReceivedMsg end buffer idx: %d result: %d", idx, result);
         return result;
       case 'U':
       case 'W':
         self->compMsgData->currHdr = hdr;
         result = self->compMsgBuildMsg->forwardMsg(self);
-        COMP_MSG_DBG(self, "I", 2, "forwardMsg result: %d", result);
+        COMP_MSG_DBG(self, "I", 1, "forwardMsg result: %d", result);
         return result;
       default:
         COMP_MSG_DBG(self, "Y", 0, "handleReceivedPart: funny handleType: %c 0x%02x", hdr->hdrHandleType, hdr->hdrHandleType);
