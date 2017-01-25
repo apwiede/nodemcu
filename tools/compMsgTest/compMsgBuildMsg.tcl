@@ -324,6 +324,34 @@ puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
         set msgData "${header}${encryptedMsgData}${totalCrc}"
 #puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
+      if {[lsearch [dict get $compMsgDispatcher currHdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+        set startOffset [dict get $compMsgData headerLgth]
+        # lgth is needed without totalCrc
+        set fieldSequence [dict get $compMsgDispatcher currHdr fieldSequence]
+        set totalCrcLgth 0
+        switch [lindex $fieldSequence end] {
+          COMP_DISP_U8_TOTAL_CRC {
+            set totalCrcLgth 1
+            set totalCrcOffset [expr {[dict get $compMsgData totalLgth] - $totalCrcLgth}]
+          }
+          COMP_DISP_U16_TOTAL_CRC {
+            set totalCrcLgth 2
+            set totalCrcOffset [expr {[dict get $compMsgData totalLgth] - $totalCrcLgth}]
+          }
+        }
+      } else {
+        set totalCrcOffset [dict get $compMsgData totalLgth]
+      }
+      set fieldOffset [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $totalCrcOffset}]
+
+      dict set fieldInfo fieldLgth $totalCrcLgth
+      dict set fieldInfo fieldOffset $totalCrcOffset
+      set ::compMsg::dataView::data $msgData
+      set ::compMsg::dataView::lgth [dict get $compMsgDispatcher compMsgData totalLgth]
+      set result [::compMsg compMsgDataView setTotalCrc $fieldInfo]
+      checkErrOK $result
+      set msgData $::compMsg::dataView::data
         
 #::compMsg dataView dumpBinary $msgData [string length $msgData] "msgData"
       # here we need to decide where and how to send the message!!

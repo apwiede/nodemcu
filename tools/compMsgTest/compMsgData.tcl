@@ -615,8 +615,8 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
             dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }
           COMP_MSG_SPEC_FIELD_TOTAL_CRC {
-            set result [::compMsg compMsgDataView setTotalCrc $fieldInfo]
-            checkErrOK $result
+#            set result [::compMsg compMsgDataView setTotalCrc $fieldInfo]
+#            checkErrOK $result
             dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }
         }

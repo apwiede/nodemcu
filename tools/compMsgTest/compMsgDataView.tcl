@@ -695,7 +695,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
     proc setTotalCrc {fieldInfo} {
       set crcLgth [dict get $fieldInfo fieldLgth]
       set size [dict get $fieldInfo fieldOffset]
-#set ::crcDebug true
+set ::crcDebug true
 set cnt 0
 #puts stderr "setTotalCrc: $::compMsg::dataView::lgth!$::compMsg::dataView::data!"
       set crc  0
