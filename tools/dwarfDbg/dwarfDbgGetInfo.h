@@ -52,6 +52,9 @@ typedef struct compileUnit {
     Dwarf_Unsigned typeOffset;
     Dwarf_Unsigned nextCompileUnitOffset;
     Dwarf_Half compileUnitType;
+    Dwarf_Die compileUnitDie;
+    Dwarf_Off overallOffset;
+    char *compileUnitShortName;
 } compileUnit_t;
 
 typedef uint8_t (* addCompileUnit_t)(dwarfDbgPtr_t self, size_t *compileUnitIdx);
