@@ -73,7 +73,7 @@ static uint8_t addDirName(dwarfDbgPtr_t self, char *dirName) {
   }
   self->dwarfDbgDict->dirNamesInfo.dirNames[self->dwarfDbgDict->dirNamesInfo.numDirName][strlen(dirName)] = '\0';
   memcpy(self->dwarfDbgDict->dirNamesInfo.dirNames[self->dwarfDbgDict->dirNamesInfo.numDirName], dirName, strlen(dirName));
-printf("addDirName: %d %s\n", self->dwarfDbgDict->dirNamesInfo.numDirName, dirName);
+//printf("addDirName: %d %s\n", self->dwarfDbgDict->dirNamesInfo.numDirName, dirName);
   self->dwarfDbgDict->dirNamesInfo.numDirName++;
   return result;
 }
@@ -107,7 +107,7 @@ static uint8_t addFileName(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx
   fileNameInfo->fileName[strlen(fileName)] == '\0';
   memcpy(fileNameInfo->fileName, fileName, strlen(fileName));
   fileNameInfo->dirNameIdx = dirNameIdx;
-printf("addFileName: num: %d dirNameIdx: %d %s\n", self->dwarfDbgDict->fileNamesInfo.numFileName, dirNameIdx, fileName);
+//printf("addFileName: num: %d dirNameIdx: %d %s\n", self->dwarfDbgDict->fileNamesInfo.numFileName, dirNameIdx, fileName);
   self->dwarfDbgDict->fileNamesInfo.numFileName++;
   return result;
 }
@@ -163,11 +163,13 @@ printf("found: fileName %d num: %d\n", i, self->dwarfDbgDict->fileNamesInfo.numF
 
 static uint8_t addFileInfo(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx) {
   uint8_t result;
+  compileUnit_t *compileUnit;
   compileUnitInfo_t *compileUnitInfo;
   fileInfo_t *fileInfo;
 
   result = DWARF_DBG_ERR_OK;
-  compileUnitInfo = &self->dwarfDbgDict->compileUnitsInfo.compileUnitInfos[compileUnitIdx];
+  compileUnit = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx];
+  compileUnitInfo = &compileUnit->compileUnitInfo;
   if (compileUnitInfo->maxFileInfo <= compileUnitInfo->numFileInfo) {
     compileUnitInfo->maxFileInfo += 10;
     if (compileUnitInfo->fileInfos == NULL) {

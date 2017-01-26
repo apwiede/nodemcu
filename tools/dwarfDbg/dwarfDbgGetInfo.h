@@ -55,6 +55,9 @@ typedef struct compileUnit {
     Dwarf_Die compileUnitDie;
     Dwarf_Off overallOffset;
     char *compileUnitShortName;
+    size_t fileIdx;
+    size_t fileInfoIdx;
+    compileUnitInfo_t compileUnitInfo;
 } compileUnit_t;
 
 typedef uint8_t (* addCompileUnit_t)(dwarfDbgPtr_t self, size_t *compileUnitIdx);
@@ -64,6 +67,7 @@ typedef struct dwarfDbgGetInfo {
   size_t maxCompileUnit;
   size_t numCompileUnit;
   compileUnit_t *compileUnits;
+  compileUnit_t *currCompileUnit;
 
   addCompileUnit_t addCompileUnit;
   handleOneDieSection_t handleOneDieSection;

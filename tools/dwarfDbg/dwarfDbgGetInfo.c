@@ -41,6 +41,8 @@
 #include <tcl.h>
 #include "dwarfDbgInt.h"
 
+static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, int cnt, char **attrStr);
+
 // =================================== addCompileUnit =========================== 
 
 static uint8_t addCompileUnit(dwarfDbgPtr_t self, size_t *compileUnitIdx) {
@@ -75,15 +77,83 @@ static Dwarf_Off  DIEOverallOffset = 0;  /* DIE offset in .debug_info */
 static dwarfDbgEsb_t esbShortCuName;
 static dwarfDbgEsb_t esbLongCuName;
 
+// =================================== getProducerName =========================== 
+
+/*  Returns the producer of the CU
+  Caller must ensure producernameout is
+  a valid, constructed, empty dwarfDbgEsb_t instance before calling.
+  Never returns DW_DLV_ERROR.  */
+static int getProducerName(dwarfDbgPtr_t self, char **producerName) {
+  Dwarf_Attribute producerAttr = 0;
+  Dwarf_Error pnerr = 0;
+
+  int ares = dwarf_attr(self->dwarfDbgGetInfo->currCompileUnit->compileUnitDie, DW_AT_producer, &producerAttr, &pnerr);
+  if (ares == DW_DLV_ERROR) {
+    printf("hassattr on DW_AT_producer ares: %d pnerr: %d", ares, pnerr);
+  }
+  if (ares == DW_DLV_NO_ENTRY) {
+    /*  We add extra quotes so it looks more like
+      the names for real producers that getAttrValue
+      produces. */
+    *producerName = "\"<CU-missing-DW_AT_producer>\"";
+  } else {
+    /*  DW_DLV_OK */
+    /*  The string return is valid until the next call to this
+      function; so if the caller needs to keep the returned
+      string, the string must be copied (makename()). */
+    getAttrValue(self, 1, producerAttr, NULL, 0, producerName);
+  }
+  return ares;
+}
+
+// =================================== getCompileUnitName =========================== 
+
+/* Returns the name of the compile unit. In case of error, give up, do not return. */
+static int getCompileUnitName(dwarfDbgPtr_t self, char **shortName, char **longName) {
+  Dwarf_Attribute nameAttr = 0;
+  Dwarf_Error lerr = 0;
+  int ares;
+
+  ares = dwarf_attr(self->dwarfDbgGetInfo->currCompileUnit->compileUnitDie, DW_AT_name, &nameAttr, &lerr);
+  if (ares == DW_DLV_ERROR) {
+    printf("hassattr on DW_AT_name ares: %d lerr: %d", ares, lerr);
+  } else {
+    if (ares == DW_DLV_NO_ENTRY) {
+      *shortName = "<unknown name>";
+      *longName = "<unknown name>";
+    } else {
+      /* DW_DLV_OK */
+      /*  The string return is valid until the next call to this
+        function; so if the caller needs to keep the returned
+        string, the string must be copied (makename()). */
+      char *fileName = 0;
+
+//      self->dwarfDbgEsb->esbEmptyString(self, &esbLongCuName);
+      getAttrValue(self, 1, nameAttr, NULL, 0, longName);
+      /* Generate the short name (fileName) */
+      fileName = strrchr(*longName,'/');
+      if (!fileName) {
+        fileName = strrchr(*longName,'\\');
+      }
+      if (fileName) {
+        ++fileName;
+      } else {
+        fileName = *longName;
+      }
+      *shortName = fileName;
+    }
+  }
+  dwarf_dealloc(self->elfInfo.dbg, nameAttr, DW_DLA_ATTR);
+  return ares;
+}
+
 // =================================== getAttrValue =========================== 
 
-static int getAttrValue(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Off compileUnitOffset,
-    Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, int cnt, char **attrStr)
+static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, int cnt, char **attrStr)
 {
   Dwarf_Attribute attrib = 0;
   Dwarf_Unsigned uval = 0;
   const char * atName = 0;
-  const char * tagName = 0;
   dwarfDbgEsb_t valName;
   dwarfDbgEsb_t esb_extra;
   int tres = 0;
@@ -104,12 +174,8 @@ static int getAttrValue(Dwarf_Debug dbg, Dwarf_Half tag, Dwarf_Die die, Dwarf_Of
   Dwarf_Addr addr = 0;
   
   res = dwarf_get_AT_name(attr, &atName);
-printf("getAttrValue attr: 0x%08x atname: %s\n", attr_in, atName);
-
-  tres = dwarf_tag(die, &tag, &err);
+//printf("getAttrValue attr: 0x%08x atname: %s\n", attr_in, atName);
   fres = dwarf_whatform(attr_in, &theform, &err);
-  res = dwarf_get_TAG_name(tag, &tagName);
-printf("getAttrValue: tag: %s attr: 0x%08x theform: 0x%08x\n", tagName, attr_in, theform);
 
   switch (theform) {
   case DW_FORM_addr:
@@ -166,8 +232,7 @@ printf("ERROR attribute: 0x%08x not yet implemented\n", attr);
     break;
   case DW_FORM_strp:
     sres = dwarf_formstring(attr_in, &temps, &err);
-printf("DW_FORM_strp: attrib: 0x%08x temps: %s\n", attr_in, temps);
-*attrStr = temps;
+    *attrStr = temps;
     break;
   case DW_FORM_sec_offset:
 printf("DW_FORM_sec_offset\n");
@@ -183,117 +248,36 @@ printf("ERROR theform: 0x&08x not yet implemented\n", theform);
 }
 
 
-// =================================== getProducerName =========================== 
-
-/*  Returns the producer of the CU
-  Caller must ensure producernameout is
-  a valid, constructed, empty dwarfDbgEsb_t instance before calling.
-  Never returns DW_DLV_ERROR.  */
-static int getProducerName(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Die compileUnitDie, Dwarf_Off dieprintCuOffset, char **producerName) {
-  Dwarf_Attribute producerAttr = 0;
-  Dwarf_Error pnerr = 0;
-
-  int ares = dwarf_attr(compileUnitDie, DW_AT_producer, &producerAttr, &pnerr);
-  if (ares == DW_DLV_ERROR) {
-    printf("hassattr on DW_AT_producer ares: %d pnerr: %d", ares, pnerr);
-  }
-  if (ares == DW_DLV_NO_ENTRY) {
-    /*  We add extra quotes so it looks more like
-      the names for real producers that getAttrValue
-      produces. */
-    *producerName = "\"<CU-missing-DW_AT_producer>\"";
-  } else {
-    /*  DW_DLV_OK */
-    /*  The string return is valid until the next call to this
-      function; so if the caller needs to keep the returned
-      string, the string must be copied (makename()). */
-    getAttrValue(dbg, DW_AT_producer, compileUnitDie, dieprintCuOffset, 1, producerAttr, NULL, 0, producerName);
-  }
-  return ares;
-}
-
-// =================================== getCompileUnitName =========================== 
-
-/* Returns the name of the compile unit. In case of error, give up, do not return. */
-static int getCompileUnitName(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Die compileUnitDie, Dwarf_Off offset, char **shortName, char **longName) {
-  Dwarf_Attribute nameAttr = 0;
-  Dwarf_Error lerr = 0;
-  int ares;
-
-  ares = dwarf_attr(compileUnitDie, DW_AT_name, &nameAttr, &lerr);
-  if (ares == DW_DLV_ERROR) {
-    printf("hassattr on DW_AT_name ares: %d lerr: %d", ares, lerr);
-  } else {
-    if (ares == DW_DLV_NO_ENTRY) {
-      *shortName = "<unknown name>";
-      *longName = "<unknown name>";
-    } else {
-      /* DW_DLV_OK */
-      /*  The string return is valid until the next call to this
-        function; so if the caller needs to keep the returned
-        string, the string must be copied (makename()). */
-      char *fileName = 0;
-
-//      self->dwarfDbgEsb->esbEmptyString(self, &esbLongCuName);
-      getAttrValue(dbg, DW_TAG_compile_unit, compileUnitDie, offset, 1, nameAttr, NULL, 0, longName);
-      /* Generate the short name (fileName) */
-      fileName = strrchr(*longName,'/');
-      if (!fileName) {
-        fileName = strrchr(*longName,'\\');
-      }
-      if (fileName) {
-        ++fileName;
-      } else {
-        fileName = *longName;
-      }
-      *shortName = fileName;
-    }
-  }
-  dwarf_dealloc(dbg, nameAttr, DW_DLA_ATTR);
-  return ares;
-}
-
 // =================================== getAttribute =========================== 
 
-static uint8_t getAttribute(Dwarf_Debug dbg, Dwarf_Die die, Dwarf_Off dieprint_cu_goffset, Dwarf_Half attr,
-    Dwarf_Attribute attr_in,  char **srcfiles, Dwarf_Signed cnt)
+static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, const char **srcfiles, Dwarf_Signed cnt, const char **outStr, int *outValue)
 {
   const char *atName = NULL;
   char *templateNameStr = NULL;
   int res;
-  int tres;
   int vres;
-  Dwarf_Half tag = 0;
   Dwarf_Unsigned uval = 0;
   Dwarf_Error err;
   Dwarf_Half theform = 0;
   Dwarf_Half directform = 0;
   const char *langName = NULL;
 
+  *outStr = NULL;
+  *outValue = 0;
   res = dwarf_get_AT_name(attr, &atName);
 printf("getAttribute: atName: %s\n", atName);
-  tres = dwarf_tag(die, &tag, &err);
-printf(">>dwarf_tag: tag: %d 0x%08x\n", tag, tag);
-  if (tres == DW_DLV_ERROR) {
-    tag = 0;
-  } else if (tres == DW_DLV_NO_ENTRY) {
-    tag = 0;
-  } else {
-    /* ok */
-  }
   switch (attr) {
   case DW_AT_language:
     vres = dwarf_formudata(attr_in, &uval, &err);
     dwarf_get_LANG_name((Dwarf_Half) uval, &langName);
-printf("STR: %s\n", langName);
     res = dwarf_whatform(attr_in, &theform, &err);
     res = dwarf_whatform_direct(attr_in, &directform, &err);
-printf("language: 0x%08x theform: 0x%08x directform: 0x%08x\n", uval, theform, directform);
+    *outStr = langName;
     break;
   case DW_AT_name:
   case DW_AT_comp_dir:
-    getAttrValue(dbg, tag, die, dieprint_cu_goffset, attr, attr_in, NULL, 0, &templateNameStr);
-printf("NAME: %s\n", templateNameStr);
+    getAttrValue(self, attr, attr_in, NULL, 0, &templateNameStr);
+    *outStr = templateNameStr;
     break;
   default:
     break;
@@ -333,11 +317,11 @@ printf("sectionName: %s\n", sectionName);
 //        int fission_data_result = 0;
 
     result = self->dwarfDbgGetInfo->addCompileUnit(self, &compileUnitIdx);
-printf("addCompileUnit: result: %d compileUnitIdx: %d\n", result, compileUnitIdx);
+//printf("addCompileUnit: result: %d compileUnitIdx: %d\n", result, compileUnitIdx);
     checkErrOK(result);
 //        memset(&fission_data,0,sizeof(fission_data));
     compileUnit = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx];
-printf("call dwarf_next_cu_header_d\n");
+//printf("call dwarf_next_cu_header_d\n");
     nres = dwarf_next_cu_header_d(self->elfInfo.dbg, 1,
       &compileUnit->compileUnitHeaderLength,
       &compileUnit->versionStamp,
@@ -350,7 +334,7 @@ printf("call dwarf_next_cu_header_d\n");
       &compileUnit->nextCompileUnitOffset,
       &compileUnit->compileUnitType,
       &err);
-printf("after dwarf_next_cu_header_d nres: %d loop_count: %d\n", nres, loopCount);
+//printf("after dwarf_next_cu_header_d nres: %d loop_count: %d\n", nres, loopCount);
     if (nres == DW_DLV_NO_ENTRY) {
       // we have processed all entries
       break;
@@ -358,36 +342,31 @@ printf("after dwarf_next_cu_header_d nres: %d loop_count: %d\n", nres, loopCount
     if (nres != DW_DLV_OK) {
       return DWARF_DBG_ERR_CANNOT_GET_NEXT_COMPILE_UNIT;
     }
+    self->dwarfDbgGetInfo->currCompileUnit = compileUnit;
     /*  get basic information about the current compile unit: producer, name */
     sres = dwarf_siblingof_b(self->elfInfo.dbg, NULL,/* is_info */1, &compileUnit->compileUnitDie, &err);
     if (sres != DW_DLV_OK) {
 printf("siblingof cu header sres: %d err: %p", sres, err);
       return DWARF_DBG_ERR_CANNOT_GET_SIBLING_OF_COMPILE_UNIT;
     }
-printf("compileUnitDie1: %p\n", compileUnit->compileUnitDie);
     dwarf_die_offsets(compileUnit->compileUnitDie, &compileUnit->overallOffset, &DIEOffset, &err);
 #ifdef NOTDEF
     {
     /* Get producer name for this compile unit */
       char *producerName;
       
-      getProducerName(self, self->elfInfo.dbg, compileUnit->compileUnitDie, compileUnit->overallOffset, &producerName);
+      getProducerName(self, self->elfInfo.dbg, &producerName);
 printf("producerName: %s\n", producerName);
     }
 #endif
     DIEOverallOffset = compileUnit->overallOffset;
-printf("OFFSET0: %d %d\n", DIEOffset, compileUnit->overallOffset);
-    getCompileUnitName(self, self->elfInfo.dbg, compileUnit->compileUnitDie, compileUnit->overallOffset, &compileUnitShortName, &compileUnitLongName);
-printf("compileUnitShortName: %s\n", compileUnitShortName);
+    getCompileUnitName(self, &compileUnitShortName, &compileUnitLongName);
+printf("compileUnitDie: %p overallOffset: %d compileUnitShortName: %s\n", compileUnit->compileUnitDie, compileUnit->overallOffset, compileUnitShortName);
     compileUnit->compileUnitShortName = ckalloc(strlen(compileUnitShortName) + 1);
     compileUnit->compileUnitShortName[strlen(compileUnitShortName)] = '\0';
     memcpy(compileUnit->compileUnitShortName, compileUnitShortName, strlen(compileUnitShortName));
 #ifdef NOTDEF
 // FIXME is that at all necessary??
-    /*  Release the 'compileUnitDie' created by the call
-        to 'dwarf_siblingof' at the top of the main loop. */
-    dwarf_dealloc(self->elfInfo.dbg, compileUnit->compileUnitDie, DW_DLA_DIE);
-    compileUnit->compileUnitDie = NULL; /* For debugging, stale die should be NULL. */
 
     sres = dwarf_siblingof_b(self->elfInfo.dbg, NULL, /* is_info */ 1, &compileUnit->compileUnitDie, &err);
 printf("compileUnitDie2: %p shortName: %s sres: %d\n", compileUnit->compileUnitDie, compileUnit->compileUnitShortName, sres);
@@ -412,7 +391,7 @@ printf("OFFSET1: %d %d\n", DIEOffset, compileUnit->overallOffset);
         printf("accessing tag of die! tres: %d, err: %p", tres, err);
       }
       res = dwarf_get_TAG_name(tag, &tagName);
-printf("tagname: %s\n", tagName);
+printf("compileUnitDie tagname: 0x%08x %s\n", tag, tagName);
 
 #ifdef NOTDEF
       ores = dwarf_die_CU_offset(compileUnit->compileUnitDie, &offset, &err);
@@ -426,23 +405,74 @@ printf("dwarf_die_cu_offset: offset: %d\n", offset);
       atres = dwarf_attrlist(compileUnit->compileUnitDie, &atList, &atCnt, &err);
 printf("atcnt: %d\n", atCnt);
       {
-        int i;
-        
+        Dwarf_Signed srcCnt = 0;
+        char **srcFiles = 0;
+        Dwarf_Error srcerr = 0;
+        int i = 0;
+        int srcf = dwarf_srcfiles(compileUnit->compileUnitDie, &srcFiles, &srcCnt, &err);
+
+        if (srcf == DW_DLV_ERROR) {
+          return DWRAF_DBG_ERR_GET_SRC_FILES;
+        } /*DW_DLV_NO_ENTRY generally means there
+          there is no DW_AT_stmt_list attribute.
+          and we do not want to print anything
+          about statements in that case */
+
         for (i = 0; i < atCnt; i++) {
           Dwarf_Half attr;
+          const char *stringValue;
+          const char *shortName;
+          char buf[255];
+          int numericValue;
           int ares;
 
           ares = dwarf_whatattr(atList[i], &attr, &err);
           if (ares == DW_DLV_OK) {
             // NULL -> srcfiles 0 ->cnt
-            result = getAttribute(self->elfInfo.dbg, compileUnit->compileUnitDie, compileUnit->overallOffset,
-                 attr, atList[i],  NULL, 0);
-            
+            result = getAttribute(self, attr, atList[i], /* srcfiles */ NULL, /* cnt */ 0, &stringValue, &numericValue);
+            switch (attr) {
+            case DW_AT_language:
+//printf("  LANG_name: %s\n", stringValue);
+              break;
+            case DW_AT_name:
+              if (stringValue != NULL) {
+                if (strrchr(stringValue, '/') != NULL) {
+                  sprintf(buf, "%s", stringValue);
+                  result = self->dwarfDbgDict->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+printf("with /: %s result: %d\n", stringValue, result);
+                  checkErrOK(result);
+                  shortName = NULL;
+                } else {
+                  shortName = stringValue;
+                }
+              }
+              break;
+            case DW_AT_comp_dir:
+              if ((stringValue != NULL) && (shortName != NULL)) {
+                sprintf(buf, "%s/%s", stringValue, shortName);
+                result = self->dwarfDbgDict->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+printf("  NAME: %s result: %d\n", buf, result);
+                checkErrOK(result);
+              }
+              break;
+            default:
+              break;
+            }
+            // here we need to handle children and source lines etc.
           }
+        }
+        for (i = 0; i < srcCnt; i++) {
+printf("  src: %s\n", srcFiles[i]);
+          result = self->dwarfDbgDict->addSourceFile(self, srcFiles[i], compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+          checkErrOK(result);
         }
       }
     }
-  }
+    /*  Release the 'compileUnitDie' created by the call
+        to 'dwarf_siblingof' at the top of the main loop. */
+    dwarf_dealloc(self->elfInfo.dbg, compileUnit->compileUnitDie, DW_DLA_DIE);
+    compileUnit->compileUnitDie = NULL; /* For debugging, stale die should be NULL. */
+  } // end loop
   return result;
 }
 
@@ -451,7 +481,7 @@ printf("atcnt: %d\n", atCnt);
 int dwarfDbgGetInfos(dwarfDbgPtr_t self) {
   uint8_t result;
 
-printf("dwrafDbgGetInfos\n");
+printf("dwarfDbgGetInfos\n");
   result = DWARF_DBG_ERR_OK;
   result = self->dwarfDbgGetInfo->handleOneDieSection(self);
   checkErrOK(result);
