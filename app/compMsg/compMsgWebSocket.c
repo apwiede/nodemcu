@@ -324,7 +324,7 @@ static uint8_t webSocketRecv(char *string, socketUserData_t *sud, char **data, i
       sud->isWebsocket = 1;
     }
 
-    COMP_MSG_DBG(self, "W", 2, "payload: %d!%s!\n", payloadLen, payload);
+    COMP_MSG_DBG(self, "W", 1, "payload: %d!%s!\n", payloadLen, payload);
     result = espconn_sent(sud->pesp_conn, (unsigned char *)payload, payloadLen);
     os_free(key);
     COMP_MSG_DBG(self, "W", 2, "espconn_sent: result: %d\n", result);
@@ -418,7 +418,7 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
       COMP_MSG_DBG(self, "W", 2, "value connection: %s result: %d\n", connection, result);
       result2 = sud->compMsgDispatcher->compMsgHttp->getHttpGetHeaderValueForId(sud, COMP_MSG_HTTP_UPGRADE, &upgrade);
       COMP_MSG_DBG(self, "W", 2, "value upgrade: %s result: %d\n", upgrade, result);
-      if ((result1 == COMP_MSG_ERR_OK) && (result1 == COMP_MSG_ERR_OK) && (c_strcmp(connection, "Upgrade") == 0) && (c_strcmp(upgrade, "websocket") == 0)) {
+      if ((result1 == COMP_MSG_ERR_OK) && (result1 == COMP_MSG_ERR_OK) && (c_strncmp(connection, "Upgrade", 7) == 0) && (c_strcmp(upgrade, "websocket") == 0)) {
         idx = 0;
         sud->curr_url = NULL;
         COMP_MSG_DBG(self, "W", 2, "num_urls: %d\n", sud->num_urls);
