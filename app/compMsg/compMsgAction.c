@@ -96,23 +96,26 @@ static uint8_t runAPMode(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_OK;
 }
 
+sint8 gresult2 = -13;
+
 // ================================= lightSleepWakeupCallback ====================================
 
 static void lightSleepWakeupCallback(void) {
  compMsgDispatcher_t *self;
 
-ets_printf(">>>>lSWC\n");
+ets_printf(">>>>lSWC gresult2: %d\n", gresult2);
  self = compMsgDispatcher;
  COMP_MSG_DBG(self, "Y", 0, "lightSleepWakeupCallback\n");
  wifi_fpm_close();      // disable force sleep function
 // wifi_set_opmode(STATION_MODE);         // set station mode
-// wifi_station_connect();            // connect to AP
+// wifi_station_connect();            // connect 12to AP
 }
 
 // ================================= startLightSleepWakeupMode ====================================
 
 static uint8_t startLightSleepWakeupMode(compMsgDispatcher_t *self) {
   int result;
+
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode1\n");
   wifi_station_disconnect();
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode2\n");
@@ -121,22 +124,23 @@ static uint8_t startLightSleepWakeupMode(compMsgDispatcher_t *self) {
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode4\n");
 
   wifi_set_opmode(NULL_MODE); // set WiFi mode to null mode.
+//  wifi_set_opmode(STATION_MODE); // set WiFi mode to null mode.
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode3\n");
 
   wifi_fpm_open();               // enable force sleep
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode5\n");
 
-//  PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U,FUNC_GPIO15);
-  PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO4_U,FUNC_GPIO4);
-  gpio_pin_wakeup_enable(PERIPHS_IO_MUX_FUNC, GPIO_PIN_INTR_LOLEVEL);
-  gpio_pin_wakeup_enable(PERIPHS_IO_MUX_FUNC, GPIO_PIN_INTR_HILEVEL);
+
+  PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U,3);
+  gpio_pin_wakeup_enable(13, GPIO_PIN_INTR_LOLEVEL);
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode6\n");
 
   wifi_fpm_set_wakeup_cb(lightSleepWakeupCallback);   // Set wakeup callback
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode7\n");
 
-  wifi_fpm_do_sleep(FPM_SLEEP_MAX_TIME);
-//  wifi_fpm_do_sleep(5000*1000);
+  gresult2 = wifi_fpm_do_sleep(FPM_SLEEP_MAX_TIME);
+//  gresult2 = wifi_fpm_do_sleep(5000*1000);
+ets_printf("gresult2: %d\n", gresult2);
   return COMP_MSG_ERR_OK;
 }
 
