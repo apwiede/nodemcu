@@ -197,29 +197,39 @@ printf("addFileInfo: compileUnitIdx: %d fileNameIdx: %d fileInfoIdx: %d\n", comp
 
 // =================================== addFileLine =========================== 
 
-static uint8_t addFileLine(dwarfDbgPtr_t self, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx) {
+static uint8_t addFileLine(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx) {
   uint8_t result;
+  compileUnit_t *compileUnit;
   compileUnitInfo_t *compileUnitInfo;
   fileInfo_t *fileInfo;
+  fileLineInfo_t *fileLineInfo;
 
+printf("addFileLine: pc: 0x%08x lineNo: %d\n", pc, lineNo);
   result = DWARF_DBG_ERR_OK;
-  compileUnitInfo = &self->dwarfDbgDict->compileUnitsInfo.compileUnitInfos[compileUnitIdx];
+  compileUnit = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx];
+  compileUnitInfo = &compileUnit->compileUnitInfo;
+  if (compileUnitInfo->fileInfos == NULL) {
+    // seems to be no file infos!!
+    return result;
+  }
   fileInfo = &compileUnitInfo->fileInfos[fileInfoIdx];
   if (fileInfo->maxFileLine <= fileInfo->numFileLine) {
     fileInfo->maxFileLine += 5;
     if (fileInfo->fileLines == NULL) {
-      fileInfo->fileLines = (int *)ckalloc(sizeof(int*) * fileInfo->maxFileLine);
+      fileInfo->fileLines = (fileLineInfo_t *)ckalloc(sizeof(fileLineInfo_t) * fileInfo->maxFileLine);
       if (fileInfo->fileLines == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     } else {
-      fileInfo->fileLines = (int *)ckrealloc((char *)fileInfo->fileLines, sizeof(int *) * fileInfo->maxFileLine);
+      fileInfo->fileLines = (fileLineInfo_t *)ckrealloc((char *)fileInfo->fileLines, sizeof(fileLineInfo_t) * fileInfo->maxFileLine);
       if (fileInfo->fileLines == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     }
   }
-  fileInfo->fileLines[fileInfo->numFileLine] = lineNo;
+  fileLineInfo = &fileInfo->fileLines[fileInfo->numFileLine];
+  fileLineInfo->lineNo = lineNo;
+  fileLineInfo->pc = pc;
   *fileLineIdx = fileInfo->numFileLine;
   fileInfo->numFileLine++;
   return result;

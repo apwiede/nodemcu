@@ -285,6 +285,64 @@ printf("getAttribute: atName: %s\n", atName);
 
 }
 
+// =================================== getCompileUnitLineInfos =========================== 
+
+static uint8_t getCompileUnitLineInfos(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx) {
+  uint8_t result;
+  Dwarf_Unsigned lineVersion = 0;
+  Dwarf_Line_Context lineContext = 0;
+  Dwarf_Small tableCount = 0;
+  Dwarf_Error err = 0;
+  int lres = 0;
+  Dwarf_Signed lineCount = 0;
+  Dwarf_Line *lineBuf = NULL;
+  Dwarf_Signed lineCountActuals = 0;
+  Dwarf_Line *lineBufActuals = NULL;
+  Dwarf_Addr pc = 0;
+  Dwarf_Unsigned lineNo = 0;
+  int i = 0;
+
+  result = DWARF_DBG_ERR_OK;
+printf("getCompileUnitLineInfos\n");
+  lres = dwarf_srclines_b(self->dwarfDbgGetInfo->currCompileUnit->compileUnitDie, &lineVersion, &tableCount, &lineContext, &err);
+if (tableCount > 0) {
+printf(">>table_count: %d\n", tableCount);
+}
+  if (lres == DW_DLV_OK) {
+printf("dwarf_srclines_two_level_from_linecontext\n");
+    lres = dwarf_srclines_two_level_from_linecontext(lineContext, &lineBuf, &lineCount,
+          &lineBufActuals, &lineCountActuals, &err);
+    if (lres != DW_DLV_OK) {
+      return DWARF_DBG_ERR_GET_SRC_LINES;
+    }
+    if (lineCount > 0) {
+printf(">>>lineCount: %d\n", lineCount);
+      for (i = 0; i < lineCount; i++) {
+        Dwarf_Line line = lineBuf[i];
+        char* fileName = 0;
+        int ares = 0;
+        int lires = 0;
+
+        pc = 0;
+        ares = dwarf_lineaddr(line, &pc, &err);
+        if (ares != DW_DLV_OK) {
+          return DWARF_DBG_ERR_GET_LINE_ADDR;
+        }
+        lires = dwarf_lineno(line, &lineNo, &err);
+        if (lires != DW_DLV_OK) {
+          return DWARF_DBG_ERR_GET_LINE_NO;
+        }
+//printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d\n", line, pc, lineNo);
+        result = self->dwarfDbgDict->addFileLine(self, pc, lineNo, compileUnitIdx, fileInfoIdx, fileLineIdx);
+
+      }
+    }
+  } else {
+    return DWARF_DBG_ERR_GET_SRC_LINES;
+  }
+  return result;
+}
+
 // =================================== handleOneDieSection =========================== 
 
 static uint8_t handleOneDieSection(dwarfDbgPtr_t self) {
@@ -410,6 +468,7 @@ printf("atcnt: %d\n", atCnt);
         Dwarf_Error srcerr = 0;
         int i = 0;
         int srcf = dwarf_srcfiles(compileUnit->compileUnitDie, &srcFiles, &srcCnt, &err);
+        size_t fileLineIdx;
 
         if (srcf == DW_DLV_ERROR) {
           return DWRAF_DBG_ERR_GET_SRC_FILES;
@@ -458,9 +517,12 @@ printf("  NAME: %s result: %d\n", buf, result);
             default:
               break;
             }
-            // here we need to handle children and source lines etc.
+            // here we need to handle children etc.
           }
         }
+        // here we need to handle source lines
+        result = getCompileUnitLineInfos(self, compileUnitIdx, compileUnit->fileInfoIdx, &fileLineIdx);
+        checkErrOK(result);
         for (i = 0; i < srcCnt; i++) {
 printf("  src: %s\n", srcFiles[i]);
           result = self->dwarfDbgDict->addSourceFile(self, srcFiles[i], compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);

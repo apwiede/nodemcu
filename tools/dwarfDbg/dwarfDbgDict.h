@@ -45,7 +45,7 @@ typedef uint8_t (* addDirName_t)(dwarfDbgPtr_t self, char *dirName);
 typedef uint8_t (* addFileName_t)(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx);
 typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx);
 typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx);
-typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx);
+typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx);
 typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, Dwarf_Off overallOffset, size_t *compileUnitIdx);
 
 typedef struct dirNamesInfo {
@@ -65,11 +65,16 @@ typedef struct fileNamesInfo {
   fileNameInfo_t *fileNames;
 } fileNamesInfo_t;
 
+typedef struct fileLineInfo {
+  Dwarf_Addr pc;
+  size_t lineNo;
+} fileLineInfo_t;
+
 typedef struct fileInfo {
   size_t fileNameIdx;
   int  maxFileLine;    /* Size of the fileLines array. */
   int  numFileLine;    /* Index of the topmost fileName */
-  int *fileLines;
+  fileLineInfo_t *fileLines;
 } fileInfo_t;
 
 typedef struct compileUnitInfo {

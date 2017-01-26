@@ -41,7 +41,7 @@
 #ifndef DWARFDBG_ERROR_CODES_H
 #define	DWARFDBG_ERROR_CODES_H
 
-#define checkErrOK(result) if(result != DWARF_DBG_ERR_OK) return result
+#define checkErrOK(result) if (result != DWARF_DBG_ERR_OK) return result
 
 enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_OK                                   = 0,
@@ -49,6 +49,9 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_CANNOT_GET_NEXT_COMPILE_UNIT         = 2,
   DWARF_DBG_ERR_CANNOT_GET_SIBLING_OF_COMPILE_UNIT   = 3,
   DWRAF_DBG_ERR_GET_SRC_FILES                        = 4,
+  DWARF_DBG_ERR_GET_SRC_LINES                        = 5,
+  DWARF_DBG_ERR_GET_LINE_ADDR                        = 6,
+  DWARF_DBG_ERR_GET_LINE_NO                          = 7,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */
