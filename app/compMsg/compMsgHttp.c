@@ -88,6 +88,9 @@ static httpHeaderKeyInfo_t httpHeaderKeyInfos[] = {
   {"accept-encoding",                  "Accept-Encoding",                  COMP_MSG_HTTP_ACCEPT_ENCODING},
   {"host",                             "Host",                             COMP_MSG_HTTP_HOST},
   {"x-aspnet-version",                 "X-Aspnet-Version",                 COMP_MSG_HTTP_X_ASPNET_VERSION},
+  {"sec-websocket-extensions",         "Sec-WebSocket-Extensions",         COMP_MSG_HTTP_SEC_WEBSOCKET_EXTENSIONS},
+  {"pragma",                           "Pragma",                           COMP_MSG_HTTP_PRAGMA},
+  {"origin",                           "Origin",                           COMP_MSG_HTTP_ORIGIN},
 
   {NULL, NULL, -1},
 };
