@@ -72,7 +72,7 @@ typedef struct fileLineInfo {
 typedef struct fileInfo {
   size_t fileNameIdx;
   int  maxFileLine;    /* Size of the fileLines array. */
-  int  numFileLine;    /* Index of the topmost fileName */
+  int  numFileLine;    /* Index of the topmost entry */
   fileLineInfo_t *fileLines;
 } fileInfo_t;
 
@@ -80,13 +80,13 @@ typedef struct compileUnitInfo {
   char *fileName;
   Dwarf_Off overallOffset;
   int  maxFileInfo;    /* Size of the fileInfos array. */
-  int  numFileInfo;    /* Index of the topmost fileName */
+  int  numFileInfo;    /* Index of the topmost entry */
   fileInfo_t *fileInfos;
 } compileUnitInfo_t;
 
 typedef struct compileUnitsInfo {
-  int  maxCompileUnit;    /* Size of the compileUnits array. */
-  int  numCompileUnit;    /* Index of the topmost fileName */
+  int  maxCompileUnitInfo;    /* Size of the compileUnitInfos array. */
+  int  numCompileUnitInfo;    /* Index of the topmost entry */
   compileUnitInfo_t *compileUnitInfos;
 } compileUnitsInfo_t;
 

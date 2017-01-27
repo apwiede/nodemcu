@@ -47,6 +47,64 @@
 
 #include "dwarfDbgInt.h"
 
+/* *************************************************************************
+ * dirName:
+ *   maxDirName 5   # max free slots
+ *   numDirName 3   # next free slot
+ *   dirNames  char *dirName0 | char *dirName1 | char *dirnName2
+ *
+ * fileNameInfo:
+ *   char *fileName
+ *   size_t dirNameIdx
+ *
+ * fileName:
+ *   maxFileName 10   # max free slots
+ *   numFileName 2    # next free slot
+ *   fileNames  fileNameInfo0 | fileNameInfo1
+ *
+ * fileLineInfo:
+ *   Dwarf_Addr pc   # addr in object
+ *   size_t lineNo   # line number in source file
+ *
+ * fileInfo
+ *   fileNameIdx   # index into fileNames
+ *   maxFileLine 50
+ *   numFileLine  3
+ *   fileLines     fileLineInfo0 | fileLineInfo1
+ *
+ * compileUnitInfo
+ *   char *fileName  # short name of compile unit
+ *   Dwarf_Off overallOffset  # offset into .debug_info section
+ *   maxFileInfo  20
+ *   numFileInfo   2
+ *   fileInfos    fileInfo0 | fileInfo1
+ *
+ * compileUnit
+ *   compileUnitHeaderLength
+ *   versionStamp
+ *   abbrevOffset
+ *   addressSize
+ *   lengthSize
+ *   extensionSize
+ *   signature
+ *   typeOffset
+ *   nextCompileUnitOffset
+ *   compileUnitType
+ *   compileUnitDie
+ *   overallOffset
+ *   compileUnitShortName
+ *   fileNameIdx 3
+ *   fileInfoIdx 0
+ *   compileUnitInfo
+ *
+ * dwarfDbgGetInfo
+ *   maxCompileUnit 40
+ *   numCompileUnit  2
+ *   compileUnits    compileUnit0 | compileUnit1
+ *   currCompileUnit *compileUnit1
+ *
+ * */
+
 // =================================== addDirName =========================== 
 
 static uint8_t addDirName(dwarfDbgPtr_t self, char *dirName) {
@@ -240,22 +298,43 @@ printf("addFileLine: pc: 0x%08x lineNo: %d fileInfoIdx: %d\n", pc, lineNo, fileI
 int dwarfDbgGetFileInfos(dwarfDbgPtr_t self) {
   uint8_t result;
   int tclResult;
-  Tcl_Obj *listPtr;
-  Tcl_Obj *objPtr;
+  Tcl_Obj *listPtr1;
+  Tcl_Obj *listPtr2;
+  Tcl_Obj *objPtr1;
+  Tcl_Obj *objPtr2;
+  Tcl_Obj *objPtr3;
+  Tcl_Obj *objPtr4;
+  Tcl_Obj *objPtr5;
   size_t idx;
   compileUnit_t *compileUnit;
+  fileInfo_t *fileInfo;
 
 printf("dwarfDbgGetFileInfos self: %p numCompileUnit: %d\n", self, self->dwarfDbgGetInfo->numCompileUnit);
   result = DWARF_DBG_ERR_OK;
   // make a Tcl list of all compile unit file names
-  listPtr = Tcl_NewListObj(0, NULL);
-printf("listPtr: %p\n", listPtr);
+  listPtr1 = Tcl_NewListObj(0, NULL);
+printf("listPtr: %p\n", listPtr1);
   for (idx = 0; idx < self->dwarfDbgGetInfo->numCompileUnit; idx++) {
+    listPtr2 = Tcl_NewListObj(0, NULL);
     compileUnit = &self->dwarfDbgGetInfo->compileUnits[idx];
-    objPtr = Tcl_NewStringObj(compileUnit->compileUnitShortName, -1);
-    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr, objPtr);
+    objPtr1 = Tcl_NewStringObj(compileUnit->compileUnitShortName, -1);
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr1);
+    objPtr2 = Tcl_NewIntObj(idx);
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr2);
+    objPtr3 = Tcl_NewIntObj(compileUnit->fileNameIdx);
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr3);
+    objPtr4 = Tcl_NewIntObj(compileUnit->compileUnitInfo.numFileInfo - 1);
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr4);
+    if (compileUnit->compileUnitInfo.numFileInfo > 0) {
+      fileInfo = &compileUnit->compileUnitInfo.fileInfos[0];
+      objPtr5 = Tcl_NewIntObj(fileInfo->numFileLine - 1);
+    } else {
+      objPtr5 = Tcl_NewIntObj(0);
+    }
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr5);
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr1, listPtr2);
   }
-  Tcl_SetObjResult(self->interp, listPtr);
+  Tcl_SetObjResult(self->interp, listPtr1);
   // make a Tcl dict of all all lines and addresse for each compile unit file name
 
   return result;
@@ -272,8 +351,8 @@ int dwarfDbgFileInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgFileInfo->fileNamesInfo.numFileName = 0;
   self->dwarfDbgFileInfo->fileNamesInfo.fileNames = NULL;
 
-  self->dwarfDbgFileInfo->compileUnitsInfo.maxCompileUnit = 0;
-  self->dwarfDbgFileInfo->compileUnitsInfo.numCompileUnit = 0;
+  self->dwarfDbgFileInfo->compileUnitsInfo.maxCompileUnitInfo = 0;
+  self->dwarfDbgFileInfo->compileUnitsInfo.numCompileUnitInfo = 0;
   self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos = NULL;
 
   self->dwarfDbgFileInfo->addDirName = addDirName;
