@@ -49,13 +49,13 @@
 
 // =================================== dwarfDbgNew =========================== 
 
-dwarfDbgPtr_t dwarfDbgNew () {
+dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
   int result;
 
-printf("dwarfDbgNew\n");
-  _dwarfDbg_t *dbg2 = (_dwarfDbg_t *) ckalloc(sizeof(_dwarfDbg_t));
+printf("dwarfDbgNew interp: %p\n", interp);
   _dwarfDbg_t *dbg = ALLOC (_dwarfDbg_t);
   memset(dbg, 0, sizeof(_dwarfDbg_t));
+  dbg->interp = interp;
 
   // dwarfDbgEsb module
   dbg->dwarfDbgEsb = ALLOC(dwarfDbgEsb_t);

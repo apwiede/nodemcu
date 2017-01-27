@@ -78,9 +78,10 @@ typedef struct elfInfo {
 
 typedef struct _dwarfDbg {
   DWARFDBG_CELL_FREE freeCell; 
-  void*           clientData;
-  char *          errorStr; /* cause of error */
-  char            errorBuf[256]; /* cause of error */
+  void *clientData;
+  char *errorStr; /* cause of error */
+  char errorBuf[256]; /* cause of error */
+  Tcl_Interp *interp;
 
   elfInfo_t elfInfo;
   compileUnit_t compileUnit;

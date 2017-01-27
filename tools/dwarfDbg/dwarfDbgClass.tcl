@@ -56,7 +56,7 @@ critcl::class::define ::dwarfDbgClass {
     type    dwarfDbgPtr_t
 
     constructor {
-	instance = dwarfDbgNew ();
+	instance = dwarfDbgNew (interp);
     } {
 	/* Set back reference from dwarfDbgPtr_t instance to instance command */
 	dwarfDbgClientDataSet (instance, (ClientData) cmd);

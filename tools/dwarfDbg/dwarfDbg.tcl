@@ -48,7 +48,7 @@ critcl::cheaders   dwarfDbgInt.h dwarfDbgEsb.h dwarfDbgUtil.h dwarfDbgDict.h lib
 #  - openElf -- open an elf object file for getting debugging info
 # 
 
-critcl::api function dwarfDbgPtr_t dwarfDbgNew  {}
+critcl::api function dwarfDbgPtr_t dwarfDbgNew  {Tcl_Interp *interp}
 critcl::api function void          dwarfDbgDel  {dwarfDbgPtr_t dbg}
 
 critcl::api function void          dwarfDbgClientDataSet {dwarfDbgPtr_t dbg void* clientdata}

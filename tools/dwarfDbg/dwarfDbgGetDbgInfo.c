@@ -306,7 +306,7 @@ static uint8_t getCompileUnitLineInfos(dwarfDbgPtr_t self, size_t compileUnitIdx
 printf("getCompileUnitLineInfos\n");
   lres = dwarf_srclines_b(self->dwarfDbgGetInfo->currCompileUnit->compileUnitDie, &lineVersion, &tableCount, &lineContext, &err);
 if (tableCount > 0) {
-printf(">>table_count: %d\n", tableCount);
+printf(">>table_count: %d lineVersion: %d\n", tableCount, lineVersion);
 }
   if (lres == DW_DLV_OK) {
 printf("dwarf_srclines_two_level_from_linecontext\n");
@@ -497,7 +497,7 @@ printf("atcnt: %d\n", atCnt);
               if (stringValue != NULL) {
                 if (strrchr(stringValue, '/') != NULL) {
                   sprintf(buf, "%s", stringValue);
-                  result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+                  result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
 printf("with /: %s result: %d\n", stringValue, result);
                   checkErrOK(result);
                   shortName = NULL;
@@ -509,7 +509,7 @@ printf("with /: %s result: %d\n", stringValue, result);
             case DW_AT_comp_dir:
               if ((stringValue != NULL) && (shortName != NULL)) {
                 sprintf(buf, "%s/%s", stringValue, shortName);
-                result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+                result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
 printf("  NAME: %s result: %d\n", buf, result);
                 checkErrOK(result);
               }
@@ -522,10 +522,14 @@ printf("  NAME: %s result: %d\n", buf, result);
         }
         // here we need to handle source lines
         result = getCompileUnitLineInfos(self, compileUnitIdx, compileUnit->fileInfoIdx, &fileLineIdx);
+printf("fileLineIdx: %d\n", fileLineIdx);
         checkErrOK(result);
         for (i = 0; i < srcCnt; i++) {
+          size_t fileNameIdx;
+          size_t fileInfoIdx;
+
 printf("  src: %s\n", srcFiles[i]);
-          result = self->dwarfDbgFileInfo->addSourceFile(self, srcFiles[i], compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+          result = self->dwarfDbgFileInfo->addSourceFile(self, srcFiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
           checkErrOK(result);
         }
       }

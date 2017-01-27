@@ -204,7 +204,7 @@ static uint8_t addFileLine(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, siz
   fileInfo_t *fileInfo;
   fileLineInfo_t *fileLineInfo;
 
-printf("addFileLine: pc: 0x%08x lineNo: %d\n", pc, lineNo);
+printf("addFileLine: pc: 0x%08x lineNo: %d fileInfoIdx: %d\n", pc, lineNo, fileInfoIdx);
   result = DWARF_DBG_ERR_OK;
   compileUnit = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx];
   compileUnitInfo = &compileUnit->compileUnitInfo;
@@ -239,12 +239,24 @@ printf("addFileLine: pc: 0x%08x lineNo: %d\n", pc, lineNo);
 
 int dwarfDbgGetFileInfos(dwarfDbgPtr_t self) {
   uint8_t result;
+  int tclResult;
+  Tcl_Obj *listPtr;
+  Tcl_Obj *objPtr;
+  size_t idx;
+  compileUnit_t *compileUnit;
 
 printf("dwarfDbgGetFileInfos self: %p numCompileUnit: %d\n", self, self->dwarfDbgGetInfo->numCompileUnit);
   result = DWARF_DBG_ERR_OK;
   // make a Tcl list of all compile unit file names
+  listPtr = Tcl_NewListObj(0, NULL);
+printf("listPtr: %p\n", listPtr);
+  for (idx = 0; idx < self->dwarfDbgGetInfo->numCompileUnit; idx++) {
+    compileUnit = &self->dwarfDbgGetInfo->compileUnits[idx];
+    objPtr = Tcl_NewStringObj(compileUnit->compileUnitShortName, -1);
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr, objPtr);
+  }
+  Tcl_SetObjResult(self->interp, listPtr);
   // make a Tcl dict of all all lines and addresse for each compile unit file name
-  
 
   return result;
 }

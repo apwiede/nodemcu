@@ -8,7 +8,8 @@ if {[catch {
   dD openElf /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out
   dD getDbgInfos
 #  dD getFiles
-  dD getFileInfos
+  set compileUnitNames [dD getFileInfos]
+puts "compileUnitNames: [join [lsort -unique $compileUnitNames] \n]"
   dD closeElf
 } MSG]} {
   puts stderr "MSG: $MSG!"

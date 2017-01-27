@@ -55,7 +55,7 @@ typedef struct compileUnit {
     Dwarf_Die compileUnitDie;
     Dwarf_Off overallOffset;
     char *compileUnitShortName;
-    size_t fileIdx;
+    size_t fileNameIdx;
     size_t fileInfoIdx;
     compileUnitInfo_t compileUnitInfo;
 } compileUnit_t;
