@@ -72,6 +72,7 @@ critcl::class::define ::dwarfDbgClass {
     method openElf       as stm_OPEN_ELF
     method getFiles      as stm_GET_FILES
     method getFileInfos  as stm_GET_FILE_INFOS
+    method getFileLines  as stm_GET_FILE_LINES
     method getDbgInfos   as stm_GET_DBG_INFOS
     method closeElf      as stm_CLOSE_ELF
     method init          as stm_INIT

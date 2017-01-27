@@ -52,6 +52,7 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_GET_SRC_LINES                        = 5,
   DWARF_DBG_ERR_GET_LINE_ADDR                        = 6,
   DWARF_DBG_ERR_GET_LINE_NO                          = 7,
+  DWARF_DBG_ERR_NO_FILE_LINES                        = 8,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

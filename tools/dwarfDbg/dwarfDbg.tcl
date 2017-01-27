@@ -56,6 +56,7 @@ critcl::api function void*         dwarfDbgClientDataGet {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgOpenElf {dwarfDbgPtr_t dbg char* fileName}
 critcl::api function int           dwarfDbgGetDbgInfos {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgGetFileInfos {dwarfDbgPtr_t dbg}
+critcl::api function int           dwarfDbgGetFileLines {dwarfDbgPtr_t dbg int compileUnit}
 critcl::api function int           dwarfDbgGetFiles {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgCloseElf {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgInit {dwarfDbgPtr_t dbg}

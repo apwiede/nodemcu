@@ -52,7 +52,6 @@
 dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
   int result;
 
-printf("dwarfDbgNew interp: %p\n", interp);
   _dwarfDbg_t *dbg = ALLOC (_dwarfDbg_t);
   memset(dbg, 0, sizeof(_dwarfDbg_t));
   dbg->interp = interp;
@@ -115,8 +114,6 @@ void* dwarfDbgClientDataGet (dwarfDbgPtr_t dbg) {
 int dwarfDbgInit (dwarfDbgPtr_t dbg) {
   int result;
 
-printf("dwarfDbgInit\n");
-fflush(stdout);
   // dwarfDbgEsb module
   result = dwarfDbgEsbInit(dbg);
   checkErrOK(result);
@@ -148,8 +145,6 @@ fflush(stdout);
 // =================================== dwarfDbgGetErrorStr =========================== 
 
 char * dwarfDbgGetErrorStr (dwarfDbgPtr_t dbg) {
-printf("dwarfDbgGetErrorStr\n");
-fflush(stdout);
   return dbg->errorStr;
 }
 

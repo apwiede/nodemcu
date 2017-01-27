@@ -50,7 +50,5 @@
 // =================================== dwarfDbgUtilInit =========================== 
 
 int dwarfDbgUtilInit (dwarfDbgPtr_t self) {
-printf("dwarfDbgUtilInit\n");
-//  self->dwarfDbgUtil->getProducerName = getProducerName;
   return DWARF_DBG_ERR_OK;
 }

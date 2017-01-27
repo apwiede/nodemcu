@@ -1598,8 +1598,8 @@ int dwarfDbgOpenElf (dwarfDbgPtr_t self, char *fileName) {
   int dres = 0;
   Dwarf_Error onef_err = 0;
 
-printf("dwarfDbgOpenElf\n");
-fflush(stdout);
+//printf("dwarfDbgOpenElf\n");
+//fflush(stdout);
   self->elfInfo.fd = 0;
   self->elfInfo.cmd = 0;
   self->elfInfo.elf = 0;
@@ -1613,20 +1613,17 @@ fflush(stdout);
   self->elfInfo.cmd = ELF_C_READ;
   self->elfInfo.elf = elf_begin(self->elfInfo.fd, self->elfInfo.cmd, (Elf *) 0);
 printf("fileName: %s fd: %d arf: %p\n", fileName, self->elfInfo.fd, self->elfInfo.elf);
-fflush(stdout);
   // we only handle one elf part in this version!!
   if (self->elfInfo.elf == NULL) {
     self->errorStr = "problem in elf_begin";
     return TCL_ERROR;
   }
   dres = dwarf_elf_init(self->elfInfo.elf, DW_DLC_READ, NULL, NULL, &self->elfInfo.dbg, &onef_err);
-printf("dbg: %p dres: %d onef_err: %d\n", self->elfInfo.dbg, dres, onef_err);
   if (dres == DW_DLV_NO_ENTRY) {
     sprintf(self->errorBuf, "No DWARF information present in %s\n", fileName);
     self->errorStr = self->errorBuf;
     return TCL_ERROR;
   }   
-  printf("dwarf_elf_init ok for %p\n", self->elfInfo.elf);
   return TCL_OK;
 }
 
@@ -1636,7 +1633,6 @@ int dwarfDbgGetFiles (dwarfDbgPtr_t self) {
   Dwarf_Error pod_err;
   uint8_t result;
 
-printf("dwarfDbgGetFiles\n");
   return TCL_OK;
 }
 
@@ -1644,7 +1640,6 @@ printf("dwarfDbgGetFiles\n");
 
 int dwarfDbgCloseElf (dwarfDbgPtr_t self) {
 printf("dwarfDbgCloseElf\n");
-printf("elf: %p\n", self->elfInfo.elf);
   elf_end(self->elfInfo.elf);
 printf("fd: %d\n", self->elfInfo.fd);
   close(self->elfInfo.fd);
@@ -1654,7 +1649,6 @@ printf("fd: %d\n", self->elfInfo.fd);
 // =================================== dwarfDbgElfInfoInit =========================== 
 
 int dwarfDbgElfInfoInit (dwarfDbgPtr_t self) {
-printf("dwarfDbgElfInfoInit self: %p\n", self);
   _self = self;
   self->dwarfDbgElfInfo->getProducerName = getProducerName;
   self->dwarfDbgElfInfo->getCuName = getCuName;

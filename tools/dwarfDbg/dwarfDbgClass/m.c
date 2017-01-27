@@ -49,102 +49,70 @@
 
 /* .................................................. */
 
-/*
- *---------------------------------------------------------------------------
- *
+/*---------------------------------------------------------------------------
  * stm_CLEAR --
- *
  *	claen up all dwarf debug info. 
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	Only internal, memory allocation changes ...
- *
  *---------------------------------------------------------------------------
  */
 
 int
-stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   /* Syntax: dwarfDbg clear
    *	       [0]      [1]
    */
-
   if (objc != 2) {
     Tcl_WrongNumArgs (interp, 2, objv, NULL);
     return TCL_ERROR;
   }
 //FIXME need code here
-
   return TCL_OK;
 }
-
-/*
- *---------------------------------------------------------------------------
- *
+/*---------------------------------------------------------------------------
  * stm_DESTROY --
- *
  *	Destroys the whole dwarfDbg object.
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	Releases memory.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   /* Syntax: dwarfDbg destroy
    *	       [0]      [1]
    */
-
   if (objc != 2) {
     Tcl_WrongNumArgs (interp, 2, objv, NULL);
     return TCL_ERROR;
   }
-
   Tcl_DeleteCommandFromToken(interp, (Tcl_Command) dwarfDbgClientDataGet (dbg));
   return TCL_OK;
 }
-
-/*
- *---------------------------------------------------------------------------
- *
- * stm_FCN1 --
- *
+
+/*---------------------------------------------------------------------------
+ * stm_INIT --
  *	Returns ??? 
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	None.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_INIT (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_INIT (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
   /* Syntax: dwardfDbg init
    *	       [0]       [1]
    */
-
-printf("stm_INIT\n");
-fflush(stdout);
   if ((objc != 2)) {
     Tcl_WrongNumArgs (interp, 2, objv, NULL);
     return TCL_ERROR;
   }
-
   result = dwarfDbgInit(dbg);
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
@@ -152,41 +120,30 @@ fflush(stdout);
   return result;
 }
 
-/*
- *---------------------------------------------------------------------------
- *
+/*---------------------------------------------------------------------------
  * stm_OPEN_ELF --
- *
  *	just for testing
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	None.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
+
   /* Syntax: dwardfdbg openElf fileName
    *	       [0]       [1]     [2]
    */
-
   if ((objc < 3)) {
     Tcl_WrongNumArgs (interp, objc, objv, "fileName");
     return TCL_ERROR;
   }
-
   if ((objc != 3)) {
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-
-printf("stm_OPEN_ELF\n");
   result = dwarfDbgOpenElf (dbg, Tcl_GetString(objv[2]));
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
@@ -194,36 +151,26 @@ printf("stm_OPEN_ELF\n");
   return result;
 }
 
-/*
- *---------------------------------------------------------------------------
- *
+/*---------------------------------------------------------------------------
  * stm_GET_FILES --
- *
  *	just for testing
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	None.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_GET_FILES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_GET_FILES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
+
   /* Syntax: dwardfdbg getFiles
    *	       [0]       [1]
    */
-
   if ((objc != 2)) {
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-
-printf("stm_GET_FILES\n");
   result = dwarfDbgGetFiles (dbg);
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
@@ -231,36 +178,26 @@ printf("stm_GET_FILES\n");
   return result;
 }
 
-/*
- *---------------------------------------------------------------------------
- *
+/*---------------------------------------------------------------------------
  * stm_GET_DBG_INFOS --
- *
  *	get the necessary debug infos from the object file
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	None.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_GET_DBG_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_GET_DBG_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
+
   /* Syntax: dwardfdbg getDbgInfos
    *	       [0]       [1]
    */
-
   if ((objc != 2)) {
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-
-printf("stm_GET_DBG_INFOS\n");
   result = dwarfDbgGetDbgInfos (dbg);
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
@@ -268,36 +205,26 @@ printf("stm_GET_DBG_INFOS\n");
   return result;
 }
 
-/*
- *---------------------------------------------------------------------------
- *
+/*---------------------------------------------------------------------------
  * stm_GET_FILE_INFOS --
- *
  *	return the file infos for use by the debugger
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	None.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_GET_FILE_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_GET_FILE_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
+
   /* Syntax: dwardfdbg getFileInfos
    *	       [0]       [1]
    */
-
   if ((objc != 2)) {
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-
-printf("stm_GET_FILE_INFOS\n");
   result = dwarfDbgGetFileInfos (dbg);
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
@@ -305,36 +232,55 @@ printf("stm_GET_FILE_INFOS\n");
   return result;
 }
 
-/*
- *---------------------------------------------------------------------------
- *
- * stm_CLOSE_ELF --
- *
- *	just for testing
- *
+/*---------------------------------------------------------------------------
+ * stm_GET_FILE_LINES --
+ *	return the file infos for use by the debugger
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	None.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_CLOSE_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_GET_FILE_LINES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
+  int value;
+
+  /* Syntax: dwardfdbg getFileLines compileUnitIdx
+   *	       [0]       [1]        [2]
+   */
+  if ((objc != 3)) {
+    Tcl_WrongNumArgs (interp, objc, objv, NULL);
+    return TCL_ERROR;
+  }
+  result = Tcl_GetIntFromObj(interp, objv[2], &value);
+  result = dwarfDbgGetFileLines (dbg, value);
+  if (result != TCL_OK) {
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+  } 
+  return result;
+}
+
+/*---------------------------------------------------------------------------
+ * stm_CLOSE_ELF --
+ *	just for testing
+ * Results:
+ *	A standard Tcl result code.
+ * Side effects:
+ *	None.
+ *---------------------------------------------------------------------------
+ */
+
+int stm_CLOSE_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+  int result;
+
   /* Syntax: dwardfdbg closeElf
    *	       [0]       [1]
    */
-
   if ((objc != 2)) {
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-
-printf("stm_CLOSE_ELF\n");
   result = dwarfDbgCloseElf (dbg);
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
@@ -342,28 +288,19 @@ printf("stm_CLOSE_ELF\n");
   return result;
 }
 
-/*
- *---------------------------------------------------------------------------
- *
+/*---------------------------------------------------------------------------
  * stm_GET_ERROR_STR --
- *
  *	just for testing
- *
  * Results:
  *	A standard Tcl result code.
- *
  * Side effects:
  *	None.
- *
  *---------------------------------------------------------------------------
  */
 
-int
-stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
-{
+int stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
-printf("stm_GET_ERROR_STR\n");
   Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), NULL);
   return TCL_OK;
 }
