@@ -1592,149 +1592,6 @@ printf("print_die_and_children_internal: DIE_overall_offset: %d DIE_offset: %d\n
     return;
 }
 
-// =================================== handleOneDieSection =========================== 
-
-static uint8_t handleOneDieSection(dwarfDbgPtr_t self, Dwarf_Debug dbg) {
-  Dwarf_Unsigned cuHeaderLength = 0;
-  Dwarf_Unsigned abbrev_offset = 0;
-  Dwarf_Half version_stamp = 0;
-  Dwarf_Half address_size = 0;
-  Dwarf_Half extension_size = 0;
-  Dwarf_Half length_size = 0;
-  Dwarf_Sig8 signature;
-  Dwarf_Unsigned typeoffset = 0;
-  Dwarf_Unsigned nextCuOffset = 0;
-  Dwarf_Error pod_err;
-  unsigned loop_count = 0;
-  int nres = DW_DLV_OK;
-  int   cuCount = 0;
-  char * cuShortName = NULL;
-  char * cuLongName = NULL;
-  const char * section_name = 0;
-  int res = 0;
-  Dwarf_Off dieprintCuGoffset = 0;
-  int result;
-  size_t cuIdx;
-
-  /* Loop until it fails.  */
-  for (;;++loop_count) {
-    int sres = DW_DLV_OK;
-    Dwarf_Die cuDie = 0;
-    struct Dwarf_Debug_Fission_Per_CU_s fission_data;
-    int fission_data_result = 0;
-    Dwarf_Half cuType = 0;
-
-    memset(&fission_data,0,sizeof(fission_data));
-    nres = dwarf_next_cu_header_d(dbg, /* is_info */1, &cuHeaderLength, &version_stamp,
-      &abbrev_offset, &address_size, &length_size,&extension_size, &signature, &typeoffset,
-      &nextCuOffset, &cuType, &pod_err);
-    if (nres != DW_DLV_OK) {
-      // add info about nres somwhere!
-      return DWARF_DBG_ERR_CANNOT_GET_NEXT_COMPILE_UNIT;
-    }
-printf("nextCuOffset: %p cuHeaderLength: %d abbrev_offset: %d address_size: %d length_size: %d\n", nextCuOffset, cuHeaderLength, abbrev_offset, address_size, length_size);
-fflush(stdout);
-    /*  get basic information about the current CU: producer, name */
-    sres = dwarf_siblingof_b(dbg, NULL,/* is_info */1, &cuDie, &pod_err);
-    if (sres != DW_DLV_OK) {
-      dieprintCuGoffset = 0;
-      printf("siblingof cu header sres: %d pod_err: %s", sres, pod_err);
-    }
-    /* Get the CU offset for easy error reporting */
-    dwarf_die_offsets(cuDie, &DIEOverallOffset, &DIEOffset, &pod_err);
-    DIECuOverallOffset = DIEOverallOffset;
-    DIECuOffset = DIEOffset;
-    dieprintCuGoffset = DIEOverallOffset;
-printf("dieprintCuGoffset: %d\n", dieprintCuGoffset);
-    {
-    /* Get producer name for this CU and update compiler list */
-      dwarfDbgEsb_t producername;
-
-      self->dwarfDbgEsb->esbConstructor(self, &producername);
-      self->dwarfDbgElfInfo->getProducerName(self, dbg, cuDie, dieprintCuGoffset, &producername);
-//printf("producername: %s\n", self->dwarfDbgEsb->esbGetString(self, &producername));
-#ifdef NOTDEF
-      update_compiler_target(self->dwarfDbgEsb->esbGetString(self, &producername));
-#endif
-      self->dwarfDbgEsb->esbDestructor(self, &producername);
-    }
-    /*  Once the compiler table has been updated, see
-      if we need to generate the list of CU compiled
-      by all the producers contained in the elf file */
-    self->dwarfDbgElfInfo->getCuName(self, dbg, cuDie, dieprintCuGoffset, &cuShortName, &cuLongName);
-printf("cuShortName: %s\n", cuShortName);
-    /* Add CU name to current compiler entry */
-//    add_cu_name_compiler_target(cuLongName);
-    /*  Some prerelease gcc versions used ranges but seemingly
-      assumed the lack of a base address in the CU was
-      defined to be a zero base.
-      Assuming a base address (and low and high) is sensible. */
-    CuBaseAddress = 0;
-    CuHighAddress = 0;
-    CuLowAddress = 0;
-
-    /*  Release the 'cuDie' created by the call
-      to 'dwarf_siblingof' at the top of the main loop. */
-    dwarf_dealloc(dbg, cuDie, DW_DLA_DIE);
-    cuDie = 0; /* For debugging, stale die should be NULL. */
-
-    /*  Process a single compilation unit in .debug_info or
-      .debug_types. */
-    sres = dwarf_siblingof_b(dbg, NULL, /* is_info */ 1, &cuDie, &pod_err);
-    if (sres == DW_DLV_OK) {
-        Dwarf_Signed cnt = 0;
-        char **srcfiles = 0;
-        Dwarf_Error srcerr = 0;
-        int i = 0;
-        int srcf = dwarf_srcfiles(cuDie, &srcfiles, &cnt, &srcerr);
-
-        if (srcf == DW_DLV_ERROR) {
-          printf("dwarf_srcfiles srcf: %d srcerr: %d", srcf, srcerr);
-          dwarf_dealloc(dbg,srcerr,DW_DLA_ERROR);
-          srcerr = 0;
-          srcfiles = 0;
-          cnt = 0;
-        } /*DW_DLV_NO_ENTRY generally means there
-          there is no DW_AT_stmt_list attribute.
-          and we do not want to print anything
-          about statements in that case */
-
-        /* Get the CU offset for easy error reporting */
-        dwarf_die_offsets(cuDie, &DIEOverallOffset, &DIEOffset, &pod_err);
-        DIECuOverallOffset = DIEOverallOffset;
-        DIECuOffset = DIEOffset;
-        dieprintCuGoffset = DIEOverallOffset;
-printf("uf: %p\n", self->dwarfDbgFileInfo->addCompileUnitFile);
-        result = self->dwarfDbgFileInfo->addCompileUnitFile(self, cuShortName, DIEOverallOffset, &cuIdx);
-        checkErrOK(result);
-printf("cuShortName: %s DIEOverallOffset: %d DIEOffset: %d cuIdx: %d\n", cuShortName, DIEOverallOffset, DIEOffset, cuIdx);
-printf("call print_die_and_children\n");
-        print_die_and_children_internal(dbg, cuDie, dieprintCuGoffset, /* is_info */ 1, srcfiles, cnt);
- 
-        if (srcf == DW_DLV_OK) {
-          int si = 0;
-
-          // handle source (*.c) and include files (*.h)
-          for (si = 0; si < cnt; ++si) {
-            size_t fileIdx;
-            size_t fileInfoIdx;
-
-            result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[si], cuIdx, &fileIdx, &fileInfoIdx);
-            checkErrOK(result);
-            printf("src: %d %s fileIdx: %d\n", si, srcfiles[si], fileIdx);
-//            dwarf_dealloc(dbg, srcfiles[si], DW_DLA_STRING);
-          }
-          for (si = 0; si < cnt; ++si) {
-            dwarf_dealloc(dbg, srcfiles[si], DW_DLA_STRING);
-          }
-          dwarf_dealloc(dbg, srcfiles, DW_DLA_LIST);
-        }
-    }
-
-  }
-  return DWARF_DBG_ERR_OK;
-}
-
 // =================================== dwarfDbgOpenElf =========================== 
 
 int dwarfDbgOpenElf (dwarfDbgPtr_t self, char *fileName) {
@@ -1747,11 +1604,6 @@ fflush(stdout);
   self->elfInfo.cmd = 0;
   self->elfInfo.elf = 0;
   self->elfInfo.dbg = 0;
-  self->dwarfDbgEsb->esbConstructor(self, &config_file_path);
-  self->dwarfDbgEsb->esbConstructor(self, &config_file_tiedpath);
-  self->dwarfDbgEsb->esbConstructor(self, &esbShortCuName);
-  self->dwarfDbgEsb->esbConstructor(self, &esbLongCuName);
-  self->dwarfDbgEsb->esbConstructor(self, &dwarf_error_line);
   (void) elf_version(EV_NONE);
   if (elf_version(EV_CURRENT) == EV_NONE) {
     self->errorStr = "dwarfDbg: libelf.a out of date.";
@@ -1785,7 +1637,6 @@ int dwarfDbgGetFiles (dwarfDbgPtr_t self) {
   uint8_t result;
 
 printf("dwarfDbgGetFiles\n");
-  result = handleOneDieSection(self, self->elfInfo.dbg);
   return TCL_OK;
 }
 

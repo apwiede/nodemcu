@@ -235,52 +235,16 @@ printf("addFileLine: pc: 0x%08x lineNo: %d\n", pc, lineNo);
   return result;
 }
 
-// =================================== addCompileUnitFile =========================== 
-
-static uint8_t addCompileUnitFile(dwarfDbgPtr_t self, char *fileName, Dwarf_Off overallOffset, size_t *compileUnitIdx) {
-  uint8_t result;
-  compileUnitInfo_t *compileUnitInfo;
-
-printf("addCompileUnitFile\n");
-  result = DWARF_DBG_ERR_OK;
-  if (self->dwarfDbgFileInfo->compileUnitsInfo.maxCompileUnit <= self->dwarfDbgFileInfo->compileUnitsInfo.numCompileUnit) {
-    self->dwarfDbgFileInfo->compileUnitsInfo.maxCompileUnit += 50;
-    if (self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos == NULL) {
-      self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos = (compileUnitInfo_t *)ckalloc(sizeof(compileUnitInfo_t) * self->dwarfDbgFileInfo->compileUnitsInfo.maxCompileUnit);
-      if (self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    } else {
-      self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos = (compileUnitInfo_t *)ckrealloc((char *)self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos, sizeof(compileUnitInfo_t) * self->dwarfDbgFileInfo->compileUnitsInfo.maxCompileUnit);
-      if (self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    }
-  }
-  compileUnitInfo = &self->dwarfDbgFileInfo->compileUnitsInfo.compileUnitInfos[self->dwarfDbgFileInfo->compileUnitsInfo.numCompileUnit];
-  compileUnitInfo->fileName = (char *)ckalloc(strlen(fileName) + 1);
-  if (compileUnitInfo->fileName == NULL) {
-    return DWARF_DBG_ERR_OUT_OF_MEMORY;
-  }
-  compileUnitInfo->fileName[strlen(fileName)] == '\0';
-  compileUnitInfo->maxFileInfo = 0;
-  compileUnitInfo->numFileInfo = 0;
-  compileUnitInfo->fileInfos = NULL;
-  memcpy(compileUnitInfo->fileName, fileName, strlen(fileName));
-  compileUnitInfo->overallOffset = overallOffset;
-printf("addCompileUnit: num: %d overallOffset: %d %s\n", self->dwarfDbgFileInfo->compileUnitsInfo.numCompileUnit, overallOffset, fileName);
-  *compileUnitIdx = self->dwarfDbgFileInfo->compileUnitsInfo.numCompileUnit;
-  self->dwarfDbgFileInfo->compileUnitsInfo.numCompileUnit++;
-  return result;
-}
-
 // =================================== dwarfDbgGetFileInfos =========================== 
 
 int dwarfDbgGetFileInfos(dwarfDbgPtr_t self) {
   uint8_t result;
 
-printf("dwarfDbgGetFileInfos\n");
+printf("dwarfDbgGetFileInfos self: %p numCompileUnit: %d\n", self, self->dwarfDbgGetInfo->numCompileUnit);
   result = DWARF_DBG_ERR_OK;
+  // make a Tcl list of all compile unit file names
+  // make a Tcl dict of all all lines and addresse for each compile unit file name
+  
 
   return result;
 }
@@ -305,7 +269,6 @@ int dwarfDbgFileInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgFileInfo->addSourceFile = addSourceFile;
   self->dwarfDbgFileInfo->addFileLine = addFileLine;
   self->dwarfDbgFileInfo->addFileInfo = addFileInfo;
-  self->dwarfDbgFileInfo->addCompileUnitFile = addCompileUnitFile;
   return DWARF_DBG_ERR_OK;
 }
 
