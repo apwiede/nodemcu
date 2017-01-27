@@ -62,7 +62,7 @@
 #include "dwarfDbgDict.h"
 #include "dwarfDbgFileInfo.h"
 #include "dwarfDbgElfInfo.h"
-#include "dwarfDbgGetInfo.h"
+#include "dwarfDbgGetDbgInfo.h"
 
 typedef struct elfInfo {
   int fd;

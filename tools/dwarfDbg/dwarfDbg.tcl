@@ -64,7 +64,7 @@ critcl::api function char*         dwarfDbgGetErrorStr {dwarfDbgPtr_t dbg}
 # # ## ### ##### ######## ############# #####################
 ## Implementation.
 
-critcl::csources dwarfDbg.c dwarfDbgElfInfo.c dwarfDbgGetInfo.c dwarfDbgUtil.c dwarfDbgEsb.c dwarfDbgDict.c
+critcl::csources dwarfDbg.c dwarfDbgElfInfo.c dwarfDbgGetDbgInfo.c dwarfDbgUtil.c dwarfDbgEsb.c dwarfDbgDict.c
 critcl::csources dwarfDbgFileInfo.c
 critcl::clibraries libdwarf/libdwarf.a /usr/lib64/libelf.so
 critcl::ccode {} ; # Fake the 'nothing to build detector'
