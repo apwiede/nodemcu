@@ -234,9 +234,9 @@ printf("stm_GET_FILES\n");
 /*
  *---------------------------------------------------------------------------
  *
- * stm_GET_INFOS --
+ * stm_GET_DBG_INFOS --
  *
- *	just for testing
+ *	get the necessary debug infos from the object file
  *
  * Results:
  *	A standard Tcl result code.
@@ -248,10 +248,10 @@ printf("stm_GET_FILES\n");
  */
 
 int
-stm_GET_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+stm_GET_DBG_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
 {
   int result;
-  /* Syntax: dwardfdbg getInfos
+  /* Syntax: dwardfdbg getDbgInfos
    *	       [0]       [1]
    */
 
@@ -260,8 +260,45 @@ stm_GET_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* 
     return TCL_ERROR;
   }
 
-printf("stm_GET_INFOS\n");
-  result = dwarfDbgGetInfos (dbg);
+printf("stm_GET_DBG_INFOS\n");
+  result = dwarfDbgGetDbgInfos (dbg);
+  if (result != TCL_OK) {
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+  } 
+  return result;
+}
+
+/*
+ *---------------------------------------------------------------------------
+ *
+ * stm_GET_FILE_INFOS --
+ *
+ *	return the file infos for use by the debugger
+ *
+ * Results:
+ *	A standard Tcl result code.
+ *
+ * Side effects:
+ *	None.
+ *
+ *---------------------------------------------------------------------------
+ */
+
+int
+stm_GET_FILE_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv)
+{
+  int result;
+  /* Syntax: dwardfdbg getFileInfos
+   *	       [0]       [1]
+   */
+
+  if ((objc != 2)) {
+    Tcl_WrongNumArgs (interp, objc, objv, NULL);
+    return TCL_ERROR;
+  }
+
+printf("stm_GET_FILE_INFOS\n");
+  result = dwarfDbgGetFileInfos (dbg);
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
   } 

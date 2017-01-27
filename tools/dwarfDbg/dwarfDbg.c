@@ -72,6 +72,11 @@ printf("dwarfDbgNew\n");
   checkAllocOK(dbg->dwarfDbgDict);
   memset(dbg->dwarfDbgDict, 0, sizeof(dwarfDbgDict_t));
 
+  // dwarfDbgFileInfo module
+  dbg->dwarfDbgFileInfo = ALLOC(dwarfDbgFileInfo_t);
+  checkAllocOK(dbg->dwarfDbgFileInfo);
+  memset(dbg->dwarfDbgFileInfo, 0, sizeof(dwarfDbgFileInfo_t));
+
   // dwarfDbgElfInfo module
   dbg->dwarfDbgElfInfo = ALLOC(dwarfDbgElfInfo_t);
   checkAllocOK(dbg->dwarfDbgElfInfo);
@@ -122,6 +127,10 @@ fflush(stdout);
 
   // dwarfDbgDict module
   result = dwarfDbgDictInit(dbg);
+  checkErrOK(result);
+
+  // dwarfDbgFileInfo module
+  result = dwarfDbgFileInfoInit(dbg);
   checkErrOK(result);
 
   // dwarfDbgElfInfo module

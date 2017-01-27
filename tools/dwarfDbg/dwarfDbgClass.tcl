@@ -67,14 +67,15 @@ critcl::class::define ::dwarfDbgClass {
 	dwarfDbgDel (instance);
     }
 
-    method clear       as stm_CLEAR
-    method destroy     as stm_DESTROY
-    method openElf     as stm_OPEN_ELF
-    method getFiles    as stm_GET_FILES
-    method getInfos    as stm_GET_INFOS
-    method closeElf    as stm_CLOSE_ELF
-    method init        as stm_INIT
-    method getErrorStr as stm_GET_ERROR_STR
+    method clear         as stm_CLEAR
+    method destroy       as stm_DESTROY
+    method openElf       as stm_OPEN_ELF
+    method getFiles      as stm_GET_FILES
+    method getFileInfos  as stm_GET_FILE_INFOS
+    method getDbgInfos   as stm_GET_DBG_INFOS
+    method closeElf      as stm_CLOSE_ELF
+    method init          as stm_INIT
+    method getErrorStr   as stm_GET_ERROR_STR
 
     support {
 	static void

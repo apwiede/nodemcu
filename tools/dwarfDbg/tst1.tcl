@@ -6,8 +6,9 @@ dwarfDbgClass create dD
 if {[catch {
   dD init
   dD openElf /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out
-  dD getInfos
+  dD getDbgInfos
 #  dD getFiles
+  dD getFileInfos
   dD closeElf
 } MSG]} {
   puts stderr "MSG: $MSG!"

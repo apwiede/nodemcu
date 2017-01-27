@@ -333,7 +333,7 @@ printf(">>>lineCount: %d\n", lineCount);
           return DWARF_DBG_ERR_GET_LINE_NO;
         }
 //printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d\n", line, pc, lineNo);
-        result = self->dwarfDbgDict->addFileLine(self, pc, lineNo, compileUnitIdx, fileInfoIdx, fileLineIdx);
+        result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, compileUnitIdx, fileInfoIdx, fileLineIdx);
 
       }
     }
@@ -497,7 +497,7 @@ printf("atcnt: %d\n", atCnt);
               if (stringValue != NULL) {
                 if (strrchr(stringValue, '/') != NULL) {
                   sprintf(buf, "%s", stringValue);
-                  result = self->dwarfDbgDict->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+                  result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
 printf("with /: %s result: %d\n", stringValue, result);
                   checkErrOK(result);
                   shortName = NULL;
@@ -509,7 +509,7 @@ printf("with /: %s result: %d\n", stringValue, result);
             case DW_AT_comp_dir:
               if ((stringValue != NULL) && (shortName != NULL)) {
                 sprintf(buf, "%s/%s", stringValue, shortName);
-                result = self->dwarfDbgDict->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+                result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
 printf("  NAME: %s result: %d\n", buf, result);
                 checkErrOK(result);
               }
@@ -525,7 +525,7 @@ printf("  NAME: %s result: %d\n", buf, result);
         checkErrOK(result);
         for (i = 0; i < srcCnt; i++) {
 printf("  src: %s\n", srcFiles[i]);
-          result = self->dwarfDbgDict->addSourceFile(self, srcFiles[i], compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
+          result = self->dwarfDbgFileInfo->addSourceFile(self, srcFiles[i], compileUnitIdx, &compileUnit->fileIdx, &compileUnit->fileInfoIdx);
           checkErrOK(result);
         }
       }
@@ -538,12 +538,12 @@ printf("  src: %s\n", srcFiles[i]);
   return result;
 }
 
-// =================================== dwarfDbgGetInfos =========================== 
+// =================================== dwarfDbgGetDbgInfos =========================== 
 
-int dwarfDbgGetInfos(dwarfDbgPtr_t self) {
+int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
   uint8_t result;
 
-printf("dwarfDbgGetInfos\n");
+printf("dwarfDbgGetDbgInfos\n");
   result = DWARF_DBG_ERR_OK;
   result = self->dwarfDbgGetInfo->handleOneDieSection(self);
   checkErrOK(result);

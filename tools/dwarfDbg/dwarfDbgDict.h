@@ -41,67 +41,7 @@
 #ifndef DWARFDBG_DICT_H
 #define	DWARFDBG_DICT_H
 
-typedef uint8_t (* addDirName_t)(dwarfDbgPtr_t self, char *dirName);
-typedef uint8_t (* addFileName_t)(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx);
-typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx);
-typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx);
-typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx);
-typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, Dwarf_Off overallOffset, size_t *compileUnitIdx);
-
-typedef struct dirNamesInfo {
-  int  maxDirName;    /* Size of the dirNames array. */
-  int  numDirName;    /* Index of the topmost dirName */
-  char **dirNames;
-} dirNamesInfo_t;
-
-typedef struct fileNameInfo {
-  char *fileName;
-  size_t dirNameIdx;
-} fileNameInfo_t;
-  
-typedef struct fileNamesInfo {
-  int  maxFileName;    /* Size of the fileNames array. */
-  int  numFileName;    /* Index of the topmost fileName */
-  fileNameInfo_t *fileNames;
-} fileNamesInfo_t;
-
-typedef struct fileLineInfo {
-  Dwarf_Addr pc;
-  size_t lineNo;
-} fileLineInfo_t;
-
-typedef struct fileInfo {
-  size_t fileNameIdx;
-  int  maxFileLine;    /* Size of the fileLines array. */
-  int  numFileLine;    /* Index of the topmost fileName */
-  fileLineInfo_t *fileLines;
-} fileInfo_t;
-
-typedef struct compileUnitInfo {
-  char *fileName;
-  Dwarf_Off overallOffset;
-  int  maxFileInfo;    /* Size of the fileInfos array. */
-  int  numFileInfo;    /* Index of the topmost fileName */
-  fileInfo_t *fileInfos;
-} compileUnitInfo_t;
-
-typedef struct compileUnitsInfo {
-  int  maxCompileUnit;    /* Size of the compileUnits array. */
-  int  numCompileUnit;    /* Index of the topmost fileName */
-  compileUnitInfo_t *compileUnitInfos;
-} compileUnitsInfo_t;
-
 typedef struct dwarfDbgDict {
-  dirNamesInfo_t dirNamesInfo;
-  fileNamesInfo_t fileNamesInfo;
-  compileUnitsInfo_t compileUnitsInfo;
-
-  addDirName_t addDirName;
-  addFileName_t addFileName;
-  addSourceFile_t addSourceFile;
-  addFileInfo_t addFileInfo;
-  addFileLine_t addFileLine;
-  addCompileUnitFile_t addCompileUnitFile;
  
 } dwarfDbgDict_t;
 
