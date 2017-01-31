@@ -436,6 +436,7 @@ puts stderr "compMsgData2 setData"
       }
       dict set fieldInfo fieldNameId $fieldNameId
       dict set fieldInfo fieldTypeId $fieldTypeId
+      dict set fieldInfo fieldKeyTypeId $fieldTypeId
       dict set fieldInfo fieldLgth $fieldLgth
       dict set fieldInfo fieldFlags [list]
       dict lappend compMsgData fields $fieldInfo
@@ -455,12 +456,14 @@ puts stderr "compMsgData2 setData"
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId COMP_MSG_NO_INCR]
       checkErrOK $result
+      set found false
       set idx 0
       set numEntries [dict get $compMsgData numFields]
       while {$idx < $numEntries} {
         set fields [dict get $compMsgData fields]
         set fieldInfo [lindex $fields $idx]
         if {$fieldNameId == [dict get $fieldInfo fieldNameId]} {
+          set found true
           switch $fieldNameId {
             COMP_MSG_SPEC_FIELD_TABLE_ROWS {
              set value [dict get $compMsgData numTabRows]
@@ -471,13 +474,32 @@ puts stderr "compMsgData2 setData"
              set result $::COMP_MSG_ERR_OK
             }
             default {
-              set result [::compMsg compMsgDataView getFieldValue $fieldInfo value 0]
+              if {[string range $fieldName 0 0] eq "#"} {
+                set saveType [dict get $fieldInfo fieldTypeId]
+                dict set fieldinfo fieldtypeId [dict get $fieldInfo fieldKeyTypeId]
+                switch $saveType {
+                  DATA_VIEW_FIELD_UINT8_VECTOR -
+                  DATA_VIEW_FIELD_INT8_VECTOR {
+                    set keyOffset 0 ; # we fetch the full lgth in compMsgDataView!!
+                  }
+                  default {
+                    set keyOffset 5 ; # uint16_t + uint8_t + uint16_t
+                  }
+                }
+                set result [::compMsg compMsgDataView getFieldValue $fieldInfo value $keyOffset]
+                dict set fieldInfo fieldTypeId $saveType
+              } else {
+                set result [::compMsg compMsgDataView getFieldValue $fieldInfo value 0]
+              }
             }
           }
           checkErrOK $result
           break
         }
         incr idx
+      }
+      if {!$found} {
+        return $::COMP_MSG_ERR_FIELD_NOT_FOUND
       }
       return $::DATA_VIEW_ERR_OK
     }
@@ -747,6 +769,7 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
     proc initReceivedMsg {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
+puts stderr "initReceivedMsg"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       # initialize field offsets for each field
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
@@ -813,19 +836,20 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
           default {
             if {[string range [dict get $msgDescPart fieldNameStr] 0 0] eq "#"} {
               set offset [dict get $compMsgData fieldOffset]
-puts stderr "== offet!$offset!"
-              set result [::compMsg dataView getUint16 $offset value]
+puts stderr "== offset!$offset!"
+              set result [::compMsg dataView getUint16 $offset key]
               checkErrOK $result
-puts stderr "key: $value!"
+puts stderr "key: $value offset: $offset!"
               incr offset 2
-              set result [::compMsg dataView getUint8 $offset value]
+              set result [::compMsg dataView getUint8 $offset keyType]
               checkErrOK $result
-puts stderr "type: $value!"
+puts stderr "type: $value offset: $offset!"
               incr offset 1
-              set result [::compMsg dataView getUint16 $offset value]
+              set result [::compMsg dataView getUint16 $offset keyLgth]
               checkErrOK $result
-puts stderr "size: $value!"
-              dict set fieldInfo fieldLgth [expr {2 + 1 + 2 + $value}]
+puts stderr "size: $value offset: $offset!"
+              dict set fieldInfo fieldKeyTypeId $keyType
+              dict set fieldInfo fieldLgth [expr {2 + 1 + 2 + $keyLgth}]
               dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
             } else {
             }

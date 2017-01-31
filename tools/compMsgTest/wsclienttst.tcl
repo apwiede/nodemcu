@@ -367,11 +367,11 @@ puts stderr "need handler for received MSG!lgth: [string length $msg]!"
       checkErrOK $result
       set result [::compMsg dataView setData "" 0]
       checkErrOK $result
-set fd [open "AAAnswer.txt" w]
-fconfigure $fd -translation binary
-puts -nonewline $fd $msg
-flush $fd
-close $fd
+#set fd [open "AAAnswer.txt" w]
+#fconfigure $fd -translation binary
+#puts -nonewline $fd $msg
+#flush $fd
+#close $fd
       set result [::compMsg compMsgIdentify handleReceivedPart ::compMsgDispatcher $msg [string length $msg]]
       checkErrOK $result
       set headerInfos [dict get $::compMsgDispatcher headerInfos]
@@ -384,10 +384,19 @@ puts stderr "hdrIdx: $hdrIdx hdrU16CmdKey: [dict get $hdr hdrU16CmdKey]!"
           fillTable
         }
         "SA" {
-          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "@clientIPAddr" ipAddr]
+::compMsg dataView dumpBinary $::compMsg::dataView::data $::compMsg::dataView::lgth "SAMSG"
+::compMsg compMsgData dumpMsg ::compMsgDispatcher
+          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "#key_clientIPAddr" ipAddr]
           checkErrOK $result
-          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "@clientPort" port]
+          set ipAddrVal [string range $ipAddr 5 end]
+puts stderr "ipAddrVal: [string length $ipAddrVal] $ipAddrVal"
+          binary scan $ipAddrVal I ipAddr
+puts stderr [format "ipAddr 0x%08x" $ipAddr]
+          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "#key_clientPort" port]
           checkErrOK $result
+          set portVal [string range $port 5 end]
+puts stderr "portVal: [string length $portVal] $portVal"
+          binary scan $portVal S port
           set part1 [expr {($ipAddr >>24) & 0xFF}]
           set part2 [expr {($ipAddr >>16) & 0xFF}]
           set part3 [expr {($ipAddr >>8) & 0xFF}]
@@ -399,8 +408,11 @@ puts stderr "hdrIdx: $hdrIdx hdrU16CmdKey: [dict get $hdr hdrU16CmdKey]!"
           puts stderr [format "IP: %d.%d.%d.%d port: $port!" $part4 $part3 $part2 $part1]
         }
         "SN" {
-          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "@clientStatus" status]
+          set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher "#key_clientStatus" status]
           checkErrOK $result
+          set statusVal [string range $status 5 end]
+puts stderr "statusVal: [string length $statusVal] $statusVal"
+          binary scan $statusVal c status
           switch $status {
             2 {
               set statusStr "WrongPasswd"

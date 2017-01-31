@@ -67,7 +67,7 @@ namespace eval compMsg {
     proc fixOffsetsForKeyValues {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-#puts stderr "==fixOffsetsForKeyValues!"
+puts stderr "==fixOffsetsForKeyValues!"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set fieldIdx 0
       set msgDescPartIdx 0
@@ -76,7 +76,6 @@ namespace eval compMsg {
         set fieldInfo [lindex $fields $fieldIdx]
         set msgDescParts [dict get $compMsgData msgDescParts]
         set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
-#puts stderr "msgDescPart: $fieldIdx!"
         dict set compMsgDispatcher msgDescPart $msgDescPart
         set msgKeyValueDescPart [list]
         set fieldNameStr [dict get $msgDescPart fieldNameStr]
@@ -106,7 +105,6 @@ namespace eval compMsg {
           if {[string range $fieldNameStr 0 0] ne "#"} {
             checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
           }
-puts stderr "size callback: $callback $fieldNameStr"
           # that is the callback to eventually get the size of the key/value field
           set callback [string range $callback 1 end] ; # strip off '@' character
           set result [::$callback compMsgDispatcher]
@@ -117,7 +115,6 @@ puts stderr "size callback: $callback $fieldNameStr"
           set msgDescPart [dict get $compMsgDispatcher msgDescPart]
           if {$msgKeyValueDescPartIdx >= 0} {
             set msgKeyValueDescPart [dict get $compMsgDispatcher msgKeyValueDescPart]
-puts stderr "msgKeyValueDescPart: $msgKeyValueDescPart!"
             dict set msgDescPart fieldSize [dict get $msgKeyValueDescPart keyLgth]
           }
           if {$msgKeyValueDescPart ne [list]} {
