@@ -293,16 +293,16 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
   struct ip_info ip_info;
   char temp[64];
 
-  COMP_MSG_DBG(self, "w", 2, "connectToAP:\n");
+  COMP_MSG_DBG(self, "w", 1, "connectToAP:\n");
   ssid = NULL;
   passwd = NULL;
   idx = 0;
   while (idx < self->numFieldsToSave) {
     fieldsToSave = &self->fieldsToSave[idx];
-    if (c_strcmp("clientSsid", fieldsToSave->fieldNameStr) == 0) {
+    if (c_strcmp("#key_clientSsid", fieldsToSave->fieldNameStr) == 0) {
       ssid = fieldsToSave->fieldValueStr;
     }
-    if (c_strcmp("clientPassword", fieldsToSave->fieldNameStr) == 0) {
+    if (c_strcmp("#key_clientPasswd", fieldsToSave->fieldNameStr) == 0) {
       passwd = fieldsToSave->fieldValueStr;
     }
     idx++;
@@ -405,6 +405,31 @@ static uint8_t getStationConfig(compMsgDispatcher_t *self) {
 //  freq_offset;
 //  freqcal_val;
 
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientSsidSize ====================================
+
+static uint8_t getClientSsidSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
+  self->compMsgData->msgDescPart->fieldSize = sizeof(compMsgWifiData.clientSsid) - 1;
+  COMP_MSG_DBG(self, "w", 1, "ssidSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
+  *numericValue = self->compMsgData->msgDescPart->fieldSize;
+  *stringValue = NULL;
+ets_printf("Ssid type: %d %d\n", self->compMsgData->msgDescPart->fieldType, DATA_VIEW_FIELD_UINT8_VECTOR);
+  self->compMsgData->msgDescPart->fieldType = DATA_VIEW_FIELD_UINT8_VECTOR;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientPasswdSize ====================================
+
+static uint8_t getClientPasswdSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_bssid;
+  self->compMsgData->msgDescPart->fieldSize = sizeof(compMsgWifiData.clientPasswd) - 1;
+  COMP_MSG_DBG(self, "w", 1, "ssidSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
+  *numericValue = self->compMsgData->msgDescPart->fieldSize;
+  *stringValue = NULL;
+  self->compMsgData->msgDescPart->fieldType = DATA_VIEW_FIELD_UINT8_VECTOR;
   return COMP_MSG_ERR_OK;
 }
 
@@ -1085,6 +1110,8 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientSsid", &getClientSsid, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPasswd", &getClientPasswd, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientSsidSize", &getClientSsidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPasswdSize", &getClientPasswdSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
 
   self->compMsgWifiData->getBssScanInfo = &getBssScanInfo;
   self->compMsgWifiData->getWifiValue = &getWifiValue;

@@ -372,7 +372,8 @@ COMP_MSG_DBG(self, "Y", 0, "init type U");
       checkErrOK(result);
       break;
     case 'W':
-      self->compMsgDebug->setDebugFlags(self, "BHIsSvWw");
+ets_printf("<<<startAPMODE\n");
+      self->compMsgDebug->setDebugFlags(self, "BdHIsSvWw");
       COMP_MSG_DBG(self, "DY", 1, "start RunAPMode\n");
       result = self->compMsgSocket->webSocketRunAPMode(self);
       checkErrOK(result);

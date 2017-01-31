@@ -120,19 +120,27 @@ static uint8_t startLightSleepWakeupMode(compMsgDispatcher_t *self) {
   wifi_station_disconnect();
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode2\n");
 
-  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);    // light sleep
-  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode4\n");
-
   wifi_set_opmode(NULL_MODE); // set WiFi mode to null mode.
 //  wifi_set_opmode(STATION_MODE); // set WiFi mode to null mode.
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode3\n");
+
+  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);    // light sleep
+  COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode4\n");
 
   wifi_fpm_open();               // enable force sleep
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode5\n");
 
 
-  PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U,3);
-  gpio_pin_wakeup_enable(13, GPIO_PIN_INTR_LOLEVEL);
+// next 2 lines work with PIN D7 of nodemcu dev kit
+//  PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U,3);
+//  gpio_pin_wakeup_enable(13, GPIO_PIN_INTR_LOLEVEL);
+// PIN D7
+
+// next 2 lines work with PIN U0RX (GPIO3) of nodemcu dev kit
+  PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0RXD_U,FUNC_GPIO3);
+  gpio_pin_wakeup_enable(GPIO_ID_PIN(3), GPIO_PIN_INTR_LOLEVEL);
+// PIN U0RX
+
   COMP_MSG_DBG(self, "Y", 0, "startLightSleepWakeupMode6\n");
 
   wifi_fpm_set_wakeup_cb(lightSleepWakeupCallback);   // Set wakeup callback

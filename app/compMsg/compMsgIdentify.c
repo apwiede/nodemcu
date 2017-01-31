@@ -406,6 +406,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   msgValPart_t *msgValPart;
   fieldsToSave_t *fieldsToSave;
   action_t actionCallback;
+  compMsgField_t *fieldInfo;
   uint8_t answerType;
   uint8_t *handle;
   bool hadActionCb;
@@ -435,12 +436,17 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   result = self->compMsgData->initReceivedMsg(self);
   checkErrOK(result);
   fieldToSaveIdx = 0;
+//self->compMsgData->dumpMsg(self);
+//self->compMsgData->compMsgDataView->dataView->dumpBinary(self->compMsgData->compMsgDataView->dataView->data, self->compMsgData->compMsgDataView->dataView->lgth, "MSG");
   while (fieldToSaveIdx < self->numFieldsToSave) {
     fieldsToSave = &self->fieldsToSave[fieldToSaveIdx];
+    COMP_MSG_DBG(self, "I", 2, "fieldsToSave: %s!\n", fieldsToSave->fieldNameStr);
     idx = 0;
     while (idx < self->compMsgData->numMsgDescParts) {
       msgDescPart = &self->compMsgData->msgDescParts[idx];
       if (c_strcmp(msgDescPart->fieldNameStr, fieldsToSave->fieldNameStr) == 0) {
+        stringValue = NULL;
+        numericValue = 0;
         result = self->compMsgData->getFieldValue(self, fieldsToSave->fieldNameStr, &numericValue, &stringValue);
         checkErrOK(result);
         COMP_MSG_DBG(self, "I", 2, "found fieldToSave: %s %s", fieldsToSave->fieldNameStr, stringValue);
@@ -642,9 +648,9 @@ if (buffer == NULL) {
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
 //compMsgData->compMsgDataView->dataView->dumpBinaryWide(received->buf, received->totalLgth, "afterdecrypt");
         }
-        COMP_MSG_DBG(self, "I", 1, "call storeReceivedMsg");
+        COMP_MSG_DBG(self, "I", 2, "call storeReceivedMsg");
         result = self->compMsgIdentify->storeReceivedMsg(self);
-        COMP_MSG_DBG(self, "I", 1, "storeReceivedMsg end buffer idx: %d result: %d", idx, result);
+        COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg end buffer idx: %d result: %d", idx, result);
         return result;
       case 'U':
       case 'W':

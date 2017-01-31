@@ -233,21 +233,21 @@ static uint8_t getTotalCrc(compMsgDispatcher_t *self, dataView_t *dataView, comp
   crcVal = 0;
   idx = 0;
   COMP_MSG_DBG(self, "v", 2, "getTotalCrc");
-  COMP_MSG_DBG(self, "v", 1, "getTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d", idx, dataView->data[idx], crc, fieldInfo->fieldOffset);
+  COMP_MSG_DBG(self, "v", 2, "getTotalCrc idx: %d ch: 0x%02x crc: 0x%04x fieldOffset: %d", idx, dataView->data[idx], crc, fieldInfo->fieldOffset);
   while (idx < fieldInfo->fieldOffset) {
-//if ((idx % 10) == 0) {
-    COMP_MSG_DBG(self, "v", 1, "totalCrc idx: %d ch: 0x%02x crc: 0x%04x", idx, dataView->data[idx], crcVal);
-//}
+if ((idx % 10) == 0) {
+    COMP_MSG_DBG(self, "v", 2, "totalCrc idx: %d ch: 0x%02x crc: 0x%04x", idx, dataView->data[idx], crcVal);
+}
     crcVal += dataView->data[idx++];
   }
-  COMP_MSG_DBG(self, "v", 1, "totalCrcVal00: 0x%04x", crcVal);
+  COMP_MSG_DBG(self, "v", 2, "totalCrcVal00: 0x%04x", crcVal);
   crcVal = ~(crcVal);
   if (crcLgth == 1) {
-    COMP_MSG_DBG(self, "v", 1, "totalCrcVal10: 0x%04x", crcVal);
+    COMP_MSG_DBG(self, "v", 2, "totalCrcVal10: 0x%04x", crcVal);
     crcVal = crcVal & 0xFF;
     result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &uint8_crc);
     checkErrOK(result);
-    COMP_MSG_DBG(self, "v", 1, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
+    COMP_MSG_DBG(self, "v", 2, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
     if (crcVal != uint8_crc) {
       COMP_MSG_DBG(self, "v", 1, "totalCrcVal1: 0x%02x crc: 0x%02x", crcVal, uint8_crc);
       return COMP_MSG_ERR_BAD_CRC_VALUE;
