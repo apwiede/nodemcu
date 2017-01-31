@@ -817,6 +817,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $compMsgWifiDataVar wifiData
 
+puts stderr ">>>getWifiKeyValueKeys"
       set fd [open [format "%s/CompMsgKeyValueKeys.txt" $::moduleFilesPath] "r"]
       gets $fd line
       set flds [split $line ","]
@@ -828,7 +829,22 @@ namespace eval compMsg {
         foreach {fieldNameStr fieldValueStr fieldTypeStr fieldLgth} $flds break
         set offset [string length "@key_"]
         set key [string range $fieldNameStr $offset end]
+puts stderr "keyValueKey: $key!"
         switch $key {
+          seqNum -
+          MACAddr -
+          machineState -
+          firmwareMainBoard -
+          firmwareDisplayBoard -
+          firmwareWifiModule -
+          lastError -
+          casingUseList -
+          casingStatisticList -
+          dataAndTime -
+          clientSsid -
+          clientPasswd {
+            set result [::compMsg compMsgModuleData setModuleValue compMsgDispatcher key_$key $fieldValueStr]
+          }
           bssid -
           ssid -
           rssi -
@@ -840,7 +856,7 @@ namespace eval compMsg {
             set result [setWifiData compMsgDispatcher wifiData $key $fieldTypeStr $fieldValueStr]
           }
           default {
-puts stderr "should handle key: $key $fieldTypeStr $fieldValueStr $fieldLgthStr!"
+puts stderr "should handle key: $key $fieldTypeStr $fieldValueStr $fieldLgth!"
           }
         }
         incr idx

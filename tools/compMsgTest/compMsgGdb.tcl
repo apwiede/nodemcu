@@ -72,6 +72,8 @@ set ::numGdbChksumChars 0
 set ::hadGdbStub false
 set ::incrLgth2 false
 set ::lgth2 0
+set ::hadPrompt false
+set ::hadNewLine false
 
 set ::handleInputDbg false
 
@@ -117,12 +119,23 @@ puts stderr "cmd: $cmd params: $params!"
       switch $reason {
         "05" {
 puts stderr "reason: $reason breakpoint"
-          set ::answer "\$g#67"
+          set ::inGdbCmd false
+#          set ::answer "\$g#67"
+          set ::brkPoint "40265731"
+          set answerCmd "Z1,${::brkPoint},04"
+          set chkSum 0
+          foreach ch [split $answerCmd ""] {
+            binary scan $ch c pch
+            set chkSum [expr {$chkSum + $pch}]
+          }
+          set ::answer [format "\$${answerCmd}#%02x" [expr {$chkSum & 0xFF}]]
+puts stderr ">>answer: $::answer!"
           foreach ch [split $::answer ""] {
             puts -nonewline $::fd0 $ch
             flush $::fd0
-            after 100
+            after 20
           }
+puts stderr ">>gdbCmd sent: $::answer!"
         }
         default {
         }
@@ -137,6 +150,23 @@ puts stderr "LL: [string length $params]!"
         set registerVals [string range $registerVals 8 end]
 puts stderr "$regName: [set $regName]!"
       }
+    }
+    "O" {
+puts stderr "received command O: $params"
+      set answerCmd "c"
+      set chkSum 0
+      foreach ch [split $answerCmd ""] {
+        binary scan $ch c pch
+        set chkSum [expr {$chkSum + $pch}]
+      }
+      set ::answer [format "\$${answerCmd}#%02x" [expr {$chkSum & 0xFF}]]
+puts stderr ">>answer: $::answer!"
+      foreach ch [split $::answer ""] {
+        puts -nonewline $::fd0 $ch
+        flush $::fd0
+        after 20
+      }
+puts stderr ">>gdbCmd sent: $::answer!"
     }
     default {
 puts stderr "bad cmd: $cmd!"
@@ -157,7 +187,7 @@ proc handleInput0 {ch bufVar lgthVar} {
     incr ::lgth2
   }
 if {$::inGdbCmd} {
-puts stderr "handleInput0 1: ch: $ch lgth: $lgth!lgth2: $::lgth2"
+puts stderr "handleInput0 1: ch: $ch lgth: $lgth!lgth2: $::lgth2 ::inGdbCmd: $::inGdbCmd"
 }
   if {($lgth == 8) && ($buf eq "gdbstub_")} {
     set ::hadGdbStub true
@@ -172,12 +202,15 @@ puts stderr "sent command '$::answer' OK"
       return $::COMP_MSG_ERR_OK
     }
     "-" {
+      if {$::inGdbCmd} {
 puts stderr "sent command '$::answer' NOT OK"
-      set buf ""
-      set lgth 0
-      return $::COMP_MSG_ERR_OK
+        set buf ""
+        set lgth 0
+        return $::COMP_MSG_ERR_OK
+      }
     }
     "\n" {
+      set ::hadNewLine true
       if {$::inGdbCmd} {
 puts stderr "gdbCmd: $::gdbCmd"
       } else {
@@ -194,9 +227,27 @@ puts stderr "gdbCmd: $::gdbCmd"
       }
       return $::COMP_MSG_ERR_OK
     }
+    "O" {
+      if {$::hadNewLine} {
+puts stderr ">>SET O inGdbCmd true"
+        set ::inGdbCmd true
+        set ::gdbCmd "O"
+        set ::gdbCmdChksum $pch
+        return $::COMP_MSG_ERR_OK
+      }
+    }
     "\$" {
        if {$::hadGdbStub} {
+puts stderr ">>SET \$ inGdbCmd true"
         set ::inGdbCmd true
+        set ::gdbCmd ""
+      }
+      return $::COMP_MSG_ERR_OK
+    }
+    "=" {
+       if {$::hadGdbStub} {
+puts stderr ">>SET = inGdbCmd false"
+        set ::inGdbCmd false
         set ::gdbCmd ""
       }
       return $::COMP_MSG_ERR_OK
@@ -204,6 +255,7 @@ puts stderr "gdbCmd: $::gdbCmd"
     default {
       if {$::inGdbCmd} {
         if {($::numGdbChksumChars == 0) && ($ch ne "#")} {
+puts stderr "chksum ch: $pch"
           append ::gdbCmd $ch
           incr ::gdbCmdChksum $pch
         }
@@ -212,7 +264,7 @@ puts stderr "gdbCmd: $::gdbCmd"
           if {$::numGdbChksumChars > 1} {
             set rchksum 0x$::gdbReceivedChksum
             if {$rchksum != [expr {$::gdbCmdChksum & 0xff}]} {
-puts stderr "bad chksum"
+puts stderr "bad chksum: $::gdbCmd $rchksum $::gdbCmdChksum"
             } else {
 puts stderr "chksum OK"
               set result [handleGdbCmd $::gdbCmd]
@@ -227,6 +279,7 @@ puts stderr "chksum OK"
           incr ::numGdbChksumChars 1
         }
         if {$ch eq "#"} {
+puts stderr "::gdbCmd: $::gdbCmd"
           set ::numGdbChksumChars 1
           set ::gdbReceivedChksum ""
         }

@@ -297,6 +297,11 @@ if {0} {
   append passwd \x00
   dict set ::compMsgDispatcher clientPassword $passwd
 puts stderr "ssid: [dict get $::compMsgDispatcher clientSsid]![dict get $::compMsgDispatcher clientPassword]!"
+
+  set result [::compMsg compMsgMsgDesc getWifiKeyValueKeys compMsgDispatcher wifiData]
+  pdict $wifiData
+  checkErrOK $result
+
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 SP hdr]
   checkErrOK $result
   set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]

@@ -80,6 +80,7 @@ namespace eval compMsg {
         dict set compMsgDispatcher msgDescPart $msgDescPart
         set msgKeyValueDescPart [list]
         set fieldNameStr [dict get $msgDescPart fieldNameStr]
+        set msgKeyValueDescPartIdx -1
         if {[string range $fieldNameStr 0 0] eq "#"} {
           # get the corresponding msgKeyValueDescPart
           set found false
@@ -89,6 +90,7 @@ namespace eval compMsg {
             set keyNameStr [dict get $msgKeyValueDescPart keyNameStr]
             if {$keyNameStr eq $fieldNameStr} {
               set found true
+              set msgKeyValueDescPartIdx $keyValueIdx
               break
             }
             incr keyValueIdx
@@ -97,12 +99,15 @@ namespace eval compMsg {
             set msgKeyValueDescPart [list]
           }
         }
+        dict set compMsgDispatcher msgKeyValueDescPart $msgKeyValueDescPart
         set callback [dict get $msgDescPart fieldSizeCallback]
         if {$callback ne [list]} {
           # the key name must have the prefix: "#key_"!
           if {[string range $fieldNameStr 0 0] ne "#"} {
             checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
           }
+puts stderr "size callback: $callback $fieldNameStr"
+          # that is the callback to eventually get the size of the key/value field
           set callback [string range $callback 1 end] ; # strip off '@' character
           set result [::$callback compMsgDispatcher]
           checkErrOK $result
@@ -110,13 +115,20 @@ namespace eval compMsg {
           set fields [dict get $compMsgData fields]
           set fieldInfo [lindex $fields $fieldIdx]
           set msgDescPart [dict get $compMsgDispatcher msgDescPart]
+          if {$msgKeyValueDescPartIdx >= 0} {
+            set msgKeyValueDescPart [dict get $compMsgDispatcher msgKeyValueDescPart]
+puts stderr "msgKeyValueDescPart: $msgKeyValueDescPart!"
+            dict set msgDescPart fieldSize [dict get $msgKeyValueDescPart keyLgth]
+          }
           if {$msgKeyValueDescPart ne [list]} {
             dict set fieldInfo fieldKey [dict get $msgKeyValueDescPart keyId]
           } else {
             dict set fieldInfo fieldKey [dict get $msgDescPart fieldKey]
           }
+puts stderr "fieldLgth1: [dict get $fieldInfo fieldLgth]!fieldSize: [dict get $msgDescPart fieldSize]!"
           dict incr msgDescPart fieldSize [expr {2 * 2 + 1}] ; # for key, type and lgth in front of value!!
           dict set fieldInfo fieldLgth [dict get $msgDescPart fieldSize]
+puts stderr "fieldLgth2: [dict get $fieldInfo fieldLgth]!"
           set fields [lreplace $fields $fieldIdx $fieldIdx $fieldInfo]
           set msgDescParts [dict get $compMsgData msgDescParts]
           set msgDescParts [lreplace $msgDescParts $msgDescPartIdx $msgDescPartIdx $msgDescPart]
@@ -170,8 +182,11 @@ namespace eval compMsg {
           checkErrOK $result
         }
         set value [dict get $compMsgDispatcher msgValPart fieldValue]
-#puts stderr "setMsgFieldValue1: $fieldNameStr!$value!"
+puts stderr "setMsgFieldValue1: $fieldNameStr!$value!"
         set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
+set value2 "???"
+set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr value2]
+puts stderr "value2: $value2!"
       } else {
         set msgValPart [dict get $compMsgDispatcher msgValPart]
         if {[lsearch [dict get $msgValPart fieldFlags] COMP_DISP_DESC_VALUE_IS_NUMBER] >= 0} {
@@ -179,7 +194,7 @@ namespace eval compMsg {
         } else {
           set value [dict get $msgValPart fieldValueStr]
         }
-#puts stderr "setMsgFieldValue2: $fieldNameStr!$value!"
+puts stderr "setMsgFieldValue2: $fieldNameStr!$value!"
         switch [dict get $msgValPart fieldNameId] {
           COMP_MSG_SPEC_FIELD_DST {
             set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
@@ -197,7 +212,7 @@ namespace eval compMsg {
         }
         checkErrOK $result
       }
-#puts stderr "setMsgFieldValue: done\n"
+puts stderr "setMsgFieldValue: done\n"
       return $::COMP_DISP_ERR_OK
     }
     

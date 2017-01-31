@@ -261,7 +261,7 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
 # we loop over the fieldSequence entries and handle them as needed
 # attention not all entries of the message are handled here, only some special entries!
  
-::compMsg compMsgMsgDesc dumpHeaderPart $hdr
+#::compMsg compMsgMsgDesc dumpHeaderPart $hdr
       # check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
       set idx 0
       set fieldSequence [dict get $hdr fieldSequence]
@@ -280,10 +280,8 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
       dict set headerInfos seqIdx 0
 #puts stderr "seqIdx: [dict get $headerInfos seqIdx]!"
       set sequenceEntry [lindex $fieldSequence [dict get $headerInfos seqIdx]]
-puts stderr "sequenceEntry0: $sequenceEntry!"
       while {$sequenceEntry ne [list]} {
         dict set received fieldOffset [dict get $headerInfos headerLgth]
-puts stderr "sequenceEntry: $sequenceEntry!"
         set hdr [lindex $headerParts $hdrIdx]
         switch $sequenceEntry {
           COMP_DISP_U16_CMD_KEY {
