@@ -546,6 +546,7 @@ static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
 static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
   compMsgField_t *fieldInfo;
   uint8_t fieldNameId;
+  uint8_t saveFieldType;
   int idx;
   int numEntries;
   int result;
@@ -576,7 +577,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
       if (fieldName[0] == '#') {
         COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue: name: %s!numeric: %d!string: %s!fieldNameId: %d!fieldKey: %d!fieldSize: %d!fieldType: %d!\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId, fieldInfo->fieldKey, compMsgData->msgDescPart->fieldSize, compMsgData->msgDescPart->fieldType);
         // key value field !!
-        // FIXME for values other than uint8_t*!!!
+        // the type is always uint8_t* we set the individual type of the key below
         COMP_MSG_DBG(self, "d", 2, "fieldInfo->fieldLgth: %d offset: %d\n", fieldInfo->fieldLgth, fieldInfo->fieldOffset);
         offset = fieldInfo->fieldOffset;
         result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldKey);
@@ -587,10 +588,15 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
         offset += 1;
         result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldSize);
         checkErrOK(result);
+        // here we need the keyValue fieldType!!
+        saveFieldType = fieldInfo->fieldTypeId;
+        fieldInfo->fieldTypeId = fieldInfo->fieldKeyTypeId;
         result = compMsgData->compMsgDataView->setFieldValue(self, compMsgData->compMsgDataView->dataView, fieldInfo, numericValue, stringValue, sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
+        fieldInfo->fieldTypeId = saveFieldType;
+        
         
       } else {
-        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue: %s!value: 0x%04x %s!", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue: %s!value: 0x%04x %s type: %d!", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldInfo->fieldTypeId);
         result = compMsgData->compMsgDataView->setFieldValue(self, compMsgData->compMsgDataView->dataView, fieldInfo, numericValue, stringValue, 0);
       }
       checkErrOK(result);
@@ -887,7 +893,7 @@ static uint8_t initReceivedMsg(compMsgDispatcher_t *self) {
         fieldInfo->fieldLgth = fillerLgth;
         compMsgData->totalLgth = compMsgData->fieldOffset + fillerLgth + crcLgth;
         compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
-        COMP_MSG_DBG(self, "d", 2, "initMsg2a idx: %d", idx);
+        COMP_MSG_DBG(self, "d", 2, "initReceivedMsg2a idx: %d", idx);
         break;
       default:
         if (msgDescPart->fieldNameStr[0] == '#') {

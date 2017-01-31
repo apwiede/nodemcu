@@ -725,7 +725,7 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
-  COMP_MSG_DBG(self, "E", 0, "readWifiValues: %s\n", fileName);
+  COMP_MSG_DBG(self, "E", 2, "readWifiValues: %s\n", fileName);
   checkErrOK(result);
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
@@ -1288,9 +1288,8 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
 
 // ================================= getWifiKeyValueKeys ====================================
 
-static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t *compMsgWifiData) {
+static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, uint8_t *fileName) {
   uint8_t result;
-  char fileName[100];
   uint8_t numEntries;
   uint8_t *fieldNameStr;
   uint8_t *fieldValueStr;
@@ -1307,12 +1306,14 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
   uint8_t*cp;
   uint8_t*ep;
   bool isEnd;
-  uint8_t bssInfoType;
+  uint16_t keyValueKey;
   uint8_t fieldTypeId;
   compMsgMsgDesc_t *compMsgMsgDesc;
+  compMsgWifiData_t *compMsgWifiData;
 
   compMsgMsgDesc = self->compMsgMsgDesc;
-  result = compMsgMsgDesc->openFile(compMsgMsgDesc, "CompMsgKeyValueKeys.txt", "r");
+  compMsgWifiData = self->compMsgWifiData;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
@@ -1344,40 +1345,82 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     fieldValueStr = cp;
     result = compMsgMsgDesc->getIntFromLine(self, cp, &uval, &ep, &isEnd);
     checkErrOK(result);
-    result = self->compMsgWifiData->bssStr2BssInfoId(fieldNameStr + c_strlen("@key_"), &bssInfoType);
+    result = self->compMsgWifiData->keyValueStr2KeyValueId(fieldNameStr + c_strlen("@key_"), &keyValueKey);
     if (result != COMP_MSG_ERR_OK) {
       // not a key the Wifi is handling (normally cloud keys)
       idx++;
       continue;
     }
-//    checkErrOK(result);
-    switch (bssInfoType) {
-    case BSS_INFO_BSSID:
-      compMsgWifiData->key_bssid = (uint16_t)uval;
+    checkErrOK(result);
+    switch (keyValueKey) {
+    case KEY_VALUE_KEY_BSSID:
+      compMsgWifiData->keyValueInfo.key_bssid = (uint16_t)uval;
       break;
-    case BSS_INFO_SSID:
-      compMsgWifiData->key_ssid = (uint16_t)uval;
+    case KEY_VALUE_KEY_SSID:
+      compMsgWifiData->keyValueInfo.key_ssid = (uint16_t)uval;
       break;
-    case BSS_INFO_SSID_LEN:
-      compMsgWifiData->key_ssid_len = (uint16_t)uval;
+    case KEY_VALUE_KEY_CHANNEL:
+      compMsgWifiData->keyValueInfo.key_channel = (uint16_t)uval;
       break;
-    case BSS_INFO_CHANNEL:
-      compMsgWifiData->key_channel = (uint16_t)uval;
+    case KEY_VALUE_KEY_RSSI:
+      compMsgWifiData->keyValueInfo.key_rssi = (uint16_t)uval;
       break;
-    case BSS_INFO_RSSI:
-      compMsgWifiData->key_rssi = (uint16_t)uval;
+    case KEY_VALUE_KEY_AUTH_MODE:
+      compMsgWifiData->keyValueInfo.key_authmode = (uint16_t)uval;
       break;
-    case BSS_INFO_AUTH_MODE:
-      compMsgWifiData->key_authmode = (uint16_t)uval;
+    case KEY_VALUE_KEY_IS_HIDDEN:
+      compMsgWifiData->keyValueInfo.key_freq_offset = (uint16_t)uval;
       break;
-    case BSS_INFO_IS_HIDDEN:
-      compMsgWifiData->key_freq_offset = (uint16_t)uval;
+    case KEY_VALUE_KEY_FREQ_OFFSET:
+      compMsgWifiData->keyValueInfo.key_freqcal_val = (uint16_t)uval;
       break;
-    case BSS_INFO_FREQ_OFFSET:
-      compMsgWifiData->key_freqcal_val = (uint16_t)uval;
+    case KEY_VALUE_KEY_FREQ_CAL_VAL:
+      compMsgWifiData->keyValueInfo.key_is_hidden = (uint16_t)uval;
       break;
-    case BSS_INFO_FREQ_CAL_VAL:
-      compMsgWifiData->key_is_hidden = (uint16_t)uval;
+    case KEY_VALUE_KEY_CLIENT_SSID:
+      compMsgWifiData->keyValueInfo.key_clientSsid = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_CLIENT_PASSWD:
+      compMsgWifiData->keyValueInfo.key_clientPasswd = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_CLIENT_IP_ADDR:
+      compMsgWifiData->keyValueInfo.key_clientIPAddr = (uint16_t)uval;
+      break;
+    case   KEY_VALUE_KEY_CLIENT_PORT:
+      compMsgWifiData->keyValueInfo.key_clientPort = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_CLIENT_STATUS:
+      compMsgWifiData->keyValueInfo.key_clientStatus = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_SEQ_NUM:
+      compMsgWifiData->keyValueInfo.key_seqNum = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_MAC_ADDR:
+      compMsgWifiData->keyValueInfo.key_MACAddr = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_MACHINE_STATE:
+      compMsgWifiData->keyValueInfo.key_machineState = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD:
+      compMsgWifiData->keyValueInfo.key_firmwareMainBoard = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_FIRMWARE_DISPLAY_BOARD:
+      compMsgWifiData->keyValueInfo.key_firmwareDisplayBoard = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_FIRMWARE_WIFI_MODULE:
+      compMsgWifiData->keyValueInfo.key_firmwareWifiModule = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_LAST_ERROR:
+      compMsgWifiData->keyValueInfo.key_lastError = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_CASING_USE_LIST:
+      compMsgWifiData->keyValueInfo.key_casingUseList = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_CASING_STATISTIC_LIST:
+      compMsgWifiData->keyValueInfo.key_casingStatisticList = (uint16_t)uval;
+      break;
+    case KEY_VALUE_KEY_DAT_AND_TIME:
+      compMsgWifiData->keyValueInfo.key_dataAndTime = (uint16_t)uval;
       break;
     }
     checkIsEnd(isEnd);
@@ -1389,30 +1432,83 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, compMsgWifiData_t
     checkErrOK(result);
     result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, fieldTypeStr, &fieldTypeId);
     checkErrOK(result);
-    switch (bssInfoType) {
-    case BSS_INFO_BSSID:
+    switch (keyValueKey) {
+    case KEY_VALUE_KEY_BSSID:
       compMsgWifiData->bssScanTypes.bssidType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_bssid = (uint8_t)fieldTypeId;
       break;
-    case BSS_INFO_SSID:
+    case KEY_VALUE_KEY_SSID:
       compMsgWifiData->bssScanTypes.ssidType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_ssid = (uint8_t)fieldTypeId;
       break;
-    case BSS_INFO_CHANNEL:
+    case KEY_VALUE_KEY_CHANNEL:
       compMsgWifiData->bssScanTypes.channelType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_channel = (uint8_t)fieldTypeId;
       break;
-    case BSS_INFO_RSSI:
+    case KEY_VALUE_KEY_RSSI:
       compMsgWifiData->bssScanTypes.rssiType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_rssi = (uint8_t)fieldTypeId;
       break;
-    case BSS_INFO_AUTH_MODE:
+    case KEY_VALUE_KEY_AUTH_MODE:
       compMsgWifiData->bssScanTypes.authmodeType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_authmode = (uint8_t)fieldTypeId;
       break;
-    case BSS_INFO_IS_HIDDEN:
+    case KEY_VALUE_KEY_FREQ_OFFSET:
       compMsgWifiData->bssScanTypes.freq_offsetType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_freq_offset = (uint8_t)fieldTypeId;
       break;
-    case BSS_INFO_FREQ_OFFSET:
+    case KEY_VALUE_KEY_FREQ_CAL_VAL:
       compMsgWifiData->bssScanTypes.freqcal_valType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_freqcal_val = (uint8_t)fieldTypeId;
       break;
-    case BSS_INFO_FREQ_CAL_VAL:
+    case KEY_VALUE_KEY_IS_HIDDEN:
       compMsgWifiData->bssScanTypes.is_hiddenType = (uint8_t)fieldTypeId;
+      compMsgWifiData->keyValueInfo.key_type_is_hidden = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_CLIENT_SSID:
+      compMsgWifiData->keyValueInfo.key_type_clientSsid = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_CLIENT_PASSWD:
+      compMsgWifiData->keyValueInfo.key_type_clientPasswd = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_CLIENT_IP_ADDR:
+      compMsgWifiData->keyValueInfo.key_type_clientIPAddr = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_CLIENT_PORT:
+      compMsgWifiData->keyValueInfo.key_type_clientPort = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_CLIENT_STATUS:
+      compMsgWifiData->keyValueInfo.key_type_clientStatus = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_SEQ_NUM:
+      compMsgWifiData->keyValueInfo.key_type_seqNum = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_MAC_ADDR:
+      compMsgWifiData->keyValueInfo.key_type_MACAddr = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_MACHINE_STATE:
+      compMsgWifiData->keyValueInfo.key_type_machineState = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD:
+      compMsgWifiData->keyValueInfo.key_type_firmwareMainBoard = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_FIRMWARE_DISPLAY_BOARD:
+      compMsgWifiData->keyValueInfo.key_type_firmwareDisplayBoard = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_FIRMWARE_WIFI_MODULE:
+      compMsgWifiData->keyValueInfo.key_type_firmwareWifiModule = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_LAST_ERROR:
+      compMsgWifiData->keyValueInfo.key_type_lastError = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_CASING_USE_LIST:
+      compMsgWifiData->keyValueInfo.key_type_casingUseList = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_CASING_STATISTIC_LIST:
+      compMsgWifiData->keyValueInfo.key_type_casingStatisticList = (uint8_t)fieldTypeId;
+      break;
+    case KEY_VALUE_KEY_DAT_AND_TIME:
+      compMsgWifiData->keyValueInfo.key_type_dataAndTime = (uint8_t)fieldTypeId;
       break;
     }
     cp = ep;

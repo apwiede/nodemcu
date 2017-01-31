@@ -298,7 +298,7 @@ static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback NOT found: %s 0x%02x\n", callbackName, callbackType);
+  COMP_MSG_DBG(self, "U", 1, "getFieldValueCallback NOT found: %s 0x%02x\n", callbackName, callbackType);
   return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 

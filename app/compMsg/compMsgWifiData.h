@@ -96,16 +96,33 @@
 #define BSS_INFO_FREQ_OFFSET  9
 #define BSS_INFO_FREQ_CAL_VAL 10
 
-#define KEY_VALUE_KEY_SSID         1
-#define KEY_VALUE_KEY_PASSWORD     2
-#define KEY_VALUE_KEY_BSSIDSET     3
-#define KEY_VALUE_KEY_BSSID        4
-#define KEY_VALUE_KEY_STATUS       5
-#define KEY_VALUE_KEY_MODE         6
-#define KEY_VALUE_KEY_AUTHMODE     7
-#define KEY_VALUE_KEY_CHANNEL      8
-#define KEY_VALUE_KEY_FREQ_OFFSET  9
-#define KEY_VALUE_KEY_FREQCAL_VAL  10
+#define KEY_VALUE_KEY_SSID                   1
+#define KEY_VALUE_KEY_PASSWORD               2
+#define KEY_VALUE_KEY_BSSIDSET               3
+#define KEY_VALUE_KEY_BSSID                  4
+#define KEY_VALUE_KEY_STATUS                 5
+#define KEY_VALUE_KEY_MODE                   6
+#define KEY_VALUE_KEY_AUTH_MODE              7
+#define KEY_VALUE_KEY_CHANNEL                8
+#define KEY_VALUE_KEY_FREQ_OFFSET            9
+#define KEY_VALUE_KEY_FREQ_CAL_VAL           10
+#define KEY_VALUE_KEY_RSSI                   11
+#define KEY_VALUE_KEY_IS_HIDDEN              12
+#define KEY_VALUE_KEY_CLIENT_SSID            13
+#define KEY_VALUE_KEY_CLIENT_PASSWD          14
+#define KEY_VALUE_KEY_CLIENT_IP_ADDR         15
+#define KEY_VALUE_KEY_CLIENT_PORT            16
+#define KEY_VALUE_KEY_CLIENT_STATUS          17
+#define KEY_VALUE_KEY_SEQ_NUM                18
+#define KEY_VALUE_KEY_MAC_ADDR               19
+#define KEY_VALUE_KEY_MACHINE_STATE          20
+#define KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD    21
+#define KEY_VALUE_KEY_FIRMWARE_DISPLAY_BOARD 22
+#define KEY_VALUE_KEY_FIRMWARE_WIFI_MODULE   23
+#define KEY_VALUE_KEY_LAST_ERROR             24
+#define KEY_VALUE_KEY_CASING_USE_LIST        25
+#define KEY_VALUE_KEY_CASING_STATISTIC_LIST  26
+#define KEY_VALUE_KEY_DAT_AND_TIME           27
 
 enum webSocket_opcode {
   OPCODE_TEXT = 1,
@@ -176,7 +193,60 @@ typedef struct stationConfig {
   int16_t freqcal_val;
 } stationConfig_t;
 
+typedef struct keyValueInfo {
+  uint16_t key_ssid;
+  uint16_t key_ssid_len;
+  uint16_t key_bssid;
+  uint16_t key_channel;
+  uint16_t key_rssi;
+  uint16_t key_authmode;
+  uint16_t key_freq_offset;
+  uint16_t key_freqcal_val;
+  uint16_t key_is_hidden;
+  uint16_t key_clientSsid;
+  uint16_t key_clientPasswd;
+  uint16_t key_clientIPAddr;
+  uint16_t key_clientPort;
+  uint16_t key_clientStatus;
+  uint16_t key_seqNum;
+  uint16_t key_MACAddr;
+  uint16_t key_machineState;
+  uint16_t key_firmwareMainBoard;
+  uint16_t key_firmwareDisplayBoard;
+  uint16_t key_firmwareWifiModule;
+  uint16_t key_lastError;
+  uint16_t key_casingUseList;
+  uint16_t key_casingStatisticList;
+  uint16_t key_dataAndTime;
+
+  uint8_t key_type_ssid;
+  uint8_t key_type_ssid_len;
+  uint8_t key_type_bssid;
+  uint8_t key_type_channel;
+  uint8_t key_type_rssi;
+  uint8_t key_type_authmode;
+  uint8_t key_type_freq_offset;
+  uint8_t key_type_freqcal_val;
+  uint8_t key_type_is_hidden;
+  uint8_t key_type_clientSsid;
+  uint8_t key_type_clientPasswd;
+  uint8_t key_type_clientIPAddr;
+  uint8_t key_type_clientPort;
+  uint8_t key_type_clientStatus;
+  uint8_t key_type_seqNum;
+  uint8_t key_type_MACAddr;
+  uint8_t key_type_machineState;
+  uint8_t key_type_firmwareMainBoard;
+  uint8_t key_type_firmwareDisplayBoard;
+  uint8_t key_type_firmwareWifiModule;
+  uint8_t key_type_lastError;
+  uint8_t key_type_casingUseList;
+  uint8_t key_type_casingStatisticList;
+  uint8_t key_type_dataAndTime;
+} keyValueInfo_t;
+
 typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
+typedef uint8_t (* keyValueStr2KeyValueId_t)(uint8_t *fieldName, uint16_t *fieldId);
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startStationCb_t)(compMsgDispatcher_t *self);
@@ -188,15 +258,7 @@ typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8
 typedef uint8_t (* netSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 
 typedef struct compMsgWifiData {
-  uint16_t key_ssid;
-  uint16_t key_ssid_len;
-  uint16_t key_bssid;
-  uint16_t key_channel;
-  uint16_t key_rssi;
-  uint16_t key_authmode;
-  uint16_t key_freq_offset;
-  uint16_t key_freqcal_val;
-  uint16_t key_is_hidden;
+  keyValueInfo_t keyValueInfo;
 
   uint8_t wifiOpMode;
   uint8_t provisioningSsid[33];
@@ -225,6 +287,7 @@ typedef struct compMsgWifiData {
   bssScanTypes_t bssScanTypes;
 
   bssScanInfos_t bssScanInfos;
+  keyValueStr2KeyValueId_t keyValueStr2KeyValueId;
   getBssScanInfo_t getBssScanInfo;
   getWifiValue_t getWifiValue;
   getWifiConfig_t getWifiConfig;

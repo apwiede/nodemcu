@@ -47,8 +47,6 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
-#define COMP_MSG_ACTIONS_FILE_NAME "CompMsgActions.txt"
-
 #define FPM_SLEEP_MAX_TIME  0xFFFFFFF
 
 typedef struct actionName2Action {

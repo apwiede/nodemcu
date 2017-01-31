@@ -49,8 +49,6 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
-#define COMP_MSG_WIFI_VALUES_FILE_NAME "myConfig.txt"
-
 static bool bssScanRunning = false;
 static bssScanInfos_t bssScanInfos = { NULL, 0, 0};
 static stationConfig_t stationConfig;
@@ -67,6 +65,33 @@ static str2id_t bssStr2BssInfoIds [] = {
   { "is_hidden",   BSS_INFO_IS_HIDDEN },
   { "freq_offset", BSS_INFO_FREQ_OFFSET },
   { "freqcal_val", BSS_INFO_FREQ_CAL_VAL },
+  { NULL,          0 },
+};
+
+static str2id_t keyValueStr2KeyValueIds [] = {
+  { "ssid",                 KEY_VALUE_KEY_SSID },
+  { "bssid",                KEY_VALUE_KEY_BSSID },
+  { "authmode",             KEY_VALUE_KEY_AUTH_MODE },
+  { "channel",              KEY_VALUE_KEY_CHANNEL },
+  { "freq_offset",          KEY_VALUE_KEY_FREQ_OFFSET },
+  { "freqcal_val",          KEY_VALUE_KEY_FREQ_CAL_VAL },
+  { "rssi",                 KEY_VALUE_KEY_RSSI},
+  { "is_hidden",            KEY_VALUE_KEY_IS_HIDDEN },
+  { "clientSsid",           KEY_VALUE_KEY_CLIENT_SSID },
+  { "clientPasswd",         KEY_VALUE_KEY_CLIENT_PASSWD },
+  { "clientIPAddr",         KEY_VALUE_KEY_CLIENT_IP_ADDR },
+  { "clientPort",           KEY_VALUE_KEY_CLIENT_PORT },
+  { "clientStatus",         KEY_VALUE_KEY_CLIENT_STATUS },
+  { "seqNum",               KEY_VALUE_KEY_SEQ_NUM },
+  { "MACAddr",              KEY_VALUE_KEY_MAC_ADDR },
+  { "machineState",         KEY_VALUE_KEY_MACHINE_STATE },
+  { "firmwareMainBoard",    KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD },
+  { "firmwareDisplayBoard", KEY_VALUE_KEY_FIRMWARE_DISPLAY_BOARD },
+  { "firmwareWifiModule",   KEY_VALUE_KEY_FIRMWARE_WIFI_MODULE },
+  { "lastError",            KEY_VALUE_KEY_LAST_ERROR },
+  { "casingUseList",        KEY_VALUE_KEY_CASING_USE_LIST },
+  { "casingStatisticList",  KEY_VALUE_KEY_CASING_STATISTIC_LIST },
+  { "dataAndTime",          KEY_VALUE_KEY_DAT_AND_TIME },
   { NULL,          0 },
 };
 
@@ -89,6 +114,25 @@ static uint8_t bssStr2BssInfoId(uint8_t *fieldName, uint8_t *fieldId) {
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
+// ================================= keyValueStr2KeyValueId ====================================
+
+static uint8_t keyValueStr2KeyValueId(uint8_t *fieldName, uint16_t *fieldId) {
+  int idx;
+  str2id_t *entry;
+
+  idx = 0;
+  entry = &keyValueStr2KeyValueIds[idx];
+  while (entry->str != NULL) {
+    if (c_strcmp(entry->str, fieldName) == 0) {
+      *fieldId = entry->id;
+      return COMP_MSG_ERR_OK;
+    }
+    idx++;
+    entry = &keyValueStr2KeyValueIds[idx];
+  }
+  return COMP_MSG_ERR_FIELD_NOT_FOUND;
+}
+
 // ================================= webSocketBinaryReceived ====================================
 
 static void webSocketBinaryReceived(void *arg, socketUserData_t *sud, char *pdata, unsigned short len) {
@@ -103,7 +147,7 @@ static void webSocketBinaryReceived(void *arg, socketUserData_t *sud, char *pdat
 //  checkErrOK(result);
   result = self->getNewCompMsgDataPtr(self);
   self->compMsgData->sud = sud;
-  COMP_MSG_DBG(self, "w", 1, "received compMsgData: %p sud: %p\n", self->compMsgData, self->compMsgData->sud);
+  COMP_MSG_DBG(self, "w", 2, "received compMsgData: %p sud: %p\n", self->compMsgData, self->compMsgData->sud);
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   self->compMsgData->receivedData = os_zalloc(len);
   if (self->compMsgData->receivedData == NULL) {
@@ -113,7 +157,7 @@ static void webSocketBinaryReceived(void *arg, socketUserData_t *sud, char *pdat
   c_memcpy(self->compMsgData->receivedData, pdata, len);
   self->compMsgData->receivedLgth = (uint8_t)len;
   result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_WEB_SOCKET, sud, self->compMsgData);
-  COMP_MSG_DBG(self, "w", 1, "webSocketBinaryReceived end result: %d\n", result);
+  COMP_MSG_DBG(self, "w", 2, "webSocketBinaryReceived end result: %d\n", result);
 }
 
 // ================================= netSocketToSend ====================================
@@ -136,7 +180,8 @@ static void netSocketToSend(void *arg, socketUserData_t *sud, char *pdata, unsig
   self->compMsgData->toSendData = (uint8_t *)pdata;
   self->compMsgData->toSendLgth = (uint8_t)len;
   result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
-  COMP_MSG_DBG(self, "w", 1, "netSocketSend end result: %d", result);
+//  checkErrOK(result);
+  COMP_MSG_DBG(self, "w", 2, "netSocketSend end result: %d", result);
 }
 
 // ================================= netSocketReceived ====================================
@@ -293,7 +338,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
   struct ip_info ip_info;
   char temp[64];
 
-  COMP_MSG_DBG(self, "w", 1, "connectToAP:\n");
+  COMP_MSG_DBG(self, "w", 2, "connectToAP:\n");
   ssid = NULL;
   passwd = NULL;
   idx = 0;
@@ -307,7 +352,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "w", 1, "connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
+  COMP_MSG_DBG(self, "w", 2, "connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
   result = self->compMsgWifiData->setWifiValue(self, "@clientSsid", 0, ssid);
   checkErrOK(result);
   result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
@@ -337,7 +382,7 @@ static uint8_t webSocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   uint8_t *handle;
   msgParts_t *received;
 
-  COMP_MSG_DBG(self, "w", 2, "webSocketSendConnectError: status: %d\n", status);
+  COMP_MSG_DBG(self, "w", 1, "webSocketSendConnectError: status: %d\n", status);
   result = self->compMsgWifiData->setWifiValue(self, "@clientStatus", (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
@@ -411,25 +456,63 @@ static uint8_t getStationConfig(compMsgDispatcher_t *self) {
 // ================================= getClientSsidSize ====================================
 
 static uint8_t getClientSsidSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
-  self->compMsgData->msgDescPart->fieldSize = sizeof(compMsgWifiData.clientSsid) - 1;
-  COMP_MSG_DBG(self, "w", 1, "ssidSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
+  self->compMsgData->msgDescPart->fieldKey = self->compMsgWifiData->keyValueInfo.key_clientSsid;
+  self->compMsgData->msgDescPart->fieldSize = sizeof(self->compMsgWifiData->clientSsid) - 1;
+  COMP_MSG_DBG(self, "w", 1, "clientSsidSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
   *numericValue = self->compMsgData->msgDescPart->fieldSize;
   *stringValue = NULL;
 ets_printf("Ssid type: %d %d\n", self->compMsgData->msgDescPart->fieldType, DATA_VIEW_FIELD_UINT8_VECTOR);
-  self->compMsgData->msgDescPart->fieldType = DATA_VIEW_FIELD_UINT8_VECTOR;
+  self->compMsgData->msgDescPart->fieldType = self->compMsgWifiData->keyValueInfo.key_type_clientSsid;
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= getClientPasswdSize ====================================
 
 static uint8_t getClientPasswdSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_bssid;
-  self->compMsgData->msgDescPart->fieldSize = sizeof(compMsgWifiData.clientPasswd) - 1;
-  COMP_MSG_DBG(self, "w", 1, "ssidSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
+  self->compMsgData->msgDescPart->fieldKey = self->compMsgWifiData->keyValueInfo.key_clientPasswd;
+  self->compMsgData->msgDescPart->fieldSize = sizeof(self->compMsgWifiData->clientPasswd) - 1;
+  COMP_MSG_DBG(self, "w", 1, "clientPasswdSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
   *numericValue = self->compMsgData->msgDescPart->fieldSize;
   *stringValue = NULL;
-  self->compMsgData->msgDescPart->fieldType = DATA_VIEW_FIELD_UINT8_VECTOR;
+  self->compMsgData->msgDescPart->fieldType = self->compMsgWifiData->keyValueInfo.key_type_clientPasswd;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientIPAddrSize ====================================
+
+static uint8_t getClientIPAddrSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgDescPart->fieldKey = self->compMsgWifiData->keyValueInfo.key_clientIPAddr;
+  self->compMsgData->msgDescPart->fieldSize = sizeof(self->compMsgWifiData->clientIPAddr);
+  COMP_MSG_DBG(self, "w", 1, "clientIPAddrSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
+  *numericValue = self->compMsgData->msgDescPart->fieldSize;
+  *stringValue = NULL;
+  self->compMsgData->msgDescPart->fieldType = self->compMsgWifiData->keyValueInfo.key_type_clientIPAddr;
+ets_printf("IPAddr type: %d %d\n", self->compMsgData->msgDescPart->fieldType, DATA_VIEW_FIELD_UINT32_T);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientPortSize ====================================
+
+static uint8_t getClientPortSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgDescPart->fieldKey = self->compMsgWifiData->keyValueInfo.key_clientPort;
+  self->compMsgData->msgDescPart->fieldSize = sizeof(self->compMsgWifiData->clientPort);
+  COMP_MSG_DBG(self, "w", 1, "clientPortSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
+  *numericValue = self->compMsgData->msgDescPart->fieldSize;
+  *stringValue = NULL;
+  self->compMsgData->msgDescPart->fieldType = self->compMsgWifiData->keyValueInfo.key_type_clientPort;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientStatusSize ====================================
+
+static uint8_t getClientStatusSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgDescPart->fieldKey = self->compMsgWifiData->keyValueInfo.key_clientStatus;
+  self->compMsgData->msgDescPart->fieldSize = sizeof(self->compMsgWifiData->clientStatus);
+  COMP_MSG_DBG(self, "w", 1, "clientStatusSize: %d key: %d\n", self->compMsgData->msgDescPart->fieldSize, self->compMsgData->msgDescPart->fieldKey);
+  *numericValue = self->compMsgData->msgDescPart->fieldSize;
+  *stringValue = NULL;
+  self->compMsgData->msgDescPart->fieldType = self->compMsgWifiData->keyValueInfo.key_type_clientStatus;
+ets_printf("getClientStatusSize: type: %d\n", self->compMsgWifiData->keyValueInfo.key_type_clientStatus);
   return COMP_MSG_ERR_OK;
 }
 
@@ -448,7 +531,7 @@ static uint8_t getWifiAPBssidStrSize(compMsgDispatcher_t *self, int* numericValu
 // ================================= getWifiAPSsidSize ====================================
 
 static uint8_t getWifiAPSsidSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_ssid;
+  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.keyValueInfo.key_ssid;
   self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.ssidSize;
   COMP_MSG_DBG(self, "w", 2, "ssidSize: %d\n", compMsgWifiData.bssScanSizes.ssidSize);
   *numericValue = compMsgWifiData.bssScanSizes.ssidSize;
@@ -472,7 +555,7 @@ static uint8_t getWifiAPChannelSize(compMsgDispatcher_t *self, int* numericValue
 // ================================= getWifiAPRssiSize ====================================
 
 static uint8_t getWifiAPRssiSize(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.key_rssi;
+  self->compMsgData->msgDescPart->fieldKey = compMsgWifiData.keyValueInfo.key_rssi;
   self->compMsgData->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.rssiSize;
   COMP_MSG_DBG(self, "w", 2, "rssiSize: %d\n", compMsgWifiData.bssScanSizes.rssiSize);
   *numericValue = compMsgWifiData.bssScanSizes.rssiSize;
@@ -1112,8 +1195,12 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPasswd", &getClientPasswd, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientSsidSize", &getClientSsidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPasswdSize", &getClientPasswdSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientIPAddrSize", &getClientIPAddrSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPortSize", &getClientPortSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getClientStatusSize", &getClientStatusSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
 
   self->compMsgWifiData->getBssScanInfo = &getBssScanInfo;
+  self->compMsgWifiData->keyValueStr2KeyValueId = &keyValueStr2KeyValueId;
   self->compMsgWifiData->getWifiValue = &getWifiValue;
   self->compMsgWifiData->getWifiConfig = &getWifiConfig;
   self->compMsgWifiData->setWifiValue = &setWifiValue;
@@ -1126,7 +1213,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
 
   bssScanInfos.compMsgDispatcher = self;
   self->bssScanInfos = &bssScanInfos;
-  self->compMsgMsgDesc->getWifiKeyValueKeys(self, &compMsgWifiData);
+  self->compMsgMsgDesc->getWifiKeyValueKeys(self, COMP_MSG_KEY_VALUE_KEYS_FILE_NAME);
   result = self->compMsgMsgDesc->readWifiValues(self, COMP_MSG_WIFI_VALUES_FILE_NAME);
   checkErrOK(result);
   result = self->compMsgWifiData->getWifiConfig(self);

@@ -153,6 +153,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
       checkErrOK(result);
       if (msgKeyValueDescPart != NULL) {
         fieldInfo->fieldKey = msgKeyValueDescPart->keyId;
+        fieldInfo->fieldKeyTypeId = msgKeyValueDescPart->keyType;
         COMP_MSG_DBG(self, "B", 2, "fieldKey: %d\n", msgKeyValueDescPart->keyId);
       } else {
         fieldInfo->fieldKey = msgDescPart->fieldKey;

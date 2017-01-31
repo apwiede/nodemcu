@@ -71,10 +71,11 @@ enum compMsgHttpHeaderNames
   COMP_MSG_HTTP_SEC_WEBSOCKET_PROTOCOL            = 21,
   COMP_MSG_HTTP_ACCEPT                            = 22,
   COMP_MSG_HTTP_ACCEPT_ENCODING                   = 23,
-  COMP_MSG_HTTP_X_ASPNET_VERSION                  = 24,
-  COMP_MSG_HTTP_SEC_WEBSOCKET_EXTENSIONS          = 25,
-  COMP_MSG_HTTP_PRAGMA                            = 26,
-  COMP_MSG_HTTP_ORIGIN                            = 27,
+  COMP_MSG_HTTP_ACCEPT_LANGUAGE                   = 24,
+  COMP_MSG_HTTP_X_ASPNET_VERSION                  = 25,
+  COMP_MSG_HTTP_SEC_WEBSOCKET_EXTENSIONS          = 26,
+  COMP_MSG_HTTP_PRAGMA                            = 27,
+  COMP_MSG_HTTP_ORIGIN                            = 28,
 };
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;

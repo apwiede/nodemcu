@@ -406,7 +406,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, co
     case DATA_VIEW_FIELD_INT8_T:
       if (stringValue == NULL) {
         if ((numericValue > -128) && (numericValue < 128)) {
-          result= dataView->setInt8(dataView, fieldInfo->fieldOffset, (int8_t)numericValue);
+          result= dataView->setInt8(dataView, fieldInfo->fieldOffset + fieldIdx, (int8_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -418,7 +418,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, co
     case DATA_VIEW_FIELD_UINT8_T:
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 256)) {
-          result= dataView->setUint8(dataView, fieldInfo->fieldOffset, (uint8_t)numericValue);
+          result= dataView->setUint8(dataView, fieldInfo->fieldOffset + fieldIdx, (uint8_t)numericValue);
           checkErrOK(result);
         }
       } else {
@@ -428,7 +428,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, co
     case DATA_VIEW_FIELD_INT16_T:
       if (stringValue == NULL) {
         if ((numericValue > -32767) && (numericValue < 32767)) {
-          result= dataView->setInt16(dataView, fieldInfo->fieldOffset, (int16_t)numericValue);
+          result= dataView->setInt16(dataView, fieldInfo->fieldOffset + fieldIdx, (int16_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -440,7 +440,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, co
     case DATA_VIEW_FIELD_UINT16_T:
       if (stringValue == NULL) {
         if ((numericValue >= 0) && (numericValue <= 65535)) {
-          result= dataView->setUint16(dataView, fieldInfo->fieldOffset, (uint16_t)numericValue);
+          result= dataView->setUint16(dataView, fieldInfo->fieldOffset + fieldIdx, (uint16_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -452,7 +452,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, co
     case DATA_VIEW_FIELD_INT32_T:
       if (stringValue == NULL) {
         if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
-          result= dataView->setInt32(dataView, fieldInfo->fieldOffset, (int32_t)numericValue);
+          result= dataView->setInt32(dataView, fieldInfo->fieldOffset + fieldIdx, (int32_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -465,7 +465,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, co
       if (stringValue == NULL) {
         // we have to do the signed check as numericValue is a signed integer!!
         if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
-          result= dataView->setUint32(dataView, fieldInfo->fieldOffset, (uint32_t)numericValue);
+          result= dataView->setUint32(dataView, fieldInfo->fieldOffset + fieldIdx, (uint32_t)numericValue);
           checkErrOK(result);
         } else {
           return COMP_MSG_ERR_VALUE_TOO_BIG;
@@ -533,7 +533,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, co
       break;
 #endif
     default:
-COMP_MSG_DBG(self, "v", 1, "bad type in setFieldValue. %d\n", fieldInfo->fieldTypeId);
+COMP_MSG_DBG(self, "v", 1, "bad type in setFieldValue: %d\n", fieldInfo->fieldTypeId);
       return COMP_MSG_ERR_BAD_FIELD_TYPE;
       break;
   }

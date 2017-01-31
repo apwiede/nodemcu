@@ -49,9 +49,6 @@
 #include "platform.h"
 #include "compMsgDispatcher.h"
 
-#define MSG_HEADS_FILE_NAME "CompMsgHeads.txt"
-#define MSG_FIELDS_TO_SAVE_FILE_NAME "CompMsgFieldsToSave.txt"
-
 #define DISP_FLAG_SHORT_CMD_KEY    (1 << 0)
 #define DISP_FLAG_HAVE_CMD_LGTH    (1 << 1)
 #define DISP_FLAG_IS_ENCRYPTED     (1 << 2)
@@ -196,11 +193,11 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
     hdrInfos->seqIdx++;
     seqVal = hdrInfos->headerSequence[hdrInfos->seqIdx];
   }
-  COMP_MSG_DBG(self, "I", 1, "seqIdx: %d", hdrInfos->seqIdx);
+  COMP_MSG_DBG(self, "I", 2, "seqIdx: %d", hdrInfos->seqIdx);
   hdrInfos->seqIdxAfterHeader = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
   result = nextFittingEntry(self, 0, 0);
-  COMP_MSG_DBG(self, "I", 1, "getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!", result, hdrInfos->currPartIdx);
+  COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!", result, hdrInfos->currPartIdx);
   if (received->compMsgDataView != NULL) {
     COMP_MSG_DBG(self, "I", 1, "os getHeaderIndexFromHeaderFields: free dataView: %p compMsgDataView: %p", received->compMsgDataView->dataView, received->compMsgDataView);
     os_free(received->compMsgDataView->dataView);
@@ -610,7 +607,7 @@ if (buffer == NULL) {
           compMsgData->compMsgDataView->dataView->lgth = received->totalLgth;
         }
         result = compMsgData->compMsgDataView->getTotalCrc(self, compMsgData->compMsgDataView->dataView, &fieldInfo);
-        COMP_MSG_DBG(self, "I", 1, "getTotalCrc: res!%d!", result);
+        COMP_MSG_DBG(self, "I", 2, "getTotalCrc: res!%d!", result);
         checkErrOK(result);
         if (haveDataView) {
           compMsgData->compMsgDataView->dataView->data = saveData;
@@ -731,9 +728,9 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   self->compMsgIdentify->storeReceivedMsg = &storeReceivedMsg;
   self->compMsgIdentify->sendClientIPMsg = &sendClientIPMsg;
 
-  result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, MSG_HEADS_FILE_NAME);
+  result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, COMP_MSG_HEADS_FILE_NAME);
   checkErrOK(result);
-  result=self->compMsgMsgDesc->getFieldsToSave(self, MSG_FIELDS_TO_SAVE_FILE_NAME);
+  result=self->compMsgMsgDesc->getFieldsToSave(self, COMP_MSG_FIELDS_TO_SAVE_FILE_NAME);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }

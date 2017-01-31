@@ -71,6 +71,15 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 //#define CLOUD_1
 #define CLOUD_2
 
+// compMsgMsgDesc file names
+
+#define COMP_MSG_ACTIONS_FILE_NAME        "CompMsgActions.txt"
+#define COMP_MSG_WIFI_VALUES_FILE_NAME    "myConfig.txt"
+#define COMP_MSG_KEY_VALUE_KEYS_FILE_NAME "CompMsgKeyValueKeys.txt"
+#define COMP_MSG_HEADS_FILE_NAME          "CompMsgHeads.txt"
+#define COMP_MSG_FIELDS_TO_SAVE_FILE_NAME "CompMsgFieldsToSave.txt"
+//#define COMP_MSG_WIFI_VALUES_FILE_NAME    "CompMsgWifiValues.txt"
+
 // answer message types
 #define COMP_MSG_ACK_MSG 0x01
 #define COMP_MSG_NAK_MSG 0x02

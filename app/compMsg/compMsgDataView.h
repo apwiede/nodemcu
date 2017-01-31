@@ -55,6 +55,7 @@ typedef struct compMsgField {
   uint8_t fieldNameId;
   uint8_t fieldTypeId;
   uint8_t fieldFlags;
+  uint8_t fieldKeyTypeId;
   uint16_t fieldLgth;
   uint16_t fieldKey;
   size_t fieldOffset;
