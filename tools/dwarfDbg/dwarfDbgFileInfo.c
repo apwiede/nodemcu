@@ -305,9 +305,13 @@ int dwarfDbgGetFileInfos(dwarfDbgPtr_t self) {
   Tcl_Obj *objPtr3;
   Tcl_Obj *objPtr4;
   Tcl_Obj *objPtr5;
+  Tcl_Obj *objPtr6;
   size_t idx;
   compileUnit_t *compileUnit;
+  compileUnitInfo_t *compileUnitInfo;
   fileInfo_t *fileInfo;
+  fileNameInfo_t *fileNameInfo;
+  char *dirName;
 
 //printf("dwarfDbgGetFileInfos self: %p numCompileUnit: %d\n", self, self->dwarfDbgGetInfo->numCompileUnit);
   result = DWARF_DBG_ERR_OK;
@@ -317,6 +321,8 @@ printf("listPtr: %p\n", listPtr1);
   for (idx = 0; idx < self->dwarfDbgGetInfo->numCompileUnit; idx++) {
     listPtr2 = Tcl_NewListObj(0, NULL);
     compileUnit = &self->dwarfDbgGetInfo->compileUnits[idx];
+    fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[compileUnit->fileNameIdx];
+    dirName = self->dwarfDbgFileInfo->dirNamesInfo.dirNames[fileNameInfo->dirNameIdx];
     objPtr1 = Tcl_NewStringObj(compileUnit->compileUnitShortName, -1);
     tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr1);
     objPtr2 = Tcl_NewIntObj(idx);
@@ -332,6 +338,8 @@ printf("listPtr: %p\n", listPtr1);
       objPtr5 = Tcl_NewIntObj(0);
     }
     tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr5);
+    objPtr6 = Tcl_NewStringObj(dirName, - 1);
+    tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr6);
     tclResult = Tcl_ListObjAppendElement(self->interp, listPtr1, listPtr2);
   }
   Tcl_SetObjResult(self->interp, listPtr1);
@@ -347,10 +355,17 @@ int dwarfDbgGetFileLines(dwarfDbgPtr_t self, int compileUnitIdx) {
   Tcl_Obj *dictPtr;
   Tcl_Obj *dictPtr1;
   Tcl_Obj *dictPtr2;
+  Tcl_Obj *dictPtr3;
+  Tcl_Obj *dictPtr4;
   Tcl_Obj *objPtr1;
   Tcl_Obj *objPtr2;
   Tcl_Obj *objPtr3;
   Tcl_Obj *objPtr4;
+  Tcl_Obj *objPtr5;
+  Tcl_Obj *objPtr6;
+  Tcl_Obj *objPtr7;
+  Tcl_Obj *objPtr8;
+  Tcl_Obj *objPtr9;
   size_t idx;
   compileUnit_t *compileUnit;
   fileInfo_t *fileInfo;
@@ -358,7 +373,7 @@ int dwarfDbgGetFileLines(dwarfDbgPtr_t self, int compileUnitIdx) {
 
 //printf("dwarfDbgGetFileLines compileUnitIdx: %d\n", compileUnitIdx);
   result = DWARF_DBG_ERR_OK;
-  // make a Tcl dict of all all lines and addresse for a compile unit file name
+  // make a Tcl dict of all all lines and addresses for a compile unit file name
   compileUnit = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx];
   dictPtr = Tcl_NewDictObj();
   dictPtr1 = Tcl_NewDictObj();
@@ -369,10 +384,24 @@ int dwarfDbgGetFileLines(dwarfDbgPtr_t self, int compileUnitIdx) {
     for (idx = 0; idx < fileInfo->numFileLine; idx++) {
       fileLineInfo = &fileInfo->fileLines[idx];
 //printf("idx: %d pc: 0x%08x lineNo: %d\n", idx, fileLineInfo->pc, fileLineInfo->lineNo);
+      dictPtr3 = Tcl_NewDictObj();
+      dictPtr4 = Tcl_NewDictObj();
       objPtr1 = Tcl_NewIntObj(fileLineInfo->lineNo);
       objPtr2 = Tcl_NewIntObj(fileLineInfo->pc);
-      tclResult = Tcl_DictObjPut(self->interp, dictPtr1, objPtr1, objPtr2);
-      tclResult = Tcl_DictObjPut(self->interp, dictPtr2, objPtr2, objPtr1);
+      objPtr5 = Tcl_NewIntObj(compileUnitIdx);
+      objPtr6 = Tcl_NewStringObj(compileUnit->compileUnitShortName, -1);
+
+      objPtr7 = Tcl_NewStringObj("addr", -1);
+      objPtr8 = Tcl_NewStringObj("cu", -1);
+      objPtr9 = Tcl_NewStringObj("line", -1);
+
+      tclResult = Tcl_DictObjPut(self->interp, dictPtr3, objPtr7, objPtr2);
+      tclResult = Tcl_DictObjPut(self->interp, dictPtr3, objPtr8, objPtr5);
+      tclResult = Tcl_DictObjPut(self->interp, dictPtr1, objPtr1, dictPtr3);
+
+      tclResult = Tcl_DictObjPut(self->interp, dictPtr4, objPtr9, objPtr1);
+      tclResult = Tcl_DictObjPut(self->interp, dictPtr4, objPtr8, objPtr5);
+      tclResult = Tcl_DictObjPut(self->interp, dictPtr2, objPtr2, dictPtr4);
     }
     objPtr3 = Tcl_NewStringObj("lines", -1);
     objPtr4 = Tcl_NewStringObj("addresses", -1);
