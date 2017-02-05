@@ -93,21 +93,22 @@ case DW_AT_decl_file:
   int j;
 
   sres = DW_DLV_OK;
-fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x\n", indent, attrStringValue, attrInfo->attr_in, attrInfo->theform, formStringValue, attrInfo->uval);
-for (j = 0; j < compileUnitInfo->numSourceFile; j++) {
-//printf("j: %d sourceFile: %d\n", j, compileUnitInfo->sourceFiles[j]);
-}
   fileIdx = compileUnitInfo->sourceFiles[attrInfo->uval];
-printf("numFile: %d fileIdx: %d compileUnitIdx: %d %d\n", self->dwarfDbgFileInfo->fileNamesInfo.numFileName, fileIdx, compileUnitIdx, self->dwarfDbgGetDbgInfo->currCompileUnitIdx);
-  if (fileIdx < compileUnitInfo->numSourceFile) {
+  if (fileIdx < self->dwarfDbgFileInfo->fileNamesInfo.numFileName) {
     fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[fileIdx];
     dirNamesInfo = &self->dwarfDbgFileInfo->dirNamesInfo;
-printf("dirNameIdx: %d fileName: %p\n", fileNameInfo->dirNameIdx, fileNameInfo->fileName);
     sprintf(buf, "%s/%s", dirNamesInfo->dirNames[fileNameInfo->dirNameIdx], fileNameInfo->fileName); 
   } else {
     sres = DW_DLV_ERROR;
   }
 }
+  break;
+case DW_AT_encoding:
+  formStringValue = NULL;
+  result = self->dwarfDbgStringInfo->getDW_ATE_string(self, attrInfo->uval, &formStringValue);
+  checkErrOK(result);
+  sres = DW_DLV_OK;
+  sprintf(buf, "%s", formStringValue); 
   break;
 }
 if (sres == DW_DLV_OK) {

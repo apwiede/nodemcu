@@ -465,6 +465,28 @@ static id2Str_t DW_AT_stringInfos [] = {
   { 0, NULL },
 };
 
+static id2Str_t DW_ATE_stringInfos [] = {
+  { DW_ATE_address,         "DW_ATE_address" },
+  { DW_ATE_boolean,         "DW_ATE_boolean" },
+  { DW_ATE_complex_float,   "DW_ATE_complex_float" },
+  { DW_ATE_float,           "DW_ATE_float" },
+  { DW_ATE_signed,          "DW_ATE_signed" },
+  { DW_ATE_signed_char,     "DW_ATE_signed_char" },
+  { DW_ATE_unsigned,        "DW_ATE_unsigned" },
+  { DW_ATE_unsigned_char,   "DW_ATE_unsigned_char" },
+  { DW_ATE_imaginary_float, "DW_ATE_imaginary_float" },
+  { DW_ATE_packed_decimal,  "DW_ATE_packed_decimal" },
+  { DW_ATE_numeric_string,  "DW_ATE_numeric_string" },
+  { DW_ATE_edited,          "DW_ATE_edited" },
+  { DW_ATE_signed_fixed,    "DW_ATE_signed_fixed" },
+  { DW_ATE_unsigned_fixed,  "DW_ATE_unsigned_fixed" },
+  { DW_ATE_decimal_float,   "DW_ATE_decimal_float" },
+  { DW_ATE_UTF,             "DW_ATE_UTF" },
+  { DW_ATE_UCS,             "DW_ATE_UCS" },
+  { DW_ATE_ASCII,           "DW_ATE_ASCII" },
+  { 0, NULL },
+};
+
 // =================================== getDW_TAG_string =========================== 
 
 static uint8_t getDW_TAG_string(dwarfDbgPtr_t self, Dwarf_Half tag, const char **string) {
@@ -513,6 +535,21 @@ static uint8_t getDW_AT_string(dwarfDbgPtr_t self, Dwarf_Half attr, const char *
   return DWARF_DBG_ERR_DW_AT_STRING_NOT_FOUND;
 }
 
+// =================================== getDW_ATE_string =========================== 
+
+static uint8_t getDW_ATE_string(dwarfDbgPtr_t self, Dwarf_Half attr, const char **string) {
+  id2Str_t *entry;
+  
+  entry = &DW_ATE_stringInfos[0];
+  while (entry->str != NULL) {
+    if (attr == entry->id) {
+      *string = entry->str;
+      return DWARF_DBG_ERR_OK;
+    }
+    entry++;
+  }
+  return DWARF_DBG_ERR_DW_ATE_STRING_NOT_FOUND;
+}
 
 // =================================== dwarfDbgStringInfoInit =========================== 
 
@@ -521,6 +558,7 @@ int dwarfDbgStringInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgStringInfo->getDW_TAG_string = &getDW_TAG_string;
   self->dwarfDbgStringInfo->getDW_FORM_string = &getDW_FORM_string;
   self->dwarfDbgStringInfo->getDW_AT_string = &getDW_AT_string;
+  self->dwarfDbgStringInfo->getDW_ATE_string = &getDW_ATE_string;
   return DWARF_DBG_ERR_OK;
 }
 

@@ -57,6 +57,7 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_DW_TAG_STRING_NOT_FOUND              = 10,
   DWARF_DBG_ERR_DW_FORM_STRING_NOT_FOUND             = 11,
   DWARF_DBG_ERR_DW_AT_STRING_NOT_FOUND               = 12,
+  DWARF_DBG_ERR_DW_ATE_STRING_NOT_FOUND              = 13,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

@@ -49,12 +49,13 @@ typedef struct id2Str {
 typedef uint8_t (* getDW_TAG_string_t)(dwarfDbgPtr_t self, Dwarf_Half tag, const char **string);
 typedef uint8_t (* getDW_FORM_string_t)(dwarfDbgPtr_t self, Dwarf_Half theform, const char **string);
 typedef uint8_t (* getDW_AT_string_t)(dwarfDbgPtr_t self, Dwarf_Half attr, const char **string);
+typedef uint8_t (* getDW_ATE_string_t)(dwarfDbgPtr_t self, Dwarf_Half attr, const char **string);
 
 typedef struct dwarfDbgStringInfo {
   getDW_TAG_string_t getDW_TAG_string;
   getDW_FORM_string_t getDW_FORM_string;
   getDW_AT_string_t getDW_AT_string;
-
+  getDW_ATE_string_t getDW_ATE_string;
 
 } dwarfDbgStringInfo_t;
 

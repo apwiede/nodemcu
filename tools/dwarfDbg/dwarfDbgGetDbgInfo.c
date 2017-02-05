@@ -125,50 +125,50 @@ static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute att
   switch (theform) {
   case DW_FORM_addr:
     bres = dwarf_formaddr(attr_in, &addr, &err);
-printf("DW_FORM_addr: attrib: 0x%08x addr: 0x%08x\n", attr_in, addr);
+//printf("DW_FORM_addr: attrib: 0x%08x addr: 0x%08x\n", attr_in, addr);
     break;
   case DW_FORM_data1:
     fres = dwarf_whatattr(attr_in, &attr, &err);
-printf("DW_FORM_data1 attr: 0x%08x\n", attr);
+//printf("DW_FORM_data1 attr: 0x%08x\n", attr);
     switch(attr) {
     case DW_AT_language:
-printf("DW_AT_language\n");
+//printf("DW_AT_language\n");
       break;
     case DW_AT_byte_size:
-printf("DW_AT_byte_size\n");
+//printf("DW_AT_byte_size\n");
       break;
     case DW_AT_encoding:
-printf("DW_AT_encoding\n");
+//printf("DW_AT_encoding\n");
       break;
     case DW_AT_decl_file:
-printf("DW_AT_decl_file\n");
+//printf("DW_AT_decl_file\n");
       break;
     case DW_AT_decl_line:
-printf("DW_AT_decl_line\n");
+//printf("DW_AT_decl_line\n");
       break;
     case DW_AT_upper_bound:
-printf("DW_AT_upper_bound\n");
+//printf("DW_AT_upper_bound\n");
       break;
     case DW_AT_data_member_location:
-printf("DW_AT_data_member_location\n");
+//printf("DW_AT_data_member_location\n");
       break;
     case DW_AT_inline:
-printf("DW_AT_inline\n");
+//printf("DW_AT_inline\n");
       break;
     case DW_AT_const_value:
-printf("DW_AT_const_value\n");
+//printf("DW_AT_const_value\n");
       break;
     case DW_AT_call_file:
-printf("DW_AT_call_file\n");
+//printf("DW_AT_call_file\n");
       break;
     case DW_AT_call_line:
-printf("DW_AT_call_line\n");
+//printf("DW_AT_call_line\n");
       break;
     case DW_AT_bit_offset:
-printf("DW_AT_bit_offset\n");
+//printf("DW_AT_bit_offset\n");
       break;
     case DW_AT_bit_size:
-printf("DW_AT_bit_size\n");
+//printf("DW_AT_bit_size\n");
       break;
     default:
 printf("ERROR attribute: 0x%08x not yet implemented\n", attr);
@@ -233,7 +233,7 @@ static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute
   result = DWARF_DBG_ERR_OK;
   *outStr = NULL;
   *outValue = 0;
-printf("getAttribute: 0x%04x\n", attr);
+//printf("getAttribute: 0x%04x\n", attr);
   res = dwarf_get_AT_name(attr, &atName);
 //printf("getAttribute: atName: %s\n", atName);
   getAttrValue(self, attr, attr_in, NULL, 0, dieAndChildrenIdx, isSibling, dieInfoIdx, &templateNameStr);
