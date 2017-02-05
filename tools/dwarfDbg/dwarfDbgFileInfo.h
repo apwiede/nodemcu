@@ -86,6 +86,9 @@ typedef struct compileUnitInfo {
   int  maxSourceFile;    /* Size of the source files index array. */
   int  numSourceFile;    /* Index of the topmost entry */
   size_t *sourceFiles;
+  size_t numDieAndChildren;
+  size_t maxDieAndChildren;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
 } compileUnitInfo_t;
 
 typedef struct compileUnitsInfo {

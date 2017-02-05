@@ -91,10 +91,10 @@ dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
   checkAllocOK(dbg->dwarfDbgElfInfo);
   memset(dbg->dwarfDbgElfInfo, 0, sizeof(dwarfDbgElfInfo_t));
 
-  // dwarfDbgGetInfo module
-  dbg->dwarfDbgGetInfo = ALLOC(dwarfDbgGetInfo_t);
-  checkAllocOK(dbg->dwarfDbgGetInfo);
-  memset(dbg->dwarfDbgGetInfo, 0, sizeof(dwarfDbgGetInfo_t));
+  // dwarfDbgGetDbgInfo module
+  dbg->dwarfDbgGetDbgInfo = ALLOC(dwarfDbgGetDbgInfo_t);
+  checkAllocOK(dbg->dwarfDbgGetDbgInfo);
+  memset(dbg->dwarfDbgGetDbgInfo, 0, sizeof(dwarfDbgGetDbgInfo_t));
 
   return dbg;
 }
@@ -152,8 +152,8 @@ int dwarfDbgInit (dwarfDbgPtr_t dbg) {
   result = dwarfDbgElfInfoInit(dbg);
   checkErrOK(result);
 
-  // dwarfDbgGetInfo module
-  result = dwarfDbgGetInfoInit(dbg);
+  // dwarfDbgGetDbgInfo module
+  result = dwarfDbgGetDbgInfoInit(dbg);
   checkErrOK(result);
 
 // add all other init parts for modules here !!

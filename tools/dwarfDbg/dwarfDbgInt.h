@@ -95,7 +95,7 @@ typedef struct _dwarfDbg {
   dwarfDbgStringInfo_t *dwarfDbgStringInfo;
   dwarfDbgDieInfo_t *dwarfDbgDieInfo;
   dwarfDbgElfInfo_t *dwarfDbgElfInfo;
-  dwarfDbgGetInfo_t *dwarfDbgGetInfo;
+  dwarfDbgGetDbgInfo_t *dwarfDbgGetDbgInfo;
 
 } _dwarfDbg_t;
 

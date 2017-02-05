@@ -77,9 +77,9 @@ typedef uint8_t (* addDieChild_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, 
 typedef uint8_t (* addDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die die, size_t *dieAndChildrenIdx);
 
 typedef struct dwarfDbgDieInfo {
-  size_t numDieAndChildren;
-  size_t maxDieAndChildren;
-  dieAndChildrenInfo_t *dieAndChildren;
+//  size_t numDieAndChildren;
+//  size_t maxDieAndChildren;
+//  dieAndChildrenInfo_t *dieAndChildren;
 
   showSiblings_t showSiblings;
   showChildren_t showChildren;

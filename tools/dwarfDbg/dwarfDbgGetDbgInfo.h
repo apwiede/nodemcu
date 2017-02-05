@@ -32,14 +32,14 @@
 */
 
 /* 
- * File:   dwarfDbgGetInfo.h
+ * File:   dwarfDbgGetDbgInfo.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on January 24, 2017
  */
 
-#ifndef DWARFDBG_GET_INFO_H
-#define	DWARFDBG_GET_INFO_H
+#ifndef DWARF_DBG_GET_DBG_INFO_H
+#define	DWARF_DBG_GET_DBG_INFO_H
 
 typedef struct compileUnit {
     Dwarf_Unsigned compileUnitHeaderLength;
@@ -63,14 +63,15 @@ typedef struct compileUnit {
 typedef uint8_t (* addCompileUnit_t)(dwarfDbgPtr_t self, size_t *compileUnitIdx);
 typedef uint8_t (* handleOneDieSection_t)(dwarfDbgPtr_t self);
 
-typedef struct dwarfDbgGetInfo {
+typedef struct dwarfDbgGetDbgInfo {
   size_t maxCompileUnit;
   size_t numCompileUnit;
   compileUnit_t *compileUnits;
   compileUnit_t *currCompileUnit;
+  int currCompileUnitIdx;
 
   addCompileUnit_t addCompileUnit;
   handleOneDieSection_t handleOneDieSection;
-} dwarfDbgGetInfo_t;
+} dwarfDbgGetDbgInfo_t;
 
-#endif  /* DWARFDBG_GET_INFO */
+#endif  /* DWARF_DBG_GET_DBG_INFO */
