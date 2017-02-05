@@ -441,9 +441,9 @@ printf("get_attr_value: theform: 0x%08x attrib: 0x%08x\n", theform, attrib);
                   " info we got tag 0x%x %s",
                 (Dwarf_Unsigned)goff,
                 tag_for_check,
+#ifdef NOTDEF
                 get_TAG_name(tag_for_check,
                   pd_dwarf_names_print_on_error));
-#ifdef NOTDEF
                 DWARF_CHECK_ERROR(type_offset_result,small_buf);
 #endif
               }
@@ -843,134 +843,11 @@ wres = 0;
   default:
     printf("dwarf_whatform unexpected value res: %d err: %d", DW_DLV_OK, err);
   }
-#ifdef NOTDEF
-  show_form_itself(show_form,local_verbose,theform, direct_form,esbp);
-#endif
 }
-
-// =================================== get_producer_name =========================== 
-
-/*  Returns the producer of the CU
-  Caller must ensure producernameout is
-  a valid, constructed, empty dwarfDbgEsb_t instance before calling.
-  Never returns DW_DLV_ERROR.  */
-static int getProducerName(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Die cuDie, Dwarf_Off dieprintCuOffset, dwarfDbgEsb_t *producernameout) {
-  Dwarf_Attribute producer_attr = 0;
-  Dwarf_Error pnerr = 0;
-
-  int ares = dwarf_attr(cuDie, DW_AT_producer, &producer_attr, &pnerr);
-  if (ares == DW_DLV_ERROR) {
-    printf("hassattr on DW_AT_producer ares: %d pnerr: %d", ares, pnerr);
-  }
-  if (ares == DW_DLV_NO_ENTRY) {
-    /*  We add extra quotes so it looks more like
-      the names for real producers that get_attr_value
-      produces. */
-    self->dwarfDbgEsb->esbAppend(self, producernameout,"\"<CU-missing-DW_AT_producer>\"");
-  } else {
-    /*  DW_DLV_OK */
-    /*  The string return is valid until the next call to this
-      function; so if the caller needs to keep the returned
-      string, the string must be copied (makename()). */
-    get_attr_value(dbg, DW_TAG_compile_unit,
-      cuDie, dieprintCuOffset,
-      producer_attr, NULL, 0, producernameout,
-      0 /*show_form_used*/,0 /* verbose */);
-  }
-  /*  If ares is error or missing case,
-    producer_attr will be left
-    NULL by the call,
-    which is safe when calling dealloc(). */
-  dwarf_dealloc(dbg, producer_attr, DW_DLA_ATTR);
-  return ares;
-}
-
-// =================================== getCuName =========================== 
-
-/* Returns the cu of the CU. In case of error, give up, do not return. */
-static int getCuName(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Die cuDie, Dwarf_Off dieprintCuOffset, char * *short_name, char * *long_name) {
-  Dwarf_Attribute name_attr = 0;
-  Dwarf_Error lerr = 0;
-  int ares;
-
-  ares = dwarf_attr(cuDie, DW_AT_name, &name_attr, &lerr);
-  if (ares == DW_DLV_ERROR) {
-    printf("hassattr on DW_AT_name ares: %d lerr: %d", ares, lerr);
-  } else {
-    if (ares == DW_DLV_NO_ENTRY) {
-      *short_name = "<unknown name>";
-      *long_name = "<unknown name>";
-    } else {
-      /* DW_DLV_OK */
-      /*  The string return is valid until the next call to this
-        function; so if the caller needs to keep the returned
-        string, the string must be copied (makename()). */
-      char *filename = 0;
-
-      self->dwarfDbgEsb->esbEmptyString(self, &esbLongCuName);
-      get_attr_value(dbg, DW_TAG_compile_unit,
-        cuDie, dieprintCuOffset,
-        name_attr, NULL, 0, &esbLongCuName,
-        0 /*show_form_used*/,0 /* verbose */);
-      *long_name = self->dwarfDbgEsb->esbGetString(self, &esbLongCuName);
-      /* Generate the short name (filename) */
-      filename = strrchr(*long_name,'/');
-      if (!filename) {
-        filename = strrchr(*long_name,'\\');
-      }
-      if (filename) {
-        ++filename;
-      } else {
-        filename = *long_name;
-      }
-      self->dwarfDbgEsb->esbEmptyString(self, &esbShortCuName);
-      self->dwarfDbgEsb->esbAppend(self, &esbShortCuName,filename);
-      *short_name = self->dwarfDbgEsb->esbGetString(self, &esbShortCuName);
-    }
-  }
-  dwarf_dealloc(dbg, name_attr, DW_DLA_ATTR);
-  return ares;
-}
-
 
 static int die_stack_indent_level = 0;
 static int local_symbols_already_began = FALSE;
 int stop_indent_level = 0;
-typedef enum /* Dwarf_Check_Categories */ {
-    abbrev_code_result,
-    pubname_attr_result,
-    reloc_offset_result,
-    attr_tag_result,
-    tag_tree_result,
-    type_offset_result,
-    decl_file_result,
-    ranges_result,
-    lines_result,
-    aranges_result,
-    /*  Harmless errors are errors detected inside libdwarf but
-        not reported via DW_DLE_ERROR returns because the errors
-        won't really affect client code.  The 'harmless' errors
-        are reported and otherwise ignored.  It is difficult to report
-        the error when the error is noticed by libdwarf, the error
-        is reported at a later time.
-        The other errors dwarfdump reports are also generally harmless
-        but are detected by dwarfdump so it's possble to report the
-        error as soon as the error is discovered. */
-    harmless_result,
-    fde_duplication,
-    frames_result,
-    locations_result,
-    names_result,
-    abbreviations_result,
-    dwarf_constants_result,
-    di_gaps_result,
-    forward_decl_result,
-    self_references_result,
-    attr_encoding_result,
-    duplicated_attributes_result,
-    total_check_result,
-    LAST_CATEGORY  /* Must be last */
-} Dwarf_Check_Categories;
 
 print_die_stack(Dwarf_Debug dbg, char **srcfiles, Dwarf_Signed cnt) {
 //printf("print_die_stack called\n");
@@ -979,23 +856,6 @@ static int pd_dwarf_names_print_on_error = 1;
 static Dwarf_Bool bSawLow = FALSE;
 static Dwarf_Bool bSawHigh = FALSE;
 
-
-const char * get_TAG_name(unsigned int val_in,int printonerr)
-{
-   const char *v = 0;
-   int res = dwarf_get_TAG_name(val_in,&v);
-printf("get_TAG_name: %d %s\n", val_in, v);
-   return v;
-//   return ellipname(res,val_in,v,"TAG",printonerr);
-}
-const char * get_AT_name(unsigned int val_in,int printonerr)
-{
-   const char *v = 0;
-   int res = dwarf_get_AT_name(val_in,&v);
-printf("get_AT_name: %d %s\n", val_in, v);
-   return v;
-//   return ellipname(res,val_in,v,"AT",printonerr);
-}
 
 // =================================== getCompileUnitLineInfos =========================== 
 
@@ -1065,9 +925,10 @@ print_attribute(Dwarf_Debug dbg, Dwarf_Die die,
     int die_indent_level,
     char **srcfiles, Dwarf_Signed cnt)
 {
+uint8_t result;
+const char *tagName;
     Dwarf_Attribute attrib = 0;
     Dwarf_Unsigned uval = 0;
-    const char * atname = 0;
     dwarfDbgEsb_t valname;
     dwarfDbgEsb_t esb_extra;
     int tres = 0;
@@ -1091,11 +952,12 @@ print_attribute(Dwarf_Debug dbg, Dwarf_Die die,
 //    esb_constructor(&esb_extra);
 //    esb_constructor(&valname);
 //    is_info = dwarf_get_die_infotypes_flag(die);
-    atname = get_AT_name(attr,pd_dwarf_names_print_on_error);
 
     tres = dwarf_tag(die, &tag, &err);
     fres = dwarf_whatform(attr_in, &theform, &err);
-printf("get_attr_value: tag: %s attr: 0x%08x theform: 0x%08x\n", get_TAG_name(tag, 0), attr_in, theform);
+  result = _self->dwarfDbgStringInfo->getDW_TAG_string(_self, tag, &tagName);
+  checkErrOK(result);
+printf("get_attr_value: tag: %s attr: 0x%08x theform: 0x%08x\n", tagName, attr_in, theform);
 
     switch (theform) {
     case DW_FORM_addr:
@@ -1206,7 +1068,6 @@ result = getCompileUnitLineInfos(dbg, die, dieprint_cu_goffset);
     if (tres != DW_DLV_OK) {
         printf("accessing tag of die! tres: %d, podie_err: %d", tres, podie_err);
     }
-    tagname = get_TAG_name(tag,pd_dwarf_names_print_on_error);
 
     ores = dwarf_die_CU_offset(die, &offset, &podie_err);
     if (ores != DW_DLV_OK) {
@@ -1650,8 +1511,6 @@ printf("fd: %d\n", self->elfInfo.fd);
 
 int dwarfDbgElfInfoInit (dwarfDbgPtr_t self) {
   _self = self;
-  self->dwarfDbgElfInfo->getProducerName = getProducerName;
-  self->dwarfDbgElfInfo->getCuName = getCuName;
   return DWARF_DBG_ERR_OK;
 }
 

@@ -116,9 +116,9 @@ static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute att
 //printf("++getAttrValue: dieAndChildrenIdx: 0x%02x attr: 0x%08x uval: 0x%08x theform: 0x%08x\n", dieAndChildrenIdx, attr, uval, theform);
   if ((int)dieAndChildrenIdx >= 0) {
     if (isSibling) {
-      result = self->dwarfDbgDieInfo->addDieSiblingAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, uval, theform, directform, flags, &attrIdx);
+      result = self->dwarfDbgDieInfo->addDieSiblingAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, uval, theform, directform, flags, &attrIdx);
     } else {
-      result = self->dwarfDbgDieInfo->addDieChildAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, uval, theform, directform, flags, &attrIdx);
+      result = self->dwarfDbgDieInfo->addDieChildAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, uval, theform, directform, flags, &attrIdx);
     }
     checkErrOK(result);
   }
@@ -186,8 +186,29 @@ printf("DW_FORM_sec_offset\n");
   case DW_FORM_ref4:
 printf("DW_FORM_ref4\n");
     break;
+  case DW_FORM_data2:
+printf("DW_FORM_data2\n");
+    break;
+  case DW_FORM_data4:
+printf("DW_FORM_data4\n");
+    break;
+  case DW_FORM_block:
+printf("DW_FORM_block\n");
+    break;
+  case DW_FORM_block1:
+printf("DW_FORM_block1\n");
+    break;
+  case DW_FORM_sdata:
+printf("DW_FORM_sdata\n");
+    break;
+  case DW_FORM_exprloc:
+printf("DW_FORM_exprloc\n");
+    break;
+  case DW_FORM_flag_present:
+printf("DW_FORM_flag_present\n");
+    break;
   default:
-printf("ERROR theform: 0x&08x not yet implemented\n", theform);
+printf("ERROR theform: 0x%08x not yet implemented\n", theform);
     break;
   }
   return 1;
@@ -212,7 +233,7 @@ static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute
   result = DWARF_DBG_ERR_OK;
   *outStr = NULL;
   *outValue = 0;
-printf("gtetAttribute: 0x%04x\n", attr);
+printf("getAttribute: 0x%04x\n", attr);
   res = dwarf_get_AT_name(attr, &atName);
 //printf("getAttribute: atName: %s\n", atName);
   getAttrValue(self, attr, attr_in, NULL, 0, dieAndChildrenIdx, isSibling, dieInfoIdx, &templateNameStr);
@@ -362,7 +383,10 @@ if (tableCount > 0) {
   return result;
 }
 
+static int numDies = 0;
 static int numSiblings = 0;
+static int numAddSibling = 0;
+static int numAddChild = 0;
 static int childrenLevel = 0;
 // =================================== handleOneDie =========================== 
 
@@ -386,13 +410,14 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
   Dwarf_Die sibling = NULL;
 
   result = DWARF_DBG_ERR_OK;
-printf("handleOneDie die: %p\n", die);
+printf("handleOneDie die: %p numDies: %d\n", die, ++numDies);
   compileUnit = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx];
   tres = dwarf_tag(die, &tag, &err);
   if (tres != DW_DLV_OK) {
     printf("accessing tag of die! tres: %d, err: %p", tres, err);
   }
-  res = dwarf_get_TAG_name(tag, &tagName);
+  result = self->dwarfDbgStringInfo->getDW_TAG_string(self, tag, &tagName);
+  checkErrOK(result);
 printf("TAG: %p %s\n", die, tagName);
 
   ores = dwarf_die_CU_offset(die, &offset, &err);
@@ -401,9 +426,11 @@ printf("TAG: %p %s\n", die, tagName);
     return DWARF_DBG_ERR_CANNOT_GET_CU_OFFSET;
   }
   if (isSibling) {
+printf("numAddSibling: %d\n", ++numAddSibling);
     result = self->dwarfDbgDieInfo->addDieSibling(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
     checkErrOK(result);
   } else {
+printf("numAddChild: %d\n", ++numAddChild);
     result = self->dwarfDbgDieInfo->addDieChild(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
     checkErrOK(result);
   }
@@ -433,7 +460,8 @@ printf("  DW_AT_name\n");
 printf("    AT_name: %s\n", stringValue);
             if (strrchr(stringValue, '/') != NULL) {
               sprintf(buf, "%s", strrchr(stringValue, '/'));
-              result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
+printf(">>addDieATName file: %s\n", buf);
+              result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
 printf("    with /: %s result: %d\n", stringValue, result);
               checkErrOK(result);
               shortName = NULL;
@@ -446,7 +474,8 @@ printf("    with /: %s result: %d\n", stringValue, result);
 printf("  DW_AT_comp_dir\n");
           if ((stringValue != NULL) && (shortName != NULL)) {
             sprintf(buf, "%s/%s", stringValue, shortName);
-            result = self->dwarfDbgFileInfo->addSourceFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
+printf(">>addDieAT_comp_dir file: %s\n", buf);
+            result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
 printf("    NAME: %s result: %d\n", buf, result);
             checkErrOK(result);
           }
@@ -516,6 +545,7 @@ static uint8_t handleDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die in_die_in, cha
   Dwarf_Die in_die = in_die_in;
   int cdres = DW_DLV_OK;
   int numChildren = 0;
+  Dwarf_Bool isSibling = 0;
   
 
   result = DWARF_DBG_ERR_OK;
@@ -528,7 +558,10 @@ printf("pre-descent numChildren: %d\n", numChildren);
     /* Here do pre-descent processing of the die. */
     {
 printf("before handleOneDie in_die: %p\n", in_die);
-      result = handleOneDie(self, in_die, srcfiles, cnt, compileUnitIdx, /* isSibling */ 0, dieAndChildrenIdx, &dieInfoIdx);
+  if (isSibling) {
+  } else {
+  }
+      result = handleOneDie(self, in_die, srcfiles, cnt, compileUnitIdx, isSibling, dieAndChildrenIdx, &dieInfoIdx);
 printf("after handleOneDie in_die: %p\n", in_die);
 printf("call dwarf_child in_die: %p\n", in_die);
       child = NULL;
@@ -563,6 +596,7 @@ printf("post-descent\n");
       if (cdres == DW_DLV_OK) {
         /*  Set to process the sibling, loop again. */
         in_die = sibling;
+        isSibling = 1;
       } else {
         /*  We are done, no more siblings at this level. */
         break;
@@ -670,6 +704,21 @@ printf("call handleDieAndChildren\n");
     }
 printf("handleOneDieSection after handleDieAndChildren result: %d\n", result);
 
+// for testing show the structure
+{
+  int dieAndChildrenIdx;
+//  showFd = fopen("showInfo.txt", "w");
+
+fprintf(showFd, "++ numDieAndChildren: %d\n", self->dwarfDbgDieInfo->numDieAndChildren);
+  dieAndChildrenIdx = 0;
+  for (dieAndChildrenIdx = 0; dieAndChildrenIdx < self->dwarfDbgDieInfo->numDieAndChildren; dieAndChildrenIdx++) {
+fprintf(showFd, "++ idx: %d\n", dieAndChildrenIdx);
+    self->dwarfDbgDieInfo->showChildren(self, dieAndChildrenIdx, "  ");
+    self->dwarfDbgDieInfo->showSiblings(self, dieAndChildrenIdx, "  ");
+  }
+fflush(showFd);
+
+}
     // eventually handle ranges here
     // here we need to handle source lines
     result = getCompileUnitLineInfos(self, compileUnitIdx, compileUnit->fileInfoIdx, &fileLineIdx);
@@ -681,6 +730,7 @@ printf("handleOneDieSection after handleDieAndChildren result: %d\n", result);
 
 //printf("  src: %s\n", srcFiles[i]);
       result = self->dwarfDbgFileInfo->addSourceFile(self, srcFiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
+printf("  src: %s %d fileNameIdx: %d fileInfoIdx: %d\n", srcFiles[i], i, fileNameIdx, fileInfoIdx);
       checkErrOK(result);
     }
 
@@ -688,6 +738,12 @@ printf("handleOneDieSection after handleDieAndChildren result: %d\n", result);
         to 'dwarf_siblingof' at the top of the main loop. */
     dwarf_dealloc(self->elfInfo.dbg, compileUnit->compileUnitDie, DW_DLA_DIE);
     compileUnit->compileUnitDie = NULL; /* For debugging, stale die should be NULL. */
+int i ;
+compileUnitInfo_t *compileUnitInfo;
+compileUnitInfo = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx].compileUnitInfo;
+for (i = 0; i < compileUnitInfo->numSourceFile; i++) {
+printf(">>source: %d %d\n", i, compileUnitInfo->sourceFiles[i]);
+}
   } // end loop
   return result;
 }

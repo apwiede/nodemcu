@@ -54,6 +54,9 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_GET_LINE_NO                          = 7,
   DWARF_DBG_ERR_NO_FILE_LINES                        = 8,
   DWARF_DBG_ERR_CANNOT_GET_CU_OFFSET                 = 9,
+  DWARF_DBG_ERR_DW_TAG_STRING_NOT_FOUND              = 10,
+  DWARF_DBG_ERR_DW_FORM_STRING_NOT_FOUND             = 11,
+  DWARF_DBG_ERR_DW_AT_STRING_NOT_FOUND               = 12,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

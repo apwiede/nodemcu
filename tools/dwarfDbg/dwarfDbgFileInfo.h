@@ -44,6 +44,7 @@
 typedef uint8_t (* addDirName_t)(dwarfDbgPtr_t self, char *dirName);
 typedef uint8_t (* addFileName_t)(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx);
 typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx);
+typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx);
 typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx);
 typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx);
 
@@ -82,6 +83,9 @@ typedef struct compileUnitInfo {
   int  maxFileInfo;    /* Size of the fileInfos array. */
   int  numFileInfo;    /* Index of the topmost entry */
   fileInfo_t *fileInfos;
+  int  maxSourceFile;    /* Size of the source files index array. */
+  int  numSourceFile;    /* Index of the topmost entry */
+  size_t *sourceFiles;
 } compileUnitInfo_t;
 
 typedef struct compileUnitsInfo {
@@ -98,6 +102,7 @@ typedef struct dwarfDbgFileInfo {
   addDirName_t addDirName;
   addFileName_t addFileName;
   addSourceFile_t addSourceFile;
+  addCompileUnitFile_t addCompileUnitFile;
   addFileInfo_t addFileInfo;
   addFileLine_t addFileLine;
  

@@ -170,9 +170,9 @@ static uint8_t addFileName(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx
   return result;
 }
 
-// =================================== addSourceFile =========================== 
+// =================================== addCompileUnitFile =========================== 
 
-static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx) {
+static uint8_t addCompileUnitFile(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx) {
   uint8_t result;
   char *cp;
   int i;
@@ -180,6 +180,7 @@ static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileU
   int fileIdx;
   fileNameInfo_t *fileNameInfo;
 
+printf("addCompileUnitFile\n");
   result = DWARF_DBG_ERR_OK;
   cp = strrchr(pathName, '/');
   *cp++ = '\0';
@@ -214,6 +215,74 @@ static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileU
   *fileNameIdx = fileIdx;
   result = self->dwarfDbgFileInfo->addFileInfo(self, compileUnitIdx, fileIdx, fileInfoIdx);
   checkErrOK(result);
+  return result;
+}
+
+// =================================== addSourceFile =========================== 
+
+static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx) {
+  uint8_t result;
+  char *cp;
+  int i;
+  int dirIdx;
+  int fileIdx;
+  fileNameInfo_t *fileNameInfo;
+  compileUnitInfo_t *compileUnitInfo;
+
+printf(">>addSourceFile: %s\n", pathName);
+  result = DWARF_DBG_ERR_OK;
+  cp = strrchr(pathName, '/');
+  *cp++ = '\0';
+//printf("path: %s name: %s\n", pathName, cp);
+  dirIdx = -1;
+  for (i = 0; i < self->dwarfDbgFileInfo->dirNamesInfo.numDirName; i++) {
+    if (strcmp(pathName, self->dwarfDbgFileInfo->dirNamesInfo.dirNames[i]) == 0) {
+//printf("found: dirName %d num: %d\n", i, self->dwarfDbgFileInfo->dirNamesInfo.numDirName);
+      dirIdx = i;
+      break;
+    }
+  }
+  if (dirIdx < 0) {
+    dirIdx = self->dwarfDbgFileInfo->dirNamesInfo.numDirName;
+    result = self->dwarfDbgFileInfo->addDirName(self, pathName);
+    checkErrOK(result);
+  }
+  fileIdx = -1;
+  for (i = 0; i < self->dwarfDbgFileInfo->fileNamesInfo.numFileName; i++) {
+    fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[i];
+    if ((strcmp(cp, fileNameInfo->fileName) == 0) && (fileNameInfo->dirNameIdx == dirIdx)) {
+//printf("found: fileName %d num: %d\n", i, self->dwarfDbgFileInfo->fileNamesInfo.numFileName);
+      fileIdx = i;
+      break;
+    }
+  }
+  if (fileIdx < 0) {
+    fileIdx = self->dwarfDbgFileInfo->fileNamesInfo.numFileName;
+    result = self->dwarfDbgFileInfo->addFileName(self, cp, dirIdx);
+    checkErrOK(result);
+  }
+
+  compileUnitInfo = &self->dwarfDbgGetInfo->compileUnits[compileUnitIdx].compileUnitInfo;
+  if (compileUnitInfo->maxSourceFile <= compileUnitInfo->numSourceFile) {
+    compileUnitInfo->maxSourceFile += 10;
+    if (compileUnitInfo->sourceFiles == NULL) {
+      compileUnitInfo->sourceFiles = (size_t *)ckalloc(sizeof(size_t) * compileUnitInfo->maxSourceFile);
+      if (compileUnitInfo->sourceFiles == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+      compileUnitInfo->sourceFiles[0] = 0; // just to initialize
+      compileUnitInfo->numSourceFile = 1; // needed because slot 0 is empty in dwarf info!!
+    } else {
+      compileUnitInfo->sourceFiles = (size_t *)ckrealloc((char *)compileUnitInfo->sourceFiles, sizeof(size_t) * compileUnitInfo->maxSourceFile);
+      if (compileUnitInfo->sourceFiles == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    }
+  }
+  compileUnitInfo->sourceFiles[compileUnitInfo->numSourceFile] = fileIdx;
+printf(">>sourceFiles idx: %d\n", compileUnitInfo->numSourceFile);
+  compileUnitInfo->numSourceFile++;
+  *fileNameIdx = fileIdx;
   return result;
 }
 
@@ -432,6 +501,7 @@ int dwarfDbgFileInfoInit (dwarfDbgPtr_t self) {
 
   self->dwarfDbgFileInfo->addDirName = addDirName;
   self->dwarfDbgFileInfo->addFileName = addFileName;
+  self->dwarfDbgFileInfo->addCompileUnitFile = addCompileUnitFile;
   self->dwarfDbgFileInfo->addSourceFile = addSourceFile;
   self->dwarfDbgFileInfo->addFileLine = addFileLine;
   self->dwarfDbgFileInfo->addFileInfo = addFileInfo;

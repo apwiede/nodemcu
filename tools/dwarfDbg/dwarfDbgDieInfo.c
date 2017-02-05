@@ -41,16 +41,107 @@
 #include <tcl.h>
 #include "dwarfDbgInt.h"
 
+FILE *showFd = NULL;
+
+// =================================== showSiblings =========================== 
+
+static uint8_t showSiblings(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, const char *indent) {
+  int result;
+  int siblingIdx = 0;
+  int attrIdx = 0;
+  int sres = 0;
+  const char *tagStringValue;
+  const char *attrStringValue;
+  const char *formStringValue;
+  dieAndChildrenInfo_t *dieAndChildren;
+  dieInfo_t *dieInfo;
+  dieAttr_t *attrInfo;
+  Dwarf_Error err;
+  char *temps;
+
+  result = DWARF_DBG_ERR_OK;
+  dieAndChildren = &self->dwarfDbgDieInfo->dieAndChildren[dieAndChildrenIdx];
+fprintf(showFd, "++ numSiblings: %d\n", dieAndChildren->numSiblings);
+  for(siblingIdx = 0; siblingIdx < dieAndChildren->numSiblings; siblingIdx++) {
+    dieInfo = &dieAndChildren->dieSiblings[siblingIdx];
+tagStringValue = NULL;
+    result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagStringValue);
+    checkErrOK(result);
+    fprintf(showFd, "%s%s: %04d offset: 0x%08x tag: 0x%04x numAttr: %d\n", indent, tagStringValue, siblingIdx, dieInfo->offset, dieInfo->tag, dieInfo->numAttr);
+    for(attrIdx = 0; attrIdx < dieInfo->numAttr; attrIdx++) {
+      attrInfo = &dieInfo->dieAttrs[attrIdx];
+      attrStringValue = NULL;
+      result = self->dwarfDbgStringInfo->getDW_AT_string(self, attrInfo->attr, &attrStringValue);
+      checkErrOK(result);
+      result = self->dwarfDbgStringInfo->getDW_FORM_string(self, attrInfo->theform, &formStringValue);
+      checkErrOK(result);
+sres = dwarf_formstring(attrInfo->attr_in, &temps, &err);
+if (sres == DW_DLV_OK) {
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x %s\n", indent, attrStringValue, attrInfo->attr_in, attrInfo->theform, formStringValue, attrInfo->uval, temps);
+} else {
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x\n", indent, attrStringValue, attrInfo->attr_in, attrInfo->theform, formStringValue, attrInfo->uval);
+}
+    }
+  }
+  return result;
+}
+
+// =================================== showChildren =========================== 
+
+static uint8_t showChildren(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, const char *indent) {
+  int result;
+  int childIdx = 0;
+  int attrIdx = 0;
+  int sres = 0;
+  const char *tagStringValue;
+  const char *attrStringValue;
+  const char *formStringValue;
+  dieAndChildrenInfo_t *dieAndChildren;
+  dieInfo_t *dieInfo;
+  dieAttr_t *attrInfo;
+  Dwarf_Error err;
+  char *temps;
+
+  result = DWARF_DBG_ERR_OK;
+  dieAndChildren = &self->dwarfDbgDieInfo->dieAndChildren[dieAndChildrenIdx];
+fprintf(showFd, "++ numChildren: %d\n", dieAndChildren->numChildren);
+  for(childIdx = 0; childIdx < dieAndChildren->numChildren; childIdx++) {
+    dieInfo = &dieAndChildren->dieChildren[childIdx];
+tagStringValue = NULL;
+    result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagStringValue);
+    checkErrOK(result);
+    fprintf(showFd, "%s%s: %04d offset: 0x%08x tag: 0x%04x numAttr: %d\n", indent, tagStringValue, childIdx, dieInfo->offset, dieInfo->tag, dieInfo->numAttr);
+    for(attrIdx = 0; attrIdx < dieInfo->numAttr; attrIdx++) {
+      attrInfo = &dieInfo->dieAttrs[attrIdx];
+      attrStringValue = NULL;
+      result = self->dwarfDbgStringInfo->getDW_AT_string(self, attrInfo->attr, &attrStringValue);
+      checkErrOK(result);
+      result = self->dwarfDbgStringInfo->getDW_FORM_string(self, attrInfo->theform, &formStringValue);
+      checkErrOK(result);
+sres = dwarf_formstring(attrInfo->attr_in, &temps, &err);
+if (sres == DW_DLV_OK) {
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x %s\n", indent, attrStringValue, attrInfo->attr_in, attrInfo->theform, formStringValue, attrInfo->uval, temps);
+} else {
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x\n", indent, attrStringValue, attrInfo->attr_in, attrInfo->theform, formStringValue, attrInfo->uval);
+}
+    }
+  }
+  return result;
+}
+
 // =================================== addDieChildAttr =========================== 
 
-static uint8_t addDieChildAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t childIdx, Dwarf_Half attr, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *childAttrIdx) {
+static uint8_t addDieChildAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t childIdx, Dwarf_Half attr, Dwarf_Attribute attr_in, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *childAttrIdx) {
   uint8_t result;
+  const char *stringValue;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   dieAttr_t *dieAttr;
 
   result = DWARF_DBG_ERR_OK;
-printf("== addDieChildAttr: dieAndChildrenIdx: %d childIdx: %d attr: 0x%08x uval: 0x%08x, theform: 0x%04x\n", dieAndChildrenIdx, childIdx, attr, uval, theform);
+  result = self->dwarfDbgStringInfo->getDW_AT_string(self, attr, &stringValue);
+  checkErrOK(result);
+printf("== addDieChildAttr: %s dieAndChildrenIdx: %d childIdx: %d attr: 0x%08x attr_in: 0x%08x uval: 0x%08x, theform: 0x%04x\n", stringValue, dieAndChildrenIdx, childIdx, attr, attr_in, uval, theform);
   dieAndChildrenInfo = &self->dwarfDbgDieInfo->dieAndChildren[dieAndChildrenIdx];
   dieInfo = &dieAndChildrenInfo->dieChildren[childIdx];
   if (dieInfo->maxAttr <= dieInfo->numAttr) {
@@ -70,6 +161,12 @@ printf("== addDieChildAttr: dieAndChildrenIdx: %d childIdx: %d attr: 0x%08x uval
 printf("== numAttrs: %d\n", dieInfo->numAttr);
   dieAttr = &dieInfo->dieAttrs[dieInfo->numAttr];
   memset(dieAttr, 0, sizeof(dieAttr_t));
+  dieAttr->attr = attr;
+  dieAttr->attr_in = attr_in;
+  dieAttr->uval = uval;
+  dieAttr->theform = theform;
+  dieAttr->directform = directform;
+  dieAttr->flags = flags;
   *childAttrIdx = dieInfo->numAttr;
   dieInfo->numAttr++;
   return result;
@@ -77,14 +174,17 @@ printf("== numAttrs: %d\n", dieInfo->numAttr);
 
 // =================================== addDieSiblingAttr =========================== 
 
-static uint8_t addDieSiblingAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t siblingIdx, Dwarf_Half attr, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *siblingAttrIdx) {
+static uint8_t addDieSiblingAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t siblingIdx, Dwarf_Half attr, Dwarf_Attribute attr_in, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *siblingAttrIdx) {
   uint8_t result;
+  const char *stringValue;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   dieAttr_t *dieAttr;
 
   result = DWARF_DBG_ERR_OK;
-printf("== addDieSiblingAttr: dieAndChildrenIdx: %d siblingIdx: %d attr: 0x%08x uval: 0x%08x, theform: 0x%04x\n", dieAndChildrenIdx, siblingIdx, attr, uval, theform);
+  result = self->dwarfDbgStringInfo->getDW_AT_string(self, attr, &stringValue);
+  checkErrOK(result);
+printf("== addDieSiblingAttr: %s dieAndChildrenIdx: %d siblingIdx: %d attr: 0x%08x attr_in: 0x%08x uval: 0x%08x, theform: 0x%04x\n", stringValue, dieAndChildrenIdx, siblingIdx, attr, attr_in, uval, theform);
   dieAndChildrenInfo = &self->dwarfDbgDieInfo->dieAndChildren[dieAndChildrenIdx];
   dieInfo = &dieAndChildrenInfo->dieSiblings[siblingIdx];
   if (dieInfo->maxAttr <= dieInfo->numAttr) {
@@ -104,6 +204,12 @@ printf("== addDieSiblingAttr: dieAndChildrenIdx: %d siblingIdx: %d attr: 0x%08x 
 printf("== numAttrs: %d\n", dieInfo->numAttr);
   dieAttr = &dieInfo->dieAttrs[dieInfo->numAttr];
   memset(dieAttr, 0, sizeof(dieAttr_t));
+  dieAttr->attr = attr;
+  dieAttr->attr_in = attr_in;
+  dieAttr->uval = uval;
+  dieAttr->theform = theform;
+  dieAttr->directform = directform;
+  dieAttr->flags = flags;
   *siblingAttrIdx = dieInfo->numAttr;
   dieInfo->numAttr++;
   return result;
@@ -136,6 +242,8 @@ printf("== addDieSibling: offset: 0x%04x tag: 0x%04x\n", offset, tag);
 printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblings);
   dieInfo = &dieAndChildrenInfo->dieSiblings[dieAndChildrenInfo->numSiblings];
   memset(dieInfo, 0, sizeof(dieInfo_t));
+  dieInfo->offset = offset;
+  dieInfo->tag = tag;
   *siblingIdx = dieAndChildrenInfo->numSiblings;
   dieAndChildrenInfo->numSiblings++;
   return result;
@@ -168,6 +276,8 @@ printf("== addDieChild: offset: 0x%04x tag: 0x%04x\n", offset, tag);
 printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
   dieInfo = &dieAndChildrenInfo->dieChildren[dieAndChildrenInfo->numChildren];
   memset(dieInfo, 0, sizeof(dieInfo_t));
+  dieInfo->offset = offset;
+  dieInfo->tag = tag;
   *childIdx = dieAndChildrenInfo->numChildren;
   dieAndChildrenInfo->numChildren++;
   return result;
@@ -207,10 +317,13 @@ printf("== numDieAndChildren: %d\n", self->dwarfDbgDieInfo->numDieAndChildren);
 
 int dwarfDbgDieInfoInit (dwarfDbgPtr_t self) {
 
+  showFd = stdout;
   self->dwarfDbgDieInfo->maxDieAndChildren = 0;
   self->dwarfDbgDieInfo->numDieAndChildren = 0;
   self->dwarfDbgDieInfo->dieAndChildren = NULL;
 
+  self->dwarfDbgDieInfo->showSiblings = &showSiblings;
+  self->dwarfDbgDieInfo->showChildren = &showChildren;
   self->dwarfDbgDieInfo->addDieSiblingAttr = &addDieSiblingAttr;
   self->dwarfDbgDieInfo->addDieChildAttr = &addDieChildAttr;
   self->dwarfDbgDieInfo->addDieSibling = &addDieSibling;

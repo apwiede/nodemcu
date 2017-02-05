@@ -41,14 +41,7 @@
 #ifndef DWARFDBG_ELF_INFO_H
 #define	DWARFDBG_ELF_INFO_H
 
-typedef int (* getProducerName_t)(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, dwarfDbgEsb_t *producernameout);
-typedef int (*getCuName_t)(dwarfDbgPtr_t self, Dwarf_Debug dbg, Dwarf_Die cu_die, Dwarf_Off dieprint_cu_offset, char** short_name, char ** long_name);
-
 typedef struct dwarfDbgElfInfo {
-
-    getProducerName_t getProducerName;
-    getCuName_t getCuName;
-
 } dwarfDbgElfInfo_t;
 
 #endif  /* DWARFDBG_ELF_INFO_H */
