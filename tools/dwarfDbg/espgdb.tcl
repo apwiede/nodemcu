@@ -81,6 +81,7 @@ set ::incrLgth2 false
 set ::lgth2 0
 set ::hadPrompt false
 set ::hadNewLine false
+set ::expectRegisters false
 
 set ::handleInputDbg false
 
@@ -207,6 +208,28 @@ puts stderr ">>answer: $::answer!"
 puts stderr ">>gdbCmd sent: $::answer!"
 }
 
+# ================================ callDbgReadBytes ===============================
+
+proc callDbgReadBytes {} {
+#  set addr "40272611"
+  set addr "3ffffc30"
+#  set dbgCmd "m${addr},c"
+  set dbgCmd "m${addr},4"
+  set chkSum 0
+  foreach ch [split $dbgCmd ""] {
+    binary scan $ch c pch
+    set chkSum [expr {$chkSum + $pch}]
+  }
+  set ::answer [format "\$${dbgCmd}#%02x" [expr {$chkSum & 0xFF}]]
+puts stderr ">>answer: $::answer!"
+  foreach ch [split $::answer ""] {
+    puts -nonewline $::fd0 $ch
+    flush $::fd0
+    after 20
+  }
+puts stderr ">>gdbCmd sent: $::answer!"
+}
+
 # ================================ handleGdbCmd ===============================
 
 proc handleGdbCmd {gdbCmd} {
@@ -240,6 +263,7 @@ puts stderr "default reason: $reason breakpoint"
       }
     }
     "q" {
+      set ::expectRegisters true
 puts stderr "q LL: [string length $params]!"
       set registerVals $params
       set regNames [list a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 pc sar litbase sr176 xx ps]
@@ -272,20 +296,31 @@ puts stderr [format "$regName: 0x%s" $swapRegName]
     "2" -
     "1" -
     "0" {
+      if {$::expectRegisters} {
 puts stderr "regs LL: [string length $gdbCmd]!"
-      set registerVals $gdbCmd
-      set regNames [list a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 pc sar litbase sr176 xx ps reason]
-      foreach regName $regNames {
-        set $regName [string range $registerVals 0 7]
-        set registerVals [string range $registerVals 8 end]
-        set val [set $regName]
+        set registerVals $gdbCmd
+        set regNames [list a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 pc sar litbase sr176 xx ps reason]
+        foreach regName $regNames {
+          set $regName [string range $registerVals 0 7]
+          set registerVals [string range $registerVals 8 end]
+          set val [set $regName]
+          set p4 [string range $val 0 1]
+          set p3 [string range $val 2 3]
+          set p2 [string range $val 4 5]
+          set p1 [string range $val 6 7]
+          set swapRegName "${p1}${p2}${p3}${p4}!"
+#puts stderr "$regName: [set $regName]!"
+puts stderr [format "$regName: 0x%s" $swapRegName]
+        }
+        set ::expectRegisters false
+      } else {
+        set val $gdbCmd
         set p4 [string range $val 0 1]
         set p3 [string range $val 2 3]
         set p2 [string range $val 4 5]
         set p1 [string range $val 6 7]
-        set swapRegName "${p1}${p2}${p3}${p4}!"
-#puts stderr "$regName: [set $regName]!"
-puts stderr [format "$regName: 0x%s" $swapRegName]
+        set swapVal "${p1}${p2}${p3}${p4}!"
+puts stderr [format "VAL: 0x%s" $swapVal]
       }
     }
     "O" {
@@ -373,7 +408,7 @@ puts stderr "sent command - '$::answer' NOT OK"
       }
     }
     "\$" {
-       if {$::hadGdbStub} {
+       if {$::hadGdbStub || ($::lastCh eq "+") || ($::lastCh eq "\n")} {
 #puts stderr ">>SET \$ inGdbCmd true"
         set ::inGdbCmd true
         set ::gdbCmd ""
@@ -539,6 +574,7 @@ proc readByte0 {fd bufVar lgthVar} {
 #puts stderr "=readByte0: read: $ch!lgth: $lgth!inGdbCmd: $::inGdbCmd!"
   set result [handleInput0 $ch buf lgth]
   checkErrOK $result
+  set ::lastCh $ch
 }
 
 # ================================ buildWidget ===============================
@@ -565,7 +601,9 @@ proc buildWidget {} {
   ttk::button ${::infoFr}.continueb -text Continue -command ::callDbgContinue
   ttk::button ${::infoFr}.registersb -text Registers -command ::callDbgGetRegisters
   ttk::button ${::infoFr}.breakpointl -textvariable ::brkPointVal -command ::callDbgResetBreakPoint
-  pack ${::infoFr}.continueb ${::infoFr}.registersb ${::infoFr}.breakpointl -side left
+set ::bytesVal "read bytes"
+  ttk::button ${::infoFr}.readbytesl -textvariable ::bytesVal -command ::callDbgReadBytes
+  pack ${::infoFr}.continueb ${::infoFr}.registersb ${::infoFr}.breakpointl ${::infoFr}.readbytesl -side left
   frame .txt -width 600 -height 100
   set txtFr .txt
   set ::textId [showSourceFile CreateScrolledText $txtFr showSource 40]
