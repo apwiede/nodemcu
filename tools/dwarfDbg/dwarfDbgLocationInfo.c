@@ -55,6 +55,24 @@
  *
  * */
 
+static uint8_t getAddressSizeAndMax(dwarfDbgPtr_t self, Dwarf_Half *size, Dwarf_Addr *max, Dwarf_Error *err) {
+  int dres = 0;
+  Dwarf_Half lsize = 4;
+  /* Get address size and largest representable address */
+  dres = dwarf_get_address_size(self->elfInfo.dbg, &lsize, err);
+  if (dres != DW_DLV_OK) {
+    printf("get_address_size() dres: %d err: %p", dres, *err);
+    return DWARF_DBG_ERR_CANNOT_GET_ADDR_SIZE;
+  }
+  if (max) {
+    *max = (lsize == 8 ) ? 0xffffffffffffffffULL : 0xffffffff;
+  }
+  if (size) {
+    *size = lsize;
+  }
+  return DWARF_DBG_ERR_OK;
+}
+
 // =================================== addLocation =========================== 
 
 static uint8_t addLocationDirName(dwarfDbgPtr_t self, char *dirName) {
@@ -86,16 +104,77 @@ static uint8_t addLocationDirName(dwarfDbgPtr_t self, char *dirName) {
   return result;
 }
 
+// =================================== getLocationList =========================== 
+
+static uint8_t getLocationList(dwarfDbgPtr_t self, Dwarf_Attribute attr) {
+  uint8_t result;
+  Dwarf_Error err = NULL;
+  Dwarf_Loc_Head_c loclistHead = 0;
+  Dwarf_Unsigned noOfElements = 0;
+  Dwarf_Addr lopc = 0;
+  Dwarf_Addr hipc = 0;
+  Dwarf_Small lleValue = 0; /* DWARF5 */
+  Dwarf_Small loclistSource = 0;
+  Dwarf_Unsigned locentryCount = 0;
+  Dwarf_Locdesc_c locentry = 0;
+  Dwarf_Unsigned locdescOffset = 0;
+  Dwarf_Unsigned sectionOffset = 0;
+  int lres = 0;
+  int llent = 0;
+  int i;
+
+  result = DWARF_DBG_ERR_OK;
+  lres = dwarf_get_loclist_c(attr, &loclistHead, &noOfElements, &err);
+  if (lres != DW_DLV_OK) {
+    return DWARF_DBG_ERR_CANNOT_GET_LOC_LIST_C;
+  }
+printf("numLocations: %d\n", noOfElements);
+  for (llent = 0; llent < noOfElements; ++llent) {
+    char small_buf[150];
+    Dwarf_Unsigned locdescOffset = 0;
+    Dwarf_Locdesc_c locentry = 0;
+    Dwarf_Addr lopcfinal = 0;
+    Dwarf_Addr hipcfinal = 0;
+    Dwarf_Small op = 0;
+    Dwarf_Unsigned opd1 = 0;
+    Dwarf_Unsigned opd2 = 0;
+    Dwarf_Unsigned opd3 = 0;
+    Dwarf_Unsigned offsetforbranch = 0;
+    const char *opName = NULL;
+    int res = 0;
+
+    lres = dwarf_get_locdesc_entry_c(loclistHead, llent, &lleValue, &lopc, &hipc, &locentryCount,
+           &locentry, &loclistSource, &sectionOffset, &locdescOffset, &err);
+    if (lres != DW_DLV_OK) {
+      return DWARF_DBG_ERR_CANNOT_GET_LOC_DESC_ENTRY_C;
+    }
+printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x\n", lleValue, lopc, hipc);
+    for (i = 0; i < locentryCount; i++) {
+      res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
+      if (res != DW_DLV_OK) {
+        return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
+      }
+      result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
+      checkErrOK(result);
+printf("op: 0x%02x %s opd1: 0x%02x opd2: 0x%02x opd3: 0x%02x offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);
+    }
+  }
+  return result;
+}
 
 // =================================== dwarfDbgLocationInfoInit =========================== 
 
 int dwarfDbgLocationInfoInit (dwarfDbgPtr_t self) {
-//  self->dwarfDbgFileInfo->dirNamesInfo.maxDirName = 0;
-//  self->dwarfDbgFileInfo->dirNamesInfo.numDirName = 0;
-//  self->dwarfDbgFileInfo->dirNamesInfo.dirNames = NULL;
+  uint8_t result;
 
-//  self->dwarfDbgFileInfo->addDirName = &addDirName;
-  return DWARF_DBG_ERR_OK;
+  result = DWARF_DBG_ERR_OK;
+//  self->dwarfDbgLocationInfo->dirNamesInfo.maxDirName = 0;
+//  self->dwarfDbgLocationInfo->dirNamesInfo.numDirName = 0;
+//  self->dwarfDbgLocationInfo->dirNamesInfo.dirNames = NULL;
+
+    self->dwarfDbgLocationInfo->getAddressSizeAndMax = &getAddressSizeAndMax;
+    self->dwarfDbgLocationInfo->getLocationList = &getLocationList;
+  return result;
 }
 
 
