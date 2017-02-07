@@ -102,7 +102,8 @@ int os_printf_plus(const char *format, ...)  __attribute__ ((format (printf, 1, 
 //implies a minimum size of about 190 bytes.
 #define PBUFLEN 256
 //Length of gdb stdout buffer, for console redirection
-#define OBUFLEN 32
+//#define OBUFLEN 32
+#define OBUFLEN 512
 
 //The asm stub saves the Xtensa registers here when a debugging exception happens.
 struct XTensa_exception_frame_s gdbstub_savedRegs;
@@ -184,6 +185,7 @@ static void ATTR_GDBFN gdbPacketHex(int val, int bits) {
 static void ATTR_GDBFN gdbPacketEnd() {
   gdbSendChar('#');
   gdbPacketHex(chsum, 8);
+gdbSendChar('\n');
 }
 
 //Error states used by the routines that grab stuff from the incoming gdb packet
@@ -292,6 +294,9 @@ static void ATTR_GDBFN sendReason() {
   //exception-to-signal mapping
   char exceptionSignal[] = {4,31,11,11,2,6,8,0,6,7,0,0,7,7,7,7};
   int i = 0;
+char buf [12];
+
+ets_printf("@@sendReason: 0x%02x pc: 0x%08x\n", gdbstub_savedRegs.reason, gdbstub_savedRegs.pc);
   gdbPacketStart();
   gdbPacketChar('T');
   if (gdbstub_savedRegs.reason == 0xff) {
@@ -303,6 +308,10 @@ static void ATTR_GDBFN sendReason() {
   } else {
     //We stopped because of a debugging exception.
     gdbPacketHex(5, 8); //sigtrap
+gdbPacketHex(16, 8); 
+gdbPacketChar(':');
+gdbPacketHex(gdbstub_savedRegs.pc, 32);
+gdbPacketChar(';');
 //Current Xtensa GDB versions don't seem to request this, so let's leave it off.
 #if 0
     if (gdbstub_savedRegs.reason&(1 << 0)) reason = "break";
@@ -323,7 +332,9 @@ static void ATTR_GDBFN sendReason() {
 static int ATTR_GDBFN gdbHandleCommand(unsigned char *cmd, int len) {
   //Handle a command
   int i, j, k;
+  int result;
   unsigned char *data = cmd + 1;
+//ets_printf("@@gdbstub_gdbHandleCommand: %s pc: 0x%08x!\n", cmd, gdbstub_savedRegs.pc);
   if (cmd[0] == 'g') {    //send all registers to gdb
     gdbPacketStart();
     gdbPacketHex(iswap(gdbstub_savedRegs.a0), 32);
@@ -335,6 +346,7 @@ static int ATTR_GDBFN gdbHandleCommand(unsigned char *cmd, int len) {
     gdbPacketHex(iswap(gdbstub_savedRegs.sr176), 32);
     gdbPacketHex(0, 32);
     gdbPacketHex(iswap(gdbstub_savedRegs.ps), 32);
+gdbPacketHex(iswap(gdbstub_savedRegs.reason), 32);
     gdbPacketEnd();
   } else if (cmd[0] == 'G') {  //receive content for all registers from gdb
     gdbstub_savedRegs.a0 = iswap(gdbGetHexVal(&data, 32));
@@ -353,6 +365,7 @@ static int ATTR_GDBFN gdbHandleCommand(unsigned char *cmd, int len) {
     i = gdbGetHexVal(&data, -1);
     data++;
     j = gdbGetHexVal(&data, -1);
+ets_printf("gdbstub_@@i: %d j: %d\n", i, j);
     gdbPacketStart();
     for (k = 0; k < j; k++) {
       gdbPacketHex(readbyte(i++), 8);
@@ -386,8 +399,11 @@ static int ATTR_GDBFN gdbHandleCommand(unsigned char *cmd, int len) {
 //    gdbPacketStr("vCont;c;s");
 //    gdbPacketEnd();
   } else if (strncmp((char*)cmd, "vCont;c", 7) == 0 || cmd[0] == 'c') {  //continue execution
+ets_printf("@@CMD continue\n");
+//gdbstub_savedRegs.pc += 3;
     return ST_CONT;
   } else if (strncmp((char*)cmd, "vCont;s", 7) == 0 || cmd[0] == 's') {  //single-step instruction
+ets_printf("@@CMD singleStep\n");
     //Single-stepping can go wrong if an interrupt is pending, especially when it is e.g. a task switch:
     //the ICOUNT register will overflow in the task switch code. That is why we disable interupts when
     //doing single-instruction stepping.
@@ -411,9 +427,13 @@ static int ATTR_GDBFN gdbHandleCommand(unsigned char *cmd, int len) {
     i = gdbGetHexVal(&data, -1);
     data++; //skip ','
     j = gdbGetHexVal(&data, -1);
-    gdbPacketStart();
+//    gdbPacketStart();
     if (cmd[1] == '1') {  //Set breakpoint
-      if (gdbstub_set_hw_breakpoint(i, j)) {
+      result = gdbstub_set_hw_breakpoint(i, j);
+ets_printf("@@setHwBrkPoint: 0x%08x 0x%08x result: %d\n", i, j, result);
+//      if (gdbstub_set_hw_breakpoint(i, j)) {}
+gdbPacketStart();
+      if (result) {
         gdbPacketStr("OK");
       } else {
         gdbPacketStr("E01");
@@ -479,11 +499,14 @@ static int ATTR_GDBFN gdbReadCommand() {
   unsigned char sentchs[2];
   int p = 0;
   unsigned char *ptr;
+int result;
   c = gdbRecvChar();
+//ets_printf("gdbstub_gdbReadCommand: :%c\n", c);
   if (c != '$') return c;
   while(1) {
     c = gdbRecvChar();
     if (c == '#') {  //end of packet, checksum follows
+//ets_printf("gdbstub_gdbReadCommand2: :%c\n", c);
       cmd[p] = 0;
       break;
     }
@@ -502,12 +525,14 @@ static int ATTR_GDBFN gdbReadCommand() {
     cmd[p++] = c;
     if (p >= PBUFLEN) return ST_ERR;
   }
+//ets_printf("gdbstub_gdbReadCommand3: \n");
   //A # has been received. Get and check the received chsum.
   sentchs[0] = gdbRecvChar();
   sentchs[1] = gdbRecvChar();
   ptr = &sentchs[0];
   rchsum = gdbGetHexVal(&ptr, 8);
-  os_printf("checksum c %x r %x\n", chsum, rchsum);
+//ets_printf("@@chksum c %x r %x\n", chsum, rchsum);
+//  os_printf("==checksum c %x r %x\n", chsum, rchsum);
   if (rchsum != chsum) {
     gdbSendChar('-');
     return ST_ERR;
@@ -538,36 +563,46 @@ static void ATTR_GDBFN emulLdSt() {
   unsigned char i1 = readbyte(gdbstub_savedRegs.pc+1);
   unsigned char i2 = readbyte(gdbstub_savedRegs.pc+2);
   int *p;
+ets_printf("@@emulLdSt: pc: 0x%08x i0: 0x%02x i1: 0x%02x i2: 0x%02x reson: 0x%08x\n", gdbstub_savedRegs.pc, i0, i1, i2, gdbstub_savedRegs.reason);
   if ((i0&0xf) == 2 && (i1 & 0xf0) == 0x20) {
     //l32i
     p = (int*)getaregval(i1 & 0xf)+(i2*4);
     setaregval(i0 >> 4, *p);
+ets_printf("@@pc 1: 0x%08x\n", gdbstub_savedRegs.pc);
     gdbstub_savedRegs.pc += 3;
   } else if ((i0 & 0xf) == 0x8) {
     //l32i.n
     p = (int*)getaregval(i1 & 0xf)+((i1 >> 4) * 4);
     setaregval(i0 >> 4, *p);
+ets_printf("@@pc 2: 0x%08x\n", gdbstub_savedRegs.pc);
     gdbstub_savedRegs.pc += 2;
   } else if ((i0 & 0xf) == 2 && (i1 & 0xf0) == 0x60) {
     //s32i
     p = (int*)getaregval(i1 & 0xf) + (i2 * 4);
     *p = getaregval(i0 >> 4);
+ets_printf("@@pc 3: 0x%08x\n", gdbstub_savedRegs.pc);
     gdbstub_savedRegs.pc += 3;
   } else if ((i0 & 0xf) == 0x9) {
     //s32i.n
     p = (int*)getaregval(i1 & 0xf)+((i1 >> 4) * 4);
     *p = getaregval(i0 >> 4);
+ets_printf("@@pc 4: 0x%08x\n", gdbstub_savedRegs.pc);
     gdbstub_savedRegs.pc += 2;
   } else {
-    os_printf("GDBSTUB: No l32i/s32i instruction: %x %x %x. Huh?", i2, i1, i0);
+ets_printf("GDBSTUB: No l32i/s32i instruction: %x %x %x. Huh?\n", i2, i1, i0);
+//    os_printf("GDBSTUB: No l32i/s32i instruction: %x %x %x. Huh?", i2, i1, i0);
+ets_printf("@@pc51: 0x%08x\n", gdbstub_savedRegs.pc);
+//    gdbstub_savedRegs.pc += 3;
   }
 }
 
 //We just caught a debug exception and need to handle it. This is called from an assembly
 //routine in gdbstub-entry.S
 void ATTR_GDBFN gdbstub_handle_debug_exception() {
+int result;
   ets_wdt_disable();
 
+ets_printf("@@gdbstub_handle_debug_exception pc: 0x%08x singleStepPs: %d\n", gdbstub_savedRegs.pc, singleStepPs);
   if (singleStepPs != -1) {
     //We come here after single-stepping an instruction. Interrupts are disabled
     //for the single step. Re-enable them here.
@@ -576,12 +611,18 @@ void ATTR_GDBFN gdbstub_handle_debug_exception() {
   }
 
   sendReason();
+ets_printf("@@gdbstub_handle_debug_exception called sendReason\n");
   while(gdbReadCommand() != ST_CONT);
+ets_printf("@@after gdbReadCommand2: reason: 0x%08x\n", gdbstub_savedRegs.reason);
+gdbstub_savedRegs.reason = 0x8;
+ets_printf("@@gdbstub_handle_debug_exception2\n");
   if ((gdbstub_savedRegs.reason & 0x84) == 0x4) {
+ets_printf("@@reason 4\n");
     //We stopped due to a watchpoint. We can't re-execute the current instruction
     //because it will happily re-trigger the same watchpoint, so we emulate it 
     //while we're still in debugger space.
     emulLdSt();
+ets_printf("@@reason 4 pc: 0x%08x\n", gdbstub_savedRegs.pc);
   } else if ((gdbstub_savedRegs.reason & 0x88) == 0x8) {
     //We stopped due to a BREAK instruction. Skip over it.
     //Check the instruction first; gdb may have replaced it with the original instruction
@@ -590,6 +631,7 @@ void ATTR_GDBFN gdbstub_handle_debug_exception() {
           (readbyte(gdbstub_savedRegs.pc + 1) & 0xf0) == 0x40 &&
           (readbyte(gdbstub_savedRegs.pc) & 0x0f) == 0x00) {
       gdbstub_savedRegs.pc += 3;
+ets_printf("@@reason 8 pc: 0x%08x\n", gdbstub_savedRegs.pc);
     }
   } else if ((gdbstub_savedRegs.reason & 0x90) == 0x10) {
     //We stopped due to a BREAK.N instruction. Skip over it, after making sure the instruction
@@ -597,9 +639,11 @@ void ATTR_GDBFN gdbstub_handle_debug_exception() {
     if ((readbyte(gdbstub_savedRegs.pc + 1) & 0xf0) == 0xf0 &&
           readbyte(gdbstub_savedRegs.pc) == 0x2d) {
       gdbstub_savedRegs.pc += 3;
+ets_printf("@@reason 10 pc: 0x%08x\n", gdbstub_savedRegs.pc);
     }
   }
   ets_wdt_enable();
+ets_printf("@@gdbstub_handle_debug_exception end pc: 0x%08x\n", gdbstub_savedRegs.pc);
 }
 
 
@@ -645,7 +689,8 @@ static void ATTR_GDBFN gdb_semihost_putchar1(char c) {
   obuf[obufpos++] = c;
   if (c == '\n' || obufpos == OBUFLEN) {
     gdbPacketStart();
-    gdbPacketChar('O');
+//    gdbPacketChar('O');
+    gdbPacketChar('Y');
     for (i = 0; i < obufpos; i++) gdbPacketHex(obuf[i], 8);
     gdbPacketEnd();
     obufpos = 0;
