@@ -51,7 +51,7 @@
 
 // ================================= createMsgFromHeaderPart ====================================
 
-static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
+static uint8_t ICACHE_FLASH_ATTR createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
   uint8_t result;
   int idx;
   bool isEnd;
@@ -103,7 +103,7 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t 
  * \return Error code or ErrorOK
  *
  */
-static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
+static uint8_t ICACHE_FLASH_ATTR fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t msgDescPartIdx;
   uint8_t fieldIdx;
@@ -183,7 +183,7 @@ static uint8_t fixOffsetsForKeyValues(compMsgDispatcher_t *self) {
  * \return Error code or ErrorOK
  *
  */
-static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
+static uint8_t ICACHE_FLASH_ATTR setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
   uint8_t result;
   uint8_t *fieldNameStr;
   uint8_t *stringValue;
@@ -256,7 +256,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
  * \return Error code or ErrorOK
  *
  */
-static uint8_t setMsgValues(compMsgDispatcher_t *self) {
+static uint8_t ICACHE_FLASH_ATTR setMsgValues(compMsgDispatcher_t *self) {
   uint8_t result;
   uint8_t type;
   compMsgDataView_t *dataView;
@@ -316,7 +316,7 @@ static uint8_t setMsgValues(compMsgDispatcher_t *self) {
  * \return Error code or ErrorOK
  *
  */
-static uint8_t buildMsg(compMsgDispatcher_t *self) {
+static uint8_t ICACHE_FLASH_ATTR buildMsg(compMsgDispatcher_t *self) {
   uint8_t result;
   size_t msgLgth;
   uint8_t *msgData;
@@ -419,7 +419,7 @@ static uint8_t buildMsg(compMsgDispatcher_t *self) {
 
 // ================================= forwardMsg ====================================
 
-static uint8_t forwardMsg(compMsgDispatcher_t *self) {
+static uint8_t ICACHE_FLASH_ATTR forwardMsg(compMsgDispatcher_t *self) {
   uint8_t result;
   headerPart_t *hdr;
   int hdrIdx;

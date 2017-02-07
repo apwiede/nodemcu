@@ -50,6 +50,10 @@
 #include "driver/uart.h"
 #include "compMsgDispatcher.h"
 
+#ifdef GDB_STUB
+#include "../gdbstub/gdbstub.h"
+#endif
+
 #define DISP_HANDLE_PREFIX "stmsgdisp_"
 #define KEY_VALUE_DESC_PARTS_FILE "CompMsgKeyValueKeys.txt"
 
@@ -265,7 +269,16 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   uint32_t baud;
   size_t msgLgth;
   uint8_t *msgData;
+uint8_t *xxxZZZ;
 
+#ifdef GDB_STUB
+gdbstub_init();
+#endif
+#ifdef GDB_STUB
+xxxZZZ = "Hello Arnulf";
+ets_printf("initDispatcher: self: %p %p msgData: %p %p\n", self, &self, xxxZZZ, &xxxZZZ);
+ets_printf("dispInit1\n");
+#endif
 //COMP_MSG_DBG(self, "Y", 0, "call DescInit");
   result = compMsgMsgDescInit(self);
   checkErrOK(result);
@@ -298,6 +311,9 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
 //COMP_MSG_DBG(self, "Y", 0, "call OtaInit");
   result = compMsgOtaInit(self);
   checkErrOK(result);
+#ifdef GDB_STUB
+ets_printf("dispInit2\n");
+#endif
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
   if (typelen > 0) {
@@ -325,6 +341,16 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
       checkErrOK(result);
       result = self->compMsgIdentify->handleReceivedPart(self, msgData, msgLgth);
       checkErrOK(result);
+      break;
+    case 'G':
+#ifdef GDB_STUB
+ets_printf("dispInit3\n");
+#endif
+      self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
+      COMP_MSG_DBG(self, "Y", 1, "start gdbstub_init\n");
+#ifdef GDB_STUB
+ets_printf("dispInit4\n");
+#endif
       break;
     case 'I':
       self->compMsgDebug->setDebugFlags(self, "BHIWsSw");
@@ -383,6 +409,10 @@ ets_printf("<<<startAPMODE\n");
       break;
     }
   }
+#ifdef GDB_STUB
+ets_printf("compMsgDispatcherInit end\n");
+ets_printf("dispInit5\n");
+#endif
   return COMP_MSG_ERR_OK;
 }
 
