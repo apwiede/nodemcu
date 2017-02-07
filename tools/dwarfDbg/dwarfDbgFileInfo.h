@@ -41,12 +41,19 @@
 #ifndef DWARFDBG_FILE_INFO_H
 #define	DWARFDBG_FILE_INFO_H
 
+#define LINE_NEW_STATEMENT   0x01
+#define LINE_NEW_BASIC_BLOCK 0x02
+#define LINE_END_SEQUENCE    0x04
+#define LINE_PROLOGUE_END    0x08
+#define LINE_PROLOGUE_BEGIN  0x10
+
 typedef uint8_t (* addDirName_t)(dwarfDbgPtr_t self, char *dirName);
 typedef uint8_t (* addFileName_t)(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx);
 typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx);
 typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx);
 typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx);
-typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx);
+typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, int flags, uint16_t isa, uint16_t discriminator, size_t fileInfoIdx, size_t *fileLineIdx);
+typedef uint8_t (* addRangeInfo_t)(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr dwr_addr2, enum Dwarf_Ranges_Entry_Type dwrType, size_t *rangeInfoIdx);
 
 typedef struct dirNamesInfo {
   int  maxDirName;    /* Size of the dirNames array. */
@@ -68,6 +75,9 @@ typedef struct fileNamesInfo {
 typedef struct fileLineInfo {
   Dwarf_Addr pc;
   size_t lineNo;
+  uint16_t flags;
+  uint16_t isa;
+  uint16_t discriminator;
 } fileLineInfo_t;
 
 typedef struct fileInfo {
@@ -76,6 +86,12 @@ typedef struct fileInfo {
   int  numFileLine;    /* Index of the topmost entry */
   fileLineInfo_t *fileLines;
 } fileInfo_t;
+
+typedef struct rangeInfo {
+    Dwarf_Addr dwr_addr1;
+    Dwarf_Addr dwr_addr2;
+    enum Dwarf_Ranges_Entry_Type  dwr_type;
+} rangeInfo_t;
 
 typedef struct compileUnitInfo {
   char *fileName;
@@ -89,6 +105,9 @@ typedef struct compileUnitInfo {
   size_t numDieAndChildren;
   size_t maxDieAndChildren;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
+  int  maxRangeInfo;    /* Size of the rangeInfos array. */
+  int  numRangeInfo;    /* Index of the topmost entry */
+  rangeInfo_t *rangeInfos;
 } compileUnitInfo_t;
 
 typedef struct compileUnitsInfo {
@@ -108,7 +127,7 @@ typedef struct dwarfDbgFileInfo {
   addCompileUnitFile_t addCompileUnitFile;
   addFileInfo_t addFileInfo;
   addFileLine_t addFileLine;
- 
+  addRangeInfo_t addRangeInfo;
 } dwarfDbgFileInfo_t;
 
 

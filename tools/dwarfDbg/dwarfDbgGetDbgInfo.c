@@ -75,6 +75,36 @@ static Dwarf_Off  DIEOverallOffset = 0;  /* DIE offset in .debug_info */
 static dwarfDbgEsb_t esbShortCuName;
 static dwarfDbgEsb_t esbLongCuName;
 
+// =================================== getRanges =========================== 
+
+static uint8_t getRanges(dwarfDbgPtr_t self, Dwarf_Attribute attr_in) {
+  uint8_t result;
+  int rres = 0;
+  int fres = 0;
+  Dwarf_Ranges *rangeset = 0;
+  Dwarf_Signed rangecount = 0;
+  Dwarf_Unsigned bytecount = 0;
+  Dwarf_Unsigned original_off = 0;
+  Dwarf_Error err;
+  compileUnit_t *compileUnit;
+  int i;
+  size_t rangeIdx = 0;
+
+  result = DWARF_DBG_ERR_OK;
+  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
+  fres = dwarf_global_formref(attr_in, &original_off, &err);
+  if (fres == DW_DLV_OK) {
+    rres = dwarf_get_ranges_a(self->elfInfo.dbg, original_off, compileUnit->compileUnitDie, &rangeset, &rangecount, &bytecount, &err);
+printf("rangecount: %d bytecount: %d\n", rangecount, bytecount);
+    for (i = 0; i < rangecount; i++) {
+      Dwarf_Ranges *range = &rangeset[i];
+      result = self->dwarfDbgFileInfo->addRangeInfo(self, range->dwr_addr1, range->dwr_addr2, range->dwr_type, &rangeIdx);
+    }
+  }
+
+  return result;
+}
+
 // =================================== getAttrValue =========================== 
 
 static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, int cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t dieInfoIdx, char **attrStr)
@@ -214,7 +244,6 @@ printf("ERROR theform: 0x%08x not yet implemented\n", theform);
   return 1;
 }
 
-
 // =================================== getAttribute =========================== 
 
 static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, const char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t dieInfoIdx, const char **outStr, int *outValue)
@@ -248,6 +277,10 @@ static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute
   case DW_AT_name:
   case DW_AT_comp_dir:
     *outStr = templateNameStr;
+    break;
+  case DW_AT_ranges:
+    result = getRanges(self, attr_in);
+    checkErrOK(result);
     break;
   default:
     break;
@@ -340,6 +373,9 @@ static uint8_t getCompileUnitLineInfos(dwarfDbgPtr_t self, size_t compileUnitIdx
   Dwarf_Line *lineBufActuals = NULL;
   Dwarf_Addr pc = 0;
   Dwarf_Unsigned lineNo = 0;
+  Dwarf_Bool newstatement = 0;
+  Dwarf_Bool lineendsequence = 0;
+  Dwarf_Bool new_basic_block = 0;
   int i = 0;
 
   result = DWARF_DBG_ERR_OK;
@@ -362,6 +398,18 @@ if (tableCount > 0) {
         char* fileName = 0;
         int ares = 0;
         int lires = 0;
+        int nsres = 0;
+        int disres = 0;
+        Dwarf_Bool prologue_end = 0;
+        Dwarf_Bool epilogue_begin = 0;
+        Dwarf_Unsigned isa = 0;
+        Dwarf_Unsigned discriminator = 0;
+        int flags;
+        char *ns;
+        char *bb;
+        char *et;
+        char *pe;
+        char *eb;
 
         pc = 0;
         ares = dwarf_lineaddr(line, &pc, &err);
@@ -372,8 +420,50 @@ if (tableCount > 0) {
         if (lires != DW_DLV_OK) {
           return DWARF_DBG_ERR_GET_LINE_NO;
         }
-//printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d\n", line, pc, lineNo);
-        result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, compileUnitIdx, fileInfoIdx, fileLineIdx);
+        flags = 0;
+        ns = "";
+        bb = "";
+        et = "";
+        pe = "";
+        eb = "";
+nsres = dwarf_linebeginstatement(line, &newstatement, &err);
+if (nsres == DW_DLV_OK) {
+//printf("NS\n");
+  if (newstatement) {
+    ns = " NS";
+    flags |= LINE_NEW_STATEMENT;
+  }
+}
+nsres = dwarf_lineblock(line, &new_basic_block, &err);
+if (nsres == DW_DLV_OK) {
+  if (new_basic_block) {
+//printf("BB\n");
+    bb = " BB";
+    flags |= LINE_NEW_BASIC_BLOCK;
+  }
+}
+nsres = dwarf_lineendsequence(line, &lineendsequence, &err);
+if (nsres == DW_DLV_OK) {
+  if (lineendsequence) {
+//printf("ET\n");
+    et = " ET";
+    flags |= LINE_END_SEQUENCE;
+  }
+}
+disres = dwarf_prologue_end_etc(line, &prologue_end, &epilogue_begin, &isa, &discriminator, &err);
+if (disres == DW_DLV_OK) {
+//printf("prologue_end: %d epilogue_begin: %d isa: %d discriminator: %d\n", prologue_end, epilogue_begin, isa, discriminator);
+  if (prologue_end) {
+    pe = " PE";
+    flags |= LINE_PROLOGUE_END;
+  }
+  if (epilogue_begin) {
+    eb = " EB";
+    flags |= LINE_PROLOGUE_BEGIN;
+  }
+}
+printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d%s%s%s%s%s isa: %d dis: %d\n", line, pc, lineNo, ns, bb, et, eb, pe, isa, discriminator);
+        result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, flags, (uint16_t)isa, (uint16_t)discriminator, fileInfoIdx, fileLineIdx);
 
       }
     }
@@ -459,7 +549,7 @@ printf("  DW_AT_name\n");
           if (stringValue != NULL) {
 printf("    AT_name: %s\n", stringValue);
             if (strrchr(stringValue, '/') != NULL) {
-              sprintf(buf, "%s", strrchr(stringValue, '/'));
+              sprintf(buf, "%s", strrchr(stringValue, '/')+1);
 printf(">>addDieATName file: %s\n", buf);
               result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
 printf("    with /: %s result: %d\n", stringValue, result);
@@ -513,15 +603,69 @@ printf("  DW_AT_data_member_location\n");
         case DW_AT_sibling :
 printf("  DW_AT_sibling \n");
           break;
-
-#ifdef NOTDEF
-        case DW_AT_encoding:
-printf("  DW_AT_encoding\n");
+        case DW_AT_location:
+printf("  DW_AT_location\n");
           break;
-        case DW_AT_encoding:
-printf("  DW_AT_encoding\n");
+        case DW_AT_GNU_call_site_value:
+printf("  DW_AT_GNU_call_site_value\n");
           break;
-#endif
+        case DW_AT_GNU_all_call_sites:
+printf("  DW_AT_GNU_all_call_sites\n");
+          break;
+        case DW_AT_upper_bound:
+printf("  DW_AT_upper_bound\n");
+          break;
+        case DW_AT_abstract_origin:
+printf("  DW_AT_abstract_origin\n");
+          break;
+        case DW_AT_prototyped:
+printf("  DW_AT_prototyped\n");
+          break;
+        case DW_AT_frame_base:
+printf("  DW_AT_frame_base\n");
+          break;
+        case DW_AT_high_pc:
+printf("  DW_AT_high_pc\n");
+          break;
+        case DW_AT_GNU_all_tail_call_sites:
+printf("  DW_AT_GNU_all_tail_call_sites\n");
+          break;
+        case DW_AT_const_value:
+printf("  DW_AT_const_value\n");
+          break;
+        case DW_AT_inline:
+printf("  DW_AT_inline\n");
+          break;
+        case DW_AT_declaration:
+printf("  DW_AT_declaration\n");
+          break;
+        case DW_AT_external:
+printf("  DW_AT_external\n");
+          break;
+        case DW_AT_bit_offset:
+printf("  DW_AT_bit_offset\n");
+          break;
+        case DW_AT_bit_size:
+printf("  DW_AT_bit_size\n");
+          break;
+        case DW_AT_artificial:
+printf("  DW_AT_artificial\n");
+          break;
+        case DW_AT_entry_pc:
+printf("  DW_AT_entry_pc\n");
+          break;
+        case DW_AT_call_file:
+printf("  DW_AT_call_file\n");
+          break;
+        case DW_AT_call_line:
+printf("  DW_AT_call_line\n");
+          break;
+        case DW_AT_linkage_name:
+printf("  DW_AT_linkage_name\n");
+          break;
+        case DW_AT_GNU_call_site_target:
+printf("  DW_AT_GNU_call_site_target\n");
+          break;
         default:
 printf("  DW_AT_?? 0x%02x\n", attr);
           break;
@@ -707,7 +851,7 @@ printf("producerName: %s\n", producerName);
 
 //printf("  src: %s\n", srcFiles[i]);
       result = self->dwarfDbgFileInfo->addSourceFile(self, srcFiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
-printf("  src: %s %d fileNameIdx: %d fileInfoIdx: %d\n", srcFiles[i], i, fileNameIdx, fileInfoIdx);
+//printf("  src: %s %d fileNameIdx: %d fileInfoIdx: %d\n", srcFiles[i], i, fileNameIdx, fileInfoIdx);
       checkErrOK(result);
     }
 
@@ -720,7 +864,7 @@ printf("handleOneDieSection after handleDieAndChildren result: %d\n", result);
 {
   int dieAndChildrenIdx;
   compileUnitInfo_t *compileUnitInfo;
-//  showFd = fopen("showInfo.txt", "w");
+  showFd = fopen("showInfo.txt", "w");
 
   compileUnitInfo = &compileUnit->compileUnitInfo;
 fprintf(showFd, "++ numDieAndChildren: %d\n", compileUnitInfo->numDieAndChildren);
