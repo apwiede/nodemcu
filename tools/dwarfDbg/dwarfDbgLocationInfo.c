@@ -47,13 +47,7 @@
 
 #include "dwarfDbgInt.h"
 
-/* *************************************************************************
- * dirName:
- *   maxDirName 5   # max free slots
- *   numDirName 3   # next free slot
- *   dirNames  char *dirName0 | char *dirName1 | char *dirnName2
- *
- * */
+// =================================== getAddressSizeAndMax =========================== 
 
 static uint8_t getAddressSizeAndMax(dwarfDbgPtr_t self, Dwarf_Half *size, Dwarf_Addr *max, Dwarf_Error *err) {
   int dres = 0;
@@ -106,7 +100,7 @@ static uint8_t addLocationDirName(dwarfDbgPtr_t self, char *dirName) {
 
 // =================================== getLocationList =========================== 
 
-static uint8_t getLocationList(dwarfDbgPtr_t self, Dwarf_Attribute attr) {
+static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t dieInfoIdx, Dwarf_Bool isSibling, size_t attrIdx, Dwarf_Attribute attr) {
   uint8_t result;
   Dwarf_Error err = NULL;
   Dwarf_Loc_Head_c loclistHead = 0;
@@ -122,13 +116,25 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, Dwarf_Attribute attr) {
   int lres = 0;
   int llent = 0;
   int i;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  compileUnitInfo_t *compileUnitInfo;
+  dieInfo_t *dieInfo;
+  dieAttr_t *dieAttr;
 
   result = DWARF_DBG_ERR_OK;
+  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx].compileUnitInfo;
+  dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+  if (isSibling) {
+    dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
+  } else {
+    dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
+  }
+  dieAttr = &dieInfo->dieAttrs[attrIdx];
   lres = dwarf_get_loclist_c(attr, &loclistHead, &noOfElements, &err);
   if (lres != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_LOC_LIST_C;
   }
-printf("numLocations: %d\n", noOfElements);
+printf("numLocations: %d locationInfo: %p\n", noOfElements, dieAttr->locationInfo);
   for (llent = 0; llent < noOfElements; ++llent) {
     char small_buf[150];
     Dwarf_Unsigned locdescOffset = 0;
@@ -142,6 +148,7 @@ printf("numLocations: %d\n", noOfElements);
     Dwarf_Unsigned offsetforbranch = 0;
     const char *opName = NULL;
     int res = 0;
+    locationOp_t *locationOp;
 
     lres = dwarf_get_locdesc_entry_c(loclistHead, llent, &lleValue, &lopc, &hipc, &locentryCount,
            &locentry, &loclistSource, &sectionOffset, &locdescOffset, &err);
@@ -149,11 +156,25 @@ printf("numLocations: %d\n", noOfElements);
       return DWARF_DBG_ERR_CANNOT_GET_LOC_DESC_ENTRY_C;
     }
 printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x\n", lleValue, lopc, hipc);
+    dieAttr->locationInfo->lopc = lopc;
+    dieAttr->locationInfo->hipc = hipc;
+    // allocate all needed memory her as we know how many entries
+    dieAttr->locationInfo->maxLocEntry = locentryCount;
+    dieAttr->locationInfo->locationOps = (locationOp_t *)ckalloc(sizeof(locationOp_t) * locentryCount); 
+    if (dieAttr->locationInfo->locationOps == NULL) {
+      return DWARF_DBG_ERR_OUT_OF_MEMORY;
+    }
     for (i = 0; i < locentryCount; i++) {
       res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
       if (res != DW_DLV_OK) {
         return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
       }
+      locationOp = &dieAttr->locationInfo->locationOps[i];
+      locationOp->op = op;
+      locationOp->opd1 = opd1;
+      locationOp->opd2 = opd2;
+      locationOp->opd3 = opd3;
+      locationOp->offsetforbranch = offsetforbranch;
       result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
       checkErrOK(result);
 printf("op: 0x%02x %s opd1: 0x%02x opd2: 0x%02x opd3: 0x%02x offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);

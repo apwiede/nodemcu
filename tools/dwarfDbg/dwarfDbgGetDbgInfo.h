@@ -61,7 +61,7 @@ typedef struct compileUnit {
 } compileUnit_t;
 
 typedef uint8_t (* addCompileUnit_t)(dwarfDbgPtr_t self, size_t *compileUnitIdx);
-typedef uint8_t (* handleOneDieSection_t)(dwarfDbgPtr_t self);
+typedef uint8_t (* handleCompileUnits_t)(dwarfDbgPtr_t self);
 
 typedef struct dwarfDbgGetDbgInfo {
   size_t maxCompileUnit;
@@ -71,7 +71,7 @@ typedef struct dwarfDbgGetDbgInfo {
   int currCompileUnitIdx;
 
   addCompileUnit_t addCompileUnit;
-  handleOneDieSection_t handleOneDieSection;
+  handleCompileUnits_t handleCompileUnits;
 } dwarfDbgGetDbgInfo_t;
 
 #endif  /* DWARF_DBG_GET_DBG_INFO */

@@ -148,14 +148,11 @@ static uint8_t addFileName(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx
     self->dwarfDbgFileInfo->fileNamesInfo.maxFileName += 50;
     if (self->dwarfDbgFileInfo->fileNamesInfo.fileNames == NULL) {
       self->dwarfDbgFileInfo->fileNamesInfo.fileNames = (fileNameInfo_t *)ckalloc(sizeof(fileNameInfo_t) * self->dwarfDbgFileInfo->fileNamesInfo.maxFileName);
-      if (self->dwarfDbgFileInfo->fileNamesInfo.fileNames == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
     } else {
       self->dwarfDbgFileInfo->fileNamesInfo.fileNames = (fileNameInfo_t *)ckrealloc((char *)self->dwarfDbgFileInfo->fileNamesInfo.fileNames, sizeof(fileNameInfo_t) * self->dwarfDbgFileInfo->fileNamesInfo.maxFileName);
-      if (self->dwarfDbgFileInfo->fileNamesInfo.fileNames == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
+    }
+    if (self->dwarfDbgFileInfo->fileNamesInfo.fileNames == NULL) {
+      return DWARF_DBG_ERR_OUT_OF_MEMORY;
     }
   }
   fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[self->dwarfDbgFileInfo->fileNamesInfo.numFileName];
@@ -185,7 +182,11 @@ static uint8_t addCompileUnitFile(dwarfDbgPtr_t self, char *pathName, size_t com
 printf("addCompileUnitFile compileUnitIdx: %d %d\n", compileUnitIdx, self->dwarfDbgGetDbgInfo->currCompileUnitIdx);
   result = DWARF_DBG_ERR_OK;
   cp = strrchr(pathName, '/');
-  *cp++ = '\0';
+  if (cp != NULL) {
+    *cp++ = '\0';
+  } else {
+    cp = "";
+  }
 //printf("path: %s name: %s\n", pathName, cp);
   dirIdx = -1;
   for (i = 0; i < self->dwarfDbgFileInfo->dirNamesInfo.numDirName; i++) {

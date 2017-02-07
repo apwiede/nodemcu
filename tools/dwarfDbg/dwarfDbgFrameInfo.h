@@ -41,13 +41,50 @@
 #ifndef DWARF_DBG_FRAME_INFO_H
 #define	DWARF_DBG_FRAME_INFO_H
 
-typedef uint8_t (* getFrameList_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t dieInfoIdx, Dwarf_Bool isSibling, size_t attrIdx, Dwarf_Attribute attr);
+typedef uint8_t (* addFrameRegCol_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t cieFdeIdx, size_t fdeIdx, Dwarf_Addr pc, Dwarf_Signed offset, Dwarf_Signed reg);
+typedef uint8_t (* addFde_t)(dwarfDbgPtr_t self,Dwarf_Signed cieIdx, size_t cieFdeIdx, size_t fdeIdx, Dwarf_Addr pc, Dwarf_Signed offset, Dwarf_Signed reg);
+typedef uint8_t (* addCieFde_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t cieFdeIdx, Dwarf_Addr lowPc, Dwarf_Unsigned funcLgth, Dwarf_Signed reg, Dwarf_Signed offset, size_t *fdeIdx);
+typedef uint8_t (* addFrameInfo_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, Dwarf_Addr pc, Dwarf_Unsigned funcLgthg, size_t *cieFdeIdx);
+typedef uint8_t (* getFrameList_t)(dwarfDbgPtr_t self);
+
+typedef struct frameRegCol {
+  Dwarf_Addr pc;
+  Dwarf_Signed offset;
+  Dwarf_Signed reg;
+  Dwarf_Signed cfaReg; // is always c_cfa_reg!
+} frameRegCol_t;
+
+typedef struct frameDataEntry {
+  Dwarf_Addr lowPc;
+  Dwarf_Unsigned funcLgth;
+  Dwarf_Signed reg;
+  Dwarf_Signed offset;
+  int numFrameRegCol;
+  int maxFrameRegCol;
+  frameRegCol_t *frameRegCols;
+} frameDataEntry_t;
+
+typedef struct cieFde {
+  Dwarf_Signed cieIdx;
+  int numFde;
+  int maxFde;
+  frameDataEntry_t *frameDataEntries;
+} cieFde_t;
 
 typedef struct frameInfo {
+  int numCieFde;
+  int maxCieFde;
+  cieFde_t *cieFdes;
 } frameInfo_t;
 
 typedef struct dwarfDbgFrameInfo {
-  getLocationList_t getLocationList;
+  frameInfo_t frameInfo;
+
+  addFrameRegCol_t addFrameRegCol;
+  addFde_t addFde;
+  addCieFde_t addCieFde;
+  addFrameInfo_t addFrameInfo;
+  getFrameList_t getFrameList;
 } dwarfDbgFrameInfo_t;
 
 

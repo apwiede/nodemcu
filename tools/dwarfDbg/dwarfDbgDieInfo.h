@@ -41,6 +41,8 @@
 #ifndef DWARF_DBG_DIE_INFO_H
 #define	DWARF_DBG_DIE_INFO_H
 
+#define DW_LOCATION_INFO 0x01
+
 typedef struct dieAttr {
   Dwarf_Half attr;
   Dwarf_Attribute attr_in;
@@ -48,6 +50,7 @@ typedef struct dieAttr {
   Dwarf_Half directform;
   Dwarf_Unsigned uval;
   uint16_t flags;
+  locationInfo_t *locationInfo;
 } dieAttr_t;
 
 typedef struct dieInfo {

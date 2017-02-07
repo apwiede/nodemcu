@@ -145,17 +145,23 @@ static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute att
 
 //printf("++getAttrValue: dieAndChildrenIdx: 0x%02x attr: 0x%08x uval: 0x%08x theform: 0x%08x\n", dieAndChildrenIdx, attr, uval, theform);
   if ((int)dieAndChildrenIdx >= 0) {
+    switch (attr) {
+    case DW_AT_location:
+      flags |= DW_LOCATION_INFO;
+      break;
+    }
     if (isSibling) {
       result = self->dwarfDbgDieInfo->addDieSiblingAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, uval, theform, directform, flags, &attrIdx);
     } else {
       result = self->dwarfDbgDieInfo->addDieChildAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, uval, theform, directform, flags, &attrIdx);
     }
     checkErrOK(result);
+printf("attrIdx: %d isSibling: %d\n", attrIdx, isSibling);
   }
   switch (theform) {
   case DW_FORM_addr:
     bres = dwarf_formaddr(attr_in, &addr, &err);
-//printf("DW_FORM_addr: attrib: 0x%08x addr: 0x%08x\n", attr_in, addr);
+printf("DW_FORM_addr: attrib: 0x%08x addr: 0x%08x\n", attr_in, addr);
     break;
   case DW_FORM_data1:
     fres = dwarf_whatattr(attr_in, &attr, &err);
@@ -200,6 +206,9 @@ static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute att
     case DW_AT_bit_size:
 //printf("DW_AT_bit_size\n");
       break;
+    case DW_AT_location:
+printf("DW_AT_location should call getLocation\n");
+      break;
     default:
 printf("ERROR attribute: 0x%08x not yet implemented\n", attr);
       break;
@@ -212,6 +221,12 @@ printf("ERROR attribute: 0x%08x not yet implemented\n", attr);
     break;
   case DW_FORM_sec_offset:
 printf("DW_FORM_sec_offset\n");
+    switch(attr) {
+    case DW_AT_location:
+      result = self->dwarfDbgLocationInfo->getLocationList(self, dieAndChildrenIdx, dieInfoIdx, isSibling, attrIdx, attr_in);
+      checkErrOK(result);
+      break;
+    }
     break;
   case DW_FORM_ref4:
 printf("DW_FORM_ref4\n");
@@ -265,6 +280,11 @@ static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute
 //printf("getAttribute: 0x%04x\n", attr);
   res = dwarf_get_AT_name(attr, &atName);
 //printf("getAttribute: atName: %s\n", atName);
+  switch (attr) {
+  case DW_AT_location:
+printf("getAttr: location\n");
+    break;
+  }
   getAttrValue(self, attr, attr_in, NULL, 0, dieAndChildrenIdx, isSibling, dieInfoIdx, &templateNameStr);
   switch (attr) {
   case DW_AT_language:
@@ -281,6 +301,9 @@ static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute
   case DW_AT_ranges:
     result = getRanges(self, attr_in);
     checkErrOK(result);
+    break;
+  case DW_AT_location:
+printf("getAttribute: location\n");
     break;
   default:
     break;
@@ -751,9 +774,9 @@ printf("handleDieAndChildren done die: %p level: %d\n", in_die_in, childrenLevel
   return result;
 }
 
-// =================================== handleOneDieSection =========================== 
+// =================================== handleCompileUnits =========================== 
 
-static uint8_t handleOneDieSection(dwarfDbgPtr_t self) {
+static uint8_t handleCompileUnits(dwarfDbgPtr_t self) {
   uint8_t result;
   const char * sectionName = 0;
   int res = 0;
@@ -776,6 +799,8 @@ static uint8_t handleOneDieSection(dwarfDbgPtr_t self) {
   if (res != DW_DLV_OK || !sectionName || !strlen(sectionName)) {
     sectionName = ".debug_info";
   }
+  result = self->dwarfDbgLocationInfo->getAddressSizeAndMax(self, &self->dwarfDbgLocationInfo->addrSize, &self->dwarfDbgLocationInfo->maxAddr, &err);
+printf("addrSize: 0x%08x maxAddr: 0x%08x\n", self->dwarfDbgLocationInfo->addrSize, self->dwarfDbgLocationInfo->maxAddr);
   /* Loop over compile units until it fails.  */
   for (;;++loopCount) {
     int sres = DW_DLV_OK;
@@ -810,6 +835,18 @@ printf("addCompileUnit: result: %d compileUnitIdx: %d\n", result, compileUnitIdx
     if (nres != DW_DLV_OK) {
       return DWARF_DBG_ERR_CANNOT_GET_NEXT_COMPILE_UNIT;
     }
+#ifdef NOTDEF
+{
+Dwarf_Addr low_pc = 0;
+struct Addr_Map_Entry *mp = 0;
+void *lowpcSet = NULL;
+
+low_pc = 0x40100098;
+mp = (void *)addrMapFind(low_pc, &lowpcSet);
+printf("mp: %p low_pc: 0x%08x lowpcSet: %p\n", mp, low_pc, lowpcSet);
+}
+#endif
+
     self->dwarfDbgGetDbgInfo->currCompileUnit = compileUnit;
     /*  get basic information about the current compile unit: producer, name */
     sres = dwarf_siblingof_b(self->elfInfo.dbg, NULL,/* is_info */1, &compileUnit->compileUnitDie, &err);
@@ -858,13 +895,13 @@ printf("producerName: %s\n", producerName);
 printf("call handleDieAndChildren\n");
         result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcFiles, srcCnt, compileUnitIdx);
     }
-printf("handleOneDieSection after handleDieAndChildren result: %d\n", result);
+printf("handleCompileUnits after handleDieAndChildren result: %d\n", result);
 
 // for testing show the structure
 {
   int dieAndChildrenIdx;
   compileUnitInfo_t *compileUnitInfo;
-  showFd = fopen("showInfo.txt", "w");
+//  showFd = fopen("showInfo.txt", "w");
 
   compileUnitInfo = &compileUnit->compileUnitInfo;
 fprintf(showFd, "++ numDieAndChildren: %d\n", compileUnitInfo->numDieAndChildren);
@@ -903,9 +940,12 @@ int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
 
 //printf("dwarfDbgGetDbgInfos\n");
   result = DWARF_DBG_ERR_OK;
-  result = self->dwarfDbgGetDbgInfo->handleOneDieSection(self);
+  result = self->dwarfDbgFrameInfo->getFrameList(self);
+printf("getFrameLists: result: %d\n", result);
   checkErrOK(result);
-
+  result = self->dwarfDbgGetDbgInfo->handleCompileUnits(self);
+printf("handleCompileUnits: result: %d\n", result);
+  checkErrOK(result);
   return result;
 }
 
@@ -918,6 +958,6 @@ int dwarfDbgGetDbgInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgGetDbgInfo->compileUnits = NULL;
 
   self->dwarfDbgGetDbgInfo->addCompileUnit = &addCompileUnit;
-  self->dwarfDbgGetDbgInfo->handleOneDieSection = &handleOneDieSection;
+  self->dwarfDbgGetDbgInfo->handleCompileUnits = &handleCompileUnits;
   return DWARF_DBG_ERR_OK;
 }
