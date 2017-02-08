@@ -186,9 +186,115 @@ printf("op: 0x%02x %s opd1: 0x%02x opd2: 0x%02x opd3: 0x%02x offsetforbranch: %d
 // =================================== dwarfDbgGetVarAddr =========================== 
 
 int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char *varName, int pc, int fp, int *addr) {
+  int result;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  compileUnitInfo_t *compileUnitInfo;
+  dieInfo_t *dieInfo;
+  dieAttr_t *dieAttr;
+  locationInfo_t *locationInfo;
+  int idx;
+  int idx1;
+  int idx2;
+  int idx3;
+  int idx4;
+  int idx5;
+  int idx6;
+  int idx7;
+  int idx8;
+  int found;
+  cieFde_t *cieFde;
+  frameInfo_t *frameInfo;
+  frameDataEntry_t *fde;
+  frameRegCol_t *frc;
+
+  result = DWARF_DBG_ERR_OK;
 printf("dwarfDbgGetVarAddr: %s pc: 0x%08x fp: 0x%08x\n", varName, pc, fp);
 fflush(stdout);
-  *addr = fp + 20;
+//  *addr = fp + 20;
+  found = 0;
+#ifdef NOTDEF
+  for (idx = 0; idx < self->dwarfDbgGetDbgInfo->numCompileUnit; idx++) {
+    compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[idx].compileUnitInfo;
+//printf("idx: %d\n", idx);
+    for (idx2 = 0; idx2 < compileUnitInfo->numDieAndChildren; idx2++) {
+      dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[idx2];
+//printf("idx2: %d\n", idx2);
+      for (idx3 = 0; idx3 < dieAndChildrenInfo->numChildren; idx3++) {
+        dieInfo = &dieAndChildrenInfo->dieChildren[idx3];
+//printf("idx3: %d\n", idx3);
+        for (idx5 = 0; idx5 < dieInfo->numAttr; idx5++) {
+          dieAttr = &dieInfo->dieAttrs[idx5];
+//printf("idx5: %d\n", idx5);
+            locationInfo = dieAttr->locationInfo;
+            if ((locationInfo != NULL) &&(locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
+              found = 1;
+printf("idx: %d idx2: %d idx3: %d idx5: %d idx7: %d\n", idx, idx2, idx3, idx5, idx7);
+              break;
+            }
+        }
+        if (found) {
+          break;
+        }
+      }
+printf("found1: %d\n", found);
+      if (!found) {
+        for (idx4 = 0; idx4 < dieAndChildrenInfo->numSiblings; idx4++) {
+          dieInfo = &dieAndChildrenInfo->dieSiblings[idx4];
+          for (idx6 = 0; idx6 < dieInfo->numAttr; idx6++) {
+            dieAttr = &dieInfo->dieAttrs[idx6];
+              locationInfo = dieAttr->locationInfo;
+              if ((locationInfo != NULL) &&(locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
+                found = 1;
+printf("idx: %d idx2: %d idx4: %d idx6: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", idx, idx2, idx4, idx6, pc, locationInfo->lopc, locationInfo->hipc);
+                break;
+              }
+          }
+          if (found) {
+            break;
+          }
+        }
+        if (found) {
+          break;
+        }
+      }
+      if (found) {
+        break;
+      }
+    }
+    if (found) {
+      break;
+    }
+  }
+printf("found: %d\n", found);
+fflush(stdout);
+#endif
+  frameInfo = &self->dwarfDbgFrameInfo->frameInfo;
+  for (idx = 0; idx < frameInfo->numCieFde; idx++) {
+    cieFde = &frameInfo->cieFdes[idx];
+    for (idx1 = 0; idx1 < cieFde->numFde; idx1++) {
+      fde = &cieFde->frameDataEntries[idx1];
+      if ((fde->lowPc <= pc ) && (pc <= (fde->lowPc + fde->funcLgth)))  {
+        found = 1;
+printf("idx: %d idx1: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", idx, idx1, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
+        // get the RegCol here !!!
+        // FIXME !! need code here
+printf ("numFrameRegCol: %d maxFrameRegCol: %d\n", fde->numFrameRegCol, fde->maxFrameRegCol);
+        for (idx2 = 0; idx2 < fde->numFrameRegCol; idx2++) {
+          frc = &fde->frameRegCols[idx2];
+printf("pc: 0x%08x offset: %d reg: %d\n", frc->pc, frc->offset, frc->reg);
+        }
+        break;
+      }
+      if (found) {
+        break;
+      }
+    }
+    if (found) {
+      break;
+    }
+  }
+printf("found: %d\n", found);
+fflush(stdout);
   return TCL_OK;
 }
 

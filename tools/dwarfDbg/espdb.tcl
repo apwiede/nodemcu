@@ -690,15 +690,15 @@ if {[llength $argv] > 0} {
   set sourceFileName "compMsgAction.c"
 }
 
-buildWidget
+#buildWidget
 dwarfDbgClass create ::dD
+::dD init
+::dD openElf /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out
+::dD getDbgInfos
 scan "0x4025eaab" %x pc
 scan "0x3ffffbb0" %x fp
 set addr [::dD getVarAddr yyyQQQ $pc $fp]
 puts [format "addr: 0x%008x" $addr]
-::dD init
-::dD openElf /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out
-::dD getDbgInfos
 getCompileUnitInfos
 flush stderr
 
@@ -706,6 +706,6 @@ set sourceDirName "/home/arnulf/apwiede-nodemcu-firmware/app/compMsg"
 showDebugFile $sourceDirName $sourceFileName
 
 puts stderr "call init0"
-init0
+#init0
 
-vwait forever
+#vwait forever
