@@ -60,6 +60,7 @@ critcl::api function int           dwarfDbgGetDbgInfos {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgGetFileInfos {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgGetFileLines {dwarfDbgPtr_t dbg int compileUnit}
 critcl::api function int           dwarfDbgGetFiles {dwarfDbgPtr_t dbg}
+critcl::api function int           dwarfDbgGetVarAddr {dwarfDbgPtr_t dbg char* varName int pc int fp int* addr}
 critcl::api function int           dwarfDbgCloseElf {dwarfDbgPtr_t dbg}
 critcl::api function int           dwarfDbgInit {dwarfDbgPtr_t dbg}
 critcl::api function char*         dwarfDbgGetErrorStr {dwarfDbgPtr_t dbg}

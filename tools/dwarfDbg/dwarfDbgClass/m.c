@@ -60,7 +60,7 @@
  */
 
 int
-stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+stm_CLEAR (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   /* Syntax: dwarfDbg clear
    *	       [0]      [1]
    */
@@ -81,7 +81,7 @@ stm_CLEAR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv
  *---------------------------------------------------------------------------
  */
 
-int stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_DESTROY (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   /* Syntax: dwarfDbg destroy
    *	       [0]      [1]
    */
@@ -89,7 +89,7 @@ int stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST
     Tcl_WrongNumArgs (interp, 2, objv, NULL);
     return TCL_ERROR;
   }
-  Tcl_DeleteCommandFromToken(interp, (Tcl_Command) dwarfDbgClientDataGet (dbg));
+  Tcl_DeleteCommandFromToken(interp, (Tcl_Command) dwarfDbgClientDataGet (self));
   return TCL_OK;
 }
 
@@ -103,7 +103,7 @@ int stm_DESTROY (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST
  *---------------------------------------------------------------------------
  */
 
-int stm_INIT (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_INIT (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
   /* Syntax: dwardfDbg init
@@ -113,9 +113,9 @@ int stm_INIT (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* o
     Tcl_WrongNumArgs (interp, 2, objv, NULL);
     return TCL_ERROR;
   }
-  result = dwarfDbgInit(dbg);
+  result = dwarfDbgInit(self);
   if (result != TCL_OK) {
-    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } 
   return result;
 }
@@ -130,7 +130,7 @@ int stm_INIT (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* o
  *---------------------------------------------------------------------------
  */
 
-int stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_OPEN_ELF (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
   /* Syntax: dwardfdbg openElf fileName
@@ -144,9 +144,9 @@ int stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONS
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-  result = dwarfDbgOpenElf (dbg, Tcl_GetString(objv[2]));
+  result = dwarfDbgOpenElf (self, Tcl_GetString(objv[2]));
   if (result != TCL_OK) {
-    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } 
   return result;
 }
@@ -161,7 +161,7 @@ int stm_OPEN_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONS
  *---------------------------------------------------------------------------
  */
 
-int stm_GET_FILES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_GET_FILES (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
   /* Syntax: dwardfdbg getFiles
@@ -171,9 +171,9 @@ int stm_GET_FILES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CON
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-  result = dwarfDbgGetFiles (dbg);
+  result = dwarfDbgGetFiles (self);
   if (result != TCL_OK) {
-    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } 
   return result;
 }
@@ -188,7 +188,7 @@ int stm_GET_FILES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CON
  *---------------------------------------------------------------------------
  */
 
-int stm_GET_DBG_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_GET_DBG_INFOS (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
   /* Syntax: dwardfdbg getDbgInfos
@@ -198,9 +198,9 @@ int stm_GET_DBG_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj*
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-  result = dwarfDbgGetDbgInfos (dbg);
+  result = dwarfDbgGetDbgInfos (self);
   if (result != TCL_OK) {
-    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } 
   return result;
 }
@@ -215,7 +215,7 @@ int stm_GET_DBG_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj*
  *---------------------------------------------------------------------------
  */
 
-int stm_GET_FILE_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_GET_FILE_INFOS (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
   /* Syntax: dwardfdbg getFileInfos
@@ -225,10 +225,51 @@ int stm_GET_FILE_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-  result = dwarfDbgGetFileInfos (dbg);
+  result = dwarfDbgGetFileInfos (self);
   if (result != TCL_OK) {
-    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } 
+  return result;
+}
+
+/*---------------------------------------------------------------------------
+ * stm_GET_VAR_ADDR --
+ *	return the address of a variable depending on pc and fp register value
+ *      for use by the debugger
+ * Results:
+ *	A standard Tcl result code.
+ * Side effects:
+ *	None.
+ *---------------------------------------------------------------------------
+ */
+
+int stm_GET_VAR_ADDR (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+  int result;
+  int pc;
+  int fp;
+  int addr;
+  Tcl_Obj *objPtr;
+
+  /* Syntax: dwardfdbg getVarAddr varName pc  fp
+   *	       [0]       [1]         [2]  [3] [4]
+   */
+  if ((objc != 5)) {
+    Tcl_WrongNumArgs (interp, objc, objv, NULL);
+    return TCL_ERROR;
+  }
+  if (Tcl_GetIntFromObj(interp, objv[3], &pc) != TCL_OK) {
+    return TCL_ERROR;
+  }
+  if (Tcl_GetIntFromObj(interp, objv[4], &fp) != TCL_OK) {
+    return TCL_ERROR;
+  }
+  result = dwarfDbgGetVarAddr (self, Tcl_GetString(objv[2]), pc, fp, &addr);
+  if (result != TCL_OK) {
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
+  } else {
+    objPtr = Tcl_NewIntObj(addr);
+    Tcl_SetObjResult(interp, objPtr);
+  }
   return result;
 }
 
@@ -242,7 +283,7 @@ int stm_GET_FILE_INFOS (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj
  *---------------------------------------------------------------------------
  */
 
-int stm_GET_FILE_LINES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_GET_FILE_LINES (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
   int value;
 
@@ -254,9 +295,9 @@ int stm_GET_FILE_LINES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj
     return TCL_ERROR;
   }
   result = Tcl_GetIntFromObj(interp, objv[2], &value);
-  result = dwarfDbgGetFileLines (dbg, value);
+  result = dwarfDbgGetFileLines (self, value);
   if (result != TCL_OK) {
-    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } 
   return result;
 }
@@ -271,7 +312,7 @@ int stm_GET_FILE_LINES (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj
  *---------------------------------------------------------------------------
  */
 
-int stm_CLOSE_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_CLOSE_ELF (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
   /* Syntax: dwardfdbg closeElf
@@ -281,9 +322,9 @@ int stm_CLOSE_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CON
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-  result = dwarfDbgCloseElf (dbg);
+  result = dwarfDbgCloseElf (self);
   if (result != TCL_OK) {
-    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), TCL_STATIC);
+    Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } 
   return result;
 }
@@ -298,10 +339,10 @@ int stm_CLOSE_ELF (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CON
  *---------------------------------------------------------------------------
  */
 
-int stm_GET_ERROR_STR (dwarfDbgPtr_t dbg, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
+int stm_GET_ERROR_STR (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj* CONST* objv) {
   int result;
 
-  Tcl_SetResult  (interp, dwarfDbgGetErrorStr(dbg), NULL);
+  Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), NULL);
   return TCL_OK;
 }
 /*

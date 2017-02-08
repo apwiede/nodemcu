@@ -9,12 +9,11 @@
 # in C, with both classes and their instances represented as Tcl
 # commands.
 #
-# Copyright (c) 2012 Andreas Kupries <andreas_kupries@users.sourceforge.net>
+# Copyright (c) 2017 Arnulf Wiedemann <arnulf@wiedemann-pri.de>
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: stackc.tcl,v 1.1 2008/06/19 23:03:35 andreas_kupries Exp $
 
 package require Tcl 8.6
 package require critcl 3.1
@@ -74,6 +73,7 @@ critcl::class::define ::dwarfDbgClass {
     method getFileInfos  as stm_GET_FILE_INFOS
     method getFileLines  as stm_GET_FILE_LINES
     method getDbgInfos   as stm_GET_DBG_INFOS
+    method getVarAddr    as stm_GET_VAR_ADDR
     method closeElf      as stm_CLOSE_ELF
     method init          as stm_INIT
     method getErrorStr   as stm_GET_ERROR_STR

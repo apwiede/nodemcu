@@ -183,6 +183,15 @@ printf("op: 0x%02x %s opd1: 0x%02x opd2: 0x%02x opd3: 0x%02x offsetforbranch: %d
   return result;
 }
 
+// =================================== dwarfDbgGetVarAddr =========================== 
+
+int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char *varName, int pc, int fp, int *addr) {
+printf("dwarfDbgGetVarAddr: %s pc: 0x%08x fp: 0x%08x\n", varName, pc, fp);
+fflush(stdout);
+  *addr = fp + 20;
+  return TCL_OK;
+}
+
 // =================================== dwarfDbgLocationInfoInit =========================== 
 
 int dwarfDbgLocationInfoInit (dwarfDbgPtr_t self) {
