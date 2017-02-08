@@ -193,6 +193,7 @@ puts stderr ">>gdbCmd sent: $::answer!"
 
 proc callDbgGetRegisters {} {
   set answerCmd "g"
+  set ::expectRegisters true
   set chkSum 0
   foreach ch [split $answerCmd ""] {
     binary scan $ch c pch
@@ -263,7 +264,6 @@ puts stderr "default reason: $reason breakpoint"
       }
     }
     "q" {
-      set ::expectRegisters true
 puts stderr "q LL: [string length $params]!"
       set registerVals $params
       set regNames [list a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 pc sar litbase sr176 xx ps]
