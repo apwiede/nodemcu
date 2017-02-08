@@ -41,10 +41,9 @@
 #ifndef DWARF_DBG_FRAME_INFO_H
 #define	DWARF_DBG_FRAME_INFO_H
 
-typedef uint8_t (* addFrameRegCol_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t cieFdeIdx, size_t fdeIdx, Dwarf_Addr pc, Dwarf_Signed offset, Dwarf_Signed reg);
-typedef uint8_t (* addFde_t)(dwarfDbgPtr_t self,Dwarf_Signed cieIdx, size_t cieFdeIdx, size_t fdeIdx, Dwarf_Addr pc, Dwarf_Signed offset, Dwarf_Signed reg);
-typedef uint8_t (* addCieFde_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t cieFdeIdx, Dwarf_Addr lowPc, Dwarf_Unsigned funcLgth, Dwarf_Signed reg, Dwarf_Signed offset, size_t *fdeIdx);
-typedef uint8_t (* addFrameInfo_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, Dwarf_Addr pc, Dwarf_Unsigned funcLgthg, size_t *cieFdeIdx);
+typedef uint8_t (* addFrameRegCol_t)(dwarfDbgPtr_t self,Dwarf_Signed cieIdx, size_t cieFdeIdx, size_t fdeIdx, Dwarf_Addr pc, Dwarf_Signed offset, Dwarf_Signed reg, size_t *frcIdx);
+typedef uint8_t (* addFde_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t cieFdeIdx, Dwarf_Addr lowPc, Dwarf_Unsigned funcLgth, Dwarf_Signed reg, Dwarf_Signed offset, size_t *fdeIdx);
+typedef uint8_t (* addCieFde_t)(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, Dwarf_Addr pc, Dwarf_Unsigned funcLgthg, size_t *cieFdeIdx);
 typedef uint8_t (* getFrameList_t)(dwarfDbgPtr_t self);
 
 typedef struct frameRegCol {
@@ -83,7 +82,6 @@ typedef struct dwarfDbgFrameInfo {
   addFrameRegCol_t addFrameRegCol;
   addFde_t addFde;
   addCieFde_t addCieFde;
-  addFrameInfo_t addFrameInfo;
   getFrameList_t getFrameList;
 } dwarfDbgFrameInfo_t;
 
