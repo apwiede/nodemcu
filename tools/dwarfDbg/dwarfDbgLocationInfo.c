@@ -185,27 +185,34 @@ printf("op: 0x%02x %s opd1: 0x%02x opd2: 0x%02x opd3: 0x%02x offsetforbranch: %d
 
 // =================================== dwarfDbgGetVarAddr =========================== 
 
-int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char *varName, int pc, int fp, int *addr) {
+int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, char *varName, int pc, int fp, int *addr) {
   int result;
-  dieAndChildrenInfo_t *dieAndChildrenInfo;
-  compileUnitInfo_t *compileUnitInfo;
-  dieInfo_t *dieInfo;
-  dieAttr_t *dieAttr;
-  locationInfo_t *locationInfo;
-  int idx;
-  int idx1;
-  int idx2;
-  int idx3;
   int idx4;
   int idx5;
   int idx6;
   int idx7;
   int idx8;
-  int found;
+
+  int compileUnitIdx = 0;
+  int cieFdeIdx = 0;
+  int fdeIdx = 0;
+  int frcIdx = 0;
+  int lastFdeIdx = 0;
+  int found = 0;
+  int newFp = 0;
+  int dieAndChildrenIdx;
+  int dieInfoIdx;
+  int dieAttrIdx;
   cieFde_t *cieFde;
   frameInfo_t *frameInfo;
   frameDataEntry_t *fde;
   frameRegCol_t *frc;
+  compileUnit_t *compileUnit;
+  compileUnitInfo_t *compileUnitInfo;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  dieInfo_t *dieInfo;
+  dieAttr_t *dieAttr;
+  locationInfo_t *locationInfo;
 
   result = DWARF_DBG_ERR_OK;
 printf("dwarfDbgGetVarAddr: %s pc: 0x%08x fp: 0x%08x\n", varName, pc, fp);
@@ -213,46 +220,8 @@ fflush(stdout);
 //  *addr = fp + 20;
   found = 0;
 #ifdef NOTDEF
-  for (idx = 0; idx < self->dwarfDbgGetDbgInfo->numCompileUnit; idx++) {
-    compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[idx].compileUnitInfo;
-//printf("idx: %d\n", idx);
-    for (idx2 = 0; idx2 < compileUnitInfo->numDieAndChildren; idx2++) {
-      dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[idx2];
-//printf("idx2: %d\n", idx2);
-      for (idx3 = 0; idx3 < dieAndChildrenInfo->numChildren; idx3++) {
-        dieInfo = &dieAndChildrenInfo->dieChildren[idx3];
-//printf("idx3: %d\n", idx3);
-        for (idx5 = 0; idx5 < dieInfo->numAttr; idx5++) {
-          dieAttr = &dieInfo->dieAttrs[idx5];
-//printf("idx5: %d\n", idx5);
-            locationInfo = dieAttr->locationInfo;
-            if ((locationInfo != NULL) &&(locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
-              found = 1;
-printf("idx: %d idx2: %d idx3: %d idx5: %d idx7: %d\n", idx, idx2, idx3, idx5, idx7);
-              break;
-            }
-        }
-        if (found) {
-          break;
-        }
-      }
 printf("found1: %d\n", found);
       if (!found) {
-        for (idx4 = 0; idx4 < dieAndChildrenInfo->numSiblings; idx4++) {
-          dieInfo = &dieAndChildrenInfo->dieSiblings[idx4];
-          for (idx6 = 0; idx6 < dieInfo->numAttr; idx6++) {
-            dieAttr = &dieInfo->dieAttrs[idx6];
-              locationInfo = dieAttr->locationInfo;
-              if ((locationInfo != NULL) &&(locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
-                found = 1;
-printf("idx: %d idx2: %d idx4: %d idx6: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", idx, idx2, idx4, idx6, pc, locationInfo->lopc, locationInfo->hipc);
-                break;
-              }
-          }
-          if (found) {
-            break;
-          }
-        }
         if (found) {
           break;
         }
@@ -261,40 +230,129 @@ printf("idx: %d idx2: %d idx4: %d idx6: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n"
         break;
       }
     }
-    if (found) {
-      break;
-    }
-  }
 printf("found: %d\n", found);
 fflush(stdout);
 #endif
   frameInfo = &self->dwarfDbgFrameInfo->frameInfo;
-  for (idx = 0; idx < frameInfo->numCieFde; idx++) {
-    cieFde = &frameInfo->cieFdes[idx];
-    for (idx1 = 0; idx1 < cieFde->numFde; idx1++) {
-      fde = &cieFde->frameDataEntries[idx1];
-      if ((fde->lowPc <= pc ) && (pc <= (fde->lowPc + fde->funcLgth)))  {
-        found = 1;
-printf("idx: %d idx1: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", idx, idx1, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
-        // get the RegCol here !!!
-        // FIXME !! need code here
-printf ("numFrameRegCol: %d maxFrameRegCol: %d\n", fde->numFrameRegCol, fde->maxFrameRegCol);
-        for (idx2 = 0; idx2 < fde->numFrameRegCol; idx2++) {
-          frc = &fde->frameRegCols[idx2];
-printf("pc: 0x%08x offset: %d reg: %d\n", frc->pc, frc->offset, frc->reg);
-        }
+  for (cieFdeIdx = 0; cieFdeIdx < frameInfo->numCieFde; cieFdeIdx++) {
+    cieFde = &frameInfo->cieFdes[cieFdeIdx];
+    for (fdeIdx = 0; fdeIdx < cieFde->numFde; fdeIdx++) {
+      fde = &cieFde->frameDataEntries[fdeIdx];
+//printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", cieFdeIdx, fdeIdx, lastFdeIdx, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
+      if (fde->lowPc > pc) {
         break;
       }
-      if (found) {
-        break;
+      if ((fde->lowPc <= pc ) && (pc <= (fde->lowPc + fde->funcLgth)))  {
+        found = 1;
+//printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", cieFdeIdx, fdeIdx, lastFdeIdx, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
+        // get the RegCol here !!!
+        // FIXME !! need code here
+//printf ("  numFrameRegCol: %d maxFrameRegCol: %d\n", fde->numFrameRegCol, fde->maxFrameRegCol);
+        for (frcIdx = 0; frcIdx < fde->numFrameRegCol; frcIdx++) {
+          frc = &fde->frameRegCols[frcIdx];
+//printf("   frcIdx: %d pc: 0x%08x offset: %d reg: %d\n", frcIdx, frc->pc, frc->offset, frc->reg);
+          if (frc->pc > pc) {
+printf("   frcIdx: %d frc >!\n", frcIdx);
+          }
+        }
+        lastFdeIdx = fdeIdx;
       }
     }
     if (found) {
       break;
     }
   }
-printf("found: %d\n", found);
+  if (found) {
+    fde = &cieFde->frameDataEntries[lastFdeIdx];
+    frc = &fde->frameRegCols[0];
+printf("  pc: 0x%08x offset: %d reg: %d\n", frc->pc, frc->offset, frc->reg);
+printf("addr for var %s pc: 0x%08x fp: 0x%08x found cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d\n", varName, pc, fp, cieFdeIdx, fdeIdx, lastFdeIdx);
+     switch (frc->reg) {
+     case 1:
+       newFp = fp + frc->offset;
+printf("fp: 0x%08x newFp: 0x%08x\n", fp, newFp);
+       break;
+     default:
+fprintf(stderr, "rule for reg: %d not yet implemented\n", frc->reg);
+       break;
+     }
 fflush(stdout);
+  } else {
+printf("addr for var: %s pc: 0x%08x fp: 0x%08x not found\n", varName, pc, fp);
+    self->errorStr = "Cannot get addr for var\n";
+    return TCL_ERROR;
+  }
+  // and now get the variable location!
+  // first the compileUnit
+  found = 0;
+  for (compileUnitIdx = 0; compileUnitIdx < self->dwarfDbgGetDbgInfo->numCompileUnit; compileUnitIdx++) {
+    compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx];
+    if (strcmp(compileUnit->compileUnitShortName, sourceFileName) == 0) {
+      found = 1;
+      break;
+    }
+  }
+printf("found: %d compileUnitIdx: %d\n", found, compileUnitIdx);
+  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx].compileUnitInfo;
+  for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnitInfo->numDieAndChildren; dieAndChildrenIdx++) {
+    dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+printf("dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
+    for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numChildren; dieInfoIdx++) {
+      dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
+//printf("children dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+      for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
+        dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
+        if (dieAttr->attr == DW_AT_name) {
+printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx);
+          if (dieAttr->attr == DW_AT_location) {
+            locationInfo = dieAttr->locationInfo;
+if (locationInfo == NULL) {
+printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
+} else {
+printf("dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
+}
+            if ((locationInfo != NULL) && (locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
+              found = 1;
+printf("child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
+//            break;
+            }
+          }
+        }
+      }
+      if (found) {
+        break;
+      }
+    }
+printf("children done: found: %d numSiblings: %d\n", found, dieAndChildrenInfo->numSiblings);
+    if (!found) {
+      for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numSiblings; dieInfoIdx++) {
+        dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
+//printf("siblings dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+        for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
+          dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
+          if (dieAttr->attr == DW_AT_name) {
+printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx);
+            if (dieAttr->attr == DW_AT_location) {
+              locationInfo = dieAttr->locationInfo;
+if (locationInfo == NULL) {
+printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
+} else {
+printf("dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
+}
+              if ((locationInfo != NULL) && (locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
+                found = 1;
+printf("sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
+//                break;
+              }
+            }
+          }
+        }
+        if (found) {
+          break;
+        }
+      }
+    }
+  }
   return TCL_OK;
 }
 

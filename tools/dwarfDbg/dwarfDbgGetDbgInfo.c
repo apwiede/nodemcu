@@ -937,9 +937,13 @@ printf(">>source: %d %d\n", i, compileUnitInfo->sourceFiles[i]);
 
 int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
   uint8_t result;
+  char *chunk;
 
 //printf("dwarfDbgGetDbgInfos\n");
   result = DWARF_DBG_ERR_OK;
+  // for performance alloc a big chunk of memory and free it imidiately again
+  chunk = ckalloc(10*1024*1024);
+  ckfree(chunk);
   result = self->dwarfDbgFrameInfo->getFrameList(self);
 printf("getFrameLists: result: %d\n", result);
   checkErrOK(result);

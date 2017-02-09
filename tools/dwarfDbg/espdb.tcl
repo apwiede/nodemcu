@@ -695,9 +695,10 @@ dwarfDbgClass create ::dD
 ::dD init
 ::dD openElf /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out
 ::dD getDbgInfos
-scan "0x4025eaab" %x pc
+#scan "0x4025eaab" %x pc
+scan "0x4025ea24" %x pc
 scan "0x3ffffbb0" %x fp
-set addr [::dD getVarAddr yyyQQQ $pc $fp]
+set addr [::dD getVarAddr compMsgDispatcher.c yyyQQQ $pc $fp]
 puts [format "addr: 0x%008x" $addr]
 getCompileUnitInfos
 flush stderr

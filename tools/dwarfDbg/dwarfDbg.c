@@ -112,66 +112,66 @@ dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
 // =================================== dwarfDbgDel =========================== 
 
 void
-dwarfDbgDel (dwarfDbgPtr_t dbg) {
-  ckfree ((char*) dbg);
+dwarfDbgDel (dwarfDbgPtr_t self) {
+  ckfree ((char*) self);
 }
 
 // =================================== dwarfDbgClientDataSet =========================== 
 
 void
-dwarfDbgClientDataSet (dwarfDbgPtr_t dbg, void* clientdata) {
-  dbg->clientData = clientdata;
+dwarfDbgClientDataSet (dwarfDbgPtr_t self, void* clientdata) {
+  self->clientData = clientdata;
 }
 
 // =================================== dwarfDbgClientDataGet =========================== 
 
-void* dwarfDbgClientDataGet (dwarfDbgPtr_t dbg) {
-  return dbg->clientData;
+void* dwarfDbgClientDataGet (dwarfDbgPtr_t self) {
+  return self->clientData;
 }
 
 // =================================== dwarfDbgInit =========================== 
 
-int dwarfDbgInit (dwarfDbgPtr_t dbg) {
+int dwarfDbgInit (dwarfDbgPtr_t self) {
   int result;
 
   // dwarfDbgEsb module
-  result = dwarfDbgEsbInit(dbg);
+  result = dwarfDbgEsbInit(self);
   checkErrOK(result);
 
   // dwarfDbgUtil module
-  result = dwarfDbgUtilInit(dbg);
+  result = dwarfDbgUtilInit(self);
   checkErrOK(result);
 
   // dwarfDbgDict module
-  result = dwarfDbgDictInit(dbg);
+  result = dwarfDbgDictInit(self);
   checkErrOK(result);
 
   // dwarfDbgLocationInfo module
-  result = dwarfDbgLocationInfoInit(dbg);
+  result = dwarfDbgLocationInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgFrameInfo module
-  result = dwarfDbgFrameInfoInit(dbg);
+  result = dwarfDbgFrameInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgFileInfo module
-  result = dwarfDbgFileInfoInit(dbg);
+  result = dwarfDbgFileInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgStringInfo module
-  result = dwarfDbgStringInfoInit(dbg);
+  result = dwarfDbgStringInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgDieInfo module
-  result = dwarfDbgDieInfoInit(dbg);
+  result = dwarfDbgDieInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgElfInfo module
-  result = dwarfDbgElfInfoInit(dbg);
+  result = dwarfDbgElfInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgGetDbgInfo module
-  result = dwarfDbgGetDbgInfoInit(dbg);
+  result = dwarfDbgGetDbgInfoInit(self);
   checkErrOK(result);
 
 // add all other init parts for modules here !!
@@ -180,8 +180,8 @@ int dwarfDbgInit (dwarfDbgPtr_t dbg) {
 
 // =================================== dwarfDbgGetErrorStr =========================== 
 
-char * dwarfDbgGetErrorStr (dwarfDbgPtr_t dbg) {
-  return dbg->errorStr;
+char * dwarfDbgGetErrorStr (dwarfDbgPtr_t self) {
+  return self->errorStr;
 }
 
 /*

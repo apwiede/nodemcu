@@ -145,7 +145,7 @@ static uint8_t addFrameRegCol(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t ci
   frameRegCol->pc = pc;
   frameRegCol->reg = reg;
   frameRegCol->offset = offset;
-printf("frc: pc: 0x%08x reg: %d offset: %d\n", pc, reg, offset);
+//printf("frc: pc: 0x%08x reg: %d offset: %d\n", pc, reg, offset);
   *frcIdx = fde->numFrameRegCol;
   fde->numFrameRegCol++;
   return result;
@@ -174,13 +174,14 @@ static uint8_t addFde(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t cieFdeIdx,
       return DWARF_DBG_ERR_OUT_OF_MEMORY;
     }
   }
+  frameInfo->numFde++;
   frameDataEntry = &cieFde->frameDataEntries[cieFde->numFde];
   memset(frameDataEntry, 0, sizeof(frameDataEntry_t));
   frameDataEntry->lowPc = lowPc;
   frameDataEntry->funcLgth = funcLgth;
   frameDataEntry->reg = reg;
   frameDataEntry->offset = offset;
-printf("addFde: cieFdeIdx: %d fdeIdx: %d frameDataEntry: %p pc: 0x%08x funcLgth: %d pc+funcLgth: 0x%08x reg: %d offset: %d\n", cieFdeIdx, cieFde->numFde, frameDataEntry, lowPc, funcLgth, lowPc+funcLgth, reg, offset);
+printf("addFde: %d cieFdeIdx: %d fdeIdx: %d pc: 0x%08x funcLgth: %d pc+funcLgth: 0x%08x reg: %d offset: %d\n", frameInfo->numFde, cieFdeIdx, cieFde->numFde, lowPc, funcLgth, lowPc+funcLgth, reg, offset);
   *fdeIdx = cieFde->numFde;
   cieFde->numFde++;
   return result;
@@ -211,7 +212,7 @@ static uint8_t addCieFde(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, Dwarf_Addr pc,
   for (idx = 0; idx < frameInfo->numCieFde; idx++) {
     cieFde = &frameInfo->cieFdes[idx];
     if (cieFde->cieIdx == cieIdx) {
-printf("addCieFd: 1 cieIdx: %d cieFdeIdx: %d\n", cieIdx, idx);
+//printf("addCieFd: 1 cieIdx: %d cieFdeIdx: %d\n", cieIdx, idx);
       *cieFdeIdx = idx;
       return DWARF_DBG_ERR_OK;
     }
@@ -219,7 +220,7 @@ printf("addCieFd: 1 cieIdx: %d cieFdeIdx: %d\n", cieIdx, idx);
   cieFde = &frameInfo->cieFdes[frameInfo->numCieFde];
   memset(cieFde, 0, sizeof(cieFde_t));
   cieFde->cieIdx = cieIdx;
-printf("addCieFd: 2 cieIdx: %d cieFdeIdx: %d\n", cieIdx, frameInfo->numCieFde);
+//printf("addCieFd: 2 cieIdx: %d cieFdeIdx: %d\n", cieIdx, frameInfo->numCieFde);
   *cieFdeIdx = frameInfo->numCieFde;
   frameInfo->numCieFde++;
   return result;
@@ -267,7 +268,7 @@ printf("getFrameList: cie_element_count: %d fde_element_count: %d\n", cie_elemen
     }
 //    mp = addrMapFind(low_pc, &lowpcSet);
 //printf("mp: %p low_pc: 0x%08x lowpcSet: %p\n", mp, low_pc, lowpcSet);
-printf("i: %d low_pc: 0x%08x func_length: %d pc+fl: 0x%08x cie_offset: 0x%08x cie_index: %d fde_offset: 0x%08x\n", i, lowPc, funcLgth, lowPc+funcLgth, cieOffset, cieIdx, fde_offset);
+//printf("i: %d low_pc: 0x%08x func_length: %d pc+fl: 0x%08x cie_offset: 0x%08x cie_index: %d fde_offset: 0x%08x\n", i, lowPc, funcLgth, lowPc+funcLgth, cieOffset, cieIdx, fde_offset);
     self->dwarfDbgFrameInfo->addCieFde(self, cieIdx, lowPc, funcLgth, &cieFdeIdx);
     for (j = lowPc; j < lowPc + funcLgth; j++) {
       Dwarf_Half k = 0;
@@ -290,7 +291,6 @@ printf("i: %d low_pc: 0x%08x func_length: %d pc+fl: 0x%08x cie_offset: 0x%08x ci
       unsigned cf_same_val = 1035;
       unsigned cf_undefined_val = 1034;
 
-printf("j loop start: 0x%08x\n", j);
       jsave = j;
       fires = dwarf_get_fde_info_for_cfa_reg3_b(fde, j, &valueType, &offsetRelevant, &reg,
           &offsetOrBlockLen, &blockPtr, &rowPc, &hasMoreRows, &subsequentPc, &err);
@@ -314,36 +314,11 @@ printf("j loop start: 0x%08x\n", j);
           j = subsequentPc - 1;
         }
       }
-printf("offsetRelevant: %d\n", offsetRelevant);
       if (offsetRelevant) {
         size_t frcIdx = 0;
-#ifdef NOTDEF
-        Dwarf_Signed reg = 0;
-        Dwarf_Signed offset_relevant = 0;
-        int fires = 0;
-        Dwarf_Small value_type = 0;
-        Dwarf_Ptr block_ptr = 0;
-        Dwarf_Signed offset_or_block_len = 0;
-        Dwarf_Signed offset = 0;
-        Dwarf_Addr row_pc = 0;
-
-        fires = dwarf_get_fde_info_for_reg3(fde, k, jsave, &value_type, &offset_relevant, &reg,
-                  &offset_or_block_len, &block_ptr, &row_pc, &err);
-        offset = offset_or_block_len;
-printf("fires: %d offset_relevant: %d\n");
-        if (fires == DW_DLV_ERROR) {
-          return DWARF_DBG_ERR_GET_FDE_INFO_FOR_REG3;
-        }
-        if (fires == DW_DLV_NO_ENTRY) {
-          continue;
-        }
-#endif
-        if (offsetRelevant) {
-printf("j2: 0x%08x value_type3: %d offset_relevant: %d reg: %d offset: %d\n", j, valueType, offsetRelevant, reg, offset);
-//printf("k: %d value_type2: %d offset_relevant: %d reg: %d offset: %d\n", k, value_type, offsetRelevant, reg, offset);
-          result = addFrameRegCol(self, cieIdx, cieFdeIdx, fdeIdx, jsave, offset, reg, &frcIdx);
-          checkErrOK(result);
-        }
+//printf("j2: 0x%08x value_type3: %d offset_relevant: %d reg: %d offset: %d\n", j, valueType, offsetRelevant, reg, offset);
+        result = addFrameRegCol(self, cieIdx, cieFdeIdx, fdeIdx, jsave, offset, reg, &frcIdx);
+        checkErrOK(result);
       }
       for (k = 0; k < cf_table_entry_count; k++) {
         Dwarf_Signed reg = 0;
@@ -366,13 +341,12 @@ printf("j2: 0x%08x value_type3: %d offset_relevant: %d reg: %d offset: %d\n", j,
           continue;
         }
         if (offset_relevant) {
-printf("k: %d value_type2: %d offset_relevant: %d reg: %d offset: %d\n", k, value_type, offset_relevant, reg, offset);
+//printf("k: %d value_type2: %d offset_relevant: %d reg: %d offset: %d\n", k, value_type, offset_relevant, reg, offset);
 //printf("k: %d value_type2: %d offset_relevant: %d reg: %d offset: %d\n", k, value_type, offset_relevant, reg, offset);
           result = addFrameRegCol(self, cieIdx, cieFdeIdx, fdeIdx, jsave, offset, reg, &frcIdx);
           checkErrOK(result);
         }
       }
-printf("j loop end: 0x%08x\n", j);
     }
   }
   return result;

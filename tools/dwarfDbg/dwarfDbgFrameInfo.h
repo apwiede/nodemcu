@@ -71,6 +71,7 @@ typedef struct cieFde {
 } cieFde_t;
 
 typedef struct frameInfo {
+  int numFde;
   int numCieFde;
   int maxCieFde;
   cieFde_t *cieFdes;
