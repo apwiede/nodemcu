@@ -231,11 +231,15 @@ static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileU
   int fileIdx;
   fileNameInfo_t *fileNameInfo;
   compileUnitInfo_t *compileUnitInfo;
+  char saveCh;
 
 //printf(">>addSourceFile: %s\n", pathName);
   result = DWARF_DBG_ERR_OK;
   cp = strrchr(pathName, '/');
-  *cp++ = '\0';
+  if (cp != NULL) {
+    saveCh = *cp;
+    *cp++ = '\0';
+  }
 //printf("path: %s name: %s\n", pathName, cp);
   dirIdx = -1;
   for (i = 0; i < self->dwarfDbgFileInfo->dirNamesInfo.numDirName; i++) {
@@ -264,6 +268,9 @@ static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileU
     result = self->dwarfDbgFileInfo->addFileName(self, cp, dirIdx);
     checkErrOK(result);
   }
+  if (cp != NULL) {
+    cp[-1] = saveCh;
+  }
 
   compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx].compileUnitInfo;
   if (compileUnitInfo->maxSourceFile <= compileUnitInfo->numSourceFile) {
@@ -283,7 +290,7 @@ static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t compileU
     }
   }
   compileUnitInfo->sourceFiles[compileUnitInfo->numSourceFile] = fileIdx;
-printf(">>sourceFiles idx: %d\n", compileUnitInfo->numSourceFile);
+//printf(">>sourceFiles idx: %d\n", compileUnitInfo->numSourceFile);
   compileUnitInfo->numSourceFile++;
   *fileNameIdx = fileIdx;
   return result;

@@ -122,6 +122,7 @@ static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute att
   Dwarf_Bool is_info = FALSE;
   Dwarf_Addr elf_max_address = 0;
   Dwarf_Error paerr = 0;
+  Dwarf_Half attr2 = 0;
 
   char * temps = NULL;
   int res = 0;
@@ -135,37 +136,26 @@ static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute att
   Dwarf_Half directform = 0;
   Dwarf_Error err = 0;
   Dwarf_Addr addr = 0;
+  char *sourceFile = NULL;
+  int sourceLineNo = -1;
   
   result = DWARF_DBG_ERR_OK;
+  *attrStr = NULL;
   res = dwarf_get_AT_name(attr, &atName);
-//printf("getAttrValue attr: 0x%08x atname: %s\n", attr_in, atName);
+printf("getAttrValue attr: 0x%08x atname: %s\n", attr_in, atName);
   fres = dwarf_whatform(attr_in, &theform, &err);
 //printf("getAttrValue: fres: %d res: %d theform: 0x%02x\n", fres, res, theform);
   vres = dwarf_formudata(attr_in, &uval, &err);
+printf("uval: %d\n", uval);
 
-//printf("++getAttrValue: dieAndChildrenIdx: 0x%02x attr: 0x%08x uval: 0x%08x theform: 0x%08x\n", dieAndChildrenIdx, attr, uval, theform);
-  if ((int)dieAndChildrenIdx >= 0) {
-    switch (attr) {
-    case DW_AT_location:
-      flags |= DW_LOCATION_INFO;
-      break;
-    }
-    if (isSibling) {
-      result = self->dwarfDbgDieInfo->addDieSiblingAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, uval, theform, directform, flags, &attrIdx);
-    } else {
-      result = self->dwarfDbgDieInfo->addDieChildAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, uval, theform, directform, flags, &attrIdx);
-    }
-    checkErrOK(result);
-printf("attrIdx: %d isSibling: %d\n", attrIdx, isSibling);
-  }
   switch (theform) {
   case DW_FORM_addr:
     bres = dwarf_formaddr(attr_in, &addr, &err);
 printf("DW_FORM_addr: attrib: 0x%08x addr: 0x%08x\n", attr_in, addr);
     break;
   case DW_FORM_data1:
-    fres = dwarf_whatattr(attr_in, &attr, &err);
-//printf("DW_FORM_data1 attr: 0x%08x\n", attr);
+    fres = dwarf_whatattr(attr_in, &attr2, &err);
+printf("DW_FORM_data1 attr: 0x%08x attr2: 0x%08x\n", attr, attr2);
     switch(attr) {
     case DW_AT_language:
 //printf("DW_AT_language\n");
@@ -177,10 +167,14 @@ printf("DW_FORM_addr: attrib: 0x%08x addr: 0x%08x\n", attr_in, addr);
 //printf("DW_AT_encoding\n");
       break;
     case DW_AT_decl_file:
-//printf("DW_AT_decl_file\n");
+printf("DW_AT_decl_file srcfiles: %p\n", srcfiles);
+      if (srcfiles != NULL) {
+        sourceFile = srcfiles[uval-1];
+printf("FILE: %s\n", srcfiles[uval-1]);
+      }
       break;
     case DW_AT_decl_line:
-//printf("DW_AT_decl_line\n");
+printf("DW_AT_decl_line1 uval: %d\n", uval);
       break;
     case DW_AT_upper_bound:
 //printf("DW_AT_upper_bound\n");
@@ -218,21 +212,33 @@ printf("ERROR attribute: 0x%08x not yet implemented\n", attr);
   case DW_FORM_strp:
     sres = dwarf_formstring(attr_in, &temps, &err);
     *attrStr = temps;
+printf("attrStr: %s\n", temps);
     break;
   case DW_FORM_sec_offset:
 printf("DW_FORM_sec_offset\n");
-    switch(attr) {
-    case DW_AT_location:
-      result = self->dwarfDbgLocationInfo->getLocationList(self, dieAndChildrenIdx, dieInfoIdx, isSibling, attrIdx, attr_in);
-      checkErrOK(result);
-      break;
-    }
+printf("DW_FORM_sec_offset2\n");
     break;
   case DW_FORM_ref4:
 printf("DW_FORM_ref4\n");
     break;
   case DW_FORM_data2:
-printf("DW_FORM_data2\n");
+printf("DW_FORM_data2 uval: %d\n", uval);
+    switch (attr) {
+      case DW_AT_decl_file:
+      case DW_AT_call_file:
+        if (srcfiles != NULL) {
+printf("FILE: %s\n", srcfiles[uval-1]);
+        }
+        break;
+      case DW_AT_decl_line:
+printf("DW_AT_decl_line2: uval: %d\n", uval);
+        sourceLineNo = uval;
+        break;
+      case DW_AT_decl_column:
+      case DW_AT_call_column:
+      case DW_AT_call_line:
+        break;
+    }
     break;
   case DW_FORM_data4:
 printf("DW_FORM_data4\n");
@@ -247,7 +253,51 @@ printf("DW_FORM_block1\n");
 printf("DW_FORM_sdata\n");
     break;
   case DW_FORM_exprloc:
-printf("DW_FORM_exprloc\n");
+    {
+printf("getAttrValue DW_FORM_exprloc\n");
+// print_exprloc_content
+// get_string_from_locs
+      Dwarf_Loc_Head_c head = 0;
+      Dwarf_Locdesc_c locentry = 0;
+      int lres = 0;
+      Dwarf_Unsigned lopc = 0;
+      Dwarf_Unsigned hipc = 0;
+      Dwarf_Unsigned ulocentry_count = 0;
+      Dwarf_Unsigned section_offset = 0;
+      Dwarf_Unsigned locdesc_offset = 0;
+      Dwarf_Small lle_value = 0;
+      Dwarf_Small loclist_source = 0;
+      Dwarf_Unsigned no_of_elements;
+      Dwarf_Loc_Head_c loclist_head = 0;
+      int no_of_ops = 0;
+      int i = 0;
+      int res = 0;
+
+      lres = dwarf_get_loclist_c(attr_in,&loclist_head, &no_of_elements, &err);
+      lres = dwarf_get_locdesc_entry_c(loclist_head, 0, /* Data from 0th LocDesc */ &lle_value, &lopc, &hipc,
+            &ulocentry_count, &locentry, &loclist_source, &section_offset, &locdesc_offset, &err);
+      if (lres != DW_DLV_OK) {
+        return DWARF_DBG_CANNOT_GET_LOCDESC_ENTRY_C;
+      }
+      no_of_ops = ulocentry_count;
+printf("one_locdesc: locentry: %p no_of_ops: %d\n", locentry, no_of_ops);
+      for (i = 0; i < no_of_ops; i++) {
+        Dwarf_Small op = 0;
+        Dwarf_Unsigned opd1 = 0;
+        Dwarf_Unsigned opd2 = 0;
+        Dwarf_Unsigned opd3 = 0;
+        Dwarf_Unsigned offsetforbranch = 0;
+        const char * opName = 0;
+        /* DWARF 2,3,4 and DWARF5 style */
+        int res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
+        if (res != DW_DLV_OK) {
+          return DWARF_DBG_CANNOT_GET_LOCATION_OP_VALUE;
+        }
+        result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
+        checkErrOK(result);
+printf("opName: %s offsetforbranch: %d op1: %d\n", opName, offsetforbranch, opd1);
+      }
+    }
     break;
   case DW_FORM_flag_present:
 printf("DW_FORM_flag_present\n");
@@ -256,12 +306,52 @@ printf("DW_FORM_flag_present\n");
 printf("ERROR theform: 0x%08x not yet implemented\n", theform);
     break;
   }
+//printf("++getAttrValue: dieAndChildrenIdx: 0x%02x attr: 0x%08x uval: 0x%08x theform: 0x%08x\n", dieAndChildrenIdx, attr, uval, theform);
+  if ((int)dieAndChildrenIdx >= 0) {
+    switch (attr) {
+    case DW_AT_location:
+      flags |= DW_LOCATION_INFO;
+      break;
+    case DW_AT_name:
+      if (*attrStr != NULL) {
+        flags |= DW_NAME_INFO;
+      }
+      break;
+    }
+    if (isSibling) {
+      result = self->dwarfDbgDieInfo->addDieSiblingAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, *attrStr, sourceFile, sourceLineNo, uval, theform, directform, flags, &attrIdx);
+    } else {
+      result = self->dwarfDbgDieInfo->addDieChildAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, *attrStr, sourceFile, sourceLineNo, uval, theform, directform, flags, &attrIdx);
+    }
+    checkErrOK(result);
+    switch (theform) {
+    case DW_FORM_exprloc:
+      switch (attr) {
+      case DW_AT_location:
+printf("AT_location: exprloc\n");
+        result = self->dwarfDbgLocationInfo->getLocationList(self, dieAndChildrenIdx, dieInfoIdx, isSibling, attrIdx, attr_in);
+        checkErrOK(result);
+        break;
+      }
+      break;
+    case DW_FORM_sec_offset:
+      switch (attr) {
+printf("AT_location: sec_offset\n");
+      case DW_AT_location:
+        result = self->dwarfDbgLocationInfo->getLocationList(self, dieAndChildrenIdx, dieInfoIdx, isSibling, attrIdx, attr_in);
+        checkErrOK(result);
+        break;
+      }
+      break;
+    }
+//printf("attrIdx: %d isSibling: %d\n", attrIdx, isSibling);
+  }
   return 1;
 }
 
 // =================================== getAttribute =========================== 
 
-static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, const char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t dieInfoIdx, const char **outStr, int *outValue)
+static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t dieInfoIdx, const char **outStr, int *outValue)
 {
   uint8_t result;
   const char *atName = NULL;
@@ -285,7 +375,7 @@ static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute
 printf("getAttr: location\n");
     break;
   }
-  getAttrValue(self, attr, attr_in, NULL, 0, dieAndChildrenIdx, isSibling, dieInfoIdx, &templateNameStr);
+  getAttrValue(self, attr, attr_in, srcfiles, cnt, dieAndChildrenIdx, isSibling, dieInfoIdx, &templateNameStr);
   switch (attr) {
   case DW_AT_language:
     vres = dwarf_formudata(attr_in, &uval, &err);
@@ -561,7 +651,7 @@ printf("atCnt: %p %d\n", die, atCnt);
       ares = dwarf_whatattr(atList[i], &attr, &err);
       if (ares == DW_DLV_OK) {
         stringValue = NULL;
-        result = getAttribute(self, attr, atList[i], /* srcfiles */ NULL, /* cnt */ 0, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
+        result = getAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
         switch (attr) {
         case DW_AT_language:
 printf("  DW_AT_language\n");
@@ -791,7 +881,7 @@ static uint8_t handleCompileUnits(dwarfDbgPtr_t self) {
   int i = 0;
   size_t fileLineIdx;
   Dwarf_Signed srcCnt = 0;
-  char **srcFiles = 0;
+  char **srcfiles = 0;
 
   isInfo = TRUE;
   result = DWARF_DBG_ERR_OK;
@@ -873,7 +963,7 @@ printf("producerName: %s\n", producerName);
 
     {
       Dwarf_Error srcerr = 0;
-      int srcf = dwarf_srcfiles(compileUnit->compileUnitDie, &srcFiles, &srcCnt, &err);
+      int srcf = dwarf_srcfiles(compileUnit->compileUnitDie, &srcfiles, &srcCnt, &err);
 
       if (srcf == DW_DLV_ERROR) {
         return DWRAF_DBG_ERR_GET_SRC_FILES;
@@ -886,14 +976,14 @@ printf("producerName: %s\n", producerName);
       size_t fileNameIdx;
       size_t fileInfoIdx;
 
-//printf("  src: %s\n", srcFiles[i]);
-      result = self->dwarfDbgFileInfo->addSourceFile(self, srcFiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
-//printf("  src: %s %d fileNameIdx: %d fileInfoIdx: %d\n", srcFiles[i], i, fileNameIdx, fileInfoIdx);
+//printf("  src: %s\n", srcfiles[i]);
+      result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
+//printf("  src: %s %d fileNameIdx: %d fileInfoIdx: %d\n", srcfiles[i], i, fileNameIdx, fileInfoIdx);
       checkErrOK(result);
     }
 
 printf("call handleDieAndChildren\n");
-        result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcFiles, srcCnt, compileUnitIdx);
+        result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt, compileUnitIdx);
     }
 printf("handleCompileUnits after handleDieAndChildren result: %d\n", result);
 
@@ -927,7 +1017,7 @@ int i ;
 compileUnitInfo_t *compileUnitInfo;
 compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx].compileUnitInfo;
 for (i = 0; i < compileUnitInfo->numSourceFile; i++) {
-printf(">>source: %d %d\n", i, compileUnitInfo->sourceFiles[i]);
+//printf(">>source: %d %d\n", i, compileUnitInfo->sourceFiles[i]);
 }
   } // end loop
   return result;

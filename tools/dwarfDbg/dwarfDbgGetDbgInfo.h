@@ -69,6 +69,9 @@ typedef struct dwarfDbgGetDbgInfo {
   compileUnit_t *compileUnits;
   compileUnit_t *currCompileUnit;
   int currCompileUnitIdx;
+  size_t numAttrStr;
+  size_t maxAttrStr;
+  char **attrStrs;
 
   addCompileUnit_t addCompileUnit;
   handleCompileUnits_t handleCompileUnits;

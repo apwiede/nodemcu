@@ -67,6 +67,8 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_CANNOT_GET_FDE_RANGE                 = 20,
   DWARF_DBG_ERR_GET_FDE_INFO_FOR_CFA_REG3_B          = 21,
   DWARF_DBG_ERR_GET_FDE_INFO_FOR_REG3                = 22,
+  DWARF_DBG_CANNOT_GET_LOCDESC_ENTRY_C               = 23,
+  DWARF_DBG_CANNOT_GET_LOCATION_OP_VALUE             = 24,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

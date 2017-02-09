@@ -69,7 +69,7 @@ static uint8_t getAddressSizeAndMax(dwarfDbgPtr_t self, Dwarf_Half *size, Dwarf_
 
 // =================================== addLocation =========================== 
 
-static uint8_t addLocationDirName(dwarfDbgPtr_t self, char *dirName) {
+static uint8_t addLocation(dwarfDbgPtr_t self, char *dirName) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -100,7 +100,7 @@ static uint8_t addLocationDirName(dwarfDbgPtr_t self, char *dirName) {
 
 // =================================== getLocationList =========================== 
 
-static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t dieInfoIdx, Dwarf_Bool isSibling, size_t attrIdx, Dwarf_Attribute attr) {
+static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t dieInfoIdx, Dwarf_Bool isSibling, int attrIdx, Dwarf_Attribute attr) {
   uint8_t result;
   Dwarf_Error err = NULL;
   Dwarf_Loc_Head_c loclistHead = 0;
@@ -134,7 +134,7 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
   if (lres != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_LOC_LIST_C;
   }
-printf("numLocations: %d locationInfo: %p\n", noOfElements, dieAttr->locationInfo);
+printf("attrIdx: %d numLocations: %d locationInfo: %p\n", attrIdx, noOfElements, dieAttr->locationInfo);
   for (llent = 0; llent < noOfElements; ++llent) {
     char small_buf[150];
     Dwarf_Unsigned locdescOffset = 0;
@@ -160,6 +160,7 @@ printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x\n", lleValue, lopc, hipc);
     dieAttr->locationInfo->hipc = hipc;
     // allocate all needed memory her as we know how many entries
     dieAttr->locationInfo->maxLocEntry = locentryCount;
+    dieAttr->locationInfo->numLocEntry = locentryCount;
     dieAttr->locationInfo->locationOps = (locationOp_t *)ckalloc(sizeof(locationOp_t) * locentryCount); 
     if (dieAttr->locationInfo->locationOps == NULL) {
       return DWARF_DBG_ERR_OUT_OF_MEMORY;
@@ -177,7 +178,7 @@ printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x\n", lleValue, lopc, hipc);
       locationOp->offsetforbranch = offsetforbranch;
       result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
       checkErrOK(result);
-printf("op: 0x%02x %s opd1: 0x%02x opd2: 0x%02x opd3: 0x%02x offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);
+printf("op: 0x%02x %s opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);
     }
   }
   return result;
@@ -187,52 +188,34 @@ printf("op: 0x%02x %s opd1: 0x%02x opd2: 0x%02x opd3: 0x%02x offsetforbranch: %d
 
 int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, char *varName, int pc, int fp, int *addr) {
   int result;
-  int idx4;
-  int idx5;
-  int idx6;
-  int idx7;
-  int idx8;
-
   int compileUnitIdx = 0;
   int cieFdeIdx = 0;
   int fdeIdx = 0;
   int frcIdx = 0;
   int lastFdeIdx = 0;
   int found = 0;
+  int haveNameAttr = 0;
   int newFp = 0;
-  int dieAndChildrenIdx;
-  int dieInfoIdx;
-  int dieAttrIdx;
-  cieFde_t *cieFde;
-  frameInfo_t *frameInfo;
-  frameDataEntry_t *fde;
-  frameRegCol_t *frc;
-  compileUnit_t *compileUnit;
-  compileUnitInfo_t *compileUnitInfo;
-  dieAndChildrenInfo_t *dieAndChildrenInfo;
-  dieInfo_t *dieInfo;
-  dieAttr_t *dieAttr;
+  int dieAndChildrenIdx = 0;
+  int dieInfoIdx = 0;
+  int dieAttrIdx = 0;
+  int locEntryIdx = 0;
+  char *attrStr = NULL;
+  cieFde_t *cieFde = NULL;
+  frameInfo_t *frameInfo = NULL;
+  frameDataEntry_t *fde = NULL;
+  frameRegCol_t *frc = NULL;
+  compileUnit_t *compileUnit = NULL;
+  compileUnitInfo_t *compileUnitInfo = NULL;
+  dieAndChildrenInfo_t *dieAndChildrenInfo = NULL;
+  dieInfo_t *dieInfo = NULL;
+  dieAttr_t *dieAttr = NULL;
   locationInfo_t *locationInfo;
-
+  locationOp_t *locationOp;
   result = DWARF_DBG_ERR_OK;
 printf("dwarfDbgGetVarAddr: %s pc: 0x%08x fp: 0x%08x\n", varName, pc, fp);
 fflush(stdout);
-//  *addr = fp + 20;
   found = 0;
-#ifdef NOTDEF
-printf("found1: %d\n", found);
-      if (!found) {
-        if (found) {
-          break;
-        }
-      }
-      if (found) {
-        break;
-      }
-    }
-printf("found: %d\n", found);
-fflush(stdout);
-#endif
   frameInfo = &self->dwarfDbgFrameInfo->frameInfo;
   for (cieFdeIdx = 0; cieFdeIdx < frameInfo->numCieFde; cieFdeIdx++) {
     cieFde = &frameInfo->cieFdes[cieFdeIdx];
@@ -270,7 +253,7 @@ printf("addr for var %s pc: 0x%08x fp: 0x%08x found cieFdeIdx: %d fdeIdx: %d las
      switch (frc->reg) {
      case 1:
        newFp = fp + frc->offset;
-printf("fp: 0x%08x newFp: 0x%08x\n", fp, newFp);
+printf("newFp0: 0x%08x fp: 0x%08x frc->offset: %d\n", newFp, fp, frc->offset);
        break;
      default:
 fprintf(stderr, "rule for reg: %d not yet implemented\n", frc->reg);
@@ -293,6 +276,11 @@ printf("addr for var: %s pc: 0x%08x fp: 0x%08x not found\n", varName, pc, fp);
     }
   }
 printf("found: %d compileUnitIdx: %d\n", found, compileUnitIdx);
+  if (!found) {
+    self->errorStr = "Cannot get compile unit for var\n";
+    return TCL_ERROR;
+  }
+  found = 0;
   compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx].compileUnitInfo;
   for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnitInfo->numDieAndChildren; dieAndChildrenIdx++) {
     dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
@@ -300,22 +288,28 @@ printf("dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, d
     for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numChildren; dieInfoIdx++) {
       dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
 //printf("children dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+      haveNameAttr = 0;
       for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
         dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
-        if (dieAttr->attr == DW_AT_name) {
-printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx);
-          if (dieAttr->attr == DW_AT_location) {
-            locationInfo = dieAttr->locationInfo;
+        if (dieAttr->flags & DW_NAME_INFO) {
+printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
+           attrStr = self->dwarfDbgGetDbgInfo->attrStrs[dieAttr->attrStrIdx];
+printf("ATname: %p %s\n", attrStr, attrStr);
+          if (strcmp(varName, attrStr) == 0) {
+            haveNameAttr = 1;
+          }
+        }
+        if ((dieAttr->flags & DW_LOCATION_INFO) && haveNameAttr) {
+          locationInfo = dieAttr->locationInfo;
 if (locationInfo == NULL) {
 printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
 } else {
 printf("dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
 }
-            if ((locationInfo != NULL) && (locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
-              found = 1;
+          if ((locationInfo != NULL) && (locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
+            found = 1;
 printf("child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
-//            break;
-            }
+//          break;
           }
         }
       }
@@ -327,23 +321,50 @@ printf("children done: found: %d numSiblings: %d\n", found, dieAndChildrenInfo->
     if (!found) {
       for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numSiblings; dieInfoIdx++) {
         dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
-//printf("siblings dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+printf("siblings dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+        haveNameAttr = 0;
         for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
+const char *atName = NULL;
           dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
-          if (dieAttr->attr == DW_AT_name) {
-printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx);
-            if (dieAttr->attr == DW_AT_location) {
-              locationInfo = dieAttr->locationInfo;
+//printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%02x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
+self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &atName);
+printf("idx: %d name: %s haveNameAttr: %d\n", dieAttrIdx, atName, haveNameAttr);
+          if (dieAttr->flags & DW_NAME_INFO) {
+printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%04x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
+             attrStr = self->dwarfDbgGetDbgInfo->attrStrs[dieAttr->attrStrIdx];
+printf("ATname: %s\n", attrStr);
+             if (strcmp(varName, attrStr) == 0) {
+printf("FND: ATname: %s\n", attrStr);
+               haveNameAttr = 1;
+             }
+          }
+          if (haveNameAttr && (dieAttr->attr == DW_AT_location)) {
+            locationInfo = dieAttr->locationInfo;
 if (locationInfo == NULL) {
 printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
 } else {
-printf("dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
+printf("  dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
 }
-              if ((locationInfo != NULL) && (locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
-                found = 1;
-printf("sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
-//                break;
+            if (locationInfo != NULL) {
+              found = 1;
+printf("sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
+              for(locEntryIdx = 0; locEntryIdx < locationInfo->numLocEntry; locEntryIdx++) {
+                locationOp = &locationInfo->locationOps[locEntryIdx];
+printf("locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);
+                switch(locationOp->op) {
+                case DW_OP_fbreg:
+printf("newFp1: 0x%08x opd1: %d\n", newFp, locationOp->opd1);
+                  newFp = newFp + locationOp->opd1;
+                  break;
+                default:
+fprintf(stderr, "missing location op: 0x%04x for varName address calculation: %s\n", locationOp->op, varName);
+                  self->errorStr = "missing location op for varName address calculation";
+                  return TCL_ERROR;
+                  break;
+                }
+                break;
               }
+              break;
             }
           }
         }
@@ -353,6 +374,12 @@ printf("sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lo
       }
     }
   }
+  if (!found) {
+    self->errorStr = "varName location not found";
+    return TCL_ERROR;
+  }
+printf("newFp: 0x%08x fp: 0x%08x\n", newFp, fp);
+  *addr = newFp;
   return TCL_OK;
 }
 
@@ -362,13 +389,7 @@ int dwarfDbgLocationInfoInit (dwarfDbgPtr_t self) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
-//  self->dwarfDbgLocationInfo->dirNamesInfo.maxDirName = 0;
-//  self->dwarfDbgLocationInfo->dirNamesInfo.numDirName = 0;
-//  self->dwarfDbgLocationInfo->dirNamesInfo.dirNames = NULL;
-
-    self->dwarfDbgLocationInfo->getAddressSizeAndMax = &getAddressSizeAndMax;
-    self->dwarfDbgLocationInfo->getLocationList = &getLocationList;
+  self->dwarfDbgLocationInfo->getAddressSizeAndMax = &getAddressSizeAndMax;
+  self->dwarfDbgLocationInfo->getLocationList = &getLocationList;
   return result;
 }
-
-
