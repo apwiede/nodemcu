@@ -55,7 +55,7 @@ static uint8_t showDieEntries(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, Dwar
   const char *attrStringValue;
   const char *formStringValue;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   dieInfo_t *dieInfo;
   dieAttr_t *attrInfo;
   Dwarf_Error err;
@@ -63,8 +63,8 @@ static uint8_t showDieEntries(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, Dwar
   char buf[255];
 
   result = DWARF_DBG_ERR_OK;
-  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx].compileUnitInfo;
-  dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
   if (isSibling) {
     maxEntries = dieAndChildrenInfo->numSiblings;
   } else {
@@ -99,11 +99,11 @@ case DW_AT_decl_file:
   int fileIdx;
   fileNameInfo_t *fileNameInfo;
   dirNamesInfo_t *dirNamesInfo;
-  int compileUnitIdx = self->dwarfDbgGetDbgInfo->currCompileUnitIdx;
+  int compileUnitIdx = self->dwarfDbgCompileUnitInfo->currCompileUnitIdx;
   int j;
 
   sres = DW_DLV_OK;
-  fileIdx = compileUnitInfo->sourceFiles[attrInfo->uval];
+  fileIdx = compileUnit->sourceFiles[attrInfo->uval];
   if (fileIdx < self->dwarfDbgFileInfo->fileNamesInfo.numFileName) {
     fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[fileIdx];
     dirNamesInfo = &self->dwarfDbgFileInfo->dirNamesInfo;
@@ -139,33 +139,33 @@ static uint8_t addAttrStr(dwarfDbgPtr_t self, const char *str, int *attrStrIdx) 
   int strIdx;
 
   result = DWARF_DBG_ERR_OK;
-  for(strIdx = 0; strIdx < self->dwarfDbgGetDbgInfo->numAttrStr; strIdx++) {
-    if (strcmp(self->dwarfDbgGetDbgInfo->attrStrs[strIdx], str) == 0) {
+  for(strIdx = 0; strIdx < self->dwarfDbgCompileUnitInfo->numAttrStr; strIdx++) {
+    if (strcmp(self->dwarfDbgCompileUnitInfo->attrStrs[strIdx], str) == 0) {
       *attrStrIdx = strIdx;
       return result;
     }
   }
-  if (self->dwarfDbgGetDbgInfo->maxAttrStr <= self->dwarfDbgGetDbgInfo->numAttrStr) {
-    self->dwarfDbgGetDbgInfo->maxAttrStr += 10;
-    if (self->dwarfDbgGetDbgInfo->attrStrs == NULL) {
-      self->dwarfDbgGetDbgInfo->attrStrs = (char **)ckalloc(sizeof(char *) * self->dwarfDbgGetDbgInfo->maxAttrStr);
-      if (self->dwarfDbgGetDbgInfo->attrStrs == NULL) {
+  if (self->dwarfDbgCompileUnitInfo->maxAttrStr <= self->dwarfDbgCompileUnitInfo->numAttrStr) {
+    self->dwarfDbgCompileUnitInfo->maxAttrStr += 10;
+    if (self->dwarfDbgCompileUnitInfo->attrStrs == NULL) {
+      self->dwarfDbgCompileUnitInfo->attrStrs = (char **)ckalloc(sizeof(char *) * self->dwarfDbgCompileUnitInfo->maxAttrStr);
+      if (self->dwarfDbgCompileUnitInfo->attrStrs == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     } else {
-      self->dwarfDbgGetDbgInfo->attrStrs = (char **)ckrealloc((char *)self->dwarfDbgGetDbgInfo->attrStrs, sizeof(char *) * self->dwarfDbgGetDbgInfo->maxAttrStr);
-      if (self->dwarfDbgGetDbgInfo->attrStrs == NULL) {
+      self->dwarfDbgCompileUnitInfo->attrStrs = (char **)ckrealloc((char *)self->dwarfDbgCompileUnitInfo->attrStrs, sizeof(char *) * self->dwarfDbgCompileUnitInfo->maxAttrStr);
+      if (self->dwarfDbgCompileUnitInfo->attrStrs == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     }
   }
-//printf("== numAttrStrs: %d %s\n", self->dwarfDbgGetDbgInfo->numAttrStr, str);
-  attrStr = &self->dwarfDbgGetDbgInfo->attrStrs[self->dwarfDbgGetDbgInfo->numAttrStr];
+//printf("== numAttrStrs: %d %s\n", self->dwarfDbgCompileUnitInfo->numAttrStr, str);
+  attrStr = &self->dwarfDbgCompileUnitInfo->attrStrs[self->dwarfDbgCompileUnitInfo->numAttrStr];
   *attrStr = ckalloc(strlen(str) + 1);
   memset(*attrStr, 0, strlen(str) + 1);
   memcpy(*attrStr, str, strlen(str));
-  *attrStrIdx = self->dwarfDbgGetDbgInfo->numAttrStr;
-  self->dwarfDbgGetDbgInfo->numAttrStr++;
+  *attrStrIdx = self->dwarfDbgCompileUnitInfo->numAttrStr;
+  self->dwarfDbgCompileUnitInfo->numAttrStr++;
   return result;
 }
 
@@ -177,7 +177,7 @@ static uint8_t addDieAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, Dwarf_Bo
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   dieAttr_t *dieAttr;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   fileInfo_t *fileInfo;
   int attrStrIdx = -1;
 
@@ -186,8 +186,8 @@ static uint8_t addDieAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, Dwarf_Bo
   result = self->dwarfDbgStringInfo->getDW_AT_string(self, attr, &stringValue);
   checkErrOK(result);
 printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%08x attr_in: 0x%08x uval: 0x%08x, theform: 0x%04x\n", stringValue, dieAndChildrenIdx, isSibling, idx, attr, attr_in, uval, theform);
-  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx].compileUnitInfo;
-  dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
   if (isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[idx];
   } else {
@@ -269,12 +269,12 @@ static uint8_t addDieSibling(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_
   uint8_t result;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
 
   result = DWARF_DBG_ERR_OK;
 printf("== addDieSibling: offset: 0x%04x tag: 0x%04x\n", offset, tag);
-  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx].compileUnitInfo;
-  dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
   if (dieAndChildrenInfo->maxSiblings <= dieAndChildrenInfo->numSiblings) {
     dieAndChildrenInfo->maxSiblings += 10;
     if (dieAndChildrenInfo->dieSiblings == NULL) {
@@ -305,12 +305,12 @@ static uint8_t addDieChild(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t 
   uint8_t result;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
 
   result = DWARF_DBG_ERR_OK;
 printf("== addDieChild: offset: 0x%04x tag: 0x%04x\n", offset, tag);
-  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx].compileUnitInfo;
-  dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
   if (dieAndChildrenInfo->maxChildren <= dieAndChildrenInfo->numChildren) {
     dieAndChildrenInfo->maxChildren += 10;
     if (dieAndChildrenInfo->dieChildren == NULL) {
@@ -340,30 +340,30 @@ printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
 static uint8_t addDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die die, size_t *dieAndChildrenIdx) {
   uint8_t result;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
 
   result = DWARF_DBG_ERR_OK;
 printf("== addDieAndChildren: die: 0x%08x\n", die);
-  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx].compileUnitInfo;
-  if (compileUnitInfo->maxDieAndChildren <= compileUnitInfo->numDieAndChildren) {
-    compileUnitInfo->maxDieAndChildren += 10;
-    if (compileUnitInfo->dieAndChildrenInfo == NULL) {
-      compileUnitInfo->dieAndChildrenInfo = (dieAndChildrenInfo_t *)ckalloc(sizeof(dieAndChildrenInfo_t) * compileUnitInfo->maxDieAndChildren);
-      if (compileUnitInfo->dieAndChildrenInfo == NULL) {
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  if (compileUnit->maxDieAndChildren <= compileUnit->numDieAndChildren) {
+    compileUnit->maxDieAndChildren += 10;
+    if (compileUnit->dieAndChildrenInfo == NULL) {
+      compileUnit->dieAndChildrenInfo = (dieAndChildrenInfo_t *)ckalloc(sizeof(dieAndChildrenInfo_t) * compileUnit->maxDieAndChildren);
+      if (compileUnit->dieAndChildrenInfo == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     } else {
-      compileUnitInfo->dieAndChildrenInfo = (dieAndChildrenInfo_t *)ckrealloc((char *)compileUnitInfo->dieAndChildrenInfo, sizeof(dieAndChildrenInfo_t) * compileUnitInfo->maxDieAndChildren);
-      if (compileUnitInfo->dieAndChildrenInfo == NULL) {
+      compileUnit->dieAndChildrenInfo = (dieAndChildrenInfo_t *)ckrealloc((char *)compileUnit->dieAndChildrenInfo, sizeof(dieAndChildrenInfo_t) * compileUnit->maxDieAndChildren);
+      if (compileUnit->dieAndChildrenInfo == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     }
   }
-printf("== numDieAndChildren: %d\n", compileUnitInfo->numDieAndChildren);
-  dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[compileUnitInfo->numDieAndChildren];
+printf("== numDieAndChildren: %d\n", compileUnit->numDieAndChildren);
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[compileUnit->numDieAndChildren];
   memset(dieAndChildrenInfo, 0, sizeof(dieAndChildrenInfo_t));
-  *dieAndChildrenIdx = compileUnitInfo->numDieAndChildren;
-  compileUnitInfo->numDieAndChildren++;
+  *dieAndChildrenIdx = compileUnit->numDieAndChildren;
+  compileUnit->numDieAndChildren++;
   return result;
 }
 

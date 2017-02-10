@@ -41,39 +41,10 @@
 #ifndef DWARF_DBG_GET_DBG_INFO_H
 #define	DWARF_DBG_GET_DBG_INFO_H
 
-typedef struct _compileUnit {
-    Dwarf_Unsigned compileUnitHeaderLength;
-    Dwarf_Half versionStamp;
-    Dwarf_Off abbrevOffset;
-    Dwarf_Half addressSize;
-    Dwarf_Half lengthSize;
-    Dwarf_Half extensionSize;
-    Dwarf_Sig8 signature;
-    Dwarf_Unsigned typeOffset;
-    Dwarf_Unsigned nextCompileUnitOffset;
-    Dwarf_Half compileUnitType;
-    Dwarf_Die compileUnitDie;
-    Dwarf_Off overallOffset;
-    char *compileUnitShortName;
-    size_t fileNameIdx;
-    size_t fileInfoIdx;
-    compileUnitInfo_t compileUnitInfo;
-} _compileUnit_t;
-
-typedef uint8_t (* _addCompileUnit_t)(dwarfDbgPtr_t self, size_t *compileUnitIdx);
 typedef uint8_t (* handleCompileUnits_t)(dwarfDbgPtr_t self);
 
 typedef struct dwarfDbgGetDbgInfo {
-  size_t maxCompileUnit;
-  size_t numCompileUnit;
-  _compileUnit_t *compileUnits;
-  _compileUnit_t *currCompileUnit;
-  int currCompileUnitIdx;
-  size_t numAttrStr;
-  size_t maxAttrStr;
-  char **attrStrs;
 
-  _addCompileUnit_t addCompileUnit;
   handleCompileUnits_t handleCompileUnits;
 } dwarfDbgGetDbgInfo_t;
 

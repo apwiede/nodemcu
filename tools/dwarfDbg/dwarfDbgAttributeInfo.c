@@ -423,12 +423,12 @@ static uint8_t handleDW_AT_rangesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInIn
   Dwarf_Unsigned bytecount = 0;
   Dwarf_Unsigned original_off = 0;
   Dwarf_Error err;
-  _compileUnit_t *compileUnit;
+  compileUnit_t *compileUnit;
   int i;
   size_t rangeIdx = 0;
 
   result = DWARF_DBG_ERR_OK;
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   fres = dwarf_global_formref(attrInInfo->attr_in, &original_off, &err);
   if (fres != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_GLOBA_FORMREF;

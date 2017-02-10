@@ -59,8 +59,8 @@ typedef struct compileUnit {
   Dwarf_Off overallOffset;
   char *shortFileName;
   char *longFileName;
-  size_t fileNameIdx;
-  size_t fileInfoIdx;
+  int fileNameIdx;
+  int fileInfoIdx;
 
   int  maxFileInfo;    /* Size of the fileInfos array. */
   int  numFileInfo;    /* Index of the topmost entry */
@@ -88,6 +88,10 @@ typedef struct dwarfDbgCompileUnitInfo {
   int numCompileUnit;
   int maxCompileUnit;
   compileUnit_t *compileUnits;
+
+  int numAttrStr;
+  int maxAttrStr;
+  char **attrStrs;
 
   getAddressSizeAndMax_t getAddressSizeAndMax;
   addCompileUnit_t addCompileUnit;

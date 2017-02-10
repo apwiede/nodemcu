@@ -49,10 +49,10 @@
 
 typedef uint8_t (* addDirName_t)(dwarfDbgPtr_t self, char *dirName);
 typedef uint8_t (* addFileName_t)(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx);
-typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, size_t *fileNameIdx, size_t *fileInfoIdx);
-typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx);
-typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx);
-typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, int flags, uint16_t isa, uint16_t discriminator, size_t fileInfoIdx, size_t *fileLineIdx);
+typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, int *fileNameIdx, int *fileInfoIdx);
+typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, int *fileNameIdx, int *fileInfoIdx);
+typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, int fileNameIdx, int *fileInfoIdx);
+typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, int lineNo, int flags, uint16_t isa, uint16_t discriminator, int fileInfoIdx, int *fileLineIdx);
 typedef uint8_t (* addRangeInfo_t)(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr dwr_addr2, enum Dwarf_Ranges_Entry_Type dwrType, size_t *rangeInfoIdx);
 typedef uint8_t (* getFileIdxFromFileName_t)(dwarfDbgPtr_t self, const char *pathName, int *fileInfoIdx);
 typedef uint8_t (* getFileNameFromFileIdx_t)(dwarfDbgPtr_t self,int fileIdx,  const char **pathName);

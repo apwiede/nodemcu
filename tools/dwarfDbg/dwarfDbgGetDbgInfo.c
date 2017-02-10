@@ -41,36 +41,6 @@
 #include <tcl.h>
 #include "dwarfDbgInt.h"
 
-// =================================== addCompileUnit =========================== 
-
-static uint8_t addCompileUnit(dwarfDbgPtr_t self, size_t *compileUnitIdx) {
-  uint8_t result;
-  _compileUnit_t *compileUnit;
-
-  result = DWARF_DBG_ERR_OK;
-  if (self->dwarfDbgGetDbgInfo->maxCompileUnit <= self->dwarfDbgGetDbgInfo->numCompileUnit) {
-    self->dwarfDbgGetDbgInfo->maxCompileUnit += 50;
-    if (self->dwarfDbgGetDbgInfo->compileUnits == NULL) {
-      self->dwarfDbgGetDbgInfo->compileUnits = (_compileUnit_t *)ckalloc(sizeof(_compileUnit_t) * self->dwarfDbgGetDbgInfo->maxCompileUnit);
-      if (self->dwarfDbgGetDbgInfo->compileUnits == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    } else {
-      self->dwarfDbgGetDbgInfo->compileUnits = (_compileUnit_t *)ckrealloc((char *)self->dwarfDbgGetDbgInfo->compileUnits, sizeof(_compileUnit_t) * self->dwarfDbgGetDbgInfo->maxCompileUnit);
-      if (self->dwarfDbgGetDbgInfo->compileUnits == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    }
-  }
-//printf("compileUnitIdx: %d\n", self->dwarfDbgGetDbgInfo->numCompileUnit);
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->numCompileUnit];
-  memset(compileUnit, 0, sizeof(_compileUnit_t));
-  *compileUnitIdx = self->dwarfDbgGetDbgInfo->numCompileUnit;
-  self->dwarfDbgGetDbgInfo->numCompileUnit++;
-printf("addCompileUnit end\n");
-  return result;
-}
-
 static Dwarf_Off  DIEOffset = 0;      /* DIE offset in compile unit */
 static Dwarf_Off  DIEOverallOffset = 0;  /* DIE offset in .debug_info */
 static dwarfDbgEsb_t esbShortCuName;
@@ -87,7 +57,7 @@ static uint8_t getRanges(dwarfDbgPtr_t self, Dwarf_Attribute attr_in) {
   Dwarf_Unsigned bytecount = 0;
   Dwarf_Unsigned original_off = 0;
   Dwarf_Error err;
-  _compileUnit_t *compileUnit;
+  compileUnit_t *compileUnit;
   int i;
   size_t rangeIdx = 0;
 
@@ -361,7 +331,7 @@ static int getProducerName(dwarfDbgPtr_t self, char **producerName) {
   Dwarf_Attribute producerAttr = 0;
   Dwarf_Error pnerr = 0;
 
-  int ares = dwarf_attr(self->dwarfDbgGetDbgInfo->currCompileUnit->compileUnitDie, DW_AT_producer, &producerAttr, &pnerr);
+  int ares = dwarf_attr(self->dwarfDbgCompileUnitInfo->currCompileUnit->compileUnitDie, DW_AT_producer, &producerAttr, &pnerr);
   if (ares == DW_DLV_ERROR) {
     printf("hassattr on DW_AT_producer ares: %d pnerr: %d", ares, pnerr);
   }
@@ -388,7 +358,7 @@ static int getCompileUnitName(dwarfDbgPtr_t self, char **shortName, char **longN
   Dwarf_Error lerr = 0;
   int ares;
 
-  ares = dwarf_attr(self->dwarfDbgGetDbgInfo->currCompileUnit->compileUnitDie, DW_AT_name, &nameAttr, &lerr);
+  ares = dwarf_attr(self->dwarfDbgCompileUnitInfo->currCompileUnit->compileUnitDie, DW_AT_name, &nameAttr, &lerr);
   if (ares == DW_DLV_ERROR) {
     printf("hassattr on DW_AT_name ares: %d lerr: %d", ares, lerr);
   } else {
@@ -423,7 +393,7 @@ static int getCompileUnitName(dwarfDbgPtr_t self, char **shortName, char **longN
 
 // =================================== getCompileUnitLineInfos =========================== 
 
-static uint8_t getCompileUnitLineInfos(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx) {
+static uint8_t getCompileUnitLineInfos(dwarfDbgPtr_t self,  int *fileLineIdx) {
   uint8_t result;
   Dwarf_Unsigned lineVersion = 0;
   Dwarf_Line_Context lineContext = 0;
@@ -440,10 +410,13 @@ static uint8_t getCompileUnitLineInfos(dwarfDbgPtr_t self, size_t compileUnitIdx
   Dwarf_Bool lineendsequence = 0;
   Dwarf_Bool new_basic_block = 0;
   int i = 0;
+  int fileInfoIdx;
+  compileUnit_t *compileUnit;
 
   result = DWARF_DBG_ERR_OK;
 //printf("getCompileUnitLineInfos\n");
-  lres = dwarf_srclines_b(self->dwarfDbgGetDbgInfo->currCompileUnit->compileUnitDie, &lineVersion, &tableCount, &lineContext, &err);
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  lres = dwarf_srclines_b(compileUnit->compileUnitDie, &lineVersion, &tableCount, &lineContext, &err);
 if (tableCount > 0) {
 //printf(">>table_count: %d lineVersion: %d\n", tableCount, lineVersion);
 }
@@ -526,7 +499,7 @@ if (disres == DW_DLV_OK) {
   }
 }
 printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d%s%s%s%s%s isa: %d dis: %d\n", line, pc, lineNo, ns, bb, et, eb, pe, isa, discriminator);
-        result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, flags, (uint16_t)isa, (uint16_t)discriminator, fileInfoIdx, fileLineIdx);
+        result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, flags, (uint16_t)isa, (uint16_t)discriminator, compileUnit->fileInfoIdx, fileLineIdx);
 
       }
     }
@@ -554,7 +527,7 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
   const char * tagName = 0;
   size_t i = 0;
   Dwarf_Error err;
-  _compileUnit_t *compileUnit;
+  compileUnit_t *compileUnit;
   Dwarf_Half tag = 0;
   Dwarf_Off offset = 0;
   Dwarf_Signed atCnt = 0;
@@ -564,7 +537,7 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
 
   result = DWARF_DBG_ERR_OK;
 printf("handleOneDie die: %p numDies: %d\n", die, ++numDies);
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx];
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   tres = dwarf_tag(die, &tag, &err);
   if (tres != DW_DLV_OK) {
     printf("accessing tag of die! tres: %d, err: %p", tres, err);
@@ -622,7 +595,7 @@ printf("    AT_name: %s\n", stringValue);
             if (strrchr(stringValue, '/') != NULL) {
               sprintf(buf, "%s", strrchr(stringValue, '/')+1);
 printf(">>addDieATName file: %s\n", buf);
-              result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
+              result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
 printf("    with /: %s result: %d\n", stringValue, result);
               checkErrOK(result);
               shortName = NULL;
@@ -636,7 +609,7 @@ printf("  DW_AT_comp_dir\n");
           if ((stringValue != NULL) && (shortName != NULL)) {
             sprintf(buf, "%s/%s", stringValue, shortName);
 printf(">>addDieAT_comp_dir file: %s\n", buf);
-            result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, compileUnitIdx, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
+            result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
 printf("    NAME: %s result: %d\n", buf, result);
             checkErrOK(result);
           }
@@ -834,7 +807,7 @@ static uint8_t handleCompileUnits(dwarfDbgPtr_t self) {
   char * compileUnitLongName = NULL;
   size_t compileUnitIdx = 0;
   int i = 0;
-  size_t fileLineIdx;
+  int fileLineIdx;
   Dwarf_Signed srcCnt = 0;
   char **srcfiles = 0;
 
@@ -854,6 +827,7 @@ printf("addrSize: 0x%08x maxAddr: 0x%08x\n", self->dwarfDbgCompileUnitInfo->addr
     result = self->dwarfDbgCompileUnitInfo->addCompileUnit(self);
     if (result == DWARF_DBG_ERR_NO_ENTRY) {
       // we have processed all entries
+      result = DWARF_DBG_ERR_OK;
       break;
     }
     checkErrOK(result);
@@ -872,8 +846,8 @@ printf("handle srcfiles\n");
 
 printf("srcCnt: %d compileUnitIdx: %d\n", srcCnt, compileUnitIdx);
       for (i = 0; i < srcCnt; i++) {
-        size_t fileNameIdx;
-        size_t fileInfoIdx;
+        int fileNameIdx;
+        int fileInfoIdx;
 
 printf("  src: %s\n", srcfiles[i]);
         result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], &fileNameIdx, &fileInfoIdx);
@@ -890,12 +864,10 @@ printf("handleCompileUnits after handleDieAndChildren result: %d\n", result);
 // for testing show the structure
 {
   int dieAndChildrenIdx;
-  compileUnitInfo_t *compileUnitInfo;
 //  showFd = fopen("showInfo.txt", "w");
 
-  compileUnitInfo = &compileUnit->compileUnitInfo;
-fprintf(showFd, "++ numDieAndChildren: %d\n", compileUnitInfo->numDieAndChildren);
-  for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnitInfo->numDieAndChildren; dieAndChildrenIdx++) {
+fprintf(showFd, "++ numDieAndChildren: %d\n", compileUnit->numDieAndChildren);
+  for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
 fprintf(showFd, "++ idx: %d\n", dieAndChildrenIdx);
     self->dwarfDbgDieInfo->showChildren(self, dieAndChildrenIdx, "  ");
     self->dwarfDbgDieInfo->showSiblings(self, dieAndChildrenIdx, "  ");
@@ -906,7 +878,7 @@ fflush(showFd);
 #endif
     // eventually handle ranges here
     // here we need to handle source lines
-    result = getCompileUnitLineInfos(self, compileUnitIdx, compileUnit->fileInfoIdx, &fileLineIdx);
+    result = getCompileUnitLineInfos(self, &fileLineIdx);
 //printf("fileLineIdx: %d\n", fileLineIdx);
     checkErrOK(result);
 
@@ -915,9 +887,8 @@ fflush(showFd);
     dwarf_dealloc(self->elfInfo.dbg, compileUnit->compileUnitDie, DW_DLA_DIE);
     compileUnit->compileUnitDie = NULL; /* For debugging, stale die should be NULL. */
 int i ;
-compileUnitInfo_t *compileUnitInfo;
-compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx].compileUnitInfo;
-for (i = 0; i < compileUnitInfo->numSourceFile; i++) {
+compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+for (i = 0; i < compileUnit->numSourceFile; i++) {
 //printf(">>source: %d %d\n", i, compileUnitInfo->sourceFiles[i]);
 }
   } // end loop
@@ -948,11 +919,6 @@ printf("handleCompileUnits: result: %d\n", result);
 
 int dwarfDbgGetDbgInfoInit (dwarfDbgPtr_t self) {
 
-  self->dwarfDbgGetDbgInfo->maxCompileUnit = 0;
-  self->dwarfDbgGetDbgInfo->numCompileUnit = 0;
-  self->dwarfDbgGetDbgInfo->compileUnits = NULL;
-
-  self->dwarfDbgGetDbgInfo->addCompileUnit = &addCompileUnit;
   self->dwarfDbgGetDbgInfo->handleCompileUnits = &handleCompileUnits;
   return DWARF_DBG_ERR_OK;
 }

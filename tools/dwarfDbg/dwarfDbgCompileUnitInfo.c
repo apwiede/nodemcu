@@ -97,7 +97,7 @@ static uint8_t addCompileUnit(dwarfDbgPtr_t self) {
   }
 printf("  >>compileUnitIdx: %d\n", self->dwarfDbgCompileUnitInfo->numCompileUnit);
   compileUnit = &self->dwarfDbgCompileUnitInfo->compileUnits[self->dwarfDbgCompileUnitInfo->numCompileUnit];
-  memset(compileUnit, 0, sizeof(_compileUnit_t));
+  memset(compileUnit, 0, sizeof(compileUnit_t));
   self->dwarfDbgCompileUnitInfo->currCompileUnitIdx = self->dwarfDbgCompileUnitInfo->numCompileUnit;
   self->dwarfDbgCompileUnitInfo->numCompileUnit++;
   self->dwarfDbgCompileUnitInfo->currCompileUnit = compileUnit;
@@ -165,6 +165,9 @@ printf("  >>name2: %s %s\n", compileUnit->shortFileName, compileUnit->longFileNa
 
 int dwarfDbgCompileUnitInfoInit (dwarfDbgPtr_t self) {
   uint8_t result;
+  self->dwarfDbgCompileUnitInfo->maxCompileUnit = 0;
+  self->dwarfDbgCompileUnitInfo->numCompileUnit = 0;
+  self->dwarfDbgCompileUnitInfo->compileUnits = NULL;
 
   result = DWARF_DBG_ERR_OK;
   self->dwarfDbgCompileUnitInfo->getAddressSizeAndMax = &getAddressSizeAndMax;

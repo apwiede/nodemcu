@@ -97,13 +97,13 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
   int llent = 0;
   int i;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   dieInfo_t *dieInfo;
   dieAttr_t *dieAttr;
 
   result = DWARF_DBG_ERR_OK;
-  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx].compileUnitInfo;
-  dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
   if (isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
   } else {
@@ -186,8 +186,7 @@ int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, int sourceLin
   frameInfo_t *frameInfo = NULL;
   frameDataEntry_t *fde = NULL;
   frameRegCol_t *frc = NULL;
-  _compileUnit_t *compileUnit = NULL;
-  compileUnitInfo_t *compileUnitInfo = NULL;
+  compileUnit_t *compileUnit = NULL;
   dieAndChildrenInfo_t *dieAndChildrenInfo = NULL;
   dieInfo_t *dieInfo = NULL;
   dieAttr_t *dieAttr = NULL;
@@ -248,9 +247,9 @@ printf("addr for var: %s pc: 0x%08x fp: 0x%08x not found\n", varName, pc, fp);
   // and now get the variable location!
   // first the compileUnit
   found = 0;
-  for (compileUnitIdx = 0; compileUnitIdx < self->dwarfDbgGetDbgInfo->numCompileUnit; compileUnitIdx++) {
-    compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx];
-    if (strcmp(compileUnit->compileUnitShortName, sourceFileName) == 0) {
+  for (compileUnitIdx = 0; compileUnitIdx < self->dwarfDbgCompileUnitInfo->numCompileUnit; compileUnitIdx++) {
+    compileUnit = &self->dwarfDbgCompileUnitInfo->compileUnits[compileUnitIdx];
+    if (strcmp(compileUnit->shortFileName, sourceFileName) == 0) {
       found = 1;
       break;
     }
@@ -261,9 +260,8 @@ printf("found: %d compileUnitIdx: %d\n", found, compileUnitIdx);
     return TCL_ERROR;
   }
   found = 0;
-  compileUnitInfo = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx].compileUnitInfo;
-  for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnitInfo->numDieAndChildren; dieAndChildrenIdx++) {
-    dieAndChildrenInfo = &compileUnitInfo->dieAndChildrenInfo[dieAndChildrenIdx];
+  for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
+    dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
 printf("dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
     for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numChildren; dieInfoIdx++) {
       dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
@@ -271,14 +269,20 @@ printf("dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, d
       haveNameAttr = 0;
       for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
         dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
+printf("yyattr: 0x%04x dieAttrIdx: %d\n", dieAttr->attr, dieAttrIdx);
+fflush(stdout);
         switch (dieAttr->attr) {
         case DW_AT_name:
 printf("DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
-           attrStr = self->dwarfDbgGetDbgInfo->attrStrs[dieAttr->attrStrIdx];
+           if ((dieAttr->attrStrIdx < 0) || (dieAttr->attrStrIdx >= dieInfo->numAttr)) {
+printf("ERROR bad dieAttr->attrStrIdx: %d\n", dieAttr->attrStrIdx);
+           } else  {
+           attrStr = self->dwarfDbgCompileUnitInfo->attrStrs[dieAttr->attrStrIdx];
 printf("DW_AT_name1: %p %s\n", attrStr, attrStr);
 fflush(stdout);
           if (strcmp(varName, attrStr) == 0) {
             haveNameAttr = 1;
+          }
           }
           break;
         case DW_AT_decl_file:
@@ -359,7 +363,7 @@ printf("idx: %d name: %s haveNameAttr: %d\n", dieAttrIdx, atName, haveNameAttr);
           switch (dieAttr->attr) {
           case DW_AT_name:
 //printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%04x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
-            attrStr = self->dwarfDbgGetDbgInfo->attrStrs[dieAttr->attrStrIdx];
+            attrStr = self->dwarfDbgCompileUnitInfo->attrStrs[dieAttr->attrStrIdx];
 printf("DW_AT_name: %s\n", attrStr);
             if (strcmp(varName, attrStr) == 0) {
 printf("FND: ATname2: %s\n", attrStr);

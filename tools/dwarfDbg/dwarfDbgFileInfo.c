@@ -171,7 +171,7 @@ printf("addFileName: num: %d dirNameIdx: %d %s\n", self->dwarfDbgFileInfo->fileN
 
 // =================================== addCompileUnitFile =========================== 
 
-static uint8_t addCompileUnitFile(dwarfDbgPtr_t self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx) {
+static uint8_t addCompileUnitFile(dwarfDbgPtr_t self, char *pathName, int *fileNameIdx, int *fileInfoIdx) {
   uint8_t result;
   char *cp;
   int i;
@@ -179,7 +179,8 @@ static uint8_t addCompileUnitFile(dwarfDbgPtr_t self, char *pathName, size_t com
   int fileIdx;
   fileNameInfo_t *fileNameInfo;
 
-printf("addCompileUnitFile compileUnitIdx: %d %d\n", compileUnitIdx, self->dwarfDbgGetDbgInfo->currCompileUnitIdx);
+printf("addCompileUnitFile compileUnitIdx: %d\n", self->dwarfDbgCompileUnitInfo->currCompileUnitIdx);
+
   result = DWARF_DBG_ERR_OK;
   cp = strrchr(pathName, '/');
   if (cp != NULL) {
@@ -216,14 +217,14 @@ printf("addCompileUnitFile compileUnitIdx: %d %d\n", compileUnitIdx, self->dwarf
     checkErrOK(result);
   }
   *fileNameIdx = fileIdx;
-  result = self->dwarfDbgFileInfo->addFileInfo(self, compileUnitIdx, fileIdx, fileInfoIdx);
+  result = self->dwarfDbgFileInfo->addFileInfo(self, fileIdx, fileInfoIdx);
   checkErrOK(result);
   return result;
 }
 
 // =================================== addSourceFile =========================== 
 
-static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t *fileNameIdx, size_t *fileInfoIdx) {
+static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, int *fileNameIdx, int *fileInfoIdx) {
   uint8_t result;
   char *cp;
   int i;
@@ -298,58 +299,54 @@ static uint8_t addSourceFile(dwarfDbgPtr_t self, char *pathName, size_t *fileNam
 
 // =================================== addFileInfo =========================== 
 
-static uint8_t addFileInfo(dwarfDbgPtr_t self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx) {
+static uint8_t addFileInfo(dwarfDbgPtr_t self, int fileNameIdx, int *fileInfoIdx) {
   uint8_t result;
-  _compileUnit_t *compileUnit;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   fileInfo_t *fileInfo;
 
   result = DWARF_DBG_ERR_OK;
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx];
-  compileUnitInfo = &compileUnit->compileUnitInfo;
-  if (compileUnitInfo->maxFileInfo <= compileUnitInfo->numFileInfo) {
-    compileUnitInfo->maxFileInfo += 10;
-    if (compileUnitInfo->fileInfos == NULL) {
-      compileUnitInfo->fileInfos = (fileInfo_t *)ckalloc(sizeof(fileInfo_t) * compileUnitInfo->maxFileInfo);
-      if (compileUnitInfo->fileInfos == NULL) {
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  if (compileUnit->maxFileInfo <= compileUnit->numFileInfo) {
+    compileUnit->maxFileInfo += 10;
+    if (compileUnit->fileInfos == NULL) {
+      compileUnit->fileInfos = (fileInfo_t *)ckalloc(sizeof(fileInfo_t) * compileUnit->maxFileInfo);
+      if (compileUnit->fileInfos == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     } else {
-      compileUnitInfo->fileInfos = (fileInfo_t *)ckrealloc((char *)compileUnitInfo->fileInfos, sizeof(fileInfo_t) * compileUnitInfo->maxFileInfo);
-      if (compileUnitInfo->fileInfos == NULL) {
+      compileUnit->fileInfos = (fileInfo_t *)ckrealloc((char *)compileUnit->fileInfos, sizeof(fileInfo_t) * compileUnit->maxFileInfo);
+      if (compileUnit->fileInfos == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     }
   }
-  fileInfo = &compileUnitInfo->fileInfos[compileUnitInfo->numFileInfo];
+  fileInfo = &compileUnit->fileInfos[compileUnit->numFileInfo];
   fileInfo->maxFileLine = 0;
   fileInfo->numFileLine = 0;
   fileInfo->fileLines = NULL;
   fileInfo->fileNameIdx = fileNameIdx;
-  *fileInfoIdx = compileUnitInfo->numFileInfo;
-//printf("addFileInfo: compileUnitIdx: %d fileNameIdx: %d fileInfoIdx: %d\n", compileUnitIdx, fileNameIdx, *fileInfoIdx);
-  compileUnitInfo->numFileInfo++;
+  *fileInfoIdx = compileUnit->numFileInfo;
+//printf("addFileInfo: fileNameIdx: %d fileInfoIdx: %d\n", fileNameIdx, *fileInfoIdx);
+  compileUnit->numFileInfo++;
   return result;
 }
 
 // =================================== addFileLine =========================== 
 
-static uint8_t addFileLine(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, int flags, uint16_t isa, uint16_t discriminator, size_t fileInfoIdx, size_t *fileLineIdx) {
+static uint8_t addFileLine(dwarfDbgPtr_t self, Dwarf_Addr pc, int lineNo, int flags, uint16_t isa, uint16_t discriminator, int fileInfoIdx, int *fileLineIdx) {
   uint8_t result;
-  _compileUnit_t *compileUnit;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   fileInfo_t *fileInfo;
   fileLineInfo_t *fileLineInfo;
 
 //printf("addFileLine: pc: 0x%08x lineNo: %d fileInfoIdx: %d\n", pc, lineNo, fileInfoIdx);
   result = DWARF_DBG_ERR_OK;
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
-  compileUnitInfo = &compileUnit->compileUnitInfo;
-  if (compileUnitInfo->fileInfos == NULL) {
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  if (compileUnit->fileInfos == NULL) {
     // seems to be no file infos!!
     return result;
   }
-  fileInfo = &compileUnitInfo->fileInfos[fileInfoIdx];
+  fileInfo = &compileUnit->fileInfos[fileInfoIdx];
   if (fileInfo->maxFileLine <= fileInfo->numFileLine) {
     fileInfo->maxFileLine += 5;
     if (fileInfo->fileLines == NULL) {
@@ -379,15 +376,13 @@ static uint8_t addFileLine(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, int
 
 static uint8_t getFileIdxFromFileName(dwarfDbgPtr_t self, const char *pathName, int *fileInfoIdx) {
   uint8_t result;
-  _compileUnit_t *compileUnit;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   fileNameInfo_t *fileNameInfo;
   int fileIdx;
 
   *fileInfoIdx = -1;
   result = DWARF_DBG_ERR_OK;
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
-  compileUnitInfo = &compileUnit->compileUnitInfo;
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   for (fileIdx = 0; fileIdx < self->dwarfDbgFileInfo->fileNamesInfo.numFileName; fileIdx++) {
     fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[fileIdx];
     if (strcmp(pathName, fileNameInfo->fileName) == 0) {
@@ -403,14 +398,12 @@ printf("found: fileName %s %d num: %d\n", pathName, fileIdx);
 
 static uint8_t getFileNameFromFileIdx(dwarfDbgPtr_t self, int fileIdx, const char **pathName) {
   uint8_t result;
-  _compileUnit_t *compileUnit;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   fileNameInfo_t *fileNameInfo;
 
   *pathName = NULL;
   result = DWARF_DBG_ERR_OK;
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
-  compileUnitInfo = &compileUnit->compileUnitInfo;
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   if ((fileIdx >= 0) && (fileIdx < self->dwarfDbgFileInfo->fileNamesInfo.numFileName)) {
     fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[fileIdx];
     *pathName = fileNameInfo->fileName;
@@ -423,38 +416,36 @@ printf("found: fileName %s %d num: %d\n", *pathName, fileIdx);
 
 static uint8_t addRangeInfo(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr dwr_addr2, enum Dwarf_Ranges_Entry_Type dwrType, size_t *rangeInfoIdx) {
   uint8_t result;
-  _compileUnit_t *compileUnit;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   rangeInfo_t *rangeInfo;
 
 printf("  >>addRangeInfo: dwr1: 0x%08x dwr2: 0x%08x dwrType: %d\n", dwr_addr1, dwr_addr2, dwrType);
   result = DWARF_DBG_ERR_OK;
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
-  compileUnitInfo = &compileUnit->compileUnitInfo;
-  if (compileUnitInfo->fileInfos == NULL) {
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  if (compileUnit->fileInfos == NULL) {
     // seems to be no file infos!!
     return result;
   }
-  if (compileUnitInfo->maxRangeInfo <= compileUnitInfo->numRangeInfo) {
-    compileUnitInfo->maxRangeInfo += 5;
-    if (compileUnitInfo->rangeInfos == NULL) {
-      compileUnitInfo->rangeInfos = (rangeInfo_t *)ckalloc(sizeof(rangeInfo_t) * compileUnitInfo->maxRangeInfo);
-      if (compileUnitInfo->rangeInfos == NULL) {
+  if (compileUnit->maxRangeInfo <= compileUnit->numRangeInfo) {
+    compileUnit->maxRangeInfo += 5;
+    if (compileUnit->rangeInfos == NULL) {
+      compileUnit->rangeInfos = (rangeInfo_t *)ckalloc(sizeof(rangeInfo_t) * compileUnit->maxRangeInfo);
+      if (compileUnit->rangeInfos == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     } else {
-      compileUnitInfo->rangeInfos = (rangeInfo_t *)ckrealloc((char *)compileUnitInfo->rangeInfos, sizeof(rangeInfo_t) * compileUnitInfo->maxRangeInfo);
-      if (compileUnitInfo->rangeInfos == NULL) {
+      compileUnit->rangeInfos = (rangeInfo_t *)ckrealloc((char *)compileUnit->rangeInfos, sizeof(rangeInfo_t) * compileUnit->maxRangeInfo);
+      if (compileUnit->rangeInfos == NULL) {
         return DWARF_DBG_ERR_OUT_OF_MEMORY;
       }
     }
   }
-  rangeInfo = &compileUnitInfo->rangeInfos[compileUnitInfo->numRangeInfo];
+  rangeInfo = &compileUnit->rangeInfos[compileUnit->numRangeInfo];
   rangeInfo->dwr_addr1 = dwr_addr1;
   rangeInfo->dwr_addr2 = dwr_addr2;
   rangeInfo->dwr_type = dwrType;
-  *rangeInfoIdx = compileUnitInfo->numRangeInfo;
-  compileUnitInfo->numRangeInfo++;
+  *rangeInfoIdx = compileUnit->numRangeInfo;
+  compileUnit->numRangeInfo++;
   return result;
 }
 
@@ -472,8 +463,7 @@ int dwarfDbgGetFileInfos(dwarfDbgPtr_t self) {
   Tcl_Obj *objPtr5;
   Tcl_Obj *objPtr6;
   size_t idx;
-  _compileUnit_t *compileUnit;
-  compileUnitInfo_t *compileUnitInfo;
+  compileUnit_t *compileUnit;
   fileInfo_t *fileInfo;
   fileNameInfo_t *fileNameInfo;
   char *dirName;
@@ -483,21 +473,21 @@ int dwarfDbgGetFileInfos(dwarfDbgPtr_t self) {
   // make a Tcl list of all compile unit file names
   listPtr1 = Tcl_NewListObj(0, NULL);
 printf("listPtr: %p\n", listPtr1);
-  for (idx = 0; idx < self->dwarfDbgGetDbgInfo->numCompileUnit; idx++) {
+  for (idx = 0; idx < self->dwarfDbgCompileUnitInfo->numCompileUnit; idx++) {
     listPtr2 = Tcl_NewListObj(0, NULL);
-    compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[idx];
+    compileUnit = &self->dwarfDbgCompileUnitInfo->compileUnits[idx];
     fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[compileUnit->fileNameIdx];
     dirName = self->dwarfDbgFileInfo->dirNamesInfo.dirNames[fileNameInfo->dirNameIdx];
-    objPtr1 = Tcl_NewStringObj(compileUnit->compileUnitShortName, -1);
+    objPtr1 = Tcl_NewStringObj(compileUnit->shortFileName, -1);
     tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr1);
     objPtr2 = Tcl_NewIntObj(idx);
     tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr2);
     objPtr3 = Tcl_NewIntObj(compileUnit->fileNameIdx);
     tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr3);
-    objPtr4 = Tcl_NewIntObj(compileUnit->compileUnitInfo.numFileInfo - 1);
+    objPtr4 = Tcl_NewIntObj(compileUnit->numFileInfo - 1);
     tclResult = Tcl_ListObjAppendElement(self->interp, listPtr2, objPtr4);
-    if (compileUnit->compileUnitInfo.numFileInfo > 0) {
-      fileInfo = &compileUnit->compileUnitInfo.fileInfos[0];
+    if (compileUnit->numFileInfo > 0) {
+      fileInfo = &compileUnit->fileInfos[0];
       objPtr5 = Tcl_NewIntObj(fileInfo->numFileLine - 1);
     } else {
       objPtr5 = Tcl_NewIntObj(0);
@@ -532,19 +522,19 @@ int dwarfDbgGetFileLines(dwarfDbgPtr_t self, int compileUnitIdx) {
   Tcl_Obj *objPtr8;
   Tcl_Obj *objPtr9;
   size_t idx;
-  _compileUnit_t *compileUnit;
+  compileUnit_t *compileUnit;
   fileInfo_t *fileInfo;
   fileLineInfo_t *fileLineInfo;
 
 //printf("dwarfDbgGetFileLines compileUnitIdx: %d\n", compileUnitIdx);
   result = DWARF_DBG_ERR_OK;
   // make a Tcl dict of all all lines and addresses for a compile unit file name
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx];
+  compileUnit = &self->dwarfDbgCompileUnitInfo->compileUnits[compileUnitIdx];
   dictPtr = Tcl_NewDictObj();
   dictPtr1 = Tcl_NewDictObj();
   dictPtr2 = Tcl_NewDictObj();
-  if (compileUnit->compileUnitInfo.numFileInfo > 0) {
-    fileInfo = &compileUnit->compileUnitInfo.fileInfos[0];
+  if (compileUnit->numFileInfo > 0) {
+    fileInfo = &compileUnit->fileInfos[0];
 //printf("numFileLine: %d\n", fileInfo->numFileLine);
     for (idx = 0; idx < fileInfo->numFileLine; idx++) {
       fileLineInfo = &fileInfo->fileLines[idx];
@@ -554,7 +544,7 @@ int dwarfDbgGetFileLines(dwarfDbgPtr_t self, int compileUnitIdx) {
       objPtr1 = Tcl_NewIntObj(fileLineInfo->lineNo);
       objPtr2 = Tcl_NewIntObj(fileLineInfo->pc);
       objPtr5 = Tcl_NewIntObj(compileUnitIdx);
-      objPtr6 = Tcl_NewStringObj(compileUnit->compileUnitShortName, -1);
+      objPtr6 = Tcl_NewStringObj(compileUnit->shortFileName, -1);
 
       objPtr7 = Tcl_NewStringObj("addr", -1);
       objPtr8 = Tcl_NewStringObj("cu", -1);
@@ -606,5 +596,3 @@ int dwarfDbgFileInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgFileInfo->addRangeInfo = &addRangeInfo;
   return DWARF_DBG_ERR_OK;
 }
-
-
