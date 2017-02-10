@@ -66,6 +66,7 @@
 #include "dwarfDbgDieInfo.h"
 #include "dwarfDbgStringInfo.h"
 #include "dwarfDbgFileInfo.h"
+#include "dwarfDbgCompileUnitInfo.h"
 #include "dwarfDbgElfInfo.h"
 #include "dwarfDbgGetDbgInfo.h"
 
@@ -100,6 +101,7 @@ typedef struct _dwarfDbg {
   dwarfDbgLocationInfo_t *dwarfDbgLocationInfo;
   dwarfDbgStringInfo_t *dwarfDbgStringInfo;
   dwarfDbgDieInfo_t *dwarfDbgDieInfo;
+  dwarfDbgCompileUnitInfo_t *dwarfDbgCompileUnitInfo;
   dwarfDbgElfInfo_t *dwarfDbgElfInfo;
   dwarfDbgGetDbgInfo_t *dwarfDbgGetDbgInfo;
 

@@ -42,7 +42,7 @@
 #define	DWARF_DBG_ATTRIBUTE_INFO_H
 
 typedef uint8_t (* addAttribute_t)(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, int *dieAttrIdx);
-typedef uint8_t (* handleAttribute_t)(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, int *dieAttrIdx);
+typedef uint8_t (* handleAttribute_t)(dwarfDbgPtr_t self, Dwarf_Die die, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, int *dieAttrIdx);
 
 typedef struct dwarfDbgAttributeInfo {
   addAttribute_t addAttribute;

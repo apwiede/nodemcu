@@ -47,26 +47,6 @@
 
 #include "dwarfDbgInt.h"
 
-// =================================== getAddressSizeAndMax =========================== 
-
-static uint8_t getAddressSizeAndMax(dwarfDbgPtr_t self, Dwarf_Half *size, Dwarf_Addr *max, Dwarf_Error *err) {
-  int dres = 0;
-  Dwarf_Half lsize = 4;
-  /* Get address size and largest representable address */
-  dres = dwarf_get_address_size(self->elfInfo.dbg, &lsize, err);
-  if (dres != DW_DLV_OK) {
-    printf("get_address_size() dres: %d err: %p", dres, *err);
-    return DWARF_DBG_ERR_CANNOT_GET_ADDR_SIZE;
-  }
-  if (max) {
-    *max = (lsize == 8 ) ? 0xffffffffffffffffULL : 0xffffffff;
-  }
-  if (size) {
-    *size = lsize;
-  }
-  return DWARF_DBG_ERR_OK;
-}
-
 // =================================== addLocation =========================== 
 
 static uint8_t addLocation(dwarfDbgPtr_t self, char *dirName) {
@@ -206,7 +186,7 @@ int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, int sourceLin
   frameInfo_t *frameInfo = NULL;
   frameDataEntry_t *fde = NULL;
   frameRegCol_t *frc = NULL;
-  compileUnit_t *compileUnit = NULL;
+  _compileUnit_t *compileUnit = NULL;
   compileUnitInfo_t *compileUnitInfo = NULL;
   dieAndChildrenInfo_t *dieAndChildrenInfo = NULL;
   dieInfo_t *dieInfo = NULL;
@@ -462,7 +442,6 @@ int dwarfDbgLocationInfoInit (dwarfDbgPtr_t self) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
-  self->dwarfDbgLocationInfo->getAddressSizeAndMax = &getAddressSizeAndMax;
   self->dwarfDbgLocationInfo->getLocationList = &getLocationList;
   return result;
 }

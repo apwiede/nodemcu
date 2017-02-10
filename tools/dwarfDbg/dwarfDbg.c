@@ -101,6 +101,11 @@ dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
   checkAllocOK(dbg->dwarfDbgDieInfo);
   memset(dbg->dwarfDbgDieInfo, 0, sizeof(dwarfDbgDieInfo_t));
 
+  // dwarfDbgCompileUnitInfo module
+  dbg->dwarfDbgCompileUnitInfo = ALLOC(dwarfDbgCompileUnitInfo_t);
+  checkAllocOK(dbg->dwarfDbgCompileUnitInfo);
+  memset(dbg->dwarfDbgCompileUnitInfo, 0, sizeof(dwarfDbgCompileUnitInfo_t));
+
   // dwarfDbgElfInfo module
   dbg->dwarfDbgElfInfo = ALLOC(dwarfDbgElfInfo_t);
   checkAllocOK(dbg->dwarfDbgElfInfo);
@@ -173,6 +178,10 @@ int dwarfDbgInit (dwarfDbgPtr_t self) {
 
   // dwarfDbgDieInfo module
   result = dwarfDbgDieInfoInit(self);
+  checkErrOK(result);
+
+  // dwarfDbgCompileUnitInfo module
+  result = dwarfDbgCompileUnitInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgElfInfo module
