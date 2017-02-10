@@ -1,0 +1,48 @@
+# =====
+dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) (from Tcl)
+  self->dwarfDbgGetDbgInfo->handleCompileUnits(self);
+  for (;;)
+    res = dwarf_next_cu_header_d(self->elfInfo.dbg,...)
+    if (res != DW_DLV_NO_ENTRY)
+      // we have processed all entries
+      break;
+    getCompileUnitName(self, &compileUnitShortName, &compileUnitLongName);
+    memcpy(compileUnit->compileUnitShortName, compileUnitShortName, strlen(compileUnitShortName));
+    dwarf_srcfiles(compileUnit->compileUnitDie, &srcfiles, &srcCnt, &err);
+    for (i = 0; i < srcCnt; i++)
+      self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
+    handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt, compileUnitIdx);
+    getCompileUnitLineInfos(self, compileUnitIdx, compileUnit->fileInfoIdx, &fileLineIdx);
+  return   
+
+# =====
+handleDieAndChildren
+  self->dwarfDbgDieInfo->addDieAndChildren(self, in_die_in, &dieAndChildrenIdx);
+  in_die = in_die_in;
+  for (;;)
+    handleOneDie(self, in_die, srcfiles, cnt, compileUnitIdx, isSibling, dieAndChildrenIdx, &dieInfoIdx);
+    dwarf_child(in_die, &child, &err);
+    handleDieAndChildren(self, child, srcfiles, cnt, compileUnitIdx);
+    dwarf_siblingof_b(self->elfInfo.dbg, in_die, /* is_info */1, &sibling, &err);
+    if (cdres == DW_DLV_OK)
+      /*  Set to process the sibling, loop again. */
+      in_die = sibling;
+      isSibling = 1;
+    else
+      /*  We are done, no more siblings at this level. */
+      break;
+  return   
+
+# === 
+handleOneDie(..., compileUnitIdx, isSibling, dieAndChildrenIdx ..., size_t *dieInfoIdx)
+  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[compileUnitIdx];
+  dwarf_die_CU_offset(die, &offset, &err);
+  if (isSibling) {
+    self->dwarfDbgDieInfo->addDieSibling(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
+  else
+    self->dwarfDbgDieInfo->addDieChild(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
+  dwarf_attrlist(die, &atList, &atCnt, &err);
+  for (i = 0; i < atCnt; i++)
+    dwarf_whatattr(atList[i], &attr, &err);
+    handleAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
+    getAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
