@@ -253,51 +253,7 @@ printf("DW_FORM_block1\n");
 printf("DW_FORM_sdata\n");
     break;
   case DW_FORM_exprloc:
-    {
 printf("getAttrValue DW_FORM_exprloc\n");
-// print_exprloc_content
-// get_string_from_locs
-      Dwarf_Loc_Head_c head = 0;
-      Dwarf_Locdesc_c locentry = 0;
-      int lres = 0;
-      Dwarf_Unsigned lopc = 0;
-      Dwarf_Unsigned hipc = 0;
-      Dwarf_Unsigned ulocentry_count = 0;
-      Dwarf_Unsigned section_offset = 0;
-      Dwarf_Unsigned locdesc_offset = 0;
-      Dwarf_Small lle_value = 0;
-      Dwarf_Small loclist_source = 0;
-      Dwarf_Unsigned no_of_elements;
-      Dwarf_Loc_Head_c loclist_head = 0;
-      int no_of_ops = 0;
-      int i = 0;
-      int res = 0;
-
-      lres = dwarf_get_loclist_c(attr_in,&loclist_head, &no_of_elements, &err);
-      lres = dwarf_get_locdesc_entry_c(loclist_head, 0, /* Data from 0th LocDesc */ &lle_value, &lopc, &hipc,
-            &ulocentry_count, &locentry, &loclist_source, &section_offset, &locdesc_offset, &err);
-      if (lres != DW_DLV_OK) {
-        return DWARF_DBG_CANNOT_GET_LOCDESC_ENTRY_C;
-      }
-      no_of_ops = ulocentry_count;
-printf("one_locdesc: locentry: %p no_of_ops: %d\n", locentry, no_of_ops);
-      for (i = 0; i < no_of_ops; i++) {
-        Dwarf_Small op = 0;
-        Dwarf_Unsigned opd1 = 0;
-        Dwarf_Unsigned opd2 = 0;
-        Dwarf_Unsigned opd3 = 0;
-        Dwarf_Unsigned offsetforbranch = 0;
-        const char * opName = 0;
-        /* DWARF 2,3,4 and DWARF5 style */
-        int res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
-        if (res != DW_DLV_OK) {
-          return DWARF_DBG_CANNOT_GET_LOCATION_OP_VALUE;
-        }
-        result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
-        checkErrOK(result);
-printf("opName: %s offsetforbranch: %d op1: %d\n", opName, offsetforbranch, opd1);
-      }
-    }
     break;
   case DW_FORM_flag_present:
 printf("DW_FORM_flag_present\n");
@@ -647,10 +603,12 @@ printf("atCnt: %p %d\n", die, atCnt);
       char buf[255];
       int numericValue;
       int ares;
+      int dieAttrIdx;
 
       ares = dwarf_whatattr(atList[i], &attr, &err);
       if (ares == DW_DLV_OK) {
         stringValue = NULL;
+        result = self->dwarfDbgAttributeInfo->handleAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, &dieAttrIdx);
         result = getAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
         switch (attr) {
         case DW_AT_language:
@@ -815,9 +773,6 @@ printf("pre-descent numChildren: %d\n", numChildren);
     /* Here do pre-descent processing of the die. */
     {
 printf("before handleOneDie in_die: %p\n", in_die);
-  if (isSibling) {
-  } else {
-  }
       result = handleOneDie(self, in_die, srcfiles, cnt, compileUnitIdx, isSibling, dieAndChildrenIdx, &dieInfoIdx);
 printf("after handleOneDie in_die: %p\n", in_die);
 printf("call dwarf_child in_die: %p\n", in_die);
@@ -972,21 +927,23 @@ printf("producerName: %s\n", producerName);
         and we do not want to print anything
         about statements in that case */
 
-    for (i = 0; i < srcCnt; i++) {
-      size_t fileNameIdx;
-      size_t fileInfoIdx;
+printf("srcCnt: %d compileUnitIdx: %d\n", srcCnt, compileUnitIdx);
+      for (i = 0; i < srcCnt; i++) {
+        size_t fileNameIdx;
+        size_t fileInfoIdx;
 
-//printf("  src: %s\n", srcfiles[i]);
-      result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
+printf("  src: %s\n", srcfiles[i]);
+        result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
 //printf("  src: %s %d fileNameIdx: %d fileInfoIdx: %d\n", srcfiles[i], i, fileNameIdx, fileInfoIdx);
-      checkErrOK(result);
-    }
+        checkErrOK(result);
+      }
 
 printf("call handleDieAndChildren\n");
-        result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt, compileUnitIdx);
+      result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt, compileUnitIdx);
     }
 printf("handleCompileUnits after handleDieAndChildren result: %d\n", result);
 
+#ifdef SHOWSTRUCTURE
 // for testing show the structure
 {
   int dieAndChildrenIdx;
@@ -1003,6 +960,7 @@ fprintf(showFd, "++ idx: %d\n", dieAndChildrenIdx);
 fflush(showFd);
 
 }
+#endif
     // eventually handle ranges here
     // here we need to handle source lines
     result = getCompileUnitLineInfos(self, compileUnitIdx, compileUnit->fileInfoIdx, &fileLineIdx);

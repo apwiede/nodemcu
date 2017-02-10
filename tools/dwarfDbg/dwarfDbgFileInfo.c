@@ -375,6 +375,50 @@ static uint8_t addFileLine(dwarfDbgPtr_t self, Dwarf_Addr pc, size_t lineNo, int
   return result;
 }
 
+// =================================== getFileIdxFromFileName =========================== 
+
+static uint8_t getFileIdxFromFileName(dwarfDbgPtr_t self, const char *pathName, int *fileInfoIdx) {
+  uint8_t result;
+  compileUnit_t *compileUnit;
+  compileUnitInfo_t *compileUnitInfo;
+  fileNameInfo_t *fileNameInfo;
+  int fileIdx;
+
+  *fileInfoIdx = -1;
+  result = DWARF_DBG_ERR_OK;
+  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
+  compileUnitInfo = &compileUnit->compileUnitInfo;
+  for (fileIdx = 0; fileIdx < self->dwarfDbgFileInfo->fileNamesInfo.numFileName; fileIdx++) {
+    fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[fileIdx];
+    if (strcmp(pathName, fileNameInfo->fileName) == 0) {
+printf("found: fileName %s %d num: %d\n", pathName, fileIdx);
+      *fileInfoIdx = fileIdx;
+      break;
+    }
+  }
+  return result;
+}
+
+// =================================== getFileNameFromFileIdx =========================== 
+
+static uint8_t getFileNameFromFileIdx(dwarfDbgPtr_t self, int fileIdx, const char **pathName) {
+  uint8_t result;
+  compileUnit_t *compileUnit;
+  compileUnitInfo_t *compileUnitInfo;
+  fileNameInfo_t *fileNameInfo;
+
+  *pathName = NULL;
+  result = DWARF_DBG_ERR_OK;
+  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
+  compileUnitInfo = &compileUnit->compileUnitInfo;
+  if ((fileIdx >= 0) && (fileIdx < self->dwarfDbgFileInfo->fileNamesInfo.numFileName)) {
+    fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[fileIdx];
+    *pathName = fileNameInfo->fileName;
+printf("found: fileName %s %d num: %d\n", *pathName, fileIdx);
+  }
+  return result;
+}
+
 // =================================== addRangeInfo =========================== 
 
 static uint8_t addRangeInfo(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr dwr_addr2, enum Dwarf_Ranges_Entry_Type dwrType, size_t *rangeInfoIdx) {
@@ -557,6 +601,8 @@ int dwarfDbgFileInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgFileInfo->addSourceFile = &addSourceFile;
   self->dwarfDbgFileInfo->addFileLine = &addFileLine;
   self->dwarfDbgFileInfo->addFileInfo = &addFileInfo;
+  self->dwarfDbgFileInfo->getFileIdxFromFileName = &getFileIdxFromFileName;
+  self->dwarfDbgFileInfo->getFileNameFromFileIdx = &getFileNameFromFileIdx;
   self->dwarfDbgFileInfo->addRangeInfo = &addRangeInfo;
   return DWARF_DBG_ERR_OK;
 }

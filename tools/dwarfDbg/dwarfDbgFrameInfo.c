@@ -181,7 +181,7 @@ static uint8_t addFde(dwarfDbgPtr_t self, Dwarf_Signed cieIdx, size_t cieFdeIdx,
   frameDataEntry->funcLgth = funcLgth;
   frameDataEntry->reg = reg;
   frameDataEntry->offset = offset;
-printf("addFde: %d cieFdeIdx: %d fdeIdx: %d pc: 0x%08x funcLgth: %d pc+funcLgth: 0x%08x reg: %d offset: %d\n", frameInfo->numFde, cieFdeIdx, cieFde->numFde, lowPc, funcLgth, lowPc+funcLgth, reg, offset);
+//printf("addFde: %d cieFdeIdx: %d fdeIdx: %d pc: 0x%08x funcLgth: %d pc+funcLgth: 0x%08x reg: %d offset: %d\n", frameInfo->numFde, cieFdeIdx, cieFde->numFde, lowPc, funcLgth, lowPc+funcLgth, reg, offset);
   *fdeIdx = cieFde->numFde;
   cieFde->numFde++;
   return result;

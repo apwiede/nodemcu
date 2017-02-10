@@ -247,23 +247,27 @@ int stm_GET_VAR_ADDR (dwarfDbgPtr_t self, Tcl_Interp* interp, int objc, Tcl_Obj*
   int result;
   int pc;
   int fp;
+  int sourceLineNo;
   int addr;
   Tcl_Obj *objPtr;
 
-  /* Syntax: dwardfdbg getVarAddr sourceName varName pc  fp
-   *	       [0]       [1]         [2]        [3]  [4] [5]
+  /* Syntax: dwardfdbg getVarAddr sourceFileName sourceLineNo varName pc  fp
+   *	       [0]       [1]            [2]            [3]  [    4]   [5] [6]
    */
-  if ((objc != 6)) {
+  if ((objc != 7)) {
     Tcl_WrongNumArgs (interp, objc, objv, NULL);
     return TCL_ERROR;
   }
-  if (Tcl_GetIntFromObj(interp, objv[4], &pc) != TCL_OK) {
+  if (Tcl_GetIntFromObj(interp, objv[3], &sourceLineNo) != TCL_OK) {
     return TCL_ERROR;
   }
-  if (Tcl_GetIntFromObj(interp, objv[5], &fp) != TCL_OK) {
+  if (Tcl_GetIntFromObj(interp, objv[5], &pc) != TCL_OK) {
     return TCL_ERROR;
   }
-  result = dwarfDbgGetVarAddr (self, Tcl_GetString(objv[2]),Tcl_GetString(objv[3]), pc, fp, &addr);
+  if (Tcl_GetIntFromObj(interp, objv[6], &fp) != TCL_OK) {
+    return TCL_ERROR;
+  }
+  result = dwarfDbgGetVarAddr (self, Tcl_GetString(objv[2]),sourceLineNo, Tcl_GetString(objv[4]), pc, fp, &addr);
   if (result != TCL_OK) {
     Tcl_SetResult  (interp, dwarfDbgGetErrorStr(self), TCL_STATIC);
   } else {

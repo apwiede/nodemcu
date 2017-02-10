@@ -76,15 +76,20 @@ dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
   checkAllocOK(dbg->dwarfDbgDict);
   memset(dbg->dwarfDbgDict, 0, sizeof(dwarfDbgDict_t));
 
-  // dwarfDbgLocationInfo module
-  dbg->dwarfDbgLocationInfo = ALLOC(dwarfDbgLocationInfo_t);
-  checkAllocOK(dbg->dwarfDbgLocationInfo);
-  memset(dbg->dwarfDbgLocationInfo, 0, sizeof(dwarfDbgLocationInfo_t));
-
   // dwarfDbgFrameInfo module
   dbg->dwarfDbgFrameInfo = ALLOC(dwarfDbgFrameInfo_t);
   checkAllocOK(dbg->dwarfDbgFrameInfo);
   memset(dbg->dwarfDbgFrameInfo, 0, sizeof(dwarfDbgFrameInfo_t));
+
+  // dwarfDbgAttributeInfo module
+  dbg->dwarfDbgAttributeInfo = ALLOC(dwarfDbgAttributeInfo_t);
+  checkAllocOK(dbg->dwarfDbgAttributeInfo);
+  memset(dbg->dwarfDbgAttributeInfo, 0, sizeof(dwarfDbgAttributeInfo_t));
+
+  // dwarfDbgLocationInfo module
+  dbg->dwarfDbgLocationInfo = ALLOC(dwarfDbgLocationInfo_t);
+  checkAllocOK(dbg->dwarfDbgLocationInfo);
+  memset(dbg->dwarfDbgLocationInfo, 0, sizeof(dwarfDbgLocationInfo_t));
 
   // dwarfDbgFileInfo module
   dbg->dwarfDbgFileInfo = ALLOC(dwarfDbgFileInfo_t);
@@ -146,12 +151,16 @@ int dwarfDbgInit (dwarfDbgPtr_t self) {
   result = dwarfDbgDictInit(self);
   checkErrOK(result);
 
-  // dwarfDbgLocationInfo module
-  result = dwarfDbgLocationInfoInit(self);
-  checkErrOK(result);
-
   // dwarfDbgFrameInfo module
   result = dwarfDbgFrameInfoInit(self);
+  checkErrOK(result);
+
+  // dwarfDbgAttributeInfo module
+  result = dwarfDbgAttributeInfoInit(self);
+  checkErrOK(result);
+
+  // dwarfDbgLocationInfo module
+  result = dwarfDbgLocationInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgFileInfo module

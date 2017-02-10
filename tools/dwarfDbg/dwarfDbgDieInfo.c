@@ -178,6 +178,7 @@ static uint8_t addDieAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, Dwarf_Bo
   dieInfo_t *dieInfo;
   dieAttr_t *dieAttr;
   compileUnitInfo_t *compileUnitInfo;
+  fileInfo_t *fileInfo;
   int attrStrIdx = -1;
 
   result = DWARF_DBG_ERR_OK;
@@ -218,7 +219,12 @@ printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%0
   dieAttr->uval = uval;
   dieAttr->theform = theform;
   dieAttr->directform = directform;
-  dieAttr->sourceFileIdx = -1;
+  if (sourceFile != NULL) {
+    result = self->dwarfDbgFileInfo->getFileIdxFromFileName(self, sourceFile, &dieAttr->sourceFileIdx);
+    checkErrOK(result);
+  } else {
+    dieAttr->sourceFileIdx = -1;
+  }
   dieAttr->sourceLineNo = sourceLineNo;
   dieAttr->flags = flags;
   dieAttr->attrStrIdx = attrStrIdx;

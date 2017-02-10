@@ -698,8 +698,10 @@ dwarfDbgClass create ::dD
 #scan "0x4025eaab" %x pc
 scan "0x4025ea24" %x pc
 scan "0x3ffffbb0" %x fp
-set addr [::dD getVarAddr compMsgDispatcher.c yyyQQQ $pc $fp]
-puts [format "addr: 0x%008x" $addr]
+foreach varName [list yyyQQQ yyyZZZ yyyYYY result hdr handle id stopbits] {
+  set addr [::dD getVarAddr compMsgDispatcher.c 357 $varName $pc $fp]
+puts [format " @@$varName addr: 0x%008x" $addr]
+}
 getCompileUnitInfos
 flush stderr
 

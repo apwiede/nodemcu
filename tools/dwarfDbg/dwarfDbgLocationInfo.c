@@ -186,7 +186,7 @@ printf("op: 0x%02x %s opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opN
 
 // =================================== dwarfDbgGetVarAddr =========================== 
 
-int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, char *varName, int pc, int fp, int *addr) {
+int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, int sourceLineNo, char *varName, int pc, int fp, int *addr) {
   int result;
   int compileUnitIdx = 0;
   int cieFdeIdx = 0;
@@ -201,6 +201,7 @@ int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, char *varName
   int dieAttrIdx = 0;
   int locEntryIdx = 0;
   char *attrStr = NULL;
+  const char *fileName = NULL;
   cieFde_t *cieFde = NULL;
   frameInfo_t *frameInfo = NULL;
   frameDataEntry_t *fde = NULL;
@@ -227,7 +228,6 @@ fflush(stdout);
       }
       if ((fde->lowPc <= pc ) && (pc <= (fde->lowPc + fde->funcLgth)))  {
         found = 1;
-//printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", cieFdeIdx, fdeIdx, lastFdeIdx, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
         // get the RegCol here !!!
         // FIXME !! need code here
 //printf ("  numFrameRegCol: %d maxFrameRegCol: %d\n", fde->numFrameRegCol, fde->maxFrameRegCol);
@@ -251,7 +251,7 @@ printf("   frcIdx: %d frc >!\n", frcIdx);
 printf("  pc: 0x%08x offset: %d reg: %d\n", frc->pc, frc->offset, frc->reg);
 printf("addr for var %s pc: 0x%08x fp: 0x%08x found cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d\n", varName, pc, fp, cieFdeIdx, fdeIdx, lastFdeIdx);
      switch (frc->reg) {
-     case 1:
+     case DW_FRAME_REG1:
        newFp = fp + frc->offset;
 printf("newFp0: 0x%08x fp: 0x%08x frc->offset: %d\n", newFp, fp, frc->offset);
        break;
@@ -291,25 +291,69 @@ printf("dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, d
       haveNameAttr = 0;
       for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
         dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
-        if (dieAttr->flags & DW_NAME_INFO) {
-printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
+        switch (dieAttr->attr) {
+        case DW_AT_name:
+printf("DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
            attrStr = self->dwarfDbgGetDbgInfo->attrStrs[dieAttr->attrStrIdx];
-printf("ATname: %p %s\n", attrStr, attrStr);
+printf("DW_AT_name1: %p %s\n", attrStr, attrStr);
+fflush(stdout);
           if (strcmp(varName, attrStr) == 0) {
             haveNameAttr = 1;
           }
+          break;
+        case DW_AT_decl_file:
+result = self->dwarfDbgFileInfo->getFileNameFromFileIdx(self, dieAttr->sourceFileIdx, &fileName);
+if (fileName != NULL) {
+printf("DW_AT_decl_file1: %s\n", fileName);
+} else {
+printf("DW_AT_decl_file1: %p\n", fileName);
+}
+fflush(stdout);
+          break;
+        case DW_AT_decl_line:
+printf("DW_AT_decl_line1: %d\n", dieAttr->sourceLineNo);
+          break;
         }
-        if ((dieAttr->flags & DW_LOCATION_INFO) && haveNameAttr) {
+        if (haveNameAttr && (dieAttr->attr == DW_AT_location)) {
           locationInfo = dieAttr->locationInfo;
 if (locationInfo == NULL) {
-printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
+//printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
 } else {
-printf("dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
+//printf("dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
 }
-          if ((locationInfo != NULL) && (locationInfo->lopc <= pc) && (pc <= locationInfo->hipc)) {
+          if (locationInfo != NULL) {
             found = 1;
 printf("child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
-//          break;
+printf("child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
+              for(locEntryIdx = 0; locEntryIdx < locationInfo->numLocEntry; locEntryIdx++) {
+                locationOp = &locationInfo->locationOps[locEntryIdx];
+printf("locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);
+                switch(locationOp->op) {
+                case DW_OP_fbreg:
+printf("newFp1: 0x%08x opd1: %d\n", newFp, locationOp->opd1);
+                  newFp = newFp + locationOp->opd1;
+                  break;
+                case DW_OP_lit0:
+printf("  >>need code 1 for DW_OP_lit0\n");
+                  break;
+                case DW_OP_reg2:
+printf("  >>need code 1 for DW_OP_reg2\n");
+                  break;
+                case DW_OP_breg1:
+printf("  >>need code 1 for DW_OP_breg1\n");
+                  break;
+                case DW_OP_GNU_entry_value:
+printf("  >>need code 1 for DW_OP_GNU_entry_value\n");
+                  break;
+                default:
+fprintf(stderr, "missing location op1: 0x%04x for varName address calculation: %s\n", locationOp->op, varName);
+                  self->errorStr = "missing location op for varName address calculation";
+                  return TCL_ERROR;
+                  break;
+                }
+                break;
+              }
+          break;
           }
         }
       }
@@ -318,10 +362,13 @@ printf("child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc
       }
     }
 printf("children done: found: %d numSiblings: %d\n", found, dieAndChildrenInfo->numSiblings);
+    if (found) {
+      break;
+    }
     if (!found) {
       for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numSiblings; dieInfoIdx++) {
         dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
-printf("siblings dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+//printf("siblings dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
         haveNameAttr = 0;
         for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
 const char *atName = NULL;
@@ -329,21 +376,35 @@ const char *atName = NULL;
 //printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%02x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
 self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &atName);
 printf("idx: %d name: %s haveNameAttr: %d\n", dieAttrIdx, atName, haveNameAttr);
-          if (dieAttr->flags & DW_NAME_INFO) {
-printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%04x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
-             attrStr = self->dwarfDbgGetDbgInfo->attrStrs[dieAttr->attrStrIdx];
-printf("ATname: %s\n", attrStr);
-             if (strcmp(varName, attrStr) == 0) {
-printf("FND: ATname: %s\n", attrStr);
-               haveNameAttr = 1;
-             }
+          switch (dieAttr->attr) {
+          case DW_AT_name:
+//printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%04x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
+            attrStr = self->dwarfDbgGetDbgInfo->attrStrs[dieAttr->attrStrIdx];
+printf("DW_AT_name: %s\n", attrStr);
+            if (strcmp(varName, attrStr) == 0) {
+printf("FND: ATname2: %s\n", attrStr);
+              haveNameAttr = 1;
+            }
+            break;
+          case DW_AT_decl_file:
+result = self->dwarfDbgFileInfo->getFileNameFromFileIdx(self, dieAttr->sourceFileIdx, &fileName);
+if (fileName != NULL) {
+printf("DW_AT_decl_file2: %s\n", fileName);
+} else {
+printf("DW_AT_decl_file2: %p\n", fileName);
+}
+fflush(stdout);
+            break;
+          case DW_AT_decl_line:
+printf("DW_AT_decl_line2: %d\n", dieAttr->sourceLineNo);
+            break;
           }
           if (haveNameAttr && (dieAttr->attr == DW_AT_location)) {
             locationInfo = dieAttr->locationInfo;
 if (locationInfo == NULL) {
-printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
+//printf("dieAttrIdx: %d location: %p\n", dieAttrIdx, locationInfo);
 } else {
-printf("  dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
+//printf("  dieAttrIdx: %d location: %p lopc: 0x%08x hipc: 0x%08x\n", dieAttrIdx, locationInfo, locationInfo->lopc, locationInfo->hipc);
 }
             if (locationInfo != NULL) {
               found = 1;
@@ -356,8 +417,20 @@ printf("locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, loc
 printf("newFp1: 0x%08x opd1: %d\n", newFp, locationOp->opd1);
                   newFp = newFp + locationOp->opd1;
                   break;
+                case DW_OP_lit0:
+printf("  >>need code 2 for DW_OP_lit0\n");
+                  break;
+                case DW_OP_reg2:
+printf("  >>need code 2 for DW_OP_reg2\n");
+                  break;
+                case DW_OP_breg1:
+printf("  >>need code 2 for DW_OP_breg1\n");
+                  break;
+                case DW_OP_GNU_entry_value:
+printf("  >>need code 2 for DW_OP_GNU_entry_value\n");
+                  break;
                 default:
-fprintf(stderr, "missing location op: 0x%04x for varName address calculation: %s\n", locationOp->op, varName);
+fprintf(stderr, "missing location op2: 0x%04x for varName address calculation: %s\n", locationOp->op, varName);
                   self->errorStr = "missing location op for varName address calculation";
                   return TCL_ERROR;
                   break;
@@ -378,7 +451,7 @@ fprintf(stderr, "missing location op: 0x%04x for varName address calculation: %s
     self->errorStr = "varName location not found";
     return TCL_ERROR;
   }
-printf("newFp: 0x%08x fp: 0x%08x\n", newFp, fp);
+printf("++++newFp: varName: %s addr: 0x%08x fp: 0x%08x\n", varName, newFp, fp);
   *addr = newFp;
   return TCL_OK;
 }
