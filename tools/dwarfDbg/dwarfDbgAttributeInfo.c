@@ -431,6 +431,10 @@ static uint8_t handleDW_AT_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo
   int res = 0;
   char *name;
   Dwarf_Error err = NULL;
+  compileUnit_t *compileUnit = NULL;
+  dieAndChildrenInfo_t *dieAndChildrenInfo = NULL;
+  dieInfo_t *dieInfo = NULL;
+  dieAttr_t *dieAttr = NULL;
 
   result = DWARF_DBG_ERR_OK;
   res = dwarf_formstring(attrInInfo->attrIn, &name, &err);
@@ -438,7 +442,16 @@ static uint8_t handleDW_AT_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo
     return DWARF_DBG_ERR_CANNOT_GET_NAME_FORMSTRING;
   }
 printf("  >>name: %d %s\n", attrInInfo->uval, name);
-
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[attrInInfo->dieAndChildrenIdx];
+  if (attrInInfo->isSibling) {
+    dieInfo = &dieAndChildrenInfo->dieSiblings[attrInInfo->dieInfoIdx];
+  } else {
+    dieInfo = &dieAndChildrenInfo->dieChildren[attrInInfo->dieInfoIdx];
+  }
+  dieAttr = &dieInfo->dieAttrs[attrInInfo->dieAttrIdx];
+  result = self->dwarfDbgDieInfo->addAttrStr(self, name, &dieAttr->attrStrIdx);
+  checkErrOK(result);
   return result;
 }
 

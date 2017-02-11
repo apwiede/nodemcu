@@ -287,14 +287,9 @@ printf("whatattr: i: %d ares: %d attr: 0x%02x\n", i, ares, attr);
       if (ares == DW_DLV_OK) {
         stringValue = NULL;
         result = self->dwarfDbgAttributeInfo->handleAttribute(self, die, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, *dieInfoIdx, isSibling, &dieAttrIdx);
-//printf("call getAttributeValue\n");
-//        result = getAttrValue(self, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue);
-//printf("getAttributeValue called\n");
+#ifdef NOTDEF
+// FIXME need another place for calling addCompileUnitFile!!!
         switch (attr) {
-        case DW_AT_language:
-printf("  DW_AT_language\n");
-//printf("  LANG_name: %s\n", stringValue);
-          break;
         case DW_AT_name:
 printf("  DW_AT_name\n");
           if (stringValue != NULL) {
@@ -322,7 +317,7 @@ printf("    NAME: %s result: %d\n", buf, result);
           }
           break;
         }
-        // here we need to handle children etc.
+#endif
       }
     }
   }

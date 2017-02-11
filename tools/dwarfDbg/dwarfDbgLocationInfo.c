@@ -110,7 +110,7 @@ printf("dieAndChildrenInfo: %p\n", dieAndChildrenInfo);
   } else {
     dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
   }
-printf("dieInfo: %p\n", dieInfo);
+printf("getLocationList: dieInfo: %p\n", dieInfo);
   dieAttr = &dieInfo->dieAttrs[attrIdx];
 printf("dieAttr: %p attr: 0x%04x\n", dieAttr, attr);
   lres = dwarf_get_loclist_c(attr, &loclistHead, &noOfElements, &err);
@@ -269,7 +269,7 @@ printf("found: %d compileUnitIdx: %d\n", found, compileUnitIdx);
 printf("dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
     for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numChildren; dieInfoIdx++) {
       dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
-//printf("children dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+printf("children dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
       haveNameAttr = 0;
       for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
         dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
