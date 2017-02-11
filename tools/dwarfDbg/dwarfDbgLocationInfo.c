@@ -104,12 +104,15 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
   result = DWARF_DBG_ERR_OK;
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
+printf("dieAndChildrenInfo: %p\n", dieAndChildrenInfo);
   if (isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
   } else {
     dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
   }
+printf("dieInfo: %p\n", dieInfo);
   dieAttr = &dieInfo->dieAttrs[attrIdx];
+printf("dieAttr: %p attr: 0x%04x\n", dieAttr, attr);
   lres = dwarf_get_loclist_c(attr, &loclistHead, &noOfElements, &err);
   if (lres != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_LOC_LIST_C;
@@ -130,12 +133,13 @@ printf("attrIdx: %d numLocations: %d locationInfo: %p\n", attrIdx, noOfElements,
     int res = 0;
     locationOp_t *locationOp;
 
+printf("loclistHead: %p llent: %d\n", loclistHead, llent);
     lres = dwarf_get_locdesc_entry_c(loclistHead, llent, &lleValue, &lopc, &hipc, &locentryCount,
            &locentry, &loclistSource, &sectionOffset, &locdescOffset, &err);
     if (lres != DW_DLV_OK) {
       return DWARF_DBG_ERR_CANNOT_GET_LOC_DESC_ENTRY_C;
     }
-printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x\n", lleValue, lopc, hipc);
+printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x locationInfo: %p\n", lleValue, lopc, hipc, dieAttr->locationInfo);
     dieAttr->locationInfo->lopc = lopc;
     dieAttr->locationInfo->hipc = hipc;
     // allocate all needed memory her as we know how many entries
@@ -273,7 +277,7 @@ printf("yyattr: 0x%04x dieAttrIdx: %d\n", dieAttr->attr, dieAttrIdx);
 fflush(stdout);
         switch (dieAttr->attr) {
         case DW_AT_name:
-printf("DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
+printf("DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attrIn, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
            if ((dieAttr->attrStrIdx < 0) || (dieAttr->attrStrIdx >= dieInfo->numAttr)) {
 printf("ERROR bad dieAttr->attrStrIdx: %d\n", dieAttr->attrStrIdx);
            } else  {

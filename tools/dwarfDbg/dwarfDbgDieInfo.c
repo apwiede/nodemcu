@@ -88,7 +88,7 @@ tagStringValue = NULL;
       checkErrOK(result);
       result = self->dwarfDbgStringInfo->getDW_FORM_string(self, attrInfo->theform, &formStringValue);
       checkErrOK(result);
-sres = dwarf_formstring(attrInfo->attr_in, &temps, &err);
+sres = dwarf_formstring(attrInfo->attrIn, &temps, &err);
 if (sres == DW_DLV_OK) {
 sprintf(buf, "%s", temps);
 }
@@ -122,9 +122,9 @@ case DW_AT_encoding:
   break;
 }
 if (sres == DW_DLV_OK) {
-      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x %s\n", indent, attrStringValue, attrInfo->attr_in, attrInfo->theform, formStringValue, attrInfo->uval, buf);
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x %s\n", indent, attrStringValue, attrInfo->attrIn, attrInfo->theform, formStringValue, attrInfo->uval, buf);
 } else {
-      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x\n", indent, attrStringValue, attrInfo->attr_in, attrInfo->theform, formStringValue, attrInfo->uval);
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x\n", indent, attrStringValue, attrInfo->attrIn, attrInfo->theform, formStringValue, attrInfo->uval);
 }
     }
   }
@@ -171,9 +171,9 @@ static uint8_t addAttrStr(dwarfDbgPtr_t self, const char *str, int *attrStrIdx) 
 
 // =================================== addDieAttr =========================== 
 
-static uint8_t addDieAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t idx, Dwarf_Half attr, Dwarf_Attribute attr_in, const char *attrStr, const char *sourceFile, int sourceLineNo, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *attrIdx) {
+static uint8_t addDieAttr(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Bool isSibling, int idx, Dwarf_Half attr, Dwarf_Attribute attrIn,  Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *attrIdx) {
   uint8_t result;
-  const char *stringValue;
+  const char *atName;
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   dieAttr_t *dieAttr;
@@ -182,10 +182,9 @@ static uint8_t addDieAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, Dwarf_Bo
   int attrStrIdx = -1;
 
   result = DWARF_DBG_ERR_OK;
-  // next line no longer needed??
-  result = self->dwarfDbgStringInfo->getDW_AT_string(self, attr, &stringValue);
+  result = self->dwarfDbgStringInfo->getDW_AT_string(self, attr, &atName);
   checkErrOK(result);
-printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%08x attr_in: 0x%08x uval: 0x%08x, theform: 0x%04x\n", stringValue, dieAndChildrenIdx, isSibling, idx, attr, attr_in, uval, theform);
+printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%08x attr_in: 0x%08x uval: 0x%08x, theform: 0x%04x\n", atName, dieAndChildrenIdx, isSibling, idx, attr, attrIn, uval, theform);
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
   if (isSibling) {
@@ -208,17 +207,20 @@ printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%0
     }
   }
 //printf("== numAttrs: %d\n", dieInfo->numAttr);
-  if (flags & DW_NAME_INFO) {
+#ifdef NOTDEF
+  if (attr == DW_AT_name) {
     result = addAttrStr(self, attrStr, &attrStrIdx);
     checkErrOK(result);
   }
+#endif
   dieAttr = &dieInfo->dieAttrs[dieInfo->numAttr];
   memset(dieAttr, 0, sizeof(dieAttr_t));
   dieAttr->attr = attr;
-  dieAttr->attr_in = attr_in;
+  dieAttr->attrIn = attrIn;
   dieAttr->uval = uval;
   dieAttr->theform = theform;
   dieAttr->directform = directform;
+#ifdef NOTDEF
   if (sourceFile != NULL) {
     result = self->dwarfDbgFileInfo->getFileIdxFromFileName(self, sourceFile, &dieAttr->sourceFileIdx);
     checkErrOK(result);
@@ -228,14 +230,22 @@ printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%0
   dieAttr->sourceLineNo = sourceLineNo;
   dieAttr->flags = flags;
   dieAttr->attrStrIdx = attrStrIdx;
-  if (flags & DW_LOCATION_INFO) {
+#endif
+printf(">>addDieAttr: %s attr: 0x%04x\n", atName, attr);
+  if (attr == DW_AT_location) {
+printf(">>addDieAttr2: %s IDX: %d\n", atName, dieInfo->numAttr);
     dieAttr->locationInfo = (locationInfo_t *)ckalloc(sizeof(locationInfo_t));
+    if (dieAttr->locationInfo == NULL) {
+      return DWARF_DBG_ERR_OUT_OF_MEMORY;
+    }
     memset(dieAttr->locationInfo, 0, sizeof(locationInfo_t));
   } else {
     dieAttr->locationInfo = NULL;
   }
   *attrIdx = dieInfo->numAttr;
   dieInfo->numAttr++;
+printf("addDieAttr done attrIdx: %d\n", *attrIdx);
+fflush(stdout);
   return result;
 }
 
@@ -253,14 +263,14 @@ static uint8_t showChildren(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, const 
 
 // =================================== addDieChildAttr =========================== 
 
-static uint8_t addDieChildAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t childIdx, Dwarf_Half attr, Dwarf_Attribute attr_in, const char *attrStr, const char *sourceFile, int sourceLineNo, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *childAttrIdx) {
-  return addDieAttr(self, dieAndChildrenIdx, /* isSibling */ 0, childIdx, attr, attr_in, attrStr, sourceFile, sourceLineNo, uval, theform, directform, flags, childAttrIdx);
+static uint8_t addDieChildAttr(dwarfDbgPtr_t self, int dieAndChildrenIdx, int childIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *childAttrIdx) {
+  return addDieAttr(self, dieAndChildrenIdx, /* isSibling */ 0, childIdx, attr, attrIn, uval, theform, directform, childAttrIdx);
 }
 
 // =================================== addDieSiblingAttr =========================== 
 
-static uint8_t addDieSiblingAttr(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t siblingIdx, Dwarf_Half attr, Dwarf_Attribute attr_in, const char *attrStr, const char *sourceFile, int sourceLineNo, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *siblingAttrIdx) {
-  return addDieAttr(self, dieAndChildrenIdx, /* isSibling */ 1, siblingIdx, attr, attr_in, attrStr, sourceFile, sourceLineNo, uval, theform, directform, flags, siblingAttrIdx);
+static uint8_t addDieSiblingAttr(dwarfDbgPtr_t self, int dieAndChildrenIdx, int siblingIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *siblingAttrIdx) {
+  return addDieAttr(self, dieAndChildrenIdx, /* isSibling */ 1, siblingIdx, attr, attrIn, uval, theform, directform, siblingAttrIdx);
 }
 
 // =================================== addDieSibling =========================== 

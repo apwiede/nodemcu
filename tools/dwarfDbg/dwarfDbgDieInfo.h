@@ -46,11 +46,10 @@
 
 typedef struct dieAttr {
   Dwarf_Half attr;
-  Dwarf_Attribute attr_in;
+  Dwarf_Attribute attrIn;
   Dwarf_Half theform;
   Dwarf_Half directform;
   Dwarf_Unsigned uval;
-  uint16_t flags;
   int sourceFileIdx;
   int sourceLineNo;
   int attrStrIdx;
@@ -78,8 +77,8 @@ typedef struct dieAndChildrenInfo {
 typedef uint8_t (* showChildren_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, const char *indent);
 typedef uint8_t (* showSiblings_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, const char *indent);
 typedef uint8_t (* addAttrStr_t)(dwarfDbgPtr_t self, const char *str, int *attrStrIdx);
-typedef uint8_t (* addDieChildAttr_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t childIdx, Dwarf_Half attr, Dwarf_Attribute attr_in, const char *attrStr, const char *sourceFile, int sourceFileLine, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *childAttrIdx);
-typedef uint8_t (* addDieSiblingAttr_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t siblingIdx, Dwarf_Half attr, Dwarf_Attribute attr_in, const char *attrStr, const char *sourceFile, int sourceFileLine, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, uint16_t flags, size_t *siblingAttrIdx);
+typedef uint8_t (* addDieChildAttr_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int childIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *childAttrIdx);
+typedef uint8_t (* addDieSiblingAttr_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int siblingIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *siblingAttrIdx);
 typedef uint8_t (* addDieSibling_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t offset, Dwarf_Half tag, size_t *siblingIdx);
 typedef uint8_t (* addDieChild_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t offset, Dwarf_Half tag, size_t *childIdx);
 typedef uint8_t (* addDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die die, size_t *dieAndChildrenIdx);

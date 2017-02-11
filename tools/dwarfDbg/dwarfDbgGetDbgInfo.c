@@ -46,37 +46,6 @@ static Dwarf_Off  DIEOverallOffset = 0;  /* DIE offset in .debug_info */
 static dwarfDbgEsb_t esbShortCuName;
 static dwarfDbgEsb_t esbLongCuName;
 
-// =================================== getRanges =========================== 
-
-static uint8_t getRanges(dwarfDbgPtr_t self, Dwarf_Attribute attr_in) {
-  uint8_t result;
-  int rres = 0;
-  int fres = 0;
-  Dwarf_Ranges *rangeset = 0;
-  Dwarf_Signed rangecount = 0;
-  Dwarf_Unsigned bytecount = 0;
-  Dwarf_Unsigned original_off = 0;
-  Dwarf_Error err;
-  compileUnit_t *compileUnit;
-  int i;
-  size_t rangeIdx = 0;
-
-  result = DWARF_DBG_ERR_OK;
-#ifdef NOTDEF
-  compileUnit = &self->dwarfDbgGetDbgInfo->compileUnits[self->dwarfDbgGetDbgInfo->currCompileUnitIdx];
-  fres = dwarf_global_formref(attr_in, &original_off, &err);
-  if (fres == DW_DLV_OK) {
-    rres = dwarf_get_ranges_a(self->elfInfo.dbg, original_off, compileUnit->compileUnitDie, &rangeset, &rangecount, &bytecount, &err);
-printf("rangecount: %d bytecount: %d\n", rangecount, bytecount);
-    for (i = 0; i < rangecount; i++) {
-      Dwarf_Ranges *range = &rangeset[i];
-      result = self->dwarfDbgFileInfo->addRangeInfo(self, range->dwr_addr1, range->dwr_addr2, range->dwr_type, &rangeIdx);
-    }
-  }
-#endif
-  return result;
-}
-
 // =================================== getAttrValue =========================== 
 
 static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, int cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t dieInfoIdx, char **attrStr)
@@ -120,275 +89,11 @@ printf("getAttrValue attr: 0x%08x atname: %s\n", attr_in, atName);
   vres = dwarf_formudata(attr_in, &uval, &err);
 printf("uval: %d\n", uval);
 
-  switch (theform) {
-  case DW_FORM_addr:
-    bres = dwarf_formaddr(attr_in, &addr, &err);
-printf("DW_FORM_addr: attrib: 0x%08x addr: 0x%08x\n", attr_in, addr);
-    break;
-  case DW_FORM_data1:
-    fres = dwarf_whatattr(attr_in, &attr2, &err);
-printf("DW_FORM_data1 attr: 0x%08x attr2: 0x%08x\n", attr, attr2);
-    switch(attr) {
-    case DW_AT_byte_size:
-//printf("DW_AT_byte_size\n");
-      break;
-    case DW_AT_encoding:
-//printf("DW_AT_encoding\n");
-      break;
-    case DW_AT_decl_file:
-printf("DW_AT_decl_file srcfiles: %p\n", srcfiles);
-      if (srcfiles != NULL) {
-        sourceFile = srcfiles[uval-1];
-printf("FILE: %s\n", srcfiles[uval-1]);
-      }
-      break;
-    case DW_AT_decl_line:
-printf("DW_AT_decl_line1 uval: %d\n", uval);
-      break;
-    case DW_AT_upper_bound:
-//printf("DW_AT_upper_bound\n");
-      break;
-    case DW_AT_data_member_location:
-//printf("DW_AT_data_member_location\n");
-      break;
-    case DW_AT_inline:
-//printf("DW_AT_inline\n");
-      break;
-    case DW_AT_const_value:
-//printf("DW_AT_const_value\n");
-      break;
-    case DW_AT_call_file:
-//printf("DW_AT_call_file\n");
-      break;
-    case DW_AT_call_line:
-//printf("DW_AT_call_line\n");
-      break;
-    case DW_AT_bit_offset:
-//printf("DW_AT_bit_offset\n");
-      break;
-    case DW_AT_bit_size:
-//printf("DW_AT_bit_size\n");
-      break;
-    case DW_AT_location:
-printf("DW_AT_location should call getLocation\n");
-      break;
-    }
-    break;
-  case DW_FORM_string:
-  case DW_FORM_strp:
-    sres = dwarf_formstring(attr_in, &temps, &err);
-    *attrStr = temps;
-printf("attrStr: %s\n", temps);
-    break;
-  case DW_FORM_sec_offset:
-printf("DW_FORM_sec_offset\n");
-printf("DW_FORM_sec_offset2\n");
-    break;
-  case DW_FORM_ref4:
-printf("DW_FORM_ref4\n");
-    break;
-  case DW_FORM_data2:
-printf("DW_FORM_data2 uval: %d\n", uval);
-    switch (attr) {
-      case DW_AT_decl_file:
-      case DW_AT_call_file:
-        if (srcfiles != NULL) {
-printf("FILE: %s\n", srcfiles[uval-1]);
-        }
-        break;
-      case DW_AT_decl_line:
-printf("DW_AT_decl_line2: uval: %d\n", uval);
-        sourceLineNo = uval;
-        break;
-      case DW_AT_decl_column:
-      case DW_AT_call_column:
-      case DW_AT_call_line:
-        break;
-    }
-    break;
-  case DW_FORM_data4:
-printf("DW_FORM_data4\n");
-    break;
-  case DW_FORM_block:
-printf("DW_FORM_block\n");
-    break;
-  case DW_FORM_block1:
-printf("DW_FORM_block1\n");
-    break;
-  case DW_FORM_sdata:
-printf("DW_FORM_sdata\n");
-    break;
-  case DW_FORM_exprloc:
-printf("getAttrValue DW_FORM_exprloc\n");
-    break;
-  case DW_FORM_flag_present:
-printf("DW_FORM_flag_present\n");
-    break;
-  default:
-printf("ERROR theform: 0x%08x not yet implemented\n", theform);
-    break;
-  }
 //printf("++getAttrValue: dieAndChildrenIdx: 0x%02x attr: 0x%08x uval: 0x%08x theform: 0x%08x\n", dieAndChildrenIdx, attr, uval, theform);
   if ((int)dieAndChildrenIdx < 0) {
 printf("ERROR dieAndChildrenIdx < 0\n");
   }
-  if ((int)dieAndChildrenIdx >= 0) {
-    switch (attr) {
-    case DW_AT_location:
-      flags |= DW_LOCATION_INFO;
-      break;
-    }
-    if (isSibling) {
-      result = self->dwarfDbgDieInfo->addDieSiblingAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, *attrStr, sourceFile, sourceLineNo, uval, theform, directform, flags, &attrIdx);
-    } else {
-      result = self->dwarfDbgDieInfo->addDieChildAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attr_in, *attrStr, sourceFile, sourceLineNo, uval, theform, directform, flags, &attrIdx);
-    }
-    checkErrOK(result);
-    switch (theform) {
-    case DW_FORM_exprloc:
-      switch (attr) {
-      case DW_AT_location:
-printf("AT_location: exprloc\n");
-        result = self->dwarfDbgLocationInfo->getLocationList(self, dieAndChildrenIdx, dieInfoIdx, isSibling, attrIdx, attr_in);
-        checkErrOK(result);
-        break;
-      }
-      break;
-    case DW_FORM_sec_offset:
-      switch (attr) {
-printf("AT_location: sec_offset\n");
-      case DW_AT_location:
-        result = self->dwarfDbgLocationInfo->getLocationList(self, dieAndChildrenIdx, dieInfoIdx, isSibling, attrIdx, attr_in);
-        checkErrOK(result);
-        break;
-      }
-      break;
-    }
-//printf("attrIdx: %d isSibling: %d\n", attrIdx, isSibling);
-  }
   return 1;
-}
-
-// =================================== getAttribute =========================== 
-
-static uint8_t getAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t dieInfoIdx, const char **outStr, int *outValue)
-{
-  uint8_t result;
-  const char *atName = NULL;
-  char *templateNameStr = NULL;
-  int res;
-  int vres;
-  Dwarf_Unsigned uval = 0;
-  Dwarf_Error err;
-  Dwarf_Half theform = 0;
-  Dwarf_Half directform = 0;
-  const char *langName = NULL;
-
-  result = DWARF_DBG_ERR_OK;
-  *outStr = NULL;
-  *outValue = 0;
-//printf("getAttribute: 0x%04x\n", attr);
-  res = dwarf_get_AT_name(attr, &atName);
-//printf("getAttribute: atName: %s\n", atName);
-  switch (attr) {
-  case DW_AT_location:
-printf("getAttr: location\n");
-    break;
-  }
-  getAttrValue(self, attr, attr_in, srcfiles, cnt, dieAndChildrenIdx, isSibling, dieInfoIdx, &templateNameStr);
-  switch (attr) {
-  case DW_AT_language:
-    vres = dwarf_formudata(attr_in, &uval, &err);
-    dwarf_get_LANG_name((Dwarf_Half) uval, &langName);
-    res = dwarf_whatform(attr_in, &theform, &err);
-    res = dwarf_whatform_direct(attr_in, &directform, &err);
-    *outStr = langName;
-    break;
-  case DW_AT_name:
-  case DW_AT_comp_dir:
-    *outStr = templateNameStr;
-    break;
-  case DW_AT_ranges:
-    result = getRanges(self, attr_in);
-    checkErrOK(result);
-    break;
-  case DW_AT_location:
-printf("getAttribute: location\n");
-    break;
-  default:
-    break;
-  }
-  return result;
-}
-
-// =================================== getProducerName =========================== 
-
-/*  Returns the producer of the CU
-  Caller must ensure producernameout is
-  a valid, constructed, empty dwarfDbgEsb_t instance before calling.
-  Never returns DW_DLV_ERROR.  */
-static int getProducerName(dwarfDbgPtr_t self, char **producerName) {
-  Dwarf_Attribute producerAttr = 0;
-  Dwarf_Error pnerr = 0;
-
-  int ares = dwarf_attr(self->dwarfDbgCompileUnitInfo->currCompileUnit->compileUnitDie, DW_AT_producer, &producerAttr, &pnerr);
-  if (ares == DW_DLV_ERROR) {
-    printf("hassattr on DW_AT_producer ares: %d pnerr: %d", ares, pnerr);
-  }
-  if (ares == DW_DLV_NO_ENTRY) {
-    /*  We add extra quotes so it looks more like
-      the names for real producers that getAttrValue
-      produces. */
-    *producerName = "\"<CU-missing-DW_AT_producer>\"";
-  } else {
-    /*  DW_DLV_OK */
-    /*  The string return is valid until the next call to this
-      function; so if the caller needs to keep the returned
-      string, the string must be copied (makename()). */
-//    getAttrValue(self, 1, producerAttr, NULL, 0, -1, 1, 1, producerName);
-  }
-  return ares;
-}
-
-// =================================== getCompileUnitName =========================== 
-
-/* Returns the name of the compile unit. In case of error, give up, do not return. */
-static int getCompileUnitName(dwarfDbgPtr_t self, char **shortName, char **longName) {
-  Dwarf_Attribute nameAttr = 0;
-  Dwarf_Error lerr = 0;
-  int ares;
-
-  ares = dwarf_attr(self->dwarfDbgCompileUnitInfo->currCompileUnit->compileUnitDie, DW_AT_name, &nameAttr, &lerr);
-  if (ares == DW_DLV_ERROR) {
-    printf("hassattr on DW_AT_name ares: %d lerr: %d", ares, lerr);
-  } else {
-    if (ares == DW_DLV_NO_ENTRY) {
-      *shortName = "<unknown name>";
-      *longName = "<unknown name>";
-    } else {
-      /* DW_DLV_OK */
-      /*  The string return is valid until the next call to this
-        function; so if the caller needs to keep the returned
-        string, the string must be copied (makename()). */
-      char *fileName = 0;
-
-//      self->dwarfDbgEsb->esbEmptyString(self, &esbLongCuName);
-      getAttrValue(self, 1, nameAttr, NULL, 0, -1, 1, 1, longName);
-      /* Generate the short name (fileName) */
-      fileName = strrchr(*longName,'/');
-      if (!fileName) {
-        fileName = strrchr(*longName,'\\');
-      }
-      if (fileName) {
-        ++fileName;
-      } else {
-        fileName = *longName;
-      }
-      *shortName = fileName;
-    }
-  }
-  dwarf_dealloc(self->elfInfo.dbg, nameAttr, DW_DLA_ATTR);
-  return ares;
 }
 
 // =================================== getCompileUnitLineInfos =========================== 
@@ -567,7 +272,7 @@ printf("atCnt: %p %d\n", die, atCnt);
       Dwarf_Half attr;
       Dwarf_Attribute producerAttr;
       Dwarf_Attribute attrIn;
-      const char *stringValue;
+      char *stringValue;
       const char *shortName;
       char buf[255];
       int numericValue;
@@ -581,8 +286,10 @@ printf("whatattr: i: %d ares: %d attr: 0x%02x\n", i, ares, attr);
       attrIn = atList[i];
       if (ares == DW_DLV_OK) {
         stringValue = NULL;
-        result = self->dwarfDbgAttributeInfo->handleAttribute(self, die, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, isSibling, &dieAttrIdx);
-        result = getAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
+        result = self->dwarfDbgAttributeInfo->handleAttribute(self, die, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, *dieInfoIdx, isSibling, &dieAttrIdx);
+//printf("call getAttributeValue\n");
+//        result = getAttrValue(self, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue);
+//printf("getAttributeValue called\n");
         switch (attr) {
         case DW_AT_language:
 printf("  DW_AT_language\n");
@@ -613,105 +320,6 @@ printf(">>addDieAT_comp_dir file: %s\n", buf);
 printf("    NAME: %s result: %d\n", buf, result);
             checkErrOK(result);
           }
-          break;
-        case DW_AT_producer:
-printf("  DW_AT_producer\n");
-          break;
-        case DW_AT_ranges:
-printf("  DW_AT_ranges\n");
-          break;
-        case DW_AT_low_pc:
-printf("  DW_AT_low_pc\n");
-          break;
-        case DW_AT_stmt_list:
-printf("  DW_AT_stmt_list\n");
-          break;
-        case DW_AT_byte_size:
-printf("  DW_AT_byte_size\n");
-          break;
-        case DW_AT_encoding:
-printf("  DW_AT_encoding\n");
-          break;
-        case DW_AT_decl_file:
-printf("  DW_AT_decl_file\n");
-          break;
-        case DW_AT_decl_line:
-printf("  DW_AT_decl_line\n");
-          break;
-        case DW_AT_type:
-printf("  DW_AT_type\n");
-          break;
-        case DW_AT_data_member_location:
-printf("  DW_AT_data_member_location\n");
-          break;
-        case DW_AT_sibling :
-printf("  DW_AT_sibling \n");
-          break;
-        case DW_AT_location:
-printf("  DW_AT_location\n");
-          break;
-        case DW_AT_GNU_call_site_value:
-printf("  DW_AT_GNU_call_site_value\n");
-          break;
-        case DW_AT_GNU_all_call_sites:
-printf("  DW_AT_GNU_all_call_sites\n");
-          break;
-        case DW_AT_upper_bound:
-printf("  DW_AT_upper_bound\n");
-          break;
-        case DW_AT_abstract_origin:
-printf("  DW_AT_abstract_origin\n");
-          break;
-        case DW_AT_prototyped:
-printf("  DW_AT_prototyped\n");
-          break;
-        case DW_AT_frame_base:
-printf("  DW_AT_frame_base\n");
-          break;
-        case DW_AT_high_pc:
-printf("  DW_AT_high_pc\n");
-          break;
-        case DW_AT_GNU_all_tail_call_sites:
-printf("  DW_AT_GNU_all_tail_call_sites\n");
-          break;
-        case DW_AT_const_value:
-printf("  DW_AT_const_value\n");
-          break;
-        case DW_AT_inline:
-printf("  DW_AT_inline\n");
-          break;
-        case DW_AT_declaration:
-printf("  DW_AT_declaration\n");
-          break;
-        case DW_AT_external:
-printf("  DW_AT_external\n");
-          break;
-        case DW_AT_bit_offset:
-printf("  DW_AT_bit_offset\n");
-          break;
-        case DW_AT_bit_size:
-printf("  DW_AT_bit_size\n");
-          break;
-        case DW_AT_artificial:
-printf("  DW_AT_artificial\n");
-          break;
-        case DW_AT_entry_pc:
-printf("  DW_AT_entry_pc\n");
-          break;
-        case DW_AT_call_file:
-printf("  DW_AT_call_file\n");
-          break;
-        case DW_AT_call_line:
-printf("  DW_AT_call_line\n");
-          break;
-        case DW_AT_linkage_name:
-printf("  DW_AT_linkage_name\n");
-          break;
-        case DW_AT_GNU_call_site_target:
-printf("  DW_AT_GNU_call_site_target\n");
-          break;
-        default:
-printf("  DW_AT_?? 0x%02x\n", attr);
           break;
         }
         // here we need to handle children etc.

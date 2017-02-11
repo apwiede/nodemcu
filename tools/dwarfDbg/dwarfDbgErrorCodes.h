@@ -77,6 +77,7 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_CANNOT_GET_CU_OFFSET                 = 30,
   DWARF_DBG_ERR_CANNOT_GET_DIE_OFFSETS               = 31,
   DWARF_DBG_ERR_CANNOT_GET_ATTR                      = 32,
+  DWARF_DBG_ERR_CANNOT_GET_FORMADDR                  = 33,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */
