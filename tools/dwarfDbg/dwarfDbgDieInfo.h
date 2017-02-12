@@ -41,8 +41,9 @@
 #ifndef DWARF_DBG_DIE_INFO_H
 #define	DWARF_DBG_DIE_INFO_H
 
-#define DW_LOCATION_INFO 0x01
-#define DW_NAME_INFO     0x02
+#define DW_LOCATION_INFO              0x01
+#define DW_NAME_INFO                  0x02
+#define DW_HIGH_PC_OFFSET_FROM_LOW_PC 0x04
 
 typedef struct dieAttr {
   Dwarf_Half attr;
@@ -50,38 +51,44 @@ typedef struct dieAttr {
   Dwarf_Half theform;
   Dwarf_Half directform;
   Dwarf_Unsigned uval;
+  Dwarf_Off refOffset;   // this offset refers to a dieInfo.offset field with the same value
+  Dwarf_Addr lowPc;
+  Dwarf_Addr highPc;
+  Dwarf_Signed signedLowPcOffset;
+  Dwarf_Unsigned unsignedLowPcOffset;
   int sourceFileIdx;
   int sourceLineNo;
   int attrStrIdx;
+  uint16_t flags;
   locationInfo_t *locationInfo;
 } dieAttr_t;
 
 typedef struct dieInfo {
-  size_t offset;
+  Dwarf_Off offset;     // this can be referenced by dieAttr.refOffset.
   Dwarf_Half tag;
-  size_t numAttr;
-  size_t maxAttr;
+  int numAttr;
+  int maxAttr;
   dieAttr_t *dieAttrs;
 } dieInfo_t;
 
 typedef struct dieAndChildrenInfo {
   Dwarf_Die die;
-  size_t numSiblings;
-  size_t maxSiblings;
+  int numSiblings;
+  int maxSiblings;
   dieInfo_t *dieSiblings;
-  size_t numChildren;
-  size_t maxChildren;
+  int numChildren;
+  int maxChildren;
   dieInfo_t *dieChildren;
 } dieAndChildrenInfo_t;
 
-typedef uint8_t (* showChildren_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, const char *indent);
-typedef uint8_t (* showSiblings_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, const char *indent);
+typedef uint8_t (* showChildren_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, const char *indent);
+typedef uint8_t (* showSiblings_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, const char *indent);
 typedef uint8_t (* addAttrStr_t)(dwarfDbgPtr_t self, const char *str, int *attrStrIdx);
 typedef uint8_t (* addDieChildAttr_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int childIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *childAttrIdx);
 typedef uint8_t (* addDieSiblingAttr_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int siblingIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *siblingAttrIdx);
-typedef uint8_t (* addDieSibling_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t offset, Dwarf_Half tag, size_t *siblingIdx);
-typedef uint8_t (* addDieChild_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t offset, Dwarf_Half tag, size_t *childIdx);
-typedef uint8_t (* addDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die die, size_t *dieAndChildrenIdx);
+typedef uint8_t (* addDieSibling_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off offset, Dwarf_Half tag, int *siblingIdx);
+typedef uint8_t (* addDieChild_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off offset, Dwarf_Half tag, int *childIdx);
+typedef uint8_t (* addDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die die, int *dieAndChildrenIdx);
 
 typedef struct dwarfDbgDieInfo {
 

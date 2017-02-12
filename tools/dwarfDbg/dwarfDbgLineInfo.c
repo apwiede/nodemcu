@@ -164,7 +164,7 @@ printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d%s%s%s%s%s isa: %d dis
   return result;
 }
 
-// =================================== dwarfDbgRangeInfoInit =========================== 
+// =================================== dwarfDbgLineInfoInit =========================== 
 
 int dwarfDbgLineInfoInit (dwarfDbgPtr_t self) {
   uint8_t result;

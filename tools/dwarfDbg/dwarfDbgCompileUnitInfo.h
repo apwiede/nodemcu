@@ -61,6 +61,7 @@ typedef struct compileUnit {
   char *longFileName;
   int fileNameIdx;
   int fileInfoIdx;
+  int level;
   Dwarf_Bool isCompileUnitDie;
 
   int  maxFileInfo;    /* Size of the fileInfos array. */

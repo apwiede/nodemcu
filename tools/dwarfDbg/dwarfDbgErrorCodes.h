@@ -78,6 +78,14 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_CANNOT_GET_DIE_OFFSETS               = 31,
   DWARF_DBG_ERR_CANNOT_GET_ATTR                      = 32,
   DWARF_DBG_ERR_CANNOT_GET_FORMADDR                  = 33,
+  DWARF_DBG_ERR_CANNOT_GET_FORMREF                   = 34,
+  DWARF_DBG_ERR_CANNOT_GET_FORMDATA                  = 35,
+  DWARF_DBG_ERR_BAD_FRAME_BASE_FORM                  = 36,
+  DWARF_DBG_ERR_CANNOT_GET_FORM_EXPRLOC              = 37,
+  DWARF_DBG_ERR_GET_LOCLIST_FROM_EXPR_C              = 38,
+  DWARF_DBG_ERR_GET_LOCDESC_ENTRY_C                  = 39,
+  DWARF_DBG_ERR_GET_VERSION_OF_DIE                   = 40,
+  DWARF_DBG_ERR_GET_DIE_ADDRESS_SIZE                 = 41,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */
