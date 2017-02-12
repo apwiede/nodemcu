@@ -179,9 +179,8 @@ static uint8_t addCompileUnitFile(dwarfDbgPtr_t self, char *pathName, int *fileN
   int fileIdx;
   fileNameInfo_t *fileNameInfo;
 
-printf("addCompileUnitFile compileUnitIdx: %d\n", self->dwarfDbgCompileUnitInfo->currCompileUnitIdx);
-
   result = DWARF_DBG_ERR_OK;
+printf("  >>addCompileUnitFile compileUnitIdx: %d %s\n", self->dwarfDbgCompileUnitInfo->currCompileUnitIdx, pathName);
   cp = strrchr(pathName, '/');
   if (cp != NULL) {
     *cp++ = '\0';

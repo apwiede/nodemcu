@@ -221,7 +221,7 @@ static int numAddChild = 0;
 static int childrenLevel = 0;
 // =================================== handleOneDie =========================== 
 
-static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, Dwarf_Signed cnt, size_t compileUnitIdx, Dwarf_Bool isSibling, size_t dieAndChildrenIdx, size_t *dieInfoIdx) {
+static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, Dwarf_Signed cnt, Dwarf_Bool isSibling, size_t dieAndChildrenIdx, size_t *dieInfoIdx) {
   uint8_t result;
   int tres = 0;
   int ores = 0;
@@ -267,58 +267,17 @@ printf("numAddChild: %d\n", ++numAddChild);
   }
   atres = dwarf_attrlist(die, &atList, &atCnt, &err);
 printf("atCnt: %p %d\n", die, atCnt);
-  {
-    for (i = 0; i < atCnt; i++) {
-      Dwarf_Half attr;
-      Dwarf_Attribute producerAttr;
-      Dwarf_Attribute attrIn;
-      char *stringValue;
-      const char *shortName;
-      char buf[255];
-      int numericValue;
-      int ares;
-      int dieAttrIdx;
-char *producerName = NULL;
-Dwarf_Half theform = 0;
+  for (i = 0; i < atCnt; i++) {
+    Dwarf_Half attr;
+    Dwarf_Attribute attrIn;
+    int ares;
+    int dieAttrIdx;
 
-      ares = dwarf_whatattr(atList[i], &attr, &err);
-printf("whatattr: i: %d ares: %d attr: 0x%02x\n", i, ares, attr);
-      attrIn = atList[i];
-      if (ares == DW_DLV_OK) {
-        stringValue = NULL;
-        result = self->dwarfDbgAttributeInfo->handleAttribute(self, die, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, *dieInfoIdx, isSibling, &dieAttrIdx);
-#ifdef NOTDEF
-// FIXME need another place for calling addCompileUnitFile!!!
-        switch (attr) {
-        case DW_AT_name:
-printf("  DW_AT_name\n");
-          if (stringValue != NULL) {
-printf("    AT_name: %s\n", stringValue);
-            if (strrchr(stringValue, '/') != NULL) {
-              sprintf(buf, "%s", strrchr(stringValue, '/')+1);
-printf(">>addDieATName file: %s\n", buf);
-              result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
-printf("    with /: %s result: %d\n", stringValue, result);
-              checkErrOK(result);
-              shortName = NULL;
-            } else {
-              shortName = stringValue;
-            }
-          }
-          break;
-        case DW_AT_comp_dir:
-printf("  DW_AT_comp_dir\n");
-          if ((stringValue != NULL) && (shortName != NULL)) {
-            sprintf(buf, "%s/%s", stringValue, shortName);
-printf(">>addDieAT_comp_dir file: %s\n", buf);
-            result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
-printf("    NAME: %s result: %d\n", buf, result);
-            checkErrOK(result);
-          }
-          break;
-        }
-#endif
-      }
+    ares = dwarf_whatattr(atList[i], &attr, &err);
+    attrIn = atList[i];
+    if (ares == DW_DLV_OK) {
+      result = self->dwarfDbgAttributeInfo->handleAttribute(self, die, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, *dieInfoIdx, isSibling, &dieAttrIdx);
+printf("after handleAttribute\n");
     }
   }
   return result;
@@ -326,7 +285,7 @@ printf("    NAME: %s result: %d\n", buf, result);
 
 // =================================== handleDieAndChildren =========================== 
 
-static uint8_t handleDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die in_die_in, char **srcfiles, Dwarf_Signed cnt, size_t compileUnitIdx) {
+static uint8_t handleDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die in_die_in, char **srcfiles, Dwarf_Signed cnt) {
   uint8_t result;
   size_t dieInfoIdx = 0;
   size_t dieAndChildrenIdx = 0;
@@ -337,10 +296,12 @@ static uint8_t handleDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die in_die_in, cha
   int cdres = DW_DLV_OK;
   int numChildren = 0;
   Dwarf_Bool isSibling = 0;
+  compileUnit_t *compileUnit = NULL;
   
 
   result = DWARF_DBG_ERR_OK;
-printf("handleDieAndChildren die: %p level: %d\n", in_die_in, ++childrenLevel);
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+printf("@@handleDieAndChildren die: %p level: %d isCompileUnitDie: %d\n", in_die_in, ++childrenLevel, compileUnit->isCompileUnitDie);
   result = self->dwarfDbgDieInfo->addDieAndChildren(self, in_die_in, &dieAndChildrenIdx);
   checkErrOK(result);
   for(;;) {
@@ -349,7 +310,8 @@ printf("pre-descent numChildren: %d\n", numChildren);
     /* Here do pre-descent processing of the die. */
     {
 printf("before handleOneDie in_die: %p\n", in_die);
-      result = handleOneDie(self, in_die, srcfiles, cnt, compileUnitIdx, isSibling, dieAndChildrenIdx, &dieInfoIdx);
+      result = handleOneDie(self, in_die, srcfiles, cnt, isSibling, dieAndChildrenIdx, &dieInfoIdx);
+      compileUnit->isCompileUnitDie = 0;
 printf("after handleOneDie in_die: %p\n", in_die);
 printf("call dwarf_child in_die: %p\n", in_die);
       child = NULL;
@@ -359,7 +321,7 @@ printf("after call dwarf_child in_die: %p child: %p cdres: %d\n", in_die, child,
       if (cdres == DW_DLV_OK) {
 printf("child first\n");
 printf("call recursive handleDieAndChildren: child: %p numChildren: %d\n", child, numChildren);
-        handleDieAndChildren(self, child, srcfiles, cnt, compileUnitIdx);
+        handleDieAndChildren(self, child, srcfiles, cnt);
         dwarf_dealloc(self->elfInfo.dbg, child, DW_DLA_DIE);
         child = 0;
       }
@@ -408,7 +370,6 @@ static uint8_t handleCompileUnits(dwarfDbgPtr_t self) {
   int   compileUnitCount = 0;
   char * compileUnitShortName = NULL;
   char * compileUnitLongName = NULL;
-  size_t compileUnitIdx = 0;
   int i = 0;
   int fileLineIdx;
   Dwarf_Signed srcCnt = 0;
@@ -447,7 +408,7 @@ printf("handle srcfiles\n");
         and we do not want to print anything
         about statements in that case */
 
-printf("srcCnt: %d compileUnitIdx: %d\n", srcCnt, compileUnitIdx);
+printf("srcCnt: %d currCompileUnitIdx: %d\n", srcCnt, self->dwarfDbgCompileUnitInfo->currCompileUnitIdx);
       for (i = 0; i < srcCnt; i++) {
         int fileNameIdx;
         int fileInfoIdx;
@@ -459,7 +420,8 @@ printf("  src: %s\n", srcfiles[i]);
       }
 
 printf("call handleDieAndChildren\n");
-      result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt, compileUnitIdx);
+      compileUnit->isCompileUnitDie = 1;
+      result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt);
     }
 printf("handleCompileUnits after handleDieAndChildren result: %d\n", result);
 

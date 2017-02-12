@@ -184,7 +184,7 @@ static uint8_t addDieAttr(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Bool 
   result = DWARF_DBG_ERR_OK;
   result = self->dwarfDbgStringInfo->getDW_AT_string(self, attr, &atName);
   checkErrOK(result);
-printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%08x attr_in: 0x%08x uval: 0x%08x, theform: 0x%04x\n", atName, dieAndChildrenIdx, isSibling, idx, attr, attrIn, uval, theform);
+printf("  >>==addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%08x attr_in: 0x%08x uval: 0x%08x, theform: 0x%04x\n", atName, dieAndChildrenIdx, isSibling, idx, attr, attrIn, uval, theform);
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
   if (isSibling) {
@@ -207,12 +207,6 @@ printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%0
     }
   }
 //printf("== numAttrs: %d\n", dieInfo->numAttr);
-#ifdef NOTDEF
-  if (attr == DW_AT_name) {
-    result = addAttrStr(self, attrStr, &attrStrIdx);
-    checkErrOK(result);
-  }
-#endif
   dieAttr = &dieInfo->dieAttrs[dieInfo->numAttr];
   memset(dieAttr, 0, sizeof(dieAttr_t));
   dieAttr->attr = attr;
@@ -231,9 +225,7 @@ printf("== addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%0
   dieAttr->flags = flags;
   dieAttr->attrStrIdx = attrStrIdx;
 #endif
-printf(">>addDieAttr: %s attr: 0x%04x\n", atName, attr);
   if (attr == DW_AT_location) {
-printf(">>addDieAttr2: %s IDX: %d\n", atName, dieInfo->numAttr);
     dieAttr->locationInfo = (locationInfo_t *)ckalloc(sizeof(locationInfo_t));
     if (dieAttr->locationInfo == NULL) {
       return DWARF_DBG_ERR_OUT_OF_MEMORY;
@@ -244,8 +236,6 @@ printf(">>addDieAttr2: %s IDX: %d\n", atName, dieInfo->numAttr);
   }
   *attrIdx = dieInfo->numAttr;
   dieInfo->numAttr++;
-printf("addDieAttr done attrIdx: %d\n", *attrIdx);
-fflush(stdout);
   return result;
 }
 

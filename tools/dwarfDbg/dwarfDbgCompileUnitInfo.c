@@ -157,7 +157,7 @@ printf("  >>name: %d %s\n", nameAttr, longFileName);
   compileUnit->longFileName = ckalloc(strlen(longFileName) + 1);
   memset(compileUnit->longFileName, 0, strlen(longFileName) + 1);
   memcpy(compileUnit->longFileName, longFileName, strlen(longFileName));
-printf("  >>name2: %s %s\n", compileUnit->shortFileName, compileUnit->longFileName);
+printf("  >>name2: %s %s!\n", compileUnit->shortFileName, compileUnit->longFileName);
   return result;
 }
 

@@ -113,7 +113,7 @@ printf("  >>addAttribute called:\n");
 
 // =================================== handleDW_AT_abstract_originAttr =========================== 
 
-static uint8_t handleDW_AT_abstract_originAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_abstract_originAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -123,7 +123,7 @@ static uint8_t handleDW_AT_abstract_originAttr(dwarfDbgPtr_t self, attrInInfo_t 
 
 // =================================== handleDW_AT_artificialAttr =========================== 
 
-static uint8_t handleDW_AT_artificialAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_artificialAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -133,7 +133,7 @@ static uint8_t handleDW_AT_artificialAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
 
 // =================================== handleDW_AT_bit_offsetAttr =========================== 
 
-static uint8_t handleDW_AT_bit_offsetAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_bit_offsetAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -143,7 +143,7 @@ static uint8_t handleDW_AT_bit_offsetAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
 
 // =================================== handleDW_AT_bit_sizeAttr =========================== 
 
-static uint8_t handleDW_AT_bit_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_bit_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -153,7 +153,7 @@ static uint8_t handleDW_AT_bit_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
 
 // =================================== handleDW_AT_byte_sizeAttr =========================== 
 
-static uint8_t handleDW_AT_byte_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_byte_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -163,7 +163,7 @@ static uint8_t handleDW_AT_byte_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
 
 // =================================== handleDW_AT_call_fileAttr =========================== 
 
-static uint8_t handleDW_AT_call_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_call_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -173,7 +173,7 @@ static uint8_t handleDW_AT_call_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
 
 // =================================== handleDW_AT_call_lineAttr =========================== 
 
-static uint8_t handleDW_AT_call_lineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_call_lineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -183,25 +183,42 @@ static uint8_t handleDW_AT_call_lineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
 
 // =================================== handleDW_AT_comp_dirAttr =========================== 
 
-static uint8_t handleDW_AT_comp_dirAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_comp_dirAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   int res = 0;
   char *name;
+  char buf[255];
   Dwarf_Error err = NULL;
+  compileUnit_t *compileUnit = NULL;
+  dieAndChildrenInfo_t *dieAndChildrenInfo = NULL;
+  dieInfo_t *dieInfo = NULL;
+  dieAttr_t *dieAttr = NULL;
 
   result = DWARF_DBG_ERR_OK;
   res = dwarf_formstring(attrInInfo->attrIn, &name, &err);
   if (res != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_NAME_FORMSTRING;
   }
-printf("  >>comp_dir: %d %s\n", attrInInfo->uval, name);
-
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+printf("  >>comp_dir: %d %s isCompileUnitDie: %d\n", attrInInfo->uval, name, compileUnit->isCompileUnitDie);
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[attrInInfo->dieAndChildrenIdx];
+  if (attrInInfo->isSibling) {
+    dieInfo = &dieAndChildrenInfo->dieSiblings[attrInInfo->dieInfoIdx];
+  } else {
+    dieInfo = &dieAndChildrenInfo->dieChildren[attrInInfo->dieInfoIdx];
+  }
+  dieAttr = &dieInfo->dieAttrs[attrInInfo->dieAttrIdx];
+  result = self->dwarfDbgDieInfo->addAttrStr(self, name, &dieAttr->attrStrIdx);
+  checkErrOK(result);
+  sprintf(buf, "%s/%s", name, compileUnit->shortFileName);
+  result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
+  checkErrOK(result);
   return result;
 }
 
 // =================================== handleDW_AT_const_valueAttr =========================== 
 
-static uint8_t handleDW_AT_const_valueAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_const_valueAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -211,7 +228,7 @@ static uint8_t handleDW_AT_const_valueAttr(dwarfDbgPtr_t self, attrInInfo_t *att
 
 // =================================== handleDW_AT_data_member_locationAttr =========================== 
 
-static uint8_t handleDW_AT_data_member_locationAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_data_member_locationAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -221,7 +238,7 @@ static uint8_t handleDW_AT_data_member_locationAttr(dwarfDbgPtr_t self, attrInIn
 
 // =================================== handleDW_AT_declarationAttr =========================== 
 
-static uint8_t handleDW_AT_declarationAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_declarationAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -231,7 +248,7 @@ static uint8_t handleDW_AT_declarationAttr(dwarfDbgPtr_t self, attrInInfo_t *att
 
 // =================================== handleDW_AT_decl_fileAttr =========================== 
 
-static uint8_t handleDW_AT_decl_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_decl_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   const char *sourceFile = NULL;
 
@@ -248,7 +265,7 @@ printf("  >>FILE: %s\n", attrInInfo->srcfiles[attrInInfo->uval-1]);
 
 // =================================== handleDW_AT_decl_lineAttr =========================== 
 
-static uint8_t handleDW_AT_decl_lineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_decl_lineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -259,7 +276,7 @@ printf("  >>DW_AT_decl_line: %d 0x%04x\n", attrInInfo->uval, attrInInfo->uval);
 
 // =================================== handleDW_AT_encodingAttr =========================== 
 
-static uint8_t handleDW_AT_encodingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_encodingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -269,7 +286,7 @@ static uint8_t handleDW_AT_encodingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
 
 // =================================== handleDW_AT_entry_pcAttr =========================== 
 
-static uint8_t handleDW_AT_entry_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_entry_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   int res = 0;
   Dwarf_Error err = NULL;
@@ -285,7 +302,7 @@ static uint8_t handleDW_AT_entry_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
 
 // =================================== handleDW_AT_externalAttr =========================== 
 
-static uint8_t handleDW_AT_externalAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_externalAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -295,7 +312,7 @@ static uint8_t handleDW_AT_externalAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
 
 // =================================== handleDW_AT_frame_baseAttr =========================== 
 
-static uint8_t handleDW_AT_frame_baseAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_frame_baseAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -305,7 +322,7 @@ static uint8_t handleDW_AT_frame_baseAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
 
 // =================================== handleDW_AT_GNU_all_call_sitesAttr =========================== 
 
-static uint8_t handleDW_AT_GNU_all_call_sitesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_GNU_all_call_sitesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -315,7 +332,7 @@ static uint8_t handleDW_AT_GNU_all_call_sitesAttr(dwarfDbgPtr_t self, attrInInfo
 
 // =================================== handleDW_AT_GNU_all_tail_call_sitesAttr =========================== 
 
-static uint8_t handleDW_AT_GNU_all_tail_call_sitesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_GNU_all_tail_call_sitesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -325,7 +342,7 @@ static uint8_t handleDW_AT_GNU_all_tail_call_sitesAttr(dwarfDbgPtr_t self, attrI
 
 // =================================== handleDW_AT_GNU_call_site_targetAttr =========================== 
 
-static uint8_t handleDW_AT_GNU_call_site_targetAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_GNU_call_site_targetAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -335,7 +352,7 @@ static uint8_t handleDW_AT_GNU_call_site_targetAttr(dwarfDbgPtr_t self, attrInIn
 
 // =================================== handleDW_AT_GNU_call_site_valueAttr =========================== 
 
-static uint8_t handleDW_AT_GNU_call_site_valueAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_GNU_call_site_valueAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -345,7 +362,7 @@ static uint8_t handleDW_AT_GNU_call_site_valueAttr(dwarfDbgPtr_t self, attrInInf
 
 // =================================== handleDW_AT_high_pcAttr =========================== 
 
-static uint8_t handleDW_AT_high_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_high_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   int res = 0;
   Dwarf_Error err = NULL;
@@ -361,7 +378,7 @@ static uint8_t handleDW_AT_high_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInI
 
 // =================================== handleDW_AT_inlineAttr =========================== 
 
-static uint8_t handleDW_AT_inlineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_inlineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -371,7 +388,7 @@ static uint8_t handleDW_AT_inlineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInIn
 
 // =================================== handleDW_AT_languageAttr =========================== 
 
-static uint8_t handleDW_AT_languageAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_languageAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   const char *language = NULL;
   int res = 0;
@@ -388,7 +405,7 @@ printf("  >>language: 0x%04x %d %s\n", attrInInfo->uval, attrInInfo->uval, langu
 
 // =================================== handleDW_AT_linkage_nameAttr =========================== 
 
-static uint8_t handleDW_AT_linkage_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_linkage_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -398,7 +415,7 @@ static uint8_t handleDW_AT_linkage_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *at
 
 // =================================== handleDW_AT_locationAttr =========================== 
 
-static uint8_t handleDW_AT_locationAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_locationAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -410,7 +427,7 @@ printf("LOCATION: dieAndChildrenIdx: %d dieInfoIdx: %d isSibling: %d dieAttrIdx:
 
 // =================================== handleDW_AT_low_pcAttr =========================== 
 
-static uint8_t handleDW_AT_low_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_low_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   int res = 0;
   Dwarf_Error err = NULL;
@@ -426,7 +443,7 @@ static uint8_t handleDW_AT_low_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInIn
 
 // =================================== handleDW_AT_nameAttr =========================== 
 
-static uint8_t handleDW_AT_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   int res = 0;
   char *name;
@@ -457,7 +474,7 @@ printf("  >>name: %d %s\n", attrInInfo->uval, name);
 
 // =================================== handleDW_AT_producerAttr =========================== 
 
-static uint8_t handleDW_AT_producerAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_producerAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   Dwarf_Error err;
   Dwarf_Attribute producerAttr;
@@ -465,18 +482,15 @@ static uint8_t handleDW_AT_producerAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
   char *producerName;
 
   result = DWARF_DBG_ERR_OK;
-printf("  >>producer:\n");
   ares = dwarf_attr(attrInInfo->die, DW_AT_producer, &producerAttr, &err);
   ares = dwarf_formstring(producerAttr, &producerName, &err);
-printf("  >>ares: %d producerName: %s\n", ares, producerName);
-
-
+printf("  >>producerName: %s\n", producerName);
   return result;
 }
 
 // =================================== handleDW_AT_prototypedAttr =========================== 
 
-static uint8_t handleDW_AT_prototypedAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_prototypedAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -486,7 +500,7 @@ static uint8_t handleDW_AT_prototypedAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
 
 // =================================== handleDW_AT_rangesAttr =========================== 
 
-static uint8_t handleDW_AT_rangesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_rangesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
   int rres = 0;
   int fres = 0;
@@ -519,7 +533,7 @@ printf("  >>rangecount: %d bytecount: %d\n", rangecount, bytecount);
 
 // =================================== handleDW_AT_siblingAttr =========================== 
 
-static uint8_t handleDW_AT_siblingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_siblingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -529,7 +543,7 @@ static uint8_t handleDW_AT_siblingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInI
 
 // =================================== handleDW_AT_stmt_listAttr =========================== 
 
-static uint8_t handleDW_AT_stmt_listAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_stmt_listAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -539,7 +553,7 @@ static uint8_t handleDW_AT_stmt_listAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
 
 // =================================== handleDW_AT_typeAttr =========================== 
 
-static uint8_t handleDW_AT_typeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_typeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -549,7 +563,7 @@ static uint8_t handleDW_AT_typeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo
 
 // =================================== handleDW_AT_upper_boundAttr =========================== 
 
-static uint8_t handleDW_AT_upper_boundAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo, int *dieAttrIdx) {
+static uint8_t handleDW_AT_upper_boundAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
@@ -647,150 +661,150 @@ printf("  >>addAttribute2: %s 0x%04x theform: 0x%04x directform: 0x%04x uval: %d
   attrInInfo.dieAttrIdx = *dieAttrIdx;
   attrInInfo.isSibling = isSibling;
   attrInInfo.die = die;
-printf("attrName. %s\n", attrName);
+printf("  >>attrName: %s\n", attrName);
   switch (attr) {
   case DW_AT_abstract_origin:
-    result = handleDW_AT_abstract_originAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_abstract_originAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_artificial:
-    result = handleDW_AT_artificialAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_artificialAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_bit_offset:
-    result = handleDW_AT_bit_offsetAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_bit_offsetAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_bit_size:
-    result = handleDW_AT_bit_sizeAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_bit_sizeAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_byte_size:
-    result = handleDW_AT_byte_sizeAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_byte_sizeAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_call_file:
-    result = handleDW_AT_call_fileAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_call_fileAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_call_line:
-    result = handleDW_AT_call_lineAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_call_lineAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_comp_dir:
-    result = handleDW_AT_comp_dirAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_comp_dirAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_const_value:
-    result = handleDW_AT_const_valueAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_const_valueAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_data_member_location:
-    result = handleDW_AT_data_member_locationAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_data_member_locationAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_declaration:
-    result = handleDW_AT_declarationAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_declarationAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_decl_file:
-    result = handleDW_AT_decl_fileAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_decl_fileAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_decl_line:
-    result = handleDW_AT_decl_lineAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_decl_lineAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_encoding:
-    result = handleDW_AT_encodingAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_encodingAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_entry_pc:
-    result = handleDW_AT_entry_pcAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_entry_pcAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_external:
-    result = handleDW_AT_externalAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_externalAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_frame_base:
-    result = handleDW_AT_frame_baseAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_frame_baseAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_GNU_all_call_sites:
-    result = handleDW_AT_GNU_all_call_sitesAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_GNU_all_call_sitesAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_GNU_all_tail_call_sites:
-    result = handleDW_AT_GNU_all_tail_call_sitesAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_GNU_all_tail_call_sitesAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_GNU_call_site_target:
-    result = handleDW_AT_GNU_call_site_targetAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_GNU_call_site_targetAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_GNU_call_site_value:
-    result = handleDW_AT_GNU_call_site_valueAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_GNU_call_site_valueAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_high_pc:
-    result = handleDW_AT_high_pcAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_high_pcAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_inline:
-    result = handleDW_AT_inlineAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_inlineAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_language:
-    result = handleDW_AT_languageAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_languageAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_linkage_name:
-    result = handleDW_AT_linkage_nameAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_linkage_nameAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_location:
-    result = handleDW_AT_locationAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_locationAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_low_pc:
-    result = handleDW_AT_low_pcAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_low_pcAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_name:
-    result = handleDW_AT_nameAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_nameAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_producer:
-    result = handleDW_AT_producerAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_producerAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_prototyped:
-    result = handleDW_AT_prototypedAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_prototypedAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_ranges:
-    result = handleDW_AT_rangesAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_rangesAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_sibling:
-    result = handleDW_AT_siblingAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_siblingAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_stmt_list:
-    result = handleDW_AT_stmt_listAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_stmt_listAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_type:
-    result = handleDW_AT_typeAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_typeAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   case DW_AT_upper_bound:
-    result = handleDW_AT_upper_boundAttr(self, &attrInInfo, dieAttrIdx);
+    result = handleDW_AT_upper_boundAttr(self, &attrInInfo);
     checkErrOK(result);
     break;
   default:
-fprintf(stderr, "missing attr: %d 0x%04x in handleAttribute\n", attr, attr);
+fprintf(stderr, "ERROR missing attr: %d 0x%04x in handleAttribute\n", attr, attr);
     return DWARF_DBG_ERR_MISSING_ATTR_IN_SWITCH;
   }
   return result;
