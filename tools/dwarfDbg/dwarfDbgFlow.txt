@@ -12,7 +12,7 @@ dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) (from Tcl)
     for (i = 0; i < srcCnt; i++)
       self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], compileUnitIdx, &fileNameIdx, &fileInfoIdx);
     handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt, compileUnitIdx);
-    getCompileUnitLineInfos(self, compileUnitIdx, compileUnit->fileInfoIdx, &fileLineIdx);
+    self->dwarfDbgLineInfo->handleLineInfos(self, &fileLineIdx);
   return   
 
 # =====
@@ -41,8 +41,13 @@ handleOneDie(..., compileUnitIdx, isSibling, dieAndChildrenIdx ..., size_t *dieI
     self->dwarfDbgDieInfo->addDieSibling(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
   else
     self->dwarfDbgDieInfo->addDieChild(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
-  dwarf_attrlist(die, &atList, &atCnt, &err);
-  for (i = 0; i < atCnt; i++)
+  dwarf_attrlist(die, &atList, &attrCnt, &err);
+  for (i = 0; i < attrCnt; i++)
     dwarf_whatattr(atList[i], &attr, &err);
     handleAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
-    getAttribute(self, attr, atList[i], srcfiles, cnt, dieAndChildrenIdx, isSibling, *dieInfoIdx, &stringValue, &numericValue);
+
+
+
+
+DW_TAG_typedef entries have a DW_AT_type entry whith a reference of form DW_FORM_ref<n>
+Ths reference refers to the dieInfo.offset field in ia DW_TAG_base_type "dieInfo" entry!
