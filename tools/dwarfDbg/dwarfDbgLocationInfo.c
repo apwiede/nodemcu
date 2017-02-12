@@ -103,7 +103,7 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
 
   result = DWARF_DBG_ERR_OK;
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
 printf("dieAndChildrenInfo: %p\n", dieAndChildrenInfo);
   if (isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
@@ -265,7 +265,7 @@ printf("found: %d compileUnitIdx: %d\n", found, compileUnitIdx);
   }
   found = 0;
   for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
-    dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[dieAndChildrenIdx];
+    dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
 printf("dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
     for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numChildren; dieInfoIdx++) {
       dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];

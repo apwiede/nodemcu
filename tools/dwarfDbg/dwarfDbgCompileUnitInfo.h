@@ -73,7 +73,7 @@ typedef struct compileUnit {
 
   int numDieAndChildren;
   int maxDieAndChildren;
-  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  dieAndChildrenInfo_t *dieAndChildrenInfos;
 
   int  maxRangeInfo;    /* Size of the rangeInfos array. */
   int  numRangeInfo;    /* Index of the topmost entry */

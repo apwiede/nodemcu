@@ -201,7 +201,7 @@ static uint8_t handleDW_AT_comp_dirAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
   }
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
 printf("  >>comp_dir: %d %s isCompileUnitDie: %d\n", attrInInfo->uval, name, compileUnit->isCompileUnitDie);
-  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[attrInInfo->dieAndChildrenIdx];
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[attrInInfo->dieAndChildrenIdx];
   if (attrInInfo->isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[attrInInfo->dieInfoIdx];
   } else {
@@ -460,7 +460,7 @@ static uint8_t handleDW_AT_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo
   }
 printf("  >>name: %d %s\n", attrInInfo->uval, name);
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfo[attrInInfo->dieAndChildrenIdx];
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[attrInInfo->dieAndChildrenIdx];
   if (attrInInfo->isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[attrInInfo->dieInfoIdx];
   } else {
@@ -561,6 +561,9 @@ static uint8_t handleAttribute(dwarfDbgPtr_t self, Dwarf_Die die, Dwarf_Half att
   Dwarf_Attribute producerAttri = 0;
   Dwarf_Unsigned uval = 0;
   Dwarf_Error err = NULL;
+  compileUnit_t *compileUnit;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  dieInfo_t *dieInfo;
 
   result = DWARF_DBG_ERR_OK;
   if ((int)dieAndChildrenIdx < 0) {
@@ -616,16 +619,18 @@ printf("DWARF_DBG_ERR_CANNOT_GET_FORMUDATA %d %d %d\n", res, DW_DLV_ERROR, DW_DL
       attrInInfo.uval = -1;
     }
   }
-compileUnit_t *compileUnit;
-compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
   if (isSibling) {
 printf("  >>addAttribute: isSibling: \n");
+    dieInfo = &compileUnit->dieAndChildrenInfos->dieSiblings[dieInfoIdx];
     result = self->dwarfDbgDieInfo->addDieSiblingAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attrIn, uval, attrInInfo.theform, attrInInfo.directform, dieAttrIdx);
-dieAttr_t dieAttr = compileUnit->dieAndChildrenInfo->dieSiblings->dieAttrs[*dieAttrIdx];
+dieAttr_t dieAttr = dieInfo->dieAttrs[*dieAttrIdx];
   } else {
 printf("  >>addAttribute: isChild:\n");
+    dieInfo = &compileUnit->dieAndChildrenInfos->dieSiblings[dieInfoIdx];
     result = self->dwarfDbgDieInfo->addDieChildAttr(self, dieAndChildrenIdx, dieInfoIdx, attr, attrIn, uval, theform, directform, dieAttrIdx);
-dieAttr_t dieAttr = compileUnit->dieAndChildrenInfo->dieChildren->dieAttrs[*dieAttrIdx];
+dieAttr_t dieAttr = dieInfo->dieAttrs[*dieAttrIdx];
   }
   checkErrOK(result);
 printf("  >>addAttribute2: %s 0x%04x theform: 0x%04x directform: 0x%04x uval: %d 0x%04x dieAttrIdx: %d\n", attrName, attr, attrInInfo.theform, attrInInfo.directform, attrInInfo.uval, attrInInfo.uval, *dieAttrIdx);
