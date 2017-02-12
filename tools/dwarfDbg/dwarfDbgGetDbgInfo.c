@@ -41,184 +41,12 @@
 #include <tcl.h>
 #include "dwarfDbgInt.h"
 
-static Dwarf_Off  DIEOffset = 0;      /* DIE offset in compile unit */
-static Dwarf_Off  DIEOverallOffset = 0;  /* DIE offset in .debug_info */
-static dwarfDbgEsb_t esbShortCuName;
-static dwarfDbgEsb_t esbLongCuName;
-
-// =================================== getAttrValue =========================== 
-
-static int getAttrValue(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, int cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, size_t dieInfoIdx, char **attrStr)
-{
-  int result;
-  Dwarf_Attribute attrib = 0;
-  Dwarf_Unsigned uval = 0;
-  const char * atName = 0;
-  dwarfDbgEsb_t valName;
-  dwarfDbgEsb_t esb_extra;
-  int tres = 0;
-  int append_extra_string = 0;
-  int found_search_attr = FALSE;
-  int bTextFound = FALSE;
-  Dwarf_Bool is_info = FALSE;
-  Dwarf_Addr elf_max_address = 0;
-  Dwarf_Error paerr = 0;
-  Dwarf_Half attr2 = 0;
-
-  char * temps = NULL;
-  int res = 0;
-  int fres = 0;
-  int sres = 0;
-  int bres = 0;
-  int vres = 0;
-  uint16_t flags = 0;
-  size_t attrIdx;
-  Dwarf_Half theform = 0;
-  Dwarf_Half directform = 0;
-  Dwarf_Error err = 0;
-  Dwarf_Addr addr = 0;
-  char *sourceFile = NULL;
-  int sourceLineNo = -1;
-  
-  result = DWARF_DBG_ERR_OK;
-  *attrStr = NULL;
-  res = dwarf_get_AT_name(attr, &atName);
-printf("getAttrValue attr: 0x%08x atname: %s\n", attr_in, atName);
-  fres = dwarf_whatform(attr_in, &theform, &err);
-//printf("getAttrValue: fres: %d res: %d theform: 0x%02x\n", fres, res, theform);
-  vres = dwarf_formudata(attr_in, &uval, &err);
-printf("uval: %d\n", uval);
-
-//printf("++getAttrValue: dieAndChildrenIdx: 0x%02x attr: 0x%08x uval: 0x%08x theform: 0x%08x\n", dieAndChildrenIdx, attr, uval, theform);
-  if ((int)dieAndChildrenIdx < 0) {
-printf("ERROR dieAndChildrenIdx < 0\n");
-  }
-  return 1;
-}
-
-// =================================== getCompileUnitLineInfos =========================== 
-
-static uint8_t getCompileUnitLineInfos(dwarfDbgPtr_t self,  int *fileLineIdx) {
-  uint8_t result;
-  Dwarf_Unsigned lineVersion = 0;
-  Dwarf_Line_Context lineContext = 0;
-  Dwarf_Small tableCount = 0;
-  Dwarf_Error err = 0;
-  int lres = 0;
-  Dwarf_Signed lineCount = 0;
-  Dwarf_Line *lineBuf = NULL;
-  Dwarf_Signed lineCountActuals = 0;
-  Dwarf_Line *lineBufActuals = NULL;
-  Dwarf_Addr pc = 0;
-  Dwarf_Unsigned lineNo = 0;
-  Dwarf_Bool newstatement = 0;
-  Dwarf_Bool lineendsequence = 0;
-  Dwarf_Bool new_basic_block = 0;
-  int i = 0;
-  int fileInfoIdx;
-  compileUnit_t *compileUnit;
-
-  result = DWARF_DBG_ERR_OK;
-//printf("getCompileUnitLineInfos\n");
-  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-  lres = dwarf_srclines_b(compileUnit->compileUnitDie, &lineVersion, &tableCount, &lineContext, &err);
-if (tableCount > 0) {
-//printf(">>table_count: %d lineVersion: %d\n", tableCount, lineVersion);
-}
-  if (lres == DW_DLV_OK) {
-//printf("dwarf_srclines_two_level_from_linecontext\n");
-    lres = dwarf_srclines_two_level_from_linecontext(lineContext, &lineBuf, &lineCount,
-          &lineBufActuals, &lineCountActuals, &err);
-    if (lres != DW_DLV_OK) {
-      return DWARF_DBG_ERR_GET_SRC_LINES;
-    }
-    if (lineCount > 0) {
-//printf(">>>lineCount: %d\n", lineCount);
-      for (i = 0; i < lineCount; i++) {
-        Dwarf_Line line = lineBuf[i];
-        char* fileName = 0;
-        int ares = 0;
-        int lires = 0;
-        int nsres = 0;
-        int disres = 0;
-        Dwarf_Bool prologue_end = 0;
-        Dwarf_Bool epilogue_begin = 0;
-        Dwarf_Unsigned isa = 0;
-        Dwarf_Unsigned discriminator = 0;
-        int flags;
-        char *ns;
-        char *bb;
-        char *et;
-        char *pe;
-        char *eb;
-
-        pc = 0;
-        ares = dwarf_lineaddr(line, &pc, &err);
-        if (ares != DW_DLV_OK) {
-          return DWARF_DBG_ERR_GET_LINE_ADDR;
-        }
-        lires = dwarf_lineno(line, &lineNo, &err);
-        if (lires != DW_DLV_OK) {
-          return DWARF_DBG_ERR_GET_LINE_NO;
-        }
-        flags = 0;
-        ns = "";
-        bb = "";
-        et = "";
-        pe = "";
-        eb = "";
-nsres = dwarf_linebeginstatement(line, &newstatement, &err);
-if (nsres == DW_DLV_OK) {
-//printf("NS\n");
-  if (newstatement) {
-    ns = " NS";
-    flags |= LINE_NEW_STATEMENT;
-  }
-}
-nsres = dwarf_lineblock(line, &new_basic_block, &err);
-if (nsres == DW_DLV_OK) {
-  if (new_basic_block) {
-//printf("BB\n");
-    bb = " BB";
-    flags |= LINE_NEW_BASIC_BLOCK;
-  }
-}
-nsres = dwarf_lineendsequence(line, &lineendsequence, &err);
-if (nsres == DW_DLV_OK) {
-  if (lineendsequence) {
-//printf("ET\n");
-    et = " ET";
-    flags |= LINE_END_SEQUENCE;
-  }
-}
-disres = dwarf_prologue_end_etc(line, &prologue_end, &epilogue_begin, &isa, &discriminator, &err);
-if (disres == DW_DLV_OK) {
-//printf("prologue_end: %d epilogue_begin: %d isa: %d discriminator: %d\n", prologue_end, epilogue_begin, isa, discriminator);
-  if (prologue_end) {
-    pe = " PE";
-    flags |= LINE_PROLOGUE_END;
-  }
-  if (epilogue_begin) {
-    eb = " EB";
-    flags |= LINE_PROLOGUE_BEGIN;
-  }
-}
-printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d%s%s%s%s%s isa: %d dis: %d\n", line, pc, lineNo, ns, bb, et, eb, pe, isa, discriminator);
-        result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, flags, (uint16_t)isa, (uint16_t)discriminator, compileUnit->fileInfoIdx, fileLineIdx);
-
-      }
-    }
-  } else {
-    return DWARF_DBG_ERR_GET_SRC_LINES;
-  }
-  return result;
-}
-
 static int numDies = 0;
 static int numSiblings = 0;
 static int numAddSibling = 0;
 static int numAddChild = 0;
 static int childrenLevel = 0;
+
 // =================================== handleOneDie =========================== 
 
 static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, Dwarf_Signed cnt, Dwarf_Bool isSibling, size_t dieAndChildrenIdx, size_t *dieInfoIdx) {
@@ -443,7 +271,7 @@ fflush(showFd);
 #endif
     // eventually handle ranges here
     // here we need to handle source lines
-    result = getCompileUnitLineInfos(self, &fileLineIdx);
+    result = self->dwarfDbgLineInfo->handleLineInfos(self, &fileLineIdx);
 //printf("fileLineIdx: %d\n", fileLineIdx);
     checkErrOK(result);
 
