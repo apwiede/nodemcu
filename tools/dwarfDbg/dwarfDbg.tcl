@@ -41,6 +41,7 @@ critcl::api header dwarfDbg.h
 critcl::cheaders   dwarfDbgInt.h dwarfDbgEsb.h dwarfDbgUtil.h dwarfDbgDict.h libdwarf/*.h
 critcl::cheaders   dwarfDbgGetDbgInfo.h dwarfDbgDieInfo.h dwarfDbgStringInfo.h dwarfDbgLocationInfo.h
 critcl::cheaders   dwarfDbgFrameInfo.h dwarfDbgAttributeInfo.h dwarfDbgCompileUnitInfo.h
+critcl::cheaders   dwarfDbgLineInfo.h
 
 # # ## ### ##### ######## ############# #####################
 ## Exported API
@@ -70,7 +71,7 @@ critcl::api function char*         dwarfDbgGetErrorStr {dwarfDbgPtr_t dbg}
 
 critcl::csources dwarfDbg.c dwarfDbgElfInfo.c dwarfDbgGetDbgInfo.c dwarfDbgUtil.c dwarfDbgEsb.c dwarfDbgDict.c
 critcl::csources dwarfDbgFileInfo.c dwarfDbgDieInfo.c dwarfDbgStringInfo.c dwarfDbgLocationInfo.c 
-critcl::csources dwarfDbgFrameInfo.c dwarfDbgAttributeInfo.c dwarfDbgCompileUnitInfo.c
+critcl::csources dwarfDbgFrameInfo.c dwarfDbgAttributeInfo.c dwarfDbgCompileUnitInfo.c dwarfDbgLineInfo.c
 critcl::clibraries libdwarf/libdwarf.a /usr/lib64/libelf.so
 critcl::ccode {} ; # Fake the 'nothing to build detector'
 
