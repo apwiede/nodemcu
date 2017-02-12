@@ -411,43 +411,6 @@ printf("found: fileName %s %d num: %d\n", *pathName, fileIdx);
   return result;
 }
 
-// =================================== addRangeInfo =========================== 
-
-static uint8_t addRangeInfo(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr dwr_addr2, enum Dwarf_Ranges_Entry_Type dwrType, size_t *rangeInfoIdx) {
-  uint8_t result;
-  compileUnit_t *compileUnit;
-  rangeInfo_t *rangeInfo;
-
-printf("  >>addRangeInfo: dwr1: 0x%08x dwr2: 0x%08x dwrType: %d\n", dwr_addr1, dwr_addr2, dwrType);
-  result = DWARF_DBG_ERR_OK;
-  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-  if (compileUnit->fileInfos == NULL) {
-    // seems to be no file infos!!
-    return result;
-  }
-  if (compileUnit->maxRangeInfo <= compileUnit->numRangeInfo) {
-    compileUnit->maxRangeInfo += 5;
-    if (compileUnit->rangeInfos == NULL) {
-      compileUnit->rangeInfos = (rangeInfo_t *)ckalloc(sizeof(rangeInfo_t) * compileUnit->maxRangeInfo);
-      if (compileUnit->rangeInfos == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    } else {
-      compileUnit->rangeInfos = (rangeInfo_t *)ckrealloc((char *)compileUnit->rangeInfos, sizeof(rangeInfo_t) * compileUnit->maxRangeInfo);
-      if (compileUnit->rangeInfos == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    }
-  }
-  rangeInfo = &compileUnit->rangeInfos[compileUnit->numRangeInfo];
-  rangeInfo->dwr_addr1 = dwr_addr1;
-  rangeInfo->dwr_addr2 = dwr_addr2;
-  rangeInfo->dwr_type = dwrType;
-  *rangeInfoIdx = compileUnit->numRangeInfo;
-  compileUnit->numRangeInfo++;
-  return result;
-}
-
 // =================================== dwarfDbgGetFileInfos =========================== 
 
 int dwarfDbgGetFileInfos(dwarfDbgPtr_t self) {
@@ -592,6 +555,5 @@ int dwarfDbgFileInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgFileInfo->addFileInfo = &addFileInfo;
   self->dwarfDbgFileInfo->getFileIdxFromFileName = &getFileIdxFromFileName;
   self->dwarfDbgFileInfo->getFileNameFromFileIdx = &getFileNameFromFileIdx;
-  self->dwarfDbgFileInfo->addRangeInfo = &addRangeInfo;
   return DWARF_DBG_ERR_OK;
 }

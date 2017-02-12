@@ -91,6 +91,11 @@ dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
   checkAllocOK(dbg->dwarfDbgFileInfo);
   memset(dbg->dwarfDbgFileInfo, 0, sizeof(dwarfDbgFileInfo_t));
 
+  // dwarfDbgRangeInfo module
+  dbg->dwarfDbgRangeInfo = ALLOC(dwarfDbgRangeInfo_t);
+  checkAllocOK(dbg->dwarfDbgRangeInfo);
+  memset(dbg->dwarfDbgRangeInfo, 0, sizeof(dwarfDbgRangeInfo_t));
+
   // dwarfDbgLineInfo module
   dbg->dwarfDbgLineInfo = ALLOC(dwarfDbgLineInfo_t);
   checkAllocOK(dbg->dwarfDbgLineInfo);
@@ -166,6 +171,10 @@ int dwarfDbgInit (dwarfDbgPtr_t self) {
 
   // dwarfDbgFileInfo module
   result = dwarfDbgFileInfoInit(self);
+  checkErrOK(result);
+
+  // dwarfDbgRangeInfo module
+  result = dwarfDbgRangeInfoInit(self);
   checkErrOK(result);
 
   // dwarfDbgLineInfo module

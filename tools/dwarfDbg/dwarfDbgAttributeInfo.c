@@ -502,32 +502,9 @@ static uint8_t handleDW_AT_prototypedAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
 
 static uint8_t handleDW_AT_rangesAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
-  int rres = 0;
-  int fres = 0;
-  Dwarf_Ranges *rangeset = 0;
-  Dwarf_Signed rangecount = 0;
-  Dwarf_Unsigned bytecount = 0;
-  Dwarf_Unsigned original_off = 0;
-  Dwarf_Error err;
-  compileUnit_t *compileUnit;
-  int i;
-  size_t rangeIdx = 0;
 
   result = DWARF_DBG_ERR_OK;
-  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-  fres = dwarf_global_formref(attrInInfo->attrIn, &original_off, &err);
-  if (fres != DW_DLV_OK) {
-    return DWARF_DBG_ERR_CANNOT_GET_GLOBA_FORMREF;
-  }
-  if (fres == DW_DLV_OK) {
-    rres = dwarf_get_ranges_a(self->elfInfo.dbg, original_off, compileUnit->compileUnitDie, &rangeset, &rangecount, &bytecount, &err);
-printf("  >>rangecount: %d bytecount: %d\n", rangecount, bytecount);
-    for (i = 0; i < rangecount; i++) {
-      Dwarf_Ranges *range = &rangeset[i];
-      result = self->dwarfDbgFileInfo->addRangeInfo(self, range->dwr_addr1, range->dwr_addr2, range->dwr_type, &rangeIdx);
-      // FIXME need to store rangeIdx somwhere!!
-    }
-  }
+  result = self->dwarfDbgRangeInfo->handleRangeInfos(self, attrInInfo->attrIn);
   return result;
 }
 
