@@ -131,7 +131,7 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
     Dwarf_Unsigned opd3 = 0;
     Dwarf_Unsigned offsetforbranch = 0;
     const char *opName = NULL;
-    char extraBuf[150];
+    char extraBuf[1024];
     char buf2[100];
     int res = 0;
     locationOp_t *locationOp;
@@ -145,7 +145,9 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
       return DWARF_DBG_ERR_CANNOT_GET_LOC_DESC_ENTRY_C;
     }
     if (llent == 0) {
+if ((lopc != 0) && (hipc != 0xffffffff)) {
 printf(" <loclist at offset 0x%08x with %d entries follows>\n", locdescOffset, noOfElements);
+}
     }
 //printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x locationInfo: %p\n", lleValue, lopc, hipc, dieAttr->locationInfo);
 //printf("lopc: 0x%08x hipc: 0x%08x\n", lopc, hipc);
@@ -190,7 +192,11 @@ printf(" <loclist at offset 0x%08x with %d entries follows>\n", locdescOffset, n
 //printf("op: 0x%02x %s opd1: %d opd2: 0x%08x opd3: 0x%02x\n", op, opName, opd1, opd2, opd3);
 //printf("op: 0x%02x %s opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);
     }
+if ((lopc != 0) && (hipc != 0xffffffff)) {
 printf("                   %*s[%2d]< offset pair low-off : 0x%08x addr  0x%08x high-off  0x%08x addr 0x%08x>%s\n", (self->dwarfDbgCompileUnitInfo->currCompileUnit->level * 2), " ", llent, lopc, lopc, hipc, hipc, extraBuf);
+} else {
+printf(" %s", extraBuf);
+}
   }
   return result;
 }

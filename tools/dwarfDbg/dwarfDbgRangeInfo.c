@@ -103,7 +103,7 @@ static uint8_t handleRangeInfos(dwarfDbgPtr_t self, Dwarf_Attribute attrIn) {
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   fres = dwarf_global_formref(attrIn, &original_off, &err);
   if (fres != DW_DLV_OK) {
-    return DWARF_DBG_ERR_CANNOT_GET_GLOBA_FORMREF;
+    return DWARF_DBG_ERR_CANNOT_GET_GLOBAL_FORMREF;
   }
   if (fres == DW_DLV_OK) {
     rres = dwarf_get_ranges_a(self->elfInfo.dbg, original_off, compileUnit->compileUnitDie, &rangeset, &rangecount, &bytecount, &err);

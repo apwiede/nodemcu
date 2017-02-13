@@ -106,6 +106,7 @@ printf("<%2d><0x%08x> %*s%s\n", compileUnit->level, offset, compileUnit->level *
     attrIn = atList[i];
     if (ares == DW_DLV_OK) {
       result = self->dwarfDbgAttributeInfo->handleAttribute(self, die, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, *dieInfoIdx, isSibling, &dieAttrIdx);
+//printf("result: %d\n", result);
     }
   }
   return result;

@@ -218,7 +218,7 @@ printf("                     %*s%-26s", (compileUnit->level - 1) * 2, " ", atNam
   dieAttr->sourceFileIdx = -1;
   dieAttr->sourceLineNo = -1;
   dieAttr->flags = 0;
-  if ((attr == DW_AT_location) || (attr == DW_AT_frame_base)) {
+  if ((attr == DW_AT_location) || (attr == DW_AT_frame_base) || (attr == DW_AT_GNU_call_site_value)) {
     dieAttr->locationInfo = (locationInfo_t *)ckalloc(sizeof(locationInfo_t));
     if (dieAttr->locationInfo == NULL) {
       return DWARF_DBG_ERR_OUT_OF_MEMORY;

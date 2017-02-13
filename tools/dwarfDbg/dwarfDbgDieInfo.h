@@ -50,6 +50,7 @@ typedef struct dieAttr {
   Dwarf_Attribute attrIn;
   Dwarf_Half theform;
   Dwarf_Half directform;
+  Dwarf_Signed sval;
   Dwarf_Unsigned uval;
   Dwarf_Off refOffset;   // this offset refers to a dieInfo.offset field with the same value
   Dwarf_Addr lowPc;
