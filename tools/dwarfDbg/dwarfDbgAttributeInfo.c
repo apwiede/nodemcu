@@ -336,53 +336,67 @@ static uint8_t handleDW_AT_frame_baseAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
     return DWARF_DBG_ERR_CANNOT_GET_FORM_EXPRLOC;
   }
   {
-    Dwarf_Half address_size = 0;
-    Dwarf_Half offset_size = 0;
+    Dwarf_Half addressSize = 0;
+    Dwarf_Half offsetSize = 0;
     Dwarf_Half version = 0;
     Dwarf_Loc_Head_c head = 0;
     Dwarf_Locdesc_c locentry = 0;
     Dwarf_Unsigned lopc = 0;
     Dwarf_Unsigned hipc = 0;
-    Dwarf_Unsigned ulocentry_count = 0;
-    Dwarf_Unsigned section_offset = 0;
-    Dwarf_Unsigned locdesc_offset = 0;
-    Dwarf_Small lle_value = 0;
-    Dwarf_Small loclist_source = 0;
+    Dwarf_Unsigned ulocentryCount = 0;
+    Dwarf_Unsigned sectionOffset = 0;
+    Dwarf_Unsigned locdescOffset = 0;
+    Dwarf_Small lleValue = 0;
+    Dwarf_Small loclistSource = 0;
     Dwarf_Unsigned ulistlen = 0;
     int i = 0;
 
-    res = dwarf_get_version_of_die(attrInInfo->compileUnit->compileUnitDie, &version, &offset_size);
+    res = dwarf_get_version_of_die(attrInInfo->compileUnit->compileUnitDie, &version, &offsetSize);
     if (res != DW_DLV_OK) {
 //char * errmsg = dwarf_errmsg(err);
       return DWARF_DBG_ERR_GET_VERSION_OF_DIE;
     }
-    res = dwarf_get_die_address_size(attrInInfo->compileUnit->compileUnitDie, &address_size, &err);
+    res = dwarf_get_die_address_size(attrInInfo->compileUnit->compileUnitDie, &addressSize, &err);
     if (res != DW_DLV_OK) {
       return DWARF_DBG_ERR_GET_DIE_ADDRESS_SIZE;
     }
-    res = dwarf_loclist_from_expr_c(self->elfInfo.dbg, x, tempud, address_size, offset_size,
+    res = dwarf_loclist_from_expr_c(self->elfInfo.dbg, x, tempud, addressSize, offsetSize,
             version, &head, &ulistlen, &err);
     if (res != DW_DLV_OK) {
       return DWARF_DBG_ERR_GET_LOCLIST_FROM_EXPR_C;
     }
-    res = dwarf_get_locdesc_entry_c(head, 0, /* Data from 0th LocDesc */ &lle_value, &lopc, &hipc,
-            &ulocentry_count, &locentry, &loclist_source, &section_offset, &locdesc_offset, &err);
+    res = dwarf_get_locdesc_entry_c(head, 0, /* Data from 0th LocDesc */ &lleValue, &lopc, &hipc,
+            &ulocentryCount, &locentry, &loclistSource, &sectionOffset, &locdescOffset, &err);
     if (res != DW_DLV_OK) {
       return DWARF_DBG_ERR_GET_LOCDESC_ENTRY_C;
     }
-    for (i = 0; i < ulocentry_count; i++) {
+    // allocate all needed memory here as we know how many entries
+    attrInInfo->dieAttr->locationInfo->maxLocEntry = ulocentryCount;
+    attrInInfo->dieAttr->locationInfo->numLocEntry = ulocentryCount;
+    attrInInfo->dieAttr->locationInfo->locationOps = (locationOp_t *)ckalloc(sizeof(locationOp_t) * ulocentryCount);
+    if (attrInInfo->dieAttr->locationInfo->locationOps == NULL) {
+      return DWARF_DBG_ERR_OUT_OF_MEMORY;
+    }
+    for (i = 0; i < ulocentryCount; i++) {
       Dwarf_Small op = 0;
       Dwarf_Unsigned opd1 = 0;
       Dwarf_Unsigned opd2 = 0;
       Dwarf_Unsigned opd3 = 0;
       Dwarf_Unsigned offsetforbranch = 0;
+      locationOp_t *locationOp = NULL;
       const char * opName = 0;
 
       res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
 //printf("op: 0x%04x opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opd1, opd2, opd3, offsetforbranch);
-        if (res != DW_DLV_OK) {
-          return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
-        }
+      if (res != DW_DLV_OK) {
+        return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
+      }
+      locationOp = &attrInInfo->dieAttr->locationInfo->locationOps[i];
+      locationOp->op = op;
+      locationOp->opd1 = opd1;
+      locationOp->opd2 = opd2;
+      locationOp->opd3 = opd3;
+      locationOp->offsetforbranch = offsetforbranch;
       result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
       checkErrOK(result);
       if (opd1 == 0) {
@@ -391,10 +405,7 @@ printf(" %s", opName);
 printf(" %s %d", opName, opd1);
       }
     }
-
-
   }
-
   return result;
 }
 
@@ -522,7 +533,7 @@ static uint8_t handleDW_AT_locationAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
-printf("LOCATION: dieAndChildrenIdx: %d dieInfoIdx: %d isSibling: %d dieAttrIdx: %d\n", attrInInfo->dieAndChildrenIdx, attrInInfo->dieInfoIdx, attrInInfo->isSibling, attrInInfo->dieAttrIdx);
+//printf("LOCATION: dieAndChildrenIdx: %d dieInfoIdx: %d isSibling: %d dieAttrIdx: %d\n", attrInInfo->dieAndChildrenIdx, attrInInfo->dieInfoIdx, attrInInfo->isSibling, attrInInfo->dieAttrIdx);
   result = self->dwarfDbgLocationInfo->getLocationList(self, attrInInfo->dieAndChildrenIdx, attrInInfo->dieInfoIdx, attrInInfo->isSibling, attrInInfo->dieAttrIdx, attrInInfo->attrIn);
   checkErrOK(result);
   return result;

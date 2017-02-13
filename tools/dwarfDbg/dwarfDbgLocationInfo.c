@@ -100,6 +100,7 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
   compileUnit_t *compileUnit;
   dieInfo_t *dieInfo;
   dieAttr_t *dieAttr;
+  char buf[150];
 
   result = DWARF_DBG_ERR_OK;
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
@@ -130,19 +131,27 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
     Dwarf_Unsigned opd3 = 0;
     Dwarf_Unsigned offsetforbranch = 0;
     const char *opName = NULL;
+    char extraBuf[150];
+    char buf2[100];
     int res = 0;
     locationOp_t *locationOp;
+    char *bp;
 
-//printf("loclistHead: %p llent: %d\n", loclistHead, llent);
+//printf("loclistHead: %p llent: %d locdescOffset: 0x%08x\n", loclistHead, llent, locdescOffset);
+    extraBuf[0] = '\0';
     lres = dwarf_get_locdesc_entry_c(loclistHead, llent, &lleValue, &lopc, &hipc, &locentryCount,
            &locentry, &loclistSource, &sectionOffset, &locdescOffset, &err);
     if (lres != DW_DLV_OK) {
       return DWARF_DBG_ERR_CANNOT_GET_LOC_DESC_ENTRY_C;
     }
+    if (llent == 0) {
+printf(" <loclist at offset 0x%08x with %d entries follows>\n", locdescOffset, noOfElements);
+    }
 //printf("value: 0x%08x lopc: 0x%08x hipc: 0x%08x locationInfo: %p\n", lleValue, lopc, hipc, dieAttr->locationInfo);
+//printf("lopc: 0x%08x hipc: 0x%08x\n", lopc, hipc);
     dieAttr->locationInfo->lopc = lopc;
     dieAttr->locationInfo->hipc = hipc;
-    // allocate all needed memory her as we know how many entries
+    // allocate all needed memory here as we know how many entries
     dieAttr->locationInfo->maxLocEntry = locentryCount;
     dieAttr->locationInfo->numLocEntry = locentryCount;
     dieAttr->locationInfo->locationOps = (locationOp_t *)ckalloc(sizeof(locationOp_t) * locentryCount); 
@@ -150,6 +159,8 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
       return DWARF_DBG_ERR_OUT_OF_MEMORY;
     }
     for (i = 0; i < locentryCount; i++) {
+      int j;
+
       res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
       if (res != DW_DLV_OK) {
         return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
@@ -162,8 +173,24 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
       locationOp->offsetforbranch = offsetforbranch;
       result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
       checkErrOK(result);
-printf("op: 0x%02x %s opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);
+      sprintf(buf2, " %s", opName);
+      strcat(extraBuf, buf2);
+      switch (op) {
+      case DW_OP_GNU_entry_value:
+        bp = (char *)opd2;
+        sprintf(buf2, " 0x%08x contents 0x", opd1);
+        strcat(extraBuf, buf2);
+        for (j = 0; j < opd1; j++) {
+          sprintf(buf2, "%02x", *bp);
+          strcat(extraBuf, buf2);
+          locationOp->contents[j] = (*bp)++;
+        }
+        break;
+      }
+//printf("op: 0x%02x %s opd1: %d opd2: 0x%08x opd3: 0x%02x\n", op, opName, opd1, opd2, opd3);
+//printf("op: 0x%02x %s opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);
     }
+printf("                   %*s[%2d]< offset pair low-off : 0x%08x addr  0x%08x high-off  0x%08x addr 0x%08x>%s\n", (self->dwarfDbgCompileUnitInfo->currCompileUnit->level * 2), " ", llent, lopc, lopc, hipc, hipc, extraBuf);
   }
   return result;
 }

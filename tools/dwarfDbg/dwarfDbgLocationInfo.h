@@ -50,6 +50,7 @@ typedef struct locationOp {
   Dwarf_Unsigned opd2;
   Dwarf_Unsigned opd3;
   Dwarf_Unsigned offsetforbranch;
+  char contents[10];
 } locationOp_t;
 
 typedef struct locationInfo {
