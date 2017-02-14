@@ -43,6 +43,7 @@
 
 typedef struct attrInInfo attrInInfo_t;
 
+typedef int (* opHasNoOperands_t)(int op);
 typedef uint8_t (* addLocation_t)(dwarfDbgPtr_t self, char *dirName);
 typedef uint8_t (* handleLocationExprloc_t)(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo);
 typedef uint8_t (* getLocationList_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t dieInfoIdx, Dwarf_Bool isSibling, int attrIdx, Dwarf_Attribute attr);
@@ -68,6 +69,7 @@ typedef struct dwarfDbgLocationInfo {
   Dwarf_Half addrSize;
   Dwarf_Addr maxAddr;
 
+  opHasNoOperands_t opHasNoOperands;
   addLocation_t addLocation;
   handleLocationExprloc_t handleLocationExprloc;
   getLocationList_t getLocationList;

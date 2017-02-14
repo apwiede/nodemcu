@@ -71,7 +71,7 @@ static uint8_t handleOneExprOp(dwarfDbgPtr_t self, Dwarf_Locdesc_c exprc, int in
   }
   result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
     strcat(*stringOut, opName);
-    if (opHasNoOperands(op)) {
+    if (self->dwarfDbgLocationInfo->opHasNoOperands(op)) {
         /* Nothing to add. */
     } else {
       if (op >= DW_OP_breg0 && op <= DW_OP_breg31) {
@@ -146,7 +146,7 @@ static uint8_t handleOneExprOp(dwarfDbgPtr_t self, Dwarf_Locdesc_c exprc, int in
                   to implement DW_OP_implicit value in
                   this libdwarf context. */
               bp = (const unsigned char *) opd2;
-              showContents(stringOut, len, bp);
+//              showContents(stringOut, len, bp);
             }
           }
           break;
@@ -187,7 +187,7 @@ static uint8_t handleOneExprOp(dwarfDbgPtr_t self, Dwarf_Locdesc_c exprc, int in
             if (!bp) {
               fprintf(stderr, "ERROR: Null databyte pointer DW_OP_entry_value ");
             } else {
-              showContents(stringOut, length, bp);
+//              showContents(stringOut, length, bp);
             }
           }
           break;
@@ -207,7 +207,7 @@ static uint8_t handleOneExprOp(dwarfDbgPtr_t self, Dwarf_Locdesc_c exprc, int in
             if (!bp) {
               fprintf(stderr, "ERROR: Null databyte pointer DW_OP_const_type ");
             } else {
-              showContents(stringOut, length, bp);
+//              showContents(stringOut, length, bp);
             }
           }
           break;

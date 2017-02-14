@@ -937,6 +937,7 @@ int dwarfDbgLocationInfoInit (dwarfDbgPtr_t self) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
+  self->dwarfDbgLocationInfo->opHasNoOperands = &opHasNoOperands;
   self->dwarfDbgLocationInfo->handleLocationExprloc = &handleLocationExprloc;
   self->dwarfDbgLocationInfo->getLocationList = &getLocationList;
   return result;
