@@ -53,7 +53,7 @@ typedef struct locationOp {
   Dwarf_Unsigned opd1;
   Dwarf_Unsigned opd2;
   Dwarf_Unsigned opd3;
-  Dwarf_Unsigned offsetforbranch;
+  Dwarf_Unsigned offsetForBranch;
   char contents[10];
 } locationOp_t;
 

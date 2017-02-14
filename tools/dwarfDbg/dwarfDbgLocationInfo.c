@@ -189,7 +189,7 @@ static void showContents(char **stringOut, unsigned int length, const unsigned c
 
 // =================================== handleOneExprOp =========================== 
 
-static uint8_t handleOneExprOp(dwarfDbgPtr_t self, Dwarf_Locdesc_c exprc, int index, char **stringOut) {
+static uint8_t handleOneExprOp(dwarfDbgPtr_t self, locationOp_t *locationOp, int index, char **stringOut) {
   /*  local_space_needed is intended to be 'more than big enough' for a short group of loclist entries.  */
   int result;
   char buf[100];
@@ -197,7 +197,7 @@ static uint8_t handleOneExprOp(dwarfDbgPtr_t self, Dwarf_Locdesc_c exprc, int in
   Dwarf_Unsigned opd1 = 0;
   Dwarf_Unsigned opd2 = 0;
   Dwarf_Unsigned opd3 = 0;
-  Dwarf_Unsigned offsetforbranch = 0;
+  Dwarf_Unsigned offsetForBranch = 0;
   const char *opName = NULL;
   Dwarf_Error err = NULL;
 
@@ -205,215 +205,185 @@ static uint8_t handleOneExprOp(dwarfDbgPtr_t self, Dwarf_Locdesc_c exprc, int in
     strcat(*stringOut, " ");
   }
   /* DWARF 2,3,4 and DWARF5 style */
-  int res = dwarf_get_location_op_value_c(exprc, index, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
-  if (res != DW_DLV_OK) {
-    return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
-  }
+  op = locationOp->op;
+  opd1 = locationOp->opd1;
+  opd2 = locationOp->opd2;
+  opd3 = locationOp->opd3;
+  offsetForBranch = locationOp->offsetForBranch;
   result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
-    strcat(*stringOut, opName);
-    if (opHasNoOperands(op)) {
-        /* Nothing to add. */
+  strcat(*stringOut, opName);
+  if (opHasNoOperands(op)) {
+    /* Nothing to add. */
+  } else {
+    if (op >= DW_OP_breg0 && op <= DW_OP_breg31) {
+      snprintf(buf, sizeof(buf), "%+d", (Dwarf_Signed) opd1);
+      strcat(*stringOut, buf);
     } else {
-      if (op >= DW_OP_breg0 && op <= DW_OP_breg31) {
-        snprintf(buf, sizeof(buf), "%+d", (Dwarf_Signed) opd1);
-        strcat(*stringOut, buf);
-      } else {
 //printf("opName: %s op: 0x%02x opd1: %d opd2: 0x%08x\n", opName, op, opd1, opd2);
-        switch (op) {
-        case DW_OP_addr:
-          snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
-          strcat(*stringOut, buf);
-          break;
-        case DW_OP_const1s:
-        case DW_OP_const2s:
-        case DW_OP_const4s:
-        case DW_OP_const8s:
-        case DW_OP_consts:
-        case DW_OP_skip:
-        case DW_OP_bra:
-        case DW_OP_fbreg:
-          strcat(*stringOut," ");
-          snprintf(buf, sizeof(buf), " %+d", (Dwarf_Signed) opd1);
-          strcat(*stringOut, buf);
-          break;
-        case DW_OP_GNU_addr_index: /* unsigned val */
-        case DW_OP_addrx: /* DWARF5: unsigned val */
-        case DW_OP_GNU_const_index:
-        case DW_OP_constx: /* DWARF5: unsigned val */
-        case DW_OP_const1u:
-        case DW_OP_const2u:
-        case DW_OP_const4u:
-        case DW_OP_const8u:
-        case DW_OP_constu:
-        case DW_OP_pick:
-        case DW_OP_plus_uconst:
-        case DW_OP_regx:
-        case DW_OP_piece:
-        case DW_OP_deref_size:
-        case DW_OP_xderef_size:
-          snprintf(buf, sizeof(buf), " %u", opd1);
-          strcat(*stringOut, buf);
-          break;
-        case DW_OP_bregx:
-          snprintf(buf, sizeof(buf), " <0x%08x> %+d", (Dwarf_Unsigned) opd1, (Dwarf_Signed)opd2);
-          strcat(*stringOut, buf);
-          break;
-        case DW_OP_call2:
-        case DW_OP_call4:
-        case DW_OP_call_ref:
-          snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
-          strcat(*stringOut, buf);
-        case DW_OP_bit_piece:
-          snprintf(buf, sizeof(buf), " <0x%08x> offset <0x%08x>", (Dwarf_Unsigned) opd1, (Dwarf_Unsigned)opd2);
-          strcat(*stringOut, buf);
-          break;
-        case DW_OP_implicit_value:
-          {
+      switch (op) {
+      case DW_OP_addr:
+        snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
+        strcat(*stringOut, buf);
+        break;
+      case DW_OP_const1s:
+      case DW_OP_const2s:
+      case DW_OP_const4s:
+      case DW_OP_const8s:
+      case DW_OP_consts:
+      case DW_OP_skip:
+      case DW_OP_bra:
+      case DW_OP_fbreg:
+        strcat(*stringOut," ");
+        snprintf(buf, sizeof(buf), " %+d", (Dwarf_Signed) opd1);
+        strcat(*stringOut, buf);
+        break;
+      case DW_OP_GNU_addr_index: /* unsigned val */
+      case DW_OP_addrx: /* DWARF5: unsigned val */
+      case DW_OP_GNU_const_index:
+      case DW_OP_constx: /* DWARF5: unsigned val */
+      case DW_OP_const1u:
+      case DW_OP_const2u:
+      case DW_OP_const4u:
+      case DW_OP_const8u:
+      case DW_OP_constu:
+      case DW_OP_pick:
+      case DW_OP_plus_uconst:
+      case DW_OP_regx:
+      case DW_OP_piece:
+      case DW_OP_deref_size:
+      case DW_OP_xderef_size:
+        snprintf(buf, sizeof(buf), " %u", opd1);
+        strcat(*stringOut, buf);
+        break;
+      case DW_OP_bregx:
+        snprintf(buf, sizeof(buf), " <0x%08x> %+d", (Dwarf_Unsigned) opd1, (Dwarf_Signed)opd2);
+        strcat(*stringOut, buf);
+        break;
+      case DW_OP_call2:
+      case DW_OP_call4:
+      case DW_OP_call_ref:
+        snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
+        strcat(*stringOut, buf);
+      case DW_OP_bit_piece:
+        snprintf(buf, sizeof(buf), " <0x%08x> offset <0x%08x>", (Dwarf_Unsigned) opd1, (Dwarf_Unsigned)opd2);
+        strcat(*stringOut, buf);
+        break;
+      case DW_OP_implicit_value:
+        {
 #define IMPLICIT_VALUE_PRINT_MAX 12
-            unsigned int len = 0;
-            snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
-            strcat(*stringOut, buf);
-            /*  The other operand is a block of opd1 bytes. */
-            /*  FIXME */
-            len = opd1;
-            if (len > IMPLICIT_VALUE_PRINT_MAX) {
-              len = IMPLICIT_VALUE_PRINT_MAX;
-            }
-#undef IMPLICIT_VALUE_PRINT_MAX
-            {
-              const unsigned char *bp = 0;
-              /*  This is a really ugly cast, a way
-                  to implement DW_OP_implicit value in
-                  this libdwarf context. */
-              bp = (const unsigned char *) opd2;
-              showContents(stringOut, len, bp);
-            }
-          }
-          break;
-
-        /* We do not know what the operands, if any, are. */
-        case DW_OP_HP_unknown:
-        case DW_OP_HP_is_value:
-        case DW_OP_HP_fltconst4:
-        case DW_OP_HP_fltconst8:
-        case DW_OP_HP_mod_range:
-        case DW_OP_HP_unmod_range:
-        case DW_OP_HP_tls:
-        case DW_OP_INTEL_bit_piece:
-        case DW_OP_stack_value:  /* DWARF4 */
-          break;
-        case DW_OP_GNU_uninit:  /* DW_OP_APPLE_uninit */
-          /* No operands. */
-          break;
-        case DW_OP_GNU_encoded_addr:
+          unsigned int len = 0;
           snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
           strcat(*stringOut, buf);
-          break;
-        case DW_OP_implicit_pointer:       /* DWARF5 */
-        case DW_OP_GNU_implicit_pointer:
-          snprintf(buf, sizeof(buf), " <0x%08x> %+d", (Dwarf_Unsigned) opd1, (Dwarf_Signed)opd2);
-          strcat(*stringOut, buf);
-          break;
-        case DW_OP_entry_value:       /* DWARF5 */
-        case DW_OP_GNU_entry_value:
+          /*  The other operand is a block of opd1 bytes. */
+          /*  FIXME */
+          len = opd1;
+          if (len > IMPLICIT_VALUE_PRINT_MAX) {
+            len = IMPLICIT_VALUE_PRINT_MAX;
+          }
+#undef IMPLICIT_VALUE_PRINT_MAX
           {
             const unsigned char *bp = 0;
-            unsigned int length = 0;
+            /*  This is a really ugly cast, a way
+                to implement DW_OP_implicit value in
+                this libdwarf context. */
+            bp = (const unsigned char *) opd2;
+            showContents(stringOut, len, bp);
+          }
+        }
+        break;
 
-            length = opd1;
-            snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
-            strcat(*stringOut, buf);
-            bp = (Dwarf_Small *) opd2;
-            if (!bp) {
-              fprintf(stderr, "ERROR: Null databyte pointer DW_OP_entry_value ");
-            } else {
-              showContents(stringOut, length, bp);
-            }
-          }
-          break;
-        case DW_OP_const_type:           /* DWARF5 */
-        case DW_OP_GNU_const_type:
-          {
-            const unsigned char *bp = 0;
-            unsigned int length = 0;
+      /* We do not know what the operands, if any, are. */
+      case DW_OP_HP_unknown:
+      case DW_OP_HP_is_value:
+      case DW_OP_HP_fltconst4:
+      case DW_OP_HP_fltconst8:
+      case DW_OP_HP_mod_range:
+      case DW_OP_HP_unmod_range:
+      case DW_OP_HP_tls:
+      case DW_OP_INTEL_bit_piece:
+      case DW_OP_stack_value:  /* DWARF4 */
+        break;
+      case DW_OP_GNU_uninit:  /* DW_OP_APPLE_uninit */
+        /* No operands. */
+        break;
+      case DW_OP_GNU_encoded_addr:
+        snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
+        strcat(*stringOut, buf);
+        break;
+      case DW_OP_implicit_pointer:       /* DWARF5 */
+      case DW_OP_GNU_implicit_pointer:
+        snprintf(buf, sizeof(buf), " <0x%08x> %+d", (Dwarf_Unsigned) opd1, (Dwarf_Signed)opd2);
+        strcat(*stringOut, buf);
+        break;
+      case DW_OP_entry_value:       /* DWARF5 */
+      case DW_OP_GNU_entry_value:
+        {
+          const unsigned char *bp = 0;
+          unsigned int length = 0;
 
-            length = opd2;
-            snprintf(buf, sizeof(buf), " <0x%08x> const length: %u", (Dwarf_Unsigned) opd1, length);
-            strcat(*stringOut, buf);
-            strcat(*stringOut," const length: ");
-
-            /* Now point to the data bytes of the const. */
-            bp = (Dwarf_Small *) opd3;
-            if (!bp) {
-              fprintf(stderr, "ERROR: Null databyte pointer DW_OP_const_type ");
-            } else {
-              showContents(stringOut, length, bp);
-            }
-          }
-          break;
-        case DW_OP_regval_type:           /* DWARF5 */
-        case DW_OP_GNU_regval_type:
-          {
-            snprintf(buf, sizeof(buf), " 0x%08x <0x%08x>", opd1, opd2);
-            strcat(*stringOut, buf);
-          }
-          break;
-        case DW_OP_deref_type: /* DWARF5 */
-        case DW_OP_GNU_deref_type:
-          {
-            snprintf(buf, sizeof(buf), " 0x%02x <0x%08x>", opd1, opd2);
-            strcat(*stringOut, buf);
-          }
-          break;
-        case DW_OP_convert: /* DWARF5 */
-        case DW_OP_GNU_convert:
-        case DW_OP_reinterpret: /* DWARF5 */
-        case DW_OP_GNU_reinterpret:
-        case DW_OP_GNU_parameter_ref:
-          snprintf(buf, sizeof(buf), " 0x%02x", opd1);
+          length = opd1;
+          snprintf(buf, sizeof(buf), " <0x%08x>", (Dwarf_Unsigned) opd1);
           strcat(*stringOut, buf);
-          break;
-        default:
-          {
-            snprintf(buf, sizeof(buf), " dwarf_op unknown 0x%x", (unsigned)op);
-            strcat(*stringOut, buf);
+          bp = (Dwarf_Small *) opd2;
+          if (!bp) {
+            fprintf(stderr, "ERROR: Null databyte pointer DW_OP_entry_value ");
+          } else {
+            showContents(stringOut, length, bp);
           }
-          break;
+        }
+        break;
+      case DW_OP_const_type:           /* DWARF5 */
+      case DW_OP_GNU_const_type:
+        {
+          const unsigned char *bp = 0;
+          unsigned int length = 0;
+
+          length = opd2;
+          snprintf(buf, sizeof(buf), " <0x%08x> const length: %u", (Dwarf_Unsigned) opd1, length);
+          strcat(*stringOut, buf);
+          strcat(*stringOut," const length: ");
+
+          /* Now point to the data bytes of the const. */
+          bp = (Dwarf_Small *) opd3;
+          if (!bp) {
+            fprintf(stderr, "ERROR: Null databyte pointer DW_OP_const_type ");
+          } else {
+            showContents(stringOut, length, bp);
+          }
+        }
+        break;
+      case DW_OP_regval_type:           /* DWARF5 */
+      case DW_OP_GNU_regval_type:
+        {
+          snprintf(buf, sizeof(buf), " 0x%08x <0x%08x>", opd1, opd2);
+          strcat(*stringOut, buf);
+        }
+        break;
+      case DW_OP_deref_type: /* DWARF5 */
+      case DW_OP_GNU_deref_type:
+        {
+          snprintf(buf, sizeof(buf), " 0x%02x <0x%08x>", opd1, opd2);
+          strcat(*stringOut, buf);
+        }
+        break;
+      case DW_OP_convert: /* DWARF5 */
+      case DW_OP_GNU_convert:
+      case DW_OP_reinterpret: /* DWARF5 */
+      case DW_OP_GNU_reinterpret:
+      case DW_OP_GNU_parameter_ref:
+        snprintf(buf, sizeof(buf), " 0x%02x", opd1);
+        strcat(*stringOut, buf);
+        break;
+      default:
+        {
+          snprintf(buf, sizeof(buf), " dwarf_op unknown 0x%x", (unsigned)op);
+          strcat(*stringOut, buf);
+        }
+        break;
       }
     }
   }
   return DWARF_DBG_ERR_OK;
-}
-
-// =================================== addLocation =========================== 
-
-static uint8_t addLocation(dwarfDbgPtr_t self, char *dirName) {
-  uint8_t result;
-
-  result = DWARF_DBG_ERR_OK;
-  if (self->dwarfDbgFileInfo->dirNamesInfo.maxDirName <= self->dwarfDbgFileInfo->dirNamesInfo.numDirName) {
-    self->dwarfDbgFileInfo->dirNamesInfo.maxDirName += 50;
-    if (self->dwarfDbgFileInfo->dirNamesInfo.dirNames == NULL) {
-      self->dwarfDbgFileInfo->dirNamesInfo.dirNames = (char **)ckalloc(sizeof(char *) * self->dwarfDbgFileInfo->dirNamesInfo.maxDirName);
-      if (self->dwarfDbgFileInfo->dirNamesInfo.dirNames == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    } else {
-      self->dwarfDbgFileInfo->dirNamesInfo.dirNames = (char **)ckrealloc((char *)self->dwarfDbgFileInfo->dirNamesInfo.dirNames, sizeof(char *) * self->dwarfDbgFileInfo->dirNamesInfo.maxDirName);
-      if (self->dwarfDbgFileInfo->dirNamesInfo.dirNames == NULL) {
-        return DWARF_DBG_ERR_OUT_OF_MEMORY;
-      }
-    }
-  }
-  self->dwarfDbgFileInfo->dirNamesInfo.dirNames[self->dwarfDbgFileInfo->dirNamesInfo.numDirName] = (char *)ckalloc(strlen(dirName) + 1);
-  if (self->dwarfDbgFileInfo->dirNamesInfo.dirNames[self->dwarfDbgFileInfo->dirNamesInfo.numDirName] == NULL) {
-    return DWARF_DBG_ERR_OUT_OF_MEMORY;
-  }
-  self->dwarfDbgFileInfo->dirNamesInfo.dirNames[self->dwarfDbgFileInfo->dirNamesInfo.numDirName][strlen(dirName)] = '\0';
-  memcpy(self->dwarfDbgFileInfo->dirNamesInfo.dirNames[self->dwarfDbgFileInfo->dirNamesInfo.numDirName], dirName, strlen(dirName));
-//printf("addDirName: %d %s\n", self->dwarfDbgFileInfo->dirNamesInfo.numDirName, dirName);
-  self->dwarfDbgFileInfo->dirNamesInfo.numDirName++;
-  return result;
 }
 
 // =================================== handleLocationExprloc =========================== 
@@ -496,12 +466,12 @@ DWARF_DBG_PRINT(self, "L", 1, "%s", extraBuf);
       Dwarf_Unsigned opd1 = 0;
       Dwarf_Unsigned opd2 = 0;
       Dwarf_Unsigned opd3 = 0;
-      Dwarf_Unsigned offsetforbranch = 0;
+      Dwarf_Unsigned offsetForBranch = 0;
       locationOp_t *locationOp = NULL;
       const char *opName = 0;
 
-      res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
-//printf("op: 0x%04x opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opd1, opd2, opd3, offsetforbranch);
+      res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetForBranch, &err);
+//printf("op: 0x%04x opd1: %d opd2: %d opd3: %d offsetForBranch: %d\n", op, opd1, opd2, opd3, offsetForBranch);
       if (res != DW_DLV_OK) {
         return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
       }
@@ -510,20 +480,10 @@ DWARF_DBG_PRINT(self, "L", 1, "%s", extraBuf);
       locationOp->opd1 = opd1;
       locationOp->opd2 = opd2;
       locationOp->opd3 = opd3;
-      locationOp->offsetforbranch = offsetforbranch;
-      result = handleOneExprOp(self, locentry, i, &extraBufPtr);
+      locationOp->offsetForBranch = offsetForBranch;
+      result = handleOneExprOp(self, locationOp, i, &extraBufPtr);
       checkErrOK(result);
 DWARF_DBG_PRINT(self, "A", 1, " %s", extraBuf);
-      
-#ifdef NOTDEF
-      result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
-      checkErrOK(result);
-      if (opd1 == 0) {
-DWARF_DBG_PRINT(self, "A", 1, " %s", opName);
-      } else {
-DWARF_DBG_PRINT(self, "A", 1, " %s %d", opName, opd1);
-      }
-#endif
     }
   }
   return result;
@@ -580,7 +540,7 @@ static uint8_t getLocationList(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, siz
     Dwarf_Unsigned opd1 = 0;
     Dwarf_Unsigned opd2 = 0;
     Dwarf_Unsigned opd3 = 0;
-    Dwarf_Unsigned offsetforbranch = 0;
+    Dwarf_Unsigned offsetForBranch = 0;
     const char *opName = NULL;
     char extraBuf[1024];
     char buf2[100];
@@ -615,7 +575,7 @@ DWARF_DBG_PRINT(self, "L", 1, " <loclist at offset 0x%08x with %d entries follow
     for (i = 0; i < locentryCount; i++) {
       int j;
 
-      res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetforbranch, &err);
+      res = dwarf_get_location_op_value_c(locentry, i, &op, &opd1, &opd2, &opd3, &offsetForBranch, &err);
       if (res != DW_DLV_OK) {
         return DWARF_DBG_ERR_CANNOT_GET_LOCATION_OP_VALUE_C;
       }
@@ -624,7 +584,7 @@ DWARF_DBG_PRINT(self, "L", 1, " <loclist at offset 0x%08x with %d entries follow
       locationOp->opd1 = opd1;
       locationOp->opd2 = opd2;
       locationOp->opd3 = opd3;
-      locationOp->offsetforbranch = offsetforbranch;
+      locationOp->offsetForBranch = offsetForBranch;
       result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
       checkErrOK(result);
       sprintf(buf2, " %s", opName);
@@ -642,7 +602,7 @@ DWARF_DBG_PRINT(self, "L", 1, " <loclist at offset 0x%08x with %d entries follow
         break;
       }
 //printf("op: 0x%02x %s opd1: %d opd2: 0x%08x opd3: 0x%02x\n", op, opName, opd1, opd2, opd3);
-//printf("op: 0x%02x %s opd1: %d opd2: %d opd3: %d offsetforbranch: %d\n", op, opName, opd1, opd2, opd3, offsetforbranch);
+//printf("op: 0x%02x %s opd1: %d opd2: %d opd3: %d offsetForBranch: %d\n", op, opName, opd1, opd2, opd3, offsetForBranch);
     }
 if ((lopc != 0) && (hipc != 0xffffffff)) {
 DWARF_DBG_PRINT(self, "L", 1, "                   %*s[%2d]< offset pair low-off : 0x%08x addr  0x%08x high-off  0x%08x addr 0x%08x>%s\n", (self->dwarfDbgCompileUnitInfo->currCompileUnit->level * 2), " ", llent, lopc, lopc, hipc, hipc, extraBuf);
