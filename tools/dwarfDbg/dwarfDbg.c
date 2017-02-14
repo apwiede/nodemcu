@@ -56,6 +56,11 @@ dwarfDbgPtr_t dwarfDbgNew (Tcl_Interp *interp) {
   memset(dbg, 0, sizeof(_dwarfDbg_t));
   dbg->interp = interp;
 
+  // dwarfDbgDebugInfo module
+  dbg->dwarfDbgDebugInfo = ALLOC(dwarfDbgDebugInfo_t);
+  checkAllocOK(dbg->dwarfDbgDebugInfo);
+  memset(dbg->dwarfDbgDebugInfo, 0, sizeof(dwarfDbgDebugInfo_t));
+
   // dwarfDbgStringInfo module
   dbg->dwarfDbgStringInfo = ALLOC(dwarfDbgStringInfo_t);
   checkAllocOK(dbg->dwarfDbgStringInfo);
@@ -148,6 +153,10 @@ void* dwarfDbgClientDataGet (dwarfDbgPtr_t self) {
 
 int dwarfDbgInit (dwarfDbgPtr_t self) {
   int result;
+
+  // dwarfDbgDebugInfo module
+  result = dwarfDbgDebugInfoInit(self);
+  checkErrOK(result);
 
   // dwarfDbgUtil module
   result = dwarfDbgUtilInit(self);

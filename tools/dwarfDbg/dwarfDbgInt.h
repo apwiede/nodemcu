@@ -56,6 +56,7 @@
 #include "dwarf.h"
 #include "dwarfDbg.h"
 #include "dwarfDbgErrorCodes.h"
+#include "dwarfDbgDebugInfo.h"
 #include "dwarfDbgEsb.h"
 #include "dwarfDbg/dwarfDbgDecls.h"
 #include "dwarfDbgUtil.h"
@@ -95,6 +96,7 @@ typedef struct _dwarfDbg {
   compileUnit_t compileUnit;
 
   dwarfDbgEsb_t *dwarfDbgEsb;
+  dwarfDbgDebugInfo_t *dwarfDbgDebugInfo;
   dwarfDbgUtil_t *dwarfDbgUtil;
   dwarfDbgDict_t *dwarfDbgDict;
   dwarfDbgFileInfo_t *dwarfDbgFileInfo;

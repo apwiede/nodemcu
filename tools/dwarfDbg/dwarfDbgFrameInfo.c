@@ -246,7 +246,7 @@ static uint8_t getFrameList(dwarfDbgPtr_t self) {
   if (fres != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_FDE_LIST;
   }
-printf("getFrameList: cie_element_count: %d fde_element_count: %d\n", cie_element_count, fde_element_count);
+DWARF_DBG_PRINT(self, "f", 1, "getFrameList: cie_element_count: %d fde_element_count: %d\n", cie_element_count, fde_element_count);
   fres = dwarf_get_address_size(self->elfInfo.dbg, &address_size, &err);
   for (i = 0; i < fde_element_count; i++) {
     int j = 0;

@@ -186,7 +186,7 @@ static uint8_t addDieAttr(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Bool 
   checkErrOK(result);
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
 //printf("  >>==addDieAttr: %s dieAndChildrenIdx: %d isSibling: %d idx: %d attr: 0x%08x attr_in: 0x%08x\n", atName, dieAndChildrenIdx, isSibling, idx, attr, attrIn);
-printf("                     %*s%-26s", (compileUnit->level - 1) * 2, " ", atName);
+DWARF_DBG_PRINT(self, "A", 1, "                     %*s%-26s", (compileUnit->level - 1) * 2, " ", atName);
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
   if (isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[idx];

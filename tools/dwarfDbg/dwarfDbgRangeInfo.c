@@ -54,7 +54,7 @@ static uint8_t addRangeInfo(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr
   compileUnit_t *compileUnit;
   rangeInfo_t *rangeInfo;
 
-printf("                      dwr1: 0x%08x dwr2: 0x%08x dwrType: %d\n", dwr_addr1, dwr_addr2, dwrType);
+DWARF_DBG_PRINT(self, "R", 1, "                      dwr1: 0x%08x dwr2: 0x%08x dwrType: %d\n", dwr_addr1, dwr_addr2, dwrType);
   result = DWARF_DBG_ERR_OK;
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   if (compileUnit->fileInfos == NULL) {
@@ -107,7 +107,7 @@ static uint8_t handleRangeInfos(dwarfDbgPtr_t self, Dwarf_Attribute attrIn) {
   }
   if (fres == DW_DLV_OK) {
     rres = dwarf_get_ranges_a(self->elfInfo.dbg, original_off, compileUnit->compileUnitDie, &rangeset, &rangecount, &bytecount, &err);
-printf(" count: %d bytecount: %d\n", rangecount, bytecount);
+DWARF_DBG_PRINT(self, "R", 1, " count: %d bytecount: %d\n", rangecount, bytecount);
     for (i = 0; i < rangecount; i++) {
       Dwarf_Ranges *range = &rangeset[i];
       result = self->dwarfDbgRangeInfo->addRangeInfo(self, range->dwr_addr1, range->dwr_addr2, range->dwr_type, &rangeIdx);

@@ -153,7 +153,7 @@ if (tableCount > 0) {
             flags |= LINE_PROLOGUE_BEGIN;
           }
         }
-printf("dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d%s%s%s%s%s isa: %d dis: %d\n", line, pc, lineNo, ns, bb, et, eb, pe, isa, discriminator);
+DWARF_DBG_PRINT(self, "L", 1, "dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d%s%s%s%s%s isa: %d dis: %d\n", line, pc, lineNo, ns, bb, et, eb, pe, isa, discriminator);
         result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, flags, (uint16_t)isa, (uint16_t)discriminator, compileUnit->fileInfoIdx, fileLineIdx);
 
       }

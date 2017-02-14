@@ -118,7 +118,7 @@ static uint8_t addAttribute(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
-printf("  >>addAttribute called:\n");
+DWARF_DBG_PRINT(self, "A", 1, "  >>addAttribute called:\n");
   return result;
 }
 
@@ -134,7 +134,7 @@ static uint8_t handleDW_AT_abstract_originAttr(dwarfDbgPtr_t self, attrInInfo_t 
   if (res != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_FORMREF;
   }
-printf(" <0x%08x>", attrInInfo->dieAttr->refOffset);
+DWARF_DBG_PRINT(self, "A", 1, " <0x%08x>", attrInInfo->dieAttr->refOffset);
   return result;
 }
 
@@ -174,7 +174,7 @@ static uint8_t handleDW_AT_byte_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
-printf(" %d ", attrInInfo->uval);
+DWARF_DBG_PRINT(self, "A", 1, " %d ", attrInInfo->uval);
   return result;
 }
 
@@ -217,7 +217,7 @@ static uint8_t handleDW_AT_comp_dirAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
     return DWARF_DBG_ERR_CANNOT_GET_NAME_FORMSTRING;
   }
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-printf("  %s", name);
+DWARF_DBG_PRINT(self, "A", 1, "  %s", name);
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[attrInInfo->dieAndChildrenIdx];
   if (attrInInfo->isSibling) {
     dieInfo = &dieAndChildrenInfo->dieSiblings[attrInInfo->dieInfoIdx];
@@ -242,10 +242,10 @@ static uint8_t handleDW_AT_const_valueAttr(dwarfDbgPtr_t self, attrInInfo_t *att
   if (attrInInfo->flags & DWARF_DBG_FLAG_SVAL) {
     attrInInfo->dieAttr->sval = attrInInfo->sval;
     attrInInfo->dieAttr->flags |= DWARF_DBG_FLAG_SVAL;
-printf(" %d", attrInInfo->sval);
+DWARF_DBG_PRINT(self, "A", 1, " %d", attrInInfo->sval);
   } else {
     attrInInfo->dieAttr->uval = attrInInfo->uval;
-printf(" %d", attrInInfo->uval);
+DWARF_DBG_PRINT(self, "A", 1, " %d", attrInInfo->uval);
   }
   return result;
 }
@@ -257,10 +257,10 @@ static uint8_t handleDW_AT_data_member_locationAttr(dwarfDbgPtr_t self, attrInIn
 
   result = DWARF_DBG_ERR_OK;
   if (attrInInfo->flags & DWARF_DBG_FLAG_SVAL) {
-printf("ERROR data_member_location2: sval: %d\n", attrInInfo->sval);
+DWARF_DBG_PRINT(self, "A", 1, "ERROR data_member_location2: sval: %d\n", attrInInfo->sval);
   } else {
     attrInInfo->dieAttr->uval = attrInInfo->uval;
-printf(" %d", attrInInfo->dieAttr->uval);
+DWARF_DBG_PRINT(self, "A", 1, " %d", attrInInfo->dieAttr->uval);
   }
   return result;
 }
@@ -286,7 +286,7 @@ static uint8_t handleDW_AT_decl_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
   if (attrInInfo->srcfiles != NULL) {
     if ((attrInInfo->uval > 0) && (attrInInfo->uval <= attrInInfo->cnt)) {
       sourceFile = attrInInfo->srcfiles[attrInInfo->uval-1];
-printf(" %s ", attrInInfo->srcfiles[attrInInfo->uval-1]);
+DWARF_DBG_PRINT(self, "A", 1, " %s ", attrInInfo->srcfiles[attrInInfo->uval-1]);
       result = self->dwarfDbgFileInfo->addSourceFile(self, sourceFile, &fileIdx, &attrInInfo->dieAttr->sourceFileIdx);
     }
   }
@@ -299,7 +299,7 @@ static uint8_t handleDW_AT_decl_lineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
-printf(" %d ", attrInInfo->uval);
+DWARF_DBG_PRINT(self, "A", 1, " %d ", attrInInfo->uval);
   attrInInfo->dieAttr->sourceLineNo = attrInInfo->uval;
   return result;
 }
@@ -312,7 +312,7 @@ static uint8_t handleDW_AT_encodingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
 
   result = DWARF_DBG_ERR_OK;
   result = self->dwarfDbgStringInfo->getDW_ATE_string(self, attrInInfo->uval, &encodingString);
-printf(" %s ", encodingString);
+DWARF_DBG_PRINT(self, "A", 1, " %s ", encodingString);
 
   return result;
 }
@@ -425,9 +425,9 @@ static uint8_t handleDW_AT_frame_baseAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
       result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
       checkErrOK(result);
       if (opd1 == 0) {
-printf(" %s", opName);
+DWARF_DBG_PRINT(self, "A", 1, " %s", opName);
       } else {
-printf(" %s %d", opName, opd1);
+DWARF_DBG_PRINT(self, "A", 1, " %s %d", opName, opd1);
       }
     }
   }
@@ -441,7 +441,7 @@ static uint8_t handleDW_AT_GNU_all_call_sitesAttr(dwarfDbgPtr_t self, attrInInfo
 
   result = DWARF_DBG_ERR_OK;
   if (attrInInfo->dieAttr->theform == DW_FORM_flag_present) {
-printf(" yes(1)");
+DWARF_DBG_PRINT(self, "A", 1, " yes(1)");
   }
   return result;
 }
@@ -548,9 +548,9 @@ static uint8_t handleDW_AT_GNU_call_site_valueAttr(dwarfDbgPtr_t self, attrInInf
       result = self->dwarfDbgStringInfo->getDW_OP_string(self, op, &opName);
       checkErrOK(result);
       if (opd1 == 0) {
-printf(" %s", opName);
+DWARF_DBG_PRINT(self, "A", 1, " %s", opName);
       } else {
-printf(" %s %d", opName, opd1);
+DWARF_DBG_PRINT(self, "A", 1, " %s %d", opName, opd1);
       }
     }
   }
@@ -576,13 +576,13 @@ static uint8_t handleDW_AT_high_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInI
     attrInInfo->dieAttr->flags >= DW_HIGH_PC_OFFSET_FROM_LOW_PC;
     res = dwarf_formudata(attrInInfo->attrIn, &tempud, &err);
     if (res == DW_DLV_OK) {
-printf(" <offset-from-lowpc>%d", tempud);
+DWARF_DBG_PRINT(self, "A", 1, " <offset-from-lowpc>%d", tempud);
       attrInInfo->dieAttr->unsignedLowPcOffset = tempud;
     } else {
       res = dwarf_formsdata(attrInInfo->attrIn, &tempsd, &err);
       if (res == DW_DLV_OK) {
         attrInInfo->dieAttr->signedLowPcOffset = tempsd;
-printf(" <offset-from-lowpc>%d", tempsd);
+DWARF_DBG_PRINT(self, "A", 1, " <offset-from-lowpc>%d", tempsd);
       } else {
         return DWARF_DBG_ERR_CANNOT_GET_FORMDATA;
       }
@@ -590,11 +590,11 @@ printf(" <offset-from-lowpc>%d", tempsd);
   } else {
     res = dwarf_formaddr(attrInInfo->attrIn, &addr, &err);
     if (res != DW_DLV_OK) {
-printf(" res: %d uval: %d \n", res, attrInInfo->uval);
+DWARF_DBG_PRINT(self, "A", 1, " res: %d uval: %d \n", res, attrInInfo->uval);
       return DWARF_DBG_ERR_CANNOT_GET_FORMADDR;
     }
     attrInInfo->dieAttr->highPc = addr;
-printf(" 0x%08x", addr);
+DWARF_DBG_PRINT(self, "A", 1, " 0x%08x", addr);
   }
   return result;
 }
@@ -621,7 +621,7 @@ static uint8_t handleDW_AT_languageAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
   if (res != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_LANGUAGE_NAME;
   }
-printf(" %s", language);
+DWARF_DBG_PRINT(self, "A", 1, " %s", language);
   
   return result;
 }
@@ -662,7 +662,7 @@ static uint8_t handleDW_AT_low_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInIn
     return DWARF_DBG_ERR_CANNOT_GET_FORMADDR;
   }
   attrInInfo->dieAttr->lowPc = addr;
-printf(" 0x%08x", attrInInfo->dieAttr->lowPc);
+DWARF_DBG_PRINT(self, "A", 1, " 0x%08x", attrInInfo->dieAttr->lowPc);
   return result;
 }
 
@@ -683,7 +683,7 @@ static uint8_t handleDW_AT_nameAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo
   if (res != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_NAME_FORMSTRING;
   }
-printf(" %s", name);
+DWARF_DBG_PRINT(self, "A", 1, " %s", name);
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[attrInInfo->dieAndChildrenIdx];
   if (attrInInfo->isSibling) {
@@ -709,7 +709,7 @@ static uint8_t handleDW_AT_producerAttr(dwarfDbgPtr_t self, attrInInfo_t *attrIn
   result = DWARF_DBG_ERR_OK;
   ares = dwarf_attr(attrInInfo->die, DW_AT_producer, &producerAttr, &err);
   ares = dwarf_formstring(producerAttr, &producerName, &err);
-printf(" %s", producerName);
+DWARF_DBG_PRINT(self, "A", 1, " %s", producerName);
   return result;
 }
 
@@ -720,7 +720,7 @@ static uint8_t handleDW_AT_prototypedAttr(dwarfDbgPtr_t self, attrInInfo_t *attr
 
   result = DWARF_DBG_ERR_OK;
   if (attrInInfo->dieAttr->theform == DW_FORM_flag_present) {
-printf(" yes(1)");
+DWARF_DBG_PRINT(self, "A", 1, " yes(1)");
   }
   return result;
 }
@@ -747,7 +747,7 @@ static uint8_t handleDW_AT_siblingAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInI
   if (res != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_FORMREF;
   }
-printf(" 0x%08x", attrInInfo->dieAttr->refOffset);
+DWARF_DBG_PRINT(self, "A", 1, " 0x%08x", attrInInfo->dieAttr->refOffset);
   return result;
 }
 
@@ -758,9 +758,9 @@ static uint8_t handleDW_AT_stmt_listAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
 
   result = DWARF_DBG_ERR_OK;
   if (attrInInfo->flags & DWARF_DBG_FLAG_SVAL) {
-printf("stmt_list2: sval: %d\n", attrInInfo->sval);
+DWARF_DBG_PRINT(self, "A", 1, "stmt_list2: sval: %d\n", attrInInfo->sval);
   } else {
-printf(" 0x%08x", attrInInfo->uval);
+DWARF_DBG_PRINT(self, "A", 1, " 0x%08x", attrInInfo->uval);
   }
   return result;
 }
@@ -778,7 +778,7 @@ static uint8_t handleDW_AT_typeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo
   if (res != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_FORMREF;
   }
-printf(" 0x%08x", attrInInfo->dieAttr->refOffset);
+DWARF_DBG_PRINT(self, "A", 1, " 0x%08x", attrInInfo->dieAttr->refOffset);
 
   return result;
 }
@@ -792,10 +792,10 @@ static uint8_t handleDW_AT_upper_boundAttr(dwarfDbgPtr_t self, attrInInfo_t *att
   if (attrInInfo->flags & DWARF_DBG_FLAG_SVAL) {
     attrInInfo->dieAttr->sval = attrInInfo->sval;
     attrInInfo->dieAttr->flags |= DWARF_DBG_FLAG_SVAL;
-printf(" %d", attrInInfo->sval);
+DWARF_DBG_PRINT(self, "A", 1, " %d", attrInInfo->sval);
   } else {
     attrInInfo->dieAttr->uval = attrInInfo->uval;
-printf(" %d", attrInInfo->uval);
+DWARF_DBG_PRINT(self, "A", 1, " %d", attrInInfo->uval);
   }
   return result;
 }
@@ -813,7 +813,7 @@ const char *formStr;
 
   result = DWARF_DBG_ERR_OK;
   if ((int)dieAndChildrenIdx < 0) {
-printf("ERROR dieAndChildrenIdx < 0\n");
+DWARF_DBG_PRINT(self, "A", 1, "ERROR dieAndChildrenIdx < 0\n");
   }
   attrInInfo.formClass = DW_FORM_CLASS_UNKNOWN;
   res = dwarf_whatform(attrIn, &attrInInfo.theform, &err);
@@ -851,7 +851,7 @@ printf("ERROR dieAndChildrenIdx < 0\n");
         case DW_TAG_typedef:
           break;
         default:
-printf("Attr result21a: %d attrName: %s\n", result, attrName);
+DWARF_DBG_PRINT(self, "A", 1, "Attr result21a: %d attrName: %s\n", result, attrName);
           return DWARF_DBG_ERR_CANNOT_GET_GLOBAL_FORMREF;
         }
       }
@@ -1036,7 +1036,7 @@ self->dwarfDbgStringInfo->getDW_FORM_string(self, attrInInfo.dieAttr->theform, &
 fprintf(stderr, "ERROR missing attr: %d 0x%04x in handleAttribute\n", attr, attr);
     return DWARF_DBG_ERR_MISSING_ATTR_IN_SWITCH;
   }
-printf("\n");
+DWARF_DBG_PRINT(self, "A", 1, "\n");
   return result;
 }
 
