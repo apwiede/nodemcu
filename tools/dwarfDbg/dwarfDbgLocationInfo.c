@@ -653,6 +653,7 @@ DWARF_DBG_PRINT(self, "L", 1, " %s", extraBuf);
   return result;
 }
 
+#ifdef NOTDEF
 // =================================== dwarfDbgGetVarAddr =========================== 
 
 int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, int sourceLineNo, char *varName, int pc, int fp, int *addr) {
@@ -928,6 +929,7 @@ DWARF_DBG_PRINT(self, "L", 1, "++++newFp: varName: %s addr: 0x%08x fp: 0x%08x\n"
   *addr = newFp;
   return TCL_OK;
 }
+#endif
 
 // =================================== dwarfDbgLocationInfoInit =========================== 
 
