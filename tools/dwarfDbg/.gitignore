@@ -3,3 +3,4 @@ include
 libdwarf
 B
 doxygen_dwarfDbg/*
+*.swp
