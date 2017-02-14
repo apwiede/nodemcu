@@ -41,8 +41,37 @@
 #ifndef DWARF_DBG_ATTRIBUTE_INFO_H
 #define	DWARF_DBG_ATTRIBUTE_INFO_H
 
+typedef struct compileUnit compileUnit_t;
+typedef struct dieAndChildrenInfo dieAndChildrenInfo_t;
+typedef struct dieInfo dieInfo_t;
+typedef struct dieAttr dieAttr_t;
+
 typedef uint8_t (* addAttribute_t)(dwarfDbgPtr_t self, Dwarf_Half attr, Dwarf_Attribute attrIn, char **srcfiles, Dwarf_Signed cnt, size_t dieAndChildrenIdx, Dwarf_Bool isSibling, int *dieAttrIdx);
 typedef uint8_t (* handleAttribute_t)(dwarfDbgPtr_t self, Dwarf_Die die, Dwarf_Half attr, Dwarf_Attribute attrIn, char **srcfiles, Dwarf_Signed cnt, int dieAndChildrenIdx, int dieInfoIdx, Dwarf_Bool isSibling, int *dieAttrIdx);
+
+typedef struct attrInInfo {
+  Dwarf_Half attr;
+  Dwarf_Attribute attrIn;
+  char **srcfiles;
+  Dwarf_Signed cnt;
+  int dieAndChildrenIdx;
+  int dieInfoIdx;
+  int dieAttrIdx;
+  Dwarf_Die die;
+  Dwarf_Bool isSibling;
+  Dwarf_Unsigned uval;
+  Dwarf_Signed sval;
+  Dwarf_Half theform;
+  Dwarf_Half directform;
+  Dwarf_Half version;
+  Dwarf_Half offsetSize;
+  compileUnit_t *compileUnit;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  dieInfo_t *dieInfo;
+  dieAttr_t *dieAttr;
+  uint16_t flags;
+  enum Dwarf_Form_Class formClass;
+} attrInInfo_t;
 
 typedef struct dwarfDbgAttributeInfo {
   addAttribute_t addAttribute;

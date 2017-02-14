@@ -95,13 +95,13 @@ static uint8_t addCompileUnit(dwarfDbgPtr_t self) {
       }
     }
   }
-printf("  >>compileUnitIdx: %d\n", self->dwarfDbgCompileUnitInfo->numCompileUnit);
+DWARF_DBG_PRINT(self, "C", 1, "  >>compileUnitIdx: %d\n", self->dwarfDbgCompileUnitInfo->numCompileUnit);
   compileUnit = &self->dwarfDbgCompileUnitInfo->compileUnits[self->dwarfDbgCompileUnitInfo->numCompileUnit];
   memset(compileUnit, 0, sizeof(compileUnit_t));
   self->dwarfDbgCompileUnitInfo->currCompileUnitIdx = self->dwarfDbgCompileUnitInfo->numCompileUnit;
   self->dwarfDbgCompileUnitInfo->numCompileUnit++;
   self->dwarfDbgCompileUnitInfo->currCompileUnit = compileUnit;
-printf("  >>addCompileUnit end\n");
+DWARF_DBG_PRINT(self, "C", 1, "  >>addCompileUnit end\n");
 
   res = dwarf_next_cu_header_d(self->elfInfo.dbg, 1,
     &compileUnit->compileUnitHeaderLength,
@@ -125,7 +125,7 @@ printf("  >>addCompileUnit end\n");
   }
   res = dwarf_siblingof_b(self->elfInfo.dbg, NULL,/* is_info */1, &compileUnit->compileUnitDie, &err);
   if (res != DW_DLV_OK) {
-printf("siblingof cu header sres: %d err: %p", res, err);
+DWARF_DBG_PRINT(self, "C", 1, "siblingof cu header sres: %d err: %p", res, err);
     return DWARF_DBG_ERR_CANNOT_GET_SIBLING_OF_COMPILE_UNIT;
   }
   res = dwarf_die_offsets(compileUnit->compileUnitDie, &compileUnit->overallOffset, &DIEOffset, &err);
@@ -140,7 +140,7 @@ printf("siblingof cu header sres: %d err: %p", res, err);
   if (res != DW_DLV_OK) {
     return DWARF_DBG_ERR_CANNOT_GET_NAME_FORMSTRING;
   }
-printf("  >>name: %d %s\n", nameAttr, longFileName);
+DWARF_DBG_PRINT(self, "C", 1, "  >>name: %d %s\n", nameAttr, longFileName);
   fileName = strrchr(longFileName,'/');
   if (!fileName) {
     fileName = strrchr(longFileName,'\\');
@@ -157,7 +157,7 @@ printf("  >>name: %d %s\n", nameAttr, longFileName);
   compileUnit->longFileName = ckalloc(strlen(longFileName) + 1);
   memset(compileUnit->longFileName, 0, strlen(longFileName) + 1);
   memcpy(compileUnit->longFileName, longFileName, strlen(longFileName));
-printf("  >>name2: %s %s!\n", compileUnit->shortFileName, compileUnit->longFileName);
+DWARF_DBG_PRINT(self, "C", 1, "  >>name2: %s %s!\n", compileUnit->shortFileName, compileUnit->longFileName);
   return result;
 }
 

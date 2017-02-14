@@ -86,6 +86,9 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_GET_LOCDESC_ENTRY_C                  = 39,
   DWARF_DBG_ERR_GET_VERSION_OF_DIE                   = 40,
   DWARF_DBG_ERR_GET_DIE_ADDRESS_SIZE                 = 41,
+  DWARF_DBG_ERR_CANNOT_GET_FORMSTRING                = 42,
+  DWARF_DBG_ERR_BAD_SRCFILE_INDEX                    = 43,
+  DWARF_DBG_ERR_LOCATION_BAD_FORM                    = 44,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

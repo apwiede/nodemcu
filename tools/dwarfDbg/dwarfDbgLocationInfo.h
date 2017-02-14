@@ -41,7 +41,10 @@
 #ifndef DWARF_DBG_LOCATION_INFO_H
 #define	DWARF_DBG_LOCATION_INFO_H
 
+typedef struct attrInInfo attrInInfo_t;
+
 typedef uint8_t (* addLocation_t)(dwarfDbgPtr_t self, char *dirName);
+typedef uint8_t (* handleLocationExprloc_t)(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo);
 typedef uint8_t (* getLocationList_t)(dwarfDbgPtr_t self, size_t dieAndChildrenIdx, size_t dieInfoIdx, Dwarf_Bool isSibling, int attrIdx, Dwarf_Attribute attr);
 
 typedef struct locationOp {
@@ -66,6 +69,7 @@ typedef struct dwarfDbgLocationInfo {
   Dwarf_Addr maxAddr;
 
   addLocation_t addLocation;
+  handleLocationExprloc_t handleLocationExprloc;
   getLocationList_t getLocationList;
 } dwarfDbgLocationInfo_t;
 

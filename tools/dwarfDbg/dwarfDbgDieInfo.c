@@ -218,14 +218,20 @@ DWARF_DBG_PRINT(self, "A", 1, "                     %*s%-26s", (compileUnit->lev
   dieAttr->sourceFileIdx = -1;
   dieAttr->sourceLineNo = -1;
   dieAttr->flags = 0;
-  if ((attr == DW_AT_location) || (attr == DW_AT_frame_base) || (attr == DW_AT_GNU_call_site_value)) {
+  switch (attr) {
+  case DW_AT_location:
+  case DW_AT_frame_base:
+  case DW_AT_GNU_call_site_target:
+  case DW_AT_GNU_call_site_value:
     dieAttr->locationInfo = (locationInfo_t *)ckalloc(sizeof(locationInfo_t));
     if (dieAttr->locationInfo == NULL) {
       return DWARF_DBG_ERR_OUT_OF_MEMORY;
     }
     memset(dieAttr->locationInfo, 0, sizeof(locationInfo_t));
-  } else {
+    break;
+  default:
     dieAttr->locationInfo = NULL;
+    break;
   }
   *attrIdx = dieInfo->numAttr;
   dieInfo->numAttr++;
