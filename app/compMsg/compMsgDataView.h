@@ -70,6 +70,7 @@ typedef uint8_t (* setRandomNum_t)(compMsgDispatcher_t *self, dataView_t *dataVi
 
 typedef uint8_t (* getSequenceNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint32_t *value);
 typedef uint8_t (* setSequenceNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
+typedef uint8_t (* setSavedSequenceNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
 
 typedef uint8_t (* getFiller_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint8_t **value);
 typedef uint8_t (* setFiller_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
@@ -93,6 +94,7 @@ typedef struct compMsgDataView {
 
   getSequenceNum_t getSequenceNum;
   setSequenceNum_t setSequenceNum;
+  setSavedSequenceNum_t setSavedSequenceNum;
 
   getFiller_t getFiller;
   setFiller_t setFiller;

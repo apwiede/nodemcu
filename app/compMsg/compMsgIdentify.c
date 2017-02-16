@@ -446,7 +446,11 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
         numericValue = 0;
         result = self->compMsgData->getFieldValue(self, fieldsToSave->fieldNameStr, &numericValue, &stringValue);
         checkErrOK(result);
-        COMP_MSG_DBG(self, "I", 2, "found fieldToSave: %s %s", fieldsToSave->fieldNameStr, stringValue);
+        if (stringValue != NULL) {
+          COMP_MSG_DBG(self, "I", 2, "found fieldToSave: %s %s", fieldsToSave->fieldNameStr, stringValue);
+        } else {
+          COMP_MSG_DBG(self, "I", 2, "found fieldToSave: %s %d", fieldsToSave->fieldNameStr, numericValue);
+        }
         fieldsToSave->fieldValueStr = stringValue;
         fieldsToSave->fieldValue = numericValue;
       }
@@ -484,6 +488,7 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   uint8_t result;
   int ipAddr;
   int port;
+  int sequenceNum;
   int numericValue;
   char temp[64];
   uint8_t *stringValue;
@@ -498,8 +503,10 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   checkErrOK(result);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
   checkErrOK(result);
+  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_SEQUENCE_NUM, DATA_VIEW_FIELD_UINT32_T, &sequenceNum, &stringValue);
+  checkErrOK(result);
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
-  COMP_MSG_DBG(self, "I", 2, "IP: %s port: %d", temp, port);
+  COMP_MSG_DBG(self, "I", 2, "IP: %s port: %d sequenceNum: %d", temp, port, sequenceNum);
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
   COMP_MSG_DBG(self, "I", 2, "prepareAnswerMsg: result: %d", result);
   checkErrOK(result);

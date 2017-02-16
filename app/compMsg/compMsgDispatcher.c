@@ -256,9 +256,92 @@ uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_
   return COMP_MSG_ERR_OK;
 }
 
+#ifdef GDB_STUB
+int WWWAAA = 123;
+uint8_t tst3(int i1) {
+  return WWWAAA + i1;
+}
+uint8_t tst2(compMsgDispatcher_t *self, int i1, int i2) {
+  uint8_t result;
+  result = tst3(i1);
+  return result;
+}
+uint8_t tst1(compMsgDispatcher_t *self, const uint8_t *type, size_t typelen) {
+  int yyyQQQ;
+  int yyyYYY;
+  char *yyyZZZ;
+  uint8_t result;
+  uint8_t result2;
+  headerPart_t *hdr;
+  uint8_t *handle = NULL;
+  int id = 12;
+  int stopbits =34;
+  int parity = 56;
+  int databits =78;
+
+yyyYYY = 456;
+yyyZZZ = "Hello Arnulf";
+ets_printf("self: %p\n", &self);
+ets_printf("type: %p\n", &type);
+ets_printf("typelen: %p\n", &typelen);
+ets_printf("yyyQQQ: %p\n", &yyyQQQ);
+ets_printf("yyyZZZ: %p\n", &yyyZZZ);
+ets_printf("yyyYYY: %p\n", &yyyYYY);
+ets_printf("result2: %p\n", &result2);
+ets_printf("hdr: %p\n", &hdr);
+ets_printf("handle: %p\n", &handle);
+ets_printf("id: %p\n", &id);
+ets_printf("stopbits: %p\n", &stopbits);
+ets_printf("parity: %p\n", &parity);
+ets_printf("databits: %p\n", &databits);
+#ifdef NOTDEF
+//COMP_MSG_DBG(self, "Y", 0, "call DescInit");
+  result = compMsgMsgDescInit(self);
+  checkErrOK(result);
+  result = compMsgUtilInit(self);
+  checkErrOK(result);
+  result = compMsgRequestInit(self);
+  checkErrOK(result);
+//COMP_MSG_DBG(self, "Y", 0, "call IdentifyInit");
+  result = compMsgIdentifyInit(self);
+  checkErrOK(result);
+  result = compMsgBuildMsgInit(self);
+  checkErrOK(result);
+  result = compMsgSendReceiveInit(self);
+  checkErrOK(result);
+  result = compMsgActionInit(self);
+  checkErrOK(result);
+//COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
+  result = compMsgWifiInit(self);
+  checkErrOK(result);
+  result = compMsgModuleDataInit(self);
+  checkErrOK(result);
+  result = compMsgTimerInit(self);
+  checkErrOK(result);
+  result = compMsgWebSocketInit(self);
+  checkErrOK(result);
+  result = compMsgNetSocketInit(self);
+  checkErrOK(result);
+  result = compMsgHttpInit(self);
+  checkErrOK(result);
+//COMP_MSG_DBG(self, "Y", 0, "call OtaInit");
+  result = compMsgOtaInit(self);
+  checkErrOK(result);
+#endif
+#ifdef GDB_STUB
+ets_printf("dispInit2\n");
+#endif
+  result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
+  return result;
+}
+#endif
+
 // ================================= initDispatcher ====================================
 
-static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, size_t typelen) {
+uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, size_t typelen) {
+  int xxxQQQ;
+  int xxxYYY;
+  char *xxxZZZ;
   uint8_t result;
   headerPart_t *hdr;
   uint8_t *handle;
@@ -269,14 +352,32 @@ static uint8_t initDispatcher(compMsgDispatcher_t *self, const uint8_t *type, si
   uint32_t baud;
   size_t msgLgth;
   uint8_t *msgData;
-uint8_t *xxxZZZ;
 
 #ifdef GDB_STUB
 gdbstub_init();
 #endif
 #ifdef GDB_STUB
+result = tst1(self, type, typelen);
+xxxYYY = 456;
 xxxZZZ = "Hello Arnulf";
-ets_printf("initDispatcher: self: %p %p msgData: %p %p\n", self, &self, xxxZZZ, &xxxZZZ);
+ets_printf("initDispatcher: self: %p %p xxxZZZ: %p %p\n", self, &self, xxxZZZ, &xxxZZZ);
+ets_printf("self: %p\n", &self);
+ets_printf("type: %p\n", &type);
+ets_printf("typelen: %p\n", &typelen);
+ets_printf("xxxQQQ: %p\n", &xxxQQQ);
+ets_printf("xxxZZZ: %p\n", &xxxZZZ);
+ets_printf("xxxYYY: %p\n", &xxxYYY);
+ets_printf("result: %p\n", &result);
+ets_printf("hdr: %p\n", &hdr);
+ets_printf("handle: %p\n", &handle);
+ets_printf("id: %p\n", &id);
+ets_printf("stopbits: %p\n", &stopbits);
+ets_printf("parity: %p\n", &parity);
+ets_printf("databits: %p\n", &databits);
+ets_printf("baud: %p\n", &baud);
+ets_printf("msgLgth: %p\n", &msgLgth);
+ets_printf("msgData: %p\n", &msgData);
+ets_printf("WWWAAA: %p\n", &WWWAAA);
 ets_printf("dispInit1\n");
 #endif
 //COMP_MSG_DBG(self, "Y", 0, "call DescInit");

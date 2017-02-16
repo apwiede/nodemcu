@@ -72,18 +72,19 @@
 #define WIFI_INFO_CLIENT_IP_ADDR         30
 #define WIFI_INFO_CLIENT_PORT            31
 #define WIFI_INFO_CLIENT_STATUS          32
-#define WIFI_INFO_CLOUD_SECURE_CONNECT   33
-#define WIFI_INFO_CLOUD_PORT             34
-#define WIFI_INFO_CLOUD_HOST_1           35
-#define WIFI_INFO_CLOUD_URL_1_PART_1     36
-#define WIFI_INFO_CLOUD_URL_TENANT_ID_1  37
-#define WIFI_INFO_CLOUD_URL_1_PART_2     38
-#define WIFI_INFO_CLOUD_NODE_TOKEN_1     39
-#define WIFI_INFO_CLOUD_HOST_2           40
-#define WIFI_INFO_CLOUD_URL_2_PART_1     41
-#define WIFI_INFO_CLOUD_URL_TENANT_ID_2  42
-#define WIFI_INFO_CLOUD_URL_2_PART_2     43
-#define WIFI_INFO_CLOUD_NODE_TOKEN_2     44
+#define WIFI_INFO_CLIENT_SEQUENCE_NUM    33
+#define WIFI_INFO_CLOUD_SECURE_CONNECT   34
+#define WIFI_INFO_CLOUD_PORT             35
+#define WIFI_INFO_CLOUD_HOST_1           36
+#define WIFI_INFO_CLOUD_URL_1_PART_1     37
+#define WIFI_INFO_CLOUD_URL_TENANT_ID_1  38
+#define WIFI_INFO_CLOUD_URL_1_PART_2     39
+#define WIFI_INFO_CLOUD_NODE_TOKEN_1     40
+#define WIFI_INFO_CLOUD_HOST_2           41
+#define WIFI_INFO_CLOUD_URL_2_PART_1     42
+#define WIFI_INFO_CLOUD_URL_TENANT_ID_2  43
+#define WIFI_INFO_CLOUD_URL_2_PART_2     44
+#define WIFI_INFO_CLOUD_NODE_TOKEN_2     45
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -123,6 +124,8 @@
 #define KEY_VALUE_KEY_CASING_USE_LIST        25
 #define KEY_VALUE_KEY_CASING_STATISTIC_LIST  26
 #define KEY_VALUE_KEY_DAT_AND_TIME           27
+
+#define WIFI_USE_SAVED_SEQUENCE_NUM          0x01
 
 enum webSocket_opcode {
   OPCODE_TEXT = 1,
@@ -256,6 +259,7 @@ typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 typedef uint8_t (* netSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
+typedef uint8_t (* getClientSequenceNum_t)(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue);
 
 typedef struct compMsgWifiData {
   keyValueInfo_t keyValueInfo;
@@ -269,6 +273,7 @@ typedef struct compMsgWifiData {
   uint32_t clientIPAddr;
   uint16_t clientPort;
   uint8_t clientStatus;
+  uint32_t clientSequenceNum;
 #ifdef CLIENT_SSL_ENABLE
   uint8_t cloudSecureConnect;
 #endif
@@ -285,6 +290,7 @@ typedef struct compMsgWifiData {
   uint8_t *cloudNodeToken2;
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
+  uint16_t flags;
 
   bssScanInfos_t bssScanInfos;
   keyValueStr2KeyValueId_t keyValueStr2KeyValueId;
@@ -296,6 +302,7 @@ typedef struct compMsgWifiData {
   bssStr2BssInfoId_t bssStr2BssInfoId;
   connectToAP_t connectToAP;
   startStationCb_t startStationCb;
+  getClientSequenceNum_t getClientSequenceNum;
   webSocketSendConnectError_t webSocketSendConnectError;
   netSocketSendConnectError_t netSocketSendConnectError;
 

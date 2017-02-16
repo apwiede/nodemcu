@@ -636,7 +636,12 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;
       case COMP_MSG_SPEC_FIELD_SEQUENCE_NUM:
-        result = compMsgData->compMsgDataView->setSequenceNum(self, compMsgData->compMsgDataView->dataView, fieldInfo);
+        if (self->compMsgWifiData->flags & WIFI_USE_SAVED_SEQUENCE_NUM) {
+          result = compMsgData->compMsgDataView->setSavedSequenceNum(self, compMsgData->compMsgDataView->dataView, fieldInfo);
+          self->compMsgWifiData->flags &= ~WIFI_USE_SAVED_SEQUENCE_NUM;
+        } else {
+          result = compMsgData->compMsgDataView->setSequenceNum(self, compMsgData->compMsgDataView->dataView, fieldInfo);
+        }
         checkErrOK(result);
         fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
         break;

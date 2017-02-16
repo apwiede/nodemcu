@@ -331,6 +331,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
   bool boolResult;
   uint8_t *ssid;
   uint8_t *passwd;
+  uint32_t sequenceNum;
   int numericValue;
   fieldsToSave_t *fieldsToSave;
   int idx;
@@ -346,17 +347,24 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
     fieldsToSave = &self->fieldsToSave[idx];
     if (c_strcmp("#key_clientSsid", fieldsToSave->fieldNameStr) == 0) {
       ssid = fieldsToSave->fieldValueStr;
+      result = self->compMsgWifiData->setWifiValue(self, "@clientSsid", 0, ssid);
+      checkErrOK(result);
     }
     if (c_strcmp("#key_clientPasswd", fieldsToSave->fieldNameStr) == 0) {
       passwd = fieldsToSave->fieldValueStr;
+      result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
+      checkErrOK(result);
+    }
+    if (c_strcmp("@sequenceNum", fieldsToSave->fieldNameStr) == 0) {
+ets_printf("seq: %p %d\n", fieldsToSave->fieldValueStr, fieldsToSave->fieldValue);
+      sequenceNum = fieldsToSave->fieldValue;
+      result = self->compMsgWifiData->setWifiValue(self, "@sequenceNum", sequenceNum, NULL);
+      checkErrOK(result);
+      self->compMsgWifiData->flags |= WIFI_USE_SAVED_SEQUENCE_NUM;
     }
     idx++;
   }
   COMP_MSG_DBG(self, "w", 2, "connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
-  result = self->compMsgWifiData->setWifiValue(self, "@clientSsid", 0, ssid);
-  checkErrOK(result);
-  result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
-  checkErrOK(result);
   self->compMsgSendReceive->startSendMsg = self->compMsgIdentify->sendClientIPMsg;
   result = self->compMsgSocket->netSocketRunClientMode(self);
   COMP_MSG_DBG(self, "w", 2, "runClientMode: result: %d\n", result);
@@ -703,6 +711,14 @@ static uint8_t getClientPort(compMsgDispatcher_t *self, int* numericValue, uint8
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= getClientSequenceNum ====================================
+
+static uint8_t getClientSequenceNum(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.clientSequenceNum;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= getClientStatus ====================================
 
 static uint8_t getClientStatus(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
@@ -1006,13 +1022,16 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_CLOUD_NODE_TOKEN_2:
     *stringValue = compMsgWifiData.cloudNodeToken2;
     break;
+  case WIFI_INFO_CLIENT_SEQUENCE_NUM:
+    *numericValue = compMsgWifiData.clientSequenceNum;
+    break;
 #ifdef CLIENT_SSL_ENABLE
   case WIFI_INFO_CLOUD_SECURE_CONNECT:
     *numericValue = compMsgWifiData.cloudSecureConnect;
     break;
 #endif
   default:
-COMP_MSG_DBG(self, "w", 1, "bad which: %d\n", which);
+COMP_MSG_DBG(self, "w", 1, "getWifiValue bad which: %d\n", which);
     return COMP_MSG_ERR_BAD_WIFI_VALUE_WHICH;
     break;
   }
@@ -1131,6 +1150,9 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
     checkAllocOK(compMsgWifiData.cloudNodeToken2);
     c_memcpy(compMsgWifiData.cloudNodeToken2, stringValue, c_strlen(stringValue));
     break;
+  case COMP_MSG_SPEC_FIELD_SEQUENCE_NUM:
+    compMsgWifiData.clientSequenceNum = numericValue;
+    break;
 #ifdef CLIENT_SSL_ENABLE
   case COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT:
     compMsgWifiData.cloudSecureConnect = numericValue;
@@ -1208,6 +1230,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->compMsgWifiData->bssStr2BssInfoId = &bssStr2BssInfoId;
   self->compMsgWifiData->connectToAP = &connectToAP;
   self->compMsgWifiData->startStationCb = &startStationCb;
+  self->compMsgWifiData->getClientSequenceNum = &getClientSequenceNum;
   self->compMsgWifiData->webSocketSendConnectError = &webSocketSendConnectError;
   self->compMsgWifiData->netSocketSendConnectError = &netSocketSendConnectError;
 

@@ -70,12 +70,23 @@ static uint8_t getSequenceNum(compMsgDispatcher_t *self, dataView_t *dataView, c
   return dataView->getUint32(dataView, fieldInfo->fieldOffset, value);
 }
 
+// ================================= setSavedSequenceNum ====================================
+
+static uint8_t setSavedSequenceNum(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
+  uint8_t result;
+  int seqeunceNum;
+  uint8_t *stringValue;
+
+  result = self->compMsgWifiData->getClientSequenceNum(self, &sequenceNum, &stringValue);
+  checkErrOK(result);
+  return dataView->setUint32(dataView, fieldInfo->fieldOffset, sequenceNum);
+}
+
 // ================================= setSequenceNum ====================================
 
 static uint8_t setSequenceNum(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo) {
   return dataView->setUint32(dataView, fieldInfo->fieldOffset, sequenceNum++);
 }
-
 
 // ================================= getFiller ====================================
 
@@ -560,6 +571,7 @@ compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
 
   compMsgDataView->getSequenceNum = &getSequenceNum;
   compMsgDataView->setSequenceNum = &setSequenceNum;
+  compMsgDataView->setSavedSequenceNum = &setSavedSequenceNum;
 
   compMsgDataView->getFiller = &getFiller;
   compMsgDataView->setFiller = &setFiller;
