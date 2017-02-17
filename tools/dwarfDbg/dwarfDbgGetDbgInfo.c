@@ -84,7 +84,7 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
     printf("dwarf_die_CU_offset ores: %d err: %p", ores, err);
     return DWARF_DBG_ERR_CANNOT_GET_CU_OFFSET;
   }
-DWARF_DBG_PRINT(self, "G", 1, "<%2d><0x%08x> %*s%s\n", compileUnit->level, offset, compileUnit->level * 2, " ", tagName);
+  DWARF_DBG_PRINT(self, "G", 1, "<%2d><0x%08x> %*s%s\n", compileUnit->level, offset, compileUnit->level * 2, " ", tagName);
   if (isSibling) {
 //printf("  >>numAddSibling: %d\n", ++numAddSibling);
     result = self->dwarfDbgDieInfo->addDieSibling(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
@@ -213,7 +213,7 @@ static uint8_t handleCompileUnits(dwarfDbgPtr_t self) {
     sectionName = ".debug_info";
   }
   result = self->dwarfDbgCompileUnitInfo->getAddressSizeAndMax(self, &self->dwarfDbgCompileUnitInfo->addrSize, &self->dwarfDbgCompileUnitInfo->maxAddr, &err);
-DWARF_DBG_PRINT(self, "G", 1, "addrSize: 0x%08x maxAddr: 0x%08x\n", self->dwarfDbgCompileUnitInfo->addrSize, self->dwarfDbgCompileUnitInfo->maxAddr);
+  DWARF_DBG_PRINT(self, "G", 1, "addrSize: 0x%08x maxAddr: 0x%08x\n", self->dwarfDbgCompileUnitInfo->addrSize, self->dwarfDbgCompileUnitInfo->maxAddr);
   /* Loop over compile units until it fails.  */
   for (;;++loopCount) {
     int sres = DW_DLV_OK;
@@ -227,7 +227,7 @@ DWARF_DBG_PRINT(self, "G", 1, "addrSize: 0x%08x maxAddr: 0x%08x\n", self->dwarfD
     }
     checkErrOK(result);
     compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-DWARF_DBG_PRINT(self, "G", 1, "handle srcfiles\n");
+    DWARF_DBG_PRINT(self, "G", 1, "handle srcfiles\n");
     {
       Dwarf_Error srcerr = 0;
       int srcf = dwarf_srcfiles(compileUnit->compileUnitDie, &srcfiles, &srcCnt, &err);
@@ -239,12 +239,12 @@ DWARF_DBG_PRINT(self, "G", 1, "handle srcfiles\n");
         and we do not want to print anything
         about statements in that case */
 
-DWARF_DBG_PRINT(self, "G", 1, "srcCnt: %d currCompileUnitIdx: %d\n", srcCnt, self->dwarfDbgCompileUnitInfo->currCompileUnitIdx);
+      DWARF_DBG_PRINT(self, "G", 1, "srcCnt: %d currCompileUnitIdx: %d\n", srcCnt, self->dwarfDbgCompileUnitInfo->currCompileUnitIdx);
       for (i = 0; i < srcCnt; i++) {
         int pathNameIdx;
         int fileInfoIdx;
 
-DWARF_DBG_PRINT(self, "G", 1, "  src: %s\n", srcfiles[i]);
+        DWARF_DBG_PRINT(self, "G", 1, "  src: %s\n", srcfiles[i]);
         result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], &pathNameIdx, &fileInfoIdx);
 //printf("  src: %s %d pathNameIdx: %d fileInfoIdx: %d\n", srcfiles[i], i, pathNameIdx, fileInfoIdx);
         checkErrOK(result);
@@ -302,10 +302,10 @@ int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
   chunk = ckalloc(10*1024*1024);
   ckfree(chunk);
   result = self->dwarfDbgFrameInfo->getFrameList(self);
-DWARF_DBG_PRINT(self, "G", 1, "getFrameLists: result: %d\n", result);
+  DWARF_DBG_PRINT(self, "G", 1, "getFrameLists: result: %d\n", result);
   checkErrOK(result);
   result = self->dwarfDbgGetDbgInfo->handleCompileUnits(self);
-DWARF_DBG_PRINT(self, "G", 1, "handleCompileUnits: result: %d\n", result);
+  DWARF_DBG_PRINT(self, "G", 1, "handleCompileUnits: result: %d\n", result);
   checkErrOK(result);
   return result;
 }

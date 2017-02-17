@@ -276,7 +276,7 @@ static uint8_t handleAddrExprloc(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
     strcat(extraBuf, buf);
   }
   strcat(extraBuf, ": ");
-DWARF_DBG_PRINT(self, "L", 1, "%s", extraBuf);
+  DWARF_DBG_PRINT(self, "L", 1, "%s", extraBuf);
   extraBuf[0] = '\0';
   {
     Dwarf_Half addressSize = 0;
@@ -342,7 +342,7 @@ DWARF_DBG_PRINT(self, "L", 1, "%s", extraBuf);
       locationOp->offsetForBranch = offsetForBranch;
       result = handleOneExprOp(self, locationOp, i, &extraBufPtr);
       checkErrOK(result);
-DWARF_DBG_PRINT(self, "A", 1, " %s", extraBuf);
+      DWARF_DBG_PRINT(self, "A", 1, " %s", extraBuf);
     }
   }
   return result;
@@ -377,7 +377,7 @@ int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, int sourceLin
   locationInfo_t *locationInfo;
   locationOp_t *locationOp;
   result = DWARF_DBG_ERR_OK;
-DWARF_DBG_PRINT(self, "L", 1, "dwarfDbgGetVarAddr: %s pc: 0x%08x fp: 0x%08x\n", varName, pc, fp);
+  DWARF_DBG_PRINT(self, "L", 1, "dwarfDbgGetVarAddr: %s pc: 0x%08x fp: 0x%08x\n", varName, pc, fp);
 fflush(stdout);
   found = 0;
   frameInfo = &self->dwarfDbgFrameInfo->frameInfo;
@@ -398,7 +398,7 @@ printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0
           frc = &fde->frameRegCols[frcIdx];
 //printf("   frcIdx: %d pc: 0x%08x offset: %d reg: %d\n", frcIdx, frc->pc, frc->offset, frc->reg);
           if (frc->pc > pc) {
-DWARF_DBG_PRINT(self, "L", 1, "   frcIdx: %d frc >!\n", frcIdx);
+            DWARF_DBG_PRINT(self, "L", 1, "   frcIdx: %d frc >!\n", frcIdx);
           }
         }
         lastFdeIdx = fdeIdx;
@@ -411,20 +411,20 @@ DWARF_DBG_PRINT(self, "L", 1, "   frcIdx: %d frc >!\n", frcIdx);
   if (found) {
     fde = &cieFde->frameDataEntries[lastFdeIdx];
     frc = &fde->frameRegCols[0];
-DWARF_DBG_PRINT(self, "L", 1, "  pc: 0x%08x offset: %d reg: %d\n", frc->pc, frc->offset, frc->reg);
-DWARF_DBG_PRINT(self, "L", 1, "addr for var %s pc: 0x%08x fp: 0x%08x found cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d\n", varName, pc, fp, cieFdeIdx, fdeIdx, lastFdeIdx);
-     switch (frc->reg) {
-     case DW_FRAME_REG1:
-       newFp = fp + frc->offset;
-DWARF_DBG_PRINT(self, "L", 1, "newFp0: 0x%08x fp: 0x%08x frc->offset: %d\n", newFp, fp, frc->offset);
-       break;
-     default:
+    DWARF_DBG_PRINT(self, "L", 1, "  pc: 0x%08x offset: %d reg: %d\n", frc->pc, frc->offset, frc->reg);
+    DWARF_DBG_PRINT(self, "L", 1, "addr for var %s pc: 0x%08x fp: 0x%08x found cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d\n", varName, pc, fp, cieFdeIdx, fdeIdx, lastFdeIdx);
+    switch (frc->reg) {
+    case DW_FRAME_REG1:
+      newFp = fp + frc->offset;
+      DWARF_DBG_PRINT(self, "L", 1, "newFp0: 0x%08x fp: 0x%08x frc->offset: %d\n", newFp, fp, frc->offset);
+      break;
+    default:
 fprintf(stderr, "rule for reg: %d not yet implemented\n", frc->reg);
-       break;
-     }
+      break;
+    }
 fflush(stdout);
   } else {
-DWARF_DBG_PRINT(self, "L", 1, "addr for var: %s pc: 0x%08x fp: 0x%08x not found\n", varName, pc, fp);
+    DWARF_DBG_PRINT(self, "L", 1, "addr for var: %s pc: 0x%08x fp: 0x%08x not found\n", varName, pc, fp);
     self->errorStr = "Cannot get addr for var\n";
     return TCL_ERROR;
   }
@@ -438,7 +438,7 @@ DWARF_DBG_PRINT(self, "L", 1, "addr for var: %s pc: 0x%08x fp: 0x%08x not found\
       break;
     }
   }
-DWARF_DBG_PRINT(self, "L", 1, "found: %d compileUnitIdx: %d\n", found, compileUnitIdx);
+  DWARF_DBG_PRINT(self, "L", 1, "found: %d compileUnitIdx: %d\n", found, compileUnitIdx);
   if (!found) {
     self->errorStr = "Cannot get compile unit for var\n";
     return TCL_ERROR;
@@ -446,27 +446,27 @@ DWARF_DBG_PRINT(self, "L", 1, "found: %d compileUnitIdx: %d\n", found, compileUn
   found = 0;
   for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
     dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
-DWARF_DBG_PRINT(self, "L", 1, "dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
+    DWARF_DBG_PRINT(self, "L", 1, "dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
     for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numChildren; dieInfoIdx++) {
       dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
-DWARF_DBG_PRINT(self, "L", 1, "children dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+      DWARF_DBG_PRINT(self, "L", 1, "children dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
       haveNameAttr = 0;
       for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
         dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
-DWARF_DBG_PRINT(self, "L", 1, "yyattr: 0x%04x dieAttrIdx: %d\n", dieAttr->attr, dieAttrIdx);
+        DWARF_DBG_PRINT(self, "L", 1, "yyattr: 0x%04x dieAttrIdx: %d\n", dieAttr->attr, dieAttrIdx);
 fflush(stdout);
         switch (dieAttr->attr) {
         case DW_AT_name:
-DWARF_DBG_PRINT(self, "L", 1, "DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attrIn, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
-           if ((dieAttr->attrStrIdx < 0) || (dieAttr->attrStrIdx >= dieInfo->numAttr)) {
-DWARF_DBG_PRINT(self, "L", 1, "ERROR bad dieAttr->attrStrIdx: %d\n", dieAttr->attrStrIdx);
-           } else  {
-           attrStr = self->dwarfDbgCompileUnitInfo->attrStrs[dieAttr->attrStrIdx];
-DWARF_DBG_PRINT(self, "L", 1, "DW_AT_name1: %p %s\n", attrStr, attrStr);
+          DWARF_DBG_PRINT(self, "L", 1, "DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attrIn, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
+          if ((dieAttr->attrStrIdx < 0) || (dieAttr->attrStrIdx >= dieInfo->numAttr)) {
+            DWARF_DBG_PRINT(self, "L", 1, "ERROR bad dieAttr->attrStrIdx: %d\n", dieAttr->attrStrIdx);
+          } else  {
+            attrStr = self->dwarfDbgCompileUnitInfo->attrStrs[dieAttr->attrStrIdx];
+            DWARF_DBG_PRINT(self, "L", 1, "DW_AT_name1: %p %s\n", attrStr, attrStr);
 fflush(stdout);
-          if (strcmp(varName, attrStr) == 0) {
-            haveNameAttr = 1;
-          }
+            if (strcmp(varName, attrStr) == 0) {
+              haveNameAttr = 1;
+            }
           }
           break;
         case DW_AT_decl_file:
@@ -479,7 +479,7 @@ DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_file1: %p\n", fileName);
 fflush(stdout);
           break;
         case DW_AT_decl_line:
-DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_line1: %d\n", dieAttr->sourceLineNo);
+          DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_line1: %d\n", dieAttr->sourceLineNo);
           break;
         }
         if (haveNameAttr && (dieAttr->attr == DW_AT_location)) {
@@ -491,27 +491,27 @@ if (locationInfo == NULL) {
 }
           if (locationInfo != NULL) {
             found = 1;
-DWARF_DBG_PRINT(self, "L", 1, "child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
-DWARF_DBG_PRINT(self, "L", 1, "child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
+            DWARF_DBG_PRINT(self, "L", 1, "child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
+            DWARF_DBG_PRINT(self, "L", 1, "child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
               for(locEntryIdx = 0; locEntryIdx < locationInfo->numLocEntry; locEntryIdx++) {
                 locationOp = &locationInfo->locationOps[locEntryIdx];
-DWARF_DBG_PRINT(self, "L", 1, "locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);
+                DWARF_DBG_PRINT(self, "L", 1, "locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);
                 switch(locationOp->op) {
                 case DW_OP_fbreg:
-DWARF_DBG_PRINT(self, "L", 1, "newFp1: 0x%08x opd1: %d\n", newFp, locationOp->opd1);
+                  DWARF_DBG_PRINT(self, "L", 1, "newFp1: 0x%08x opd1: %d\n", newFp, locationOp->opd1);
                   newFp = newFp + locationOp->opd1;
                   break;
                 case DW_OP_lit0:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_lit0\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_lit0\n");
                   break;
                 case DW_OP_reg2:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_reg2\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_reg2\n");
                   break;
                 case DW_OP_breg1:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_breg1\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_breg1\n");
                   break;
                 case DW_OP_GNU_entry_value:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_GNU_entry_value\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 1 for DW_OP_GNU_entry_value\n");
                   break;
                 default:
 fprintf(stderr, "missing location op1: 0x%04x for varName address calculation: %s\n", locationOp->op, varName);
@@ -529,7 +529,7 @@ fprintf(stderr, "missing location op1: 0x%04x for varName address calculation: %
         break;
       }
     }
-DWARF_DBG_PRINT(self, "L", 1, "children done: found: %d numSiblings: %d\n", found, dieAndChildrenInfo->numSiblings);
+    DWARF_DBG_PRINT(self, "L", 1, "children done: found: %d numSiblings: %d\n", found, dieAndChildrenInfo->numSiblings);
     if (found) {
       break;
     }
@@ -543,7 +543,7 @@ const char *atName = NULL;
           dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
 //printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%02x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
 self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &atName);
-DWARF_DBG_PRINT(self, "L", 1, "idx: %d name: %s haveNameAttr: %d\n", dieAttrIdx, atName, haveNameAttr);
+          DWARF_DBG_PRINT(self, "L", 1, "idx: %d name: %s haveNameAttr: %d\n", dieAttrIdx, atName, haveNameAttr);
           switch (dieAttr->attr) {
           case DW_AT_name:
 //printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%04x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
@@ -564,7 +564,7 @@ DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_file2: %p\n", fileName);
 fflush(stdout);
             break;
           case DW_AT_decl_line:
-DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_line2: %d\n", dieAttr->sourceLineNo);
+            DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_line2: %d\n", dieAttr->sourceLineNo);
             break;
           }
           if (haveNameAttr && (dieAttr->attr == DW_AT_location)) {
@@ -576,26 +576,26 @@ if (locationInfo == NULL) {
 }
             if (locationInfo != NULL) {
               found = 1;
-DWARF_DBG_PRINT(self, "L", 1, "sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
+              DWARF_DBG_PRINT(self, "L", 1, "sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
               for(locEntryIdx = 0; locEntryIdx < locationInfo->numLocEntry; locEntryIdx++) {
                 locationOp = &locationInfo->locationOps[locEntryIdx];
-DWARF_DBG_PRINT(self, "L", 1, "locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);
+                DWARF_DBG_PRINT(self, "L", 1, "locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);
                 switch(locationOp->op) {
                 case DW_OP_fbreg:
-DWARF_DBG_PRINT(self, "L", 1, "newFp1: 0x%08x opd1: %d\n", newFp, locationOp->opd1);
+                  DWARF_DBG_PRINT(self, "L", 1, "newFp1: 0x%08x opd1: %d\n", newFp, locationOp->opd1);
                   newFp = newFp + locationOp->opd1;
                   break;
                 case DW_OP_lit0:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_lit0\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_lit0\n");
                   break;
                 case DW_OP_reg2:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_reg2\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_reg2\n");
                   break;
                 case DW_OP_breg1:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_breg1\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_breg1\n");
                   break;
                 case DW_OP_GNU_entry_value:
-DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_GNU_entry_value\n");
+                  DWARF_DBG_PRINT(self, "L", 1, "  >>need code 2 for DW_OP_GNU_entry_value\n");
                   break;
                 default:
 fprintf(stderr, "missing location op2: 0x%04x for varName address calculation: %s\n", locationOp->op, varName);
@@ -619,7 +619,7 @@ fprintf(stderr, "missing location op2: 0x%04x for varName address calculation: %
     self->errorStr = "varName location not found";
     return TCL_ERROR;
   }
-DWARF_DBG_PRINT(self, "L", 1, "++++newFp: varName: %s addr: 0x%08x fp: 0x%08x\n", varName, newFp, fp);
+  DWARF_DBG_PRINT(self, "L", 1, "++++newFp: varName: %s addr: 0x%08x fp: 0x%08x\n", varName, newFp, fp);
   *addr = newFp;
   return TCL_OK;
 }
