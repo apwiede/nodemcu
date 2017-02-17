@@ -384,7 +384,7 @@ namespace eval ::compMsg {
           return $::COMP_MSG_ERR_OK ; # just ignore silently
         } else {
           if {$incrVal == $::COMP_MSG_NO_INCR} {
-puts stderr "field not found!incrVal: $incrVal!"
+puts stderr "field not found: $fieldName!incrVal: $incrVal!"
             checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
           } else {
             if {$firstFreeEntry ne ""} {

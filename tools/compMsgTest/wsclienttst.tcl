@@ -469,6 +469,35 @@ puts stderr "dispatcherHandle!$dispatcherHandle!"
   checkErrOK $result
 }
 
+# ================================ sendAppMsgToMcu ===============================
+
+proc sendAppMsgToMcu {type} {
+puts stderr "===sendAppMsgToMcu: $type!"
+  switch $type {
+    PP {
+      set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 19713 16641 PP hdr]
+      checkErrOK $result
+pdict $hdr
+    }
+    PM {
+      set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 19712 16640 PM hdr]
+      checkErrOK $result
+pdict $hdr
+    }
+    default {
+    }
+  }
+  set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
+  checkErrOK $result
+  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
+  checkErrOK $result
+  set result [::compMsg compMsgData getMsgData ::compMsgDispatcher msgData msgLgth]
+  checkErrOK $result
+puts stderr "msgLgth: $msgLgth!"
+  set url "http://192.168.178.96:8080"
+  set token [::http::geturl $url -query $msgData]
+}
+
 # ================================ main ===============================
 
 InitCompMsg
@@ -481,7 +510,9 @@ puts stderr "buildAPListWidget start"
 buildAPListWidget
 puts stderr "buildAPListWidget built"
 set startBtn [::ttk::button .start -text "Start" -command [list getAPInfos $::clientSocket]]
-pack $startBtn
+set msg1Btn [::ttk::button .msg1 -text "McuMsg1" -command [list ::sendAppMsgToMcu PP]]
+set msg2Btn [::ttk::button .msg2 -text "McuMsg2" -command [list ::sendAppMsgToMcu PM]]
+pack $startBtn $msg1Btn $msg2Btn -side left
 
 
 vwait forever
