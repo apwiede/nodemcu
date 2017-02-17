@@ -47,6 +47,57 @@
 
 #include "dwarfDbgInt.h"
 
+/* *************************************************************************
+ * lineInfo:
+ *   Dwarf_Addr pc   # addr in object
+ *   int lineNo      # line number in source file
+ *   uint16_t flags
+ *   uint8_t isa
+ *   uint8_t discriminator
+ *
+ */
+
+// =================================== addLineInfo =========================== 
+
+static uint8_t addLineInfo(dwarfDbgPtr_t self, Dwarf_Addr pc, int lineNo, int flags, uint16_t isa, uint16_t discriminator, int fileInfoIdx, int *fileLineIdx) {
+  uint8_t result;
+  compileUnit_t *compileUnit;
+  fileInfo_t *fileInfo;
+  lineInfo_t *lineInfo;
+
+//printf("addFileLine: pc: 0x%08x lineNo: %d fileInfoIdx: %d\n", pc, lineNo, fileInfoIdx);
+  result = DWARF_DBG_ERR_OK;
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  if (compileUnit->fileInfos == NULL) {
+    // seems to be no file infos!!
+    return result;
+  }
+  fileInfo = &compileUnit->fileInfos[fileInfoIdx];
+  if (fileInfo->maxFileLine <= fileInfo->numFileLine) {
+    fileInfo->maxFileLine += 5;
+    if (fileInfo->fileLines == NULL) {
+      fileInfo->fileLines = (lineInfo_t *)ckalloc(sizeof(lineInfo_t) * fileInfo->maxFileLine);
+      if (fileInfo->fileLines == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    } else {
+      fileInfo->fileLines = (lineInfo_t *)ckrealloc((char *)fileInfo->fileLines, sizeof(lineInfo_t) * fileInfo->maxFileLine);
+      if (fileInfo->fileLines == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    }
+  }
+  lineInfo = &fileInfo->fileLines[fileInfo->numFileLine];
+  lineInfo->lineNo = lineNo;
+  lineInfo->pc = pc;
+  lineInfo->flags = flags;
+  lineInfo->isa = isa;
+  lineInfo->discriminator = discriminator;
+  *fileLineIdx = fileInfo->numFileLine;
+  fileInfo->numFileLine++;
+  return result;
+}
+
 // =================================== handleLineInfos =========================== 
 
 static uint8_t handleLineInfos(dwarfDbgPtr_t self, int *fileLineIdx) {
@@ -74,11 +125,12 @@ static uint8_t handleLineInfos(dwarfDbgPtr_t self, int *fileLineIdx) {
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   lres = dwarf_srclines_b(compileUnit->compileUnitDie, &lineVersion, &tableCount, &lineContext, &err);
 if (tableCount > 0) {
-//printf(">>table_count: %d lineVersion: %d\n", tableCount, lineVersion);
+printf(">>table_count: %d lineVersion: %d\n", tableCount, lineVersion);
 }
   if (lres == DW_DLV_OK) {
 //printf("dwarf_srclines_two_level_from_linecontext\n");
     lres = dwarf_srclines_two_level_from_linecontext(lineContext, &lineBuf, &lineCount, &lineBufActuals, &lineCountActuals, &err);
+//printf("lineCount: %d lineCountActuals: %d\n", lineCount, lineCountActuals);
     if (lres != DW_DLV_OK) {
       return DWARF_DBG_ERR_GET_SRC_LINES;
     }
@@ -154,7 +206,7 @@ if (tableCount > 0) {
           }
         }
 DWARF_DBG_PRINT(self, "L", 1, "dwarf_lineaddr: line: 0x%08x pc: 0x%08x lineNo: %d%s%s%s%s%s isa: %d dis: %d\n", line, pc, lineNo, ns, bb, et, eb, pe, isa, discriminator);
-        result = self->dwarfDbgFileInfo->addFileLine(self, pc, lineNo, flags, (uint16_t)isa, (uint16_t)discriminator, compileUnit->fileInfoIdx, fileLineIdx);
+        result = self->dwarfDbgLineInfo->addLineInfo(self, pc, lineNo, flags, (uint16_t)isa, (uint16_t)discriminator, compileUnit->fileInfoIdx, fileLineIdx);
 
       }
     }
@@ -170,6 +222,8 @@ int dwarfDbgLineInfoInit (dwarfDbgPtr_t self) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
+
+  self->dwarfDbgLineInfo->addLineInfo = &addLineInfo;
   self->dwarfDbgLineInfo->handleLineInfos = &handleLineInfos;
   return result;
 }

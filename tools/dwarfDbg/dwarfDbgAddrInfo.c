@@ -385,7 +385,7 @@ fflush(stdout);
     cieFde = &frameInfo->cieFdes[cieFdeIdx];
     for (fdeIdx = 0; fdeIdx < cieFde->numFde; fdeIdx++) {
       fde = &cieFde->frameDataEntries[fdeIdx];
-//printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", cieFdeIdx, fdeIdx, lastFdeIdx, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
+printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", cieFdeIdx, fdeIdx, lastFdeIdx, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
       if (fde->lowPc > pc) {
         break;
       }
@@ -470,7 +470,7 @@ fflush(stdout);
           }
           break;
         case DW_AT_decl_file:
-result = self->dwarfDbgFileInfo->getFileNameFromFileIdx(self, dieAttr->sourceFileIdx, &fileName);
+result = self->dwarfDbgFileInfo->getFileNameFromPathNameIdx(self, dieAttr->sourceFileIdx, &fileName);
 if (fileName != NULL) {
 DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_file1: %s\n", fileName);
 } else {
@@ -555,7 +555,7 @@ DWARF_DBG_PRINT(self, "L", 1, "FND: ATname2: %s\n", attrStr);
             }
             break;
           case DW_AT_decl_file:
-result = self->dwarfDbgFileInfo->getFileNameFromFileIdx(self, dieAttr->sourceFileIdx, &fileName);
+result = self->dwarfDbgFileInfo->getFileNameFromPathNameIdx(self, dieAttr->sourceFileIdx, &fileName);
 if (fileName != NULL) {
 DWARF_DBG_PRINT(self, "L", 1, "DW_AT_decl_file2: %s\n", fileName);
 } else {

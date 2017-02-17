@@ -59,7 +59,7 @@ typedef struct compileUnit {
   Dwarf_Off overallOffset;
   char *shortFileName;
   char *longFileName;
-  int fileNameIdx;
+  int pathNameIdx;
   int fileInfoIdx;
   int level;
   Dwarf_Bool isCompileUnitDie;

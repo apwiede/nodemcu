@@ -222,7 +222,7 @@ DWARF_DBG_PRINT(self, "A", 1, "  %s", name);
   result = self->dwarfDbgDieInfo->addAttrStr(self, name, &dieAttr->attrStrIdx);
   checkErrOK(result);
   sprintf(buf, "%s/%s", name, compileUnit->shortFileName);
-  result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, &compileUnit->fileNameIdx, &compileUnit->fileInfoIdx);
+  result = self->dwarfDbgFileInfo->addCompileUnitFile(self, buf, &compileUnit->pathNameIdx, &compileUnit->fileInfoIdx);
   checkErrOK(result);
   return result;
 }

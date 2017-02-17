@@ -97,17 +97,17 @@ case DW_AT_call_file:
 case DW_AT_decl_file:
 {
   int fileIdx;
-  fileNameInfo_t *fileNameInfo;
+  pathNameInfo_t *pathNameInfo;
   dirNamesInfo_t *dirNamesInfo;
   int compileUnitIdx = self->dwarfDbgCompileUnitInfo->currCompileUnitIdx;
   int j;
 
   sres = DW_DLV_OK;
   fileIdx = compileUnit->sourceFiles[attrInfo->uval];
-  if (fileIdx < self->dwarfDbgFileInfo->fileNamesInfo.numFileName) {
-    fileNameInfo = &self->dwarfDbgFileInfo->fileNamesInfo.fileNames[fileIdx];
+  if (fileIdx < self->dwarfDbgFileInfo->pathNamesInfo.numPathName) {
+    pathNameInfo = &self->dwarfDbgFileInfo->pathNamesInfo.pathNames[fileIdx];
     dirNamesInfo = &self->dwarfDbgFileInfo->dirNamesInfo;
-    sprintf(buf, "%s/%s", dirNamesInfo->dirNames[fileNameInfo->dirNameIdx], fileNameInfo->fileName); 
+    sprintf(buf, "%s/%s", dirNamesInfo->dirNames[pathNameInfo->dirNameIdx], pathNameInfo->fileName); 
   } else {
     sres = DW_DLV_ERROR;
   }

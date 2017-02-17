@@ -41,10 +41,31 @@
 #ifndef DWARF_DBG_LINE_INFO_H
 #define	DWARF_DBG_LINE_INFO_H
 
+#define LINE_NEW_STATEMENT   0x01
+#define LINE_NEW_BASIC_BLOCK 0x02
+#define LINE_END_SEQUENCE    0x04
+#define LINE_PROLOGUE_END    0x08
+#define LINE_PROLOGUE_BEGIN  0x10
+
+typedef struct lineInfo {
+  Dwarf_Addr pc;
+  int lineNo;
+  uint16_t flags;
+  uint16_t isa;
+  uint16_t discriminator;
+} lineInfo_t;
+
+typedef struct addr2FileAndLineInfo {
+  Dwarf_Addr pc;
+  
+} addr2FileAndLineInfo_t;
+
+typedef uint8_t (* addLineInfo_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, int lineNo, int flags, uint16_t isa, uint16_t discriminator, int fileInfoIdx, int *fileLineIdx);
 typedef uint8_t (* handleLineInfos_t)(dwarfDbgPtr_t self, int *fileLineIdx);
 
 typedef struct dwarfDbgLineInfo {
 
+  addLineInfo_t addLineInfo;
   handleLineInfos_t handleLineInfos;
 } dwarfDbgLineInfo_t;
 

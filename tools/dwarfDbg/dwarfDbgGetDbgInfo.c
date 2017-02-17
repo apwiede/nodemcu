@@ -241,12 +241,12 @@ DWARF_DBG_PRINT(self, "G", 1, "handle srcfiles\n");
 
 DWARF_DBG_PRINT(self, "G", 1, "srcCnt: %d currCompileUnitIdx: %d\n", srcCnt, self->dwarfDbgCompileUnitInfo->currCompileUnitIdx);
       for (i = 0; i < srcCnt; i++) {
-        int fileNameIdx;
+        int pathNameIdx;
         int fileInfoIdx;
 
 DWARF_DBG_PRINT(self, "G", 1, "  src: %s\n", srcfiles[i]);
-        result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], &fileNameIdx, &fileInfoIdx);
-//printf("  src: %s %d fileNameIdx: %d fileInfoIdx: %d\n", srcfiles[i], i, fileNameIdx, fileInfoIdx);
+        result = self->dwarfDbgFileInfo->addSourceFile(self, srcfiles[i], &pathNameIdx, &fileInfoIdx);
+//printf("  src: %s %d pathNameIdx: %d fileInfoIdx: %d\n", srcfiles[i], i, pathNameIdx, fileInfoIdx);
         checkErrOK(result);
       }
 

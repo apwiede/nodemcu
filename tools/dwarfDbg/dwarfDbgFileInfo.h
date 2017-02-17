@@ -41,95 +41,49 @@
 #ifndef DWARFDBG_FILE_INFO_H
 #define	DWARFDBG_FILE_INFO_H
 
-#define LINE_NEW_STATEMENT   0x01
-#define LINE_NEW_BASIC_BLOCK 0x02
-#define LINE_END_SEQUENCE    0x04
-#define LINE_PROLOGUE_END    0x08
-#define LINE_PROLOGUE_BEGIN  0x10
-
-typedef uint8_t (* addDirName_t)(dwarfDbgPtr_t self, char *dirName);
-typedef uint8_t (* addFileName_t)(dwarfDbgPtr_t self, char *fileName, size_t dirNameIdx);
-typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, int *fileNameIdx, int *fileInfoIdx);
-typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, int *fileNameIdx, int *fileInfoIdx);
-typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, int fileNameIdx, int *fileInfoIdx);
-typedef uint8_t (* addFileLine_t)(dwarfDbgPtr_t self, Dwarf_Addr pc, int lineNo, int flags, uint16_t isa, uint16_t discriminator, int fileInfoIdx, int *fileLineIdx);
-typedef uint8_t (* getFileIdxFromFileName_t)(dwarfDbgPtr_t self, const char *pathName, int *fileInfoIdx);
-typedef uint8_t (* getFileNameFromFileIdx_t)(dwarfDbgPtr_t self,int fileIdx,  const char **pathName);
-
 typedef struct dirNamesInfo {
   int  maxDirName;    /* Size of the dirNames array. */
   int  numDirName;    /* Index of the topmost dirName */
   char **dirNames;
 } dirNamesInfo_t;
 
-typedef struct fileNameInfo {
+typedef struct pathNameInfo {
   char *fileName;
   size_t dirNameIdx;
-} fileNameInfo_t;
+} pathNameInfo_t;
   
-typedef struct fileNamesInfo {
-  int  maxFileName;    /* Size of the fileNames array. */
-  int  numFileName;    /* Index of the topmost fileName */
-  fileNameInfo_t *fileNames;
-} fileNamesInfo_t;
-
-typedef struct fileLineInfo {
-  Dwarf_Addr pc;
-  size_t lineNo;
-  uint16_t flags;
-  uint16_t isa;
-  uint16_t discriminator;
-} fileLineInfo_t;
+typedef struct pathNamesInfo {
+  int  maxPathName;    /* Size of the fileNames array. */
+  int  numPathName;    /* Index of the topmost fileName */
+  pathNameInfo_t *pathNames;
+} pathNamesInfo_t;
 
 typedef struct fileInfo {
-  size_t fileNameIdx;
+  int pathNameIdx;
   int  maxFileLine;    /* Size of the fileLines array. */
   int  numFileLine;    /* Index of the topmost entry */
-  fileLineInfo_t *fileLines;
+  lineInfo_t *fileLines;
 } fileInfo_t;
 
-typedef struct rangeInfo {
-    Dwarf_Addr dwr_addr1;
-    Dwarf_Addr dwr_addr2;
-    enum Dwarf_Ranges_Entry_Type  dwr_type;
-} rangeInfo_t;
-
-typedef struct compileUnitInfo {
-  char *fileName;
-  Dwarf_Off overallOffset;
-  int  maxFileInfo;    /* Size of the fileInfos array. */
-  int  numFileInfo;    /* Index of the topmost entry */
-  fileInfo_t *fileInfos;
-  int  maxSourceFile;    /* Size of the source files index array. */
-  int  numSourceFile;    /* Index of the topmost entry */
-  size_t *sourceFiles;
-  size_t numDieAndChildren;
-  size_t maxDieAndChildren;
-  dieAndChildrenInfo_t *dieAndChildrenInfo;
-  int  maxRangeInfo;    /* Size of the rangeInfos array. */
-  int  numRangeInfo;    /* Index of the topmost entry */
-  rangeInfo_t *rangeInfos;
-} compileUnitInfo_t;
-
-typedef struct compileUnitsInfo {
-  int  maxCompileUnitInfo;    /* Size of the compileUnitInfos array. */
-  int  numCompileUnitInfo;    /* Index of the topmost entry */
-  compileUnitInfo_t *compileUnitInfos;
-} compileUnitsInfo_t;
+typedef uint8_t (* addDirName_t)(dwarfDbgPtr_t self, char *dirName);
+typedef uint8_t (* addPathName_t)(dwarfDbgPtr_t self, char *fileName, int dirNameIdx, int *pathNameidx);
+typedef uint8_t (* addSourceFile_t)(dwarfDbgPtr_t self, char *pathName, int *pathNameIdx, int *fileInfoIdx);
+typedef uint8_t (* addCompileUnitFile_t)(dwarfDbgPtr_t self, char *pathName, int *pathNameIdx, int *fileInfoIdx);
+typedef uint8_t (* addFileInfo_t)(dwarfDbgPtr_t self, int pathNameIdx, int *fileInfoIdx);
+typedef uint8_t (* getPathNameIdxFromFileName_t)(dwarfDbgPtr_t self, const char *pathName, int *pathNameIdx);
+typedef uint8_t (* getFileNameFromPathNameIdx_t)(dwarfDbgPtr_t self, int pathNameIdx,  const char **pathName);
 
 typedef struct dwarfDbgFileInfo {
   dirNamesInfo_t dirNamesInfo;
-  fileNamesInfo_t fileNamesInfo;
-  compileUnitsInfo_t compileUnitsInfo;
+  pathNamesInfo_t pathNamesInfo;
 
   addDirName_t addDirName;
-  addFileName_t addFileName;
+  addPathName_t addPathName;
   addSourceFile_t addSourceFile;
   addCompileUnitFile_t addCompileUnitFile;
   addFileInfo_t addFileInfo;
-  addFileLine_t addFileLine;
-  getFileIdxFromFileName_t getFileIdxFromFileName;
-  getFileNameFromFileIdx_t getFileNameFromFileIdx;
+  getPathNameIdxFromFileName_t getPathNameIdxFromFileName;
+  getFileNameFromPathNameIdx_t getFileNameFromPathNameIdx;
   addRangeInfo_t addRangeInfo;
 } dwarfDbgFileInfo_t;
 

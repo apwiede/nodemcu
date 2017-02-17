@@ -41,6 +41,12 @@
 #ifndef DWARF_DBG_RANGE_INFO_H
 #define	DWARF_DBG_RANGE_INFO_H
 
+typedef struct rangeInfo {
+    Dwarf_Addr dwr_addr1;
+    Dwarf_Addr dwr_addr2;
+    enum Dwarf_Ranges_Entry_Type  dwr_type;
+} rangeInfo_t;
+
 typedef uint8_t (* addRangeInfo_t)(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr dwr_addr2, enum Dwarf_Ranges_Entry_Type dwrType, int *rangeInfoIdx);
 typedef uint8_t (* handleRangeInfos_t)(dwarfDbgPtr_t self, Dwarf_Attribute attrIn);
 

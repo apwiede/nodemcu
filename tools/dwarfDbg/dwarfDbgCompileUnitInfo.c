@@ -47,6 +47,41 @@
 
 #include "dwarfDbgInt.h"
 
+/* *************************************************************************
+ * compileUnit
+ *   compileUnitHeaderLength
+ *   versionStamp
+ *   abbrevOffset
+ *   addressSize
+ *   lengthSize
+ *   extensionSize
+ *   signature
+ *   typeOffset
+ *   nextCompileUnitOffset
+ *   compileUnitType
+ *   compileUnitDie
+ *   overallOffset
+ *   shortFileName
+ *   longFileName
+ *   pathNameIdx
+ *   fileInfoIdx
+ *   level
+ *   isCompileUnitDie
+ *   maxFileLineInfo
+ *   numFileLineInfo
+ *   fileInfos
+ *   maxSourceFile
+ *   numSourceFile
+ *   sourceFiles
+ *   numDieAndChildren
+ *   maxDieAndChildren
+ *   dieAndChildrenInfos
+ *   maxRangeInfo
+ *   numRangeInfo
+ *   rangeInfos
+ */ 
+
+
 // =================================== getAddressSizeAndMax =========================== 
 
 static uint8_t getAddressSizeAndMax(dwarfDbgPtr_t self, Dwarf_Half *size, Dwarf_Addr *max, Dwarf_Error *err) {
