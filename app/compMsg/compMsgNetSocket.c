@@ -94,6 +94,7 @@ typedef void (* netSocketTextReceived_t)(void *arg, void *sud, char *pdata, unsi
 static int cnt = 0;
 static ip_addr_t host_ip; // for dns
 static int dns_reconn_count = 0;
+static uint16_t tcp_server_timeover = 30;
 
 // ============================ netSocketSendData =======================
 
@@ -127,8 +128,9 @@ static uint8_t netSocketSendData(socketUserData_t *sud, const char *payload, int
 
 // ================================= netSocketRecv ====================================
 
-static uint8_t netSocketRecv(char *payload, socketUserData_t *sud, char **data, int *lgth) {
+static uint8_t netSocketRecv(char *payload, int payloadLgth, socketUserData_t *sud, char **data, int *lgth) {
   char *key = NULL;
+  uint8_t result;
   int idx;
   int found;
   compMsgDispatcher_t *self;
@@ -138,12 +140,20 @@ static uint8_t netSocketRecv(char *payload, socketUserData_t *sud, char **data, 
   COMP_MSG_DBG(self, "N", 1, "netSocketRecv:remote_port: %d\n", sud->remote_port);
 
 //FIXME need to handle data!!
-//  sud->netSocketReceived(sud->compMsgDispatcher, sud, data, lgth);
+  COMP_MSG_DBG(self, "N", 2, "netSocketRecv:call compMsgHttp->httpParse\n");
+  if (sud->httpMsgInfos == NULL) {
+    sud->maxHttpMsgInfos = 5;
+    sud->numHttpMsgInfos = 0;
+    sud->httpMsgInfos = os_zalloc(sud->maxHttpMsgInfos * sizeof(httpMsgInfo_t));
+    sud->connectionType = NET_SOCKET_TYPE_CLIENT;
+  }
+  result = sud->compMsgDispatcher->compMsgHttp->httpParse(sud, payload, payloadLgth);
+
+//  COMP_MSG_DBG(self, "N", 1, "netSocketRecv:call sud->netSocketReceived\n");
+//  sud->netSocketReceived(sud->compMsgDispatcher, sud, payload, payloadLgth);
 //  netSocketParse(string, os_strlen(string), data, lgth, sud);
   return NETSOCKET_ERR_OK;
 }
-
-static uint16_t tcp_server_timeover = 30;
 
 // ================================= serverDisconnected  ====================================
 
@@ -185,21 +195,22 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   pesp_conn = (struct espconn *)arg;
   sud = (socketUserData_t *)pesp_conn->reverse;
   self = sud->compMsgDispatcher;
-  COMP_MSG_DBG(self, "N", 1, "socketReceived: arg: %p len: %d\n", arg, len);
-  COMP_MSG_DBG(self, "N", 2, "socketReceived: arg: %p pdata: %s len: %d", arg, pdata, len);
+  COMP_MSG_DBG(self, "N", 2, "socketReceived: arg: %p len: %d\n", arg, len);
+  COMP_MSG_DBG(self, "N", 1, "socketReceived: arg: %p pdata: %s len: %d", arg, pdata, len);
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
-  COMP_MSG_DBG(self, "N", 1, "remote %s:%d received\n", temp, pesp_conn->proto.tcp->remote_port);
+  COMP_MSG_DBG(self, "N", 2, "remote %s:%d received\n", temp, pesp_conn->proto.tcp->remote_port);
+ets_printf(">>>socketReceived: sud->secure: %d\n", sud->secure);
   sud->remote_ip[0] = pesp_conn->proto.tcp->remote_ip[0];
   sud->remote_ip[1] = pesp_conn->proto.tcp->remote_ip[1];
   sud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
   sud->remote_ip[3] = pesp_conn->proto.tcp->remote_ip[3];
   sud->remote_port = pesp_conn->proto.tcp->remote_port;
   COMP_MSG_DBG(self, "N", 2, "==received remote_port: %d\n", sud->remote_port);
-  result = netSocketRecv(pdata, sud, &data, &lgth);
+  result = netSocketRecv(pdata, len, sud, &data, &lgth);
 COMP_MSG_DBG(self, "Y", 1, "==received remote_port: %d result: %d\n", sud->remote_port, result);
 // for testing!!
-result = self->compMsgAction->startLightSleepWakeupMode(self);
-COMP_MSG_DBG(self, "Y", 1, "==startLightSleepWakeupMode result: %d\n", result);
+//result = self->compMsgAction->startLightSleepWakeupMode(self);
+//COMP_MSG_DBG(self, "Y", 1, "==startLightSleepWakeupMode result: %d\n", result);
 
 //  checkErrOK(gL,result,"netSocketRecv");
 }
@@ -321,7 +332,13 @@ static void netSocketReceived(void *arg, char *pdata, unsigned short len) {
   }
   COMP_MSG_DBG(self, "N", 1, "netSocketReceived is called. %d %s", len, pdata);
   COMP_MSG_DBG(self, "N", 1, "pesp_conn: %p", pesp_conn);
-  COMP_MSG_DBG(self, "N", 1, "call httpParse");
+  COMP_MSG_DBG(self, "N", 1, "call httpParse httpMsgInfos: %p num: %d max: %d\n", sud->httpMsgInfos, sud->numHttpMsgInfos, sud->maxHttpMsgInfos);
+  if (sud->httpMsgInfos == NULL) {
+    sud->maxHttpMsgInfos = 5;
+    sud->numHttpMsgInfos = 0;
+    sud->httpMsgInfos = os_zalloc(sud->maxHttpMsgInfos * sizeof(httpMsgInfo_t));
+    sud->connectionType = NET_SOCKET_TYPE_CLIENT;
+  }
   result = sud->compMsgDispatcher->compMsgHttp->httpParse(sud, pdata, len);
   if (result != NETSOCKET_ERR_OK) {
     // FIXME
@@ -391,9 +408,9 @@ if (result != COMP_MSG_ERR_OK) {
   }
 }
 
-// ================================= socketConnect  ====================================
+// ================================= netSocketConnect  ====================================
 
-static void socketConnect(void *arg) {
+static void netSocketConnect(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
   compMsgDispatcher_t *self;
@@ -409,7 +426,7 @@ static void socketConnect(void *arg) {
     return;
   }
   self = sud->compMsgDispatcher;
-  COMP_MSG_DBG(self, "N", 2, "socketConnect");
+  COMP_MSG_DBG(self, "N", 2, "netSocketConnect");
 #ifdef CLIENT_SSL_ENABLE
   if (sud->secure){
     espconn_secure_set_size(ESPCONN_CLIENT, 5120); /* set SSL buffer size */
@@ -420,15 +437,15 @@ static void socketConnect(void *arg) {
   } else
 #endif
   {
-    COMP_MSG_DBG(self, "N", 2, "socketConnect called");
+    COMP_MSG_DBG(self, "N", 2, "netSocketConnect called");
     result = espconn_connect(pesp_conn);
     COMP_MSG_DBG(self, "N", 2, "espconn_connect: result: %d", result);
   }
 }
 
-// ================================= serverConnected  ====================================
+// ================================= netServerConnected  ====================================
 
-static void serverConnected(void *arg) {
+static void netServerConnected(void *arg) {
   struct espconn *pesp_conn;
   socketUserData_t *sud;
   compMsgDispatcher_t *self;
@@ -441,7 +458,7 @@ static void serverConnected(void *arg) {
     return;
   }
   self = sud->compMsgDispatcher;
-  COMP_MSG_DBG(self, "N", 2, "serverConnected: arg: %p", arg);
+  COMP_MSG_DBG(self, "N", 1, "netServerConnected: arg: %p", arg);
   for(i = 0; i < MAX_SOCKET; i++) {
     if (socket[i] == NULL) { // found empty slot
       break;
@@ -547,7 +564,7 @@ static void socketDnsFound(const char *name, ip_addr_t *ipaddr, void *arg) {
         COMP_MSG_DBG(self, "N", 1, IPSTR, IP2STR(&(ipaddr->addr)));
       }
     }
-    socketConnect(pesp_conn);
+    netSocketConnect(pesp_conn);
   }
 }
 
@@ -682,8 +699,8 @@ static  void startClientMode(void *arg) {
 
   compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
   self = compMsgTimerSlot->compMsgDispatcher;
-  COMP_MSG_DBG(self, "N", 2, "startClientMode\n");
-  COMP_MSG_DBG(self, "N", 1, "startClientMode timerInfo:%p\n", compMsgTimerSlot);
+  COMP_MSG_DBG(self, "N", 1, "net startClientMode\n");
+  COMP_MSG_DBG(self, "N", 2, "net startClientMode timerInfo:%p\n", compMsgTimerSlot);
   compMsgTimerSlot->connectionMode = STATION_IF;
   pesp_conn = NULL;
 
@@ -700,7 +717,7 @@ static  void startClientMode(void *arg) {
 
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   port = numericValue;
-  COMP_MSG_DBG(self, "N", 1, "IP: %s port: %d result: %d\n", temp, port, result);
+  COMP_MSG_DBG(self, "N", 1, "net startClientMode IP: %s port: %d result: %d\n", temp, port, result);
 
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
 //   checkAllocOK(sud);
@@ -742,31 +759,31 @@ static  void startClientMode(void *arg) {
   COMP_MSG_DBG(self, "N", 2, "port: %d\n", port);
 
   COMP_MSG_DBG(self, "N", 2, "call regist connectcb\n");
-  result = espconn_regist_connectcb(pesp_conn, serverConnected);
+  result = espconn_regist_connectcb(pesp_conn, netServerConnected);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_REGIST_CONNECT_CB;
   }
-  COMP_MSG_DBG(self, "N", 2, "regist connectcb result: %d\n", result);
-  result = espconn_regist_recvcb(pesp_conn, socketReceived);
+  COMP_MSG_DBG(self, "N", 2, "regist connectcb netServerConnected result: %d\n", result);
+  result = espconn_regist_recvcb(pesp_conn, netSocketReceived);
   if (result != COMP_MSG_ERR_OK) {
-    COMP_MSG_DBG(self, "N", 1, "regist socketReceived err: %d", result);
+    COMP_MSG_DBG(self, "N", 2, "regist netSocketReceived err: %d", result);
   }
-  result = espconn_regist_sentcb(pesp_conn, socketSent);
+  result = espconn_regist_sentcb(pesp_conn, netSocketSent);
   if (result != COMP_MSG_ERR_OK) {
-    COMP_MSG_DBG(self, "N", 1, "regist socketSent err: %d", result);
+    COMP_MSG_DBG(self, "N", 2, "regist netSocketSent err: %d", result);
   }
   result = espconn_accept(pesp_conn);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_TCP_ACCEPT;
-    COMP_MSG_DBG(self, "N", 1, "regist_accept err result: %d", result);
+    COMP_MSG_DBG(self, "N", 2, "regist_accept err result: %d", result);
   }
   result = espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_REGIST_TIME;
-    COMP_MSG_DBG(self, "N", 1, "regist_time err result: %d", result);
+    COMP_MSG_DBG(self, "N", 2, "regist_time err result: %d", result);
   }
   if (self->compMsgSendReceive->startSendMsg != NULL) {
-    COMP_MSG_DBG(self, "N", 1, "call startSendMsg: %p\n", self->compMsgSendReceive->startSendMsg);
+    COMP_MSG_DBG(self, "N", 2, "call startSendMsg: %p\n", self->compMsgSendReceive->startSendMsg);
     result = self->compMsgSendReceive->startSendMsg(self);
     COMP_MSG_DBG(self, "N", 2, "startSendMsg result: %d", result);
   }

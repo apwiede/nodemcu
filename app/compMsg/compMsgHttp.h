@@ -76,6 +76,7 @@ enum compMsgHttpHeaderNames
   COMP_MSG_HTTP_SEC_WEBSOCKET_EXTENSIONS          = 26,
   COMP_MSG_HTTP_PRAGMA                            = 27,
   COMP_MSG_HTTP_ORIGIN                            = 28,
+  COMP_MSG_HTTP_UPGRADE_INSECURE_REQUESTS         = 29,
 };
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;

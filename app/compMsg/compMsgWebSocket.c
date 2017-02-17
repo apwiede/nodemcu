@@ -341,6 +341,7 @@ static uint8_t webSocketRecv(char *string, socketUserData_t *sud, char **data, i
 
 static uint8_t webSocketRunClientMode(compMsgDispatcher_t *self, uint8_t mode) {
   int result;
+  COMP_MSG_DBG(self, "W", 1, "WARNING: webSocketRunClientMode called (not implemented!)\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -372,9 +373,9 @@ static void serverReconnected(void *arg, int8_t err) {
 
 }
 
-// ================================= socketReceived  ====================================
+// ================================= webSocketReceived  ====================================
 
-static void socketReceived(void *arg, char *pdata, unsigned short len) {
+static void webSocketReceived(void *arg, char *pdata, unsigned short len) {
   struct espconn *pesp_conn;
   char url[50] = { 0 };
   int idx;
@@ -391,10 +392,10 @@ static void socketReceived(void *arg, char *pdata, unsigned short len) {
   sud = (socketUserData_t *)pesp_conn->reverse;
   self = sud->compMsgDispatcher;
   COMP_MSG_DBG(self, "W", 2, "webSocketReceived: arg: %p len: %d\n", arg, len);
-  COMP_MSG_DBG(self, "W", 2, "socketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
+  COMP_MSG_DBG(self, "W", 2, "webSocketReceived: arg: %p pdata: %s len: %d\n", arg, pdata, len);
   c_sprintf(temp, IPSTR, IP2STR( &(pesp_conn->proto.tcp->remote_ip) ) );
   COMP_MSG_DBG(self, "W", 1, "remote %s:%d received.\n", temp, pesp_conn->proto.tcp->remote_port);
-
+ets_printf(">>>webSocketReceived: sud->secure: %d\n", sud->secure);
   sud->remote_ip[0] = pesp_conn->proto.tcp->remote_ip[0];
   sud->remote_ip[1] = pesp_conn->proto.tcp->remote_ip[1];
   sud->remote_ip[2] = pesp_conn->proto.tcp->remote_ip[2];
@@ -466,7 +467,7 @@ static void socketSent(void *arg) {
   self = sud->compMsgDispatcher;
   COMP_MSG_DBG(self, "W", 2, "webSocketSent: arg: %p\n", arg);
   if (sud->compMsgDispatcher->stopAccessPoint) {
-    COMP_MSG_DBG(self, "W", 2, "stopAccessPoint\n");
+    COMP_MSG_DBG(self, "W", 1, "stopAccessPoint\n");
     sud->compMsgDispatcher->stopAccessPoint = false;
     boolResult = wifi_set_opmode(OPMODE_STATION);
     if (!boolResult) {
@@ -503,9 +504,9 @@ static void serverConnected(void *arg) {
     return;
   }
   COMP_MSG_DBG(self, "W", 2, "registstart\n");
-  result = espconn_regist_recvcb(pesp_conn, socketReceived);
+  result = espconn_regist_recvcb(pesp_conn, webSocketReceived);
   if (result != COMP_MSG_ERR_OK) {
-    COMP_MSG_DBG(self, "Y", 0, "regist socketReceived err: %d\n", result);
+    COMP_MSG_DBG(self, "Y", 0, "regist webSocketReceived err: %d\n", result);
   }
   result = espconn_regist_sentcb(pesp_conn, socketSent);
   if (result != COMP_MSG_ERR_OK) {
@@ -611,7 +612,7 @@ sud->num_urls = 2;
 //    return COMP_MSG_ERR_TCP_ACCEPT;
   }
   COMP_MSG_DBG(self, "W", 2, "regist_accept result: %d\n", result);
-  result =espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
+  result = espconn_regist_time(pesp_conn, tcp_server_timeover, 0);
   if (result != COMP_MSG_ERR_OK) {
 //    return COMP_MSG_ERR_REGIST_TIME;
   }

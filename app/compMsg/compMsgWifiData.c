@@ -364,10 +364,11 @@ ets_printf("seq: %p %d\n", fieldsToSave->fieldValueStr, fieldsToSave->fieldValue
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "w", 2, "connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
+  COMP_MSG_DBG(self, "w", 1, "connectToAP: ssid: %s passwd: %s\n", ssid == NULL ? "nil" : (char *)ssid, passwd == NULL ? "nil" : (char *)passwd );
   self->compMsgSendReceive->startSendMsg = self->compMsgIdentify->sendClientIPMsg;
+ets_printf(">>>call netSocketRunClientMode %p!\n", self->compMsgSocket->netSocketRunClientMode);
   result = self->compMsgSocket->netSocketRunClientMode(self);
-  COMP_MSG_DBG(self, "w", 2, "runClientMode: result: %d\n", result);
+  COMP_MSG_DBG(self, "w", 2, "netSocketRunClientMode: result: %d\n", result);
   checkErrOK(result);
   COMP_MSG_DBG(self, "w", 2, "connectToAP done\n");
   return COMP_MSG_ERR_OK;

@@ -92,6 +92,7 @@ static httpHeaderKeyInfo_t httpHeaderKeyInfos[] = {
   {"sec-websocket-extensions",         "Sec-WebSocket-Extensions",         COMP_MSG_HTTP_SEC_WEBSOCKET_EXTENSIONS},
   {"pragma",                           "Pragma",                           COMP_MSG_HTTP_PRAGMA},
   {"origin",                           "Origin",                           COMP_MSG_HTTP_ORIGIN},
+  {"upgrade-insecure-requests",        "Upgrade-Insecure-Requests",        COMP_MSG_HTTP_UPGRADE_INSECURE_REQUESTS},
 
   {NULL, NULL, -1},
 };
@@ -160,6 +161,7 @@ static uint8_t getContentAndNumHeaders(compMsgDispatcher_t *self, char *data, si
   cp = data;
   lastNewLine = cp;
   // get the number of lines of the request
+ets_printf("getContentAndNumHeaders 2: size: %d\n", size);
   while (idx < size) {
     if ((*cp == '\n')) {
       // check for end of http header
@@ -167,7 +169,7 @@ static uint8_t getContentAndNumHeaders(compMsgDispatcher_t *self, char *data, si
          COMP_MSG_DBG(self, "H", 2, "cp-data: %d\n", cp - data);
          *cp = '\0';
          httpMsgInfo->content = cp + 1;
-         httpMsgInfo->currLgth = c_strlen(cp + 1);
+         httpMsgInfo->currLgth = size - (cp + 1 -data);
          break;
       }
       lastNewLine = cp;
@@ -176,6 +178,7 @@ static uint8_t getContentAndNumHeaders(compMsgDispatcher_t *self, char *data, si
     idx++;
     cp++;
   }
+ets_printf("currLgth: %d\n", httpMsgInfo->currLgth);
   return COMP_MSG_ERR_OK;
 }
 
@@ -331,25 +334,60 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
     if (httpHeaderPart->httpHeaderId == COMP_MSG_HTTP_CONTENT_LENGTH) {
       if (httpMsgInfo->expectedLgth == 0) {
         uval = c_strtoul(httpHeaderPart->httpHeaderValue, &endPtr, 10);
-        COMP_MSG_DBG(self, "H", 1, "expectedLgth: %d", uval);
+        COMP_MSG_DBG(self, "H", 2, "expectedLgth: %d", uval);
         httpMsgInfo->expectedLgth = (size_t)uval;
       }
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "Y", 1, "content: %s lgth: %d", httpMsgInfo->content, httpMsgInfo->currLgth);
+  COMP_MSG_DBG(self, "Y", 2, "content: %s lgth: %d", httpMsgInfo->content, httpMsgInfo->currLgth);
+  COMP_MSG_DBG(self, "Y", 2, "Code:: %d", httpMsgInfo->httpRequestCode);
   switch (httpMsgInfo->httpRequestCode) {
   case 200:
     COMP_MSG_DBG(self, "H", 1, "httpRequestCode: 200 OK");
     //FIXME handle message here need code!!
     msgLgth = httpMsgInfo->currLgth;
-    result = self->compMsgUtil->fromBase64(self, httpMsgInfo->content, &msgLgth, &msgData);
-    checkErrOK(result);
-    self->compMsgData->currHdr->hdrHandleType = 'W';
-COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
-    result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
-COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
-    checkErrOK(result);
+    switch (sud->connectionType) {
+    case NET_SOCKET_TYPE_CLIENT:
+      self->compMsgData->currHdr->hdrHandleType = 'W';
+      COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
+      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
+      COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
+      checkErrOK(result);
+      break;
+    case NET_SOCKET_TYPE_SOCKET:
+      result = self->compMsgUtil->fromBase64(self, httpMsgInfo->content, &msgLgth, &msgData);
+      checkErrOK(result);
+      self->compMsgData->currHdr->hdrHandleType = 'W';
+      COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
+      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
+      COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
+      checkErrOK(result);
+      break;
+    }
+    break;
+  case 0:
+    COMP_MSG_DBG(self, "H", 1, "httpRequestCode: 0 OK");
+    msgLgth = httpMsgInfo->currLgth;
+    switch (sud->connectionType) {
+    case NET_SOCKET_TYPE_CLIENT:
+      self->compMsgData->currHdr->hdrHandleType = 'W';
+      msgData = httpMsgInfo->content;
+      COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
+      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
+      COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
+      checkErrOK(result);
+      break;
+    case NET_SOCKET_TYPE_SOCKET:
+      result = self->compMsgUtil->fromBase64(self, httpMsgInfo->content, &msgLgth, &msgData);
+      checkErrOK(result);
+      self->compMsgData->currHdr->hdrHandleType = 'W';
+      COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
+      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
+      COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
+      checkErrOK(result);
+      break;
+    }
     break;
   }
   httpMsgInfo->expectedLgth = 0;

@@ -392,6 +392,7 @@ checkErrOK(result);
     break;
   case 'W':
     COMP_MSG_DBG(self, "Y", 0, "sendMsg msgLgth: %d", msgLgth);
+//self->compMsgData->compMsgDataView->dataView->dumpBinary(msgData, msgLgth, "SEND W");
     result = uartSendAnswer(self, msgData, msgLgth);
     checkErrOK(result);
     break;

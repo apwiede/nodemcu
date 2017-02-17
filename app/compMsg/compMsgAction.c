@@ -81,7 +81,7 @@ void wifi_fpm_set_wakeup_cb(void (*fcn)());
 static uint8_t runClientMode(compMsgDispatcher_t *self, uint8_t mode) {
   int result;
 
-  self->compMsgSocket->webSocketRunClientMode(self, mode);
+  self->compMsgSocket->netSocketRunClientMode(self);
   return COMP_MSG_ERR_OK;
 }
 
