@@ -64,6 +64,7 @@
 #include "dwarfDbgFrameInfo.h"
 #include "dwarfDbgLineInfo.h"
 #include "dwarfDbgRangeInfo.h"
+#include "dwarfDbgSubProgramInfo.h"
 #include "dwarfDbgAttributeInfo.h"
 #include "dwarfDbgLocationInfo.h"
 #include "dwarfDbgAddrInfo.h"
@@ -103,6 +104,7 @@ typedef struct _dwarfDbg {
   dwarfDbgFileInfo_t *dwarfDbgFileInfo;
   dwarfDbgLineInfo_t *dwarfDbgLineInfo;
   dwarfDbgRangeInfo_t *dwarfDbgRangeInfo;
+  dwarfDbgSubProgramInfo_t *dwarfDbgSubProgramInfo;
   dwarfDbgFrameInfo_t *dwarfDbgFrameInfo;
   dwarfDbgAttributeInfo_t *dwarfDbgAttributeInfo;
   dwarfDbgLocationInfo_t *dwarfDbgLocationInfo;

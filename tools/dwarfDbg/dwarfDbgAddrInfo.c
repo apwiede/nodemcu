@@ -366,6 +366,7 @@ int dwarfDbgGetVarAddr (dwarfDbgPtr_t self, char * sourceFileName, int sourceLin
   int locEntryIdx = 0;
   char *attrStr = NULL;
   const char *fileName = NULL;
+  const char *tagName = NULL;
   cieFde_t *cieFde = NULL;
   frameInfo_t *frameInfo = NULL;
   frameDataEntry_t *fde = NULL;
@@ -385,7 +386,7 @@ fflush(stdout);
     cieFde = &frameInfo->cieFdes[cieFdeIdx];
     for (fdeIdx = 0; fdeIdx < cieFde->numFde; fdeIdx++) {
       fde = &cieFde->frameDataEntries[fdeIdx];
-printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", cieFdeIdx, fdeIdx, lastFdeIdx, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
+//printf("cieFdeIdx: %d fdeIdx: %d lastFdeIdx: %d pc: 0x%08x lowPc: 0x%08x hiPc: 0x%08x\n", cieFdeIdx, fdeIdx, lastFdeIdx, pc, fde->lowPc, fde->lowPc + fde->funcLgth);
       if (fde->lowPc > pc) {
         break;
       }
@@ -446,10 +447,20 @@ fflush(stdout);
   found = 0;
   for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
     dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
-    DWARF_DBG_PRINT(self, "L", 1, "dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
+//    DWARF_DBG_PRINT(self, "L", 1, "dieAndChildrenIdx: %d children: %d siblings: %d\n", dieAndChildrenIdx, dieAndChildrenInfo->numChildren, dieAndChildrenInfo->numSiblings);
     for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numChildren; dieInfoIdx++) {
       dieInfo = &dieAndChildrenInfo->dieChildren[dieInfoIdx];
-      DWARF_DBG_PRINT(self, "L", 1, "children dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+      switch (dieInfo->tag) {
+      case DW_TAG_formal_parameter:
+      case DW_TAG_variable:
+        break;
+      default:
+        continue;
+        break;
+      }
+result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagName);
+checkErrOK(result);
+      DWARF_DBG_PRINT(self, "L", 1, "children dieInfoIdx: %d numAttr: %d tag: %s\n", dieInfoIdx, dieInfo->numAttr, tagName);
       haveNameAttr = 0;
       for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
         dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
@@ -457,7 +468,8 @@ fflush(stdout);
 fflush(stdout);
         switch (dieAttr->attr) {
         case DW_AT_name:
-          DWARF_DBG_PRINT(self, "L", 1, "DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attrIn, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
+//          DWARF_DBG_PRINT(self, "L", 1, "DW_AT_name1: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d\n", dieAttr->attrIn, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx);
+printf("attrStrIdx: %d\n", dieAttr->attrStrIdx);
           if ((dieAttr->attrStrIdx < 0) || (dieAttr->attrStrIdx >= dieInfo->numAttr)) {
             DWARF_DBG_PRINT(self, "L", 1, "ERROR bad dieAttr->attrStrIdx: %d\n", dieAttr->attrStrIdx);
           } else  {
@@ -492,7 +504,7 @@ if (locationInfo == NULL) {
           if (locationInfo != NULL) {
             found = 1;
             DWARF_DBG_PRINT(self, "L", 1, "child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d pc: %08x lopc: 0x%08x hipc: 0x%08x\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, pc, locationInfo->lopc, locationInfo->hipc);
-            DWARF_DBG_PRINT(self, "L", 1, "child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
+//            DWARF_DBG_PRINT(self, "L", 1, "child: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
               for(locEntryIdx = 0; locEntryIdx < locationInfo->numLocEntry; locEntryIdx++) {
                 locationOp = &locationInfo->locationOps[locEntryIdx];
                 DWARF_DBG_PRINT(self, "L", 1, "locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);
@@ -529,7 +541,7 @@ fprintf(stderr, "missing location op1: 0x%04x for varName address calculation: %
         break;
       }
     }
-    DWARF_DBG_PRINT(self, "L", 1, "children done: found: %d numSiblings: %d\n", found, dieAndChildrenInfo->numSiblings);
+//    DWARF_DBG_PRINT(self, "L", 1, "children done: found: %d numSiblings: %d\n", found, dieAndChildrenInfo->numSiblings);
     if (found) {
       break;
     }
@@ -537,13 +549,24 @@ fprintf(stderr, "missing location op1: 0x%04x for varName address calculation: %
       for (dieInfoIdx = 0; dieInfoIdx < dieAndChildrenInfo->numSiblings; dieInfoIdx++) {
         dieInfo = &dieAndChildrenInfo->dieSiblings[dieInfoIdx];
 //printf("siblings dieInfoIdx: %d numAttr: %d\n", dieInfoIdx, dieInfo->numAttr);
+        switch (dieInfo->tag) {
+        case DW_TAG_formal_parameter:
+        case DW_TAG_variable:
+          break;
+        default:
+          continue;
+          break;
+        }
+result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagName);
+checkErrOK(result);
+        DWARF_DBG_PRINT(self, "L", 1, "siblings dieInfoIdx: %d numAttr: %d tag: %s\n", dieInfoIdx, dieInfo->numAttr, tagName);
         haveNameAttr = 0;
         for (dieAttrIdx = 0; dieAttrIdx < dieInfo->numAttr; dieAttrIdx++) {
 const char *atName = NULL;
           dieAttr = &dieInfo->dieAttrs[dieAttrIdx];
 //printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%02x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
 self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &atName);
-          DWARF_DBG_PRINT(self, "L", 1, "idx: %d name: %s haveNameAttr: %d\n", dieAttrIdx, atName, haveNameAttr);
+//          DWARF_DBG_PRINT(self, "L", 2, "idx: %d name: %s haveNameAttr: %d\n", dieAttrIdx, atName, haveNameAttr);
           switch (dieAttr->attr) {
           case DW_AT_name:
 //printf("DW_AT_name: 0x%08x dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d attrStrIdx: %d flags: 0x%04x\n", dieAttr->attr_in, dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, dieAttr->attrStrIdx, dieAttr->flags);
@@ -576,7 +599,7 @@ if (locationInfo == NULL) {
 }
             if (locationInfo != NULL) {
               found = 1;
-              DWARF_DBG_PRINT(self, "L", 1, "sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
+//              DWARF_DBG_PRINT(self, "L", 1, "sibling: dieAndChildrenIdx: %d dieInfoIdx: %d dieAttrIdx: %d numLocEntry: %d\n", dieAndChildrenIdx, dieInfoIdx, dieAttrIdx, locationInfo->numLocEntry);
               for(locEntryIdx = 0; locEntryIdx < locationInfo->numLocEntry; locEntryIdx++) {
                 locationOp = &locationInfo->locationOps[locEntryIdx];
                 DWARF_DBG_PRINT(self, "L", 1, "locEntryIdx: %d op: 0x%02x opd1: %d\n", locEntryIdx, locationOp->op, locationOp->opd1);

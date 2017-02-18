@@ -47,14 +47,21 @@
 
 #include "dwarfDbgInt.h"
 
+ 	
+
+void qsort(void *base, size_t numelem, size_t size, int (*cmp)(const void *e1, const void *e2));
+
 // =================================== addRangeInfo =========================== 
 
 static uint8_t addRangeInfo(dwarfDbgPtr_t self, Dwarf_Addr dwr_addr1, Dwarf_Addr dwr_addr2, enum Dwarf_Ranges_Entry_Type dwrType, int *rangeInfoIdx) {
   uint8_t result;
   compileUnit_t *compileUnit;
   rangeInfo_t *rangeInfo;
+  const char *dwrTypeStr;
 
-  DWARF_DBG_PRINT(self, "R", 1, "                      dwr1: 0x%08x dwr2: 0x%08x dwrType: %d\n", dwr_addr1, dwr_addr2, dwrType);
+  result = self->dwarfDbgStringInfo->getDW_RANGES_TYPE_string(self, dwrType, &dwrTypeStr);
+  checkErrOK(result);
+  DWARF_DBG_PRINT(self, "R", 1, "                      dwr1: 0x%08x dwr2: 0x%08x dwrType: %s\n", dwr_addr1, dwr_addr2, dwrTypeStr);
   result = DWARF_DBG_ERR_OK;
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   if (compileUnit->fileInfos == NULL) {

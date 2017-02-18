@@ -479,7 +479,7 @@ static uint8_t handleDW_AT_high_pcAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInI
 
 static uint8_t handleDW_AT_inlineAttr(dwarfDbgPtr_t self, attrInInfo_t *attrInInfo) {
   uint8_t result;
-  const char *inlStr;
+  const char *inlStr = NULL;
 
   result = DWARF_DBG_ERR_OK;
   result = self->dwarfDbgStringInfo->getDW_INL_string(self, attrInInfo->dieAttr->uval, &inlStr);
@@ -732,6 +732,8 @@ const char *formStr;
       res = dwarf_global_formref(attrIn, &attrInInfo.uval, &err);
       if (res != DW_DLV_OK) {
         switch (attr) {
+        case DW_AT_artificial:
+        case DW_AT_const_value:
         case DW_AT_comp_dir:
         case DW_AT_declaration:
         case DW_AT_entry_pc:
@@ -741,6 +743,7 @@ const char *formStr;
         case DW_AT_GNU_all_tail_call_sites:
         case DW_AT_GNU_call_site_target:
         case DW_AT_GNU_call_site_value:
+        case DW_AT_high_pc:
         case DW_AT_location:
         case DW_AT_low_pc:
         case DW_AT_name:

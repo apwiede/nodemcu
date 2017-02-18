@@ -269,6 +269,8 @@ static uint8_t addDieSibling(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Of
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   compileUnit_t *compileUnit;
+  int formalParameterInfoIdx;
+  int variableInfoIdx;
 
   result = DWARF_DBG_ERR_OK;
 //printf("== addDieSibling: offset: 0x%04x tag: 0x%04x\n", offset, tag);
@@ -288,11 +290,25 @@ static uint8_t addDieSibling(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Of
       }
     }
   }
-//printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblings);
+printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblings);
   dieInfo = &dieAndChildrenInfo->dieSiblings[dieAndChildrenInfo->numSiblings];
   memset(dieInfo, 0, sizeof(dieInfo_t));
   dieInfo->offset = offset;
   dieInfo->tag = tag;
+  switch (tag) {
+  case DW_TAG_subprogram:
+    result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numSiblings, /* isSibling */ 1, &compileUnit->currSubProgramInfoIdx);
+    checkErrOK(result);
+    break;
+  case DW_TAG_formal_parameter:
+    result = self->dwarfDbgSubProgramInfo->addFormalParameterInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numSiblings, &formalParameterInfoIdx);
+    checkErrOK(result);
+    break;
+  case DW_TAG_variable:
+    result = self->dwarfDbgSubProgramInfo->addVariableInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numSiblings, &variableInfoIdx);
+    checkErrOK(result);
+    break;
+  }
   *siblingIdx = dieAndChildrenInfo->numSiblings;
   dieAndChildrenInfo->numSiblings++;
   return result;
@@ -305,6 +321,8 @@ static uint8_t addDieChild(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off 
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   compileUnit_t *compileUnit;
+  int formalParameterInfoIdx;
+  int variableInfoIdx;
 
   result = DWARF_DBG_ERR_OK;
 //printf("== addDieChild: offset: 0x%04x tag: 0x%04x\n", offset, tag);
@@ -324,11 +342,25 @@ static uint8_t addDieChild(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off 
       }
     }
   }
-//printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
+printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
   dieInfo = &dieAndChildrenInfo->dieChildren[dieAndChildrenInfo->numChildren];
   memset(dieInfo, 0, sizeof(dieInfo_t));
   dieInfo->offset = offset;
   dieInfo->tag = tag;
+  switch (tag) {
+  case DW_TAG_subprogram:
+    result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numChildren, /* isSibling */ 0, &compileUnit->currSubProgramInfoIdx);
+    checkErrOK(result);
+    break;
+  case DW_TAG_formal_parameter:
+    result = self->dwarfDbgSubProgramInfo->addFormalParameterInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numChildren, &formalParameterInfoIdx);
+    checkErrOK(result);
+    break;
+  case DW_TAG_variable:
+    result = self->dwarfDbgSubProgramInfo->addVariableInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numChildren, &variableInfoIdx);
+    checkErrOK(result);
+    break;
+  }
   *childIdx = dieAndChildrenInfo->numChildren;
   dieAndChildrenInfo->numChildren++;
   return result;

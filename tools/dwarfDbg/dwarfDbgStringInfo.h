@@ -52,6 +52,7 @@ typedef uint8_t (* getDW_AT_string_t)(dwarfDbgPtr_t self, Dwarf_Half attr, const
 typedef uint8_t (* getDW_ATE_string_t)(dwarfDbgPtr_t self, Dwarf_Half attr, const char **string);
 typedef uint8_t (* getDW_OP_string_t)(dwarfDbgPtr_t self, Dwarf_Small op, const char **string);
 typedef uint8_t (* getDW_INL_string_t)(dwarfDbgPtr_t self, Dwarf_Unsigned inl, const char **string);
+typedef uint8_t (* getDW_RANGES_TYPE_string_t)(dwarfDbgPtr_t self, int dwrType, const char **string);
 
 typedef struct dwarfDbgStringInfo {
   getDW_TAG_string_t getDW_TAG_string;
@@ -60,6 +61,7 @@ typedef struct dwarfDbgStringInfo {
   getDW_ATE_string_t getDW_ATE_string;
   getDW_OP_string_t getDW_OP_string;
   getDW_INL_string_t getDW_INL_string;
+  getDW_RANGES_TYPE_string_t getDW_RANGES_TYPE_string;
 
 } dwarfDbgStringInfo_t;
 

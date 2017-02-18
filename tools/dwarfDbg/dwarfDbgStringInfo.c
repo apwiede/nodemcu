@@ -688,6 +688,13 @@ static id2Str_t DW_INL_stringInfos [] = {
   { 0, NULL },
 };
 
+static id2Str_t DW_RANGES_TYPE_stringInfos [] = {
+  { DW_RANGES_ENTRY,             "DW_RANGES_ENTRY" },
+  { DW_RANGES_ADDRESS_SELECTION, "DW_RANGES_ADDRESS_SELECTION" },
+  { DW_RANGES_END,               "DW_RANGES_END" },
+  { 0, NULL },
+};
+
 // =================================== getDW_TAG_string =========================== 
 
 static uint8_t getDW_TAG_string(dwarfDbgPtr_t self, Dwarf_Half tag, const char **string) {
@@ -784,6 +791,22 @@ static uint8_t getDW_INL_string(dwarfDbgPtr_t self, Dwarf_Unsigned inl, const ch
   return DWARF_DBG_ERR_DW_OP_STRING_NOT_FOUND;
 }
 
+// =================================== getDW_RANGES_TYPE_string =========================== 
+
+static uint8_t getDW_RANGES_TYPE_string(dwarfDbgPtr_t self, int dwrType, const char **string) {
+  id2Str_t *entry;
+  
+  entry = &DW_RANGES_TYPE_stringInfos[0];
+  while (entry->str != NULL) {
+    if (dwrType == entry->id) {
+      *string = entry->str;
+      return DWARF_DBG_ERR_OK;
+    }
+    entry++;
+  }
+  return DWARF_DBG_ERR_DW_OP_STRING_NOT_FOUND;
+}
+
 // =================================== dwarfDbgStringInfoInit =========================== 
 
 int dwarfDbgStringInfoInit (dwarfDbgPtr_t self) {
@@ -794,6 +817,7 @@ int dwarfDbgStringInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgStringInfo->getDW_ATE_string = &getDW_ATE_string;
   self->dwarfDbgStringInfo->getDW_OP_string = &getDW_OP_string;
   self->dwarfDbgStringInfo->getDW_INL_string = &getDW_INL_string;
+  self->dwarfDbgStringInfo->getDW_RANGES_TYPE_string = &getDW_RANGES_TYPE_string;
   return DWARF_DBG_ERR_OK;
 }
 
