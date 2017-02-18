@@ -58,15 +58,19 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
   int sres = 0;
   int cdres = DW_DLV_OK;
   const char * tagName = 0;
-  size_t i = 0;
+  int i = 0;
+  int typeIdx = 0;
   Dwarf_Error err;
-  compileUnit_t *compileUnit;
   Dwarf_Half tag = 0;
   Dwarf_Off offset = 0;
   Dwarf_Signed attrCnt = 0;
   Dwarf_Attribute *atList = 0;
   Dwarf_Die child = NULL;
   Dwarf_Die sibling = NULL;
+  compileUnit_t *compileUnit;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  dieInfo_t *dieInfo = NULL;
+  attrValues_t *attrValues;
 
   result = DWARF_DBG_ERR_OK;
 //printf(">>handleOneDie die: %p numDies: %d\n", die, ++numDies);
@@ -85,30 +89,60 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
     return DWARF_DBG_ERR_CANNOT_GET_CU_OFFSET;
   }
   DWARF_DBG_PRINT(self, "G", 1, "<%2d><0x%08x> %*s%s\n", compileUnit->level, offset, compileUnit->level * 2, " ", tagName);
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
   if (isSibling) {
 //printf("  >>numAddSibling: %d\n", ++numAddSibling);
     result = self->dwarfDbgDieInfo->addDieSibling(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
     checkErrOK(result);
+    dieInfo = &dieAndChildrenInfo->dieSiblings[*dieInfoIdx];
   } else {
 //printf("  >>numAddChild: %d\n", ++numAddChild);
     result = self->dwarfDbgDieInfo->addDieChild(self, dieAndChildrenIdx, offset, tag, dieInfoIdx);
     checkErrOK(result);
+    dieInfo = &dieAndChildrenInfo->dieChildren[*dieInfoIdx];
   }
   atres = dwarf_attrlist(die, &atList, &attrCnt, &err);
 //printf("  >>attrCnt: %d\n", attrCnt);
+  attrValues = &compileUnit->attrValues;
+  memset(attrValues, 0, sizeof(attrValues_t));
   for (i = 0; i < attrCnt; i++) {
     Dwarf_Half attr;
     Dwarf_Attribute attrIn;
     int ares;
     int dieAttrIdx;
 
-    ares = dwarf_whatattr(atList[i], &attr, &err);
     attrIn = atList[i];
+    ares = dwarf_whatattr(attrIn, &attr, &err);
     if (ares == DW_DLV_OK) {
       result = self->dwarfDbgAttributeInfo->handleAttribute(self, die, attr, attrIn, srcfiles, cnt, dieAndChildrenIdx, *dieInfoIdx, isSibling, &dieAttrIdx);
 //printf("result: %d\n", result);
     }
   }
+  switch (tag) {
+  case DW_TAG_base_type:
+    result = self->dwarfDbgTypeInfo->addBaseType(self, attrValues->name, attrValues->byteSize, attrValues->encoding, &typeIdx);
+    checkErrOK(result);
+    dieInfo->tagRef = typeIdx;
+printf("baseType tagRef: %d\n", dieInfo->tagRef);
+    break;
+  case DW_TAG_typedef:
+    result = self->dwarfDbgTypeInfo->addTypeDef(self, attrValues->name, attrValues->pathNameIdx, attrValues->lineNo, attrValues->dwTypeIdx, &typeIdx);
+    checkErrOK(result);
+    dieInfo->tagRef = typeIdx;
+printf("typeDef tagRef: %d\n", dieInfo->tagRef);
+    break;
+  case DW_TAG_const_type:
+  case DW_TAG_member:
+  case DW_TAG_pointer_type:
+  case DW_TAG_structure_type:
+  case DW_TAG_array_type:
+  case DW_TAG_enumeration_type:
+  case DW_TAG_enumerator:
+  case DW_TAG_union_type:
+  case DW_TAG_volatile_type:
+printf("should store type\n");
+      break;
+    }
   return result;
 }
 
@@ -307,6 +341,7 @@ int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
   result = self->dwarfDbgGetDbgInfo->handleCompileUnits(self);
   DWARF_DBG_PRINT(self, "G", 1, "handleCompileUnits: result: %d\n", result);
   checkErrOK(result);
+printf("numDwBaseTypes: %d numDwTypeDefs: %d\n", self->dwarfDbgTypeInfo->numDwBaseType, self->dwarfDbgTypeInfo->numDwTypeDef);
   return result;
 }
 

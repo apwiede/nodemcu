@@ -67,6 +67,7 @@ typedef struct dieAttr {
 typedef struct dieInfo {
   Dwarf_Off offset;     // this can be referenced by dieAttr.refOffset.
   Dwarf_Half tag;
+  int tagRef;
   int numAttr;
   int maxAttr;
   dieAttr_t *dieAttrs;

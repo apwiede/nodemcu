@@ -64,6 +64,7 @@ typedef struct compileUnit {
   int level;
   Dwarf_Bool isCompileUnitDie;
   int currSubProgramInfoIdx;
+  attrValues_t attrValues;
 
   int  maxFileInfo;    /* Size of the fileInfos array. */
   int  numFileInfo;    /* Index of the topmost entry */

@@ -295,6 +295,7 @@ printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblings);
   memset(dieInfo, 0, sizeof(dieInfo_t));
   dieInfo->offset = offset;
   dieInfo->tag = tag;
+  dieInfo->tagRef = -1;
   switch (tag) {
   case DW_TAG_subprogram:
     result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numSiblings, /* isSibling */ 1, &compileUnit->currSubProgramInfoIdx);
@@ -347,6 +348,7 @@ printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
   memset(dieInfo, 0, sizeof(dieInfo_t));
   dieInfo->offset = offset;
   dieInfo->tag = tag;
+  dieInfo->tagRef = -1;
   switch (tag) {
   case DW_TAG_subprogram:
     result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numChildren, /* isSibling */ 0, &compileUnit->currSubProgramInfoIdx);

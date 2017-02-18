@@ -41,35 +41,99 @@
 #ifndef DWARF_DBG_TYPE_INFO_H
 #define	DWARF_DBG_TYPE_INFO_H
 
-typedef struct dwBaseType {
-  int byteSize;
-  int encoding;
-  int typeStrIdx;  // name
-} dwBaseType_t;
-
-typedef struct dwTypeDef {
-  int byteSize;
-  int encoding;
-  int typeStrIdx;  // name
-} dwTypeDef_t;
-
-typedef struct dwConstType {
-  int type;
-} dwConstType_t;
-
-typedef struct dwMember {
-  int typeStrIdx;  // name
-  int pathInfoIdx; // pathName and fileName
+typedef struct attrValues {
+  const char *name;
+  int pathNameIdx;
   int lineNo;
-  int type;
   int byteSize;
   int bitSize;
   int bitOffset;
-  int location;
+  int encoding;
+  int dwTypeIdx;
+} attrValues_t;
+
+typedef struct dwBaseType {
+  int typeStrIdx;  // DW_AT_name
+  int byteSize;    // DW_AT_byte_size
+  int encoding;    // DW_AT_encoding
+} dwBaseType_t;
+
+typedef struct dwTypeDef {
+  int typeStrIdx;  // DW_AT_name
+  int pathNameIdx; // DW_AT_decl_file
+  int lineNo;      // DW_AT_decl_line
+  int dwTypeIdx;   // DW_AT_type
+} dwTypeDef_t;
+
+typedef struct dwConstType {
+  int dwTypeIdx;  // DW_AT_type
+} dwConstType_t;
+
+typedef struct dwMember {
+  int typeStrIdx;  // DW_AT_name
+  int pathNameIdx; // DW_AT_decl_file
+  int lineNo;      // DW_AT_decl_line
+  int dwTypeIdx;   // DW_AT_type
+  int byteSize;    // DW_AT_byte_size
+  int bitSize;     // DW_AT_bit_size
+  int bitOffset;   // DW_AT_bit_offset
+  int location;    // DW_AT_location
 } dwMember_t;
 
+typedef struct dwPointerType {
+  int byteSize;    // DW_AT_byte_size
+  int dwTypeIdx;   // DW_AT_type
+} dwPointerType_t;
+
+typedef struct dwVolatileType {
+  int dwTypeIdx;   // DW_AT_type
+} dwVolatileType_t;
+
+typedef struct dwStructureType {
+  int typeStrIdx;  // DW_AT_name
+  int byteSize;    // DW_AT_byte_size
+  int pathNameIdx; // DW_AT_decl_file
+  int lineNo;      // DW_AT_decl_line
+  int siblingIdx;  // DW_AT_sibling ??? what for
+} dwStructureType_t;
+
+typedef struct dwUnionType {
+  int typeStrIdx;  // DW_AT_name
+  int byteSize;    // DW_AT_byte_size
+  int pathNameIdx; // DW_AT_decl_file
+  int lineNo;      // DW_AT_decl_line
+  int siblingIdx;  // DW_AT_sibling ??? what for
+} dwUnionType_t;
+
+typedef struct dwEnumerationType {
+  int byteSize;    // DW_AT_byte_size
+  int pathNameIdx; // DW_AT_decl_file
+  int lineNo;      // DW_AT_decl_line
+  int siblingIdx;  // DW_AT_sibling ??? what for
+} dwEnumerationType_t;
+
+typedef struct dwEnumeratorType {
+  int typeStrIdx;  // DW_AT_name
+  int constValue;  // DW_AT_const_value
+} dwEnumeratorType_t;
+
+typedef struct dwArrayType {
+  int dwTypeIdx;   // DW_AT_type
+  int siblingIdx;  // DW_AT_sibling ??? what for
+} dwArrayType_t;
+
 typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeStrIdx);
-typedef uint8_t (* addBaseType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addBaseType_t)(dwarfDbgPtr_t self, const char *name, int byteSize, int encoding, int *baseTypeIdx);
+typedef uint8_t (* addTypeDef_t)(dwarfDbgPtr_t self, const char *name, int pathNameIdx, int lineNo, int dwTypeIdx, int *typeDefIdx);
+typedef uint8_t (* addConstType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addMember_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addPointerType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addStructureType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addArrayType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addEnumerationType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addEnumerator_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addUnionType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addVolatileType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 
 typedef struct dwarfDbgTypeInfo {
   int maxDwBaseType;
@@ -88,12 +152,50 @@ typedef struct dwarfDbgTypeInfo {
   int numDwMember;
   dwMember_t *dwMembers;
 
+  int maxDwPointerType;
+  int numDwPointerType;
+  dwPointerType_t *dwPointerTypes;
+
+  int maxDwStructureType;
+  int numDwStructureType;
+  dwStructureType_t *dwStructureTypes;
+
+  int maxDwUnionType;
+  int numDwUnionType;
+  dwUnionType_t *dwUnionTypes;
+
+  int maxDwEnumerationType;
+  int numDwEnumerationType;
+  dwEnumerationType_t *dwEnumerationTypes;
+
+  int maxDwEnumeratorType;
+  int numDwEnumeratorType;
+  dwEnumeratorType_t *dwEnumeratorTypes;
+
+  int maxDwArrayType;
+  int numDwArrayType;
+  dwArrayType_t *dwArrayTypes;
+
+  int maxDwVolatileType;
+  int numDwVolatileType;
+  dwVolatileType_t *dwVolatileTypes;
+
   int maxTypeStr;
   int numTypeStr;
   char **typeStrs;
 
   addTypeStr_t addTypeStr;
   addBaseType_t addBaseType;
+  addTypeDef_t addTypeDef;
+  addConstType_t addConstType;
+  addMember_t addMember;
+  addPointerType_t addPointerType;
+  addStructureType_t addStructureType;
+  addArrayType_t addArrayType;
+  addEnumerationType_t addEnumerationType;
+  addEnumerator_t addEnumerator;
+  addUnionType_t addUnionType;
+  addVolatileType_t addVolatileType;
 } dwarfDbgTypeInfo_t;
 
 #endif  /* DWARF_DBG_TYPE_INFO_H */
