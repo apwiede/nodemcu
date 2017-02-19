@@ -59,15 +59,24 @@ typedef struct dieAttr {
   Dwarf_Unsigned unsignedLowPcOffset;
   int sourceFileIdx;
   int sourceLineNo;
+  int byteSize;
   int attrStrIdx;
   uint16_t flags;
   locationInfo_t *locationInfo;
 } dieAttr_t;
 
+#define TAG_REF_BASE_TYPE        0x01
+#define TAG_REF_TYPEDEF          0x02
+#define TAG_REF_POINTER_TYPE     0x04
+#define TAG_REF_SUBROUTINE_TYPE  0x08
+#define TAG_REF_STRUCTURE_TYPE   0x10
+#define TAG_REF_CONST_TYPE       0x20
+
 typedef struct dieInfo {
   Dwarf_Off offset;     // this can be referenced by dieAttr.refOffset.
   Dwarf_Half tag;
-  int tagRef;
+  int tagRefIdx;
+  int flags;
   int numAttr;
   int maxAttr;
   dieAttr_t *dieAttrs;

@@ -158,6 +158,7 @@ static uint8_t handleDW_AT_byte_sizeAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
   result = DWARF_DBG_ERR_OK;
   DWARF_DBG_PRINT(self, "A", 1, " %d ", attrInInfo->uval);
   self->dwarfDbgCompileUnitInfo->currCompileUnit->attrValues.byteSize = attrInInfo->uval;
+  attrInInfo->dieAttr->byteSize = attrInInfo->uval;
   return result;
 }
 
@@ -278,14 +279,16 @@ static uint8_t handleDW_AT_decl_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
   uint8_t result;
   char *sourceFile = NULL;
   int pathNameIdx = 0;
+  int idx2 = 0;
 
   result = DWARF_DBG_ERR_OK;
   if (attrInInfo->srcfiles != NULL) {
     if ((attrInInfo->uval > 0) && (attrInInfo->uval <= attrInInfo->cnt)) {
       sourceFile = attrInInfo->srcfiles[attrInInfo->uval-1];
       DWARF_DBG_PRINT(self, "A", 1, " %s ", attrInInfo->srcfiles[attrInInfo->uval-1]);
-      result = self->dwarfDbgFileInfo->addSourceFile(self, sourceFile, &pathNameIdx, &attrInInfo->dieAttr->sourceFileIdx);
+      result = self->dwarfDbgFileInfo->addSourceFile(self, sourceFile, &pathNameIdx, &idx2);
       checkErrOK(result);
+      attrInInfo->dieAttr->sourceFileIdx = pathNameIdx;
 printf("\ndecl_file: %s fileIdx: %d %d\n", sourceFile, pathNameIdx, attrInInfo->dieAttr->sourceFileIdx);
       self->dwarfDbgCompileUnitInfo->currCompileUnit->attrValues.pathNameIdx = pathNameIdx;
     } else {

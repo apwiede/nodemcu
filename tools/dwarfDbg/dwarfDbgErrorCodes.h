@@ -89,6 +89,11 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_CANNOT_GET_FORMSTRING                = 42,
   DWARF_DBG_ERR_BAD_SRCFILE_INDEX                    = 43,
   DWARF_DBG_ERR_LOCATION_BAD_FORM                    = 44,
+  DWARF_DBG_ERR_BAD_ATTR_STR_IDX                     = 45,
+  DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPEDEF           = 46,
+  DWARF_DBG_ERR_BAD_TAG_REF_TYPE                     = 47,
+  DWARF_DBG_ERR_STRUCTURE_TYPE_NOT_FOUND             = 48,
+  DWARF_DBG_ERR_POINTER_TYPE_NOT_FOUND               = 49,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

@@ -122,9 +122,9 @@ case DW_AT_encoding:
   break;
 }
 if (sres == DW_DLV_OK) {
-      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x %s\n", indent, attrStringValue, attrInfo->attrIn, attrInfo->theform, formStringValue, attrInfo->uval, buf);
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x refOffset: 0x%08x %s\n", indent, attrStringValue, attrInfo->attrIn, attrInfo->theform, formStringValue, attrInfo->uval, attrInfo->refOffset, buf);
 } else {
-      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x\n", indent, attrStringValue, attrInfo->attrIn, attrInfo->theform, formStringValue, attrInfo->uval);
+      fprintf(showFd, "%s  %s: attr_in: 0x%08x theform: 0x%04x %s uval: 0x%08x refOffset: 0x%08x\n", indent, attrStringValue, attrInfo->attrIn, attrInfo->theform, formStringValue, attrInfo->uval, attrInfo->refOffset);
 }
     }
   }
@@ -290,12 +290,14 @@ static uint8_t addDieSibling(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Of
       }
     }
   }
-printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblings);
+//printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblings);
   dieInfo = &dieAndChildrenInfo->dieSiblings[dieAndChildrenInfo->numSiblings];
   memset(dieInfo, 0, sizeof(dieInfo_t));
   dieInfo->offset = offset;
   dieInfo->tag = tag;
-  dieInfo->tagRef = -1;
+  dieInfo->tagRefIdx = -1;
+  dieInfo->flags = 0;
+#ifdef NOTDEF
   switch (tag) {
   case DW_TAG_subprogram:
     result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numSiblings, /* isSibling */ 1, &compileUnit->currSubProgramInfoIdx);
@@ -310,6 +312,7 @@ printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblings);
     checkErrOK(result);
     break;
   }
+#endif
   *siblingIdx = dieAndChildrenInfo->numSiblings;
   dieAndChildrenInfo->numSiblings++;
   return result;
@@ -343,12 +346,14 @@ static uint8_t addDieChild(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off 
       }
     }
   }
-printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
+//printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
   dieInfo = &dieAndChildrenInfo->dieChildren[dieAndChildrenInfo->numChildren];
   memset(dieInfo, 0, sizeof(dieInfo_t));
   dieInfo->offset = offset;
   dieInfo->tag = tag;
-  dieInfo->tagRef = -1;
+  dieInfo->tagRefIdx = -1;
+  dieInfo->flags = 0;
+#ifdef NOTDEF
   switch (tag) {
   case DW_TAG_subprogram:
     result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numChildren, /* isSibling */ 0, &compileUnit->currSubProgramInfoIdx);
@@ -363,6 +368,7 @@ printf("== numChildren: %d\n", dieAndChildrenInfo->numChildren);
     checkErrOK(result);
     break;
   }
+#endif
   *childIdx = dieAndChildrenInfo->numChildren;
   dieAndChildrenInfo->numChildren++;
   return result;

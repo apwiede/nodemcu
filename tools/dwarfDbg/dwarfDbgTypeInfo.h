@@ -41,6 +41,9 @@
 #ifndef DWARF_DBG_TYPE_INFO_H
 #define	DWARF_DBG_TYPE_INFO_H
 
+typedef struct dieAndChildrenInfo dieAndChildrenInfo_t;
+typedef struct dieInfo dieInfo_t;
+
 typedef struct attrValues {
   const char *name;
   int pathNameIdx;
@@ -89,9 +92,16 @@ typedef struct dwVolatileType {
   int dwTypeIdx;   // DW_AT_type
 } dwVolatileType_t;
 
+typedef struct dwSubroutineType {
+  int prototyped;  // DW_AT_prototyped
+  int dwTypeIdx;   // DW_AT_type
+  int siblingIdx;  // DW_AT_sibling ??? what for
+} dwSubroutineType_t;
+
 typedef struct dwStructureType {
   int typeStrIdx;  // DW_AT_name
   int byteSize;    // DW_AT_byte_size
+  int declaration; // DW_AT_declaration
   int pathNameIdx; // DW_AT_decl_file
   int lineNo;      // DW_AT_decl_line
   int siblingIdx;  // DW_AT_sibling ??? what for
@@ -125,15 +135,24 @@ typedef struct dwArrayType {
 typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeStrIdx);
 typedef uint8_t (* addBaseType_t)(dwarfDbgPtr_t self, const char *name, int byteSize, int encoding, int *baseTypeIdx);
 typedef uint8_t (* addTypeDef_t)(dwarfDbgPtr_t self, const char *name, int pathNameIdx, int lineNo, int dwTypeIdx, int *typeDefIdx);
-typedef uint8_t (* addConstType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addConstType_t)(dwarfDbgPtr_t self, int dwTypeIdx, int *constTypeIdx);
 typedef uint8_t (* addMember_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
-typedef uint8_t (* addPointerType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
-typedef uint8_t (* addStructureType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addPointerType_t)(dwarfDbgPtr_t self, int byteSize, int dwtypeIdx, int *pointerTypeIdx);
+typedef uint8_t (* addStructureType_t)(dwarfDbgPtr_t self, const char *name, int byteSize, int pathNameIdx, int lineNo, int declaration, int *structureTypeIdx);
 typedef uint8_t (* addArrayType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addEnumerationType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addEnumerator_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addUnionType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addVolatileType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addSubroutineType_t)(dwarfDbgPtr_t self, int prototyped, int dwTypeIdx, int siblingIdx, int *subroutineTypeIdx);
+typedef uint8_t (* handlePointerType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleConstType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleStructureType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleSubroutineType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleTypedef_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* addTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dwarf_Bool isSibling);
+typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
+typedef uint8_t (* addSiblingsTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
 
 typedef struct dwarfDbgTypeInfo {
   int maxDwBaseType;
@@ -180,6 +199,10 @@ typedef struct dwarfDbgTypeInfo {
   int numDwVolatileType;
   dwVolatileType_t *dwVolatileTypes;
 
+  int maxDwSubroutineType;
+  int numDwSubroutineType;
+  dwSubroutineType_t *dwSubroutineTypes;
+
   int maxTypeStr;
   int numTypeStr;
   char **typeStrs;
@@ -196,6 +219,15 @@ typedef struct dwarfDbgTypeInfo {
   addEnumerator_t addEnumerator;
   addUnionType_t addUnionType;
   addVolatileType_t addVolatileType;
+  addSubroutineType_t addSubroutineType;
+  handlePointerType_t handlePointerType;
+  handleConstType_t handleConstType;
+  handleStructureType_t handleStructureType;
+  handleSubroutineType_t handleSubroutineType;
+  handleTypedef_t handleTypedef;
+  addTypes_t addTypes;
+  addChildrenTypes_t addChildrenTypes;
+  addSiblingsTypes_t addSiblingsTypes;
 } dwarfDbgTypeInfo_t;
 
 #endif  /* DWARF_DBG_TYPE_INFO_H */

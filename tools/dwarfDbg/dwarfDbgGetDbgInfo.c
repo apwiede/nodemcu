@@ -122,25 +122,46 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
   case DW_TAG_base_type:
     result = self->dwarfDbgTypeInfo->addBaseType(self, attrValues->name, attrValues->byteSize, attrValues->encoding, &typeIdx);
     checkErrOK(result);
-    dieInfo->tagRef = typeIdx;
-printf("baseType tagRef: %d\n", dieInfo->tagRef);
+    dieInfo->tagRefIdx = typeIdx;
+    dieInfo->flags = TAG_REF_BASE_TYPE;
+printf("baseType tagRef: %d offset: 0x%08x\n", dieInfo->tagRefIdx, dieInfo->offset);
+    break;
+  case DW_TAG_subroutine_type:
+#ifdef NODTEF
+    result = self->dwarfDbgTypeInfo->addSubroutineType(self, attrValues->name, attrValues->byteSize, attrValues->encoding, &typeIdx);
+    checkErrOK(result);
+    dieInfo->tagRefIdx = typeIdx;
+    dieInfo->flags = TAG_REF_SUBROUTINE_TYPE;
+printf("subroutineType tagRef: %d offset: 0x%08x\n", dieInfo->tagRefIdx, dieInfo->offset);
+#endif
     break;
   case DW_TAG_typedef:
+#ifdef NODTEF
     result = self->dwarfDbgTypeInfo->addTypeDef(self, attrValues->name, attrValues->pathNameIdx, attrValues->lineNo, attrValues->dwTypeIdx, &typeIdx);
     checkErrOK(result);
-    dieInfo->tagRef = typeIdx;
-printf("typeDef tagRef: %d\n", dieInfo->tagRef);
+    dieInfo->tagRefIdx = typeIdx;
+    dieInfo->flags = TAG_REF_TYPEDEF;
+printf("typeDef tagRef: %d offset: 0x%08x\n", dieInfo->tagRefIdx, dieInfo->offset);
+#endif
+    break;
+  case DW_TAG_pointer_type:
+#ifdef NODTEF
+    result = self->dwarfDbgTypeInfo->addPointerTypf(self, attrValues->name, attrValues->pathNameIdx, attrValues->lineNo, attrValues->dwTypeIdx, &typeIdx);
+    checkErrOK(result);
+    dieInfo->tagRefIdx = typeIdx;
+    dieInfo->flags = TAG_REF_POINTER_TYPE;
+printf("pointerType tagRef: %d offset: 0x%08x\n", dieInfo->tagRefIdx, dieInfo->offset);
+#endif
     break;
   case DW_TAG_const_type:
   case DW_TAG_member:
-  case DW_TAG_pointer_type:
   case DW_TAG_structure_type:
   case DW_TAG_array_type:
   case DW_TAG_enumeration_type:
   case DW_TAG_enumerator:
   case DW_TAG_union_type:
   case DW_TAG_volatile_type:
-printf("should store type\n");
+//printf("should store type\n");
       break;
     }
   return result;
@@ -164,7 +185,7 @@ static uint8_t handleDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die in_die_in, cha
 
   result = DWARF_DBG_ERR_OK;
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
-//printf("@@handleDieAndChildren die: %p level: %d isCompileUnitDie: %d\n", in_die_in, ++childrenLevel, compileUnit->isCompileUnitDie);
+printf("@@handleDieAndChildren die: %p level: %d isCompileUnitDie: %d\n", in_die_in, ++childrenLevel, compileUnit->isCompileUnitDie);
   result = self->dwarfDbgDieInfo->addDieAndChildren(self, in_die_in, &dieAndChildrenIdx);
   checkErrOK(result);
   for(;;) {
@@ -289,16 +310,46 @@ static uint8_t handleCompileUnits(dwarfDbgPtr_t self) {
       result = handleDieAndChildren(self, compileUnit->compileUnitDie, srcfiles, srcCnt);
     }
 
+    // add the typedefs here
+    {
+      int dieAndChildrenIdx;
+printf("++ numDieAndChildren: %d cu: %s\n", compileUnit->numDieAndChildren, compileUnit->shortFileName);
+  for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
+printf("++ childIdx: %d\n", dieAndChildrenIdx);
+
+printf("++ children: structureTypes\n");
+    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
+printf("++ siblings: structureTypes\n");
+    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
+
+printf("++ children: constTypes\n");
+    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+printf("++ siblings: constTypes\n");
+    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+
+printf("++ children: pointerTypes\n");
+    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+printf("++ siblings: pointerTypes\n");
+    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+
+  }
+fflush(showFd);
+
+}
+    
+//#define SHOWSTRUCTURE
 #ifdef SHOWSTRUCTURE
 // for testing show the structure
 {
   int dieAndChildrenIdx;
 //  showFd = fopen("showInfo.txt", "w");
 
-fprintf(showFd, "++ numDieAndChildren: %d\n", compileUnit->numDieAndChildren);
+fprintf(showFd, "++ numDieAndChildren: %d cu: %s\n", compileUnit->numDieAndChildren, compileUnit->shortFileName);
   for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
-fprintf(showFd, "++ idx: %d\n", dieAndChildrenIdx);
+fprintf(showFd, "++ childIdx: %d\n", dieAndChildrenIdx);
+fprintf(showFd, "++ children:\n");
     self->dwarfDbgDieInfo->showChildren(self, dieAndChildrenIdx, "  ");
+fprintf(showFd, "++ siblings:\n");
     self->dwarfDbgDieInfo->showSiblings(self, dieAndChildrenIdx, "  ");
   }
 fflush(showFd);
