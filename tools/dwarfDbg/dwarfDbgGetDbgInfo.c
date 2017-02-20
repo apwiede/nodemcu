@@ -327,6 +327,11 @@ printf("++ children: constTypes\n");
 printf("++ siblings: constTypes\n");
     self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
 
+printf("++ children: subroutineTypes\n");
+    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
+printf("++ siblings: subroutineTypes\n");
+    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
+
 printf("++ children: pointerTypes\n");
     self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
 printf("++ siblings: pointerTypes\n");

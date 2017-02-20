@@ -517,12 +517,27 @@ static uint8_t addVolatileType(dwarfDbgPtr_t self, int byteSize, int encoding, c
 
 // =================================== addSubroutineType =========================== 
 
-static uint8_t addSubroutineType(dwarfDbgPtr_t self, int prototyped, int dwTypeIdx, int siblingIdx, int *subroutineTypeIdx) {
+static uint8_t addSubroutineType(dwarfDbgPtr_t self, int prototyped, int byteSize, int dwTypeIdx, int siblingIdx, int *subroutineTypeIdx) {
   uint8_t result = 0;
   int typeStrIdx = 0;
+  int idx = 0;
   dwSubroutineType_t *dwSubroutineType = NULL;
 
   result = DWARF_DBG_ERR_OK;
+  for(idx = 0; idx < self->dwarfDbgTypeInfo->numDwSubroutineType; idx++) {
+    dwSubroutineType = &self->dwarfDbgTypeInfo->dwSubroutineTypes[idx];
+    if (dwSubroutineType->prototyped == prototyped) {
+      if (dwSubroutineType->byteSize == byteSize) {
+        if (dwSubroutineType->dwTypeIdx == dwTypeIdx) {
+          if (dwSubroutineType->siblingIdx == siblingIdx) {
+printf("addSubroutineType: found: prototyped: %d byteSize: %d dwTypeIdx: %d siblingIdx: %d subroutineTypeIdx: %d\n", prototyped, byteSize, dwTypeIdx, siblingIdx, idx);
+            *subroutineTypeIdx = idx;
+            return result;
+          }
+        }
+      }
+    }
+  }
   if (self->dwarfDbgTypeInfo->maxDwSubroutineType <= self->dwarfDbgTypeInfo->numDwSubroutineType) {
     self->dwarfDbgTypeInfo->maxDwSubroutineType += 5;
     if (self->dwarfDbgTypeInfo->dwSubroutineTypes == NULL) {
@@ -538,12 +553,112 @@ static uint8_t addSubroutineType(dwarfDbgPtr_t self, int prototyped, int dwTypeI
     }
   }
   dwSubroutineType = &self->dwarfDbgTypeInfo->dwSubroutineTypes[self->dwarfDbgTypeInfo->numDwSubroutineType];
-  dwSubroutineType->prototyped = prototyped;
+  dwSubroutineType->byteSize = byteSize;
   dwSubroutineType->dwTypeIdx = dwTypeIdx;
   dwSubroutineType->siblingIdx = siblingIdx;
   *subroutineTypeIdx = self->dwarfDbgTypeInfo->numDwSubroutineType;
   self->dwarfDbgTypeInfo->numDwSubroutineType++;
   return result;
+}
+
+// =================================== getTypeRefIdx =========================== 
+
+static uint8_t getTypeRefIdx(dwarfDbgPtr_t self, dieAttr_t *dieAttr, int *dwTypeIdx) {
+  uint8_t result;
+  int idx2 = 0;
+  int isSibling = 0;
+  int isSibling2 = 0;
+  int maxEntries2 = 0;
+  int typeIdx = 0;
+  compileUnit_t *compileUnit;
+  dieAndChildrenInfo_t *dieAndChildrenInfo2 = NULL;
+  dieInfo_t *dieInfo2 = NULL;
+  const char *tagName2 = NULL;
+  const char *tagName = NULL;
+
+  result = DWARF_DBG_ERR_OK;
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+//printf("compileUnit: %p\n", compileUnit);
+  for (idx2 = 0; idx2 < compileUnit->numDieAndChildren; idx2++) {
+    dieAndChildrenInfo2 = &compileUnit->dieAndChildrenInfos[idx2];
+//printf("dieAndChildrenInfo2: %p\n", dieAndChildrenInfo2);
+    for (isSibling = 0; isSibling < 2; isSibling++) {
+      if (isSibling) {
+        maxEntries2 = dieAndChildrenInfo2->numSiblings;
+      } else {
+        maxEntries2 = dieAndChildrenInfo2->numChildren;
+      }
+      for(typeIdx = 0; typeIdx < maxEntries2; typeIdx++) {
+        if (isSibling) {
+          dieInfo2 = &dieAndChildrenInfo2->dieSiblings[typeIdx];
+        } else {
+          dieInfo2 = &dieAndChildrenInfo2->dieChildren[typeIdx];
+        }
+//printf("dieInfo2: %p dieAttr: %p isSibling: %d isSibling2: %d maxEntries2: %d typeIdx: %d\n", dieInfo2, dieAttr, isSibling, isSibling2, maxEntries2, typeIdx);
+self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo2->tag, &tagName2);
+//printf("tag: %s 0x%04x typeIdx: %d offset: 0x%08x refOffset: 0x%08x dieInfo2: %p\n", tagName2, dieInfo2->tag, typeIdx, dieInfo2->offset, dieAttr->refOffset, dieInfo2);
+        switch (dieInfo2->tag) {
+        case DW_TAG_base_type:
+          if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found type: %s baseTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
+            *dwTypeIdx = dieInfo2->tagRefIdx;
+            return result;
+          }
+          break;
+        case DW_TAG_structure_type:
+          if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found type: %s structureTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
+            *dwTypeIdx = dieInfo2->tagRefIdx;
+            return result;
+          }
+          break;
+        case DW_TAG_typedef:
+          if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found type: %s typedefIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
+            *dwTypeIdx = dieInfo2->tagRefIdx;
+            return result;
+          }
+          break;
+        case DW_TAG_subroutine_type:
+          if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found type: %s subroutineTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
+            *dwTypeIdx = dieInfo2->tagRefIdx;
+            return result;
+          }
+          break;
+        case DW_TAG_const_type:
+          if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found type: %s constTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
+            *dwTypeIdx = dieInfo2->tagRefIdx;
+            return result;
+          }
+          break;
+        case DW_TAG_array_type:
+          if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found type: %s arrayTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
+            *dwTypeIdx = dieInfo2->tagRefIdx;
+            return result;
+          }
+          break;
+        case DW_TAG_pointer_type:
+          if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found type: %s pointerTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
+            *dwTypeIdx = dieInfo2->tagRefIdx;
+            return result;
+          }
+          break;
+        default:
+self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo2->tag, &tagName);
+            if (dieInfo2->offset == dieAttr->refOffset) {
+printf("found default: %s dieInfo2->offset: 0x%08x dieAttr->refOffset: 0x%08x\n", tagName, dieInfo2->offset, dieAttr->refOffset);
+          }
+          break;
+        }
+      }
+    }
+  }
+printf("ERROR TYPE_REF_NOT_FOUND\n");
+  return DWARF_DBG_ERR_TYPE_REF_NOT_FOUND;
 }
 
 // =================================== handlePointerType =========================== 
@@ -554,17 +669,20 @@ static uint8_t handlePointerType(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAn
   int typeIdx = 0;
   int pointerTypeIdx = 0;
   int maxEntries = 0;
-  int maxEntries2 = 0;
+//  int maxEntries2 = 0;
   int attrIdx = 0;
+  compileUnit_t *compileUnit;
+  dieAndChildrenInfo_t *dieAndChildrenInfo2 = NULL;
   dieInfo_t *dieInfo2 = NULL;
   dieAttr_t *dieAttr = NULL;
   int byteSize;   // DW_AT_byte_size
   int dwTypeIdx;  // DW_AT_type
   int found = 0;
-  int isSibling2 = 0;
+//  int idx2 = 0;
+//  int isSibling2 = 0;
   char *attrName = NULL;
   const char *tagName = NULL;
-  const char *tagName2 = NULL;
+//  const char *tagName2 = NULL;
 
   result = DWARF_DBG_ERR_OK;
   if (isSibling) {
@@ -587,74 +705,16 @@ printf("byteSize: %d refOffset: 0x%08x\n", byteSize, dieAttr->refOffset);
       break;
     case DW_AT_type:
 printf("PTR DW_AT_type: refOffset: 0x%08x maxEntries: %d\n", dieAttr->refOffset, maxEntries);
-      for (isSibling2 = 0; isSibling2 < 2; isSibling2++) {
-      for(typeIdx = 0; typeIdx < maxEntries; typeIdx++) {
-        if (isSibling2) {
-          dieInfo2 = &dieAndChildrenInfo->dieSiblings[typeIdx];
-        } else {
-          dieInfo2 = &dieAndChildrenInfo->dieChildren[typeIdx];
-        }
-self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo2->tag, &tagName2);
-//printf("tag: %s 0x%04x typeIdx: %d offset: 0x%08x base_type: 0x%04x\n", tagName2, dieInfo2->tag, typeIdx, dieInfo2->offset, DW_TAG_base_type);
-        switch (dieInfo2->tag) {
-        case DW_TAG_base_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s baseTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_structure_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s structureTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_typedef:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s typedefIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_subroutine_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s subroutineTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_const_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s constTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_pointer_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s pointerTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        default:
-self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo2->tag, &tagName);
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found default: %s dieInfo2->offset: 0x%08x dieAttr->refOffset: 0x%08x\n", tagName, dieInfo2->offset, dieAttr->refOffset);
-          }
-          break;
-        }
-      }
-      }
+      result = getTypeRefIdx(self, dieAttr, &dwTypeIdx);
+      checkErrOK(result);
+      found++;
       break;
     default:
 printf("ERROR: DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPEDEF: 0x%04x\n", dieAttr->attr);
       return DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPEDEF;
     }
     if (found == dieInfo->numAttr) {
-printf("found 2 break\n");
+//printf("found 2 break\n");
       break;
     }
   }
@@ -705,67 +765,16 @@ printf("handleConstType tag offset: 0x%08x\n", dieInfo->offset);
     switch (dieAttr->attr) {
     case DW_AT_type:
 printf("CONST DW_AT_type: refOffset: 0x%08x maxEntries: %d\n", dieAttr->refOffset, maxEntries);
-      for (isSibling2 = 0; isSibling2 < 2; isSibling2++) {
-      for(typeIdx = 0; typeIdx < maxEntries; typeIdx++) {
-        if (isSibling2) {
-          dieInfo2 = &dieAndChildrenInfo->dieSiblings[typeIdx];
-        } else {
-          dieInfo2 = &dieAndChildrenInfo->dieChildren[typeIdx];
-        }
-self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo2->tag, &tagName2);
-printf("tag: %s typeIdx: %d offset: 0x%08x\n", tagName2, typeIdx, dieInfo2->offset);
-        switch (dieInfo2->tag) {
-        case DW_TAG_base_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s baseTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_structure_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s structureTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_array_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s arrayTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_typedef:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s typedefIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        case DW_TAG_pointer_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: %s pointerTypeIdx: %d dieInfo2->offset: 0x%08x tagRefIdx: %d\n", tagName2, typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            dwTypeIdx = dieInfo2->tagRefIdx;
-            found++;
-          }
-          break;
-        default:
-self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo2->tag, &tagName);
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found default: %s dieInfo2->offset: 0x%08x dieAttr->refOffset: 0x%08x\n", tagName, dieInfo2->offset, dieAttr->refOffset);
-          }
-          break;
-        }
-      }
-      }
+      result = getTypeRefIdx(self, dieAttr, &dwTypeIdx);
+      checkErrOK(result);
+      found++;
       break;
     default:
 printf("ERROR: DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPEDEF: 0x%04x\n", dieAttr->attr);
       return DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPEDEF;
     }
     if (found == dieInfo->numAttr) {
-printf("found 2 break\n");
+//printf("found 2 break\n");
       break;
     }
   }
@@ -870,12 +879,15 @@ static uint8_t handleSubroutineType(dwarfDbgPtr_t self, dieAndChildrenInfo_t *di
   int pointerTypeIdx = 0;
   int maxEntries = 0;
   int attrIdx = 0;
+  int prototyped = 0;
   dieInfo_t *dieInfo2 = NULL;
   dieAttr_t *dieAttr = NULL;
   int byteSize;   // DW_AT_byte_size
   int dwTypeIdx;  // DW_AT_type
+  int siblingIdx; // DW_AT_sibling
+  int subroutineTypeIdx = 0;
   int found = 0;
-  char *attrName = NULL;
+  const char *attrName = NULL;
   const char *tagName = NULL;
 
   result = DWARF_DBG_ERR_OK;
@@ -884,51 +896,47 @@ static uint8_t handleSubroutineType(dwarfDbgPtr_t self, dieAndChildrenInfo_t *di
   } else {
     maxEntries = dieAndChildrenInfo->numChildren;
   }
+  prototyped = 0;
   byteSize = -1;
   dwTypeIdx = -1;
+  siblingIdx = -1;
   attrName = NULL;
   found = 0;
   for(attrIdx = 0; attrIdx < dieInfo->numAttr; attrIdx++) {
     dieAttr = &dieInfo->dieAttrs[attrIdx];
+self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &attrName);
+//printf("handleSubroutineType: attrName: %s\n", attrName);
     switch (dieAttr->attr) {
     case DW_AT_byte_size:
       byteSize = dieAttr->byteSize;
+      found++;
+      break;
+    case DW_AT_prototyped:
+      prototyped = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_sibling:
+      siblingIdx = dieAttr->uval;
+      found++;
       break;
     case DW_AT_type:
-      for(typeIdx = 0; typeIdx < maxEntries; typeIdx++) {
-        if (isSibling) {
-          dieInfo2 = &dieAndChildrenInfo->dieSiblings[typeIdx];
-        } else {
-          dieInfo2 = &dieAndChildrenInfo->dieChildren[typeIdx];
-        }
-        switch (dieInfo2->tag) {
-        case DW_TAG_base_type:
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found type: baseTypeIdx: %d dieInfo2->offset: 0x%08x baseTypeTagRef: %d\n", typeIdx, dieInfo2->offset, dieInfo2->tagRefIdx);
-            result = self->dwarfDbgTypeInfo->addPointerType(self, byteSize, dieInfo2->tagRefIdx, &pointerTypeIdx);
-printf("new subroutineType: pointerTypIdx: %d\n", pointerTypeIdx);
-            checkErrOK(result);
-            dieInfo2->tagRefIdx = pointerTypeIdx;
-            found = 1;
-          }
-          break;
-        default:
-self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo2->tag, &tagName);
-          if (dieInfo2->offset == dieAttr->refOffset) {
-printf("found default: %s dieInfo2->offset: 0x%08x dieAttr->refOffset: 0x%08x\n", tagName, dieInfo2->offset, dieAttr->refOffset);
-          }
-          break;
-        }
-        if (found) {
-          break;
-        }
-      }
-printf("not found pointerType type: baseTypeIdx: %d dieInfo2->offset: 0x%08x\n", typeIdx, dieInfo2->offset);
+      result = getTypeRefIdx(self, dieAttr, &dwTypeIdx);
+      checkErrOK(result);
+      found++;
       break;
     default:
 printf("ERROR: DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPEDEF: 0x%04x\n", dieAttr->attr);
       return DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPEDEF;
     }
+  }
+  if (found == dieInfo->numAttr) {
+    result = self->dwarfDbgTypeInfo->addSubroutineType(self, prototyped, byteSize, dwTypeIdx, siblingIdx, &subroutineTypeIdx);
+    checkErrOK(result);
+    dieInfo->tagRefIdx = subroutineTypeIdx;
+    dieInfo->flags  = TAG_REF_SUBROUTINE_TYPE;
+  } else {
+printf("ERROR subroutineType not found found: %d numAttr: %d offset: 0x%08x\n", found, dieInfo->numAttr, dieAttr->refOffset);
+    return DWARF_DBG_ERR_SUBROUTINE_TYPE_NOT_FOUND;
   }
   return result;
 }
@@ -1179,6 +1187,7 @@ int dwarfDbgTypeInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgTypeInfo->addEnumerator = &addEnumerator;
   self->dwarfDbgTypeInfo->addUnionType = &addUnionType;
   self->dwarfDbgTypeInfo->addVolatileType = &addVolatileType;
+  self->dwarfDbgTypeInfo->addSubroutineType = &addSubroutineType;
   self->dwarfDbgTypeInfo->handlePointerType = &handlePointerType;
   self->dwarfDbgTypeInfo->handleConstType = &handleConstType;
   self->dwarfDbgTypeInfo->handleStructureType = &handleStructureType;

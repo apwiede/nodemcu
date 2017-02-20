@@ -94,6 +94,8 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_BAD_TAG_REF_TYPE                     = 47,
   DWARF_DBG_ERR_STRUCTURE_TYPE_NOT_FOUND             = 48,
   DWARF_DBG_ERR_POINTER_TYPE_NOT_FOUND               = 49,
+  DWARF_DBG_ERR_TYPE_REF_NOT_FOUND                   = 50,
+  DWARF_DBG_ERR_SUBROUTINE_TYPE_NOT_FOUND            = 51,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */

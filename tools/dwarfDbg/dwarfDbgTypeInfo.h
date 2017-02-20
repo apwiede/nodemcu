@@ -94,6 +94,7 @@ typedef struct dwVolatileType {
 
 typedef struct dwSubroutineType {
   int prototyped;  // DW_AT_prototyped
+  int byteSize;    // DW_AT_byte_size
   int dwTypeIdx;   // DW_AT_type
   int siblingIdx;  // DW_AT_sibling ??? what for
 } dwSubroutineType_t;
@@ -144,7 +145,7 @@ typedef uint8_t (* addEnumerationType_t)(dwarfDbgPtr_t self, int byteSize, int e
 typedef uint8_t (* addEnumerator_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addUnionType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addVolatileType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
-typedef uint8_t (* addSubroutineType_t)(dwarfDbgPtr_t self, int prototyped, int dwTypeIdx, int siblingIdx, int *subroutineTypeIdx);
+typedef uint8_t (* addSubroutineType_t)(dwarfDbgPtr_t self, int prototyped, int byteSize, int dwTypeIdx, int siblingIdx, int *subroutineTypeIdx);
 typedef uint8_t (* handlePointerType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
 typedef uint8_t (* handleConstType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
 typedef uint8_t (* handleStructureType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
