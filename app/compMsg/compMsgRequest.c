@@ -113,8 +113,8 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   self->compMsgRequest->msgRequestInfos.requestHandles[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestHandle;
   self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestData;
   COMP_MSG_DBG(self, "R", 2, "addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->compMsgRequest->msgRequestInfos.lastRequestIdx, requestType, requestData);
-//FIXME TEMPORARY last if clause!!
   COMP_MSG_DBG(self, "R", 2, "addRequest 2 %d %p\n", self->compMsgRequest->msgRequestInfos.currRequestIdx, requestData);
+//FIXME TEMPORARY last if clause!!
   if ((self->compMsgRequest->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->compMsgRequest->msgRequestInfos.currRequestIdx++;
     checkErrOK(result);

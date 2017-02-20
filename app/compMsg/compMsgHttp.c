@@ -342,6 +342,7 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
   }
   COMP_MSG_DBG(self, "Y", 2, "content: %s lgth: %d", httpMsgInfo->content, httpMsgInfo->currLgth);
   COMP_MSG_DBG(self, "Y", 2, "Code:: %d", httpMsgInfo->httpRequestCode);
+// FIXME need to call addRequest here !!!
   switch (httpMsgInfo->httpRequestCode) {
   case 200:
     COMP_MSG_DBG(self, "H", 1, "httpRequestCode: 200 OK");

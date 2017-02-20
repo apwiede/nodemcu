@@ -60,7 +60,9 @@ typedef struct socketInfo {
   struct espconn *pesp_conn;
 } socketInfo_t;
 
+#define MAX_CONNECTIONS_ALLOWED 4
 #define MAX_SOCKET 5
+
 static int socket_num = 0;
 static socketInfo_t *socket[MAX_SOCKET] = { NULL, NULL, NULL, NULL, NULL };
 
@@ -587,9 +589,9 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   pesp_conn = NULL;
 
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
+// set err_opcode[...] here if alloc fails or eventually a variable in compMsgDispatcher!!
 //   checkAllocOK(sud);
   COMP_MSG_DBG(self, "N", 2, "sud0: %p", sud);
-//  checkAllocgLOK(sud->urls);
   sud->maxHttpMsgInfos = 5;
   sud->numHttpMsgInfos = 0;
   sud->httpMsgInfos = os_zalloc(sud->maxHttpMsgInfos * sizeof(httpMsgInfo_t));
@@ -598,6 +600,7 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_SECURE_CONNECT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
   sud->secure = numericValue;
 #endif
+  // the following 2 calls deliver a callback function address in numericValue !!
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
   sud->netSocketReceived = (netSocketReceived_t)numericValue;
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_TO_SEND_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
@@ -782,6 +785,8 @@ static  void startClientMode(void *arg) {
 //    return COMP_MSG_ERR_REGIST_TIME;
     COMP_MSG_DBG(self, "N", 2, "regist_time err result: %d", result);
   }
+  // limit maximal allowed connections
+  result = espconn_tcp_set_max_con_allow(pesp_conn, MAX_CONNECTIONS_ALLOWED);
   if (self->compMsgSendReceive->startSendMsg != NULL) {
     COMP_MSG_DBG(self, "N", 2, "call startSendMsg: %p\n", self->compMsgSendReceive->startSendMsg);
     result = self->compMsgSendReceive->startSendMsg(self);
