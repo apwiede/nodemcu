@@ -71,6 +71,7 @@ typedef struct dieAttr {
 #define TAG_REF_SUBROUTINE_TYPE  0x08
 #define TAG_REF_STRUCTURE_TYPE   0x10
 #define TAG_REF_CONST_TYPE       0x20
+#define TAG_REF_ARRAY_TYPE       0x40
 
 typedef struct dieInfo {
   Dwarf_Off offset;     // this can be referenced by dieAttr.refOffset.

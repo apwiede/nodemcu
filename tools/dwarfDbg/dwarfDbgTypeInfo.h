@@ -140,7 +140,7 @@ typedef uint8_t (* addConstType_t)(dwarfDbgPtr_t self, int dwTypeIdx, int *const
 typedef uint8_t (* addMember_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addPointerType_t)(dwarfDbgPtr_t self, int byteSize, int dwtypeIdx, int *pointerTypeIdx);
 typedef uint8_t (* addStructureType_t)(dwarfDbgPtr_t self, const char *name, int byteSize, int pathNameIdx, int lineNo, int declaration, int *structureTypeIdx);
-typedef uint8_t (* addArrayType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addArrayType_t)(dwarfDbgPtr_t self, int dwTypeIdx, int siblingIdx, int *arrayTypeIdx);
 typedef uint8_t (* addEnumerationType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addEnumerator_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addUnionType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
@@ -151,6 +151,7 @@ typedef uint8_t (* handleConstType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *
 typedef uint8_t (* handleStructureType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
 typedef uint8_t (* handleSubroutineType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
 typedef uint8_t (* handleTypedef_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleArrayType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, int isSibling);
 typedef uint8_t (* addTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dwarf_Bool isSibling);
 typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
 typedef uint8_t (* addSiblingsTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
@@ -225,6 +226,7 @@ typedef struct dwarfDbgTypeInfo {
   handleConstType_t handleConstType;
   handleStructureType_t handleStructureType;
   handleSubroutineType_t handleSubroutineType;
+  handleArrayType_t handleArrayType;
   handleTypedef_t handleTypedef;
   addTypes_t addTypes;
   addChildrenTypes_t addChildrenTypes;

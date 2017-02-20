@@ -124,7 +124,7 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
     checkErrOK(result);
     dieInfo->tagRefIdx = typeIdx;
     dieInfo->flags = TAG_REF_BASE_TYPE;
-printf("baseType tagRef: %d offset: 0x%08x\n", dieInfo->tagRefIdx, dieInfo->offset);
+//printf("baseType tagRef: %d offset: 0x%08x\n", dieInfo->tagRefIdx, dieInfo->offset);
     break;
   case DW_TAG_subroutine_type:
 #ifdef NODTEF
@@ -331,6 +331,11 @@ printf("++ children: subroutineTypes\n");
     self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
 printf("++ siblings: subroutineTypes\n");
     self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
+
+printf("++ children: arrayTypes\n");
+    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_ARRAY_TYPE);
+printf("++ siblings: arrayTypes\n");
+    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_ARRAY_TYPE);
 
 printf("++ children: pointerTypes\n");
     self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
