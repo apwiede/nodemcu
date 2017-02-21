@@ -1,0 +1,13 @@
+doxygen/*
+app/tmp/*
+tools/compMsgTest/tmp/*
+tools/structmsgTest/tmp/*
+tools/tmp/*
+initCompMsg.pdf
+initCompMsg.ps
+tools/compMsgTest/AAAnswer.txt
+tools/compMsgTest/ADRequest.txt
+tools/compMsgTest/CDTelegram.txt
+tools/compMsgTest/debug_AA.txt
+tools/compMsgTest/do1
+dot_files/*
