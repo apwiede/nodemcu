@@ -114,8 +114,10 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
   self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.lastRequestIdx] = requestData;
   COMP_MSG_DBG(self, "R", 2, "addRequest: lastRequestIdx: %d requestType: %d compMsgData: %p\n", self->compMsgRequest->msgRequestInfos.lastRequestIdx, requestType, requestData);
   COMP_MSG_DBG(self, "R", 2, "addRequest 2 %d %p\n", self->compMsgRequest->msgRequestInfos.currRequestIdx, requestData);
-//FIXME TEMPORARY last if clause!!
-  if ((self->compMsgRequest->msgRequestInfos.currRequestIdx < 1) || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
+//FIXME TEMPORARY last 2 if clauses!!
+  if ((self->compMsgRequest->msgRequestInfos.currRequestIdx < 1) 
+      || (requestData->direction == COMP_MSG_TRANSFER_DATA)
+      || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
     self->compMsgRequest->msgRequestInfos.currRequestIdx++;
     checkErrOK(result);
     compMsgData = self->compMsgRequest->msgRequestInfos.requestData[self->compMsgRequest->msgRequestInfos.currRequestIdx];
@@ -127,6 +129,9 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
     case COMP_MSG_RECEIVED_DATA:
       COMP_MSG_DBG(self, "R", 2, "addRequest: receivedData: %p %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
       result = self->compMsgIdentify->handleReceivedPart(self, compMsgData->receivedData, compMsgData->receivedLgth);
+      break;
+    case COMP_MSG_TRANSFER_DATA:
+      result = self->compMsgSendReceive->sendMsg(self, compMsgData->receivedData, compMsgData->receivedLgth);
       break;
     default:
       COMP_MSG_DBG(self, "R", 2, "bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
@@ -140,6 +145,9 @@ static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *
     if (requestData->direction == COMP_MSG_RECEIVED_DATA) {
 // FIXME TEMPORARY need flag to see if no uart activity!!
       switch (compMsgData->direction) {
+      case COMP_MSG_TRANSFER_DATA:
+        result = self->compMsgSendReceive->sendMsg(self, compMsgData->receivedData, compMsgData->receivedLgth);
+        break;
       case COMP_MSG_TO_SEND_DATA:
         break;
       case COMP_MSG_RECEIVED_DATA:

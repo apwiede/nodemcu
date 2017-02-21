@@ -65,6 +65,7 @@ extern "C" {
 
 #define COMP_MSG_TO_SEND_DATA     (1 << 0)
 #define COMP_MSG_RECEIVED_DATA    (1 << 1)
+#define COMP_MSG_TRANSFER_DATA    (1 << 2)
 
 #define COMP_LIST_NUM_LIST_FIELDS 9
 #define COMP_LIST_CMD_KEY 0x5A5A

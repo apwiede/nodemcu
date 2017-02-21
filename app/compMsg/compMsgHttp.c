@@ -349,19 +349,17 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
     //FIXME handle message here need code!!
     msgLgth = httpMsgInfo->currLgth;
     switch (sud->connectionType) {
-    case NET_SOCKET_TYPE_CLIENT:
-      self->compMsgData->currHdr->hdrHandleType = 'W';
-      COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
-      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
-      COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
-      checkErrOK(result);
-      break;
     case NET_SOCKET_TYPE_SOCKET:
       result = self->compMsgUtil->fromBase64(self, httpMsgInfo->content, &msgLgth, &msgData);
       checkErrOK(result);
       self->compMsgData->currHdr->hdrHandleType = 'W';
       COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
-      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
+      self->compMsgData->sud = sud;
+      self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
+      self->compMsgData->receivedData = msgData;
+      self->compMsgData->receivedLgth = msgLgth;
+      result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
+//      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
       COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
       checkErrOK(result);
       break;
@@ -375,16 +373,11 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
       self->compMsgData->currHdr->hdrHandleType = 'W';
       msgData = httpMsgInfo->content;
       COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
-      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
-      COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
-      checkErrOK(result);
-      break;
-    case NET_SOCKET_TYPE_SOCKET:
-      result = self->compMsgUtil->fromBase64(self, httpMsgInfo->content, &msgLgth, &msgData);
-      checkErrOK(result);
-      self->compMsgData->currHdr->hdrHandleType = 'W';
-      COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
-      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
+      self->compMsgData->sud = sud;
+      self->compMsgData->direction = COMP_MSG_TRANSFER_DATA;
+      self->compMsgData->receivedData = msgData;
+      self->compMsgData->receivedLgth = msgLgth;
+      result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
       COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
       checkErrOK(result);
       break;
