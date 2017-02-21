@@ -1,0 +1,24 @@
+/*!
+  \defgroup grpStartDwarfDbg StartDwarfDbg
+  @{
+    <h2>Start DwarfDbg</h2>
+      <ul>
+        <li>dwarfDbgClass create ::dD<br>
+          <ul>
+            <li>::dD init<br>
+            <li>::dD openElf &lt;elf fiel name&gt;<br>
+            <li>::dD getDbgInfos<br>
+            <li>getCompileUnitInfos<br>
+              <ul>
+                <li>set ::fileInfos [::dD getFileInfos]<br>
+              </ul>
+          </ul>
+        <br>
+      </ul>
+
+    \addtogroup grpDwarfDbg
+        @{
+        @}
+
+  @}
+*/
