@@ -1,6 +1,7 @@
 var searchData=
 [
+  ['bitoffset',['bitOffset',['../structattrValues.html#ade3e90a6b7f5d538307a8b342464161b',1,'attrValues::bitOffset()'],['../structdwMember.html#ac60a3023c0300d96406cf6cff556c3ad',1,'dwMember::bitOffset()']]],
+  ['bitsize',['bitSize',['../structattrValues.html#a61cc311cd65a2e80ee3c8bb44559b0b9',1,'attrValues::bitSize()'],['../structdwMember.html#a75904fd4481da3046965e8bdebc1baf6',1,'dwMember::bitSize()']]],
   ['boolean',['boolean',['../dwarfDbg_8h.html#a621c38f1f10a1c565d897e3178b16d6e',1,'dwarfDbg.h']]],
-  ['bsawhigh',['bSawHigh',['../dwarfDbgElfInfo_8c.html#abf331e158c954d160ab815058e31dc3b',1,'dwarfDbgElfInfo.c']]],
-  ['bsawlow',['bSawLow',['../dwarfDbgElfInfo_8c.html#aac2f10f96c3ec7c3943ee38d9680c3f3',1,'dwarfDbgElfInfo.c']]]
+  ['bytesize',['byteSize',['../structdieAttr.html#afc3392dea0467385e9ca8808ca8239ff',1,'dieAttr::byteSize()'],['../structattrValues.html#a1c4fa5d1b48943db6be9ba2b9b95fca1',1,'attrValues::byteSize()'],['../structdwBaseType.html#a1d75d76ea886c6695b69b71d26ca7e84',1,'dwBaseType::byteSize()'],['../structdwMember.html#aa53b776b3c6be7ec00b3148e90e5bb6e',1,'dwMember::byteSize()'],['../structdwPointerType.html#a9715c8730b68b37c715eaa6e95b700f2',1,'dwPointerType::byteSize()'],['../structdwSubroutineType.html#a66528623a9e8546c15bc77eb3bb3a362',1,'dwSubroutineType::byteSize()'],['../structdwStructureType.html#a67aed9e4a45b6290a95ade58c88aef69',1,'dwStructureType::byteSize()'],['../structdwUnionType.html#a207070d43a7b7f8d36759f4bb302186a',1,'dwUnionType::byteSize()'],['../structdwEnumerationType.html#aad1e5e5afa307970d90be08499b18924',1,'dwEnumerationType::byteSize()']]]
 ];

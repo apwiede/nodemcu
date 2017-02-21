@@ -97,22 +97,78 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a532654a164cc274ad624a6fecad3f96f"><td class="memItemLeft" align="right" valign="top">Tcl_Obj *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a532654a164cc274ad624a6fecad3f96f">Tcl_NewDictObj</a> ()</td></tr>
+<tr class="separator:a532654a164cc274ad624a6fecad3f96f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5469ff359bb31769313b11ce06add14e"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a5469ff359bb31769313b11ce06add14e">addDirName</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char *dirName)</td></tr>
 <tr class="separator:a5469ff359bb31769313b11ce06add14e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e2a396f3bd06dae77d97cada0bcebc0"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a6e2a396f3bd06dae77d97cada0bcebc0">addFileName</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char *fileName, size_t dirNameIdx)</td></tr>
-<tr class="separator:a6e2a396f3bd06dae77d97cada0bcebc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07e48df1362c5a4773b21ccb0e99ef45"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a07e48df1362c5a4773b21ccb0e99ef45">addSourceFile</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char *pathName, size_t compileUnitIdx, size_t *fileNameIdx, size_t *fileInfoIdx)</td></tr>
-<tr class="separator:a07e48df1362c5a4773b21ccb0e99ef45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe85bd6f8244056c73a0f203b0db1e13"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#afe85bd6f8244056c73a0f203b0db1e13">addFileInfo</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, size_t compileUnitIdx, size_t fileNameIdx, size_t *fileInfoIdx)</td></tr>
-<tr class="separator:afe85bd6f8244056c73a0f203b0db1e13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5119904b7d70d6a42ba9e40d40b14616"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a5119904b7d70d6a42ba9e40d40b14616">addFileLine</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, Dwarf_Addr pc, size_t lineNo, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx)</td></tr>
-<tr class="separator:a5119904b7d70d6a42ba9e40d40b14616"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af68315f06b2d1115caf31f19f2bb987e"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#af68315f06b2d1115caf31f19f2bb987e">addPathName</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char *fileName, int dirNameIdx, int *pathNameIdx)</td></tr>
+<tr class="separator:af68315f06b2d1115caf31f19f2bb987e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3c15632c47d74266bbebf2ddf594ba0"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#ae3c15632c47d74266bbebf2ddf594ba0">addCompileUnitFile</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char *pathName, int *pathNameIdx, int *fileInfoIdx)</td></tr>
+<tr class="separator:ae3c15632c47d74266bbebf2ddf594ba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f2c34db5baf092babf756919103dfd7"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a3f2c34db5baf092babf756919103dfd7">addSourceFile</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char *pathName, int *pathNameIdx, int *fileInfoIdx)</td></tr>
+<tr class="separator:a3f2c34db5baf092babf756919103dfd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4df849aa0909652f63b03c778f3ae131"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a4df849aa0909652f63b03c778f3ae131">addFileInfo</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, int pathNameIdx, int *fileInfoIdx)</td></tr>
+<tr class="separator:a4df849aa0909652f63b03c778f3ae131"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69fd8f9736d1faa3f424d80e3054d7ef"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a69fd8f9736d1faa3f424d80e3054d7ef">getPathNameIdxFromFileName</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, const char *pathName, int *pathNameIdx)</td></tr>
+<tr class="separator:a69fd8f9736d1faa3f424d80e3054d7ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a928a045e663af3b23f9c841b6268f231"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a928a045e663af3b23f9c841b6268f231">getFileNameFromPathNameIdx</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, int pathNameIdx, const char **pathName)</td></tr>
+<tr class="separator:a928a045e663af3b23f9c841b6268f231"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc4f124de2304f0ae1f3cea5e5ba6699"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#afc4f124de2304f0ae1f3cea5e5ba6699">dwarfDbgGetFileInfos</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self)</td></tr>
 <tr class="separator:afc4f124de2304f0ae1f3cea5e5ba6699"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8182cab14999e8ac8ad39112a4c5cad"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#ae8182cab14999e8ac8ad39112a4c5cad">dwarfDbgGetFileLines</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, int compileUnitIdx)</td></tr>
+<tr class="separator:ae8182cab14999e8ac8ad39112a4c5cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f2bee34938628f003e26b5af4b06c9b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgFileInfo_8c.html#a2f2bee34938628f003e26b5af4b06c9b">dwarfDbgFileInfoInit</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self)</td></tr>
 <tr class="separator:a2f2bee34938628f003e26b5af4b06c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="ae3c15632c47d74266bbebf2ddf594ba0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t addCompileUnitFile </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>pathName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>pathNameIdx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>fileInfoIdx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00147">147</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a5469ff359bb31769313b11ce06add14e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -145,11 +201,11 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00052">52</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00082">82</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="afe85bd6f8244056c73a0f203b0db1e13"></a>
+<a class="anchor" id="a4df849aa0909652f63b03c778f3ae131"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -165,19 +221,13 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>compileUnitIdx</em>, </td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pathNameIdx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>fileNameIdx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>fileInfoIdx</em>&#160;</td>
         </tr>
         <tr>
@@ -193,11 +243,11 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00164">164</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00276">276</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a5119904b7d70d6a42ba9e40d40b14616"></a>
+<a class="anchor" id="af68315f06b2d1115caf31f19f2bb987e"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -205,67 +255,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t addFileLine </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Dwarf_Addr&#160;</td>
-          <td class="paramname"><em>pc</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>lineNo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>compileUnitIdx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>fileInfoIdx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname"><em>fileLineIdx</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00200">200</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a6e2a396f3bd06dae77d97cada0bcebc0"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static uint8_t addFileName </td>
+          <td class="memname">static uint8_t addPathName </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
           <td class="paramname"><em>self</em>, </td>
@@ -279,8 +269,14 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dirNameIdx</em>&#160;</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dirNameIdx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>pathNameIdx</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -295,11 +291,11 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00083">83</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00113">113</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a07e48df1362c5a4773b21ccb0e99ef45"></a>
+<a class="anchor" id="a3f2c34db5baf092babf756919103dfd7"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -321,19 +317,13 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>compileUnitIdx</em>, </td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>pathNameIdx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname"><em>fileNameIdx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>fileInfoIdx</em>&#160;</td>
         </tr>
         <tr>
@@ -349,7 +339,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00117">117</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00200">200</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
 
 </div>
 </div>
@@ -367,7 +357,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00266">266</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00470">470</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
 
 </div>
 </div>
@@ -385,7 +375,134 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00240">240</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00350">350</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae8182cab14999e8ac8ad39112a4c5cad"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int dwarfDbgGetFileLines </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>compileUnitIdx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00402">402</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a928a045e663af3b23f9c841b6268f231"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getFileNameFromPathNameIdx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pathNameIdx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char **&#160;</td>
+          <td class="paramname"><em>pathName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00332">332</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a69fd8f9736d1faa3f424d80e3054d7ef"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getPathNameIdxFromFileName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>pathName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>pathNameIdx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dwarfDbgFileInfo_8c_source.html#l00310">310</a> of file <a class="el" href="dwarfDbgFileInfo_8c_source.html">dwarfDbgFileInfo.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a532654a164cc274ad624a6fecad3f96f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Tcl_Obj* Tcl_NewDictObj </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

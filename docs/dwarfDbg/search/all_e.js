@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['pc',['pc',['../structfileLineInfo.html#a6574a4a5ed527e7e9f62457efb800b9f',1,'fileLineInfo']]],
-  ['pd_5fdwarf_5fnames_5fprint_5fon_5ferror',['pd_dwarf_names_print_on_error',['../dwarfDbgElfInfo_8c.html#a06995b35a5b72dd1af850b8a8550541a',1,'dwarfDbgElfInfo.c']]],
-  ['print_5fattribute',['print_attribute',['../dwarfDbgElfInfo_8c.html#a173704c50eb8c86b2441d84b1eed211f',1,'dwarfDbgElfInfo.c']]],
-  ['print_5fdie_5fand_5fchildren_5finternal',['print_die_and_children_internal',['../dwarfDbgElfInfo_8c.html#a94ad454867bc64d9e1285376cf260376',1,'dwarfDbgElfInfo.c']]],
-  ['print_5fdie_5fstack',['print_die_stack',['../dwarfDbgElfInfo_8c.html#a385ab43ca109decfd7483dca618466d6',1,'dwarfDbgElfInfo.c']]],
-  ['print_5fone_5fdie',['print_one_die',['../dwarfDbgElfInfo_8c.html#a28379d453500fe8517708679143e86e3',1,'dwarfDbgElfInfo.c']]],
-  ['pubname_5fattr_5fresult',['pubname_attr_result',['../dwarfDbgElfInfo_8c.html#a65dbdb867063f6669746189eff3cca03a1a8406e977478d34b96f1208917971d9',1,'dwarfDbgElfInfo.c']]]
+  ['pathnameidx',['pathNameIdx',['../structcompileUnit.html#aeb1a719b6e214886688dc6ba43278466',1,'compileUnit::pathNameIdx()'],['../structfileInfo.html#a6d40e19b4fe7aa00dddc0df5529bd7a6',1,'fileInfo::pathNameIdx()'],['../structattrValues.html#a384c1e88bdcc68a3eef90f08953ddafa',1,'attrValues::pathNameIdx()'],['../structdwTypeDef.html#a65fa7b2238c596d2e233f6786279f7f3',1,'dwTypeDef::pathNameIdx()'],['../structdwMember.html#a9d63321d88bf61548c264c299569a752',1,'dwMember::pathNameIdx()'],['../structdwStructureType.html#ad2d8e3e1e62653c6d1eadf7795e6a4b4',1,'dwStructureType::pathNameIdx()'],['../structdwUnionType.html#a67cef437284fb0734555793a2ec185a4',1,'dwUnionType::pathNameIdx()'],['../structdwEnumerationType.html#a2840f8a67ce07c30d6002ae06a234cfd',1,'dwEnumerationType::pathNameIdx()']]],
+  ['pathnameinfo',['pathNameInfo',['../structpathNameInfo.html',1,'']]],
+  ['pathnameinfo_5ft',['pathNameInfo_t',['../dwarfDbgFileInfo_8h.html#ac3195703fdd27c65d6a2a06910577a15',1,'dwarfDbgFileInfo.h']]],
+  ['pathnames',['pathNames',['../structpathNamesInfo.html#aed75c900dbb21c6c93264798e85c1a7f',1,'pathNamesInfo']]],
+  ['pathnamesinfo',['pathNamesInfo',['../structpathNamesInfo.html',1,'pathNamesInfo'],['../structdwarfDbgFileInfo.html#a1a7e01a2bcac5b7119f51f60cbaf3d78',1,'dwarfDbgFileInfo::pathNamesInfo()']]],
+  ['pathnamesinfo_5ft',['pathNamesInfo_t',['../dwarfDbgFileInfo_8h.html#ad57b6353726d914ffeb361f5e41b0cd1',1,'dwarfDbgFileInfo.h']]],
+  ['pc',['pc',['../structframeRegCol.html#a3a91219f1871b0c3dd8c1964324b28f2',1,'frameRegCol::pc()'],['../structlineInfo.html#ae7587c995577b7c392d53d01e8c26d04',1,'lineInfo::pc()'],['../structaddr2FileAndLineInfo.html#a66471b3664d64b9bea0ee9e3db6a46dd',1,'addr2FileAndLineInfo::pc()']]],
+  ['prototyped',['prototyped',['../structdwSubroutineType.html#ad82f7d9fb3054c53e81954c3aa0514b3',1,'dwSubroutineType']]]
 ];

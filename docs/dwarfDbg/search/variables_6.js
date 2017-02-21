@@ -1,12 +1,17 @@
 var searchData=
 [
-  ['fd',['fd',['../structelfInfo.html#ac8a1c6ebaf5d5c6884294d969ed5c1fd',1,'elfInfo']]],
-  ['fileinfoidx',['fileInfoIdx',['../structcompileUnit.html#a548e9c1274813e2fd614d9063bb1ffa7',1,'compileUnit']]],
-  ['fileinfos',['fileInfos',['../structcompileUnitInfo.html#adf628556a4fdeca6464e67121b369fab',1,'compileUnitInfo']]],
-  ['filelines',['fileLines',['../structfileInfo.html#a78a83fd4ce9c1e24900c8c34ce537795',1,'fileInfo']]],
-  ['filename',['fileName',['../structfileNameInfo.html#a8c74f57216feef7cca4dfd8941332107',1,'fileNameInfo::fileName()'],['../structcompileUnitInfo.html#a4007b9423772d85d16b0caa90c1de27b',1,'compileUnitInfo::fileName()']]],
-  ['filenameidx',['fileNameIdx',['../structfileInfo.html#a7ed597a5b99a4fae5c90a14a199fe1ee',1,'fileInfo::fileNameIdx()'],['../structcompileUnit.html#a5a89785faf27cca107f553d1de32d51a',1,'compileUnit::fileNameIdx()']]],
-  ['filenames',['fileNames',['../structfileNamesInfo.html#adbe222e2b03f038f4fa7d972cf1e1c09',1,'fileNamesInfo']]],
-  ['filenamesinfo',['fileNamesInfo',['../structdwarfDbgFileInfo.html#a5f446be54e8fb13cb3670da14fc6b127',1,'dwarfDbgFileInfo']]],
-  ['freecell',['freeCell',['../struct__dwarfDbg.html#a4c80644e22ed639745e2a8d5c40c9047',1,'_dwarfDbg']]]
+  ['getaddr_5ft',['getAddr_t',['../structdwarfDbgAddrInfo.html#a48ba3c224ef35121b476d9de6562b777',1,'dwarfDbgAddrInfo']]],
+  ['getaddresssizeandmax',['getAddressSizeAndMax',['../structdwarfDbgCompileUnitInfo.html#ad540293f6c61f70b5aebc7674973cd07',1,'dwarfDbgCompileUnitInfo']]],
+  ['getdebugflags',['getDebugFlags',['../structdwarfDbgDebugInfo.html#a749f2b3de2ee308e60b821b729622f12',1,'dwarfDbgDebugInfo']]],
+  ['getdw_5fat_5fstring',['getDW_AT_string',['../structdwarfDbgStringInfo.html#aa8a79dbbfbb27729f0232874731c23de',1,'dwarfDbgStringInfo']]],
+  ['getdw_5fate_5fstring',['getDW_ATE_string',['../structdwarfDbgStringInfo.html#a55e5b57568cd3f756f3e940796a25873',1,'dwarfDbgStringInfo']]],
+  ['getdw_5fform_5fstring',['getDW_FORM_string',['../structdwarfDbgStringInfo.html#a38091946544c1fdb5f827737e0a3033f',1,'dwarfDbgStringInfo']]],
+  ['getdw_5finl_5fstring',['getDW_INL_string',['../structdwarfDbgStringInfo.html#afcaa99630489821c6569e0747001d4be',1,'dwarfDbgStringInfo']]],
+  ['getdw_5fop_5fstring',['getDW_OP_string',['../structdwarfDbgStringInfo.html#a03049f745ebbe6f54bab1e6f5ef3b9f5',1,'dwarfDbgStringInfo']]],
+  ['getdw_5franges_5ftype_5fstring',['getDW_RANGES_TYPE_string',['../structdwarfDbgStringInfo.html#af0fd3de7e0260643acdc508a9c650fbb',1,'dwarfDbgStringInfo']]],
+  ['getdw_5ftag_5fstring',['getDW_TAG_string',['../structdwarfDbgStringInfo.html#a6e571e2c24774f98537803d0316f8500',1,'dwarfDbgStringInfo']]],
+  ['getfilenamefrompathnameidx',['getFileNameFromPathNameIdx',['../structdwarfDbgFileInfo.html#a67f6fc16c611bfbc058e926483499032',1,'dwarfDbgFileInfo']]],
+  ['getframelist',['getFrameList',['../structdwarfDbgFrameInfo.html#a42c7c52bb8b021d9f6401f9ecb6dd4de',1,'dwarfDbgFrameInfo']]],
+  ['getlocationlist',['getLocationList',['../structdwarfDbgLocationInfo.html#a0eb5b14e7e49c57f972e2e2b703c3bbd',1,'dwarfDbgLocationInfo']]],
+  ['getpathnameidxfromfilename',['getPathNameIdxFromFileName',['../structdwarfDbgFileInfo.html#ae1643d18f8888d053cbed743a82eb18c',1,'dwarfDbgFileInfo']]]
 ];

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['pc',['pc',['../structfileLineInfo.html#a6574a4a5ed527e7e9f62457efb800b9f',1,'fileLineInfo']]],
-  ['pd_5fdwarf_5fnames_5fprint_5fon_5ferror',['pd_dwarf_names_print_on_error',['../dwarfDbgElfInfo_8c.html#a06995b35a5b72dd1af850b8a8550541a',1,'dwarfDbgElfInfo.c']]]
+  ['rangeinfos',['rangeInfos',['../structcompileUnit.html#a504355643af1941a16a61738a42e287f',1,'compileUnit']]],
+  ['refoffset',['refOffset',['../structdieAttr.html#a810f56abf17dbb55ac051523039ae235',1,'dieAttr']]],
+  ['reg',['reg',['../structframeRegCol.html#a3a1bb41181acff37f75f90b8525d65bb',1,'frameRegCol::reg()'],['../structframeDataEntry.html#a4783d43fd49ed4e21012999a68c8ffdc',1,'frameDataEntry::reg()']]]
 ];

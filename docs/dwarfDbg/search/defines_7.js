@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['str',['STR',['../dwarfDbgInt_8h.html#a18d295a837ac71add5578860b55e5502',1,'dwarfDbgInt.h']]]
+  ['nalloc',['NALLOC',['../dwarfDbgInt_8h.html#a30e913ccf93d7ea095a144407af0f9a5',1,'dwarfDbgInt.h']]]
 ];

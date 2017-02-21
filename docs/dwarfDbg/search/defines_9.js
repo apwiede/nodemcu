@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['xstr',['XSTR',['../dwarfDbgInt_8h.html#abe87b341f562fd1cf40b7672e4d759da',1,'dwarfDbgInt.h']]]
+  ['str',['STR',['../dwarfDbgInt_8h.html#a18d295a837ac71add5578860b55e5502',1,'dwarfDbgInt.h']]]
 ];

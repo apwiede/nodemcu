@@ -93,70 +93,46 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0c3be7303bf92c4c0596d07a8813f885"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a0c3be7303bf92c4c0596d07a8813f885">getAttrValue</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, Dwarf_Half attr, Dwarf_Attribute attr_in, char **srcfiles, int cnt, char **attrStr)</td></tr>
-<tr class="separator:a0c3be7303bf92c4c0596d07a8813f885"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8a024f122378df35ee760701b12e189"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#ae8a024f122378df35ee760701b12e189">addCompileUnit</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, size_t *compileUnitIdx)</td></tr>
-<tr class="separator:ae8a024f122378df35ee760701b12e189"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9257053118c3c767969a4f02c9dfc165"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a9257053118c3c767969a4f02c9dfc165">getProducerName</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char **producerName)</td></tr>
-<tr class="separator:a9257053118c3c767969a4f02c9dfc165"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58fe22f41ea00f7f64e3a0bd0e777927"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a58fe22f41ea00f7f64e3a0bd0e777927">getCompileUnitName</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, char **shortName, char **longName)</td></tr>
-<tr class="separator:a58fe22f41ea00f7f64e3a0bd0e777927"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acddf8374b09350afd8a07a2e08b4e4aa"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#acddf8374b09350afd8a07a2e08b4e4aa">getAttribute</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, Dwarf_Half attr, Dwarf_Attribute attr_in, const char **srcfiles, Dwarf_Signed cnt, const char **outStr, int *outValue)</td></tr>
-<tr class="separator:acddf8374b09350afd8a07a2e08b4e4aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62a168306250cb468b87544cd89599e5"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a62a168306250cb468b87544cd89599e5">getCompileUnitLineInfos</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, size_t compileUnitIdx, size_t fileInfoIdx, size_t *fileLineIdx)</td></tr>
-<tr class="separator:a62a168306250cb468b87544cd89599e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee6fcc4eee28c539a3c83be8c1868881"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#aee6fcc4eee28c539a3c83be8c1868881">handleOneDieSection</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self)</td></tr>
-<tr class="separator:aee6fcc4eee28c539a3c83be8c1868881"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90e73212ac452032e366a3f6c2dd0f7c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a90e73212ac452032e366a3f6c2dd0f7c">handleOneDie</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, Dwarf_Die die, char **srcfiles, Dwarf_Signed cnt, Dwarf_Bool isSibling, int dieAndChildrenIdx, int *dieInfoIdx)</td></tr>
+<tr class="separator:a90e73212ac452032e366a3f6c2dd0f7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8b23604799f56b134ae5b3cfd77f337"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#ab8b23604799f56b134ae5b3cfd77f337">handleDieAndChildren</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self, Dwarf_Die in_die_in, char **srcfiles, Dwarf_Signed cnt)</td></tr>
+<tr class="separator:ab8b23604799f56b134ae5b3cfd77f337"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61c5ba8bfe3ffe7b53d1cf5b0daf36a5"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a61c5ba8bfe3ffe7b53d1cf5b0daf36a5">handleCompileUnits</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self)</td></tr>
+<tr class="separator:a61c5ba8bfe3ffe7b53d1cf5b0daf36a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afffb8d39c75da8cb33b18919c6aa6194"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#afffb8d39c75da8cb33b18919c6aa6194">dwarfDbgGetDbgInfos</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self)</td></tr>
 <tr class="separator:afffb8d39c75da8cb33b18919c6aa6194"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30e9c7fda6a17b1b89dea89906287c3b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a30e9c7fda6a17b1b89dea89906287c3b">dwarfDbgGetInfoInit</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self)</td></tr>
-<tr class="separator:a30e9c7fda6a17b1b89dea89906287c3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab65eed9041d6305b0f05aa7d51150aac"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#ab65eed9041d6305b0f05aa7d51150aac">dwarfDbgGetDbgInfoInit</a> (<a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a> self)</td></tr>
+<tr class="separator:ab65eed9041d6305b0f05aa7d51150aac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a0f09b047dd6f96f351b8a1013c97102c"><td class="memItemLeft" align="right" valign="top">static Dwarf_Off&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a0f09b047dd6f96f351b8a1013c97102c">DIEOffset</a> = 0</td></tr>
-<tr class="separator:a0f09b047dd6f96f351b8a1013c97102c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace03b3728ca57cc466393209441a0883"><td class="memItemLeft" align="right" valign="top">static Dwarf_Off&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#ace03b3728ca57cc466393209441a0883">DIEOverallOffset</a> = 0</td></tr>
-<tr class="separator:ace03b3728ca57cc466393209441a0883"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41df321bf146ae7f5a47dbc5a4fc578e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="dwarfDbgEsb_8h.html#ae82828fbbbc707eddb164e191789fc99">dwarfDbgEsb_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a41df321bf146ae7f5a47dbc5a4fc578e">esbShortCuName</a></td></tr>
-<tr class="separator:a41df321bf146ae7f5a47dbc5a4fc578e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d71822c1a52f74578f51972cf9c5544"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="dwarfDbgEsb_8h.html#ae82828fbbbc707eddb164e191789fc99">dwarfDbgEsb_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a5d71822c1a52f74578f51972cf9c5544">esbLongCuName</a></td></tr>
-<tr class="separator:a5d71822c1a52f74578f51972cf9c5544"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc7b29b6d4c897948ace423095d48374"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#acc7b29b6d4c897948ace423095d48374">numDies</a> = 0</td></tr>
+<tr class="separator:acc7b29b6d4c897948ace423095d48374"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab34dbb2cc194c304000747b02081d960"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#ab34dbb2cc194c304000747b02081d960">numSiblings</a> = 0</td></tr>
+<tr class="separator:ab34dbb2cc194c304000747b02081d960"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f08554c0dc92b8611b48e024e84c7d5"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a5f08554c0dc92b8611b48e024e84c7d5">numAddSibling</a> = 0</td></tr>
+<tr class="separator:a5f08554c0dc92b8611b48e024e84c7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6620daa01bc49c37e1850f9101cd240b"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#a6620daa01bc49c37e1850f9101cd240b">numAddChild</a> = 0</td></tr>
+<tr class="separator:a6620daa01bc49c37e1850f9101cd240b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4f6994baae97bcc540e8e71bd32b857"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dwarfDbgGetDbgInfo_8c.html#ab4f6994baae97bcc540e8e71bd32b857">childrenLevel</a> = 0</td></tr>
+<tr class="separator:ab4f6994baae97bcc540e8e71bd32b857"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="ae8a024f122378df35ee760701b12e189"></a>
+<a class="anchor" id="ab65eed9041d6305b0f05aa7d51150aac"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t addCompileUnit </td>
+          <td class="memname">int dwarfDbgGetDbgInfoInit </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>self</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname"><em>compileUnitIdx</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00048">48</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00411">411</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
 
 </div>
 </div>
@@ -174,29 +150,11 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00547">547</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00390">390</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a30e9c7fda6a17b1b89dea89906287c3b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int dwarfDbgGetInfoInit </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00560">560</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="acddf8374b09350afd8a07a2e08b4e4aa"></a>
+<a class="anchor" id="a61c5ba8bfe3ffe7b53d1cf5b0daf36a5"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -204,7 +162,33 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t getAttribute </td>
+          <td class="memname">static uint8_t handleCompileUnits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00248">248</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab8b23604799f56b134ae5b3cfd77f337"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t handleDieAndChildren </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
           <td class="paramname"><em>self</em>, </td>
@@ -212,19 +196,61 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Dwarf_Half&#160;</td>
-          <td class="paramname"><em>attr</em>, </td>
+          <td class="paramtype">Dwarf_Die&#160;</td>
+          <td class="paramname"><em>in_die_in</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Dwarf_Attribute&#160;</td>
-          <td class="paramname"><em>attr_in</em>, </td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>srcfiles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char **&#160;</td>
+          <td class="paramtype">Dwarf_Signed&#160;</td>
+          <td class="paramname"><em>cnt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00172">172</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a90e73212ac452032e366a3f6c2dd0f7c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t handleOneDie </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Dwarf_Die&#160;</td>
+          <td class="paramname"><em>die</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char **&#160;</td>
           <td class="paramname"><em>srcfiles</em>, </td>
         </tr>
         <tr>
@@ -236,74 +262,20 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char **&#160;</td>
-          <td class="paramname"><em>outStr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>outValue</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00253">253</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a0c3be7303bf92c4c0596d07a8813f885"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static int getAttrValue </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Dwarf_Half&#160;</td>
-          <td class="paramname"><em>attr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Dwarf_Attribute&#160;</td>
-          <td class="paramname"><em>attr_in</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&#160;</td>
-          <td class="paramname"><em>srcfiles</em>, </td>
+          <td class="paramtype">Dwarf_Bool&#160;</td>
+          <td class="paramname"><em>isSibling</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>cnt</em>, </td>
+          <td class="paramname"><em>dieAndChildrenIdx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">char **&#160;</td>
-          <td class="paramname"><em>attrStr</em>&#160;</td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>dieInfoIdx</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -318,164 +290,12 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00152">152</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a62a168306250cb468b87544cd89599e5"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static uint8_t getCompileUnitLineInfos </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>compileUnitIdx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>fileInfoIdx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname"><em>fileLineIdx</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00290">290</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a58fe22f41ea00f7f64e3a0bd0e777927"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static int getCompileUnitName </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&#160;</td>
-          <td class="paramname"><em>shortName</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&#160;</td>
-          <td class="paramname"><em>longName</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00112">112</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a9257053118c3c767969a4f02c9dfc165"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static int getProducerName </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char **&#160;</td>
-          <td class="paramname"><em>producerName</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00086">86</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="aee6fcc4eee28c539a3c83be8c1868881"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static uint8_t handleOneDieSection </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="dwarfDbg_8h.html#acc8234870339655ca501078a83380429">dwarfDbgPtr_t</a>&#160;</td>
-          <td class="paramname"><em>self</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00348">348</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00052">52</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a class="anchor" id="a0f09b047dd6f96f351b8a1013c97102c"></a>
+<a class="anchor" id="ab4f6994baae97bcc540e8e71bd32b857"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -483,7 +303,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Dwarf_Off DIEOffset = 0</td>
+          <td class="memname">int childrenLevel = 0</td>
         </tr>
       </table>
   </td>
@@ -493,11 +313,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00075">75</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00048">48</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ace03b3728ca57cc466393209441a0883"></a>
+<a class="anchor" id="a6620daa01bc49c37e1850f9101cd240b"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -505,7 +325,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Dwarf_Off DIEOverallOffset = 0</td>
+          <td class="memname">int numAddChild = 0</td>
         </tr>
       </table>
   </td>
@@ -515,11 +335,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00076">76</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00047">47</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a5d71822c1a52f74578f51972cf9c5544"></a>
+<a class="anchor" id="a5f08554c0dc92b8611b48e024e84c7d5"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -527,7 +347,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="dwarfDbgEsb_8h.html#ae82828fbbbc707eddb164e191789fc99">dwarfDbgEsb_t</a> esbLongCuName</td>
+          <td class="memname">int numAddSibling = 0</td>
         </tr>
       </table>
   </td>
@@ -537,11 +357,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00078">78</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00046">46</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a41df321bf146ae7f5a47dbc5a4fc578e"></a>
+<a class="anchor" id="acc7b29b6d4c897948ace423095d48374"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -549,7 +369,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="dwarfDbgEsb_8h.html#ae82828fbbbc707eddb164e191789fc99">dwarfDbgEsb_t</a> esbShortCuName</td>
+          <td class="memname">int numDies = 0</td>
         </tr>
       </table>
   </td>
@@ -559,7 +379,29 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00077">77</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00044">44</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab34dbb2cc194c304000747b02081d960"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int numSiblings = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html#l00045">45</a> of file <a class="el" href="dwarfDbgGetDbgInfo_8c_source.html">dwarfDbgGetDbgInfo.c</a>.</p>
 
 </div>
 </div>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['rangeok',['RANGEOK',['../dwarfDbgInt_8h.html#a103e8b7c2f19d00be09a4878a72614f5',1,'dwarfDbgInt.h']]]
+  ['max_5fbuffer_5fsize',['MAX_BUFFER_SIZE',['../dwarfDbgDebugInfo_8c.html#ad4d796b98c583d49e83adabd74a63bf6',1,'dwarfDbgDebugInfo.c']]]
 ];
