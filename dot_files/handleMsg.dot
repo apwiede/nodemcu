@@ -89,7 +89,7 @@ digraph G1 {
   sendCloudMsg -> Queue:f3;
   sendCloudMsg -> Queue:f4;
   {rank=same; "typeRSendAnswer"; "typeWForwardMsg"; "webSocketSendData"; "sendCloudMsg";}
-  typeWForwardMsg[style="filled", color="orange", label=<<u>typeWForwardMsg</u>> URL="\ref forwardMsg"];
+  typeWForwardMsg[style="filled", color="green", label=<<u>typeWForwardMsg</u>> URL="\ref forwardMsg"];
   typeRSendAnswer -> Queue:f0;
   typeWForwardMsg -> Queue:f0;
   typeRSendAnswer -> deleteMsg;
