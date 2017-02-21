@@ -134,24 +134,31 @@ typedef struct dwArrayType {
 } dwArrayType_t;
 
 typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeStrIdx);
+typedef uint8_t (* addArrayType_t)(dwarfDbgPtr_t self, int dwTypeIdx, int siblingIdx, int *arrayTypeIdx);
 typedef uint8_t (* addBaseType_t)(dwarfDbgPtr_t self, const char *name, int byteSize, int encoding, int *baseTypeIdx);
-typedef uint8_t (* addTypeDef_t)(dwarfDbgPtr_t self, const char *name, int pathNameIdx, int lineNo, int dwTypeIdx, int *typeDefIdx);
 typedef uint8_t (* addConstType_t)(dwarfDbgPtr_t self, int dwTypeIdx, int *constTypeIdx);
+typedef uint8_t (* addEnumerationType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addEnumerator_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addMember_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addPointerType_t)(dwarfDbgPtr_t self, int byteSize, int dwtypeIdx, int *pointerTypeIdx);
 typedef uint8_t (* addStructureType_t)(dwarfDbgPtr_t self, const char *name, int byteSize, int pathNameIdx, int lineNo, int declaration, int *structureTypeIdx);
-typedef uint8_t (* addArrayType_t)(dwarfDbgPtr_t self, int dwTypeIdx, int siblingIdx, int *arrayTypeIdx);
-typedef uint8_t (* addEnumerationType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
-typedef uint8_t (* addEnumerator_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
+typedef uint8_t (* addSubroutineType_t)(dwarfDbgPtr_t self, int prototyped, int byteSize, int dwTypeIdx, int siblingIdx, int *subroutineTypeIdx);
+typedef uint8_t (* addTypeDef_t)(dwarfDbgPtr_t self, const char *name, int pathNameIdx, int lineNo, int dwTypeIdx, int *typeDefIdx);
 typedef uint8_t (* addUnionType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
 typedef uint8_t (* addVolatileType_t)(dwarfDbgPtr_t self, int byteSize, int encoding, char *name, int *baseTypeIdx);
-typedef uint8_t (* addSubroutineType_t)(dwarfDbgPtr_t self, int prototyped, int byteSize, int dwTypeIdx, int siblingIdx, int *subroutineTypeIdx);
-typedef uint8_t (* handlePointerType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+
+typedef uint8_t (* handleArrayType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, int isSibling);
 typedef uint8_t (* handleConstType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleEnumerationType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleEnumerator_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleMember_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handlePointerType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
 typedef uint8_t (* handleStructureType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
 typedef uint8_t (* handleSubroutineType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
 typedef uint8_t (* handleTypedef_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
-typedef uint8_t (* handleArrayType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, int isSibling);
+typedef uint8_t (* handleUnionType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+typedef uint8_t (* handleVolatileType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, Dwarf_Bool isSibling);
+
 typedef uint8_t (* addTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dwarf_Bool isSibling);
 typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
 typedef uint8_t (* addSiblingsTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
@@ -210,24 +217,31 @@ typedef struct dwarfDbgTypeInfo {
   char **typeStrs;
 
   addTypeStr_t addTypeStr;
+  addArrayType_t addArrayType;
   addBaseType_t addBaseType;
-  addTypeDef_t addTypeDef;
   addConstType_t addConstType;
+  addEnumerationType_t addEnumerationType;
+  addEnumerator_t addEnumerator;
   addMember_t addMember;
   addPointerType_t addPointerType;
   addStructureType_t addStructureType;
-  addArrayType_t addArrayType;
-  addEnumerationType_t addEnumerationType;
-  addEnumerator_t addEnumerator;
+  addSubroutineType_t addSubroutineType;
+  addTypeDef_t addTypeDef;
   addUnionType_t addUnionType;
   addVolatileType_t addVolatileType;
-  addSubroutineType_t addSubroutineType;
-  handlePointerType_t handlePointerType;
+
+  handleArrayType_t handleArrayType;
   handleConstType_t handleConstType;
+  handleEnumerationType_t handleEnumerationType;
+  handleEnumerator_t handleEnumerator;
+  handleMember_t handleMember;
+  handlePointerType_t handlePointerType;
   handleStructureType_t handleStructureType;
   handleSubroutineType_t handleSubroutineType;
-  handleArrayType_t handleArrayType;
   handleTypedef_t handleTypedef;
+  handleUnionType_t handleUnionType;
+  handleVolatileType_t handleVolatileType;
+
   addTypes_t addTypes;
   addChildrenTypes_t addChildrenTypes;
   addSiblingsTypes_t addSiblingsTypes;

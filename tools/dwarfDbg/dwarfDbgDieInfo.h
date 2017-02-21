@@ -65,13 +65,18 @@ typedef struct dieAttr {
   locationInfo_t *locationInfo;
 } dieAttr_t;
 
-#define TAG_REF_BASE_TYPE        0x01
-#define TAG_REF_TYPEDEF          0x02
-#define TAG_REF_POINTER_TYPE     0x04
-#define TAG_REF_SUBROUTINE_TYPE  0x08
-#define TAG_REF_STRUCTURE_TYPE   0x10
-#define TAG_REF_CONST_TYPE       0x20
-#define TAG_REF_ARRAY_TYPE       0x40
+#define TAG_REF_BASE_TYPE        0x001
+#define TAG_REF_TYPEDEF          0x002
+#define TAG_REF_POINTER_TYPE     0x004
+#define TAG_REF_SUBROUTINE_TYPE  0x008
+#define TAG_REF_STRUCTURE_TYPE   0x010
+#define TAG_REF_CONST_TYPE       0x020
+#define TAG_REF_ARRAY_TYPE       0x040
+#define TAG_REF_MEMBER           0x080
+#define TAG_REF_ENUMERATION_TYPE 0x100
+#define TAG_REF_ENUMERATOR       0x200
+#define TAG_REF_UNION_TYPE       0x400
+#define TAG_REF_VOLATILE_TYPE    0x800
 
 typedef struct dieInfo {
   Dwarf_Off offset;     // this can be referenced by dieAttr.refOffset.
