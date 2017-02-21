@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['startdwarfdbg',['StartDwarfDbg',['../group__grpStartDwarfDbg.html',1,'']]],
   ['setdebugflags',['setDebugFlags',['../structdwarfDbgDebugInfo.html#a85b571e2e57a78e1b487c00e6fe47cb2',1,'dwarfDbgDebugInfo::setDebugFlags()'],['../dwarfDbgDebugInfo_8c.html#ab42dd1f5e0f83cb14eed0902aa036a95',1,'setDebugFlags():&#160;dwarfDbgDebugInfo.c']]],
   ['setdebugflags_5ft',['setDebugFlags_t',['../dwarfDbgDebugInfo_8h.html#a44df6444b282822dcfc2b0d0f7a6dffc',1,'dwarfDbgDebugInfo.h']]],
   ['shortfilename',['shortFileName',['../structcompileUnit.html#a53b37f739e2b1f0557c5bd487c684713',1,'compileUnit']]],

@@ -28,5 +28,7 @@ var searchData=
   ['getlocationlist_5ft',['getLocationList_t',['../dwarfDbgLocationInfo_8h.html#aebfda060b8716f7e88fda83b3c70219b',1,'dwarfDbgLocationInfo.h']]],
   ['getpathnameidxfromfilename',['getPathNameIdxFromFileName',['../structdwarfDbgFileInfo.html#ae1643d18f8888d053cbed743a82eb18c',1,'dwarfDbgFileInfo::getPathNameIdxFromFileName()'],['../dwarfDbgFileInfo_8c.html#a69fd8f9736d1faa3f424d80e3054d7ef',1,'getPathNameIdxFromFileName():&#160;dwarfDbgFileInfo.c']]],
   ['getpathnameidxfromfilename_5ft',['getPathNameIdxFromFileName_t',['../dwarfDbgFileInfo_8h.html#a342663c95443769bc0ffe62abfc2c981',1,'dwarfDbgFileInfo.h']]],
-  ['gettyperefidx',['getTypeRefIdx',['../dwarfDbgTypeInfo_8c.html#af6aab565406f0a7d920319fbf32575bc',1,'dwarfDbgTypeInfo.c']]]
+  ['gettyperefidx',['getTypeRefIdx',['../dwarfDbgTypeInfo_8c.html#af6aab565406f0a7d920319fbf32575bc',1,'dwarfDbgTypeInfo.c']]],
+  ['grpdwarfdbg',['GrpDwarfDbg',['../group__grpDwarfDbg.html',1,'']]],
+  ['grpstartdwarfdbg_2edoxy',['grpStartDwarfDbg.doxy',['../grpStartDwarfDbg_8doxy.html',1,'']]]
 ];
