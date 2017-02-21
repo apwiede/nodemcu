@@ -7,6 +7,8 @@ var searchData=
   ['u8cmdlgth',['u8CmdLgth',['../structmsgParts.html#a9389b836a9476f5b794022b3abd1730b',1,'msgParts']]],
   ['uartreceivecb',['uartReceiveCb',['../structcompMsgSendReceive.html#a61e1db7590445a4505558dc348fcc953',1,'compMsgSendReceive::uartReceiveCb()'],['../compMsgSendReceive_8c.html#aabc0feb70921c0adbf3d68f419767263',1,'uartReceiveCb():&#160;compMsgSendReceive.c']]],
   ['uartreceivecb_5ft',['uartReceiveCb_t',['../compMsgSendReceive_8h.html#a62c0b2e21ee772e85c947b97f57cdadf',1,'compMsgSendReceive.h']]],
+  ['uartsendanswer',['uartSendAnswer',['../structcompMsgSendReceive.html#a67a61215d975b4210a03614d54ea3e71',1,'compMsgSendReceive::uartSendAnswer()'],['../compMsgSendReceive_8c.html#a17348594b3adbc6a1d16989b3683e490',1,'uartSendAnswer():&#160;compMsgSendReceive.c']]],
+  ['uartsendanswer_5ft',['uartSendAnswer_t',['../compMsgSendReceive_8h.html#a9429eaae57e9d92d1e36a22ae53605e0',1,'compMsgSendReceive.h']]],
   ['uartsetup',['uartSetup',['../structcompMsgSendReceive.html#ae8ccb0ac8c8c1628b93961790ec51815',1,'compMsgSendReceive::uartSetup()'],['../compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387',1,'uartSetup():&#160;compMsgSendReceive.c']]],
   ['uartsetup_5ft',['uartSetup_t',['../compMsgSendReceive_8h.html#a93d508a0b980ad6b95ae3d2fe447ce16',1,'compMsgSendReceive.h']]],
   ['updatefirmware',['updateFirmware',['../structcompMsgOta.html#a1c7e88ca2b9c2982eb87e61776cede10',1,'compMsgOta::updateFirmware()'],['../compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55',1,'updateFirmware():&#160;compMsgOta.c']]],
@@ -26,5 +28,6 @@ var searchData=
   ['urls',['urls',['../structsocketUserData.html#a011f222d5bb8be45f3def37028dba9ea',1,'socketUserData']]],
   ['userupgradedata',['userUpgradeData',['../structuserUpgradeData.html',1,'']]],
   ['userupgradedata_5ft',['userUpgradeData_t',['../compMsgOta_8c.html#a0d7a3bf9821d166e271cf95472df532f',1,'compMsgOta.c']]],
+  ['useuart',['useUart',['../structcompMsgDebug.html#a6cbf0fe5172c7e36f05fd25c72c30bc4',1,'compMsgDebug']]],
   ['uud',['uud',['../compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb',1,'compMsgOta.c']]]
 ];

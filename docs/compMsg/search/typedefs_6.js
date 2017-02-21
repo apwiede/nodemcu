@@ -4,6 +4,7 @@ var searchData=
   ['getactioncallbackname_5ft',['getActionCallbackName_t',['../compMsgAction_8h.html#a1bc5526841c7fdfed901f9ea0bc9a7ab',1,'compMsgAction.h']]],
   ['getactionmode_5ft',['getActionMode_t',['../compMsgAction_8h.html#ae2a0b92b17ea91d5008061af412bb738',1,'compMsgAction.h']]],
   ['getbssscaninfo_5ft',['getBssScanInfo_t',['../compMsgWifiData_8h.html#a3c7169c1b63517e11c2d8663b5ab2abc',1,'compMsgWifiData.h']]],
+  ['getclientsequencenum_5ft',['getClientSequenceNum_t',['../compMsgWifiData_8h.html#afd59a9615e9dcaf6be0967aeb2f4bc02',1,'compMsgWifiData.h']]],
   ['getcrc_5ft',['getCrc_t',['../compMsgDataView_8h.html#a23b66a7f50652fc68414bbe3b60b8252',1,'compMsgDataView.h']]],
   ['getcryptkey_5ft',['getCryptKey_t',['../compMsgModuleData_8h.html#a5da1ddff2efa8d68d84743495da03ff2',1,'compMsgModuleData.h']]],
   ['getdataviewdata_5ft',['getDataViewData_t',['../dataView_8h.html#a5e0d8c44bf08a710ab511930d6dfb6a4',1,'dataView.h']]],
@@ -52,7 +53,7 @@ var searchData=
   ['getuint8vector_5ft',['getUint8Vector_t',['../dataView_8h.html#a642fbc8b056f3fc0004fda2cfbc32723',1,'dataView.h']]],
   ['getuserdata_5ft',['getUserData_t',['../compMsgOta_8h.html#af394e6a815a57e48f1a34b74f059a26d',1,'compMsgOta.h']]],
   ['getwificonfig_5ft',['getWifiConfig_t',['../compMsgWifiData_8h.html#a1c9b3c51be3f3e79f525684993f07d3b',1,'compMsgWifiData.h']]],
-  ['getwifikeyvaluekeys_5ft',['getWifiKeyValueKeys_t',['../compMsgMsgDesc_8h.html#ab1134ab2b2dcf2ee74d8380a7a1e8748',1,'compMsgMsgDesc.h']]],
+  ['getwifikeyvaluekeys_5ft',['getWifiKeyValueKeys_t',['../compMsgMsgDesc_8h.html#ac62561b4f1682f24e7b435f90ead6740',1,'compMsgMsgDesc.h']]],
   ['getwifiremoteport_5ft',['getWifiRemotePort_t',['../compMsgWifiData_8h.html#a2bfb8aaf504182fc5a5cb373af1f7d8f',1,'compMsgWifiData.h']]],
   ['getwifivalue_5ft',['getWifiValue_t',['../compMsgWifiData_8h.html#a6770b4c3642e5b4e5182227b3e48b0d2',1,'compMsgWifiData.h']]]
 ];

@@ -213,6 +213,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:aa626a4a525730dfcd781057f00a2a2f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5da1ddff2efa8d68d84743495da03ff2"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8h.html#a5da1ddff2efa8d68d84743495da03ff2">getCryptKey_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:a5da1ddff2efa8d68d84743495da03ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5a54fc7879ab0586353559439e5c9d2"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8h.html#ac5a54fc7879ab0586353559439e5c9d2">restoreUserData_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:ac5a54fc7879ab0586353559439e5c9d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acab55f76725c7fced9dc0505c09217d5"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8h.html#acab55f76725c7fced9dc0505c09217d5">setModuleValue_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue)</td></tr>
 <tr class="separator:acab55f76725c7fced9dc0505c09217d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87353a21f21d61d4d4ddd02bd137a3dd"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgModuleData_8h.html#a87353a21f21d61d4d4ddd02bd137a3dd">setModuleValues_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
@@ -969,6 +971,20 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ac5a54fc7879ab0586353559439e5c9d2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint8_t(*  restoreUserData_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgModuleData_8h_source.html#l00106">106</a> of file <a class="el" href="compMsgModuleData_8h_source.html">compMsgModuleData.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="acab55f76725c7fced9dc0505c09217d5"></a>
 <div class="memitem">
 <div class="memproto">
@@ -979,7 +995,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8h_source.html#l00106">106</a> of file <a class="el" href="compMsgModuleData_8h_source.html">compMsgModuleData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8h_source.html#l00107">107</a> of file <a class="el" href="compMsgModuleData_8h_source.html">compMsgModuleData.h</a>.</p>
 
 </div>
 </div>
@@ -993,7 +1009,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8h_source.html#l00107">107</a> of file <a class="el" href="compMsgModuleData_8h_source.html">compMsgModuleData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8h_source.html#l00108">108</a> of file <a class="el" href="compMsgModuleData_8h_source.html">compMsgModuleData.h</a>.</p>
 
 </div>
 </div>
@@ -1007,7 +1023,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8h_source.html#l00108">108</a> of file <a class="el" href="compMsgModuleData_8h_source.html">compMsgModuleData.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8h_source.html#l00109">109</a> of file <a class="el" href="compMsgModuleData_8h_source.html">compMsgModuleData.h</a>.</p>
 
 </div>
 </div>
@@ -1026,7 +1042,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00683">683</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00736">736</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>
@@ -1043,7 +1059,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00738">738</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgModuleData_8c_source.html#l00792">792</a> of file <a class="el" href="compMsgModuleData_8c_source.html">compMsgModuleData.c</a>.</p>
 
 </div>
 </div>

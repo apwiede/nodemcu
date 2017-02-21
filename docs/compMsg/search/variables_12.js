@@ -5,10 +5,12 @@ var searchData=
   ['u8cmdkey',['u8CmdKey',['../structactionName2Action.html#a5b0fd45a8541726fd92975a02b866702',1,'actionName2Action']]],
   ['u8cmdlgth',['u8CmdLgth',['../structmsgParts.html#a9389b836a9476f5b794022b3abd1730b',1,'msgParts']]],
   ['uartreceivecb',['uartReceiveCb',['../structcompMsgSendReceive.html#a61e1db7590445a4505558dc348fcc953',1,'compMsgSendReceive']]],
+  ['uartsendanswer',['uartSendAnswer',['../structcompMsgSendReceive.html#a67a61215d975b4210a03614d54ea3e71',1,'compMsgSendReceive']]],
   ['uartsetup',['uartSetup',['../structcompMsgSendReceive.html#ae8ccb0ac8c8c1628b93961790ec51815',1,'compMsgSendReceive']]],
   ['updatefirmware',['updateFirmware',['../structcompMsgOta.html#a1c7e88ca2b9c2982eb87e61776cede10',1,'compMsgOta']]],
   ['updatemodulevalues',['updateModuleValues',['../structcompMsgModuleData.html#a4ea8eccfbcfb1e8262ad6b9218486580',1,'compMsgModuleData']]],
   ['updatespiffs',['updateSpiffs',['../structcompMsgOta.html#ad7e778a3de1776b8a72573b126629957',1,'compMsgOta']]],
   ['urls',['urls',['../structsocketUserData.html#a011f222d5bb8be45f3def37028dba9ea',1,'socketUserData']]],
+  ['useuart',['useUart',['../structcompMsgDebug.html#a6cbf0fe5172c7e36f05fd25c72c30bc4',1,'compMsgDebug']]],
   ['uud',['uud',['../compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb',1,'compMsgOta.c']]]
 ];

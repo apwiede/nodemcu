@@ -120,6 +120,8 @@ Data Structures</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:a383cc726612c3f31cc235472be55516b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#a383cc726612c3f31cc235472be55516b">TCP</a>&#160;&#160;&#160;ESPCONN_TCP</td></tr>
 <tr class="separator:a383cc726612c3f31cc235472be55516b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb1fd47306841442c936bcadaf86a5f1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#abb1fd47306841442c936bcadaf86a5f1">MAX_CONNECTIONS_ALLOWED</a>&#160;&#160;&#160;4</td></tr>
+<tr class="separator:abb1fd47306841442c936bcadaf86a5f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0ab6f439d003d912087974e24160b68"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#ac0ab6f439d003d912087974e24160b68">MAX_SOCKET</a>&#160;&#160;&#160;5</td></tr>
 <tr class="separator:ac0ab6f439d003d912087974e24160b68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab186308cde33202c1a9d4d72b449df93"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#ab186308cde33202c1a9d4d72b449df93">BASE64_INVALID</a>&#160;&#160;&#160;'\xff'</td></tr>
@@ -171,8 +173,8 @@ Functions</h2></td></tr>
 <tr class="memitem:adf6d2bdc4db9359a62e950e2594d26ae"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#adf6d2bdc4db9359a62e950e2594d26ae">netSocketSendData</a> (<a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, const char *payload, int size)</td></tr>
 <tr class="memdesc:adf6d2bdc4db9359a62e950e2594d26ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">send message data to a http scoket  <a href="#adf6d2bdc4db9359a62e950e2594d26ae">More...</a><br /></td></tr>
 <tr class="separator:adf6d2bdc4db9359a62e950e2594d26ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0bee92aee0c62043835cf8f00f21d87c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#a0bee92aee0c62043835cf8f00f21d87c">netSocketRecv</a> (char *payload, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char **data, int *lgth)</td></tr>
-<tr class="separator:a0bee92aee0c62043835cf8f00f21d87c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75c2d8a43d8f7a5f61629fb0d5d516d1"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#a75c2d8a43d8f7a5f61629fb0d5d516d1">netSocketRecv</a> (char *payload, int payloadLgth, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char **data, int *lgth)</td></tr>
+<tr class="separator:a75c2d8a43d8f7a5f61629fb0d5d516d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5b7a821a95df9ef50b651e13221391"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#abe5b7a821a95df9ef50b651e13221391">serverDisconnected</a> (void *arg)</td></tr>
 <tr class="separator:abe5b7a821a95df9ef50b651e13221391"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add14ab070bc8bc84593024915206e278"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#add14ab070bc8bc84593024915206e278">serverReconnected</a> (void *arg, int8_t err)</td></tr>
@@ -193,10 +195,10 @@ Functions</h2></td></tr>
 <tr class="separator:aa9474a6de93bd89962db9deff38e4e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac01e7eb9a429723150a4de75ee89df45"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#ac01e7eb9a429723150a4de75ee89df45">netSocketConnected</a> (void *arg)</td></tr>
 <tr class="separator:ac01e7eb9a429723150a4de75ee89df45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a980f2c5b8c5840b43d47ad6fc7feaa25"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#a980f2c5b8c5840b43d47ad6fc7feaa25">socketConnect</a> (void *arg)</td></tr>
-<tr class="separator:a980f2c5b8c5840b43d47ad6fc7feaa25"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30b408f19e7e577377facdf4c8da4120"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#a30b408f19e7e577377facdf4c8da4120">serverConnected</a> (void *arg)</td></tr>
-<tr class="separator:a30b408f19e7e577377facdf4c8da4120"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1a65a321ecfe59e26dc5d29e2a36e40"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#ad1a65a321ecfe59e26dc5d29e2a36e40">netSocketConnect</a> (void *arg)</td></tr>
+<tr class="separator:ad1a65a321ecfe59e26dc5d29e2a36e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79c76c0d11f13576dd2919ed60c143f6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#a79c76c0d11f13576dd2919ed60c143f6">netServerConnected</a> (void *arg)</td></tr>
+<tr class="separator:a79c76c0d11f13576dd2919ed60c143f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2fe52f276d28d3a68b80c044be7a910"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#ae2fe52f276d28d3a68b80c044be7a910">netSocketStart</a> (void *arg)</td></tr>
 <tr class="separator:ae2fe52f276d28d3a68b80c044be7a910"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a585f116978fce5891187c7703a5d67"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgNetSocket_8c.html#a5a585f116978fce5891187c7703a5d67">socketDnsFound</a> (const char *name, ip_addr_t *ipaddr, void *arg)</td></tr>
@@ -242,7 +244,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00083">83</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00085">85</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -256,7 +258,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00084">84</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00086">86</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -274,7 +276,21 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00085">85</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00087">87</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abb1fd47306841442c936bcadaf86a5f1"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX_CONNECTIONS_ALLOWED&#160;&#160;&#160;4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00063">63</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -288,7 +304,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00063">63</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00064">64</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -302,7 +318,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00087">87</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00089">89</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -331,7 +347,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00091">91</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00093">93</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -345,7 +361,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00092">92</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00094">94</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -406,7 +422,7 @@ Variables</h2></td></tr>
 </td></tr>
 </table>
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00071">71</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00073">73</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -425,7 +441,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00833">833</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00860">860</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -451,7 +467,59 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00219">219</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00237">237</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a79c76c0d11f13576dd2919ed60c143f6"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void netServerConnected </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00450">450</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad1a65a321ecfe59e26dc5d29e2a36e40"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void netSocketConnect </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00415">415</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -477,7 +545,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00350">350</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00374">374</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -503,7 +571,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00248">248</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00266">266</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -545,7 +613,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00301">301</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00319">319</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -581,11 +649,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00287">287</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00305">305</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a0bee92aee0c62043835cf8f00f21d87c"></a>
+<a class="anchor" id="a75c2d8a43d8f7a5f61629fb0d5d516d1"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -597,6 +665,12 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">char *&#160;</td>
           <td class="paramname"><em>payload</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>payloadLgth</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -629,7 +703,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00130">130</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00133">133</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -655,7 +729,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00772">772</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00799">799</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -708,7 +782,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Error code or ErrorOK </dd></dl>
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00108">108</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00111">111</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -734,7 +808,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00329">329</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00353">353</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -760,7 +834,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00483">483</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00507">507</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -786,7 +860,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00821">821</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00848">848</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -812,33 +886,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00551">551</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a30b408f19e7e577377facdf4c8da4120"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void serverConnected </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>arg</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00426">426</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00575">575</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -864,7 +912,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00150">150</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00162">162</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -900,33 +948,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00163">163</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a980f2c5b8c5840b43d47ad6fc7feaa25"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void socketConnect </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>arg</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00391">391</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00175">175</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -968,7 +990,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00503">503</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00527">527</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1010,7 +1032,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00176">176</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00188">188</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1036,7 +1058,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00204">204</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00222">222</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1062,7 +1084,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00660">660</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00685">685</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1085,7 +1107,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00089">89</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00091">91</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1107,7 +1129,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00094">94</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00096">96</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1129,7 +1151,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00096">96</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00098">98</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1151,7 +1173,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00067">67</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00069">69</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1173,7 +1195,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00095">95</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00097">97</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1195,7 +1217,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00065">65</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00067">67</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1217,7 +1239,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00064">64</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00066">66</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>
@@ -1239,7 +1261,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00146">146</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00099">99</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
 
 </div>
 </div>

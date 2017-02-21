@@ -109,8 +109,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:a93d508a0b980ad6b95ae3d2fe447ce16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62c0b2e21ee772e85c947b97f57cdadf"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a62c0b2e21ee772e85c947b97f57cdadf">uartReceiveCb_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, size_t lgth)</td></tr>
 <tr class="separator:a62c0b2e21ee772e85c947b97f57cdadf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7764ffb81cffc7074512694660605cb8"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a7764ffb81cffc7074512694660605cb8">typeRSendAnswer_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *data, uint8_t msgLgth)</td></tr>
-<tr class="separator:a7764ffb81cffc7074512694660605cb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9429eaae57e9d92d1e36a22ae53605e0"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a9429eaae57e9d92d1e36a22ae53605e0">uartSendAnswer_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *data, uint8_t msgLgth)</td></tr>
+<tr class="separator:a9429eaae57e9d92d1e36a22ae53605e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2f270c2337d5bdc0ab5fe9d5ada052e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#af2f270c2337d5bdc0ab5fe9d5ada052e">prepareCloudMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:af2f270c2337d5bdc0ab5fe9d5ada052e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2261e0ff45c09819eee336c88c950219"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSendReceive_8h.html#a2261e0ff45c09819eee336c88c950219">startSendMsg_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
@@ -212,20 +212,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7764ffb81cffc7074512694660605cb8"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef uint8_t(*  typeRSendAnswer_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *data, uint8_t msgLgth)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgSendReceive_8h_source.html#l00053">53</a> of file <a class="el" href="compMsgSendReceive_8h_source.html">compMsgSendReceive.h</a>.</p>
-
-</div>
-</div>
 <a class="anchor" id="a62c0b2e21ee772e85c947b97f57cdadf"></a>
 <div class="memitem">
 <div class="memproto">
@@ -237,6 +223,20 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Definition at line <a class="el" href="compMsgSendReceive_8h_source.html#l00052">52</a> of file <a class="el" href="compMsgSendReceive_8h_source.html">compMsgSendReceive.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a9429eaae57e9d92d1e36a22ae53605e0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint8_t(*  uartSendAnswer_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t *data, uint8_t msgLgth)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSendReceive_8h_source.html#l00053">53</a> of file <a class="el" href="compMsgSendReceive_8h_source.html">compMsgSendReceive.h</a>.</p>
 
 </div>
 </div>
@@ -269,7 +269,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00354">354</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00413">413</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
 
 </div>
 </div>
@@ -286,7 +286,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00380">380</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSendReceive_8c_source.html#l00439">439</a> of file <a class="el" href="compMsgSendReceive_8c_source.html">compMsgSendReceive.c</a>.</p>
 
 </div>
 </div>

@@ -85,7 +85,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
@@ -104,15 +103,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 <p><a href="compMsgWifiData_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a577b94fdb8e29198f4fc38865d54d9b4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a577b94fdb8e29198f4fc38865d54d9b4">COMP_MSG_WIFI_VALUES_FILE_NAME</a>&#160;&#160;&#160;&quot;myConfig.txt&quot;</td></tr>
-<tr class="separator:a577b94fdb8e29198f4fc38865d54d9b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a5b5a587ef8a85a9b4179e68032d08f5c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a5b5a587ef8a85a9b4179e68032d08f5c">bssStr2BssInfoId</a> (uint8_t *fieldName, uint8_t *fieldId)</td></tr>
 <tr class="separator:a5b5a587ef8a85a9b4179e68032d08f5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95e1b14e625936b97ffb4276407c6288"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a95e1b14e625936b97ffb4276407c6288">keyValueStr2KeyValueId</a> (uint8_t *fieldName, uint16_t *fieldId)</td></tr>
+<tr class="separator:a95e1b14e625936b97ffb4276407c6288"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d43337c4b1a6ebf4181de07c7da77f7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a8d43337c4b1a6ebf4181de07c7da77f7">webSocketBinaryReceived</a> (void *arg, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char *pdata, unsigned short len)</td></tr>
 <tr class="separator:a8d43337c4b1a6ebf4181de07c7da77f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5721f0b2ebd1b6772a47247a11de9ef9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a5721f0b2ebd1b6772a47247a11de9ef9">netSocketToSend</a> (void *arg, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char *pdata, unsigned short len)</td></tr>
@@ -135,6 +131,16 @@ Functions</h2></td></tr>
 <tr class="separator:ac4738808533855ed681f7bdd59d4f4b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac00b99b4e44163057b3b2a106e89ec96"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#ac00b99b4e44163057b3b2a106e89ec96">getStationConfig</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:ac00b99b4e44163057b3b2a106e89ec96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9434d840b78563a13f31f610c763e86"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#af9434d840b78563a13f31f610c763e86">getClientSsidSize</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:af9434d840b78563a13f31f610c763e86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9b5393ce147c059df130b9d40fa8545"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#ac9b5393ce147c059df130b9d40fa8545">getClientPasswdSize</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:ac9b5393ce147c059df130b9d40fa8545"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbe1e57e3a6e51867ad6c172791e6ae4"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#afbe1e57e3a6e51867ad6c172791e6ae4">getClientIPAddrSize</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:afbe1e57e3a6e51867ad6c172791e6ae4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2d8624deb5e9c4a2fdb5ccd3fa8210c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#ae2d8624deb5e9c4a2fdb5ccd3fa8210c">getClientPortSize</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:ae2d8624deb5e9c4a2fdb5ccd3fa8210c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab748553e727f659f54f0cc406798a576"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#ab748553e727f659f54f0cc406798a576">getClientStatusSize</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:ab748553e727f659f54f0cc406798a576"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f53e837e3f25d7f4f5b16096a95700f"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a1f53e837e3f25d7f4f5b16096a95700f">getWifiAPBssidSize</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:a1f53e837e3f25d7f4f5b16096a95700f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cc918284468d7647654e4b0899346a8"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a9cc918284468d7647654e4b0899346a8">getWifiAPBssidStrSize</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
@@ -179,6 +185,8 @@ Functions</h2></td></tr>
 <tr class="separator:a2e734390819c24d48f840ee1eb0b5aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9bad89a7c9d50b95aa84d91516b09a2"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#af9bad89a7c9d50b95aa84d91516b09a2">getClientPort</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:af9bad89a7c9d50b95aa84d91516b09a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09663d2da40c11111d575004221bed60"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a09663d2da40c11111d575004221bed60">getClientSequenceNum</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:a09663d2da40c11111d575004221bed60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cefda94e5a215f5cea7c4133973e31b"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a8cefda94e5a215f5cea7c4133973e31b">getClientStatus</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:a8cefda94e5a215f5cea7c4133973e31b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3dce118d1a90a6f80169232617e81c7"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#ac3dce118d1a90a6f80169232617e81c7">xgetWifiKeyValue</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
@@ -189,10 +197,18 @@ Functions</h2></td></tr>
 <tr class="separator:ae0b43b81da0d428732b445261693c4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a746063650bbb53e1d936dfab5af05b5e"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a746063650bbb53e1d936dfab5af05b5e">getCloudHost2</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:a746063650bbb53e1d936dfab5af05b5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29597813aff05732465dcf00bcb2ba5f"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a29597813aff05732465dcf00bcb2ba5f">getCloudSubUrl1</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
-<tr class="separator:a29597813aff05732465dcf00bcb2ba5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf2b8ca03a4d90fdfebfb04da0b16ba9"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#abf2b8ca03a4d90fdfebfb04da0b16ba9">getCloudSubUrl2</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
-<tr class="separator:abf2b8ca03a4d90fdfebfb04da0b16ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc3ecda55f8fbcb30d397cad790fdd39"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#abc3ecda55f8fbcb30d397cad790fdd39">getCloudUrl1Part1</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:abc3ecda55f8fbcb30d397cad790fdd39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af21da2547bf3a1a271c43b184cbf9c74"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#af21da2547bf3a1a271c43b184cbf9c74">getCloudUrl1Part2</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:af21da2547bf3a1a271c43b184cbf9c74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6a37e67de2d921f83ac967a569083cd"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#ae6a37e67de2d921f83ac967a569083cd">getCloudUrlTenantId1</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:ae6a37e67de2d921f83ac967a569083cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1a499bca8f5291184f42e5232e84fef"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#aa1a499bca8f5291184f42e5232e84fef">getCloudUrl2Part1</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:aa1a499bca8f5291184f42e5232e84fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a185668037daaa1765aa92d6763e4f6e3"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a185668037daaa1765aa92d6763e4f6e3">getCloudUrl2Part2</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:a185668037daaa1765aa92d6763e4f6e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affbe36ef04916e267a393f7f6b4db1da"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#affbe36ef04916e267a393f7f6b4db1da">getCloudUrlTenantId2</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
+<tr class="separator:affbe36ef04916e267a393f7f6b4db1da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1efab33f992ad9a3f68dba5dc43d1a0"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#ae1efab33f992ad9a3f68dba5dc43d1a0">getCloudNodeToken1</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
 <tr class="separator:ae1efab33f992ad9a3f68dba5dc43d1a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1e52694a42f7be557639e3f9678dcfe"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#aa1e52694a42f7be557639e3f9678dcfe">getCloudNodeToken2</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, int *numericValue, uint8_t **stringValue)</td></tr>
@@ -231,22 +247,9 @@ Variables</h2></td></tr>
 <tr class="separator:ad39f9a79862eadaea51477303f9bbb1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a722e54448ecc379b996f781b2ef8cfaf"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgTypesAndNames_8h.html#a5baf305c5d5937aec34b1fe2bb55a598">str2id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a722e54448ecc379b996f781b2ef8cfaf">bssStr2BssInfoIds</a> []</td></tr>
 <tr class="separator:a722e54448ecc379b996f781b2ef8cfaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12796c209d62a8faf49ee703cd28b291"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgTypesAndNames_8h.html#a5baf305c5d5937aec34b1fe2bb55a598">str2id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgWifiData_8c.html#a12796c209d62a8faf49ee703cd28b291">keyValueStr2KeyValueIds</a> []</td></tr>
+<tr class="separator:a12796c209d62a8faf49ee703cd28b291"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Macro Definition Documentation</h2>
-<a class="anchor" id="a577b94fdb8e29198f4fc38865d54d9b4"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define COMP_MSG_WIFI_VALUES_FILE_NAME&#160;&#160;&#160;&quot;myConfig.txt&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00052">52</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
-
-</div>
-</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="a23a1d7737d5182951d1d6f8c413ffa8e"></a>
 <div class="memitem">
@@ -280,7 +283,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00175">175</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00220">220</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -316,7 +319,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00075">75</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00100">100</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -334,7 +337,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00992">992</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l01171">1171</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -360,7 +363,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00284">284</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00329">329</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -386,7 +389,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00257">257</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00302">302</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -428,7 +431,49 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00584">584</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00701">701</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="afbe1e57e3a6e51867ad6c172791e6ae4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getClientIPAddrSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00492">492</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -470,7 +515,49 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00760">760</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00917">917</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ac9b5393ce147c059df130b9d40fa8545"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getClientPasswdSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00480">480</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -512,7 +599,91 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00592">592</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00709">709</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae2d8624deb5e9c4a2fdb5ccd3fa8210c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getClientPortSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00505">505</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a09663d2da40c11111d575004221bed60"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getClientSequenceNum </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00717">717</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -554,7 +725,49 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00752">752</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00909">909</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="af9434d840b78563a13f31f610c763e86"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getClientSsidSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00467">467</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -596,7 +809,49 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00600">600</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00725">725</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab748553e727f659f54f0cc406798a576"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getClientStatusSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00517">517</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -638,7 +893,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00704">704</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00829">829</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -680,7 +935,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00712">712</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00837">837</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -722,7 +977,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00736">736</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00893">893</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -764,7 +1019,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00744">744</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00901">901</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -806,11 +1061,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00696">696</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00821">821</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a29597813aff05732465dcf00bcb2ba5f"></a>
+<a class="anchor" id="abc3ecda55f8fbcb30d397cad790fdd39"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -818,7 +1073,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t getCloudSubUrl1 </td>
+          <td class="memname">static uint8_t getCloudUrl1Part1 </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em>, </td>
@@ -848,11 +1103,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00720">720</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00845">845</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="abf2b8ca03a4d90fdfebfb04da0b16ba9"></a>
+<a class="anchor" id="af21da2547bf3a1a271c43b184cbf9c74"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -860,7 +1115,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t getCloudSubUrl2 </td>
+          <td class="memname">static uint8_t getCloudUrl1Part2 </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
           <td class="paramname"><em>self</em>, </td>
@@ -890,7 +1145,175 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00728">728</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00853">853</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa1a499bca8f5291184f42e5232e84fef"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getCloudUrl2Part1 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00869">869</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a185668037daaa1765aa92d6763e4f6e3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getCloudUrl2Part2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00877">877</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae6a37e67de2d921f83ac967a569083cd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getCloudUrlTenantId1 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00861">861</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="affbe36ef04916e267a393f7f6b4db1da"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t getCloudUrlTenantId2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>numericValue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t **&#160;</td>
+          <td class="paramname"><em>stringValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00885">885</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -932,7 +1355,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00768">768</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00925">925</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -974,7 +1397,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00776">776</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00933">933</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1000,7 +1423,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00375">375</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00429">429</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1042,7 +1465,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00560">560</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00677">677</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1084,7 +1507,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00461">461</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00578">578</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1126,7 +1549,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00485">485</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00602">602</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1168,7 +1591,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00413">413</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00530">530</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1210,7 +1633,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00491">491</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00608">608</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1252,7 +1675,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00419">419</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00536">536</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1294,7 +1717,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00530">530</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00647">647</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1336,7 +1759,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00443">443</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00560">560</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1378,7 +1801,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00572">572</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00689">689</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1420,7 +1843,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00473">473</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00590">590</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1462,7 +1885,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00578">578</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00695">695</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1504,7 +1927,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00479">479</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00596">596</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1546,7 +1969,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00566">566</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00683">683</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1588,7 +2011,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00467">467</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00584">584</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1630,7 +2053,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00536">536</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00653">653</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1672,7 +2095,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00449">449</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00566">566</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1714,7 +2137,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00524">524</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00641">641</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1756,7 +2179,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00437">437</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00554">554</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1798,7 +2221,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00497">497</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00614">614</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1840,7 +2263,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00425">425</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00542">542</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1866,7 +2289,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00891">891</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l01057">1057</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1892,7 +2315,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00878">878</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l01044">1044</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -1959,7 +2382,43 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Error code or ErrorOK </dd></dl>
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00794">794</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00951">951</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a95e1b14e625936b97ffb4276407c6288"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t keyValueStr2KeyValueId </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>fieldName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t *&#160;</td>
+          <td class="paramname"><em>fieldId</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00119">119</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2007,7 +2466,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00144">144</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00189">189</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2043,7 +2502,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00355">355</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00409">409</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2091,7 +2550,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00121">121</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00165">165</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2108,7 +2567,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l01060">1060</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l01250">1250</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2156,7 +2615,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00904">904</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l01070">1070</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2182,7 +2641,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00325">325</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00379">379</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2230,7 +2689,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00094">94</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00138">138</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2266,7 +2725,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00335">335</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00389">389</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2314,7 +2773,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00166">166</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00211">211</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2340,7 +2799,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00608">608</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00733">733</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2363,7 +2822,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00055">55</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00053">53</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2385,7 +2844,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00054">54</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00052">52</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2419,18 +2878,18 @@ Variables</h2></td></tr>
 <div class="line">  { <span class="stringliteral">&quot;freqcal_val&quot;</span>, <a class="code" href="compMsgWifiData_8h.html#adfb0c8f1b9ce2140661a7d5bf07b834a">BSS_INFO_FREQ_CAL_VAL</a> },</div>
 <div class="line">  { NULL,          0 },</div>
 <div class="line">}</div>
-<div class="ttc" id="compMsgWifiData_8h_html_a294a95165a09b4c1c5b1edd0c9a71c3d"><div class="ttname"><a href="compMsgWifiData_8h.html#a294a95165a09b4c1c5b1edd0c9a71c3d">BSS_INFO_FREQ_OFFSET</a></div><div class="ttdeci">#define BSS_INFO_FREQ_OFFSET</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00094">compMsgWifiData.h:94</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a0a679d41395649b382b288a91348f61e"><div class="ttname"><a href="compMsgWifiData_8h.html#a0a679d41395649b382b288a91348f61e">BSS_INFO_CHANNEL</a></div><div class="ttdeci">#define BSS_INFO_CHANNEL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00090">compMsgWifiData.h:90</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a936fcaf9ddabe2f8ec02190ec5d1ce2c"><div class="ttname"><a href="compMsgWifiData_8h.html#a936fcaf9ddabe2f8ec02190ec5d1ce2c">BSS_INFO_BSSID</a></div><div class="ttdeci">#define BSS_INFO_BSSID</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00086">compMsgWifiData.h:86</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a3ab40fbd4fc8d11045fec7ffb4c2aab4"><div class="ttname"><a href="compMsgWifiData_8h.html#a3ab40fbd4fc8d11045fec7ffb4c2aab4">BSS_INFO_AUTH_MODE</a></div><div class="ttdeci">#define BSS_INFO_AUTH_MODE</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00092">compMsgWifiData.h:92</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a4c0409a929c785939d8b71c5d1436122"><div class="ttname"><a href="compMsgWifiData_8h.html#a4c0409a929c785939d8b71c5d1436122">BSS_INFO_BSSID_STR</a></div><div class="ttdeci">#define BSS_INFO_BSSID_STR</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00087">compMsgWifiData.h:87</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a9327611c1382ff9e1ced7413e686fd9a"><div class="ttname"><a href="compMsgWifiData_8h.html#a9327611c1382ff9e1ced7413e686fd9a">BSS_INFO_IS_HIDDEN</a></div><div class="ttdeci">#define BSS_INFO_IS_HIDDEN</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00093">compMsgWifiData.h:93</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a6115bbf987db4cd9172f4db8970a3910"><div class="ttname"><a href="compMsgWifiData_8h.html#a6115bbf987db4cd9172f4db8970a3910">BSS_INFO_SSID</a></div><div class="ttdeci">#define BSS_INFO_SSID</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00088">compMsgWifiData.h:88</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a7c6612bd82012166ae0c645d80e765f9"><div class="ttname"><a href="compMsgWifiData_8h.html#a7c6612bd82012166ae0c645d80e765f9">BSS_INFO_RSSI</a></div><div class="ttdeci">#define BSS_INFO_RSSI</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00091">compMsgWifiData.h:91</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_adfb0c8f1b9ce2140661a7d5bf07b834a"><div class="ttname"><a href="compMsgWifiData_8h.html#adfb0c8f1b9ce2140661a7d5bf07b834a">BSS_INFO_FREQ_CAL_VAL</a></div><div class="ttdeci">#define BSS_INFO_FREQ_CAL_VAL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00095">compMsgWifiData.h:95</a></div></div>
-<div class="ttc" id="compMsgWifiData_8h_html_a2d1a026b44c8226412a937cc44ca535e"><div class="ttname"><a href="compMsgWifiData_8h.html#a2d1a026b44c8226412a937cc44ca535e">BSS_INFO_SSID_LEN</a></div><div class="ttdeci">#define BSS_INFO_SSID_LEN</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00089">compMsgWifiData.h:89</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a294a95165a09b4c1c5b1edd0c9a71c3d"><div class="ttname"><a href="compMsgWifiData_8h.html#a294a95165a09b4c1c5b1edd0c9a71c3d">BSS_INFO_FREQ_OFFSET</a></div><div class="ttdeci">#define BSS_INFO_FREQ_OFFSET</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00097">compMsgWifiData.h:97</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a0a679d41395649b382b288a91348f61e"><div class="ttname"><a href="compMsgWifiData_8h.html#a0a679d41395649b382b288a91348f61e">BSS_INFO_CHANNEL</a></div><div class="ttdeci">#define BSS_INFO_CHANNEL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00093">compMsgWifiData.h:93</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a936fcaf9ddabe2f8ec02190ec5d1ce2c"><div class="ttname"><a href="compMsgWifiData_8h.html#a936fcaf9ddabe2f8ec02190ec5d1ce2c">BSS_INFO_BSSID</a></div><div class="ttdeci">#define BSS_INFO_BSSID</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00089">compMsgWifiData.h:89</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a3ab40fbd4fc8d11045fec7ffb4c2aab4"><div class="ttname"><a href="compMsgWifiData_8h.html#a3ab40fbd4fc8d11045fec7ffb4c2aab4">BSS_INFO_AUTH_MODE</a></div><div class="ttdeci">#define BSS_INFO_AUTH_MODE</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00095">compMsgWifiData.h:95</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a4c0409a929c785939d8b71c5d1436122"><div class="ttname"><a href="compMsgWifiData_8h.html#a4c0409a929c785939d8b71c5d1436122">BSS_INFO_BSSID_STR</a></div><div class="ttdeci">#define BSS_INFO_BSSID_STR</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00090">compMsgWifiData.h:90</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a9327611c1382ff9e1ced7413e686fd9a"><div class="ttname"><a href="compMsgWifiData_8h.html#a9327611c1382ff9e1ced7413e686fd9a">BSS_INFO_IS_HIDDEN</a></div><div class="ttdeci">#define BSS_INFO_IS_HIDDEN</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00096">compMsgWifiData.h:96</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a6115bbf987db4cd9172f4db8970a3910"><div class="ttname"><a href="compMsgWifiData_8h.html#a6115bbf987db4cd9172f4db8970a3910">BSS_INFO_SSID</a></div><div class="ttdeci">#define BSS_INFO_SSID</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00091">compMsgWifiData.h:91</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a7c6612bd82012166ae0c645d80e765f9"><div class="ttname"><a href="compMsgWifiData_8h.html#a7c6612bd82012166ae0c645d80e765f9">BSS_INFO_RSSI</a></div><div class="ttdeci">#define BSS_INFO_RSSI</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00094">compMsgWifiData.h:94</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_adfb0c8f1b9ce2140661a7d5bf07b834a"><div class="ttname"><a href="compMsgWifiData_8h.html#adfb0c8f1b9ce2140661a7d5bf07b834a">BSS_INFO_FREQ_CAL_VAL</a></div><div class="ttdeci">#define BSS_INFO_FREQ_CAL_VAL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00098">compMsgWifiData.h:98</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a2d1a026b44c8226412a937cc44ca535e"><div class="ttname"><a href="compMsgWifiData_8h.html#a2d1a026b44c8226412a937cc44ca535e">BSS_INFO_SSID_LEN</a></div><div class="ttdeci">#define BSS_INFO_SSID_LEN</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00092">compMsgWifiData.h:92</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00059">59</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00057">57</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2452,7 +2911,78 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00057">57</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00055">55</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a12796c209d62a8faf49ee703cd28b291"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="compMsgTypesAndNames_8h.html#a5baf305c5d5937aec34b1fe2bb55a598">str2id_t</a> keyValueStr2KeyValueIds[]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">  { <span class="stringliteral">&quot;ssid&quot;</span>,                 <a class="code" href="compMsgWifiData_8h.html#a2ccfc8f7a79068cdec4e164a31b0c72f">KEY_VALUE_KEY_SSID</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;bssid&quot;</span>,                <a class="code" href="compMsgWifiData_8h.html#ac1374bd847534447fa4bf5202a4dc050">KEY_VALUE_KEY_BSSID</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;authmode&quot;</span>,             <a class="code" href="compMsgWifiData_8h.html#aee06206bf816b558f6c10e723a0fc982">KEY_VALUE_KEY_AUTH_MODE</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;channel&quot;</span>,              <a class="code" href="compMsgWifiData_8h.html#a656e6049f85fe24233ce9abee54e98b0">KEY_VALUE_KEY_CHANNEL</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;freq_offset&quot;</span>,          <a class="code" href="compMsgWifiData_8h.html#a218966c3173a2ca79677e35371cb9883">KEY_VALUE_KEY_FREQ_OFFSET</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;freqcal_val&quot;</span>,          <a class="code" href="compMsgWifiData_8h.html#ada901e2fe0065699f928f03358526459">KEY_VALUE_KEY_FREQ_CAL_VAL</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;rssi&quot;</span>,                 <a class="code" href="compMsgWifiData_8h.html#ac0de38080873cea973980e6210ae0d47">KEY_VALUE_KEY_RSSI</a>},</div>
+<div class="line">  { <span class="stringliteral">&quot;is_hidden&quot;</span>,            <a class="code" href="compMsgWifiData_8h.html#a7b06bb8f5c9169dec65563584d76ee50">KEY_VALUE_KEY_IS_HIDDEN</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;clientSsid&quot;</span>,           <a class="code" href="compMsgWifiData_8h.html#a6915f9798db6a6d2f93d3a01a493e1ef">KEY_VALUE_KEY_CLIENT_SSID</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;clientPasswd&quot;</span>,         <a class="code" href="compMsgWifiData_8h.html#a8810a03bcf2b37923f3bcf3097067ba9">KEY_VALUE_KEY_CLIENT_PASSWD</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;clientIPAddr&quot;</span>,         <a class="code" href="compMsgWifiData_8h.html#a3b54b4cf9d849d8dca93142538c5492c">KEY_VALUE_KEY_CLIENT_IP_ADDR</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;clientPort&quot;</span>,           <a class="code" href="compMsgWifiData_8h.html#ada1727e8757395f0bdca11e98ab62ced">KEY_VALUE_KEY_CLIENT_PORT</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;clientStatus&quot;</span>,         <a class="code" href="compMsgWifiData_8h.html#a09cb6ee21131ccc072aa7d6290fdfb1b">KEY_VALUE_KEY_CLIENT_STATUS</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;seqNum&quot;</span>,               <a class="code" href="compMsgWifiData_8h.html#a53923d0ea335d50fd20d443604637618">KEY_VALUE_KEY_SEQ_NUM</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;MACAddr&quot;</span>,              <a class="code" href="compMsgWifiData_8h.html#a117f9079c3e07447fa51781bf3831c72">KEY_VALUE_KEY_MAC_ADDR</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;machineState&quot;</span>,         <a class="code" href="compMsgWifiData_8h.html#a4615c1ed7813f8e70582ab9d585b6032">KEY_VALUE_KEY_MACHINE_STATE</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;firmwareMainBoard&quot;</span>,    <a class="code" href="compMsgWifiData_8h.html#a30e5d398e649acd9e198e573ec5b0658">KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;firmwareDisplayBoard&quot;</span>, <a class="code" href="compMsgWifiData_8h.html#a37c61ff856f2707718ee9657c970fef1">KEY_VALUE_KEY_FIRMWARE_DISPLAY_BOARD</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;firmwareWifiModule&quot;</span>,   <a class="code" href="compMsgWifiData_8h.html#a037bdf5dec257d2a5de18abe7bf22750">KEY_VALUE_KEY_FIRMWARE_WIFI_MODULE</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;lastError&quot;</span>,            <a class="code" href="compMsgWifiData_8h.html#a862b395640db4db0f1d1ea88dee5ec12">KEY_VALUE_KEY_LAST_ERROR</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;casingUseList&quot;</span>,        <a class="code" href="compMsgWifiData_8h.html#a0f68ab60361457fd2be823630fc6fe54">KEY_VALUE_KEY_CASING_USE_LIST</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;casingStatisticList&quot;</span>,  <a class="code" href="compMsgWifiData_8h.html#aa231b9321d07b361a2649779df2c044d">KEY_VALUE_KEY_CASING_STATISTIC_LIST</a> },</div>
+<div class="line">  { <span class="stringliteral">&quot;dataAndTime&quot;</span>,          <a class="code" href="compMsgWifiData_8h.html#a6976071879e556376a0b6c9db61584a2">KEY_VALUE_KEY_DAT_AND_TIME</a> },</div>
+<div class="line">  { NULL,          0 },</div>
+<div class="line">}</div>
+<div class="ttc" id="compMsgWifiData_8h_html_a30e5d398e649acd9e198e573ec5b0658"><div class="ttname"><a href="compMsgWifiData_8h.html#a30e5d398e649acd9e198e573ec5b0658">KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD</a></div><div class="ttdeci">#define KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00120">compMsgWifiData.h:120</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a0f68ab60361457fd2be823630fc6fe54"><div class="ttname"><a href="compMsgWifiData_8h.html#a0f68ab60361457fd2be823630fc6fe54">KEY_VALUE_KEY_CASING_USE_LIST</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CASING_USE_LIST</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00124">compMsgWifiData.h:124</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a7b06bb8f5c9169dec65563584d76ee50"><div class="ttname"><a href="compMsgWifiData_8h.html#a7b06bb8f5c9169dec65563584d76ee50">KEY_VALUE_KEY_IS_HIDDEN</a></div><div class="ttdeci">#define KEY_VALUE_KEY_IS_HIDDEN</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00111">compMsgWifiData.h:111</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a2ccfc8f7a79068cdec4e164a31b0c72f"><div class="ttname"><a href="compMsgWifiData_8h.html#a2ccfc8f7a79068cdec4e164a31b0c72f">KEY_VALUE_KEY_SSID</a></div><div class="ttdeci">#define KEY_VALUE_KEY_SSID</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00100">compMsgWifiData.h:100</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a6915f9798db6a6d2f93d3a01a493e1ef"><div class="ttname"><a href="compMsgWifiData_8h.html#a6915f9798db6a6d2f93d3a01a493e1ef">KEY_VALUE_KEY_CLIENT_SSID</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CLIENT_SSID</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00112">compMsgWifiData.h:112</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_ac0de38080873cea973980e6210ae0d47"><div class="ttname"><a href="compMsgWifiData_8h.html#ac0de38080873cea973980e6210ae0d47">KEY_VALUE_KEY_RSSI</a></div><div class="ttdeci">#define KEY_VALUE_KEY_RSSI</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00110">compMsgWifiData.h:110</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_aee06206bf816b558f6c10e723a0fc982"><div class="ttname"><a href="compMsgWifiData_8h.html#aee06206bf816b558f6c10e723a0fc982">KEY_VALUE_KEY_AUTH_MODE</a></div><div class="ttdeci">#define KEY_VALUE_KEY_AUTH_MODE</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00106">compMsgWifiData.h:106</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a53923d0ea335d50fd20d443604637618"><div class="ttname"><a href="compMsgWifiData_8h.html#a53923d0ea335d50fd20d443604637618">KEY_VALUE_KEY_SEQ_NUM</a></div><div class="ttdeci">#define KEY_VALUE_KEY_SEQ_NUM</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00117">compMsgWifiData.h:117</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a6976071879e556376a0b6c9db61584a2"><div class="ttname"><a href="compMsgWifiData_8h.html#a6976071879e556376a0b6c9db61584a2">KEY_VALUE_KEY_DAT_AND_TIME</a></div><div class="ttdeci">#define KEY_VALUE_KEY_DAT_AND_TIME</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00126">compMsgWifiData.h:126</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a8810a03bcf2b37923f3bcf3097067ba9"><div class="ttname"><a href="compMsgWifiData_8h.html#a8810a03bcf2b37923f3bcf3097067ba9">KEY_VALUE_KEY_CLIENT_PASSWD</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CLIENT_PASSWD</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00113">compMsgWifiData.h:113</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_aa231b9321d07b361a2649779df2c044d"><div class="ttname"><a href="compMsgWifiData_8h.html#aa231b9321d07b361a2649779df2c044d">KEY_VALUE_KEY_CASING_STATISTIC_LIST</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CASING_STATISTIC_LIST</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00125">compMsgWifiData.h:125</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a037bdf5dec257d2a5de18abe7bf22750"><div class="ttname"><a href="compMsgWifiData_8h.html#a037bdf5dec257d2a5de18abe7bf22750">KEY_VALUE_KEY_FIRMWARE_WIFI_MODULE</a></div><div class="ttdeci">#define KEY_VALUE_KEY_FIRMWARE_WIFI_MODULE</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00122">compMsgWifiData.h:122</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a4615c1ed7813f8e70582ab9d585b6032"><div class="ttname"><a href="compMsgWifiData_8h.html#a4615c1ed7813f8e70582ab9d585b6032">KEY_VALUE_KEY_MACHINE_STATE</a></div><div class="ttdeci">#define KEY_VALUE_KEY_MACHINE_STATE</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00119">compMsgWifiData.h:119</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a218966c3173a2ca79677e35371cb9883"><div class="ttname"><a href="compMsgWifiData_8h.html#a218966c3173a2ca79677e35371cb9883">KEY_VALUE_KEY_FREQ_OFFSET</a></div><div class="ttdeci">#define KEY_VALUE_KEY_FREQ_OFFSET</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00108">compMsgWifiData.h:108</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a862b395640db4db0f1d1ea88dee5ec12"><div class="ttname"><a href="compMsgWifiData_8h.html#a862b395640db4db0f1d1ea88dee5ec12">KEY_VALUE_KEY_LAST_ERROR</a></div><div class="ttdeci">#define KEY_VALUE_KEY_LAST_ERROR</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00123">compMsgWifiData.h:123</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_ada1727e8757395f0bdca11e98ab62ced"><div class="ttname"><a href="compMsgWifiData_8h.html#ada1727e8757395f0bdca11e98ab62ced">KEY_VALUE_KEY_CLIENT_PORT</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CLIENT_PORT</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00115">compMsgWifiData.h:115</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a656e6049f85fe24233ce9abee54e98b0"><div class="ttname"><a href="compMsgWifiData_8h.html#a656e6049f85fe24233ce9abee54e98b0">KEY_VALUE_KEY_CHANNEL</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CHANNEL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00107">compMsgWifiData.h:107</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a117f9079c3e07447fa51781bf3831c72"><div class="ttname"><a href="compMsgWifiData_8h.html#a117f9079c3e07447fa51781bf3831c72">KEY_VALUE_KEY_MAC_ADDR</a></div><div class="ttdeci">#define KEY_VALUE_KEY_MAC_ADDR</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00118">compMsgWifiData.h:118</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a3b54b4cf9d849d8dca93142538c5492c"><div class="ttname"><a href="compMsgWifiData_8h.html#a3b54b4cf9d849d8dca93142538c5492c">KEY_VALUE_KEY_CLIENT_IP_ADDR</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CLIENT_IP_ADDR</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00114">compMsgWifiData.h:114</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a37c61ff856f2707718ee9657c970fef1"><div class="ttname"><a href="compMsgWifiData_8h.html#a37c61ff856f2707718ee9657c970fef1">KEY_VALUE_KEY_FIRMWARE_DISPLAY_BOARD</a></div><div class="ttdeci">#define KEY_VALUE_KEY_FIRMWARE_DISPLAY_BOARD</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00121">compMsgWifiData.h:121</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_a09cb6ee21131ccc072aa7d6290fdfb1b"><div class="ttname"><a href="compMsgWifiData_8h.html#a09cb6ee21131ccc072aa7d6290fdfb1b">KEY_VALUE_KEY_CLIENT_STATUS</a></div><div class="ttdeci">#define KEY_VALUE_KEY_CLIENT_STATUS</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00116">compMsgWifiData.h:116</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_ac1374bd847534447fa4bf5202a4dc050"><div class="ttname"><a href="compMsgWifiData_8h.html#ac1374bd847534447fa4bf5202a4dc050">KEY_VALUE_KEY_BSSID</a></div><div class="ttdeci">#define KEY_VALUE_KEY_BSSID</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00103">compMsgWifiData.h:103</a></div></div>
+<div class="ttc" id="compMsgWifiData_8h_html_ada901e2fe0065699f928f03358526459"><div class="ttname"><a href="compMsgWifiData_8h.html#ada901e2fe0065699f928f03358526459">KEY_VALUE_KEY_FREQ_CAL_VAL</a></div><div class="ttdeci">#define KEY_VALUE_KEY_FREQ_CAL_VAL</div><div class="ttdef"><b>Definition:</b> <a href="compMsgWifiData_8h_source.html#l00109">compMsgWifiData.h:109</a></div></div>
+</div><!-- fragment -->
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00071">71</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>
@@ -2474,7 +3004,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00056">56</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWifiData_8c_source.html#l00054">54</a> of file <a class="el" href="compMsgWifiData_8c_source.html">compMsgWifiData.c</a>.</p>
 
 </div>
 </div>

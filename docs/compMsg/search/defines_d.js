@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['upgrade_5fflag_5ffinish',['UPGRADE_FLAG_FINISH',['../compMsgOta_8c.html#a568d84b95c752e811a27a337830c3a54',1,'compMsgOta.c']]],
-  ['upgrade_5fflag_5fidle',['UPGRADE_FLAG_IDLE',['../compMsgOta_8c.html#ae9af3da1e7d88b1e0f353d45059f6f1b',1,'compMsgOta.c']]],
-  ['upgrade_5fflag_5fstart',['UPGRADE_FLAG_START',['../compMsgOta_8c.html#aa45c4c3f3b5ed0d3070af7cf0fe151a9',1,'compMsgOta.c']]]
+  ['tcp',['TCP',['../compMsgNetSocket_8c.html#a383cc726612c3f31cc235472be55516b',1,'TCP():&#160;compMsgNetSocket.c'],['../compMsgWebSocket_8c.html#a383cc726612c3f31cc235472be55516b',1,'TCP():&#160;compMsgWebSocket.c']]],
+  ['timer_5fidle_5fflag',['TIMER_IDLE_FLAG',['../compMsgTimer_8h.html#a925ac437d521e71e11c025ddb3180fa4',1,'compMsgTimer.h']]],
+  ['timer_5fmode_5fauto',['TIMER_MODE_AUTO',['../compMsgTimer_8h.html#ad7119c4096ebe710c684afe19cf6c46f',1,'compMsgTimer.h']]],
+  ['timer_5fmode_5foff',['TIMER_MODE_OFF',['../compMsgTimer_8h.html#a20817a864658161f1c9077899729a98a',1,'compMsgTimer.h']]],
+  ['timer_5fmode_5fsemi',['TIMER_MODE_SEMI',['../compMsgTimer_8h.html#a20fd95e103e626373c239de06ecdc15f',1,'compMsgTimer.h']]],
+  ['timer_5fmode_5fsingle',['TIMER_MODE_SINGLE',['../compMsgTimer_8h.html#a7ac7b5af7a0bfcae1dd2f1f6fce7103e',1,'compMsgTimer.h']]]
 ];

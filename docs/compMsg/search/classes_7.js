@@ -1,7 +1,10 @@
 var searchData=
 [
-  ['socketinfo',['socketInfo',['../structsocketInfo.html',1,'']]],
-  ['socketuserdata',['socketUserData',['../structsocketUserData.html',1,'']]],
-  ['stationconfig',['stationConfig',['../structstationConfig.html',1,'']]],
-  ['str2id',['str2id',['../structstr2id.html',1,'']]]
+  ['msgdescpart',['msgDescPart',['../structmsgDescPart.html',1,'']]],
+  ['msgheader2msgptr',['msgHeader2MsgPtr',['../structmsgHeader2MsgPtr.html',1,'']]],
+  ['msgheaderinfos',['msgHeaderInfos',['../structmsgHeaderInfos.html',1,'']]],
+  ['msgkeyvaluedescpart',['msgKeyValueDescPart',['../structmsgKeyValueDescPart.html',1,'']]],
+  ['msgparts',['msgParts',['../structmsgParts.html',1,'']]],
+  ['msgrequestinfos',['msgRequestInfos',['../structmsgRequestInfos.html',1,'']]],
+  ['msgvalpart',['msgValPart',['../structmsgValPart.html',1,'']]]
 ];

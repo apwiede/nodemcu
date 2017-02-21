@@ -116,8 +116,8 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a3f6905a6579ddcab48e8b7bd613a9914"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a3f6905a6579ddcab48e8b7bd613a9914">COMP_MSG_ACTIONS_FILE_NAME</a>&#160;&#160;&#160;&quot;CompMsgActions.txt&quot;</td></tr>
-<tr class="separator:a3f6905a6579ddcab48e8b7bd613a9914"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7956a1c524b998867a62eaf109d5a97"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#af7956a1c524b998867a62eaf109d5a97">FPM_SLEEP_MAX_TIME</a>&#160;&#160;&#160;0xFFFFFFF</td></tr>
+<tr class="separator:af7956a1c524b998867a62eaf109d5a97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -130,10 +130,20 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a8a348cfca16ad39d891f54c586a270d8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a8a348cfca16ad39d891f54c586a270d8">wifi_fpm_set_wakeup_cb</a> (void(*fcn)())</td></tr>
+<tr class="separator:a8a348cfca16ad39d891f54c586a270d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e6d9c306c17c80c431b0a89cc944d73"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a3e6d9c306c17c80c431b0a89cc944d73">runClientMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t mode)</td></tr>
 <tr class="separator:a3e6d9c306c17c80c431b0a89cc944d73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a045ae26e909dcff21b326aa69bc12f1f"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a045ae26e909dcff21b326aa69bc12f1f">runAPMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a045ae26e909dcff21b326aa69bc12f1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a162d6336c9d498bc5797341af9357973"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a162d6336c9d498bc5797341af9357973">lightSleepWakeupCallback</a> (void)</td></tr>
+<tr class="separator:a162d6336c9d498bc5797341af9357973"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9262c80bb35c138e91747809aa6a1946"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a9262c80bb35c138e91747809aa6a1946">startLightSleepWakeupMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a9262c80bb35c138e91747809aa6a1946"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab080e40595485ae375701011291e9dba"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#ab080e40595485ae375701011291e9dba">tstInterruptCallback</a> (void *arg)</td></tr>
+<tr class="separator:ab080e40595485ae375701011291e9dba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad42ec6fda561050d8ba370ea82411cfd"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#ad42ec6fda561050d8ba370ea82411cfd">startTestInterrupt</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:ad42ec6fda561050d8ba370ea82411cfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a91028a6c6aa818010cfa104c701fe1"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a3a91028a6c6aa818010cfa104c701fe1">runLightSleepWakeupMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a3a91028a6c6aa818010cfa104c701fe1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40869cf0422e53a33294e40334f704cf"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a40869cf0422e53a33294e40334f704cf">runLightSleepNoWakeupMode</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
@@ -175,16 +185,20 @@ Variables</h2></td></tr>
 <tr class="separator:a0deddf9f95f6d4c3e7a23db43e0f4138"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a382bb06e3f1ba25ed65aebb497065671"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgAction_8c.html#a3cfbb94cde231011d66ef482046b2998">compMsgActions_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a382bb06e3f1ba25ed65aebb497065671">compMsgActions</a> = { NULL, 0, 0 }</td></tr>
 <tr class="separator:a382bb06e3f1ba25ed65aebb497065671"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11794dd1394f0027eeea0a80a1dce0fc"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a></td></tr>
+<tr class="separator:a11794dd1394f0027eeea0a80a1dce0fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe9cd74fafa1f69f26bafee0f012d712"><td class="memItemLeft" align="right" valign="top">sint8&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#abe9cd74fafa1f69f26bafee0f012d712">gresult2</a> = -13</td></tr>
+<tr class="separator:abe9cd74fafa1f69f26bafee0f012d712"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31ae0941cc178ce899f111870d7fba47"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgAction_8c.html#a3cb5857f6bb5bfda01c11c61a7c87003">actionName2Action_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgAction_8c.html#a31ae0941cc178ce899f111870d7fba47">actionName2Actions</a> []</td></tr>
 <tr class="separator:a31ae0941cc178ce899f111870d7fba47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
-<a class="anchor" id="a3f6905a6579ddcab48e8b7bd613a9914"></a>
+<a class="anchor" id="af7956a1c524b998867a62eaf109d5a97"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define COMP_MSG_ACTIONS_FILE_NAME&#160;&#160;&#160;&quot;CompMsgActions.txt&quot;</td>
+          <td class="memname">#define FPM_SLEEP_MAX_TIME&#160;&#160;&#160;0xFFFFFFF</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -245,7 +259,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00372">372</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00459">459</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -287,7 +301,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00215">215</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00302">302</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -329,7 +343,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00236">236</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00323">323</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -381,7 +395,7 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00193">193</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00280">280</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -407,7 +421,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00151">151</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00238">238</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -433,7 +447,33 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00161">161</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00248">248</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a162d6336c9d498bc5797341af9357973"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void lightSleepWakeupCallback </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00101">101</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -450,7 +490,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00397">397</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00487">487</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -495,7 +535,7 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00296">296</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00383">383</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -521,7 +561,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00132">132</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00220">220</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -547,7 +587,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00086">86</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00090">90</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -583,7 +623,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00077">77</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00081">81</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -609,7 +649,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00123">123</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00211">211</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -635,7 +675,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00102">102</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00190">190</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -661,7 +701,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00095">95</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00183">183</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -687,7 +727,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00116">116</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00204">204</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -713,7 +753,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00141">141</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00229">229</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -739,7 +779,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00109">109</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00197">197</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -793,7 +833,101 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00257">257</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00344">344</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a9262c80bb35c138e91747809aa6a1946"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t startLightSleepWakeupMode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00114">114</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad42ec6fda561050d8ba370ea82411cfd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t startTestInterrupt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00166">166</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab080e40595485ae375701011291e9dba"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void tstInterruptCallback </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>arg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00155">155</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a8a348cfca16ad39d891f54c586a270d8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void wifi_fpm_set_wakeup_cb </td>
+          <td>(</td>
+          <td class="paramtype">void(*)()&#160;</td>
+          <td class="paramname"><em>fcn</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -829,21 +963,21 @@ Variables</h2></td></tr>
 <div class="line">  { <span class="stringliteral">&quot;getWifiSrcId&quot;</span>,              (<a class="code" href="compMsgAction_8h.html#aeeb0f22e59792bd6726d068030d7baf6">action_t</a>)(&amp;<a class="code" href="compMsgAction_8c.html#a56a99e1b64078bf46e6097315674a2b8">getWifiSrcId</a>),              0x4141, 0, 8 },</div>
 <div class="line">  { NULL,                        NULL,                                   0, 0, 0 },</div>
 <div class="line">}</div>
-<div class="ttc" id="compMsgAction_8c_html_af69083f7341d04f3cb3e2ee328950cf7"><div class="ttname"><a href="compMsgAction_8c.html#af69083f7341d04f3cb3e2ee328950cf7">runDeletePasswdCMode</a></div><div class="ttdeci">static uint8_t runDeletePasswdCMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00123">compMsgAction.c:123</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a56a99e1b64078bf46e6097315674a2b8"><div class="ttname"><a href="compMsgAction_8c.html#a56a99e1b64078bf46e6097315674a2b8">getWifiSrcId</a></div><div class="ttdeci">static uint8_t getWifiSrcId(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00161">compMsgAction.c:161</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a7ba018f583d7a2b37257dd99fec2dbff"><div class="ttname"><a href="compMsgAction_8c.html#a7ba018f583d7a2b37257dd99fec2dbff">runModulTestMode</a></div><div class="ttdeci">static uint8_t runModulTestMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00116">compMsgAction.c:116</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a286e4b45674a9d4eddf424952e289836"><div class="ttname"><a href="compMsgAction_8c.html#a286e4b45674a9d4eddf424952e289836">runRestoreUserData</a></div><div class="ttdeci">static uint8_t runRestoreUserData(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00141">compMsgAction.c:141</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a9311aff2f9ff215f5920df174497f7f3"><div class="ttname"><a href="compMsgAction_8c.html#a9311aff2f9ff215f5920df174497f7f3">getAPList</a></div><div class="ttdeci">static uint8_t getAPList(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00151">compMsgAction.c:151</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a3a91028a6c6aa818010cfa104c701fe1"><div class="ttname"><a href="compMsgAction_8c.html#a3a91028a6c6aa818010cfa104c701fe1">runLightSleepWakeupMode</a></div><div class="ttdeci">static uint8_t runLightSleepWakeupMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00095">compMsgAction.c:95</a></div></div>
-<div class="ttc" id="compMsgAction_8h_html_aeeb0f22e59792bd6726d068030d7baf6"><div class="ttname"><a href="compMsgAction_8h.html#aeeb0f22e59792bd6726d068030d7baf6">action_t</a></div><div class="ttdeci">uint8_t(* action_t)(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8h_source.html#l00051">compMsgAction.h:51</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a8bf8162323711ab66fce8dcc9520c8ab"><div class="ttname"><a href="compMsgAction_8c.html#a8bf8162323711ab66fce8dcc9520c8ab">runWpsMode</a></div><div class="ttdeci">static uint8_t runWpsMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00109">compMsgAction.c:109</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a3e6d9c306c17c80c431b0a89cc944d73"><div class="ttname"><a href="compMsgAction_8c.html#a3e6d9c306c17c80c431b0a89cc944d73">runClientMode</a></div><div class="ttdeci">static uint8_t runClientMode(compMsgDispatcher_t *self, uint8_t mode)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00077">compMsgAction.c:77</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a40869cf0422e53a33294e40334f704cf"><div class="ttname"><a href="compMsgAction_8c.html#a40869cf0422e53a33294e40334f704cf">runLightSleepNoWakeupMode</a></div><div class="ttdeci">static uint8_t runLightSleepNoWakeupMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00102">compMsgAction.c:102</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a045ae26e909dcff21b326aa69bc12f1f"><div class="ttname"><a href="compMsgAction_8c.html#a045ae26e909dcff21b326aa69bc12f1f">runAPMode</a></div><div class="ttdeci">static uint8_t runAPMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00086">compMsgAction.c:86</a></div></div>
-<div class="ttc" id="compMsgAction_8c_html_a3ea9d16104472d246e8bd5ae75293e05"><div class="ttname"><a href="compMsgAction_8c.html#a3ea9d16104472d246e8bd5ae75293e05">runAPConnect</a></div><div class="ttdeci">static uint8_t runAPConnect(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00132">compMsgAction.c:132</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_af69083f7341d04f3cb3e2ee328950cf7"><div class="ttname"><a href="compMsgAction_8c.html#af69083f7341d04f3cb3e2ee328950cf7">runDeletePasswdCMode</a></div><div class="ttdeci">static uint8_t runDeletePasswdCMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00211">compMsgAction.c:211</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a56a99e1b64078bf46e6097315674a2b8"><div class="ttname"><a href="compMsgAction_8c.html#a56a99e1b64078bf46e6097315674a2b8">getWifiSrcId</a></div><div class="ttdeci">static uint8_t getWifiSrcId(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00248">compMsgAction.c:248</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a7ba018f583d7a2b37257dd99fec2dbff"><div class="ttname"><a href="compMsgAction_8c.html#a7ba018f583d7a2b37257dd99fec2dbff">runModulTestMode</a></div><div class="ttdeci">static uint8_t runModulTestMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00204">compMsgAction.c:204</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a286e4b45674a9d4eddf424952e289836"><div class="ttname"><a href="compMsgAction_8c.html#a286e4b45674a9d4eddf424952e289836">runRestoreUserData</a></div><div class="ttdeci">static uint8_t runRestoreUserData(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00229">compMsgAction.c:229</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a9311aff2f9ff215f5920df174497f7f3"><div class="ttname"><a href="compMsgAction_8c.html#a9311aff2f9ff215f5920df174497f7f3">getAPList</a></div><div class="ttdeci">static uint8_t getAPList(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00238">compMsgAction.c:238</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a3a91028a6c6aa818010cfa104c701fe1"><div class="ttname"><a href="compMsgAction_8c.html#a3a91028a6c6aa818010cfa104c701fe1">runLightSleepWakeupMode</a></div><div class="ttdeci">static uint8_t runLightSleepWakeupMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00183">compMsgAction.c:183</a></div></div>
+<div class="ttc" id="compMsgAction_8h_html_aeeb0f22e59792bd6726d068030d7baf6"><div class="ttname"><a href="compMsgAction_8h.html#aeeb0f22e59792bd6726d068030d7baf6">action_t</a></div><div class="ttdeci">uint8_t(* action_t)(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8h_source.html#l00053">compMsgAction.h:53</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a8bf8162323711ab66fce8dcc9520c8ab"><div class="ttname"><a href="compMsgAction_8c.html#a8bf8162323711ab66fce8dcc9520c8ab">runWpsMode</a></div><div class="ttdeci">static uint8_t runWpsMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00197">compMsgAction.c:197</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a3e6d9c306c17c80c431b0a89cc944d73"><div class="ttname"><a href="compMsgAction_8c.html#a3e6d9c306c17c80c431b0a89cc944d73">runClientMode</a></div><div class="ttdeci">static uint8_t runClientMode(compMsgDispatcher_t *self, uint8_t mode)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00081">compMsgAction.c:81</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a40869cf0422e53a33294e40334f704cf"><div class="ttname"><a href="compMsgAction_8c.html#a40869cf0422e53a33294e40334f704cf">runLightSleepNoWakeupMode</a></div><div class="ttdeci">static uint8_t runLightSleepNoWakeupMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00190">compMsgAction.c:190</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a045ae26e909dcff21b326aa69bc12f1f"><div class="ttname"><a href="compMsgAction_8c.html#a045ae26e909dcff21b326aa69bc12f1f">runAPMode</a></div><div class="ttdeci">static uint8_t runAPMode(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00090">compMsgAction.c:90</a></div></div>
+<div class="ttc" id="compMsgAction_8c_html_a3ea9d16104472d246e8bd5ae75293e05"><div class="ttname"><a href="compMsgAction_8c.html#a3ea9d16104472d246e8bd5ae75293e05">runAPConnect</a></div><div class="ttdeci">static uint8_t runAPConnect(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgAction_8c_source.html#l00220">compMsgAction.c:220</a></div></div>
 <div class="ttc" id="compMsgModuleData_8h_html_ac06da662002237d5d1f1a454f5cbc9b2"><div class="ttname"><a href="compMsgModuleData_8h.html#ac06da662002237d5d1f1a454f5cbc9b2">MODULE_INFO_AP_LIST_CALL_BACK</a></div><div class="ttdeci">#define MODULE_INFO_AP_LIST_CALL_BACK</div><div class="ttdef"><b>Definition:</b> <a href="compMsgModuleData_8h_source.html#l00074">compMsgModuleData.h:74</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00168">168</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00255">255</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>
@@ -888,6 +1022,42 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00073">73</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a11794dd1394f0027eeea0a80a1dce0fc"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a>* <a class="el" href="structcompMsgDispatcher.html">compMsgDispatcher</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00075">75</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abe9cd74fafa1f69f26bafee0f012d712"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">sint8 gresult2 = -13</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgAction_8c_source.html#l00097">97</a> of file <a class="el" href="compMsgAction_8c_source.html">compMsgAction.c</a>.</p>
 
 </div>
 </div>

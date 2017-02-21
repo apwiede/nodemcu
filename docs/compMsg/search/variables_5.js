@@ -2,6 +2,7 @@ var searchData=
 [
   ['fieldflags',['fieldFlags',['../structcompMsgField.html#a492f142b8ed3009b94378768ef935bae',1,'compMsgField::fieldFlags()'],['../structmsgValPart.html#ac3635e4ccfa965bb369b92bccebf2dae',1,'msgValPart::fieldFlags()']]],
   ['fieldkey',['fieldKey',['../structcompMsgField.html#a70be0b0a81774c03ef2d02431c730a70',1,'compMsgField::fieldKey()'],['../structmsgDescPart.html#ad534c011312d083c7d29671bff425667',1,'msgDescPart::fieldKey()']]],
+  ['fieldkeytypeid',['fieldKeyTypeId',['../structcompMsgField.html#ac87952e1c6ff1f1c9c756d03820ab548',1,'compMsgField']]],
   ['fieldkeyvaluestr',['fieldKeyValueStr',['../structmsgValPart.html#a10a3f335ab030c12a05c7f6eb88572dc',1,'msgValPart']]],
   ['fieldlgth',['fieldLgth',['../structcompMsgField.html#a731b87b441be3e3c85211326d4ac4306',1,'compMsgField::fieldLgth()'],['../structmsgDescPart.html#a34588b5d53d1f62b0e85f34e0104a1ff',1,'msgDescPart::fieldLgth()']]],
   ['fieldname',['fieldName',['../structfieldName2id.html#ac0675a365c41e0633b23daa0e3097672',1,'fieldName2id']]],
@@ -31,7 +32,7 @@ var searchData=
   ['firmwareversion',['FirmwareVersion',['../structcompMsgModuleData.html#a8ece893dd55ee7b369dd2cbc1a646b1e',1,'compMsgModuleData']]],
   ['fixoffsetsforkeyvalues',['fixOffsetsForKeyValues',['../structcompMsgBuildMsg.html#a5cc3d337ae832073563ab846a7c769f0',1,'compMsgBuildMsg']]],
   ['flag2strs',['flag2Strs',['../compMsgMsgDesc_8c.html#af4b9d24df37d19144287960a819e019f',1,'compMsgMsgDesc.c']]],
-  ['flags',['flags',['../structcompMsgData.html#a33edb9a82ca2841c514099949f61e633',1,'compMsgData']]],
+  ['flags',['flags',['../structcompMsgData.html#a33edb9a82ca2841c514099949f61e633',1,'compMsgData::flags()'],['../structcompMsgWifiData.html#a09774d43e340164f4555588bae624cf9',1,'compMsgWifiData::flags()']]],
   ['flagstr',['flagStr',['../structflag2Str.html#a00f240a9ff0c4d0a7f5964ce0c98b17c',1,'flag2Str']]],
   ['flagval',['flagVal',['../structflag2Str.html#a247d4d6fdb07969ff6b926c336d3d66f',1,'flag2Str']]],
   ['flushfile',['flushFile',['../structcompMsgMsgDesc.html#ab1b1fbfd66ae9748fa0024c2c345fa19',1,'compMsgMsgDesc']]],

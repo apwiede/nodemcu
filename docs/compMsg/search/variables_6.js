@@ -4,6 +4,7 @@ var searchData=
   ['getactioncallbackname',['getActionCallbackName',['../structcompMsgAction.html#a5c55e85b1a44ac42d600a52ab38f9f30',1,'compMsgAction']]],
   ['getactionmode',['getActionMode',['../structcompMsgAction.html#a41dc1759d7d8a66502203efd22198e50',1,'compMsgAction']]],
   ['getbssscaninfo',['getBssScanInfo',['../structcompMsgWifiData.html#ac8dc18142dd7e23dec3942894ee671d5',1,'compMsgWifiData']]],
+  ['getclientsequencenum',['getClientSequenceNum',['../structcompMsgWifiData.html#aaf297cb5d66deb40a7bed6b35ba7d283',1,'compMsgWifiData']]],
   ['getcrc',['getCrc',['../structcompMsgDataView.html#ae205bf868d7c1f39af51cd68d062f9f4',1,'compMsgDataView']]],
   ['getcryptkey',['getCryptKey',['../structcompMsgModuleData.html#ac243f262767c35c6c29d45be61abcc52',1,'compMsgModuleData']]],
   ['getdataviewdata',['getDataViewData',['../structdataView.html#aa5763b83659e3aa8edb207d3505c3a55',1,'dataView']]],
@@ -55,5 +56,6 @@ var searchData=
   ['getwifikeyvaluekeys',['getWifiKeyValueKeys',['../structcompMsgMsgDesc.html#abce2870e886b61e0ebee5459c31e7d39',1,'compMsgMsgDesc']]],
   ['getwifiremoteport',['getWifiRemotePort',['../structcompMsgWifiData.html#a759a3d6c24eb2fcece984afc6fb344c0',1,'compMsgWifiData']]],
   ['getwifivalue',['getWifiValue',['../structcompMsgWifiData.html#a0a6cd68ba2ce83adc8d7d5eef21e15c3',1,'compMsgWifiData']]],
+  ['gresult2',['gresult2',['../compMsgAction_8c.html#abe9cd74fafa1f69f26bafee0f012d712',1,'compMsgAction.c']]],
   ['guid',['GUID',['../structcompMsgModuleData.html#aa965b01727065415d9be70c0fe1537a5',1,'compMsgModuleData::GUID()'],['../structmsgParts.html#a16a0226a519d4e677ae1980e82d54747',1,'msgParts::GUID()']]]
 ];

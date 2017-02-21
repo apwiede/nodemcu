@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['websocketuserdata',['websocketUserData',['../structwebsocketUserData.html',1,'']]]
+  ['userupgradedata',['userUpgradeData',['../structuserUpgradeData.html',1,'']]]
 ];

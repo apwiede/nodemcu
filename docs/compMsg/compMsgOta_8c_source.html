@@ -168,10 +168,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">   78</a></span>&#160;  <span class="keyword">struct </span>espconn *<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>;</div>
 <div class="line"><a name="l00079"></a><span class="lineno"><a class="line" href="structuserUpgradeData.html#a57399150590506aca9d99abe8100db43">   79</a></span>&#160;  ip_addr_t <a class="code" href="structuserUpgradeData.html#a57399150590506aca9d99abe8100db43">ip</a>;</div>
 <div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">   80</a></span>&#160;  rboot_write_status <a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>;</div>
-<div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">   81</a></span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;} <a class="code" href="compMsgOta_8c.html#a0d7a3bf9821d166e271cf95472df532f">userUpgradeData_t</a>;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;</div>
-<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb">   84</a></span>&#160;<span class="keyword">static</span> <a class="code" href="structuserUpgradeData.html">userUpgradeData_t</a> *<a class="code" href="compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb">uud</a>;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;} <a class="code" href="compMsgOta_8c.html#a0d7a3bf9821d166e271cf95472df532f">userUpgradeData_t</a>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
+<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb">   83</a></span>&#160;<span class="keyword">static</span> <a class="code" href="structuserUpgradeData.html">userUpgradeData_t</a> *<a class="code" href="compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb">uud</a>;</div>
+<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">   84</a></span>&#160;<span class="keyword">static</span> <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<a class="code" href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a>;</div>
 <div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ad3a984495f9bafd63452727f8807376c">   85</a></span>&#160;<span class="keyword">static</span> os_timer_t <a class="code" href="compMsgOta_8c.html#ad3a984495f9bafd63452727f8807376c">ota_timer</a>;</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">// ================================= compMsgOtaDeinit ====================================</span></div>
@@ -224,473 +224,502 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  <span class="keywordtype">char</span> *ptrLen;</div>
 <div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="keywordtype">char</span> *ptr;</div>
 <div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  <span class="comment">// disarm the timer</span></div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  <span class="comment">// first reply?</span></div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a8b0238715e66af15a37d061c64862709">content_len</a> == 0) {</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;    <span class="comment">// valid http response?</span></div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    <span class="keywordflow">if</span> ((ptrLen = (<span class="keywordtype">char</span>*)os_strstr(pusrdata, <span class="stringliteral">&quot;Content-Length: &quot;</span>))</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;      &amp;&amp; (ptrData = (<span class="keywordtype">char</span>*)os_strstr(ptrLen, <span class="stringliteral">&quot;\r\n\r\n&quot;</span>))</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;      &amp;&amp; (os_strncmp(pusrdata + 9, <span class="stringliteral">&quot;200&quot;</span>, 3) == 0)) {</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;      <span class="comment">// end of header/start of data</span></div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;      ptrData += 4;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;      <span class="comment">// length of data after header in this chunk</span></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;      length -= (ptrData - pusrdata);</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;      <span class="comment">// running total of download length</span></div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;      uud-&gt;<a class="code" href="structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944">total_len</a> += length;</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;      <span class="comment">// process current chunk</span></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;      rboot_write_flash(&amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>, (uint8*)ptrData, length);</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;      <span class="comment">// work out total download size</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;      ptrLen += 16;</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;      ptr = (<span class="keywordtype">char</span> *)os_strstr(ptrLen, <span class="stringliteral">&quot;\r\n&quot;</span>);</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;      *ptr = <span class="charliteral">&#39;\0&#39;</span>; <span class="comment">// destructive</span></div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;      uud-&gt;<a class="code" href="structuserUpgradeData.html#a8b0238715e66af15a37d061c64862709">content_len</a> = atoi(ptrLen);</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;      <span class="comment">// fail, not a valid http header/non-200 response/etc.</span></div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    }</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    <span class="comment">// not the first chunk, process it</span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944">total_len</a> += length;</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;    rboot_write_flash(&amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>, (uint8*)pusrdata, length);</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  }</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  <span class="comment">// check if we are finished</span></div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944">total_len</a> == uud-&gt;<a class="code" href="structuserUpgradeData.html#a8b0238715e66af15a37d061c64862709">content_len</a>) {</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    system_upgrade_flag_set(<a class="code" href="compMsgOta_8c.html#a568d84b95c752e811a27a337830c3a54">UPGRADE_FLAG_FINISH</a>);</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;    <span class="comment">// clean up and call user callback</span></div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;state != ESPCONN_READ) {</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    <span class="comment">// fail, but how do we get here? premature end of stream?</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="comment">//ets_printf(&quot;upgradeRecvCb: arg: %d length: %d content_len: %d total_len: %d\n&quot;, arg, length, uud-&gt;content_len, uud-&gt;total_len);</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="comment">// disarm the timer</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  <span class="comment">// first reply?</span></div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;<span class="comment">//ets_printf(&quot;write_status: start_addr: %p start_sector: %d last_sector_erased: %d\n&quot;, uud-&gt;write_status.start_addr, uud-&gt;write_status.start_sector, uud-&gt;write_status.last_sector_erased);</span></div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a8b0238715e66af15a37d061c64862709">content_len</a> == 0) {</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="comment">// valid http response?</span></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    <span class="keywordflow">if</span> ((ptrLen = (<span class="keywordtype">char</span>*)os_strstr(pusrdata, <span class="stringliteral">&quot;Content-Length: &quot;</span>))</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;      &amp;&amp; (ptrData = (<span class="keywordtype">char</span>*)os_strstr(ptrLen, <span class="stringliteral">&quot;\r\n\r\n&quot;</span>))</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;      &amp;&amp; (os_strncmp(pusrdata + 9, <span class="stringliteral">&quot;200&quot;</span>, 3) == 0)) {</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;      <span class="comment">// end of header/start of data</span></div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;      ptrData += 4;</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;      <span class="comment">// length of data after header in this chunk</span></div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;      length -= (ptrData - pusrdata);</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;      <span class="comment">// running total of download length</span></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;      uud-&gt;<a class="code" href="structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944">total_len</a> += length;</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;      <span class="comment">// process current chunk</span></div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;ets_printf(<span class="stringliteral">&quot;write_status: start_addr: %p start_sector: %d last_sector_erased: %d\n&quot;</span>, uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>.start_addr, uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>.start_sector, uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>.last_sector_erased);</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;      rboot_write_flash(&amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>, (uint8*)ptrData, length);</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;      <span class="comment">// work out total download size</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;      ptrLen += 16;</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;      ptr = (<span class="keywordtype">char</span> *)os_strstr(ptrLen, <span class="stringliteral">&quot;\r\n&quot;</span>);</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;      *ptr = <span class="charliteral">&#39;\0&#39;</span>; <span class="comment">// destructive</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      uud-&gt;<a class="code" href="structuserUpgradeData.html#a8b0238715e66af15a37d061c64862709">content_len</a> = atoi(ptrLen);</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;      <span class="comment">// fail, not a valid http header/non-200 response/etc.</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;      <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;      <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;    }</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;    <span class="comment">// not the first chunk, process it</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944">total_len</a> += length;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    rboot_write_flash(&amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a>, (uint8*)pusrdata, length);</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  }</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  <span class="comment">// check if we are finished</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944">total_len</a> == uud-&gt;<a class="code" href="structuserUpgradeData.html#a8b0238715e66af15a37d061c64862709">content_len</a>) {</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    system_upgrade_flag_set(<a class="code" href="compMsgOta_8c.html#a568d84b95c752e811a27a337830c3a54">UPGRADE_FLAG_FINISH</a>);</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    <span class="comment">// clean up and call user callback</span></div>
 <div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="comment">// timer for next recv</span></div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    os_timer_setfn(&amp;ota_timer, (os_timer_func_t *)<a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>, 0);</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    os_timer_arm(&amp;ota_timer, OTA_NETWORK_TIMEOUT, 0);</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  }</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;}</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;<span class="comment">// ================================= upgradeDisconnectCb ====================================</span></div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="comment">// disconnect callback, clean up the connection</span></div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="comment">// we also call this ourselves</span></div>
-<div class="line"><a name="l00190"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">  190</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(<span class="keywordtype">void</span> *arg) {</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="comment">// use passed ptr, as upgrade struct may have gone by now</span></div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  <span class="keyword">struct </span>espconn *conn = (<span class="keyword">struct </span>espconn*)arg;</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  <span class="keywordflow">if</span> (conn) {</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    <span class="keywordflow">if</span> (conn-&gt;proto.tcp) {</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;      os_free(conn-&gt;proto.tcp);</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    }</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    os_free(conn);</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  }</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="comment">// is upgrade struct still around?</span></div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  <span class="comment">// if so disconnect was from remote end, or we called</span></div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <span class="comment">// ourselves to cleanup a failed connection attempt</span></div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="comment">// must ensure disconnect was for this upgrade attempt,</span></div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="comment">// not a previous one! this call back is async so another</span></div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  <span class="comment">// upgrade struct may have been created already</span></div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  <span class="keywordflow">if</span> (uud &amp;&amp; (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> == conn)) {</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    <span class="comment">// mark connection as gone</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> = 0;</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="comment">// end the update process</span></div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  }</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;}</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="comment">// ================================= upgradeConnectCb ====================================</span></div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;</div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="comment">// successfully connected to update server, send the request</span></div>
-<div class="line"><a name="l00219"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">  219</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">upgradeConnectCb</a>(<span class="keywordtype">void</span> *arg) {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  uint8_t *request;</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;  uint8_t *otaHost;</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  uint8_t *otaRomPath;</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  uint8_t *otaFsPath;</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="keyword">self</span> = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>;</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <span class="comment">// disable the timeout</span></div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  <span class="comment">// register connection callbacks</span></div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  espconn_regist_disconcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>);</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;  espconn_regist_recvcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#a0403274e6e19b5ff0774855d8ae29067">upgradeRecvCb</a>);</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;  <span class="comment">// http request string</span></div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;  request = (uint8 *)os_malloc(512);</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;  <span class="keywordflow">if</span> (!request) {</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;    <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;  }</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;  result = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#a0d460d29d86fb88fbe2271b76e914d19">getOtaHost</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>, &amp;numericValue, &amp;otaHost);</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a> == FLASH_BY_ADDR) {</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    result = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#a979e119341ee0a5a8bb1c8218c985727">getOtaFsPath</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>, &amp;numericValue, &amp;otaFsPath);</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    os_sprintf((<span class="keywordtype">char</span>*)request, <span class="stringliteral">&quot;GET %s HTTP/1.1\r\nHost: %s \r\n%s&quot;</span>, otaFsPath, otaHost, HTTP_HEADER);</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    result = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#ad19fadc0c259c1e7de22d4ce3ed482c2">getOtaRomPath</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>, &amp;numericValue, &amp;otaRomPath);</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    os_sprintf((<span class="keywordtype">char</span>*)request, <span class="stringliteral">&quot;GET %s HTTP/1.1\r\nHost: %s \r\n%s&quot;</span>, otaRomPath, otaHost, HTTP_HEADER);</div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  }</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;otaRequest: %s\n&quot;</span>, request);</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  <span class="comment">// send the http request, with timeout for reply</span></div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  os_timer_setfn(&amp;ota_timer, (os_timer_func_t *)<a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>, 0);</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;  os_timer_arm(&amp;ota_timer, OTA_NETWORK_TIMEOUT, 0);</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;  espconn_sent(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, request, os_strlen((<span class="keywordtype">char</span>*)request));</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  os_free(request);</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;}</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;<span class="comment">// ================================= connectTimeoutCb ====================================</span></div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;<span class="comment">// connection attempt timed out</span></div>
-<div class="line"><a name="l00263"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">  263</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">connectTimeoutCb</a>() {</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  <span class="keyword">self</span> = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>;</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;Connect timeout.\n&quot;</span>);</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;  <span class="comment">// not connected so don&#39;t call disconnect on the connection</span></div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <span class="comment">// but call our own disconnect callback to do the cleanup</span></div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;}</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;<span class="comment">// ================================= espErrStr ====================================</span></div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;</div>
-<div class="line"><a name="l00275"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">  275</a></span>&#160;<span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">espErrStr</a>(sint8 err) {</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;  <span class="keywordflow">switch</span>(err) {</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;    <span class="keywordflow">case</span> ESPCONN_OK:</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;No error, everything OK.&quot;</span>;</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    <span class="keywordflow">case</span> ESPCONN_MEM:</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Out of memory error.&quot;</span>;</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;    <span class="keywordflow">case</span> ESPCONN_TIMEOUT:</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Timeout.&quot;</span>;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    <span class="keywordflow">case</span> ESPCONN_RTE:</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Routing problem.&quot;</span>;</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    <span class="keywordflow">case</span> ESPCONN_INPROGRESS:</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Operation in progress.&quot;</span>;</div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    <span class="keywordflow">case</span> ESPCONN_ABRT:</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Connection aborted.&quot;</span>;</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;    <span class="keywordflow">case</span> ESPCONN_RST:</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Connection reset.&quot;</span>;</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;    <span class="keywordflow">case</span> ESPCONN_CLSD:</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Connection closed.&quot;</span>;</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;    <span class="keywordflow">case</span> ESPCONN_CONN:</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Not connected.&quot;</span>;</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    <span class="keywordflow">case</span> ESPCONN_ARG:</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Illegal argument.&quot;</span>;</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;    <span class="keywordflow">case</span> ESPCONN_ISCONN:</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Already connected.&quot;</span>;</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;  }</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;}</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;<span class="comment">// ================================= upgradeReconCb ====================================</span></div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;<span class="comment">// call back for lost connection</span></div>
-<div class="line"><a name="l00305"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">  305</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">upgradeReconCb</a>(<span class="keywordtype">void</span> *arg, sint8 errType) {</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;  <span class="keyword">self</span> = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>;</div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;Connection error: %s\n&quot;</span>, <a class="code" href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">espErrStr</a>(errType));</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;  <span class="comment">// not connected so don&#39;t call disconnect on the connection</span></div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="comment">// but call our own disconnect callback to do the cleanup</span></div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;}</div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;<span class="comment">// ================================= upgradeResolved ====================================</span></div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;<span class="comment">// call back for dns lookup</span></div>
-<div class="line"><a name="l00318"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">  318</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, ip_addr_t *ip, <span class="keywordtype">void</span> *arg) {</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;  uint8_t *otaHost;</div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;  uint8_t *dummy;</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;  <span class="keywordtype">int</span> port;</div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;  <span class="keywordtype">int</span> numeric;</div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;  <span class="keyword">self</span> = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>;</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;  result = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#a0d460d29d86fb88fbe2271b76e914d19">getOtaHost</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>, &amp;numeric, &amp;otaHost);</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;  <span class="keywordflow">if</span> (ip == 0) {</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;DNS lookup failed for: %s\n&quot;</span>, otaHost);</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;    <span class="comment">// not connected so don&#39;t call disconnect on the connection</span></div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;    <span class="comment">// but call our own disconnect callback to do the cleanup</span></div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;    <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;    <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;  }</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;  <span class="comment">// set up connection</span></div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;type = ESPCONN_TCP;</div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;state = ESPCONN_NONE;</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp-&gt;local_port = espconn_port();</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;<span class="comment">//FIXME!! get port from configuration data here!!</span></div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;  result = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#a0bcddf093e9beb75fa04ca229c3ca418">getOtaPort</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>, &amp;port, &amp;dummy);</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp-&gt;remote_port = port;</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;host: %s port: %d\n&quot;</span>, otaHost, port);</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  *(ip_addr_t*)uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp-&gt;remote_ip = *ip;</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;  <span class="comment">// set connection call backs</span></div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  espconn_regist_connectcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">upgradeConnectCb</a>);</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;  espconn_regist_reconcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">upgradeReconCb</a>);</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;  <span class="comment">// try to connect</span></div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;  espconn_connect(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;state != ESPCONN_READ) {</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="comment">// fail, but how do we get here? premature end of stream?</span></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    <span class="comment">// timer for next recv</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    os_timer_setfn(&amp;ota_timer, (os_timer_func_t *)<a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>, 0);</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    os_timer_arm(&amp;ota_timer, OTA_NETWORK_TIMEOUT, 0);</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  }</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;}</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="comment">// ================================= upgradeDisconnectCb ====================================</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="comment">// disconnect callback, clean up the connection</span></div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="comment">// we also call this ourselves</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">  193</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(<span class="keywordtype">void</span> *arg) {</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  <span class="comment">// use passed ptr, as upgrade struct may have gone by now</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  <span class="keyword">struct </span>espconn *conn = (<span class="keyword">struct </span>espconn*)arg;</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <span class="keywordflow">if</span> (conn) {</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    <span class="keywordflow">if</span> (conn-&gt;proto.tcp) {</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;      os_free(conn-&gt;proto.tcp);</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    }</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    os_free(conn);</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  }</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="comment">// is upgrade struct still around?</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="comment">// if so disconnect was from remote end, or we called</span></div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  <span class="comment">// ourselves to cleanup a failed connection attempt</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  <span class="comment">// must ensure disconnect was for this upgrade attempt,</span></div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  <span class="comment">// not a previous one! this call back is async so another</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;  <span class="comment">// upgrade struct may have been created already</span></div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  <span class="keywordflow">if</span> (uud &amp;&amp; (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> == conn)) {</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="comment">// mark connection as gone</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> = 0;</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    <span class="comment">// end the update process</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  }</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;}</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;<span class="comment">// ================================= upgradeConnectCb ====================================</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="comment">// successfully connected to update server, send the request</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">  222</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">upgradeConnectCb</a>(<span class="keywordtype">void</span> *arg) {</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  uint8_t *request;</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  uint8_t *otaHost;</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  uint8_t *otaRomPath;</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;  uint8_t *otaFsPath;</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  <span class="keyword">self</span> = <a class="code" href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a>;</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  <span class="comment">// disable the timeout</span></div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;  <span class="comment">// register connection callbacks</span></div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;  espconn_regist_disconcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>);</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;  espconn_regist_recvcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#a0403274e6e19b5ff0774855d8ae29067">upgradeRecvCb</a>);</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;  <span class="comment">// http request string</span></div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  request = (uint8 *)os_malloc(512);</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;  <span class="keywordflow">if</span> (!request) {</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    <a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>();</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;  }</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgModuleData-&gt;getOtaHost(<span class="keyword">self</span>, &amp;numericValue, &amp;otaHost);</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a> == FLASH_BY_ADDR) {</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgModuleData-&gt;getOtaFsPath(<span class="keyword">self</span>, &amp;numericValue, &amp;otaFsPath);</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    os_sprintf((<span class="keywordtype">char</span>*)request, <span class="stringliteral">&quot;GET %s HTTP/1.1\r\nHost: %s \r\n%s&quot;</span>, otaFsPath, otaHost, HTTP_HEADER);</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgModuleData-&gt;getOtaRomPath(<span class="keyword">self</span>, &amp;numericValue, &amp;otaRomPath);</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    os_sprintf((<span class="keywordtype">char</span>*)request, <span class="stringliteral">&quot;GET %s HTTP/1.1\r\nHost: %s \r\n%s&quot;</span>, otaRomPath, otaHost, HTTP_HEADER);</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  }</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;otaRequest: %s\n&quot;</span>, request);</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;  <span class="comment">// send the http request, with timeout for reply</span></div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  os_timer_setfn(&amp;ota_timer, (os_timer_func_t *)<a class="code" href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a>, 0);</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;  os_timer_arm(&amp;ota_timer, OTA_NETWORK_TIMEOUT, 0);</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;  espconn_sent(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, request, os_strlen((<span class="keywordtype">char</span>*)request));</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;  os_free(request);</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;}</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;<span class="comment">// ================================= connectTimeoutCb ====================================</span></div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;<span class="comment">// connection attempt timed out</span></div>
+<div class="line"><a name="l00266"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">  266</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">connectTimeoutCb</a>() {</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <span class="keyword">self</span> = <a class="code" href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a>;</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;Connect timeout.\n&quot;</span>);</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="comment">// not connected so don&#39;t call disconnect on the connection</span></div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  <span class="comment">// but call our own disconnect callback to do the cleanup</span></div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;}</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;<span class="comment">// ================================= espErrStr ====================================</span></div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;</div>
+<div class="line"><a name="l00278"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">  278</a></span>&#160;<span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">espErrStr</a>(sint8 err) {</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;  <span class="keywordflow">switch</span>(err) {</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    <span class="keywordflow">case</span> ESPCONN_OK:</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;No error, everything OK.&quot;</span>;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    <span class="keywordflow">case</span> ESPCONN_MEM:</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Out of memory error.&quot;</span>;</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;    <span class="keywordflow">case</span> ESPCONN_TIMEOUT:</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Timeout.&quot;</span>;</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;    <span class="keywordflow">case</span> ESPCONN_RTE:</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Routing problem.&quot;</span>;</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;    <span class="keywordflow">case</span> ESPCONN_INPROGRESS:</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Operation in progress.&quot;</span>;</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    <span class="keywordflow">case</span> ESPCONN_ABRT:</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Connection aborted.&quot;</span>;</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    <span class="keywordflow">case</span> ESPCONN_RST:</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Connection reset.&quot;</span>;</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    <span class="keywordflow">case</span> ESPCONN_CLSD:</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Connection closed.&quot;</span>;</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;    <span class="keywordflow">case</span> ESPCONN_CONN:</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Not connected.&quot;</span>;</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    <span class="keywordflow">case</span> ESPCONN_ARG:</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Illegal argument.&quot;</span>;</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;    <span class="keywordflow">case</span> ESPCONN_ISCONN:</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;Already connected.&quot;</span>;</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;  }</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;}</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;<span class="comment">// ================================= upgradeReconCb ====================================</span></div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;<span class="comment">// call back for lost connection</span></div>
+<div class="line"><a name="l00308"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">  308</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">upgradeReconCb</a>(<span class="keywordtype">void</span> *arg, sint8 errType) {</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="keyword">self</span> = <a class="code" href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a>;</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;Connection error: %s\n&quot;</span>, <a class="code" href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">espErrStr</a>(errType));</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  <span class="comment">// not connected so don&#39;t call disconnect on the connection</span></div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;  <span class="comment">// but call our own disconnect callback to do the cleanup</span></div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;  <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;}</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;<span class="comment">// ================================= upgradeResolved ====================================</span></div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;<span class="comment">// call back for dns lookup</span></div>
+<div class="line"><a name="l00321"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">  321</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, ip_addr_t *ip, <span class="keywordtype">void</span> *arg) {</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;  uint8_t *otaHost;</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;  uint8_t *dummy;</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;  <span class="keywordtype">int</span> port;</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;  <span class="keywordtype">int</span> numeric;</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;  <span class="keyword">self</span> = <a class="code" href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a>;</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;  result = <span class="keyword">self</span>-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#a0d460d29d86fb88fbe2271b76e914d19">getOtaHost</a>(<span class="keyword">self</span>, &amp;numeric, &amp;otaHost);</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  <span class="keywordflow">if</span> (ip == 0) {</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;DNS lookup failed for: %s\n&quot;</span>, otaHost);</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;    <span class="comment">// not connected so don&#39;t call disconnect on the connection</span></div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;    <span class="comment">// but call our own disconnect callback to do the cleanup</span></div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;    <a class="code" href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;  }</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;  <span class="comment">// set up connection</span></div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;type = ESPCONN_TCP;</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;state = ESPCONN_NONE;</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp-&gt;local_port = espconn_port();</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;<span class="comment">//FIXME!! get port from configuration data here!!</span></div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgModuleData-&gt;getOtaPort(<span class="keyword">self</span>, &amp;port, &amp;dummy);</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp-&gt;remote_port = port;</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;host: %s port: %d\n&quot;</span>, otaHost, port);</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;  *(ip_addr_t*)uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp-&gt;remote_ip = *ip;</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;  <span class="comment">// set connection call backs</span></div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;  espconn_regist_connectcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">upgradeConnectCb</a>);</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;  espconn_regist_reconcb(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, <a class="code" href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">upgradeReconCb</a>);</div>
 <div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;  <span class="comment">// set connection timeout timer</span></div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;  os_timer_setfn(&amp;ota_timer, (os_timer_func_t *)<a class="code" href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">connectTimeoutCb</a>, 0);</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;  os_timer_arm(&amp;ota_timer, OTA_NETWORK_TIMEOUT, 0);</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;}</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;<span class="comment">// ================================= storeUserData ====================================</span></div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;<span class="comment">// store user data</span></div>
-<div class="line"><a name="l00361"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">  361</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">storeUserData</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, <span class="keywordtype">size_t</span> msgLgth, uint8_t *msgData) {</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;  rboot_config bootconf;</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;  bootconf = rboot_get_config();</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  bootconf.user_rom_save_data_flag = 1;</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;storeUserData: msgLgth %d&quot;</span>, msgLgth);</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;  bootconf.user_rom_save_data[0] = <span class="charliteral">&#39;\0&#39;</span>;</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  c_memcpy(bootconf.user_rom_save_data, msgData, msgLgth);</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;  bootconf.user_rom_save_data_size = msgLgth;</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;  rboot_set_config(&amp;bootconf);</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;}</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;<span class="comment">// ================================= saveUserData ====================================</span></div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;<span class="comment">// save user data</span></div>
-<div class="line"><a name="l00377"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">  377</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">saveUserData</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;  <a class="code" href="structheaderPart.html">headerPart_t</a> *hdr;</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;  uint8_t *handle;</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;saveUserData called&quot;</span>);</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;<span class="comment">//FIXME get src dst and cmdKey with a call!!</span></div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgMsgDesc-&gt;getHeaderFromUniqueFields(<span class="keyword">self</span>, 22272,22272, 0x5544, &amp;hdr);</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;createMsgFromHeaderPart(<span class="keyword">self</span>, hdr, &amp;handle);</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;handle: %s result: %d&quot;</span>, handle, result);</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;}</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;<span class="comment">// ================================= getUserData ====================================</span></div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;<span class="comment">// get user data</span></div>
-<div class="line"><a name="l00395"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">  395</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">getUserData</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, uint8_t **msgData, <span class="keywordtype">size_t</span> *msgLgth) {</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;  rboot_config bootconf;</div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;</div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;  bootconf = rboot_get_config();</div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;getUserData&quot;</span>);</div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;  *msgLgth = bootconf.user_rom_save_data_size;</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;  *msgData = os_zalloc(*msgLgth);</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;  <a class="code" href="dataView_8h.html#a7b5e4ae473672cdbec87956b3a0fe668">checkAllocOK</a>(*msgData);</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;  c_memcpy(*msgData, bootconf.user_rom_save_data, *msgLgth);</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;}</div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;<span class="comment">// ================================= otaStart ====================================</span></div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;<span class="comment">// start the ota process, with user supplied options</span></div>
-<div class="line"><a name="l00410"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">  410</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, ota_callback callback, <span class="keywordtype">bool</span> flashfs) {</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;  uint8_t slot;</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;  uint8_t *otaHost;</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;  rboot_config bootconf;</div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;  err_t espconnResult;</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;  <span class="comment">// check not already updating</span></div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;  <span class="keywordflow">if</span> (system_upgrade_flag_check() == <a class="code" href="compMsgOta_8c.html#aa45c4c3f3b5ed0d3070af7cf0fe151a9">UPGRADE_FLAG_START</a>) {</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a8d305bd1e7c95e58083c7c1e43018f55">COMP_MSG_ERR_ALREADY_UPDATING</a>;</div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;  }</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;  <span class="comment">// create upgrade status structure</span></div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;  uud = (<a class="code" href="structuserUpgradeData.html">userUpgradeData_t</a> *)os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structuserUpgradeData.html">userUpgradeData_t</a>));</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;  <span class="keywordflow">if</span> (uud == NULL) {</div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5">COMP_MSG_ERR_OUT_OF_MEMORY</a>;</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;  }</div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a> = <span class="keyword">self</span>;</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;</div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  <span class="comment">// store the callback</span></div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#abcd9211c1511f2c7e35e5e3a929724e7">callback</a> = callback;</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;  <span class="comment">// try to connect</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;  espconn_connect(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;  <span class="comment">// set connection timeout timer</span></div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;  os_timer_disarm(&amp;ota_timer);</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;  os_timer_setfn(&amp;ota_timer, (os_timer_func_t *)<a class="code" href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">connectTimeoutCb</a>, 0);</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;  os_timer_arm(&amp;ota_timer, OTA_NETWORK_TIMEOUT, 0);</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;}</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;<span class="comment">// ================================= storeUserData ====================================</span></div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;<span class="comment">// store user data</span></div>
+<div class="line"><a name="l00364"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">  364</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">storeUserData</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, <span class="keywordtype">size_t</span> msgLgth, uint8_t *msgData) {</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;  rboot_config bootconf;</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;  bootconf = rboot_get_config();</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;  bootconf.user_rom_save_data_flag = BOOT_USER_ROM_DATA_SAVED;</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;storeUserData: msgLgth %d&quot;</span>, msgLgth);</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;  bootconf.user_rom_save_data[0] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;  c_memcpy(bootconf.user_rom_save_data, msgData, msgLgth);</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;  bootconf.user_rom_save_data_size = msgLgth;</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;  rboot_set_config(&amp;bootconf);</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;}</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;<span class="comment">// ================================= saveUserData ====================================</span></div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;<span class="comment">// save user data</span></div>
+<div class="line"><a name="l00380"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">  380</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">saveUserData</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;  <a class="code" href="structheaderPart.html">headerPart_t</a> *hdr;</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;  uint8_t *handle;</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;  rboot_config bootconf;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;  bootconf = rboot_get_config();</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;  bootconf.user_rom_save_data_flag = BOOT_USER_ROM_DO_SAVE_DATA;</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;  rboot_set_config(&amp;bootconf);</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;saveUserData called&quot;</span>);</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;<span class="comment">//FIXME get src dst and cmdKey with an appropriate function call!!</span></div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgMsgDesc-&gt;getHeaderFromUniqueFields(<span class="keyword">self</span>, 22272,22272, 0x5544, &amp;hdr);</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;saveUserData getHeaderFromUniqueFields result: %d&quot;</span>, result);</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgBuildMsg-&gt;createMsgFromHeaderPart(<span class="keyword">self</span>, hdr, &amp;handle);</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;handle: %s result: %d&quot;</span>, handle, result);</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;}</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;<span class="comment">// ================================= getUserData ====================================</span></div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;<span class="comment">// get user data</span></div>
+<div class="line"><a name="l00403"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">  403</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">getUserData</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, uint8_t **msgData, <span class="keywordtype">size_t</span> *msgLgth) {</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;  rboot_config bootconf;</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;  bootconf = rboot_get_config();</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;  <span class="keywordflow">switch</span> (bootconf.user_rom_save_data_flag) {</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;  <span class="keywordflow">case</span> BOOT_USER_ROM_NO_DATA_SET:</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;  <span class="keywordflow">case</span> BOOT_USER_ROM_DATA_SET:</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;  <span class="keywordflow">case</span> BOOT_USER_ROM_DO_SAVE_DATA:</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;  <span class="keywordflow">case</span> BOOT_USER_ROM_NO_SAVE_DATA:</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;  <span class="keywordflow">case</span> BOOT_USER_ROM_RESET_DATA:</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;  <span class="keywordflow">case</span> BOOT_USER_ROM_DATA_RESETTED:</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    bootconf.user_rom_save_data_flag = 0;</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;  <span class="keywordflow">case</span> BOOT_USER_ROM_DATA_SAVED:</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;  <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;  }</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;  <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;getUserData&quot;</span>);</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;  *msgLgth = bootconf.user_rom_save_data_size;</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;  *msgData = os_zalloc(*msgLgth);</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;  <a class="code" href="dataView_8h.html#a7b5e4ae473672cdbec87956b3a0fe668">checkAllocOK</a>(*msgData);</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;  c_memcpy(*msgData, bootconf.user_rom_save_data, *msgLgth);</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;}</div>
 <div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;  <span class="comment">// get details of rom slot to update</span></div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;  bootconf = rboot_get_config();</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;  slot = bootconf.current_rom;</div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;  <span class="keywordflow">if</span> (slot == 0) {</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;    slot = 1;</div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;  }  <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;    slot = 0;</div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;  }</div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a> = slot;</div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgOta-&gt;saveUserData(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;</div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  <span class="keywordflow">if</span> (flashfs) {</div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;    <span class="comment">// flash spiffs</span></div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a> = rboot_write_init((bootconf.roms[uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);</div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a> = FLASH_BY_ADDR;</div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;    <span class="comment">// flash to rom slot</span></div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a> = rboot_write_init(bootconf.roms[uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>]);</div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;  }</div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;</div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;  <span class="comment">// create connection</span></div>
-<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> = (<span class="keyword">struct </span>espconn *)os_zalloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> espconn));</div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> == NULL) {</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;    os_free(uud);</div>
-<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;    uud = NULL;</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5">COMP_MSG_ERR_OUT_OF_MEMORY</a>;</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;  }</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp = (esp_tcp *)os_zalloc(<span class="keyword">sizeof</span>(esp_tcp));</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp == NULL) {</div>
-<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
-<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;    os_free(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
-<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;    os_free(uud);</div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;    uud = NULL;</div>
-<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5">COMP_MSG_ERR_OUT_OF_MEMORY</a>;</div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;  }</div>
-<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;</div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;  <span class="comment">// set update flag</span></div>
-<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;  system_upgrade_flag_set(<a class="code" href="compMsgOta_8c.html#aa45c4c3f3b5ed0d3070af7cf0fe151a9">UPGRADE_FLAG_START</a>);</div>
-<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;  <span class="comment">// dns lookup</span></div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;  result = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#a0d460d29d86fb88fbe2271b76e914d19">getOtaHost</a>(uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>, &amp;numericValue, &amp;otaHost);</div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;  espconnResult = espconn_gethostbyname(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, otaHost, &amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#a57399150590506aca9d99abe8100db43">ip</a>, <a class="code" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a>);</div>
-<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;  <span class="keywordflow">if</span> (espconnResult == ESPCONN_OK) {</div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    <span class="comment">// hostname is already cached or is actually a dotted decimal ip address</span></div>
-<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    <a class="code" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a>(0, &amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#a57399150590506aca9d99abe8100db43">ip</a>, uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
-<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;    <span class="keywordflow">if</span> (espconnResult == ESPCONN_INPROGRESS) {</div>
-<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;      <span class="comment">// lookup taking place, will call upgrade_resolved on completion</span></div>
-<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;DNS error!\n&quot;</span>);</div>
-<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;      os_free(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp);</div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;      os_free(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
-<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;      os_free(uud);</div>
-<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;      uud = NULL;</div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a077528dcb2e28a615eb658dc9bcab5ab">COMP_MSG_ERR_DNS_ERROR</a>;</div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;    }</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;<span class="comment">// ================================= otaStart ====================================</span></div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;<span class="comment">// start the ota process, with user supplied options</span></div>
+<div class="line"><a name="l00437"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">  437</a></span>&#160;<span class="keyword">static</span> uint8_t ICACHE_FLASH_ATTR <a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, ota_callback callback, <span class="keywordtype">bool</span> flashfs) {</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;  uint8_t slot;</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;  uint8_t *otaHost;</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;  <span class="keywordtype">int</span> numericValue;</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;  rboot_config bootconf;</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;  err_t espconnResult;</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <span class="comment">// check not already updating</span></div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;  <span class="keywordflow">if</span> (system_upgrade_flag_check() == <a class="code" href="compMsgOta_8c.html#aa45c4c3f3b5ed0d3070af7cf0fe151a9">UPGRADE_FLAG_START</a>) {</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a8d305bd1e7c95e58083c7c1e43018f55">COMP_MSG_ERR_ALREADY_UPDATING</a>;</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  }</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;</div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;  <span class="comment">// create upgrade status structure</span></div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;  uud = (<a class="code" href="structuserUpgradeData.html">userUpgradeData_t</a> *)os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structuserUpgradeData.html">userUpgradeData_t</a>));</div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;  <span class="keywordflow">if</span> (uud == NULL) {</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5">COMP_MSG_ERR_OUT_OF_MEMORY</a>;</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;  }</div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;  compMsgDispatcher = <span class="keyword">self</span>;</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;  <span class="comment">// store the callback</span></div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#abcd9211c1511f2c7e35e5e3a929724e7">callback</a> = callback;</div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;  <span class="comment">// get details of rom slot to update</span></div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;  bootconf = rboot_get_config();</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;  slot = bootconf.current_rom;</div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;  <span class="keywordflow">if</span> (slot == 0) {</div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;    slot = 1;</div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;  }  <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;    slot = 0;</div>
+<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;  }</div>
+<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a> = slot;</div>
+<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;  result = <span class="keyword">self</span>-&gt;compMsgOta-&gt;saveUserData(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;</div>
+<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;  <span class="keywordflow">if</span> (flashfs) {</div>
+<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;    <span class="comment">// flash spiffs</span></div>
+<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;ets_printf(<span class="stringliteral">&quot;ota write flash1: %p\n&quot;</span>, (bootconf.roms[uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);</div>
+<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;ets_printf(<span class="stringliteral">&quot;ota write flash2: %p sector: %d setcorSize: %d offset: 0x%08x\n&quot;</span>, bootconf.roms[uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>], (BOOT_CONFIG_SECTOR + 1), SECTOR_SIZE, SPIFFS_FIXED_OFFSET_RBOOT);</div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a> = rboot_write_init((bootconf.roms[uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>] - ((BOOT_CONFIG_SECTOR + 1) * SECTOR_SIZE)) + SPIFFS_FIXED_OFFSET_RBOOT);</div>
+<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a> = FLASH_BY_ADDR;</div>
+<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    <span class="comment">// flash to rom slot</span></div>
+<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;ets_printf(<span class="stringliteral">&quot;ota write rom: %d %p\n&quot;</span>, uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>, bootconf.roms[uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>]);</div>
+<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;    uud-&gt;<a class="code" href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">write_status</a> = rboot_write_init(bootconf.roms[uud-&gt;<a class="code" href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">rom_slot</a>]);</div>
+<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;  }</div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;</div>
+<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;  <span class="comment">// create connection</span></div>
+<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> = (<span class="keyword">struct </span>espconn *)os_zalloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> espconn));</div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a> == NULL) {</div>
+<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
+<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;    os_free(uud);</div>
+<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    uud = NULL;</div>
+<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5">COMP_MSG_ERR_OUT_OF_MEMORY</a>;</div>
 <div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;  }</div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;</div>
-<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;}</div>
-<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;</div>
-<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;<span class="comment">// ================================= otaUpdatCallback ====================================</span></div>
-<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;</div>
-<div class="line"><a name="l00499"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">  499</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a>(<span class="keywordtype">bool</span> result, uint8 rom_slot) {</div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;  uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp = (esp_tcp *)os_zalloc(<span class="keyword">sizeof</span>(esp_tcp));</div>
+<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;  <span class="keywordflow">if</span> (uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp == NULL) {</div>
+<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;No ram!\n&quot;</span>);</div>
+<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;    os_free(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;    os_free(uud);</div>
+<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;    uud = NULL;</div>
+<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5">COMP_MSG_ERR_OUT_OF_MEMORY</a>;</div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;  }</div>
 <div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;</div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;  <span class="keyword">self</span> = uud-&gt;<a class="code" href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">compMsgDispatcher</a>;</div>
-<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;  <span class="keywordflow">if</span> (result == <span class="keyword">true</span>) {</div>
-<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;    <span class="comment">// success</span></div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;    <span class="keywordflow">if</span> (rom_slot == FLASH_BY_ADDR) {</div>
-<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;rBoot: Spiffs update successful.\n&quot;</span>);</div>
-<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;      <span class="comment">// set to boot new rom and then reboot</span></div>
-<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;rBoot: Firmware update successful, rebooting to rom: %d...\n&quot;</span>, rom_slot);</div>
-<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;      rboot_set_current_rom(rom_slot);</div>
-<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;call system_restart\n&quot;</span>);</div>
-<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;      system_restart();</div>
-<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;    }</div>
-<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;after call system_restart\n&quot;</span>);</div>
-<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;    <span class="comment">// fail</span></div>
-<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;rBoot: Firmware update failed!\n&quot;</span>);</div>
-<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;  }</div>
-<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;}</div>
-<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;</div>
-<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;</div>
-<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;<span class="comment">// ================================= updateFirmware ====================================</span></div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;  <span class="comment">// set update flag</span></div>
+<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;  system_upgrade_flag_set(<a class="code" href="compMsgOta_8c.html#aa45c4c3f3b5ed0d3070af7cf0fe151a9">UPGRADE_FLAG_START</a>);</div>
+<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;</div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;  <span class="comment">// dns lookup</span></div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;  result = compMsgDispatcher-&gt;<a class="code" href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgModuleData</a>-&gt;<a class="code" href="structcompMsgModuleData.html#a0d460d29d86fb88fbe2271b76e914d19">getOtaHost</a>(compMsgDispatcher, &amp;numericValue, &amp;otaHost);</div>
+<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;  espconnResult = espconn_gethostbyname(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>, otaHost, &amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#a57399150590506aca9d99abe8100db43">ip</a>, <a class="code" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a>);</div>
+<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;  <span class="keywordflow">if</span> (espconnResult == ESPCONN_OK) {</div>
+<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;    <span class="comment">// hostname is already cached or is actually a dotted decimal ip address</span></div>
+<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;    <a class="code" href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a>(0, &amp;uud-&gt;<a class="code" href="structuserUpgradeData.html#a57399150590506aca9d99abe8100db43">ip</a>, uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;    <span class="keywordflow">if</span> (espconnResult == ESPCONN_INPROGRESS) {</div>
+<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;      <span class="comment">// lookup taking place, will call upgrade_resolved on completion</span></div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;DNS error!\n&quot;</span>);</div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;      os_free(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>-&gt;proto.tcp);</div>
+<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;      os_free(uud-&gt;<a class="code" href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">conn</a>);</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;      os_free(uud);</div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;      uud = NULL;</div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a077528dcb2e28a615eb658dc9bcab5ab">COMP_MSG_ERR_DNS_ERROR</a>;</div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;    }</div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;  }</div>
 <div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;</div>
-<div class="line"><a name="l00524"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">  524</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">updateFirmware</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;}</div>
 <div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;</div>
-<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;  result = <a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>(<span class="keyword">self</span>, <a class="code" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a>, <span class="keyword">false</span>);</div>
-<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;}</div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;<span class="comment">// ================================= otaUpdatCallback ====================================</span></div>
+<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;</div>
+<div class="line"><a name="l00529"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">  529</a></span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a>(<span class="keywordtype">bool</span> result, uint8 rom_slot) {</div>
+<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;  <a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>;</div>
 <div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;</div>
-<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;<span class="comment">// ================================= updateSpiffs ====================================</span></div>
-<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;</div>
-<div class="line"><a name="l00534"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">  534</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">updateSpiffs</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;</div>
-<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;  result = <a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>(<span class="keyword">self</span>, <a class="code" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a>, <span class="keyword">true</span>);</div>
-<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;}</div>
-<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;</div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;<span class="comment">// ================================= checkClientMode ====================================</span></div>
-<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;<span class="comment">/**</span></div>
-<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;<span class="comment"> * \brief start the connection with the router for doing ota updates</span></div>
-<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
-<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
-<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00550"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">  550</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">checkClientMode</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, <span class="keywordtype">bool</span> isSpiffs) {</div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;</div>
+<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;  <span class="keyword">self</span> = <a class="code" href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a>;</div>
+<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;  <span class="keywordflow">if</span> (result == <span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160;    <span class="comment">// success</span></div>
+<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;    <span class="keywordflow">if</span> (rom_slot == FLASH_BY_ADDR) {</div>
+<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;rBoot: Spiffs update successful.\n&quot;</span>);</div>
+<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;      <span class="comment">// set to boot new rom and then reboot</span></div>
+<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;rBoot: Firmware update successful, rebooting to rom: %d...\n&quot;</span>, rom_slot);</div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;      rboot_set_current_rom(rom_slot);</div>
+<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;      <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;call system_restart\n&quot;</span>);</div>
+<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;      system_restart();</div>
+<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;    }</div>
+<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;after call system_restart\n&quot;</span>);</div>
+<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;    <span class="comment">// fail</span></div>
+<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;    <a class="code" href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a>(<span class="keyword">self</span>, <span class="stringliteral">&quot;O&quot;</span>, 1, <span class="stringliteral">&quot;rBoot: Firmware update failed!\n&quot;</span>);</div>
+<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;  }</div>
+<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;}</div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;</div>
+<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;</div>
+<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;<span class="comment">// ================================= updateFirmware ====================================</span></div>
 <div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;</div>
-<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;  <span class="keywordflow">if</span> (isSpiffs) {</div>
-<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;    <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;startSendMsg = <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateSpiffs;</div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;    <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;startSendMsg = <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateFirmware;</div>
-<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;  }</div>
-<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;  <span class="keywordflow">if</span> (!(self-&gt;runningModeFlags &amp; <a class="code" href="compMsgSocket_8h.html#a27ff846200ca040b0fdb6e31a03b7b68">COMP_DISP_RUNNING_MODE_CLIENT</a>)) {</div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgSocket-&gt;netSocketRunClientMode(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;startSendMsg(<span class="keyword">self</span>);</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
-<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;  }</div>
-<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;}</div>
-<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;</div>
-<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;<span class="comment">// ================================= compMsgOtaInit ====================================</span></div>
-<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;</div>
-<div class="line"><a name="l00571"></a><span class="lineno"><a class="line" href="compMsgOta_8h.html#ab0382bf06f7904fe99e935aa6b2ba640">  571</a></span>&#160;uint8_t <a class="code" href="compMsgOta_8c.html#ab0382bf06f7904fe99e935aa6b2ba640">compMsgOtaInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
-<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;  uint8_t result;</div>
-<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;</div>
-<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateFirmware = &amp;<a class="code" href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">updateFirmware</a>;</div>
-<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateSpiffs = &amp;<a class="code" href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">updateSpiffs</a>;</div>
-<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;checkClientMode = &amp;<a class="code" href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">checkClientMode</a>;</div>
-<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;otaStart = &amp;<a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>;</div>
-<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;storeUserData = &amp;<a class="code" href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">storeUserData</a>;</div>
-<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;saveUserData = &amp;<a class="code" href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">saveUserData</a>;</div>
-<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;getUserData = &amp;<a class="code" href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">getUserData</a>;</div>
-<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
-<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;}</div>
+<div class="line"><a name="l00554"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">  554</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">updateFirmware</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;</div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;  result = <a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>(<span class="keyword">self</span>, <a class="code" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a>, <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;}</div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;</div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;<span class="comment">// ================================= updateSpiffs ====================================</span></div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;</div>
+<div class="line"><a name="l00564"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">  564</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">updateSpiffs</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;</div>
+<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;  result = <a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>(<span class="keyword">self</span>, <a class="code" href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a>, <span class="keyword">true</span>);</div>
+<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;  <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;}</div>
+<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;</div>
+<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;<span class="comment">// ================================= checkClientMode ====================================</span></div>
+<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;<span class="comment">/**</span></div>
+<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;<span class="comment"> * \brief start the connection with the router for doing ota updates</span></div>
+<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;<span class="comment"> * \param self The dispatcher struct</span></div>
+<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;<span class="comment"> * \return Error code or ErrorOK</span></div>
+<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00580"></a><span class="lineno"><a class="line" href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">  580</a></span>&#160;<span class="keyword">static</span> uint8_t <a class="code" href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">checkClientMode</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>, <span class="keywordtype">bool</span> isSpiffs) {</div>
+<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;</div>
 <div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;</div>
-<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;<span class="comment">// ================================= newCompMsgOta ====================================</span></div>
-<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;</div>
-<div class="line"><a name="l00586"></a><span class="lineno"><a class="line" href="compMsgOta_8h.html#a5350e7759694b911251282fda0d8d21f">  586</a></span>&#160;<a class="code" href="structcompMsgOta.html">compMsgOta_t</a> *<a class="code" href="compMsgOta_8c.html#a5350e7759694b911251282fda0d8d21f">newCompMsgOta</a>() {</div>
-<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;  <a class="code" href="structcompMsgOta.html">compMsgOta_t</a> *<a class="code" href="structcompMsgOta.html">compMsgOta</a> = os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structcompMsgOta.html">compMsgOta_t</a>));</div>
-<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;  <span class="keywordflow">if</span> (compMsgOta == NULL) {</div>
-<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;    <span class="keywordflow">return</span> NULL;</div>
-<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;  }</div>
-<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;  <span class="keywordflow">return</span> compMsgOta;</div>
-<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;}</div>
-<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;</div>
-<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;}</div>
-<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;</div>
-<div class="ttc" id="structcompMsgDispatcher_html"><div class="ttname"><a href="structcompMsgDispatcher.html">compMsgDispatcher</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00098">compMsgDispatcher.h:98</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_aa8a74c50cada17c8207d84f1078d42a7"><div class="ttname"><a href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeDisconCb(void *arg)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00190">compMsgOta.c:190</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_ae24ba7875a8993c90f8132be5d904dbe"><div class="ttname"><a href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a></div><div class="ttdeci">static void otaUpdateCallback(bool result, uint8 rom_slot)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00499">compMsgOta.c:499</a></div></div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;  <span class="keywordflow">if</span> (isSpiffs) {</div>
+<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;    <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;startSendMsg = <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateSpiffs;</div>
+<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;    <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;startSendMsg = <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateFirmware;</div>
+<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;  }</div>
+<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;  <span class="keywordflow">if</span> (!(self-&gt;runningModeFlags &amp; <a class="code" href="compMsgSocket_8h.html#a27ff846200ca040b0fdb6e31a03b7b68">COMP_DISP_RUNNING_MODE_CLIENT</a>)) {</div>
+<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgSocket-&gt;netSocketRunClientMode(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;    result = <span class="keyword">self</span>-&gt;compMsgSendReceive-&gt;startSendMsg(<span class="keyword">self</span>);</div>
+<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;    <a class="code" href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a>(result);</div>
+<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;  }</div>
+<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;}</div>
+<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;</div>
+<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;<span class="comment">// ================================= compMsgOtaInit ====================================</span></div>
+<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;</div>
+<div class="line"><a name="l00601"></a><span class="lineno"><a class="line" href="compMsgOta_8h.html#ab0382bf06f7904fe99e935aa6b2ba640">  601</a></span>&#160;uint8_t <a class="code" href="compMsgOta_8c.html#ab0382bf06f7904fe99e935aa6b2ba640">compMsgOtaInit</a>(<a class="code" href="structcompMsgDispatcher.html">compMsgDispatcher_t</a> *<span class="keyword">self</span>) {</div>
+<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;  uint8_t result;</div>
+<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;</div>
+<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateFirmware = &amp;<a class="code" href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">updateFirmware</a>;</div>
+<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;updateSpiffs = &amp;<a class="code" href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">updateSpiffs</a>;</div>
+<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;checkClientMode = &amp;<a class="code" href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">checkClientMode</a>;</div>
+<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;otaStart = &amp;<a class="code" href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a>;</div>
+<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;storeUserData = &amp;<a class="code" href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">storeUserData</a>;</div>
+<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;saveUserData = &amp;<a class="code" href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">saveUserData</a>;</div>
+<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;  <span class="keyword">self</span>-&gt;compMsgOta-&gt;getUserData = &amp;<a class="code" href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">getUserData</a>;</div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;  <span class="keywordflow">return</span> <a class="code" href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a034a240ec61061e951b83f0b1683bfb0">COMP_MSG_ERR_OK</a>;</div>
+<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;}</div>
+<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;</div>
+<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;<span class="comment">// ================================= newCompMsgOta ====================================</span></div>
+<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;</div>
+<div class="line"><a name="l00616"></a><span class="lineno"><a class="line" href="compMsgOta_8h.html#a5350e7759694b911251282fda0d8d21f">  616</a></span>&#160;<a class="code" href="structcompMsgOta.html">compMsgOta_t</a> *<a class="code" href="compMsgOta_8c.html#a5350e7759694b911251282fda0d8d21f">newCompMsgOta</a>() {</div>
+<div class="line"><a name="l00617"></a><span class="lineno">  617</span>&#160;  <a class="code" href="structcompMsgOta.html">compMsgOta_t</a> *<a class="code" href="structcompMsgOta.html">compMsgOta</a> = os_zalloc(<span class="keyword">sizeof</span>(<a class="code" href="structcompMsgOta.html">compMsgOta_t</a>));</div>
+<div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;  <span class="keywordflow">if</span> (compMsgOta == NULL) {</div>
+<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;    <span class="keywordflow">return</span> NULL;</div>
+<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;  }</div>
+<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;  <span class="keywordflow">return</span> compMsgOta;</div>
+<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;}</div>
+<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;</div>
+<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;}</div>
+<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;</div>
+<div class="ttc" id="structcompMsgDispatcher_html"><div class="ttname"><a href="structcompMsgDispatcher.html">compMsgDispatcher</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00107">compMsgDispatcher.h:107</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_aa8a74c50cada17c8207d84f1078d42a7"><div class="ttname"><a href="compMsgOta_8c.html#aa8a74c50cada17c8207d84f1078d42a7">upgradeDisconCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeDisconCb(void *arg)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00193">compMsgOta.c:193</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_ae24ba7875a8993c90f8132be5d904dbe"><div class="ttname"><a href="compMsgOta_8c.html#ae24ba7875a8993c90f8132be5d904dbe">otaUpdateCallback</a></div><div class="ttdeci">static void otaUpdateCallback(bool result, uint8 rom_slot)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00529">compMsgOta.c:529</a></div></div>
 <div class="ttc" id="compMsgOta_8c_html_aefc31a38e72c45c554ea2056b365c958"><div class="ttname"><a href="compMsgOta_8c.html#aefc31a38e72c45c554ea2056b365c958">compMsgOtaDeinit</a></div><div class="ttdeci">void ICACHE_FLASH_ATTR compMsgOtaDeinit()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00091">compMsgOta.c:91</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_a12489959245f91d60f5aa090189d2eb4"><div class="ttname"><a href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callback callback, bool flashfs)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00410">compMsgOta.c:410</a></div></div>
-<div class="ttc" id="structuserUpgradeData_html_ae43aec7e0ffe05b5f66d94d5b5db62d2"><div class="ttname"><a href="structuserUpgradeData.html#ae43aec7e0ffe05b5f66d94d5b5db62d2">userUpgradeData::compMsgDispatcher</a></div><div class="ttdeci">compMsgDispatcher_t * compMsgDispatcher</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00081">compMsgOta.c:81</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a12489959245f91d60f5aa090189d2eb4"><div class="ttname"><a href="compMsgOta_8c.html#a12489959245f91d60f5aa090189d2eb4">otaStart</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR otaStart(compMsgDispatcher_t *self, ota_callback callback, bool flashfs)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00437">compMsgOta.c:437</a></div></div>
 <div class="ttc" id="compMsgOta_8c_html_a568d84b95c752e811a27a337830c3a54"><div class="ttname"><a href="compMsgOta_8c.html#a568d84b95c752e811a27a337830c3a54">UPGRADE_FLAG_FINISH</a></div><div class="ttdeci">#define UPGRADE_FLAG_FINISH</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00071">compMsgOta.c:71</a></div></div>
 <div class="ttc" id="compMsgDispatcher_8h_html"><div class="ttname"><a href="compMsgDispatcher_8h.html">compMsgDispatcher.h</a></div></div>
 <div class="ttc" id="compMsgOta_8c_html_ad3a984495f9bafd63452727f8807376c"><div class="ttname"><a href="compMsgOta_8c.html#ad3a984495f9bafd63452727f8807376c">ota_timer</a></div><div class="ttdeci">static os_timer_t ota_timer</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00085">compMsgOta.c:85</a></div></div>
@@ -698,43 +727,41 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="structcompMsgOta_html"><div class="ttname"><a href="structcompMsgOta.html">compMsgOta</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8h_source.html#l00059">compMsgOta.h:59</a></div></div>
 <div class="ttc" id="compMsgErrorCodes_8h_html_a8e5cc2b260d9b3f7a2ee3ed336275ed2a077528dcb2e28a615eb658dc9bcab5ab"><div class="ttname"><a href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a077528dcb2e28a615eb658dc9bcab5ab">COMP_MSG_ERR_DNS_ERROR</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgErrorCodes_8h_source.html#l00099">compMsgErrorCodes.h:99</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html_af03165805e4bc7e545fd3db3a849f0e3"><div class="ttname"><a href="structuserUpgradeData.html#af03165805e4bc7e545fd3db3a849f0e3">userUpgradeData::write_status</a></div><div class="ttdeci">rboot_write_status write_status</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00080">compMsgOta.c:80</a></div></div>
-<div class="ttc" id="structcompMsgModuleData_html_a979e119341ee0a5a8bb1c8218c985727"><div class="ttname"><a href="structcompMsgModuleData.html#a979e119341ee0a5a8bb1c8218c985727">compMsgModuleData::getOtaFsPath</a></div><div class="ttdeci">getOtaFsPath_t getOtaFsPath</div><div class="ttdef"><b>Definition:</b> <a href="compMsgModuleData_8h_source.html#l00149">compMsgModuleData.h:149</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_af0e7bc36b7ce33a6e8953ff9fa62bf49"><div class="ttname"><a href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">upgradeReconCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeReconCb(void *arg, sint8 errType)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00305">compMsgOta.c:305</a></div></div>
-<div class="ttc" id="structcompMsgModuleData_html_ad19fadc0c259c1e7de22d4ce3ed482c2"><div class="ttname"><a href="structcompMsgModuleData.html#ad19fadc0c259c1e7de22d4ce3ed482c2">compMsgModuleData::getOtaRomPath</a></div><div class="ttdeci">getOtaRomPath_t getOtaRomPath</div><div class="ttdef"><b>Definition:</b> <a href="compMsgModuleData_8h_source.html#l00148">compMsgModuleData.h:148</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_af0e7bc36b7ce33a6e8953ff9fa62bf49"><div class="ttname"><a href="compMsgOta_8c.html#af0e7bc36b7ce33a6e8953ff9fa62bf49">upgradeReconCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeReconCb(void *arg, sint8 errType)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00308">compMsgOta.c:308</a></div></div>
 <div class="ttc" id="dataView_8h_html_a7b5e4ae473672cdbec87956b3a0fe668"><div class="ttname"><a href="dataView_8h.html#a7b5e4ae473672cdbec87956b3a0fe668">checkAllocOK</a></div><div class="ttdeci">#define checkAllocOK(addr)</div><div class="ttdef"><b>Definition:</b> <a href="dataView_8h_source.html#l00064">dataView.h:64</a></div></div>
 <div class="ttc" id="compMsgErrorCodes_8h_html_a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5"><div class="ttname"><a href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a51a9f92a2f0cb6deb8220d56c5d0eba5">COMP_MSG_ERR_OUT_OF_MEMORY</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgErrorCodes_8h_source.html#l00057">compMsgErrorCodes.h:57</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_ab0382bf06f7904fe99e935aa6b2ba640"><div class="ttname"><a href="compMsgOta_8c.html#ab0382bf06f7904fe99e935aa6b2ba640">compMsgOtaInit</a></div><div class="ttdeci">uint8_t compMsgOtaInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00571">compMsgOta.c:571</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_ab0382bf06f7904fe99e935aa6b2ba640"><div class="ttname"><a href="compMsgOta_8c.html#ab0382bf06f7904fe99e935aa6b2ba640">compMsgOtaInit</a></div><div class="ttdeci">uint8_t compMsgOtaInit(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00601">compMsgOta.c:601</a></div></div>
 <div class="ttc" id="compMsgErrorCodes_8h_html_a8e5cc2b260d9b3f7a2ee3ed336275ed2a8d305bd1e7c95e58083c7c1e43018f55"><div class="ttname"><a href="compMsgErrorCodes_8h.html#a8e5cc2b260d9b3f7a2ee3ed336275ed2a8d305bd1e7c95e58083c7c1e43018f55">COMP_MSG_ERR_ALREADY_UPDATING</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgErrorCodes_8h_source.html#l00098">compMsgErrorCodes.h:98</a></div></div>
 <div class="ttc" id="compMsgDebug_8h_html_afa29dff5df7203ab96cec3eececcb484"><div class="ttname"><a href="compMsgDebug_8h.html#afa29dff5df7203ab96cec3eececcb484">COMP_MSG_DBG</a></div><div class="ttdeci">#define COMP_MSG_DBG</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDebug_8h_source.html#l00074">compMsgDebug.h:74</a></div></div>
 <div class="ttc" id="compMsgSocket_8h_html_a27ff846200ca040b0fdb6e31a03b7b68"><div class="ttname"><a href="compMsgSocket_8h.html#a27ff846200ca040b0fdb6e31a03b7b68">COMP_DISP_RUNNING_MODE_CLIENT</a></div><div class="ttdeci">#define COMP_DISP_RUNNING_MODE_CLIENT</div><div class="ttdef"><b>Definition:</b> <a href="compMsgSocket_8h_source.html#l00051">compMsgSocket.h:51</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_ad82e9bc8d956501c596d7b823a967e55"><div class="ttname"><a href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">updateFirmware</a></div><div class="ttdeci">static uint8_t updateFirmware(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00524">compMsgOta.c:524</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_ab36e40c19a0c4eea71126f1259579c5f"><div class="ttname"><a href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">upgradeConnectCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00219">compMsgOta.c:219</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_ab83e0d3d19225e63ae9bb3a5d43b307f"><div class="ttname"><a href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">storeUserData</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR storeUserData(compMsgDispatcher_t *self, size_t msgLgth, uint8_t *msgData)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00361">compMsgOta.c:361</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_ad82e9bc8d956501c596d7b823a967e55"><div class="ttname"><a href="compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55">updateFirmware</a></div><div class="ttdeci">static uint8_t updateFirmware(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00554">compMsgOta.c:554</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_ab36e40c19a0c4eea71126f1259579c5f"><div class="ttname"><a href="compMsgOta_8c.html#ab36e40c19a0c4eea71126f1259579c5f">upgradeConnectCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeConnectCb(void *arg)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00222">compMsgOta.c:222</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_ab83e0d3d19225e63ae9bb3a5d43b307f"><div class="ttname"><a href="compMsgOta_8c.html#ab83e0d3d19225e63ae9bb3a5d43b307f">storeUserData</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR storeUserData(compMsgDispatcher_t *self, size_t msgLgth, uint8_t *msgData)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00364">compMsgOta.c:364</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html_a57399150590506aca9d99abe8100db43"><div class="ttname"><a href="structuserUpgradeData.html#a57399150590506aca9d99abe8100db43">userUpgradeData::ip</a></div><div class="ttdeci">ip_addr_t ip</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00079">compMsgOta.c:79</a></div></div>
 <div class="ttc" id="compMsgOta_8c_html_a0403274e6e19b5ff0774855d8ae29067"><div class="ttname"><a href="compMsgOta_8c.html#a0403274e6e19b5ff0774855d8ae29067">upgradeRecvCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeRecvCb(void *arg, char *pusrdata, unsigned short length)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00132">compMsgOta.c:132</a></div></div>
-<div class="ttc" id="structcompMsgModuleData_html_a0d460d29d86fb88fbe2271b76e914d19"><div class="ttname"><a href="structcompMsgModuleData.html#a0d460d29d86fb88fbe2271b76e914d19">compMsgModuleData::getOtaHost</a></div><div class="ttdeci">getOtaHost_t getOtaHost</div><div class="ttdef"><b>Definition:</b> <a href="compMsgModuleData_8h_source.html#l00147">compMsgModuleData.h:147</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_a25a5776822c797412271e6f60a2345f2"><div class="ttname"><a href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">checkClientMode</a></div><div class="ttdeci">static uint8_t checkClientMode(compMsgDispatcher_t *self, bool isSpiffs)</div><div class="ttdoc">start the connection with the router for doing ota updates </div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00550">compMsgOta.c:550</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_a2db0cba8ad80cdab5fa5292e2a586fed"><div class="ttname"><a href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">getUserData</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR getUserData(compMsgDispatcher_t *self, uint8_t **msgData, size_t *msgLgth)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00395">compMsgOta.c:395</a></div></div>
+<div class="ttc" id="structcompMsgModuleData_html_a0d460d29d86fb88fbe2271b76e914d19"><div class="ttname"><a href="structcompMsgModuleData.html#a0d460d29d86fb88fbe2271b76e914d19">compMsgModuleData::getOtaHost</a></div><div class="ttdeci">getOtaHost_t getOtaHost</div><div class="ttdef"><b>Definition:</b> <a href="compMsgModuleData_8h_source.html#l00148">compMsgModuleData.h:148</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a25a5776822c797412271e6f60a2345f2"><div class="ttname"><a href="compMsgOta_8c.html#a25a5776822c797412271e6f60a2345f2">checkClientMode</a></div><div class="ttdeci">static uint8_t checkClientMode(compMsgDispatcher_t *self, bool isSpiffs)</div><div class="ttdoc">start the connection with the router for doing ota updates </div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00580">compMsgOta.c:580</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a2db0cba8ad80cdab5fa5292e2a586fed"><div class="ttname"><a href="compMsgOta_8c.html#a2db0cba8ad80cdab5fa5292e2a586fed">getUserData</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR getUserData(compMsgDispatcher_t *self, uint8_t **msgData, size_t *msgLgth)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00403">compMsgOta.c:403</a></div></div>
 <div class="ttc" id="compMsgOta_8c_html_ae9af3da1e7d88b1e0f353d45059f6f1b"><div class="ttname"><a href="compMsgOta_8c.html#ae9af3da1e7d88b1e0f353d45059f6f1b">UPGRADE_FLAG_IDLE</a></div><div class="ttdeci">#define UPGRADE_FLAG_IDLE</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00069">compMsgOta.c:69</a></div></div>
-<div class="ttc" id="structcompMsgDispatcher_html_a01449ed5de36e5f4e28ae079c0894379"><div class="ttname"><a href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgDispatcher::compMsgModuleData</a></div><div class="ttdeci">compMsgModuleData_t * compMsgModuleData</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00155">compMsgDispatcher.h:155</a></div></div>
+<div class="ttc" id="structcompMsgDispatcher_html_a01449ed5de36e5f4e28ae079c0894379"><div class="ttname"><a href="structcompMsgDispatcher.html#a01449ed5de36e5f4e28ae079c0894379">compMsgDispatcher::compMsgModuleData</a></div><div class="ttdeci">compMsgModuleData_t * compMsgModuleData</div><div class="ttdef"><b>Definition:</b> <a href="compMsgDispatcher_8h_source.html#l00164">compMsgDispatcher.h:164</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html_abcd9211c1511f2c7e35e5e3a929724e7"><div class="ttname"><a href="structuserUpgradeData.html#abcd9211c1511f2c7e35e5e3a929724e7">userUpgradeData::callback</a></div><div class="ttdeci">ota_callback callback</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00075">compMsgOta.c:75</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html_a2ea77689982210ef201650e171164db9"><div class="ttname"><a href="structuserUpgradeData.html#a2ea77689982210ef201650e171164db9">userUpgradeData::conn</a></div><div class="ttdeci">struct espconn * conn</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00078">compMsgOta.c:78</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_af5dac8e510d4edb04c247a381e760937"><div class="ttname"><a href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">espErrStr</a></div><div class="ttdeci">static const char *ICACHE_FLASH_ATTR espErrStr(sint8 err)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00275">compMsgOta.c:275</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_af5dac8e510d4edb04c247a381e760937"><div class="ttname"><a href="compMsgOta_8c.html#af5dac8e510d4edb04c247a381e760937">espErrStr</a></div><div class="ttdeci">static const char *ICACHE_FLASH_ATTR espErrStr(sint8 err)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00278">compMsgOta.c:278</a></div></div>
 <div class="ttc" id="compMsgOta_8c_html_a0d7a3bf9821d166e271cf95472df532f"><div class="ttname"><a href="compMsgOta_8c.html#a0d7a3bf9821d166e271cf95472df532f">userUpgradeData_t</a></div><div class="ttdeci">struct userUpgradeData userUpgradeData_t</div></div>
-<div class="ttc" id="compMsgOta_8c_html_a4e4876781f7608c8301f2ef56dc438cb"><div class="ttname"><a href="compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb">uud</a></div><div class="ttdeci">static userUpgradeData_t * uud</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00084">compMsgOta.c:84</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a4e4876781f7608c8301f2ef56dc438cb"><div class="ttname"><a href="compMsgOta_8c.html#a4e4876781f7608c8301f2ef56dc438cb">uud</a></div><div class="ttdeci">static userUpgradeData_t * uud</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00083">compMsgOta.c:83</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html_a259b4349704327b4b349e4e9096dc944"><div class="ttname"><a href="structuserUpgradeData.html#a259b4349704327b4b349e4e9096dc944">userUpgradeData::total_len</a></div><div class="ttdeci">uint32 total_len</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00076">compMsgOta.c:76</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html_a8b0238715e66af15a37d061c64862709"><div class="ttname"><a href="structuserUpgradeData.html#a8b0238715e66af15a37d061c64862709">userUpgradeData::content_len</a></div><div class="ttdeci">uint32 content_len</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00077">compMsgOta.c:77</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a11794dd1394f0027eeea0a80a1dce0fc"><div class="ttname"><a href="compMsgOta_8c.html#a11794dd1394f0027eeea0a80a1dce0fc">compMsgDispatcher</a></div><div class="ttdeci">static compMsgDispatcher_t * compMsgDispatcher</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00084">compMsgOta.c:84</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html_a32895fcdf10b95088f1718e7196a83e9"><div class="ttname"><a href="structuserUpgradeData.html#a32895fcdf10b95088f1718e7196a83e9">userUpgradeData::rom_slot</a></div><div class="ttdeci">uint8 rom_slot</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00074">compMsgOta.c:74</a></div></div>
 <div class="ttc" id="structheaderPart_html"><div class="ttname"><a href="structheaderPart.html">headerPart</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8h_source.html#l00103">compMsgMsgDesc.h:103</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_ae1695d7c513190002a8d26c715380cec"><div class="ttname"><a href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">connectTimeoutCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR connectTimeoutCb()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00263">compMsgOta.c:263</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_ae1695d7c513190002a8d26c715380cec"><div class="ttname"><a href="compMsgOta_8c.html#ae1695d7c513190002a8d26c715380cec">connectTimeoutCb</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR connectTimeoutCb()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00266">compMsgOta.c:266</a></div></div>
 <div class="ttc" id="structuserUpgradeData_html"><div class="ttname"><a href="structuserUpgradeData.html">userUpgradeData</a></div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00073">compMsgOta.c:73</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_aba6ea3a3d19028c483f054bbe8c972da"><div class="ttname"><a href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">updateSpiffs</a></div><div class="ttdeci">static uint8_t updateSpiffs(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00534">compMsgOta.c:534</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_a5350e7759694b911251282fda0d8d21f"><div class="ttname"><a href="compMsgOta_8c.html#a5350e7759694b911251282fda0d8d21f">newCompMsgOta</a></div><div class="ttdeci">compMsgOta_t * newCompMsgOta()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00586">compMsgOta.c:586</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_aba6ea3a3d19028c483f054bbe8c972da"><div class="ttname"><a href="compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da">updateSpiffs</a></div><div class="ttdeci">static uint8_t updateSpiffs(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00564">compMsgOta.c:564</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a5350e7759694b911251282fda0d8d21f"><div class="ttname"><a href="compMsgOta_8c.html#a5350e7759694b911251282fda0d8d21f">newCompMsgOta</a></div><div class="ttdeci">compMsgOta_t * newCompMsgOta()</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00616">compMsgOta.c:616</a></div></div>
 <div class="ttc" id="compMsgOta_8c_html_aa45c4c3f3b5ed0d3070af7cf0fe151a9"><div class="ttname"><a href="compMsgOta_8c.html#aa45c4c3f3b5ed0d3070af7cf0fe151a9">UPGRADE_FLAG_START</a></div><div class="ttdeci">#define UPGRADE_FLAG_START</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00070">compMsgOta.c:70</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_a877a4e208bf55a38f6628ecd67d44149"><div class="ttname"><a href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">saveUserData</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR saveUserData(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00377">compMsgOta.c:377</a></div></div>
-<div class="ttc" id="structcompMsgModuleData_html_a0bcddf093e9beb75fa04ca229c3ca418"><div class="ttname"><a href="structcompMsgModuleData.html#a0bcddf093e9beb75fa04ca229c3ca418">compMsgModuleData::getOtaPort</a></div><div class="ttdeci">getOtaPort_t getOtaPort</div><div class="ttdef"><b>Definition:</b> <a href="compMsgModuleData_8h_source.html#l00150">compMsgModuleData.h:150</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a877a4e208bf55a38f6628ecd67d44149"><div class="ttname"><a href="compMsgOta_8c.html#a877a4e208bf55a38f6628ecd67d44149">saveUserData</a></div><div class="ttdeci">static uint8_t ICACHE_FLASH_ATTR saveUserData(compMsgDispatcher_t *self)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00380">compMsgOta.c:380</a></div></div>
 <div class="ttc" id="compMsgMsgDesc_8c_html_adfac0f453f0aeb587f03d73855a998ae"><div class="ttname"><a href="compMsgMsgDesc_8c.html#adfac0f453f0aeb587f03d73855a998ae">checkErrOK</a></div><div class="ttdeci">#define checkErrOK(result)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgMsgDesc_8c_source.html#l00603">compMsgMsgDesc.c:603</a></div></div>
-<div class="ttc" id="compMsgOta_8c_html_a972f4f243a582380ae2b978af3776cbe"><div class="ttname"><a href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, void *arg)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00318">compMsgOta.c:318</a></div></div>
+<div class="ttc" id="compMsgOta_8c_html_a972f4f243a582380ae2b978af3776cbe"><div class="ttname"><a href="compMsgOta_8c.html#a972f4f243a582380ae2b978af3776cbe">upgradeResolved</a></div><div class="ttdeci">static void ICACHE_FLASH_ATTR upgradeResolved(const char *name, ip_addr_t *ip, void *arg)</div><div class="ttdef"><b>Definition:</b> <a href="compMsgOta_8c_source.html#l00321">compMsgOta.c:321</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

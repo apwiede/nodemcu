@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['websocketbinaryreceived_5ft',['webSocketBinaryReceived_t',['../compMsgSocket_8h.html#a7e39104e38c0f4c9764203062f2051b6',1,'compMsgSocket.h']]],
-  ['websocketrunapmode_5ft',['webSocketRunAPMode_t',['../compMsgSocket_8h.html#a381fc1d2ad8215c5daf6ac2b0124808c',1,'compMsgSocket.h']]],
-  ['websocketrunclientmode_5ft',['webSocketRunClientMode_t',['../compMsgSocket_8h.html#ad554aa0a16b9c30ead188754801390a4',1,'compMsgSocket.h']]],
-  ['websocketsendconnecterror_5ft',['webSocketSendConnectError_t',['../compMsgWifiData_8h.html#af27a0aa2c54ef2a8acca34c5d8f8dc84',1,'compMsgWifiData.h']]],
-  ['websocketsenddata_5ft',['webSocketSendData_t',['../compMsgSocket_8h.html#ae01e515b8fba2b5d673357462864dcd6',1,'compMsgSocket.h']]],
-  ['websockettextreceived_5ft',['webSocketTextReceived_t',['../compMsgSocket_8h.html#ab1c2d2b23bf91dc860809b55065eed95',1,'compMsgSocket.h']]],
-  ['writeline_5ft',['writeLine_t',['../compMsgMsgDesc_8h.html#a63fe844451aa07825f1064642be5b798',1,'compMsgMsgDesc.h']]]
+  ['uartreceivecb_5ft',['uartReceiveCb_t',['../compMsgSendReceive_8h.html#a62c0b2e21ee772e85c947b97f57cdadf',1,'compMsgSendReceive.h']]],
+  ['uartsendanswer_5ft',['uartSendAnswer_t',['../compMsgSendReceive_8h.html#a9429eaae57e9d92d1e36a22ae53605e0',1,'compMsgSendReceive.h']]],
+  ['uartsetup_5ft',['uartSetup_t',['../compMsgSendReceive_8h.html#a93d508a0b980ad6b95ae3d2fe447ce16',1,'compMsgSendReceive.h']]],
+  ['updatefirmware_5ft',['updateFirmware_t',['../compMsgOta_8h.html#aa504533ac227ba8d53cb93a3c93f6345',1,'compMsgOta.h']]],
+  ['updatemodulevalues_5ft',['updateModuleValues_t',['../compMsgModuleData_8h.html#a6ad8fc75409a2be9ee96d47bb3362e78',1,'compMsgModuleData.h']]],
+  ['updatespiffs_5ft',['updateSpiffs_t',['../compMsgOta_8h.html#a21a09d6f2ad7f2461dff914192824390',1,'compMsgOta.h']]],
+  ['userupgradedata_5ft',['userUpgradeData_t',['../compMsgOta_8c.html#a0d7a3bf9821d166e271cf95472df532f',1,'compMsgOta.c']]]
 ];
