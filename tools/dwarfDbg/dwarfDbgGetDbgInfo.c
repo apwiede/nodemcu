@@ -71,6 +71,8 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo = NULL;
   attrValues_t *attrValues;
+  dwType_t dwTypeInfo;
+  const char *attrName = NULL;
 
   result = DWARF_DBG_ERR_OK;
 //printf(">>handleOneDie die: %p numDies: %d\n", die, ++numDies);
@@ -120,7 +122,20 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
   }
   switch (tag) {
   case DW_TAG_base_type:
-    result = self->dwarfDbgTypeInfo->addBaseType(self, attrValues->name, attrValues->byteSize, attrValues->encoding, &typeIdx);
+    dwTypeInfo.bitOffset = -1;
+    dwTypeInfo.bitSize = -1;
+    dwTypeInfo.byteSize = attrValues->byteSize;
+    dwTypeInfo.constValue = -1;
+    dwTypeInfo.location = 0;
+    dwTypeInfo.encoding = attrValues->encoding;
+    dwTypeInfo.declaration = 0;
+    dwTypeInfo.pathNameIdx = -1;
+    dwTypeInfo.lineNo = -1;
+    attrName = attrValues->name;
+    dwTypeInfo.prototyped = 0;
+    dwTypeInfo.siblingIdx = -1;
+    dwTypeInfo.dwTypeIdx = -1;
+    result = self->dwarfDbgTypeInfo->addType(self, &dwTypeInfo, attrName, &self->dwarfDbgTypeInfo->dwBaseTypeInfos, &typeIdx);
     checkErrOK(result);
     dieInfo->tagRefIdx = typeIdx;
     dieInfo->flags = TAG_REF_BASE_TYPE;
@@ -317,32 +332,78 @@ printf("++ numDieAndChildren: %d cu: %s\n", compileUnit->numDieAndChildren, comp
   for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
 printf("++ childIdx: %d\n", dieAndChildrenIdx);
 
+printf("++ children: enumerationTypes\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_ENUMERATION_TYPE);
+    checkErrOK(result);
+printf("++ siblings: enumerationTypes\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_ENUMERATION_TYPE);
+    checkErrOK(result);
+
+printf("++ children: enumerators\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_ENUMERATOR);
+    checkErrOK(result);
+printf("++ siblings: enumerators\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_ENUMERATOR);
+    checkErrOK(result);
+
+printf("++ children: members\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_MEMBER);
+    checkErrOK(result);
+printf("++ siblings: members\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_MEMBER);
+    checkErrOK(result);
+
+printf("++ children: unionTypes\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_UNION_TYPE);
+    checkErrOK(result);
+printf("++ siblings: unionTypes\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_UNION_TYPE);
+    checkErrOK(result);
+
+printf("++ children: volatileTypes\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_VOLATILE_TYPE);
+    checkErrOK(result);
+printf("++ siblings: volatileTypes\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_VOLATILE_TYPE);
+    checkErrOK(result);
+
 printf("++ children: structureTypes\n");
-    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
+    checkErrOK(result);
 printf("++ siblings: structureTypes\n");
-    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
+    checkErrOK(result);
 
 printf("++ children: constTypes\n");
-    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+    checkErrOK(result);
 printf("++ siblings: constTypes\n");
-    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+    checkErrOK(result);
 
 printf("++ children: subroutineTypes\n");
-    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
+    checkErrOK(result);
 printf("++ siblings: subroutineTypes\n");
-    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
+    checkErrOK(result);
 
 printf("++ children: arrayTypes\n");
-    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_ARRAY_TYPE);
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_ARRAY_TYPE);
+    checkErrOK(result);
 printf("++ siblings: arrayTypes\n");
-    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_ARRAY_TYPE);
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_ARRAY_TYPE);
+    checkErrOK(result);
 
 printf("++ children: pointerTypes\n");
-    self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+    checkErrOK(result);
 printf("++ siblings: pointerTypes\n");
-    self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+    checkErrOK(result);
 
   }
+  result = self->dwarfDbgTypeInfo->checkDieTypeRefIdx(self);
 fflush(showFd);
 
 }
