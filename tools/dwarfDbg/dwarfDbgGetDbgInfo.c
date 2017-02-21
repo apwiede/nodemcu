@@ -463,7 +463,7 @@ int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
   result = self->dwarfDbgGetDbgInfo->handleCompileUnits(self);
   DWARF_DBG_PRINT(self, "G", 1, "handleCompileUnits: result: %d\n", result);
   checkErrOK(result);
-printf("numDwBaseTypes: %d numDwTypeDefs: %d\n", self->dwarfDbgTypeInfo->numDwBaseType, self->dwarfDbgTypeInfo->numDwTypeDef);
+printf("numDwBaseTypes: %d numDwTypeDefs: %d\n", self->dwarfDbgTypeInfo->dwBaseTypeInfos.numDwType, self->dwarfDbgTypeInfo->dwTypedefInfos.numDwType);
   return result;
 }
 
