@@ -125,7 +125,7 @@ puts stderr "  ==handleInput0: 3 DBT: os handleState: $myState!"
       set ::inDebug false
       set buf ""
       set lgth 0
-#      set ::currState MODULE_INFO
+      set ::currState MODULE_INFO
     }
     MODULE_INFO {
       set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 19712 MD hdr]
@@ -181,7 +181,7 @@ proc handleAnswer {bufVar lgthVar} {
   set buf $::msg
   set lgth $::msgLgth
 puts stderr "+++handleAnswer: lgth: $lgth!"
-::compMsg dataView dumpBinary $buf $lgth "handleAnswer MSG"
+#::compMsg dataView dumpBinary $buf $lgth "handleAnswer MSG"
 set header [string range $::msg 0 31]
 set payload [string range $::msg 32 end-1]
 set totalCrc [string range $::msg end end]
@@ -197,7 +197,7 @@ puts stderr "decryptedLgth: lgth: mlen: $mlen!decryptedStrLgth: [string length $
   set buf "${header}${decrypted}${totalCrc}"
 set lgth2 [string length $buf]
 set lgth $lgth2
-::compMsg dataView dumpBinary $buf $lgth2 "handleAnswer decrypted MSG"
+#::compMsg dataView dumpBinary $buf $lgth2 "handleAnswer decrypted MSG"
 puts stderr "totalLgth: $lgth lgth2: $lgth2!"
 }
   dict incr received realLgth $lgth
@@ -216,32 +216,33 @@ puts stderr "totalLgth: $lgth lgth2: $lgth2!"
   checkErrOK $result
 #::compMsg compMsgData dumpMsg ::compMsgDispatcher
   set result [::compMsg compMsgData getFieldValue ::compMsgDispatcher @cmdKey value]
-#puts stderr "cmdKey: $value!result: $result!"
+puts stderr "cmdKey: [format 0x%04x $value]!result: $result!myState:$myState!"
   checkErrOK $result
 
   switch $myState {
     INIT {
-#puts stderr "INIT handleAnswer lgth: $lgth!"
+puts stderr "INIT handleAnswer lgth: $lgth value: [format 0x%04x $value]!"
       binary scan \x49\x41 S cmdKey ; # IA
       if {$value == $cmdKey} {
         set ::currState MODULE_INFO
       }
     }
     MODULE_INFO {
-#puts stderr "MODULE_INFO handleAnswer lgth: $lgth!"
+puts stderr "MODULE_INFO handleAnswer lgth: $lgth value: [format 0x%04x $value]!"
       binary scan \x4d\x41 S cmdKey ; # MA
       if {$value == $cmdKey} {
         set ::currState OPERATION_MODE
       }
     }
     OPERATION_MODE {
-#puts stderr "OPERATION_MODE handleAnswer lgth: $lgth!"
+puts stderr "OPERATION_MODE handleAnswer lgth: $lgth value: [format 0x%04x $value]!"
       binary scan \x4d\x41 S cmdKey ; # MA
       if {$value == $cmdKey} {
         set ::currState SEND_CLOUD
       }
     }
     SEND_CLOUD {
+puts stderr "SEND_CLOUD handleAnswer lgth: $lgth value: [format 0x%04x $value]!"
       binary scan \x43\x41 S cmdKey ; # CA
       if {$value == $cmdKey} {
         set ::currState OPERATION_MODE
@@ -291,7 +292,7 @@ proc handleInput0 {ch bufVar lgthVar} {
     return $::COMP_MSG_ERR_OK
   }
   if {!$::inDebug && ($ch eq "M")} {
-#puts stderr "got 'M'"
+puts stderr "got 'M'"
     set ::inReceiveMsg true
     append buf $ch
     incr lgth
@@ -394,6 +395,7 @@ proc readByte0 {fd bufVar lgthVar} {
   set ::afterId [after 500 [list handleAnswer ::dev0Buf ::dev0Lgth]]
   set pch 0
   binary scan $ch c pch
+#puts stderr "=readByte0: read: $ch!lgth: $lgth!inDebug: $::inDebug!"
 if {!$::inDebug && ($ch ne "%") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc2")} {
 #puts stderr "=readByte0: read: $ch!lgth: $lgth!inDebug: $::inDebug!"
 }
@@ -461,6 +463,19 @@ proc getGUID {compMsgDispatcherVar valueVar} {
 
   set msgValPart [dict get $compMsgDispatcher msgValPart]
   set value "1234-5678-9012-1"
+  dict set msgValPart fieldValue $value
+  dict set compMsgDispatcher msgValPart $msgValPart
+  return $::COMP_MSG_ERR_OK
+}
+
+# ================================ getSsid ===============================
+
+proc getSsid {compMsgDispatcherVar valueVar} {
+  upvar $compMsgDispatcherVar compMsgDispatcher
+  upvar $valueVar value
+
+  set msgValPart [dict get $compMsgDispatcher msgValPart]
+  set value "Wiedemann3"
   dict set msgValPart fieldValue $value
   dict set compMsgDispatcher msgValPart $msgValPart
   return $::COMP_MSG_ERR_OK

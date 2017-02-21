@@ -179,11 +179,11 @@ puts stderr "fieldLgth2: [dict get $fieldInfo fieldLgth]!"
           checkErrOK $result
         }
         set value [dict get $compMsgDispatcher msgValPart fieldValue]
-puts stderr "setMsgFieldValue1: $fieldNameStr!$value!"
+#puts stderr "setMsgFieldValue1: $fieldNameStr!$value!"
         set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
 set value2 "???"
 set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr value2]
-puts stderr "value2: $value2!"
+#puts stderr "value2: $value2!"
       } else {
         set msgValPart [dict get $compMsgDispatcher msgValPart]
         if {[lsearch [dict get $msgValPart fieldFlags] COMP_DISP_DESC_VALUE_IS_NUMBER] >= 0} {
@@ -191,7 +191,7 @@ puts stderr "value2: $value2!"
         } else {
           set value [dict get $msgValPart fieldValueStr]
         }
-puts stderr "setMsgFieldValue2: $fieldNameStr!$value!"
+#puts stderr "setMsgFieldValue2: $fieldNameStr!$value!"
         switch [dict get $msgValPart fieldNameId] {
           COMP_MSG_SPEC_FIELD_DST {
             set result [::compMsg compMsgData setFieldValue compMsgDispatcher $fieldNameStr $value]
@@ -209,7 +209,7 @@ puts stderr "setMsgFieldValue2: $fieldNameStr!$value!"
         }
         checkErrOK $result
       }
-puts stderr "setMsgFieldValue: done\n"
+#puts stderr "setMsgFieldValue: done\n"
       return $::COMP_DISP_ERR_OK
     }
     

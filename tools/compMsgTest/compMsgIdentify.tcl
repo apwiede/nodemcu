@@ -399,7 +399,7 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
 #puts stderr "buf len: [string length [dict get $received buf]]!len: [dict get $received lgth]!"
 #puts stderr "compMsgIdentify1 setData hdrIdx: [dict get $headerInfos currPartIdx]"
       set result [::compMsg dataView setData [dict get $received buf] [dict get $received lgth]]
-::compMsg dataView dumpBinary [dict get $received buf] [dict get $received lgth] "ReceivedMsg"
+#::compMsg dataView dumpBinary [dict get $received buf] [dict get $received lgth] "ReceivedMsg"
       checkErrOK $result
       set result [handleReceivedHeader compMsgDispatcher received]
       set headerInfos [dict get $compMsgDispatcher headerInfos]

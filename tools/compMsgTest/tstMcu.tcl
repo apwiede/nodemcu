@@ -97,7 +97,7 @@ proc init0 {} {
 #  fileevent $::fd0 readable [list readByte0 $::fd0 ::dev0Buf ::dev0Lgth]
 }
 
-# the ftdi adapter for the Mcu boar has to be connected to /dev/ttyUSB1
+# the ftdi adapter for the Mcu board has to be connected to /dev/ttyUSB1
 # ================================ init1 ===============================
 
 proc init1 {} {
