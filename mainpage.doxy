@@ -1,0 +1,20 @@
+/**
+ * @{
+ */
+
+/**@}*/
+
+
+/*! \mainpage apwiede nodemcu-firmware
+ *
+ * \section intro_sec Introduction
+ *
+ * This is the introduction.
+ *
+ * \section init_sec Initialization
+ *
+ * \ref grpStartCompMsg<br>
+ *
+ * \ref grpStartDwarfDbg<br>
+ *
+ */
