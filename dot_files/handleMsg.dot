@@ -44,7 +44,7 @@ digraph G1 {
   HttpSocket -> Queue:f3;
   HttpSocket -> Queue:f4;
   {rank=same; "compmsg_uartReceiveCb"; "Mcu"; "App"; "Cloud";}
-  {rank=same; "Uart"; "WebSocket"; "HttpSocket";}
+  {rank=same; "Uart"; "WebSocket"; "HttpSocket"; "ClientMode";}
   Queue:f1 -> HttpSocket;
   Queue:f2 -> HttpSocket;
   Queue:f3 -> HttpSocket;
