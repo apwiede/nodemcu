@@ -5,12 +5,12 @@
       <ul>
         <li>dwarfDbgClass create ::dD<br>
           <ul>
-            <li>::dD init \ref dwarfDbgInit () (dwarfDbg.c)<br>
-            <li>::dD openElf &lt;elf file name&gt; \ref dwarfDbgOpenElf () (dwarfDbgElfInfo.c)<br>
-            <li>::dD getDbgInfosi \ref dwarfDbgGetDbgInfos () dwarfDbgGetDbgInfo.c)<br>
+            <li>::dD init (\ref dwarfDbgInit)<br>
+            <li>::dD openElf &lt;elf file name&gt; (\ref dwarfDbgOpenElf)<br>
+            <li>::dD getDbgInfos (\ref dwarfDbgGetDbgInfos)<br>
             <li>getCompileUnitInfos ()<br>
               <ul>
-                <li>set ::fileInfos [::dD getFileInfos] \ref dwarfDbgGetFileInfos () (dwarfDbgFileInfoxs.c)<br>
+                <li>set ::fileInfos [::dD getFileInfos] (\ref dwarfDbgGetFileInfos)<br>
               </ul>
           </ul>
         <br>
