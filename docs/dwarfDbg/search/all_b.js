@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['mainpage_2edoxy',['mainpage.doxy',['../mainpage_8doxy.html',1,'']]],
   ['max_5fbuffer_5fsize',['MAX_BUFFER_SIZE',['../dwarfDbgDebugInfo_8c.html#ad4d796b98c583d49e83adabd74a63bf6',1,'dwarfDbgDebugInfo.c']]],
   ['maxaddr',['maxAddr',['../structdwarfDbgCompileUnitInfo.html#a9f5fa7c1e376f74ce75d1b469c2f7b25',1,'dwarfDbgCompileUnitInfo::maxAddr()'],['../structdwarfDbgLocationInfo.html#aee40a6341f2aeca154d2b73e2d6f8498',1,'dwarfDbgLocationInfo::maxAddr()']]],
   ['maxattr',['maxAttr',['../structdieInfo.html#adcc30e499d7545c3e7c43460b78904e4',1,'dieInfo']]],

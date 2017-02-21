@@ -258,5 +258,6 @@ var searchData=
   ['dwuniontypes',['dwUnionTypes',['../structdwarfDbgTypeInfo.html#af465a64431aee15c57d83cdde359f62d',1,'dwarfDbgTypeInfo']]],
   ['dwvolatiletype',['dwVolatileType',['../structdwVolatileType.html',1,'']]],
   ['dwvolatiletype_5ft',['dwVolatileType_t',['../dwarfDbgTypeInfo_8h.html#a0aa8c62d2279c72c463d5d88814114e8',1,'dwarfDbgTypeInfo.h']]],
-  ['dwvolatiletypes',['dwVolatileTypes',['../structdwarfDbgTypeInfo.html#a4b2154f57168689e705482cc2fd10d20',1,'dwarfDbgTypeInfo']]]
+  ['dwvolatiletypes',['dwVolatileTypes',['../structdwarfDbgTypeInfo.html#a4b2154f57168689e705482cc2fd10d20',1,'dwarfDbgTypeInfo']]],
+  ['dwarfdbg',['DwarfDbg',['../index.html',1,'']]]
 ];
