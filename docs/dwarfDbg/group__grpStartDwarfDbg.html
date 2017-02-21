@@ -93,20 +93,20 @@ Modules</h2></td></tr>
 dwarfDbgClass create ::dD<br />
  <ul>
 <li>
-::dD init (<a class="el" href="dwarfDbg_8c.html#a96f70d4e045dee88502ed74959331b7c">dwarfDbgInit</a>)<br />
- </li>
+::dD init -&gt; C: <a class="el" href="dwarfDbg_8c.html#a96f70d4e045dee88502ed74959331b7c">dwarfDbgInit<br />
+</a> </li>
 <li>
-::dD openElf &lt;elf file name&gt; (<a class="el" href="dwarfDbgElfInfo_8c.html#a0a625fa267dff6c18b076b777305a808">dwarfDbgOpenElf</a>)<br />
- </li>
+::dD openElf &lt;elf file name&gt; -&gt; C: <a class="el" href="dwarfDbgElfInfo_8c.html#a0a625fa267dff6c18b076b777305a808">dwarfDbgOpenElf<br />
+</a> </li>
 <li>
-::dD getDbgInfos (<a class="el" href="dwarfDbgGetDbgInfo_8c.html#afffb8d39c75da8cb33b18919c6aa6194">dwarfDbgGetDbgInfos</a>)<br />
- </li>
+::dD getDbgInfos &gt; C: <a class="el" href="dwarfDbgGetDbgInfo_8c.html#afffb8d39c75da8cb33b18919c6aa6194">dwarfDbgGetDbgInfos<br />
+</a> </li>
 <li>
 getCompileUnitInfos ()<br />
  <ul>
 <li>
-set ::fileInfos <a class="el" href="dwarfDbgFileInfo_8c.html#afc4f124de2304f0ae1f3cea5e5ba6699">::dD getFileInfos</a><br />
- </li>
+set ::fileInfos [::dD getFileInfos] -&gt; C: <a class="el" href="dwarfDbgFileInfo_8c.html#afc4f124de2304f0ae1f3cea5e5ba6699">dwarfDbgGetFileInfos<br />
+</a> </li>
 </ul>
 </li>
 </ul>
