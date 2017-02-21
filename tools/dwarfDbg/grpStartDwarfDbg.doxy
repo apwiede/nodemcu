@@ -7,7 +7,7 @@
           <ul>
             <li>::dD init -&gt; C: \ref dwarfDbgInit<br>
             <li>::dD openElf &lt;elf file name&gt; -&gt; C: \ref dwarfDbgOpenElf<br>
-            <li>::dD getDbgInfos &gt; C: \ref dwarfDbgGetDbgInfos<br>
+            <li>::dD getDbgInfos -&gt; C: \ref dwarfDbgGetDbgInfos<br>
             <li>getCompileUnitInfos ()<br>
               <ul>
                 <li>set ::fileInfos [::dD getFileInfos] -&gt; C: \ref dwarfDbgGetFileInfos<br>
