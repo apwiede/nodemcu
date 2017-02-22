@@ -64,7 +64,7 @@ typedef struct dwType {
   int callFileIdx;         // DW_AT_call_file
   int callLineNo;          // DW_AT_call_line
   int constValue;          // DW_AT_const_value
-  int location;            // DW_AT_data_member_location / DW_AT_location
+  int dataLocation;        // DW_AT_data_member_location
   int declaration;         // DW_AT_declaration
   int pathNameIdx;         // DW_AT_decl_file
   int lineNo;              // DW_AT_decl_line
@@ -74,10 +74,11 @@ typedef struct dwType {
   int frameBase;           // DW_AT_frame_base
   int GNUAllCallSites;     // DW_AT_GNU_all_call_sites
   int GNUAllTailCallSites; // DW_AT_GNU_all_tail_call_sites
-  int GNUCallSiteValue;    // DW_AT_GNU_call_site_value
   int GNUCallSiteTarget;   // DW_AT_GNU_call_site_target
+  int GNUCallSiteValue;    // DW_AT_GNU_call_site_value
   int highPc;              // DW_AT_high_pc
   int isInline;            // DW_AT_inline
+  int location;            // DW_AT_location
   int linkageName;         // DW_AT_linkage_name
   int lowPc;               // DW_AT_low_pc
   int typeNameIdx;         // DW_AT_name
@@ -100,7 +101,7 @@ typedef uint8_t (* checkDieTypeRefIdx_t)(dwarfDbgPtr_t self);
 
 typedef uint8_t (* addType_t)(dwarfDbgPtr_t self, dwType_t *dwTypeInfo, const char * name, dwTypeValues_t *typeValues, int *typeIdx);
 
-typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildrenInfo, dieInfo_t *dieInfo, int isSibling, dwTypeValues_t *dwTypeValues);
+typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo);
 
 typedef uint8_t (* addTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dwarf_Bool isSibling);
 typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);

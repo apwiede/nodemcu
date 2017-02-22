@@ -122,19 +122,40 @@ static uint8_t handleOneDie(dwarfDbgPtr_t self, Dwarf_Die die, char **srcfiles, 
   }
   switch (tag) {
   case DW_TAG_base_type:
+    dwTypeInfo.artificial = -1;
+    dwTypeInfo.abstractOrigin = -1;
     dwTypeInfo.bitOffset = -1;
     dwTypeInfo.bitSize = -1;
     dwTypeInfo.byteSize = attrValues->byteSize;
+    dwTypeInfo.callFileIdx = -1;
+    dwTypeInfo.callLineNo = -1;
     dwTypeInfo.constValue = -1;
-    dwTypeInfo.location = 0;
-    dwTypeInfo.encoding = attrValues->encoding;
+    dwTypeInfo.dataLocation = 0;
     dwTypeInfo.declaration = 0;
     dwTypeInfo.pathNameIdx = -1;
     dwTypeInfo.lineNo = -1;
+    dwTypeInfo.encoding = attrValues->encoding;
+    dwTypeInfo.entryPc = 0;
+    dwTypeInfo.external = 0;
+    dwTypeInfo.frameBase = -1;
+    dwTypeInfo.GNUAllCallSites = -1;
+    dwTypeInfo.GNUAllTailCallSites = -1;
+    dwTypeInfo.GNUCallSiteTarget = -1;
+    dwTypeInfo.GNUCallSiteValue = -1;
+    dwTypeInfo.highPc = -1;
+    dwTypeInfo.isInline = -1;
+    dwTypeInfo.location = -1;
+    dwTypeInfo.linkageName = -1;
+    dwTypeInfo.lowPc = -1;
     attrName = attrValues->name;
+printf("AT_name: %s\n", attrName);
+    dwTypeInfo.typeNameIdx = -1;
     dwTypeInfo.prototyped = 0;
+    dwTypeInfo.ranges = -1;
     dwTypeInfo.siblingIdx = -1;
+    dwTypeInfo.subrangeType = -1;
     dwTypeInfo.dwTypeIdx = -1;
+    dwTypeInfo.upperBound = -1;
     result = self->dwarfDbgTypeInfo->addType(self, &dwTypeInfo, attrName, &self->dwarfDbgTypeInfo->dwBaseTypeInfos, &typeIdx);
     checkErrOK(result);
     dieInfo->tagRefIdx = typeIdx;
@@ -381,6 +402,20 @@ printf("++ siblings: structureTypes\n");
     result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
     checkErrOK(result);
 
+printf("++ children: pointerTypes\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+    checkErrOK(result);
+printf("++ siblings: pointerTypes\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+    checkErrOK(result);
+
+printf("++ children: typedefs\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_TYPEDEF);
+    checkErrOK(result);
+printf("++ siblings: typedefs\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_TYPEDEF);
+    checkErrOK(result);
+
 printf("++ children: subroutineTypes\n");
     result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
     checkErrOK(result);
@@ -393,13 +428,6 @@ printf("++ children: arrayTypes\n");
     checkErrOK(result);
 printf("++ siblings: arrayTypes\n");
     result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_ARRAY_TYPE);
-    checkErrOK(result);
-
-printf("++ children: pointerTypes\n");
-    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
-    checkErrOK(result);
-printf("++ siblings: pointerTypes\n");
-    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
     checkErrOK(result);
 
 printf("++ children: formalParameters\n");
@@ -470,13 +498,6 @@ printf("++ children: unspecifiedParameters\n");
     checkErrOK(result);
 printf("++ siblings: unspecifiedParameters\n");
     result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_UNSPECIFIED_PARAMETERS);
-    checkErrOK(result);
-
-printf("++ children: typedefs\n");
-    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_TYPEDEF);
-    checkErrOK(result);
-printf("++ siblings: typedefs\n");
-    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_TYPEDEF);
     checkErrOK(result);
 
   }

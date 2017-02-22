@@ -112,7 +112,8 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_VOLATILE_TYPE     = 65,
   DWARF_DBG_ERR_VOLATILE_TYPE_NOT_FOUND              = 66,
   DWARF_DBG_ERR_UNION_TYPE_NOT_FOUND                 = 67,
-  
+  DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPE              = 68,
+  DWARF_DBG_ERR_BAD_TAG_TYPE                         = 69,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */
