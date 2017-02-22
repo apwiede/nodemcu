@@ -187,27 +187,61 @@ static uint8_t addType(dwarfDbgPtr_t self, dwType_t *dwTypeInfo, const char * na
   }
   for(idx = 0; idx < typeValues->numDwType; idx++) {
     dwTypeInfo2 = &typeValues->dwTypes[idx];
+    if (dwTypeInfo2->artificial == dwTypeInfo->artificial) {
+    if (dwTypeInfo2->abstractOrigin == dwTypeInfo->abstractOrigin) {
     if (dwTypeInfo2->bitOffset == dwTypeInfo->bitOffset) {
       if (dwTypeInfo2->bitSize == dwTypeInfo->bitSize) {
         if (dwTypeInfo2->byteSize == dwTypeInfo->byteSize) {
+          if (dwTypeInfo2->callFileIdx == dwTypeInfo->callFileIdx) {
+          if (dwTypeInfo2->callLineNo == dwTypeInfo->callLineNo) {
           if (dwTypeInfo2->constValue == dwTypeInfo->constValue) {
             if (dwTypeInfo2->location == dwTypeInfo->location) {
               if (dwTypeInfo2->declaration == dwTypeInfo->declaration) {
                 if (dwTypeInfo2->pathNameIdx == dwTypeInfo->pathNameIdx) {
-                  if (dwTypeInfo2->lineNo == dwTypeInfo->lineNo) {
-                    if (dwTypeInfo2->encoding == dwTypeInfo->encoding) {
-                      if (dwTypeInfo2->typeNameIdx == dwTypeInfo->typeNameIdx) {
-                        if (dwTypeInfo2->prototyped == dwTypeInfo->prototyped) {
-                          if (dwTypeInfo2->siblingIdx == dwTypeInfo->siblingIdx) {
-                            if (dwTypeInfo2->dwTypeIdx == dwTypeInfo->dwTypeIdx) {
+                  if (dwTypeInfo2->frameBase == dwTypeInfo->frameBase) {
+                  if (dwTypeInfo2->GNUAllCallSites == dwTypeInfo->GNUAllCallSites) {
+                  if (dwTypeInfo2->GNUAllTailCallSites == dwTypeInfo->GNUAllTailCallSites) {
+                  if (dwTypeInfo2->GNUCallSiteValue == dwTypeInfo->GNUCallSiteValue) {
+                  if (dwTypeInfo2->GNUCallSiteTarget == dwTypeInfo->GNUCallSiteTarget) {
+                    if (dwTypeInfo2->highPc == dwTypeInfo->highPc) {
+                      if (dwTypeInfo2->encoding == dwTypeInfo->encoding) {
+                      if (dwTypeInfo2->entryPc == dwTypeInfo->entryPc) {
+                        if (dwTypeInfo2->lineNo == dwTypeInfo->lineNo) {
+                          if (dwTypeInfo2->linkageName == dwTypeInfo->linkageName) {
+                          if (dwTypeInfo2->lowPc == dwTypeInfo->lowPc) {
+                            if (dwTypeInfo2->external == dwTypeInfo->external) {
+                              if (dwTypeInfo2->isInline == dwTypeInfo->isInline) {
+                                if (dwTypeInfo2->typeNameIdx == dwTypeInfo->typeNameIdx) {
+                                  if (dwTypeInfo2->prototyped == dwTypeInfo->prototyped) {
+                                  if (dwTypeInfo2->ranges == dwTypeInfo->ranges) {
+                                    if (dwTypeInfo2->siblingIdx == dwTypeInfo->siblingIdx) {
+                                    if (dwTypeInfo2->subrangeType == dwTypeInfo->subrangeType) {
+                                      if (dwTypeInfo2->dwTypeIdx == dwTypeInfo->dwTypeIdx) {
+                                      if (dwTypeInfo2->upperBound == dwTypeInfo->upperBound) {
 printf("addType: found: typeIdx: %d\n", idx);
-                              *typeIdx = idx;
-                              return result;
+                                        *typeIdx = idx;
+                                        return result;
+                                      }
+                                      }
+                                    }
+                                  }
+                                  }
+                                  }
+                                }
+                              }
                             }
                           }
                         }
                       }
                     }
+                  }
+                  }
+                  }
+                  }
+                  }
+                  }
+                  }
+                  }
                   }
                 }
               }
@@ -216,6 +250,8 @@ printf("addType: found: typeIdx: %d\n", idx);
         }
       }
     }
+  }
+  }
   }
 
   if (typeValues->maxDwType <= typeValues->numDwType) {
@@ -426,26 +462,54 @@ static uint8_t handleType(dwarfDbgPtr_t self, dieAndChildrenInfo_t *dieAndChildr
   } else {
     maxEntries = dieAndChildrenInfo->numChildren;
   }
+  dwTypeInfo.artificial = -1;
+  dwTypeInfo.abstractOrigin = -1;
   dwTypeInfo.bitOffset = -1;
   dwTypeInfo.bitSize = -1;
   dwTypeInfo.byteSize = -1;
   dwTypeInfo.constValue = -1;
+  dwTypeInfo.callFileIdx = -1;
+  dwTypeInfo.callLineNo = -1;
   dwTypeInfo.location = 0;
   dwTypeInfo.declaration = 0;
   dwTypeInfo.pathNameIdx = -1;
+  dwTypeInfo.frameBase = -1;
+  dwTypeInfo.GNUAllCallSites = -1;
+  dwTypeInfo.GNUAllTailCallSites = -1;
+  dwTypeInfo.GNUCallSiteTarget = -1;
+  dwTypeInfo.GNUCallSiteValue = -1;
+  dwTypeInfo.highPc = -1;
+  dwTypeInfo.linkageName = -1;
   dwTypeInfo.lineNo = -1;
+  dwTypeInfo.lowPc = -1;
   dwTypeInfo.encoding = -1;
+  dwTypeInfo.external = -1;
+  dwTypeInfo.entryPc = -1;
+  dwTypeInfo.isInline = -1;
   attrName = NULL;
   dwTypeInfo.prototyped = 0;
+  dwTypeInfo.ranges = -1;
   dwTypeInfo.siblingIdx = -1;
+  dwTypeInfo.subrangeType = -1;
   dwTypeInfo.dwTypeIdx = -1;
+  dwTypeInfo.upperBound = -1;
   found = 0;
 //currTypeFlags = ATTR_arrayTypeFlags;
+self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagName);
+printf("tagName: %s\n", tagName);
   for(attrIdx = 0; attrIdx < dieInfo->numAttr; attrIdx++) {
     dieAttr = &dieInfo->dieAttrs[attrIdx];
 self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &attrName);
 printf("handleType: attrName: %s\n", attrName);
     switch (dieAttr->attr) {
+    case DW_AT_artificial:
+      dwTypeInfo.artificial = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_abstract_origin:
+      dwTypeInfo.abstractOrigin = dieAttr->uval;
+      found++;
+      break;
     case DW_AT_bit_offset:
       dwTypeInfo.bitOffset = dieAttr->uval;
       found++;
@@ -456,6 +520,14 @@ printf("handleType: attrName: %s\n", attrName);
       break;
     case DW_AT_byte_size:
       dwTypeInfo.byteSize = dieAttr->byteSize;
+      found++;
+      break;
+    case DW_AT_call_file:
+      dwTypeInfo.callFileIdx = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_call_line:
+      dwTypeInfo.callLineNo = dieAttr->uval;
       found++;
       break;
     case DW_AT_const_value:
@@ -479,6 +551,54 @@ printf("location: %d\n", dwTypeInfo.location);
       dwTypeInfo.lineNo = dieAttr->sourceLineNo;
       found++;
       break;
+    case DW_AT_entry_pc:
+      dwTypeInfo.entryPc = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_external:
+      dwTypeInfo.external = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_frame_base:
+      dwTypeInfo.frameBase = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_GNU_all_call_sites:
+      dwTypeInfo.GNUAllCallSites = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_GNU_all_tail_call_sites:
+      dwTypeInfo.GNUAllTailCallSites = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_GNU_call_site_target:
+      dwTypeInfo.GNUCallSiteTarget = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_GNU_call_site_value:
+      dwTypeInfo.GNUCallSiteValue = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_high_pc:
+      dwTypeInfo.highPc = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_inline:
+      dwTypeInfo.isInline = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_linkage_name:
+      dwTypeInfo.linkageName = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_location:
+      dwTypeInfo.location = dieAttr->uval;
+      found++;
+      break;
+    case DW_AT_low_pc:
+      dwTypeInfo.lowPc = dieAttr->uval;
+      found++;
+      break;
     case DW_AT_name:
       if ((dieAttr->attrStrIdx < 0) || (dieAttr->attrStrIdx >= self->dwarfDbgCompileUnitInfo->numAttrStr)) {
         return DWARF_DBG_ERR_BAD_ATTR_STR_IDX;
@@ -490,6 +610,10 @@ printf("location: %d\n", dwTypeInfo.location);
       dwTypeInfo.prototyped = dieAttr->uval;
       found++;
       break;
+    case DW_AT_ranges:
+      dwTypeInfo.ranges = dieAttr->uval;
+      found++;
+      break;
     case DW_AT_sibling:
       dwTypeInfo.siblingIdx = dieAttr->uval;
       found++;
@@ -497,6 +621,10 @@ printf("location: %d\n", dwTypeInfo.location);
     case DW_AT_type:
       result = getTypeRefIdx(self, dieAttr, &dwTypeInfo.dwTypeIdx);
       checkErrOK(result);
+      found++;
+      break;
+    case DW_AT_upper_bound:
+      dwTypeInfo.upperBound = dieAttr->uval;
       found++;
       break;
     default:
@@ -559,6 +687,24 @@ static uint8_t addTypes(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dw
   if (flags & TAG_REF_ENUMERATOR) {
     tagToHandle = DW_TAG_enumerator;
   }
+  if (flags & TAG_REF_FORMAL_PARAMETER) {
+    tagToHandle = DW_TAG_formal_parameter;
+  }
+  if (flags & TAG_REF_GNU_CALL_SITE) {
+    tagToHandle = DW_TAG_GNU_call_site;
+  }
+  if (flags & TAG_REF_GNU_CALL_SITE_PARAMETER) {
+    tagToHandle = DW_TAG_GNU_call_site_parameter;
+  }
+  if (flags & TAG_REF_INLINED_SUBROUTINE) {
+    tagToHandle = DW_TAG_inlined_subroutine;
+  }
+  if (flags & TAG_REF_LABEL) {
+    tagToHandle = DW_TAG_label;
+  }
+  if (flags & TAG_REF_LEXICAL_BLOCK) {
+    tagToHandle = DW_TAG_lexical_block;
+  }
   if (flags & TAG_REF_MEMBER) {
     tagToHandle = DW_TAG_member;
   }
@@ -568,6 +714,12 @@ static uint8_t addTypes(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dw
   if (flags & TAG_REF_STRUCTURE_TYPE) {
     tagToHandle = DW_TAG_structure_type;
   }
+  if (flags & TAG_REF_SUBPROGRAM) {
+    tagToHandle = DW_TAG_subprogram;
+  }
+  if (flags & TAG_REF_SUBRANGE_TYPE) {
+    tagToHandle = DW_TAG_subrange_type;
+  }
   if (flags & TAG_REF_SUBROUTINE_TYPE) {
     tagToHandle = DW_TAG_subroutine_type;
   }
@@ -576,6 +728,12 @@ static uint8_t addTypes(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dw
   }
   if (flags & TAG_REF_UNION_TYPE) {
     tagToHandle = DW_TAG_union_type;
+  }
+  if (flags & TAG_REF_UNSPECIFIED_PARAMETERS) {
+    tagToHandle = DW_TAG_unspecified_parameters;
+  }
+  if (flags & TAG_REF_VARIABLE) {
+    tagToHandle = DW_TAG_variable;
   }
   if (flags & TAG_REF_VOLATILE_TYPE) {
     tagToHandle = DW_TAG_volatile_type;
@@ -610,6 +768,30 @@ printf("2\n");
         result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwEnumeratorInfos);
         checkErrOK(result);
         break;
+      case DW_TAG_formal_parameter:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwFormalParametersInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_GNU_call_site:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwGNUCallSiteInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_GNU_call_site_parameter:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwGNUCallSiteParameterInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_label:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwLabelInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_inlined_subroutine:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwInlinedSubroutineInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_lexical_block:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwLexicalBlockInfos);
+        checkErrOK(result);
+        break;
       case DW_TAG_member:
         result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwMemberInfos);
         checkErrOK(result);
@@ -626,12 +808,28 @@ printf("2\n");
         result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwSubroutineTypeInfos);
         checkErrOK(result);
         break;
+      case DW_TAG_subprogram:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwSubprogramInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_subrange_type:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwSubrangeTypeInfos);
+        checkErrOK(result);
+        break;
       case DW_TAG_typedef:
         result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwTypedefInfos);
         checkErrOK(result);
         break;
       case DW_TAG_union_type:
         result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwUnionTypeInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_unspecified_parameters:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwUnspecifiedParametersInfos);
+        checkErrOK(result);
+        break;
+      case DW_TAG_variable:
+        result = self->dwarfDbgTypeInfo->handleType(self, dieAndChildrenInfo, dieInfo, isSibling, &self->dwarfDbgTypeInfo->dwVariableInfos);
         checkErrOK(result);
         break;
       case DW_TAG_volatile_type:

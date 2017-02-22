@@ -56,19 +56,37 @@ typedef struct attrValues {
 } attrValues_t;
 
 typedef struct dwType {
-  int bitOffset;   // DW_AT_bit_offset
-  int bitSize;     // DW_AT_bit_size
-  int byteSize;    // DW_AT_byte_size
-  int constValue;  // DW_AT_constvalue
-  int location;    // DW_AT_data_member_location
-  int declaration; // DW_AT_declaration
-  int pathNameIdx; // DW_AT_decl_file
-  int lineNo;      // DW_AT_decl_line
-  int encoding;    // DW_AT_encoding
-  int typeNameIdx; // DW_AT_name
-  int prototyped;  // DW_AT-prototyped
-  int siblingIdx;  // DW_AT_sibling
-  int dwTypeIdx;   // DW_AT_type
+  int artificial;          // DW_AT_artificial
+  int abstractOrigin;      // DW_AT_abstract_origin
+  int bitOffset;           // DW_AT_bit_offset
+  int bitSize;             // DW_AT_bit_size
+  int byteSize;            // DW_AT_byte_size
+  int callFileIdx;         // DW_AT_call_file
+  int callLineNo;          // DW_AT_call_line
+  int constValue;          // DW_AT_const_value
+  int location;            // DW_AT_data_member_location / DW_AT_location
+  int declaration;         // DW_AT_declaration
+  int pathNameIdx;         // DW_AT_decl_file
+  int lineNo;              // DW_AT_decl_line
+  int encoding;            // DW_AT_encoding
+  int entryPc;             // DW_AT_entry_pc
+  int external;            // DW_AT_external
+  int frameBase;           // DW_AT_frame_base
+  int GNUAllCallSites;     // DW_AT_GNU_all_call_sites
+  int GNUAllTailCallSites; // DW_AT_GNU_all_tail_call_sites
+  int GNUCallSiteValue;    // DW_AT_GNU_call_site_value
+  int GNUCallSiteTarget;   // DW_AT_GNU_call_site_target
+  int highPc;              // DW_AT_high_pc
+  int isInline;            // DW_AT_inline
+  int linkageName;         // DW_AT_linkage_name
+  int lowPc;               // DW_AT_low_pc
+  int typeNameIdx;         // DW_AT_name
+  int prototyped;          // DW_AT_prototyped
+  int ranges;              // DW_AT_ranges
+  int siblingIdx;          // DW_AT_sibling
+  int subrangeType;        // DW_AT_subrage_type
+  int dwTypeIdx;           // DW_AT_type
+  int upperBound;          // DW_AT_upper_bound
 } dwType_t;
 
 typedef struct dwTypeValues {
@@ -94,12 +112,22 @@ typedef struct dwarfDbgTypeInfo {
   dwTypeValues_t dwConstTypeInfos;
   dwTypeValues_t dwEnumerationTypeInfos;
   dwTypeValues_t dwEnumeratorInfos;
+  dwTypeValues_t dwFormalParametersInfos;
+  dwTypeValues_t dwGNUCallSiteInfos;
+  dwTypeValues_t dwGNUCallSiteParameterInfos;
+  dwTypeValues_t dwInlinedSubroutineInfos;
+  dwTypeValues_t dwLabelInfos;
+  dwTypeValues_t dwLexicalBlockInfos;
   dwTypeValues_t dwMemberInfos;
   dwTypeValues_t dwPointerTypeInfos;
   dwTypeValues_t dwStructureTypeInfos;
+  dwTypeValues_t dwSubprogramInfos;
+  dwTypeValues_t dwSubrangeTypeInfos;
   dwTypeValues_t dwSubroutineTypeInfos;
   dwTypeValues_t dwTypedefInfos;
   dwTypeValues_t dwUnionTypeInfos;
+  dwTypeValues_t dwUnspecifiedParametersInfos;
+  dwTypeValues_t dwVariableInfos;
   dwTypeValues_t dwVolatileTypeInfos;
 
   int maxTypeStr;

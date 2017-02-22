@@ -332,6 +332,13 @@ printf("++ numDieAndChildren: %d cu: %s\n", compileUnit->numDieAndChildren, comp
   for (dieAndChildrenIdx = 0; dieAndChildrenIdx < compileUnit->numDieAndChildren; dieAndChildrenIdx++) {
 printf("++ childIdx: %d\n", dieAndChildrenIdx);
 
+printf("++ children: constTypes\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+    checkErrOK(result);
+printf("++ siblings: constTypes\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
+    checkErrOK(result);
+
 printf("++ children: enumerationTypes\n");
     result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_ENUMERATION_TYPE);
     checkErrOK(result);
@@ -374,13 +381,6 @@ printf("++ siblings: structureTypes\n");
     result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_STRUCTURE_TYPE);
     checkErrOK(result);
 
-printf("++ children: constTypes\n");
-    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
-    checkErrOK(result);
-printf("++ siblings: constTypes\n");
-    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_CONST_TYPE);
-    checkErrOK(result);
-
 printf("++ children: subroutineTypes\n");
     result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBROUTINE_TYPE);
     checkErrOK(result);
@@ -400,6 +400,83 @@ printf("++ children: pointerTypes\n");
     checkErrOK(result);
 printf("++ siblings: pointerTypes\n");
     result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_POINTER_TYPE);
+    checkErrOK(result);
+
+printf("++ children: formalParameters\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_FORMAL_PARAMETER);
+    checkErrOK(result);
+printf("++ siblings: formalParameters\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_FORMAL_PARAMETER);
+    checkErrOK(result);
+
+printf("++ children: lexicalBlocks\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_LEXICAL_BLOCK);
+    checkErrOK(result);
+printf("++ siblings: lexicalBlocks\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_LEXICAL_BLOCK);
+    checkErrOK(result);
+
+printf("++ children: labels\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_LABEL);
+    checkErrOK(result);
+printf("++ siblings: labels\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_LABEL);
+    checkErrOK(result);
+
+printf("++ children: inlinedSubroutine\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_INLINED_SUBROUTINE);
+    checkErrOK(result);
+printf("++ siblings: inlinedSubroutine\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_INLINED_SUBROUTINE);
+    checkErrOK(result);
+
+printf("++ children: subranges\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBRANGE_TYPE);
+    checkErrOK(result);
+printf("++ siblings: subranges\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_SUBRANGE_TYPE);
+    checkErrOK(result);
+
+printf("++ children: subprograms\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_SUBPROGRAM);
+    checkErrOK(result);
+printf("++ siblings: subprograms\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_SUBPROGRAM);
+    checkErrOK(result);
+
+printf("++ children: GNUCallSites\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_GNU_CALL_SITE);
+    checkErrOK(result);
+printf("++ siblings: GNUCallSites\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_GNU_CALL_SITE);
+    checkErrOK(result);
+
+printf("++ children: GNUCallSiteParameters\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_GNU_CALL_SITE_PARAMETER);
+    checkErrOK(result);
+printf("++ siblings: GNUCallSiteParameters\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_GNU_CALL_SITE_PARAMETER);
+    checkErrOK(result);
+
+printf("++ children: variables\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_VARIABLE);
+    checkErrOK(result);
+printf("++ siblings: variables\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_VARIABLE);
+    checkErrOK(result);
+
+printf("++ children: unspecifiedParameters\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_UNSPECIFIED_PARAMETERS);
+    checkErrOK(result);
+printf("++ siblings: unspecifiedParameters\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_UNSPECIFIED_PARAMETERS);
+    checkErrOK(result);
+
+printf("++ children: typedefs\n");
+    result = self->dwarfDbgTypeInfo->addChildrenTypes(self, dieAndChildrenIdx, TAG_REF_TYPEDEF);
+    checkErrOK(result);
+printf("++ siblings: typedefs\n");
+    result = self->dwarfDbgTypeInfo->addSiblingsTypes(self, dieAndChildrenIdx, TAG_REF_TYPEDEF);
     checkErrOK(result);
 
   }

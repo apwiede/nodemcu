@@ -65,18 +65,28 @@ typedef struct dieAttr {
   locationInfo_t *locationInfo;
 } dieAttr_t;
 
-#define TAG_REF_BASE_TYPE        0x001
-#define TAG_REF_TYPEDEF          0x002
-#define TAG_REF_POINTER_TYPE     0x004
-#define TAG_REF_SUBROUTINE_TYPE  0x008
-#define TAG_REF_STRUCTURE_TYPE   0x010
-#define TAG_REF_CONST_TYPE       0x020
-#define TAG_REF_ARRAY_TYPE       0x040
-#define TAG_REF_MEMBER           0x080
-#define TAG_REF_ENUMERATION_TYPE 0x100
-#define TAG_REF_ENUMERATOR       0x200
-#define TAG_REF_UNION_TYPE       0x400
-#define TAG_REF_VOLATILE_TYPE    0x800
+#define TAG_REF_ARRAY_TYPE              0x000001
+#define TAG_REF_BASE_TYPE               0x000002
+#define TAG_REF_CONST_TYPE              0x000004
+#define TAG_REF_ENUMERATION_TYPE        0x000008
+#define TAG_REF_ENUMERATOR              0x000010
+#define TAG_REF_FORMAL_PARAMETER        0x000020
+#define TAG_REF_GNU_CALL_SITE           0x000040
+#define TAG_REF_GNU_CALL_SITE_PARAMETER 0x000080
+#define TAG_REF_INLINED_SUBROUTINE      0x000100
+#define TAG_REF_LABEL                   0x000200
+#define TAG_REF_LEXICAL_BLOCK           0x000400
+#define TAG_REF_MEMBER                  0x000800
+#define TAG_REF_POINTER_TYPE            0x001000
+#define TAG_REF_STRUCTURE_TYPE          0x002000
+#define TAG_REF_SUBPROGRAM              0x004000
+#define TAG_REF_SUBRANGE_TYPE           0x008000
+#define TAG_REF_SUBROUTINE_TYPE         0x010000
+#define TAG_REF_TYPEDEF                 0x020000
+#define TAG_REF_UNION_TYPE              0x040000
+#define TAG_REF_UNSPECIFIED_PARAMETERS  0x080000
+#define TAG_REF_VARIABLE                0x100000
+#define TAG_REF_VOLATILE_TYPE           0x200000
 
 typedef struct dieInfo {
   Dwarf_Off offset;     // this can be referenced by dieAttr.refOffset.
