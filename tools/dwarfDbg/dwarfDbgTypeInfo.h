@@ -55,94 +55,57 @@ typedef struct attrValues {
   int dwTypeIdx;
 } attrValues_t;
 
-typedef struct dwType {
-  int artificial;          // DW_AT_artificial
-  int abstractOrigin;      // DW_AT_abstract_origin
-  int bitOffset;           // DW_AT_bit_offset
-  int bitSize;             // DW_AT_bit_size
-  int byteSize;            // DW_AT_byte_size
-  int callFileIdx;         // DW_AT_call_file
-  int callLineNo;          // DW_AT_call_line
-  int constValue;          // DW_AT_const_value
-  int dataLocation;        // DW_AT_data_member_location
-  int declaration;         // DW_AT_declaration
-  int pathNameIdx;         // DW_AT_decl_file
-  int lineNo;              // DW_AT_decl_line
-  int encoding;            // DW_AT_encoding
-  int entryPc;             // DW_AT_entry_pc
-  int external;            // DW_AT_external
-  int frameBase;           // DW_AT_frame_base
-  int GNUAllCallSites;     // DW_AT_GNU_all_call_sites
-  int GNUAllTailCallSites; // DW_AT_GNU_all_tail_call_sites
-  int GNUCallSiteTarget;   // DW_AT_GNU_call_site_target
-  int GNUCallSiteValue;    // DW_AT_GNU_call_site_value
-  int highPc;              // DW_AT_high_pc
-  int isInline;            // DW_AT_inline
-  int location;            // DW_AT_location
-  int linkageName;         // DW_AT_linkage_name
-  int lowPc;               // DW_AT_low_pc
-  int typeNameIdx;         // DW_AT_name
-  int prototyped;          // DW_AT_prototyped
-  int ranges;              // DW_AT_ranges
-  int siblingIdx;          // DW_AT_sibling
-  int subrangeType;        // DW_AT_subrage_type
-  int dwTypeIdx;           // DW_AT_type
-  int upperBound;          // DW_AT_upper_bound
-} dwType_t;
+typedef struct dwAttrType {
+  int dwType;
+  int value;
+} dwAttrType_t;
 
-typedef struct dwTypeValues {
-  int maxDwType;
-  int numDwType;
-  dwType_t *dwTypes;
-} dwTypeValues_t;
+typedef struct dwAttrTypeInfo {
+  int tag;
+  int numDwAttrType;
+  int maxDwAttrType;
+  dwAttrType_t *dwAttrTypes;
+} dwAttrTypeInfo_t;
+
+typedef struct dwAttrTypeInfos {
+  int maxDwAttrTypeInfo;
+  int numDwAttrTypeInfo;
+  dwAttrTypeInfo_t *dwAttrTypeInfos;
+} dwAttrTypeInfos_t;
 
 typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeStrIdx);
+typedef uint8_t (* addAttrType_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int dwType, int value, int *attrTypeIdx);
 typedef uint8_t (* checkDieTypeRefIdx_t)(dwarfDbgPtr_t self);
 
-typedef uint8_t (* addType_t)(dwarfDbgPtr_t self, dwType_t *dwTypeInfo, const char * name, dwTypeValues_t *typeValues, int *typeIdx);
+typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int idx);
+typedef uint8_t (* addAttrTypeInfo_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, dwAttrTypeInfos_t *dwAttrTypeInfos, int *typeIdx);
 
 typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo);
 
-typedef uint8_t (* addTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags, Dwarf_Bool isSibling);
-typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
-typedef uint8_t (* addSiblingsTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int flags);
+typedef uint8_t (* addTagTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Bool isSibling);
+typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx);
+typedef uint8_t (* addSiblingsTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx);
 
 typedef struct dwarfDbgTypeInfo {
-  dwTypeValues_t dwArrayTypeInfos;
-  dwTypeValues_t dwBaseTypeInfos;
-  dwTypeValues_t dwConstTypeInfos;
-  dwTypeValues_t dwEnumerationTypeInfos;
-  dwTypeValues_t dwEnumeratorInfos;
-  dwTypeValues_t dwFormalParametersInfos;
-  dwTypeValues_t dwGNUCallSiteInfos;
-  dwTypeValues_t dwGNUCallSiteParameterInfos;
-  dwTypeValues_t dwInlinedSubroutineInfos;
-  dwTypeValues_t dwLabelInfos;
-  dwTypeValues_t dwLexicalBlockInfos;
-  dwTypeValues_t dwMemberInfos;
-  dwTypeValues_t dwPointerTypeInfos;
-  dwTypeValues_t dwStructureTypeInfos;
-  dwTypeValues_t dwSubprogramInfos;
-  dwTypeValues_t dwSubrangeTypeInfos;
-  dwTypeValues_t dwSubroutineTypeInfos;
-  dwTypeValues_t dwTypedefInfos;
-  dwTypeValues_t dwUnionTypeInfos;
-  dwTypeValues_t dwUnspecifiedParametersInfos;
-  dwTypeValues_t dwVariableInfos;
-  dwTypeValues_t dwVolatileTypeInfos;
+  dwAttrTypeInfos_t dwAttrTypeInfos;
+
+  int typeLevel;
 
   int maxTypeStr;
   int numTypeStr;
   char **typeStrs;
 
   addTypeStr_t addTypeStr;
+  addAttrType_t addAttrType;
+  printAttrTypeInfo_t printAttrTypeInfo;
+
   checkDieTypeRefIdx_t checkDieTypeRefIdx;
 
-  addType_t addType;
+  addAttrTypeInfo_t addAttrTypeInfo;
 
   handleType_t handleType;
 
-  addTypes_t addTypes;
+  addTagTypes_t addTagTypes;
   addChildrenTypes_t addChildrenTypes;
   addSiblingsTypes_t addSiblingsTypes;
 } dwarfDbgTypeInfo_t;
