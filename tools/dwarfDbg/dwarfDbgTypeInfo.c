@@ -386,6 +386,7 @@ static uint8_t getTypeRefIdx(dwarfDbgPtr_t self, dieAttr_t *dieAttr, int *dwType
   int isSibling = 0;
   int maxEntries = 0;
   int typeIdx = 0;
+  int dwAttrTypeInfoIdx = 0;
   compileUnit_t *compileUnit;
   dieAndChildrenInfo_t *dieAndChildrenInfo = NULL;
   dieInfo_t *dieInfo = NULL;
@@ -415,7 +416,7 @@ self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagName);
 
         if ((dieInfo->offset == dieAttr->refOffset) && (dieInfo->tagRefIdx == -1)) {
 printf("Warning missing tagRefIdx for: %s\n", tagName);
-          result =self->dwarfDbgTypeInfo->handleType(self, dieInfo);
+          result =self->dwarfDbgTypeInfo->handleType(self, dieInfo, &dwAttrTypeInfoIdx);
           checkErrOK(result);
         }
         if (dieInfo->offset == dieAttr->refOffset) {
@@ -509,7 +510,7 @@ printf("ERROR TYPE_REF_NOT_FOUND\n");
 
 // =================================== handleType =========================== 
 
-static uint8_t handleType(dwarfDbgPtr_t self, dieInfo_t *dieInfo) {
+static uint8_t handleType(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int *dwAttrTypeInfoIdx) {
   uint8_t result = 0;
   int entryIdx = 0;
   int typeIdx = 0;
@@ -745,10 +746,10 @@ printf("ERROR: DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPE: 0x%04x\n", dieAttr->attr);
 //if (dieInfo->tag == DW_TAG_typedef) {
 //printf("TYPE: %s attrTypeIdx: %d offset: 0x%08x\n", atName, attrTypeIdx, offset);
 //}
-    result = self->dwarfDbgTypeInfo->addAttrTypeInfo(self, &dwAttrTypeInfo, dwAttrTypeInfos, &tagRefIdx);
+    result = self->dwarfDbgTypeInfo->addAttrTypeInfo(self, &dwAttrTypeInfo, dwAttrTypeInfos, dwAttrTypeInfoIdx);
     checkErrOK(result);
-    dieInfo->tagRefIdx = tagRefIdx;
-//printf("after addAttrTypeInfo: tagRefIdx: %d\n", tagRefIdx);
+    dieInfo->tagRefIdx = *dwAttrTypeInfoIdx;
+//printf("after addAttrTypeInfo: tagRefIdx: %d\n", *dwAttrTypeInfoIdx);
   } else {
 printf("ERROR type not found found: %d numAttr: %d offset: 0x%08x\n", found, dieInfo->numAttr, dieAttr->refOffset);
     return DWARF_DBG_ERR_TYPE_NOT_FOUND;
@@ -761,22 +762,16 @@ printf("ERROR type not found found: %d numAttr: %d offset: 0x%08x\n", found, die
 static uint8_t addTagTypes(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Bool isSibling) {
   uint8_t result = 0;
   int entryIdx = 0;
-  int typeIdx = 0;
-  int typeDefIdx = 0;
   int maxEntries = 0;
-  int attrIdx = 0;
+  int siblingTagInfoIdx = 0;
+  int childTagInfoIdx = 0;
   dieAndChildrenInfo_t *dieAndChildrenInfo = NULL;
   compileUnit_t *compileUnit = NULL;
   dieInfo_t *dieInfo = NULL;
-  dieInfo_t *dieInfo2 = NULL;
-  dieAttr_t *dieAttr = NULL;
-  int found = 0;
-  int tagToHandle = 0;
-  char *attrName = NULL;
-  const char *tagName = NULL;
+  int dwAttrTypeInfoIdx = 0;
 
   result = DWARF_DBG_ERR_OK;
-printf("addTagTypes\n");
+printf("addTagTypes cu idx: %d dieAndChildrenIdx: %d\n", self->dwarfDbgCompileUnitInfo->currCompileUnitIdx, dieAndChildrenIdx);
   compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
   if (isSibling) {
@@ -784,13 +779,20 @@ printf("addTagTypes\n");
   } else {
     maxEntries = dieAndChildrenInfo->numChildren;
   }
+printf("isSibling: %d maxEntries: %d numDieAndChildren: %d maxDieAndChildren: %d\n", isSibling, maxEntries, compileUnit->numDieAndChildren, compileUnit->maxDieAndChildren);
   for(entryIdx = 0; entryIdx < maxEntries; entryIdx++) {
     if (isSibling) {
       dieInfo = &dieAndChildrenInfo->dieSiblings[entryIdx];
     } else {
       dieInfo = &dieAndChildrenInfo->dieChildren[entryIdx];
     }
-    result = self->dwarfDbgTypeInfo->handleType(self, dieInfo);
+    result = self->dwarfDbgTypeInfo->handleType(self, dieInfo, &dwAttrTypeInfoIdx);
+    checkErrOK(result);
+    if (isSibling) {
+      result = self->dwarfDbgDieInfo->addDieSiblingTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, &siblingTagInfoIdx);
+    } else {
+      result = self->dwarfDbgDieInfo->addDieChildTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, &childTagInfoIdx);
+    }
     checkErrOK(result);
   }
   return result;

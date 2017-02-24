@@ -80,7 +80,7 @@ typedef uint8_t (* checkDieTypeRefIdx_t)(dwarfDbgPtr_t self);
 typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int idx);
 typedef uint8_t (* addAttrTypeInfo_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, dwAttrTypeInfos_t *dwAttrTypeInfos, int *typeIdx);
 
-typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo);
+typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int *dwAttrTypeInfoIdx);
 
 typedef uint8_t (* addTagTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Bool isSibling);
 typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx);

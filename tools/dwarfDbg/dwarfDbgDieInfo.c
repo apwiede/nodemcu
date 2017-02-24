@@ -262,6 +262,79 @@ static uint8_t addDieSiblingAttr(dwarfDbgPtr_t self, int dieAndChildrenIdx, int 
   return addDieAttr(self, dieAndChildrenIdx, /* isSibling */ 1, siblingIdx, attr, attrIn, uval, theform, directform, siblingAttrIdx);
 }
 
+// =================================== addDieSiblingTagInfo =========================== 
+
+static uint8_t addDieSiblingTagInfo(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Half tag, int dwAttrTypeInfoIdx, int *siblingTagInfoIdx) {
+  uint8_t result;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  dieTagInfo_t *dieTagInfo;
+  compileUnit_t *compileUnit;
+
+  result = DWARF_DBG_ERR_OK;
+//printf("== addDieSiblingTagInfo: tag: 0x%04x, dieAndChildrenIdx: %d\n", tag, dieAndChildrenIdx);
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
+//printf("max: %d num: %d dieAndChildrenInfo: %p dieSiblingsTagInfos: %p\n", dieAndChildrenInfo->maxSiblingsTagInfo, dieAndChildrenInfo->numSiblingsTagInfo, dieAndChildrenInfo, dieAndChildrenInfo->dieSiblingsTagInfos);
+  if (dieAndChildrenInfo->maxSiblingsTagInfo <= dieAndChildrenInfo->numSiblingsTagInfo) {
+    dieAndChildrenInfo->maxSiblingsTagInfo += 10;
+    if (dieAndChildrenInfo->dieSiblingsTagInfos == NULL) {
+      dieAndChildrenInfo->dieSiblingsTagInfos = (dieTagInfo_t *)ckalloc(sizeof(dieTagInfo_t) * dieAndChildrenInfo->maxSiblingsTagInfo);
+      if (dieAndChildrenInfo->dieSiblingsTagInfos == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    } else {
+      dieAndChildrenInfo->dieSiblingsTagInfos = (dieTagInfo_t *)ckrealloc((char *)dieAndChildrenInfo->dieSiblingsTagInfos, sizeof(dieTagInfo_t) * dieAndChildrenInfo->maxSiblingsTagInfo);
+      if (dieAndChildrenInfo->dieSiblingsTagInfos == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    }
+  }
+//printf("== numSiblings: %d\n", dieAndChildrenInfo->numSiblingsTagInfo);
+  dieTagInfo = &dieAndChildrenInfo->dieSiblingsTagInfos[dieAndChildrenInfo->numSiblingsTagInfo];
+  memset(dieTagInfo, 0, sizeof(dieTagInfo_t));
+  dieTagInfo->tag = tag;
+  dieTagInfo->dwAttrTypeInfoIdx = -1;
+  *siblingTagInfoIdx = dieAndChildrenInfo->numSiblingsTagInfo;
+  dieAndChildrenInfo->numSiblingsTagInfo++;
+  return result;
+}
+
+// =================================== addDieChildTagInfo =========================== 
+
+static uint8_t addDieChildTagInfo(dwarfDbgPtr_t self, int dieAndChildrenIdx,  Dwarf_Half tag, int dwAttrTypeInfoIdx, int *childTagInfoIdx) {
+  uint8_t result;
+  dieAndChildrenInfo_t *dieAndChildrenInfo;
+  dieTagInfo_t *dieTagInfo;
+  compileUnit_t *compileUnit;
+
+  result = DWARF_DBG_ERR_OK;
+//printf("== addDieChildTagInfo: offset: 0x%04x tag: 0x%04x\n", offset, tag);
+  compileUnit = self->dwarfDbgCompileUnitInfo->currCompileUnit;
+  dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[dieAndChildrenIdx];
+  if (dieAndChildrenInfo->maxChildrenTagInfo <= dieAndChildrenInfo->numChildrenTagInfo) {
+    dieAndChildrenInfo->maxChildrenTagInfo += 10;
+    if (dieAndChildrenInfo->dieChildrenTagInfos == NULL) {
+      dieAndChildrenInfo->dieChildrenTagInfos = (dieTagInfo_t *)ckalloc(sizeof(dieTagInfo_t) * dieAndChildrenInfo->maxChildrenTagInfo);
+      if (dieAndChildrenInfo->dieChildrenTagInfos == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    } else {
+      dieAndChildrenInfo->dieChildrenTagInfos = (dieTagInfo_t *)ckrealloc((char *)dieAndChildrenInfo->dieChildrenTagInfos, sizeof(dieTagInfo_t) * dieAndChildrenInfo->maxChildrenTagInfo);
+      if (dieAndChildrenInfo->dieChildrenTagInfos == NULL) {
+        return DWARF_DBG_ERR_OUT_OF_MEMORY;
+      }
+    }
+  }
+//printf("== numChildren: %d\n", dieAndChildrenInfo->numChildrenTagInfo);
+  dieTagInfo = &dieAndChildrenInfo->dieChildrenTagInfos[dieAndChildrenInfo->numChildrenTagInfo];
+  memset(dieTagInfo, 0, sizeof(dieTagInfo_t));
+  dieTagInfo->tag = tag;
+  dieTagInfo->dwAttrTypeInfoIdx = -1;
+  *childTagInfoIdx = dieAndChildrenInfo->numChildrenTagInfo;
+  dieAndChildrenInfo->numChildrenTagInfo++;
+  return result;
+}
+
 // =================================== addDieSibling =========================== 
 
 static uint8_t addDieSibling(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off offset, Dwarf_Half tag, int *siblingIdx) {
@@ -269,8 +342,6 @@ static uint8_t addDieSibling(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Of
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   compileUnit_t *compileUnit;
-  int formalParameterInfoIdx;
-  int variableInfoIdx;
 
   result = DWARF_DBG_ERR_OK;
 //printf("== addDieSibling: offset: 0x%04x tag: 0x%04x\n", offset, tag);
@@ -297,22 +368,6 @@ static uint8_t addDieSibling(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Of
   dieInfo->tag = tag;
   dieInfo->tagRefIdx = -1;
   dieInfo->flags = 0;
-#ifdef NOTDEF
-  switch (tag) {
-  case DW_TAG_subprogram:
-    result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numSiblings, /* isSibling */ 1, &compileUnit->currSubProgramInfoIdx);
-    checkErrOK(result);
-    break;
-  case DW_TAG_formal_parameter:
-    result = self->dwarfDbgSubProgramInfo->addFormalParameterInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numSiblings, &formalParameterInfoIdx);
-    checkErrOK(result);
-    break;
-  case DW_TAG_variable:
-    result = self->dwarfDbgSubProgramInfo->addVariableInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numSiblings, &variableInfoIdx);
-    checkErrOK(result);
-    break;
-  }
-#endif
   *siblingIdx = dieAndChildrenInfo->numSiblings;
   dieAndChildrenInfo->numSiblings++;
   return result;
@@ -325,8 +380,6 @@ static uint8_t addDieChild(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off 
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieInfo_t *dieInfo;
   compileUnit_t *compileUnit;
-  int formalParameterInfoIdx;
-  int variableInfoIdx;
 
   result = DWARF_DBG_ERR_OK;
 //printf("== addDieChild: offset: 0x%04x tag: 0x%04x\n", offset, tag);
@@ -353,22 +406,6 @@ static uint8_t addDieChild(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off 
   dieInfo->tag = tag;
   dieInfo->tagRefIdx = -1;
   dieInfo->flags = 0;
-#ifdef NOTDEF
-  switch (tag) {
-  case DW_TAG_subprogram:
-    result = self->dwarfDbgSubProgramInfo->addSubProgramInfo(self, dieAndChildrenInfo->numChildren, /* isSibling */ 0, &compileUnit->currSubProgramInfoIdx);
-    checkErrOK(result);
-    break;
-  case DW_TAG_formal_parameter:
-    result = self->dwarfDbgSubProgramInfo->addFormalParameterInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numChildren, &formalParameterInfoIdx);
-    checkErrOK(result);
-    break;
-  case DW_TAG_variable:
-    result = self->dwarfDbgSubProgramInfo->addVariableInfo(self, compileUnit->currSubProgramInfoIdx, dieAndChildrenInfo->numChildren, &variableInfoIdx);
-    checkErrOK(result);
-    break;
-  }
-#endif
   *childIdx = dieAndChildrenInfo->numChildren;
   dieAndChildrenInfo->numChildren++;
   return result;
@@ -398,7 +435,6 @@ static uint8_t addDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die die, int *dieAndC
       }
     }
   }
-//printf("== numDieAndChildren: %d\n", compileUnit->numDieAndChildren);
   dieAndChildrenInfo = &compileUnit->dieAndChildrenInfos[compileUnit->numDieAndChildren];
   memset(dieAndChildrenInfo, 0, sizeof(dieAndChildrenInfo_t));
   *dieAndChildrenIdx = compileUnit->numDieAndChildren;
@@ -411,15 +447,13 @@ static uint8_t addDieAndChildren(dwarfDbgPtr_t self, Dwarf_Die die, int *dieAndC
 int dwarfDbgDieInfoInit (dwarfDbgPtr_t self) {
 
   showFd = stdout;
-//  self->dwarfDbgDieInfo->maxDieAndChildren = 0;
-//  self->dwarfDbgDieInfo->numDieAndChildren = 0;
-//  self->dwarfDbgDieInfo->dieAndChildren = NULL;
-
   self->dwarfDbgDieInfo->showSiblings = &showSiblings;
   self->dwarfDbgDieInfo->showChildren = &showChildren;
   self->dwarfDbgDieInfo->addAttrStr = &addAttrStr;
   self->dwarfDbgDieInfo->addDieSiblingAttr = &addDieSiblingAttr;
   self->dwarfDbgDieInfo->addDieChildAttr = &addDieChildAttr;
+  self->dwarfDbgDieInfo->addDieSiblingTagInfo = &addDieSiblingTagInfo;
+  self->dwarfDbgDieInfo->addDieChildTagInfo = &addDieChildTagInfo;
   self->dwarfDbgDieInfo->addDieSibling = &addDieSibling;
   self->dwarfDbgDieInfo->addDieChild = &addDieChild;
   self->dwarfDbgDieInfo->addDieAndChildren = &addDieAndChildren;
