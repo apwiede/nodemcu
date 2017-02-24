@@ -206,6 +206,36 @@ static void netSocketReceived(void *arg, socketUserData_t *sud, char *pdata, uns
   COMP_MSG_DBG(self, "w", 1, "wifi netSocketReceived end result: %d", result);
 }
 
+// ================================= netSocketSSDPToSend ====================================
+
+static void netSocketSSDPToSend(void *arg, socketUserData_t *sud, char *pdata, unsigned short len) {
+  compMsgDispatcher_t *compMsgDispatcher;
+  compMsgDispatcher_t *self;
+  uint8_t result;
+
+  compMsgDispatcher = (compMsgDispatcher_t *)arg;
+  self = compMsgDispatcher;
+  COMP_MSG_DBG(self, "w", 1, "netSocketSSDPSend: len: %d dispatcher: %p", len, compMsgDispatcher);
+  result = self->resetMsgInfo(self, &self->compMsgData->toSend);
+//  checkErrOK(result);
+  COMP_MSG_DBG(self, "w", 2, "netSocketSSDPSend end result: %d", result);
+}
+
+// ================================= netSocketSSDPReceived ====================================
+
+static void netSocketSSDPReceived(void *arg, socketUserData_t *sud, char *pdata, unsigned short len) {
+  compMsgDispatcher_t *compMsgDispatcher;
+  compMsgDispatcher_t *self;
+  uint8_t result;
+
+  compMsgDispatcher = (compMsgDispatcher_t *)arg;
+  self = compMsgDispatcher;
+  COMP_MSG_DBG(self, "w", 1, "wifi netSocketSSDPReceived: len: %d dispatcher: %p", len, compMsgDispatcher);
+  result = self->resetMsgInfo(self, &self->compMsgData->received);
+//  checkErrOK(result);
+  COMP_MSG_DBG(self, "w", 1, "wifi netSocketSSDPReceived end result: %d", result);
+}
+
 // ================================= webSocketTextReceived ====================================
 
 static void webSocketTextReceived(void *arg, socketUserData_t *sud, char *pdata, unsigned short len) {
@@ -712,18 +742,42 @@ static uint8_t getClientPort(compMsgDispatcher_t *self, int* numericValue, uint8
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= getClientSequenceNum ====================================
-
-static uint8_t getClientSequenceNum(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.clientSequenceNum;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getClientStatus ====================================
 
 static uint8_t getClientStatus(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
   *numericValue = compMsgWifiData.clientStatus;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getSSDPIPAddr ====================================
+
+static uint8_t getSSDPIPAddr(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.ssdpIPAddr;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getSSDPPort ====================================
+
+static uint8_t getSSDPPort(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.ssdpPort;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getSSDPStatus ====================================
+
+static uint8_t getSSDPStatus(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.ssdpStatus;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getClientSequenceNum ====================================
+
+static uint8_t getClientSequenceNum(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
+  *numericValue = compMsgWifiData.clientSequenceNum;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
 }
@@ -975,6 +1029,12 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
   case WIFI_INFO_NET_TO_SEND_CALL_BACK:
     *numericValue = (int)compMsgWifiData.netSocketToSend;
     break;
+  case WIFI_INFO_NET_SSDP_RECEIVED_CALL_BACK:
+    *numericValue = (int)compMsgWifiData.netSocketSSDPReceived;
+    break;
+  case WIFI_INFO_NET_SSDP_TO_SEND_CALL_BACK:
+    *numericValue = (int)compMsgWifiData.netSocketSSDPToSend;
+    break;
   case WIFI_INFO_CLIENT_SSID:
     *stringValue = compMsgWifiData.clientSsid;
     break;
@@ -989,6 +1049,15 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t v
     break;
   case WIFI_INFO_CLIENT_STATUS:
     *numericValue = compMsgWifiData.clientStatus;
+    break;
+  case WIFI_INFO_SSDP_IP_ADDR:
+    *numericValue = compMsgWifiData.ssdpIPAddr;
+    break;
+  case WIFI_INFO_SSDP_PORT:
+    *numericValue = compMsgWifiData.ssdpPort;
+    break;
+  case WIFI_INFO_SSDP_STATUS:
+    *numericValue = compMsgWifiData.ssdpStatus;
     break;
   case WIFI_INFO_CLOUD_PORT:
     *numericValue = compMsgWifiData.cloudPort;
@@ -1071,7 +1140,7 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
   uint8_t result;
   uint8_t fieldNameId;
 
-  COMP_MSG_DBG(self, "w", 2, "setWifiValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+  COMP_MSG_DBG(self, "w", 1, "setWifiValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR); 
   switch (fieldNameId) {
   case COMP_MSG_SPEC_FIELD_PROVISIONING_SSID:
@@ -1097,6 +1166,15 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
     break;
   case COMP_MSG_SPEC_FIELD_CLIENT_STATUS:
     compMsgWifiData.clientStatus = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR:
+    compMsgWifiData.ssdpIPAddr = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_SSDP_PORT:
+    compMsgWifiData.ssdpPort = numericValue;
+    break;
+  case COMP_MSG_SPEC_FIELD_SSDP_STATUS:
+    compMsgWifiData.ssdpStatus = numericValue;
     break;
   case COMP_MSG_SPEC_FIELD_CLOUD_PORT:
     compMsgWifiData.cloudPort = numericValue;
@@ -1175,6 +1253,8 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   compMsgWifiData.webSocketTextReceived = &webSocketTextReceived;
   compMsgWifiData.netSocketToSend = &netSocketToSend;
   compMsgWifiData.netSocketReceived = &netSocketReceived;
+  compMsgWifiData.netSocketSSDPToSend = &netSocketSSDPToSend;
+  compMsgWifiData.netSocketSSDPReceived = &netSocketSSDPReceived;
 
   self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPBssidSize",       &getWifiAPBssidSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getWifiAPBssidStrSize",    &getWifiAPBssidStrSize, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_SIZE);
@@ -1200,6 +1280,9 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientIPAddr", &getClientIPAddr, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientPort", &getClientPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getClientStatus", &getClientStatus, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getSSDPIPAddr", &getSSDPIPAddr, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getSSDPPort", &getSSDPPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getSSDPStatus", &getSSDPStatus, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudPort", &getCloudPort, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost1", &getCloudHost1, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost2", &getCloudHost2, COMP_DISP_CALLBACK_TYPE_WIFI_AP_LIST_VALUE);

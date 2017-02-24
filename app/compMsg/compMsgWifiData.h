@@ -59,32 +59,37 @@
 
 #define WIFI_INFO_WIFI                 (1 << 1)
 
-#define WIFI_INFO_WIFI_OPMODE            20
-#define WIFI_INFO_BINARY_CALL_BACK       21
-#define WIFI_INFO_TEXT_CALL_BACK         22
-#define WIFI_INFO_NET_RECEIVED_CALL_BACK 23
-#define WIFI_INFO_NET_TO_SEND_CALL_BACK  24
-#define WIFI_INFO_PROVISIONING_SSID      25
-#define WIFI_INFO_PROVISIONING_PORT      26
-#define WIFI_INFO_PROVISIONING_IP_ADDR   27
-#define WIFI_INFO_CLIENT_SSID            28
-#define WIFI_INFO_CLIENT_PASSWD          29
-#define WIFI_INFO_CLIENT_IP_ADDR         30
-#define WIFI_INFO_CLIENT_PORT            31
-#define WIFI_INFO_CLIENT_STATUS          32
-#define WIFI_INFO_CLIENT_SEQUENCE_NUM    33
-#define WIFI_INFO_CLOUD_SECURE_CONNECT   34
-#define WIFI_INFO_CLOUD_PORT             35
-#define WIFI_INFO_CLOUD_HOST_1           36
-#define WIFI_INFO_CLOUD_URL_1_PART_1     37
-#define WIFI_INFO_CLOUD_URL_TENANT_ID_1  38
-#define WIFI_INFO_CLOUD_URL_1_PART_2     39
-#define WIFI_INFO_CLOUD_NODE_TOKEN_1     40
-#define WIFI_INFO_CLOUD_HOST_2           41
-#define WIFI_INFO_CLOUD_URL_2_PART_1     42
-#define WIFI_INFO_CLOUD_URL_TENANT_ID_2  43
-#define WIFI_INFO_CLOUD_URL_2_PART_2     44
-#define WIFI_INFO_CLOUD_NODE_TOKEN_2     45
+#define WIFI_INFO_WIFI_OPMODE                 20
+#define WIFI_INFO_BINARY_CALL_BACK            21
+#define WIFI_INFO_TEXT_CALL_BACK              22
+#define WIFI_INFO_NET_RECEIVED_CALL_BACK      23
+#define WIFI_INFO_NET_TO_SEND_CALL_BACK       24
+#define WIFI_INFO_PROVISIONING_SSID           25
+#define WIFI_INFO_PROVISIONING_PORT           26
+#define WIFI_INFO_PROVISIONING_IP_ADDR        27
+#define WIFI_INFO_CLIENT_SSID                 28
+#define WIFI_INFO_CLIENT_PASSWD               29
+#define WIFI_INFO_CLIENT_IP_ADDR              30
+#define WIFI_INFO_CLIENT_PORT                 31
+#define WIFI_INFO_CLIENT_STATUS               32
+#define WIFI_INFO_CLIENT_SEQUENCE_NUM         33
+#define WIFI_INFO_CLOUD_SECURE_CONNECT        34
+#define WIFI_INFO_CLOUD_PORT                  35
+#define WIFI_INFO_CLOUD_HOST_1                36
+#define WIFI_INFO_CLOUD_URL_1_PART_1          37
+#define WIFI_INFO_CLOUD_URL_TENANT_ID_1       38
+#define WIFI_INFO_CLOUD_URL_1_PART_2          39
+#define WIFI_INFO_CLOUD_NODE_TOKEN_1          40
+#define WIFI_INFO_CLOUD_HOST_2                41
+#define WIFI_INFO_CLOUD_URL_2_PART_1          42
+#define WIFI_INFO_CLOUD_URL_TENANT_ID_2       43
+#define WIFI_INFO_CLOUD_URL_2_PART_2          44
+#define WIFI_INFO_CLOUD_NODE_TOKEN_2          45
+#define WIFI_INFO_SSDP_IP_ADDR                46
+#define WIFI_INFO_SSDP_PORT                   47
+#define WIFI_INFO_SSDP_STATUS                 48
+#define WIFI_INFO_NET_SSDP_RECEIVED_CALL_BACK 49
+#define WIFI_INFO_NET_SSDP_TO_SEND_CALL_BACK  50
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -273,6 +278,9 @@ typedef struct compMsgWifiData {
   uint32_t clientIPAddr;
   uint16_t clientPort;
   uint8_t clientStatus;
+  uint32_t ssdpIPAddr;
+  uint16_t ssdpPort;
+  uint8_t ssdpStatus;
   uint32_t clientSequenceNum;
 #ifdef CLIENT_SSL_ENABLE
   uint8_t cloudSecureConnect;
@@ -310,6 +318,8 @@ typedef struct compMsgWifiData {
   webSocketTextReceived_t webSocketTextReceived;
   netSocketToSend_t netSocketToSend;
   netSocketReceived_t netSocketReceived;
+  netSocketSSDPToSend_t netSocketSSDPToSend;
+  netSocketSSDPReceived_t netSocketSSDPReceived;
 } compMsgWifiData_t;
 
 compMsgWifiData_t *newCompMsgWifiData();

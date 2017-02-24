@@ -484,6 +484,12 @@ ets_printf("dispInit4\n");
       COMP_MSG_DBG(self, "O", 1, "chechkClientMode2 result: %d\n", result);
       checkErrOK(result);
       break;
+    case 'S':
+      self->compMsgDebug->setDebugFlags(self, "BEHINOsSwW");
+      COMP_MSG_DBG(self, "H", 1, "start RunSSDPMode");
+      result = self->compMsgSocket->netSocketRunSSDPMode(self);
+      checkErrOK(result);
+      break;
     case 'U':
 COMP_MSG_DBG(self, "Y", 0, "init type U");
       self->compMsgDebug->debugLevel = 1;

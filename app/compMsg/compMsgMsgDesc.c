@@ -725,7 +725,7 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   compMsgMsgDesc = self->compMsgMsgDesc;
   buffer = buf;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
-  COMP_MSG_DBG(self, "E", 2, "readWifiValues: %s\n", fileName);
+  COMP_MSG_DBG(self, "E", 1, "readWifiValues: %s\n", fileName);
   checkErrOK(result);
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }

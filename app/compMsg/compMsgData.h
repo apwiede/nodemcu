@@ -73,6 +73,7 @@ extern "C" {
 #define NET_SOCKET_TYPE_SOCKET        0x01
 #define NET_SOCKET_TYPE_CLIENT        0x02
 #define WEB_SOCKET_TYPE_ACCESS_POINT  0x04
+#define NET_SOCKET_TYPE_SSDP          0x08
 
 #define checkHandleOK(addr) if(addr == NULL) return COMP_MSG_ERR_BAD_HANDLE
 

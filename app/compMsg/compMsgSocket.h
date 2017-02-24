@@ -52,6 +52,7 @@ extern "C" {
 #define COMP_DISP_RUNNING_MODE_CLOUD        0x04
 #define COMP_DISP_RUNNING_MODE_APP          0x08
 #define COMP_DISP_RUNNING_MODE_WEBSOCKET    0x10
+#define COMP_DISP_RUNNING_MODE_SSDP         0x20
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -77,6 +78,8 @@ typedef void (* webSocketBinaryReceived_t)(void *arg, socketUserData_t *sud, cha
 typedef void (* webSocketTextReceived_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
 typedef void (* netSocketToSend_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
 typedef void (* netSocketReceived_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
+typedef void (* netSocketSSDPToSend_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
+typedef void (* netSocketSSDPReceived_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
 
 typedef struct socketUserData {
   struct espconn *pesp_conn;
@@ -112,8 +115,10 @@ typedef void (* startAccessPoint_t)(void *arg);
 // NetSocket stuff
 typedef uint8_t (* netSocketStartCloudSocket_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netSocketRunClientMode_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* netSocketRunSSDPMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netSocketSendData_t)(socketUserData_t *sud, const char *payload, int size);
 typedef void (* startClientMode_t)(void *arg);
+typedef void (* startSSDPMode_t)(void *arg);
 
 typedef uint8_t (* checkConnectionStatus_t)(compMsgTimerSlot_t *compMsgTimerSlot);
 typedef uint8_t (* startConnectionTimer_t)(compMsgDispatcher_t *self, uint8_t timerId, startConnection_t fcn);
@@ -127,8 +132,10 @@ typedef struct compMsgSocket {
 
   netSocketStartCloudSocket_t netSocketStartCloudSocket;
   netSocketRunClientMode_t netSocketRunClientMode;
+  netSocketRunSSDPMode_t netSocketRunSSDPMode;
   netSocketSendData_t netSocketSendData;
   startClientMode_t startClientMode;
+  startSSDPMode_t startSSDPMode;
 
   startConnectionTimer_t startConnectionTimer;
   checkConnectionStatus_t checkConnectionStatus;
