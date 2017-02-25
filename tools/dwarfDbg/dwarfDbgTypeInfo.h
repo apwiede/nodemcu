@@ -58,6 +58,7 @@ typedef struct attrValues {
 typedef struct dwAttrType {
   int dwType;
   int value;
+  int refOffset;
 } dwAttrType_t;
 
 typedef struct dwAttrTypeInfo {
@@ -74,17 +75,16 @@ typedef struct dwAttrTypeInfos {
 } dwAttrTypeInfos_t;
 
 typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeStrIdx);
-typedef uint8_t (* addAttrType_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int dwType, int value, int *attrTypeIdx);
+typedef uint8_t (* addAttrType_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int dwType, int value, int refOffset, int *attrTypeIdx);
 typedef uint8_t (* checkDieTypeRefIdx_t)(dwarfDbgPtr_t self);
 
-typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int idx);
+typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int idx, const char *indent);
 typedef uint8_t (* addAttrTypeInfo_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, dwAttrTypeInfos_t *dwAttrTypeInfos, int *typeIdx);
 
 typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int *dwAttrTypeInfoIdx);
 
-typedef uint8_t (* addTagTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Bool isSibling);
-typedef uint8_t (* addChildrenTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx);
-typedef uint8_t (* addSiblingsTypes_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx);
+typedef uint8_t (* addCompileUnitTagTypes_t)(dwarfDbgPtr_t self);
+typedef uint8_t (* printCompileUnitTagTypes_t)(dwarfDbgPtr_t self);
 
 typedef struct dwarfDbgTypeInfo {
   dwAttrTypeInfos_t dwAttrTypeInfos;
@@ -105,9 +105,8 @@ typedef struct dwarfDbgTypeInfo {
 
   handleType_t handleType;
 
-  addTagTypes_t addTagTypes;
-  addChildrenTypes_t addChildrenTypes;
-  addSiblingsTypes_t addSiblingsTypes;
+  addCompileUnitTagTypes_t addCompileUnitTagTypes;
+  printCompileUnitTagTypes_t printCompileUnitTagTypes;
 } dwarfDbgTypeInfo_t;
 
 #endif  /* DWARF_DBG_TYPE_INFO_H */

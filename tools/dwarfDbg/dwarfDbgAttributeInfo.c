@@ -289,7 +289,7 @@ static uint8_t handleDW_AT_decl_fileAttr(dwarfDbgPtr_t self, attrInInfo_t *attrI
       result = self->dwarfDbgFileInfo->addSourceFile(self, sourceFile, &pathNameIdx, &idx2);
       checkErrOK(result);
       attrInInfo->dieAttr->sourceFileIdx = pathNameIdx;
-//printf("\ndecl_file: %s fileIdx: %d %d\n", sourceFile, pathNameIdx, attrInInfo->dieAttr->sourceFileIdx);
+printf("\ndecl_file: %s fileIdx: %d %d\n", sourceFile, pathNameIdx, attrInInfo->dieAttr->sourceFileIdx);
       self->dwarfDbgCompileUnitInfo->currCompileUnit->attrValues.pathNameIdx = pathNameIdx;
     } else {
       return DWARF_DBG_ERR_BAD_SRCFILE_INDEX;

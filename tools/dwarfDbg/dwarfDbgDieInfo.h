@@ -69,7 +69,6 @@ typedef struct dieInfo {
   Dwarf_Off offset;     // this can be referenced by dieAttr.refOffset.
   Dwarf_Half tag;
   int tagRefIdx;
-  int flags;
   int numAttr;
   int maxAttr;
   dieAttr_t *dieAttrs;
@@ -82,15 +81,21 @@ typedef struct dieTagInfo {
 
 typedef struct dieAndChildrenInfo {
   Dwarf_Die die;
+  int isSibling;
+  int level;
+
   int numSiblings;
   int maxSiblings;
   dieInfo_t *dieSiblings;
+
   int numChildren;
   int maxChildren;
   dieInfo_t *dieChildren;
+
   int numSiblingsTagInfo;
   int maxSiblingsTagInfo;
   dieTagInfo_t *dieSiblingsTagInfos;
+
   int numChildrenTagInfo;
   int maxChildrenTagInfo;
   dieTagInfo_t *dieChildrenTagInfos;
@@ -105,7 +110,11 @@ typedef uint8_t (* addDieSiblingTagInfo_t)(dwarfDbgPtr_t self, int dieAndChildre
 typedef uint8_t (* addDieChildTagInfo_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx,  Dwarf_Half tag, int dwAttrTypeInfoIdx, int *childTagInfoIdx);
 typedef uint8_t (* addDieSibling_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off offset, Dwarf_Half tag, int *siblingIdx);
 typedef uint8_t (* addDieChild_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off offset, Dwarf_Half tag, int *childIdx);
-typedef uint8_t (* addDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die die, int *dieAndChildrenIdx);
+typedef uint8_t (* addDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die die, int isSibling, int level, int *dieAndChildrenIdx);
+typedef  uint8_t (* handleOneDie_t)(dwarfDbgPtr_t self, Dwarf_Die die, int isSibling, int level, char **srcfiles, Dwarf_Signed srcCnt, int dieAndChildrenIdx, int *dieInfoIdx);
+typedef uint8_t (* handleDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die in_die_in, int isSibling, int level, char **srcfiles, Dwarf_Signed cnt);
+typedef uint8_t (* printDieInfoAttrs_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, const char *indent);
+typedef uint8_t (* printCompileUnitDieAndChildren_t)(dwarfDbgPtr_t self);
 
 typedef struct dwarfDbgDieInfo {
 
@@ -119,6 +128,10 @@ typedef struct dwarfDbgDieInfo {
   addDieChildTagInfo_t addDieChildTagInfo;
   addDieSiblingTagInfo_t addDieSiblingTagInfo;
   addDieChild_t addDieChild;
+  handleOneDie_t handleOneDie;
+  handleDieAndChildren_t handleDieAndChildren;
+  printDieInfoAttrs_t printDieInfoAttrs;
+  printCompileUnitDieAndChildren_t printCompileUnitDieAndChildren;
 } dwarfDbgDieInfo_t;
 
 FILE *showFd;
