@@ -120,11 +120,15 @@ printf("addCompileUnitTagTypes: result: %d\n", result);
     result = self->dwarfDbgTypeInfo->checkDieTypeRefIdx(self);
 printf("checkDieTypeRefIdx: result: %d\n", result);
     checkErrOK(result);
+#ifdef NOTDEF
 result = self->dwarfDbgDieInfo->printCompileUnitDieAndChildren(self);
 checkErrOK(result);
+#endif
+#ifdef NOTDEF
 result = self->dwarfDbgTypeInfo->printCompileUnitTagTypes(self);
 printf("printCompileUnitTagTypes: result: %d\n", result);
 checkErrOK(result);
+#endif
 fflush(showFd);
 
     
@@ -175,7 +179,7 @@ int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
 //printf("dwarfDbgGetDbgInfos\n");
   result = DWARF_DBG_ERR_OK;
   // for performance alloc a big chunk of memory and free it imidiately again
-  chunk = ckalloc(10*1024*1024);
+  chunk = ckalloc(100*1024*1024);
   ckfree(chunk);
   result = self->dwarfDbgFrameInfo->getFrameList(self);
   DWARF_DBG_PRINT(self, "G", 1, "getFrameLists: result: %d\n", result);
@@ -183,7 +187,6 @@ int dwarfDbgGetDbgInfos(dwarfDbgPtr_t self) {
   result = self->dwarfDbgGetDbgInfo->handleCompileUnits(self);
   DWARF_DBG_PRINT(self, "G", 1, "handleCompileUnits: result: %d\n", result);
   checkErrOK(result);
-printf("numDwAttrTypeInfo: %d\n", self->dwarfDbgTypeInfo->dwAttrTypeInfos.numDwAttrTypeInfo);
   return result;
 }
 

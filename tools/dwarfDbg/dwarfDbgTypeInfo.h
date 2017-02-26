@@ -49,8 +49,6 @@ typedef struct attrValues {
   int pathNameIdx;
   int lineNo;
   int byteSize;
-  int bitSize;
-  int bitOffset;
   int encoding;
   int dwTypeIdx;
 } attrValues_t;
@@ -66,6 +64,7 @@ typedef struct dwAttrTypeInfo {
   int numDwAttrType;
   int maxDwAttrType;
   dwAttrType_t *dwAttrTypes;
+  dieInfo_t *dieInfo;
 } dwAttrTypeInfo_t;
 
 typedef struct dwAttrTypeInfos {
@@ -74,12 +73,15 @@ typedef struct dwAttrTypeInfos {
   dwAttrTypeInfo_t *dwAttrTypeInfos;
 } dwAttrTypeInfos_t;
 
+typedef uint8_t (* createMd5Key_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int numAttr, const char **md5Key);
+typedef uint8_t (* getAttrTypeInfos_t)(dwarfDbgPtr_t self, int tag, dwAttrTypeInfos_t **dwAttrTypeInfos);
 typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeStrIdx);
 typedef uint8_t (* addAttrType_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int dwType, int value, int refOffset, int *attrTypeIdx);
 typedef uint8_t (* checkDieTypeRefIdx_t)(dwarfDbgPtr_t self);
 
-typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int idx, const char *indent);
-typedef uint8_t (* addAttrTypeInfo_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, dwAttrTypeInfos_t *dwAttrTypeInfos, int *typeIdx);
+typedef uint8_t (* findAttrTypeInfo_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int isSibling, int *dwAttrTypeInfoIdx);
+typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int dwAttrTypeInfoIdx, int isSibling, const char *indent);
+typedef uint8_t (* addAttrTypeInfo_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int numAttr, int *typeIdx);
 
 typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int *dwAttrTypeInfoIdx);
 
@@ -87,7 +89,33 @@ typedef uint8_t (* addCompileUnitTagTypes_t)(dwarfDbgPtr_t self);
 typedef uint8_t (* printCompileUnitTagTypes_t)(dwarfDbgPtr_t self);
 
 typedef struct dwarfDbgTypeInfo {
-  dwAttrTypeInfos_t dwAttrTypeInfos;
+//  dwAttrTypeInfos_t dwAttrTypeInfos;
+
+  dwAttrTypeInfos_t dwArrayTypeInfos;
+  dwAttrTypeInfos_t dwBaseTypeInfos;
+  dwAttrTypeInfos_t dwCompileUnitInfos;
+  dwAttrTypeInfos_t dwConstTypeInfos;
+  dwAttrTypeInfos_t dwEnumerationTypeInfos;
+  dwAttrTypeInfos_t dwEnumeratorInfos;
+  dwAttrTypeInfos_t dwFormalParameterInfos;
+  dwAttrTypeInfos_t dwGNUCallSiteInfos;
+  dwAttrTypeInfos_t dwGNUCallSiteParameterInfos;
+  dwAttrTypeInfos_t dwInlinedSubroutineInfos;
+  dwAttrTypeInfos_t dwLabelInfos;
+  dwAttrTypeInfos_t dwLexicalBlockInfos;
+  dwAttrTypeInfos_t dwMemberInfos;
+  dwAttrTypeInfos_t dwPointerTypeInfos;
+  dwAttrTypeInfos_t dwStructureTypeInfos;
+  dwAttrTypeInfos_t dwSubprogramTypeInfos;
+  dwAttrTypeInfos_t dwSubrangeInfos;
+  dwAttrTypeInfos_t dwSubroutineTypeInfos;
+  dwAttrTypeInfos_t dwTypedefInfos;
+  dwAttrTypeInfos_t dwUnionTypeInfos;
+  dwAttrTypeInfos_t dwUnspecifiedParametersInfos;
+  dwAttrTypeInfos_t dwVariableInfos;
+  dwAttrTypeInfos_t dwVolatileTypeInfos;
+  
+  Tcl_HashTable attrTypes;
 
   int typeLevel;
 
@@ -95,8 +123,10 @@ typedef struct dwarfDbgTypeInfo {
   int numTypeStr;
   char **typeStrs;
 
+  getAttrTypeInfos_t getAttrTypeInfos;
   addTypeStr_t addTypeStr;
   addAttrType_t addAttrType;
+  findAttrTypeInfo_t findAttrTypeInfo;
   printAttrTypeInfo_t printAttrTypeInfo;
 
   checkDieTypeRefIdx_t checkDieTypeRefIdx;

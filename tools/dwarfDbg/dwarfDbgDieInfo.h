@@ -77,6 +77,7 @@ typedef struct dieInfo {
 typedef struct dieTagInfo {
   Dwarf_Half tag;
   int dwAttrTypeInfoIdx;
+  int numAttr;
 } dieTagInfo_t;
 
 typedef struct dieAndChildrenInfo {
@@ -106,8 +107,8 @@ typedef uint8_t (* showSiblings_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, co
 typedef uint8_t (* addAttrStr_t)(dwarfDbgPtr_t self, const char *str, int *attrStrIdx);
 typedef uint8_t (* addDieChildAttr_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int childIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *childAttrIdx);
 typedef uint8_t (* addDieSiblingAttr_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, int siblingIdx, Dwarf_Half attr, Dwarf_Attribute attrIn, Dwarf_Unsigned uval, Dwarf_Half theform, Dwarf_Half directform, int *siblingAttrIdx);
-typedef uint8_t (* addDieSiblingTagInfo_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Half tag, int dwAttrTypeInfoIdx, int *siblingTagInfoIdx);
-typedef uint8_t (* addDieChildTagInfo_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx,  Dwarf_Half tag, int dwAttrTypeInfoIdx, int *childTagInfoIdx);
+typedef uint8_t (* addDieSiblingTagInfo_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Half tag, int dwAttrTypeInfoIdx, int numAttr, int *siblingTagInfoIdx);
+typedef uint8_t (* addDieChildTagInfo_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx,  Dwarf_Half tag, int dwAttrTypeInfoIdx, int numAttr, int *childTagInfoIdx);
 typedef uint8_t (* addDieSibling_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off offset, Dwarf_Half tag, int *siblingIdx);
 typedef uint8_t (* addDieChild_t)(dwarfDbgPtr_t self, int dieAndChildrenIdx, Dwarf_Off offset, Dwarf_Half tag, int *childIdx);
 typedef uint8_t (* addDieAndChildren_t)(dwarfDbgPtr_t self, Dwarf_Die die, int isSibling, int level, int *dieAndChildrenIdx);

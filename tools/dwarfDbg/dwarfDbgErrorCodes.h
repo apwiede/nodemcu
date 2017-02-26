@@ -116,6 +116,7 @@ enum dwarfDbgErrorCodes {
   DWARF_DBG_ERR_UNKNOWN_TAG_TYPE                     = 69,
   DWARF_DBG_ERR_TYPE_NOT_FOUND                       = 70,
   DWARF_DBG_ERR_BAD_DW_ATTR_TYPE_INFOS_IDX           = 71,
+  DWARF_DBG_ERR_CANNOT_CREATE_HASH_ENTRY             = 72,
 };
 
 #endif  /* DWARFDBG_ERROR_CODES_H */
