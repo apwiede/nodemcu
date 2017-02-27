@@ -120,7 +120,7 @@ printf("addCompileUnitTagTypes: result: %d\n", result);
     result = self->dwarfDbgTypeInfo->checkDieTypeRefIdx(self);
 printf("checkDieTypeRefIdx: result: %d\n", result);
     checkErrOK(result);
-#ifdef NOTDEF
+#ifndef NOTDEF
 result = self->dwarfDbgDieInfo->printCompileUnitDieAndChildren(self);
 checkErrOK(result);
 #endif

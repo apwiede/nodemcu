@@ -136,81 +136,132 @@ static uint8_t toBase64(dwarfDbgPtr_t self, const char *msg, size_t *len, char *
   return DWARF_DBG_ERR_OK;
 }
 
+// =================================== genAttrTypeInfoKey =========================== 
+
+ /* we add the tag field and the attr infos to a binary string and make a base64 key out of it */
+
+static uint8_t genAttrTypeInfoKey(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, char **attrTypeInfoKey) {
+  uint8_t result;
+  char buf[1024];
+  char buf2[50];
+  int attrIdx = 0;
+  dwAttrType_t *dwAttrType = NULL;
+
+  result = DWARF_DBG_ERR_OK;
+  buf[0] = '\0';
+  sprintf(buf2, "%04x,", dwAttrTypeInfo->tag);
+  strcat(buf, buf2);
+  for (attrIdx = 0; attrIdx < dwAttrTypeInfo->numDwAttrType; attrIdx++) {
+    dwAttrType = &dwAttrTypeInfo->dwAttrTypes[attrIdx];
+    sprintf(buf2, "%04x,%08x,%08x.", dwAttrType->dwType, dwAttrType->value, dwAttrType->refOffset);
+    if (strlen(buf) + strlen(buf2) > 1020) {
+printf("ERROR buf for key to small\n");
+      return DWARF_DBG_ERR_KEY_BUF_TOO_SMALL;
+    }
+    strcat(buf, buf2);
+  }
+  *attrTypeInfoKey = strdup(buf);
+  return result;
+}
+
 // =================================== getAttrTypeInfos =========================== 
 
-static uint8_t getAttrTypeInfos(dwarfDbgPtr_t self, int tag, dwAttrTypeInfos_t **dwAttrTypeInfos) {
+static uint8_t getAttrTypeInfos(dwarfDbgPtr_t self, int tag, dwAttrTypeInfos_t **dwAttrTypeInfos, Tcl_HashTable **attrTypeInfoHashTable) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
   switch (tag) {
   case DW_TAG_array_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwArrayTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwArrayTypeHashTable;
     break;
   case DW_TAG_base_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwBaseTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwBaseTypeHashTable;
     break;
   case DW_TAG_compile_unit:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwCompileUnitInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwCompileUnitHashTable;
     break;
   case DW_TAG_const_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwConstTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwConstTypeHashTable;
     break;
   case DW_TAG_enumeration_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwEnumerationTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwEnumerationTypeHashTable;
     break;
   case DW_TAG_enumerator:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwEnumeratorInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwEnumeratorHashTable;
     break;
   case DW_TAG_formal_parameter:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwFormalParameterInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwFormalParameterHashTable;
     break;
   case DW_TAG_GNU_call_site:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwGNUCallSiteInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwGNUCallSiteHashTable;
     break;
   case DW_TAG_GNU_call_site_parameter:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwGNUCallSiteParameterInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwGNUCallSiteParameterHashTable;
     break;
   case DW_TAG_inlined_subroutine:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwInlinedSubroutineInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwInlinedSubroutineHashTable;
     break;
   case DW_TAG_label:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwLabelInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwLabelHashTable;
     break;
   case DW_TAG_lexical_block:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwLexicalBlockInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwLexicalBlockHashTable;
     break;
   case DW_TAG_member:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwMemberInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwMemberHashTable;
     break;
   case DW_TAG_pointer_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwPointerTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwPointerTypeHashTable;
     break;
   case DW_TAG_structure_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwStructureTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwStructureTypeHashTable;
     break;
   case DW_TAG_subprogram:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwSubprogramTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwSubprogramTypeHashTable;
     break;
   case DW_TAG_subrange_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwSubrangeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwSubrangeHashTable;
     break;
   case DW_TAG_subroutine_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwSubroutineTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwSubroutineTypeHashTable;
     break;
   case DW_TAG_typedef:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwTypedefInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwTypedefHashTable;
     break;
   case DW_TAG_union_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwUnionTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwUnionTypeHashTable;
     break;
   case DW_TAG_unspecified_parameters:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwUnspecifiedParametersInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwUnspecifiedParametersHashTable;
     break;
   case DW_TAG_variable:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwVariableInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwVariableHashTable;
     break;
   case DW_TAG_volatile_type:
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwVolatileTypeInfos;
+    *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwVolatileTypeHashTable;
     break;
   }
   return result;
@@ -263,26 +314,14 @@ static uint8_t findAttrTypeInfo(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int isSi
   int found;
   const char *typeName = NULL;
   const char *typeName2 = NULL;
+  Tcl_HashTable *attrTypeInfoHashTable = NULL;
 int iter = 0;
 int newEntry;
 Tcl_HashEntry *hPtr = NULL;
 dwarfDbgPtr_t xx = NULL;
 
   result = DWARF_DBG_ERR_OK;
-hPtr = Tcl_CreateHashEntry(&self->dwarfDbgTypeInfo->attrTypes, (char*)"key1", &newEntry);
-if (hPtr == NULL) {
-  return DWARF_DBG_ERR_CANNOT_CREATE_HASH_ENTRY;
-}
-printf("self: %p\n", self);
-Tcl_SetHashValue(hPtr, (ClientData)self);
-xx = Tcl_GetHashValue(hPtr);
-printf("xx: %p\n", xx);
-hPtr = Tcl_FindHashEntry(&self->dwarfDbgTypeInfo->attrTypes, (char *)"key1");
-printf("find: %p\n", hPtr);
-xx = Tcl_GetHashValue(hPtr);
-printf("xx2: %p\n", xx);
-
-  result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dieInfo->tag, &dwAttrTypeInfos);
+  result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dieInfo->tag, &dwAttrTypeInfos, &attrTypeInfoHashTable);
   checkErrOK(result);
 //printf("findAttrTypeInfo: 0x%04x num: %d\n", dieInfo->tag, dwAttrTypeInfos->numDwAttrTypeInfo);
   for (attrTypeInfoIdx = 0; attrTypeInfoIdx < dwAttrTypeInfos->numDwAttrTypeInfo; attrTypeInfoIdx++) {
@@ -337,15 +376,39 @@ static uint8_t addAttrTypeInfo(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeI
   const char *tagName = NULL;
   char *name;
   char *dirName;
-  char pathName[255];;
+  char pathName[255];
+  char *attrTypeInfoKey = NULL;
   pathNameInfo_t *pathNameInfo;
   int attrTypeInfoIdx = 0;
+  int newEntry;
+  Tcl_HashEntry *hPtr = NULL;
+  Tcl_HashTable *attrTypeInfoHashTable = NULL;
 
   self->dwarfDbgTypeInfo->typeLevel++;
   result = DWARF_DBG_ERR_OK;
+  // generate a key for the hashTables
+  result = genAttrTypeInfoKey(self, dwAttrTypeInfoIn, &attrTypeInfoKey);
+  checkErrOK(result);
+  result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dwAttrTypeInfoIn->dieInfo->tag, &dwAttrTypeInfos, &attrTypeInfoHashTable);
+  checkErrOK(result);
+  hPtr = Tcl_CreateHashEntry(attrTypeInfoHashTable, attrTypeInfoKey, &newEntry);
+printf("attrTypeInfoKey: %s newEntry: %d\n", attrTypeInfoKey, newEntry);
+  if (hPtr == NULL) {
+    return DWARF_DBG_ERR_CANNOT_CREATE_HASH_ENTRY;
+  }
+  if (!newEntry) {
+    hPtr = Tcl_FindHashEntry(attrTypeInfoHashTable, attrTypeInfoKey);
+    attrTypeInfoIdx = (int)((long int)Tcl_GetHashValue(hPtr));
+printf("found attrTypeInfoIdx: %d\n", attrTypeInfoIdx);
+result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dwAttrTypeInfoIn->dieInfo->tag, attrTypeInfoIdx, 3, "");
+checkErrOK(result);
+    *dwAttrTypeInfoIdx = attrTypeInfoIdx;
+    return result;
+  }
 //printf("SUB: dieInfo: %p\n", dwAttrTypeInfoIn->dieInfo);
 self->dwarfDbgStringInfo->getDW_TAG_string(self, dwAttrTypeInfoIn->dieInfo->tag, &tagName);
-//printf("addAttrTypeInfo: %s\n", tagName);
+printf("addAttrTypeInfo: %s\n", tagName);
+#ifdef NOTDEF
   attrTypeInfoIdx = 0;
   self->dwarfDbgTypeInfo->findAttrTypeInfo(self, dwAttrTypeInfoIn->dieInfo, /* isSibling */ 3, &attrTypeInfoIdx);
   if (attrTypeInfoIdx != 0) {
@@ -354,8 +417,7 @@ self->dwarfDbgStringInfo->getDW_TAG_string(self, dwAttrTypeInfoIn->dieInfo->tag,
     self->dwarfDbgTypeInfo->typeLevel--;
     return result;
   }
-  result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dwAttrTypeInfoIn->dieInfo->tag, &dwAttrTypeInfos);
-  checkErrOK(result);
+#endif
   if (dwAttrTypeInfos->maxDwAttrTypeInfo <= dwAttrTypeInfos->numDwAttrTypeInfo) {
     dwAttrTypeInfos->maxDwAttrTypeInfo += 5;
     if (dwAttrTypeInfos->dwAttrTypeInfos == NULL) {
@@ -370,8 +432,6 @@ self->dwarfDbgStringInfo->getDW_TAG_string(self, dwAttrTypeInfoIn->dieInfo->tag,
       }
     }
   }
-  result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dwAttrTypeInfoIn->dieInfo->tag, &dwAttrTypeInfos);
-  checkErrOK(result);
   dwAttrTypeInfo = &dwAttrTypeInfos->dwAttrTypeInfos[dwAttrTypeInfos->numDwAttrTypeInfo];
   memset(dwAttrTypeInfo, 0, sizeof(dwAttrTypeInfo_t));
   dwAttrTypeInfo->tag = dwAttrTypeInfoIn->tag;
@@ -382,6 +442,9 @@ self->dwarfDbgStringInfo->getDW_TAG_string(self, dwAttrTypeInfoIn->dieInfo->tag,
   }
   *dwAttrTypeInfoIdx = dwAttrTypeInfos->numDwAttrTypeInfo;
 printf("addAttryTypeInfo: new: %d %s\n", dwAttrTypeInfos->numDwAttrTypeInfo, tagName);
+  Tcl_SetHashValue(hPtr, (char *)((long int)dwAttrTypeInfos->numDwAttrTypeInfo));
+result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dwAttrTypeInfoIn->dieInfo->tag, dwAttrTypeInfos->numDwAttrTypeInfo, 3, "");
+checkErrOK(result);
   dwAttrTypeInfos->numDwAttrTypeInfo++;
   self->dwarfDbgTypeInfo->typeLevel--;
   return result;
@@ -389,23 +452,24 @@ printf("addAttryTypeInfo: new: %d %s\n", dwAttrTypeInfos->numDwAttrTypeInfo, tag
 
 // =================================== printAttrTypeInfo =========================== 
 
-static uint8_t printAttrTypeInfo(dwarfDbgPtr_t self, int dwAttrTypeInfoIdx, int isSibling, const char *indent) {
+static uint8_t printAttrTypeInfo(dwarfDbgPtr_t self, int tag, int dwAttrTypeInfoIdx, int isSibling, const char *indent) {
   uint8_t result;
-  dwAttrTypeInfos_t *dwAttrTypeInfos;
-  dwAttrTypeInfo_t *dwAttrTypeInfo;
-  dwAttrType_t *dwAttrType;
+  dwAttrTypeInfos_t *dwAttrTypeInfos = NULL;
+  dwAttrTypeInfo_t *dwAttrTypeInfo = NULL;
+  dwAttrType_t *dwAttrType = NULL;
+  Tcl_HashTable *attrTypeInfoHashTable = NULL;
   int attrIdx = 0;
-  const char *tagName;
-  const char *typeName;
-  char *name;
-  char *dirName;
-  pathNameInfo_t *pathNameInfo;
+  const char *tagName = NULL;
+  const char *typeName = NULL;
+  char *name = NULL;
+  char *dirName = NULL;
+  pathNameInfo_t *pathNameInfo = NULL;
   char pathName[255];
 
   result = DWARF_DBG_ERR_OK;
-return result; // FIXME!!!!
-//  dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwAttrTypeInfos;
-  if ((dwAttrTypeInfoIdx < 0) || (dwAttrTypeInfoIdx >= dwAttrTypeInfos->numDwAttrTypeInfo)) {
+  result = getAttrTypeInfos(self, tag, &dwAttrTypeInfos, &attrTypeInfoHashTable);
+  checkErrOK(result);
+  if ((dwAttrTypeInfoIdx < 0) || (dwAttrTypeInfoIdx > dwAttrTypeInfos->numDwAttrTypeInfo)) {
 printf("ERROR bad numDwAttrTypeInfo dwAttrTypeInfoIdx: %d %d\n", dwAttrTypeInfoIdx, dwAttrTypeInfos->numDwAttrTypeInfo);
     return DWARF_DBG_ERR_BAD_DW_ATTR_TYPE_INFOS_IDX;
   }
@@ -525,9 +589,9 @@ printf("Warning missing tagRefIdx for: %s\n", tagName);
           checkErrOK(result);
 //printf("after handleType: %s dwAttrTypeInfoIdx: %d dieAndChildrenIdx: %d\n", tagName, dwAttrTypeInfoIdx, dieAndChildrenIdx);
         if (isSibling) {
-//          result = self->dwarfDbgDieInfo->addDieSiblingTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &siblingTagInfoIdx);
+          result = self->dwarfDbgDieInfo->addDieSiblingTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &siblingTagInfoIdx);
         } else {
-//          result = self->dwarfDbgDieInfo->addDieChildTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &childTagInfoIdx);
+          result = self->dwarfDbgDieInfo->addDieChildTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &childTagInfoIdx);
         }
         checkErrOK(result);
         }
@@ -650,19 +714,11 @@ dwarfDbgPtr_t xx = NULL;
   result = DWARF_DBG_ERR_OK;
 if (!firstTest) {
 firstTest++;
-Tcl_InitHashTable(&self->dwarfDbgTypeInfo->attrTypes, TCL_STRING_KEYS);
-hPtr = Tcl_CreateHashEntry(&self->dwarfDbgTypeInfo->attrTypes, (char*)"key1", &newEntry);
+hPtr = Tcl_CreateHashEntry(&self->dwarfDbgTypeInfo->dwArrayTypeHashTable, (char*)"key1", &newEntry);
 if (hPtr == NULL) {
   return DWARF_DBG_ERR_CANNOT_CREATE_HASH_ENTRY;
 }
 printf("self: %p\n", self);
-Tcl_SetHashValue(hPtr, (ClientData)self);
-xx = Tcl_GetHashValue(hPtr);
-printf("xx: %p\n", xx);
-hPtr = Tcl_FindHashEntry(&self->dwarfDbgTypeInfo->attrTypes, (char *)"key1");
-printf("find: %p\n", hPtr);
-xx = Tcl_GetHashValue(hPtr);
-printf("xx2: %p\n", xx);
 }
 
   dwAttrTypeInfo.tag = dieInfo->tag;
@@ -753,12 +809,10 @@ printf("ERROR: DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPE: 0x%04x\n", dieAttr->attr);
 //printf("found: %d\n", found);
   if (found == dieInfo->numAttr) {
 dwAttrTypeInfo.dieInfo = dieInfo;
-#ifdef NOTDEF
     result = self->dwarfDbgTypeInfo->addAttrTypeInfo(self, &dwAttrTypeInfo, dieInfo->numAttr - 1, dwAttrTypeInfoIdx);
     checkErrOK(result);
     dieInfo->tagRefIdx = *dwAttrTypeInfoIdx;
 //printf("after addAttrTypeInfo: tagRefIdx: %d\n", *dwAttrTypeInfoIdx);
-#endif
   } else {
 printf("ERROR type not found found: %d numAttr: %d offset: 0x%08x\n", found, dieInfo->numAttr, dieAttr->refOffset);
     return DWARF_DBG_ERR_TYPE_NOT_FOUND;
@@ -805,9 +859,9 @@ result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagName
         checkErrOK(result);
 //printf("after handleType: %s dwAttrTypeInfoIdx: %d entryIdx: %d\n", tagName, dwAttrTypeInfoIdx, entryIdx);
         if (isSibling) {
-//          result = self->dwarfDbgDieInfo->addDieSiblingTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &siblingTagInfoIdx);
+          result = self->dwarfDbgDieInfo->addDieSiblingTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &siblingTagInfoIdx);
         } else {
-//          result = self->dwarfDbgDieInfo->addDieChildTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &childTagInfoIdx);
+          result = self->dwarfDbgDieInfo->addDieChildTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &childTagInfoIdx);
         }
         checkErrOK(result);
       }
@@ -882,6 +936,7 @@ int dwarfDbgTypeInfoInit (dwarfDbgPtr_t self) {
   uint8_t result;
 
   result = DWARF_DBG_ERR_OK;
+  self->dwarfDbgTypeInfo->genAttrTypeInfoKey = &genAttrTypeInfoKey;
   self->dwarfDbgTypeInfo->getAttrTypeInfos = &getAttrTypeInfos;
   self->dwarfDbgTypeInfo->addTypeStr = &addTypeStr;
   self->dwarfDbgTypeInfo->addAttrType = &addAttrType;
@@ -897,7 +952,6 @@ int dwarfDbgTypeInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgTypeInfo->printCompileUnitTagTypes = &printCompileUnitTagTypes;
 
   self->dwarfDbgTypeInfo->typeLevel = 0;
-//  memset(&self->dwarfDbgTypeInfo->dwAttrTypeInfos, 0, sizeof(dwAttrTypeInfo_t));
 
   memset(&self->dwarfDbgTypeInfo->dwArrayTypeInfos, 0, sizeof(dwAttrTypeInfo_t));
   memset(&self->dwarfDbgTypeInfo->dwBaseTypeInfos, 0, sizeof(dwAttrTypeInfo_t));
@@ -923,7 +977,31 @@ int dwarfDbgTypeInfoInit (dwarfDbgPtr_t self) {
   memset(&self->dwarfDbgTypeInfo->dwVariableInfos, 0, sizeof(dwAttrTypeInfo_t));
   memset(&self->dwarfDbgTypeInfo->dwVolatileTypeInfos, 0, sizeof(dwAttrTypeInfo_t));
 
-  typeFd = fopen("types.txt", "w");
-//  typeFd = stdout;
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwArrayTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwBaseTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwCompileUnitHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwConstTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwEnumerationTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwEnumeratorHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwFormalParameterHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwGNUCallSiteHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwGNUCallSiteParameterHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwInlinedSubroutineHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwLabelHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwLexicalBlockHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwMemberHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwPointerTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwStructureTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwSubprogramTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwSubrangeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwSubroutineTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwTypedefHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwUnionTypeHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwUnspecifiedParametersHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwVariableHashTable, TCL_STRING_KEYS);
+  Tcl_InitHashTable(&self->dwarfDbgTypeInfo->dwVolatileTypeHashTable, TCL_STRING_KEYS);
+
+//  typeFd = fopen("types.txt", "w");
+  typeFd = stdout;
   return result;
 }

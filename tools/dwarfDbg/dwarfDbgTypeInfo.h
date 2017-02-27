@@ -73,14 +73,15 @@ typedef struct dwAttrTypeInfos {
   dwAttrTypeInfo_t *dwAttrTypeInfos;
 } dwAttrTypeInfos_t;
 
-typedef uint8_t (* createMd5Key_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int numAttr, const char **md5Key);
-typedef uint8_t (* getAttrTypeInfos_t)(dwarfDbgPtr_t self, int tag, dwAttrTypeInfos_t **dwAttrTypeInfos);
+//typedef uint8_t (* createMd5Key_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int numAttr, const char **md5Key);
+typedef uint8_t ( *genAttrTypeInfoKey_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, char **attrTypeInfoKey);
+typedef uint8_t (* getAttrTypeInfos_t)(dwarfDbgPtr_t self, int tag, dwAttrTypeInfos_t **dwAttrTypeInfos, Tcl_HashTable **attrTypeInfoHashTable);
 typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeStrIdx);
 typedef uint8_t (* addAttrType_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int dwType, int value, int refOffset, int *attrTypeIdx);
 typedef uint8_t (* checkDieTypeRefIdx_t)(dwarfDbgPtr_t self);
 
 typedef uint8_t (* findAttrTypeInfo_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int isSibling, int *dwAttrTypeInfoIdx);
-typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int dwAttrTypeInfoIdx, int isSibling, const char *indent);
+typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int tag, int dwAttrTypeInfoIdx, int isSibling, const char *indent);
 typedef uint8_t (* addAttrTypeInfo_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int numAttr, int *typeIdx);
 
 typedef uint8_t (* handleType_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int *dwAttrTypeInfoIdx);
@@ -89,7 +90,29 @@ typedef uint8_t (* addCompileUnitTagTypes_t)(dwarfDbgPtr_t self);
 typedef uint8_t (* printCompileUnitTagTypes_t)(dwarfDbgPtr_t self);
 
 typedef struct dwarfDbgTypeInfo {
-//  dwAttrTypeInfos_t dwAttrTypeInfos;
+  Tcl_HashTable dwArrayTypeHashTable;
+  Tcl_HashTable dwBaseTypeHashTable;
+  Tcl_HashTable dwCompileUnitHashTable;
+  Tcl_HashTable dwConstTypeHashTable;
+  Tcl_HashTable dwEnumerationTypeHashTable;
+  Tcl_HashTable dwEnumeratorHashTable;
+  Tcl_HashTable dwFormalParameterHashTable;
+  Tcl_HashTable dwGNUCallSiteHashTable;
+  Tcl_HashTable dwGNUCallSiteParameterHashTable;
+  Tcl_HashTable dwInlinedSubroutineHashTable;
+  Tcl_HashTable dwLabelHashTable;
+  Tcl_HashTable dwLexicalBlockHashTable;
+  Tcl_HashTable dwMemberHashTable;
+  Tcl_HashTable dwPointerTypeHashTable;
+  Tcl_HashTable dwStructureTypeHashTable;
+  Tcl_HashTable dwSubprogramTypeHashTable;
+  Tcl_HashTable dwSubrangeHashTable;
+  Tcl_HashTable dwSubroutineTypeHashTable;
+  Tcl_HashTable dwTypedefHashTable;
+  Tcl_HashTable dwUnionTypeHashTable;
+  Tcl_HashTable dwUnspecifiedParametersHashTable;
+  Tcl_HashTable dwVariableHashTable;
+  Tcl_HashTable dwVolatileTypeHashTable;
 
   dwAttrTypeInfos_t dwArrayTypeInfos;
   dwAttrTypeInfos_t dwBaseTypeInfos;
@@ -114,8 +137,6 @@ typedef struct dwarfDbgTypeInfo {
   dwAttrTypeInfos_t dwUnspecifiedParametersInfos;
   dwAttrTypeInfos_t dwVariableInfos;
   dwAttrTypeInfos_t dwVolatileTypeInfos;
-  
-  Tcl_HashTable attrTypes;
 
   int typeLevel;
 
@@ -123,6 +144,7 @@ typedef struct dwarfDbgTypeInfo {
   int numTypeStr;
   char **typeStrs;
 
+  genAttrTypeInfoKey_t genAttrTypeInfoKey;
   getAttrTypeInfos_t getAttrTypeInfos;
   addTypeStr_t addTypeStr;
   addAttrType_t addAttrType;

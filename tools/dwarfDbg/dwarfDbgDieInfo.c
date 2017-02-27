@@ -271,6 +271,7 @@ static uint8_t addDieSiblingTagInfo(dwarfDbgPtr_t self, int dieAndChildrenIdx, D
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieTagInfo_t *dieTagInfo;
   compileUnit_t *compileUnit;
+  Tcl_HashTable *attrTypeInfoHashTable;
 
   result = DWARF_DBG_ERR_OK;
 //printf("== addDieSiblingTagInfo: tag: 0x%04x, dieAndChildrenIdx: %d, dwAttrTypeInfoIdx: %d\n", tag, dieAndChildrenIdx, dwAttrTypeInfoIdx);
@@ -286,9 +287,10 @@ printf("ERROR addDieChildTagInfo: dwAttrTypeInfoIdx -1\n");
     if (dieTagInfo->tag == tag) {
       if (dieTagInfo->dwAttrTypeInfoIdx == dwAttrTypeInfoIdx) {
         if (dieTagInfo->numAttr == numAttr) {
-          result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dieTagInfo->tag, &dwAttrTypeInfos);
+          result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dieTagInfo->tag, &dwAttrTypeInfos, &attrTypeInfoHashTable);
           checkErrOK(result);
           if (dwAttrTypeInfos->dwAttrTypeInfos[dwAttrTypeInfoIdx].numDwAttrType == numAttr) {
+printf("addDieSiblingTagInfo: found: siblingTagInfoIdx: %d\n", entryIdx);
             *siblingTagInfoIdx = entryIdx;
             return result;
           }
@@ -317,6 +319,7 @@ printf("ERROR addDieChildTagInfo: dwAttrTypeInfoIdx -1\n");
   dieTagInfo->dwAttrTypeInfoIdx = dwAttrTypeInfoIdx;
   dieTagInfo->numAttr = numAttr;
   *siblingTagInfoIdx = dieAndChildrenInfo->numSiblingsTagInfo;
+printf("addDieSiblingTagInfo: new: siblingTagInfoIdx: %d\n", *siblingTagInfoIdx);
   dieAndChildrenInfo->numSiblingsTagInfo++;
   return result;
 }
@@ -330,6 +333,7 @@ static uint8_t addDieChildTagInfo(dwarfDbgPtr_t self, int dieAndChildrenIdx,  Dw
   dieAndChildrenInfo_t *dieAndChildrenInfo;
   dieTagInfo_t *dieTagInfo;
   compileUnit_t *compileUnit;
+  Tcl_HashTable *attrTypeInfoHashTable;
 
   result = DWARF_DBG_ERR_OK;
 //printf("== addDieChildTagInfo: tag: 0x%04x dieAndChildrenIdx: %d dwAttrTypeInfoIdx: %d\n", tag, dieAndChildrenIdx, dwAttrTypeInfoIdx);
@@ -344,10 +348,11 @@ printf("ERROR addDieChildTagInfo: dwAttrTypeInfoIdx -1\n");
     if (dieTagInfo->tag == tag) {
       if (dieTagInfo->dwAttrTypeInfoIdx == dwAttrTypeInfoIdx) {
         if (dieTagInfo->numAttr == numAttr) {
-          result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dieTagInfo->tag, &dwAttrTypeInfos);
+          result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dieTagInfo->tag, &dwAttrTypeInfos, &attrTypeInfoHashTable);
           checkErrOK(result);
           if (dwAttrTypeInfos->dwAttrTypeInfos[dwAttrTypeInfoIdx].numDwAttrType == numAttr) {
             *childTagInfoIdx = entryIdx;
+printf("addDieChildTagInfo: found: childTagInfoIdx: %d\n", entryIdx);
             return result;
           }
         }
@@ -375,6 +380,7 @@ printf("ERROR addDieChildTagInfo: dwAttrTypeInfoIdx -1\n");
   dieTagInfo->dwAttrTypeInfoIdx = dwAttrTypeInfoIdx;
   dieTagInfo->numAttr = numAttr;
   *childTagInfoIdx = dieAndChildrenInfo->numChildrenTagInfo;
+printf("addDieChildTagInfo: new: childTagInfoIdx: %d\n", *childTagInfoIdx);
   dieAndChildrenInfo->numChildrenTagInfo++;
   return result;
 }
@@ -732,7 +738,7 @@ fprintf(typeFd, "== printCompileUnitDieAndChildren %d\n", self->dwarfDbgCompileU
       dieTagInfo = &dieAndChildrenInfo->dieChildrenTagInfos[entryIdx];
       result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieTagInfo->tag, &tagName);
       fprintf(typeFd, "    %d tag: %s\n", entryIdx, tagName);
-      result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dieTagInfo->dwAttrTypeInfoIdx, /* isSibling */ 0, "        ");
+      result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dieInfo->tag, dieTagInfo->dwAttrTypeInfoIdx, /* isSibling */ 0, "        ");
       checkErrOK(result);
     }
     fprintf(typeFd, "  numSiblingsTagInfo: %d\n", dieAndChildrenInfo->numSiblingsTagInfo);
@@ -741,7 +747,7 @@ fprintf(typeFd, "== printCompileUnitDieAndChildren %d\n", self->dwarfDbgCompileU
       dieTagInfo = &dieAndChildrenInfo->dieSiblingsTagInfos[entryIdx];
       result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieTagInfo->tag, &tagName);
       fprintf(typeFd, "    %d tag: %s\n", entryIdx, tagName);
-      result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dieTagInfo->dwAttrTypeInfoIdx, /* isSibling */ 1, "        ");
+      result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dieInfo->tag, dieTagInfo->dwAttrTypeInfoIdx, /* isSibling */ 1, "        ");
       checkErrOK(result);
     }
   }
