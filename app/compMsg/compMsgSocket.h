@@ -102,6 +102,7 @@ typedef struct socketUserData {
   uint8_t numHttpMsgInfos;
   uint8_t maxHttpMsgInfos;
   httpMsgInfo_t *httpMsgInfos;
+  char *payloadBuf;
 } socketUserData_t;
 
 typedef void (* startConnection_t)(void *arg);

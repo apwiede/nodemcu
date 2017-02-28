@@ -216,9 +216,9 @@ static void netSocketSSDPToSend(void *arg, socketUserData_t *sud, char *pdata, u
   compMsgDispatcher = (compMsgDispatcher_t *)arg;
   self = compMsgDispatcher;
   COMP_MSG_DBG(self, "w", 1, "netSocketSSDPSend: len: %d dispatcher: %p", len, compMsgDispatcher);
-  result = self->resetMsgInfo(self, &self->compMsgData->toSend);
+//  result = self->resetMsgInfo(self, &self->compMsgData->toSend);
 //  checkErrOK(result);
-  COMP_MSG_DBG(self, "w", 2, "netSocketSSDPSend end result: %d", result);
+  COMP_MSG_DBG(self, "w", 1, "netSocketSSDPSend end result: %d", result);
 }
 
 // ================================= netSocketSSDPReceived ====================================
@@ -1140,7 +1140,7 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
   uint8_t result;
   uint8_t fieldNameId;
 
-  COMP_MSG_DBG(self, "w", 1, "setWifiValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+  COMP_MSG_DBG(self, "w", 2, "setWifiValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR); 
   switch (fieldNameId) {
   case COMP_MSG_SPEC_FIELD_PROVISIONING_SSID:
