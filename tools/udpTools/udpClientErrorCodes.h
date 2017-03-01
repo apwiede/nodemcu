@@ -47,6 +47,8 @@ enum udpClientErrorCodes {
   UDP_CLIENT_ERR_OK                                   = 0,
   UDP_CLIENT_ERR_NO_ENTRY                             = 1,
   UDP_CLIENT_ERR_OUT_OF_MEMORY                        = 2,
+  UDP_CLIENT_ERR_ND_INIT                              = 3,
+  UDP_CLIENT_ERR_OPEN_INTERFACE                       = 4,
 };
 
 #endif  /* UDP_CLIENT_ERROR_CODES_H */

@@ -40,4 +40,4 @@ package require udpClientClass
 
 udpClientClass create ::uc
 ::uc init
-::uc openDevice wpl13s0
+::uc openDevice wlp13s0

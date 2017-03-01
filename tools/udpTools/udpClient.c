@@ -61,6 +61,11 @@ udpClientPtr_t udpClientNew (Tcl_Interp *interp) {
   checkAllocOK(dbg->udpClientDeviceInfo);
   memset(dbg->udpClientDeviceInfo, 0, sizeof(udpClientDeviceInfo_t));
 
+  // udpClientEtherInfo module
+  dbg->udpClientEtherInfo = ALLOC(udpClientEtherInfo_t);
+  checkAllocOK(dbg->udpClientEtherInfo);
+  memset(dbg->udpClientEtherInfo, 0, sizeof(udpClientEtherInfo_t));
+
   // udpClientUdpInfo module
   dbg->udpClientUdpInfo = ALLOC(udpClientUdpInfo_t);
   checkAllocOK(dbg->udpClientUdpInfo);
@@ -96,6 +101,10 @@ int udpClientInit (udpClientPtr_t self) {
 
   // udpClientDeviceInfo module
   result = udpClientDeviceInfoInit(self);
+  checkErrOK(result);
+
+  // udpClientEtherInfo module
+  result = udpClientEtherInfoInit(self);
   checkErrOK(result);
 
   // udpClientUdpInfo module

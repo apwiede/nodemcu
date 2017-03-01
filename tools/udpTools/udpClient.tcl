@@ -39,6 +39,9 @@ critcl::subject {generic data structure}
 
 critcl::api header udpClient.h
 critcl::cheaders   udpClientInt.h udpClientDeviceInfo.h udpClientErrorCodes.h udpClientUdpInfo.h
+critcl::cheaders   udpClientEtherInfo.h
+critcl::cheaders   netdissect.h ip.h netdissect-stdinc.h extract.h
+
 
 # # ## ### ##### ######## ############# #####################
 ## Exported API
@@ -62,8 +65,16 @@ critcl::api function char*          udpClientGetErrorStr {udpClientPtr_t dbg}
 # # ## ### ##### ######## ############# #####################
 ## Implementation.
 
+critcl::cflags -I. -D_U_="__attribute__((unused))"
 critcl::csources udpClient.c udpClientDeviceInfo.c udpClientUdpInfo.c
-critcl::clibraries /usr/lib64/libpcap.a
+critcl::csources udpClientEtherInfo.c
+critcl::csources netdissect.c
+critcl::clibraries /usr/lib64/libpcap.a 
+critcl::clibraries /usr/lib64/libnl-3.so 
+critcl::clibraries /usr/lib64/libnl-genl-3.so
+critcl::clibraries /lib64/libdbus-1.so.3
+critcl::clibraries /usr/lib64/libusb-1.0.so
+
 critcl::ccode {} ; # Fake the 'nothing to build detector'
 
 # ### ### ### ######### ######### #########
