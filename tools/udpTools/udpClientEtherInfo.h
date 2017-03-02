@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   udpClientDeviceInfo.h
+ * File:   udpClientEtherInfo.h
  * Author: Arnulf P. Wiedemann <arnulf@wiedemann-pri.de>
  *
  * Created on March 01, 2017
@@ -149,6 +149,24 @@ extern const struct tok smi_values[];
 #define OUI_ONLAB             0xa42305  /* Open Networking Lab */
 #define OUI_FREESCALE         0x00049f  /* Freescale */
 #define OUI_NETRONOME         0x0015ad  /* Netronome */
+
+#define HASHNAMESIZE 4096
+
+struct enamemem {
+  u_short e_addr0;
+  u_short e_addr1;
+  u_short e_addr2;
+  const char *e_name;
+  u_char *e_nsap;                 /* used only for nsaptable[] */
+#define e_bs e_nsap                     /* for bytestringtable */
+  struct enamemem *e_nxt;
+};
+
+struct hnamemem {
+  uint32_t addr;
+  const char *name;
+  struct hnamemem *nxt;
+};
 
 typedef struct udpClientEtherInfo {
 } udpClientEtherInfo_t;

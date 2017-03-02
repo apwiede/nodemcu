@@ -56,6 +56,7 @@
 #include "extract.h"
 #include "netdissect.h"
 #include "udpClientEtherInfo.h"
+#include "udpClientUdpData.h"
 #include "udpClient.h"
 #include "udpClientDeviceInfo.h"
 #include "udpClientUdpInfo.h"
@@ -73,6 +74,7 @@ typedef struct _udpClient {
   char errorBuf[256]; /* cause of error */
   Tcl_Interp *interp;
 
+  udpClientUdpData_t *udpClientUdpData;
   udpClientEtherInfo_t *udpClientEtherInfo;
   udpClientDeviceInfo_t *udpClientDeviceInfo;
   udpClientUdpInfo_t *udpClientUdpInfo;

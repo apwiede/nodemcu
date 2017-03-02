@@ -39,7 +39,7 @@ critcl::subject {generic data structure}
 
 critcl::api header udpClient.h
 critcl::cheaders   udpClientInt.h udpClientDeviceInfo.h udpClientErrorCodes.h udpClientUdpInfo.h
-critcl::cheaders   udpClientEtherInfo.h
+critcl::cheaders   udpClientEtherInfo.h udpClientUdpData.h
 critcl::cheaders   netdissect.h ip.h netdissect-stdinc.h extract.h
 
 
@@ -67,7 +67,7 @@ critcl::api function char*          udpClientGetErrorStr {udpClientPtr_t dbg}
 
 critcl::cflags -I. -D_U_="__attribute__((unused))"
 critcl::csources udpClient.c udpClientDeviceInfo.c udpClientUdpInfo.c
-critcl::csources udpClientEtherInfo.c
+critcl::csources udpClientEtherInfo.c udpClientUdpData.c
 critcl::csources netdissect.c
 critcl::clibraries /usr/lib64/libpcap.a 
 critcl::clibraries /usr/lib64/libnl-3.so 
