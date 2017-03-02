@@ -89,9 +89,49 @@ int32_t gmt2local(time_t t) {
   return (dt);
 }
 
-// =================================== ndo_printf =========================== 
+// =================================== ndoError =========================== 
 
-static int ndo_printf(netdissect_options *ndo, const char *fmt, ...) {
+/* VARARGS */
+static void ndoError(netdissect_options *ndo, const char *fmt, ...) {
+  va_list ap;
+
+  if(ndo->program_name)
+    (void)fprintf(stderr, "%s: ", ndo->program_name);
+  va_start(ap, fmt);
+  (void)vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  if (*fmt) {
+    fmt += strlen(fmt);
+    if (fmt[-1] != '\n')
+      (void)fputc('\n', stderr);
+  }
+  nd_cleanup();
+  exit(1);
+  /* NOTREACHED */
+}
+
+// =================================== ndoWarning =========================== 
+
+/* VARARGS */
+static void ndoWarning(netdissect_options *ndo, const char *fmt, ...) {
+  va_list ap;
+
+  if(ndo->program_name)
+    (void)fprintf(stderr, "%s: ", ndo->program_name);
+  (void)fprintf(stderr, "WARNING: ");
+  va_start(ap, fmt);
+  (void)vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  if (*fmt) {
+    fmt += strlen(fmt);
+    if (fmt[-1] != '\n')
+      (void)fputc('\n', stderr);
+  }
+}
+
+// =================================== ndoPrintf =========================== 
+
+static int ndoPrintf(netdissect_options *ndo, const char *fmt, ...) {
   va_list args;
   int ret;
 
@@ -248,7 +288,9 @@ fprintf(stderr, "ERROR in nd_init: %s\n", ebuf);
 
   memset(ndo, 0, sizeof(*ndo));
 //  ndo_set_function_pointers(ndo);
-  ndo->ndo_printf=ndo_printf;
+  ndo->ndo_printf = ndoPrintf;
+  ndo->ndo_error = ndoError;
+  ndo->ndo_warning = ndoWarning;
   ndo->ndo_snaplen = DEFAULT_SNAPLEN;
 printf("udpClientOpenDevice\n");
 fflush(stdout);
