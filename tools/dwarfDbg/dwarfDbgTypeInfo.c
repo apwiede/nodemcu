@@ -252,6 +252,7 @@ static uint8_t getAttrTypeInfos(dwarfDbgPtr_t self, int tag, dwAttrTypeInfos_t *
     *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwUnionTypeHashTable;
     break;
   case DW_TAG_unspecified_parameters:
+printf("dwUnspecifiedParametersInfos: num: %d\n", self->dwarfDbgTypeInfo->dwUnspecifiedParametersInfos.numDwAttrTypeInfo);
     *dwAttrTypeInfos = &self->dwarfDbgTypeInfo->dwUnspecifiedParametersInfos;
     *attrTypeInfoHashTable = &self->dwarfDbgTypeInfo->dwUnspecifiedParametersHashTable;
     break;
@@ -298,64 +299,6 @@ static uint8_t addAttrType(dwarfDbgPtr_t self, dwAttrTypeInfo_t *attrTypeInfo, i
   dwAttrType->refOffset = refOffset;
   *attrTypeIdx = attrTypeInfo->numDwAttrType;
   attrTypeInfo->numDwAttrType++;
-  return result;
-}
-
-// =================================== findAttrTypeInfo =========================== 
-
-static uint8_t findAttrTypeInfo(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int isSibling, int *dwAttrTypeInfoIdx) {
-  uint8_t result;
-  dwAttrTypeInfos_t *dwAttrTypeInfos = NULL;
-  dwAttrTypeInfo_t *dwAttrTypeInfo = NULL;
-  dwAttrType_t *dwAttrType = NULL;
-  dieAttr_t *dieAttr = NULL;
-  int attrTypeInfoIdx = 0;
-  int attrIdx = 0;
-  int found;
-  const char *typeName = NULL;
-  const char *typeName2 = NULL;
-  Tcl_HashTable *attrTypeInfoHashTable = NULL;
-int iter = 0;
-int newEntry;
-Tcl_HashEntry *hPtr = NULL;
-dwarfDbgPtr_t xx = NULL;
-
-  result = DWARF_DBG_ERR_OK;
-  result = self->dwarfDbgTypeInfo->getAttrTypeInfos(self, dieInfo->tag, &dwAttrTypeInfos, &attrTypeInfoHashTable);
-  checkErrOK(result);
-//printf("findAttrTypeInfo: 0x%04x num: %d\n", dieInfo->tag, dwAttrTypeInfos->numDwAttrTypeInfo);
-  for (attrTypeInfoIdx = 0; attrTypeInfoIdx < dwAttrTypeInfos->numDwAttrTypeInfo; attrTypeInfoIdx++) {
-    dwAttrTypeInfo = &dwAttrTypeInfos->dwAttrTypeInfos[attrTypeInfoIdx];
-iter++;
-//printf("findAttrTypeInfo: 0x%04x 0x%04x num: %d\n", dieInfo->tag, dwAttrTypeInfo->tag, dwAttrTypeInfos->numDwAttrTypeInfo);
-    if (dieInfo->tag == dwAttrTypeInfo->tag) {
-      if (dieInfo->numAttr == dwAttrTypeInfo->numDwAttrType) {
-        found = 0;
-        for (attrIdx = 0; attrIdx < dwAttrTypeInfo->numDwAttrType; attrIdx++) {
-iter++;
-          dwAttrType = &dwAttrTypeInfo->dwAttrTypes[attrIdx];
-          result = self->dwarfDbgStringInfo->getDW_AT_string(self, dwAttrType->dwType, &typeName);
-          checkErrOK(result);
-          dieAttr = &dieInfo->dieAttrs[attrIdx];
-          result = self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &typeName2);
-          checkErrOK(result);
-          if (dwAttrType->dwType == dieAttr->attr) {
-            if (dwAttrType->value == dieAttr->uval) {
-              if (dwAttrType->refOffset == dieAttr->refOffset) {
-//printf("iter: 1 %d\n", iter);
-                found++;
-              }
-            }
-          }
-        }
-        if (found == dwAttrTypeInfo->numDwAttrType) {
-          *dwAttrTypeInfoIdx = attrTypeInfoIdx;
-          return result;
-        }
-      }
-    }
-  }
-//printf("iter: 2 %d\n", iter);
   return result;
 }
 
@@ -408,16 +351,6 @@ checkErrOK(result);
 //printf("SUB: dieInfo: %p\n", dwAttrTypeInfoIn->dieInfo);
 self->dwarfDbgStringInfo->getDW_TAG_string(self, dwAttrTypeInfoIn->dieInfo->tag, &tagName);
 printf("addAttrTypeInfo: %s\n", tagName);
-#ifdef NOTDEF
-  attrTypeInfoIdx = 0;
-  self->dwarfDbgTypeInfo->findAttrTypeInfo(self, dwAttrTypeInfoIn->dieInfo, /* isSibling */ 3, &attrTypeInfoIdx);
-  if (attrTypeInfoIdx != 0) {
-    *dwAttrTypeInfoIdx = attrTypeInfoIdx;
-//printf("findAttrTypeInfo: found: %d tag: %s\n", attrTypeInfoIdx, tagName);
-    self->dwarfDbgTypeInfo->typeLevel--;
-    return result;
-  }
-#endif
   if (dwAttrTypeInfos->maxDwAttrTypeInfo <= dwAttrTypeInfos->numDwAttrTypeInfo) {
     dwAttrTypeInfos->maxDwAttrTypeInfo += 5;
     if (dwAttrTypeInfos->dwAttrTypeInfos == NULL) {
@@ -441,9 +374,9 @@ printf("addAttrTypeInfo: %s\n", tagName);
     checkErrOK(result);
   }
   *dwAttrTypeInfoIdx = dwAttrTypeInfos->numDwAttrTypeInfo;
-printf("addAttryTypeInfo: new: %d %s\n", dwAttrTypeInfos->numDwAttrTypeInfo, tagName);
+printf("addAttrTypeInfo: new: %d %s\n", dwAttrTypeInfos->numDwAttrTypeInfo, tagName);
   Tcl_SetHashValue(hPtr, (char *)((long int)dwAttrTypeInfos->numDwAttrTypeInfo));
-result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dwAttrTypeInfoIn->dieInfo->tag, dwAttrTypeInfos->numDwAttrTypeInfo, 3, "");
+result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dwAttrTypeInfoIn->tag, dwAttrTypeInfos->numDwAttrTypeInfo, 3, "");
 checkErrOK(result);
   dwAttrTypeInfos->numDwAttrTypeInfo++;
   self->dwarfDbgTypeInfo->typeLevel--;
@@ -467,10 +400,13 @@ static uint8_t printAttrTypeInfo(dwarfDbgPtr_t self, int tag, int dwAttrTypeInfo
   char pathName[255];
 
   result = DWARF_DBG_ERR_OK;
+  result = self->dwarfDbgStringInfo->getDW_TAG_string(self, tag, &tagName);
+  checkErrOK(result);
+printf("printAttrTypeInfo: tag: %s\n", tagName);
   result = getAttrTypeInfos(self, tag, &dwAttrTypeInfos, &attrTypeInfoHashTable);
   checkErrOK(result);
   if ((dwAttrTypeInfoIdx < 0) || (dwAttrTypeInfoIdx > dwAttrTypeInfos->numDwAttrTypeInfo)) {
-printf("ERROR bad numDwAttrTypeInfo dwAttrTypeInfoIdx: %d %d\n", dwAttrTypeInfoIdx, dwAttrTypeInfos->numDwAttrTypeInfo);
+printf("ERROR bad numDwAttrTypeInfo dwAttrTypeInfoIdx: dwAttrTypeInfoIdx: %d num: %d\n", dwAttrTypeInfoIdx, dwAttrTypeInfos->numDwAttrTypeInfo);
     return DWARF_DBG_ERR_BAD_DW_ATTR_TYPE_INFOS_IDX;
   }
   dwAttrTypeInfo = &dwAttrTypeInfos->dwAttrTypeInfos[dwAttrTypeInfoIdx];
@@ -782,7 +718,7 @@ self->dwarfDbgStringInfo->getDW_AT_string(self, dieAttr->attr, &attrName);
 if (dieInfo->tag == DW_TAG_typedef) {
 //printf("typedef: name: %s\n", atName);
 }
-      dieAttr->uval = typeNameIdx; // fake for findAttrTypeInfo!!
+      dieAttr->uval = typeNameIdx; 
       result = self->dwarfDbgTypeInfo->addAttrType(self, &dwAttrTypeInfo, dieAttr->attr, typeNameIdx, dieAttr->refOffset, &attrTypeIdx);
       checkErrOK(result);
       found++;
@@ -795,7 +731,7 @@ offset = dieAttr->refOffset;
       result = getTypeRefIdx(self, dieAttr, &typeRefIdx);
       checkErrOK(result);
 //printf("handleType AT_type: got typeRefIdx: %d\n", typeRefIdx);
-      dieAttr->uval = typeRefIdx; // fake for findAttrTypeInfo!!
+      dieAttr->uval = typeRefIdx;
       result = self->dwarfDbgTypeInfo->addAttrType(self, &dwAttrTypeInfo, dieAttr->attr, typeRefIdx, dieAttr->refOffset, &attrTypeIdx);
       checkErrOK(result);
 //printf("handleType after addAttrType: got attrTypeIdx: %d attridx: %d numAttr: %d\n", attrTypeIdx, attrIdx, dieInfo->numAttr);
@@ -811,6 +747,9 @@ printf("ERROR: DWARF_DBG_ERR_UNEXPECTED_ATTR_IN_TYPE: 0x%04x\n", dieAttr->attr);
 dwAttrTypeInfo.dieInfo = dieInfo;
     result = self->dwarfDbgTypeInfo->addAttrTypeInfo(self, &dwAttrTypeInfo, dieInfo->numAttr - 1, dwAttrTypeInfoIdx);
     checkErrOK(result);
+if (dieInfo->tag == DW_TAG_unspecified_parameters) {
+printf("unspecified_parameters: dwAttrTypeInfoIdx: %d\n", *dwAttrTypeInfoIdx);
+}
     dieInfo->tagRefIdx = *dwAttrTypeInfoIdx;
 //printf("after addAttrTypeInfo: tagRefIdx: %d\n", *dwAttrTypeInfoIdx);
   } else {
@@ -857,7 +796,7 @@ result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagName
 //printf(">@addCompileUnitTagTypes: isIsbling: %d dieChildrenIdx: %d entryIdx: %d tagName: %s\n", isSibling, dieAndChildrenIdx, entryIdx, tagName);
         result = self->dwarfDbgTypeInfo->handleType(self, dieInfo, &dwAttrTypeInfoIdx);
         checkErrOK(result);
-//printf("after handleType: %s dwAttrTypeInfoIdx: %d entryIdx: %d\n", tagName, dwAttrTypeInfoIdx, entryIdx);
+printf("after handleType: %s dwAttrTypeInfoIdx: %d entryIdx: %d\n", tagName, dwAttrTypeInfoIdx, entryIdx);
         if (isSibling) {
           result = self->dwarfDbgDieInfo->addDieSiblingTagInfo(self, dieAndChildrenIdx, dieInfo->tag, dwAttrTypeInfoIdx, dieInfo->numAttr, &siblingTagInfoIdx);
         } else {
@@ -942,7 +881,6 @@ int dwarfDbgTypeInfoInit (dwarfDbgPtr_t self) {
   self->dwarfDbgTypeInfo->addAttrType = &addAttrType;
   self->dwarfDbgTypeInfo->checkDieTypeRefIdx = &checkDieTypeRefIdx;
 
-  self->dwarfDbgTypeInfo->findAttrTypeInfo = &findAttrTypeInfo;
   self->dwarfDbgTypeInfo->printAttrTypeInfo = &printAttrTypeInfo;
   self->dwarfDbgTypeInfo->addAttrTypeInfo = &addAttrTypeInfo;
 

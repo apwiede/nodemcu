@@ -80,7 +80,6 @@ typedef uint8_t (* addTypeStr_t)(dwarfDbgPtr_t self, const char *str, int *typeS
 typedef uint8_t (* addAttrType_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int dwType, int value, int refOffset, int *attrTypeIdx);
 typedef uint8_t (* checkDieTypeRefIdx_t)(dwarfDbgPtr_t self);
 
-typedef uint8_t (* findAttrTypeInfo_t)(dwarfDbgPtr_t self, dieInfo_t *dieInfo, int isSibling, int *dwAttrTypeInfoIdx);
 typedef uint8_t (* printAttrTypeInfo_t)(dwarfDbgPtr_t self, int tag, int dwAttrTypeInfoIdx, int isSibling, const char *indent);
 typedef uint8_t (* addAttrTypeInfo_t)(dwarfDbgPtr_t self, dwAttrTypeInfo_t *dwAttrTypeInfo, int numAttr, int *typeIdx);
 
@@ -148,7 +147,6 @@ typedef struct dwarfDbgTypeInfo {
   getAttrTypeInfos_t getAttrTypeInfos;
   addTypeStr_t addTypeStr;
   addAttrType_t addAttrType;
-  findAttrTypeInfo_t findAttrTypeInfo;
   printAttrTypeInfo_t printAttrTypeInfo;
 
   checkDieTypeRefIdx_t checkDieTypeRefIdx;

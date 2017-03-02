@@ -707,6 +707,7 @@ static uint8_t printCompileUnitDieAndChildren(dwarfDbgPtr_t self) {
   dieInfo_t *dieInfo;
   dieTagInfo_t *dieTagInfo;
   const char *tagName;
+  const char *tagName2;
 
   result = DWARF_DBG_ERR_OK;
 fprintf(typeFd, "== printCompileUnitDieAndChildren %d\n", self->dwarfDbgCompileUnitInfo->currCompileUnitIdx);
@@ -737,10 +738,15 @@ fprintf(typeFd, "== printCompileUnitDieAndChildren %d\n", self->dwarfDbgCompileU
     for (entryIdx = 0; entryIdx < maxEntries; entryIdx++) {
       dieTagInfo = &dieAndChildrenInfo->dieChildrenTagInfos[entryIdx];
       result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieTagInfo->tag, &tagName);
+      result = self->dwarfDbgStringInfo->getDW_TAG_string(self, dieInfo->tag, &tagName2);
+printf("entryIdx: %d result: %d tag: %s dieInfo->tag: %s tagRefIdx: %d\n", entryIdx, result, tagName, tagName2, dieInfo->tagRefIdx);
+      checkErrOK(result);
       fprintf(typeFd, "    %d tag: %s\n", entryIdx, tagName);
+printf("dwAttrTypeInfoIdx: %d\n", dieTagInfo->dwAttrTypeInfoIdx);
       result = self->dwarfDbgTypeInfo->printAttrTypeInfo(self, dieInfo->tag, dieTagInfo->dwAttrTypeInfoIdx, /* isSibling */ 0, "        ");
       checkErrOK(result);
     }
+printf("childrenTagInfo done\n");
     fprintf(typeFd, "  numSiblingsTagInfo: %d\n", dieAndChildrenInfo->numSiblingsTagInfo);
     maxEntries = dieAndChildrenInfo->numSiblingsTagInfo;
     for (entryIdx = 0; entryIdx < maxEntries; entryIdx++) {
