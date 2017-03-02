@@ -57,6 +57,13 @@ static pcap_t *pd;
 static int supports_monitor_mode;
 static int packetsCaptured = 0;
 
+#define ASCII_LINELENGTH 300
+#define HEXDUMP_BYTES_PER_LINE 16
+#define HEXDUMP_SHORTS_PER_LINE (HEXDUMP_BYTES_PER_LINE / 2)
+#define HEXDUMP_HEXSTUFF_PER_SHORT 5 /* 4 hex digits and a space */
+#define HEXDUMP_HEXSTUFF_PER_LINE \
+                (HEXDUMP_HEXSTUFF_PER_SHORT * HEXDUMP_SHORTS_PER_LINE)
+
 // =================================== gmt2local =========================== 
 
 /*
@@ -87,6 +94,64 @@ int32_t gmt2local(time_t t) {
   dt += dir * 24 * 60 * 60;
 
   return (dt);
+}
+
+
+// =================================== gmt2local =========================== 
+
+void hexAndAsciiPrintWithOffset(netdissect_options *ndo, register const char *ident,
+    register const u_char *cp, register u_int length, register u_int oset) {
+  u_int caplength;
+  register u_int i;
+  register int s1, s2;
+  register int nshorts;
+  char hexstuff[HEXDUMP_SHORTS_PER_LINE*HEXDUMP_HEXSTUFF_PER_SHORT+1], *hsp;
+  char asciistuff[ASCII_LINELENGTH+1], *asp;
+
+  caplength = (ndo->ndo_snapend >= cp) ? ndo->ndo_snapend - cp : 0;
+  if (length > caplength)
+    length = caplength;
+  nshorts = length / sizeof(u_short);
+  i = 0;
+  hsp = hexstuff; asp = asciistuff;
+  while (--nshorts >= 0) {
+    s1 = *cp++;
+    s2 = *cp++;
+    (void)snprintf(hsp, sizeof(hexstuff) - (hsp - hexstuff),
+        " %02x%02x", s1, s2);
+    hsp += HEXDUMP_HEXSTUFF_PER_SHORT;
+    *(asp++) = (ND_ISGRAPH(s1) ? s1 : '.');
+    *(asp++) = (ND_ISGRAPH(s2) ? s2 : '.');
+    i++;
+    if (i >= HEXDUMP_SHORTS_PER_LINE) {
+      *hsp = *asp = '\0';
+      ND_PRINT((ndo, "%s0x%04x: %-*s  %s",
+          ident, oset, HEXDUMP_HEXSTUFF_PER_LINE,
+          hexstuff, asciistuff));
+      i = 0; hsp = hexstuff; asp = asciistuff;
+      oset += HEXDUMP_BYTES_PER_LINE;
+    }
+  }
+  if (length & 1) {
+    s1 = *cp++;
+    (void)snprintf(hsp, sizeof(hexstuff) - (hsp - hexstuff),
+        " %02x", s1);
+    hsp += 3;
+    *(asp++) = (ND_ISGRAPH(s1) ? s1 : '.');
+    ++i;
+  }
+  if (i > 0) {
+    *hsp = *asp = '\0';
+    ND_PRINT((ndo, "%s0x%04x: %-*s  %s",
+         ident, oset, HEXDUMP_HEXSTUFF_PER_LINE,
+         hexstuff, asciistuff));
+  }
+}
+
+// =================================== hexAndAsciiPrint =========================== 
+
+void hexAndAsciiPrint(netdissect_options *ndo, register const char *ident, register const u_char *cp, register u_int length) {
+  hexAndAsciiPrintWithOffset(ndo, ident, cp, length, 0);
 }
 
 // =================================== ndoError =========================== 
@@ -144,6 +209,15 @@ static int ndoPrintf(netdissect_options *ndo, const char *fmt, ...) {
   return (ret);
 }
 
+// =================================== ndoDefaultPrint =========================== 
+
+/*
+ * By default, print the specified data out in hex and ASCII.
+ */
+static void ndoDefaultPrint(netdissect_options *ndo, const u_char *bp, u_int length) {
+  hexAndAsciiPrint(ndo, "\n\t", bp, length); /* pass on lf and indentation string */
+}
+
 // =================================== etherIfHandler =========================== 
 
 /*
@@ -153,7 +227,6 @@ static int ndoPrintf(netdissect_options *ndo, const char *fmt, ...) {
  * of bytes actually captured.
  */
 u_int etherIfHandler(netdissect_options *ndo, const struct pcap_pkthdr *h, const u_char *p) {
-printf("\netherIfHandler\n");
   return (etherHandler(ndo, p, h->len, h->caplen, NULL, NULL));
 }
 
@@ -164,8 +237,7 @@ static void handlePacket(u_char *data, const struct pcap_pkthdr *h, const u_char
   int hdrlen;
 
   ndo = (netdissect_options *)data;
-printf("handlePacket: ndo_packet_number: %d\n", ndo->ndo_packet_number);
-printf("handlePacket: %s!\n", sp+32);
+printf("\nhandlePacket: %s!\n", sp+42);
                                
 // FIXME that handles the time stamp
 //  ts_print(ndo, &h->ts); 
@@ -179,7 +251,6 @@ printf("handlePacket: %s!\n", sp+32);
   ndo->ndo_snapend = sp + h->caplen;
 
   hdrlen = (ndo->ndo_if_printer)(ndo, h, sp);
-printf("handlePacket: hdrlen: %d\n", hdrlen);
 }
 
 // =================================== openInterface =========================== 
@@ -291,9 +362,8 @@ fprintf(stderr, "ERROR in nd_init: %s\n", ebuf);
   ndo->ndo_printf = ndoPrintf;
   ndo->ndo_error = ndoError;
   ndo->ndo_warning = ndoWarning;
+  ndo->ndo_default_print = ndoDefaultPrint;
   ndo->ndo_snaplen = DEFAULT_SNAPLEN;
-printf("udpClientOpenDevice\n");
-fflush(stdout);
   pd = openInterface(deviceName, ndo, ebuf);
   if (pd == NULL) {
 
@@ -302,10 +372,7 @@ fflush(stdout);
   if (setgid(getgid()) != 0 || setuid(getuid()) != 0) {
     fprintf(stderr, "Warning: setgid/setuid failed !\n");
   }
-  result1 = setuid(0);
-printf("set root uid: %d\n", result1);
   i = pcap_snapshot(pd);
-printf("i: %d snaplen: %d\n", i, ndo->ndo_snaplen);
   if (ndo->ndo_snaplen < i) {
     printf("Warning: snaplen raised from %d to %d", ndo->ndo_snaplen, i);
     ndo->ndo_snaplen = i;
@@ -314,25 +381,21 @@ printf("i: %d snaplen: %d\n", i, ndo->ndo_snaplen);
   cmdbuf = "udp port 1900";
   if (pcap_compile(pd, &fcode, cmdbuf, /* Oflag */ 0, netmask) < 0)
     error("%s", pcap_geterr(pd));
-printf("call initPrint\n");
   timezone_offset = gmt2local(0);
 //  init_print(ndo, localnet, netmask, timezone_offset);
   if (pcap_setfilter(pd, &fcode) < 0)
     error("%s", pcap_geterr(pd));
   dataLinkType = pcap_datalink(pd);
-printf("dataLinkType: %d\n", dataLinkType);
   ndo->ndo_if_printer = etherIfHandler;
   callback = handlePacket;
   pcap_userdata = (u_char *)ndo;
 
-printf("before pcap_loop\n");
   do {
     status = pcap_loop(pd, cnt, handlePacket, pcap_userdata);
     /*
      * We're printing packets.  Flush the printed output,
      * so it doesn't get intermingled with error output.
      */
-printf("loop: status: %d\n", status);
     if (status == -2) {
       /*
        * We got interrupted, so perhaps we didn't

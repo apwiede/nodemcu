@@ -351,8 +351,9 @@ const char *getName(netdissect_options *ndo, const u_char *ap) {
 const char *tok2strbuf(register const struct tok *lp, register const char *fmt, register u_int v, char *buf, size_t bufsize) {
   if (lp != NULL) {
     while (lp->s != NULL) {
-      if (lp->v == v)
+      if (lp->v == v) {
         return (lp->s);
+      }
       ++lp;
     }
   }
@@ -385,7 +386,6 @@ static void ipHandleDemux(netdissect_options *ndo, struct ip_print_demux_state *
   struct protoent *proto;
 
 again:
-printf("ipHandleDemux: %d\n", ipds->nh);
   switch (ipds->nh) {
   case IPPROTO_UDP:
     /* pass on the MF bit plus the offset to detect fragments */
@@ -415,10 +415,8 @@ void ipHandle(netdissect_options *ndo, const u_char *bp, u_int length) {
   uint16_t sum, ip_sum;
   struct protoent *proto;
 
-printf("ipHandle1: bp: %p\n", bp);
   ipds->ip = (const struct ip *)bp;
   ND_TCHECK(ipds->ip->ip_vhl);
-printf("ipHandle2: pds->ip: 0x%08x\n", ipds->ip);
   if (IP_V(ipds->ip) != 4) { /* print version and fail if != 4 */
       if (IP_V(ipds->ip) == 6)
         ND_PRINT((ndo, "IP6, wrong link-layer encapsulation "));
@@ -426,7 +424,6 @@ printf("ipHandle2: pds->ip: 0x%08x\n", ipds->ip);
         ND_PRINT((ndo, "IP%u ", IP_V(ipds->ip)));
       return;
   }
-printf("ipHandle3: ndo->ndo_eflag: %d\n", ndo->ndo_eflag);
   if (!ndo->ndo_eflag)
     ND_PRINT((ndo, "IP "));
 
@@ -436,14 +433,12 @@ printf("ipHandle3: ndo->ndo_eflag: %d\n", ndo->ndo_eflag);
     return;
   }
   hlen = IP_HL(ipds->ip) * 4;
-printf("hlen: %d\n", hlen);
   if (hlen < sizeof (struct ip)) {
     ND_PRINT((ndo, "bad-hlen %u", hlen));
     return;
   }
 
   ipds->len = EXTRACT_16BITS(&ipds->ip->ip_len);
-printf("ipds->len: %d\n", ipds->len);
   if (length < ipds->len)
     ND_PRINT((ndo, "truncated-ip - %u bytes missing! ", ipds->len - length));
   if (ipds->len < hlen) {
@@ -463,7 +458,6 @@ printf("ipds->len: %d\n", ipds->len);
   ipds->off = EXTRACT_16BITS(&ipds->ip->ip_off);
 
 
-printf("ipHandle4: ipds->off: %d\n", ipds->off);
   /*
    * If this is fragment zero, hand it to the next higher
    * level protocol.
@@ -475,7 +469,6 @@ printf("ipHandle4: ipds->off: %d\n", ipds->off);
     if (ipds->nh != IPPROTO_TCP && ipds->nh != IPPROTO_UDP && ipds->nh != IPPROTO_SCTP && ipds->nh != IPPROTO_DCCP) {
       ND_PRINT((ndo, "%s > %s: ", ipAddrString(ndo, &ipds->ip->ip_src), ipAddrString(ndo, &ipds->ip->ip_dst)));
     }
-printf("ipHandle5: ndo: %p ipds: %p\n", ndo, ipds);
     ipHandleDemux(ndo, ipds);
   } else {
     /*
@@ -487,13 +480,11 @@ printf("ipHandle5: ndo: %p ipds: %p\n", ndo, ipds);
     if (!ndo->ndo_nflag && (proto = getprotobynumber(ipds->ip->ip_p)) != NULL)
       ND_PRINT((ndo, " %s", proto->p_name));
     else 
-printf("ipHandle6: ndo: %p ipds: %p\n", ndo, ipds);
       ND_PRINT((ndo, " ip-proto-%d", ipds->ip->ip_p)); 
   }
   return;
 
 trunc:
-printf("ipHandle7: tstr: %p\n", tstr);
   ND_PRINT((ndo, "%s", tstr));
   return;
 }
@@ -509,7 +500,6 @@ printf("ipHandle7: tstr: %p\n", tstr);
 int etherTypeHandle(netdissect_options *ndo, u_short ether_type, const u_char *p,
       u_int length, u_int caplen, const struct lladdr_info *src, const struct lladdr_info *dst) {
 
-printf("etherTypeHandle\n");
   switch (ether_type) {
   case ETHERTYPE_IP:
     ipHandle(ndo, p, length);
@@ -559,10 +549,7 @@ const char *etherAddrString(netdissect_options *ndo, register const u_char *ep) 
     tok2str(oui_values, "Unknown", oui));
   } else
     *cp = '\0';
-printf("etherAddString: buf: %p\n", buf);
-printf("etherAddString: buf2: %s\n", buf);
   tp->e_name = strdup(buf);
-printf("tp->e_name: %p ndo->ndo_error: %p\n", tp->e_name, ndo->ndo_error);
   if (tp->e_name == NULL)
     (*ndo->ndo_error)(ndo, "etherAddrString: strdup(buf)");
   return (tp->e_name);
@@ -574,12 +561,9 @@ static inline void etherHdrHandle(netdissect_options *ndo, const u_char *bp, u_i
   register const struct ether_header *ep;
   uint16_t length_type;
         
-printf("etherHdrHandle: ndo->ndo_printf: %p\n", ndo->ndo_printf);
   ep = (const struct ether_header *)bp;
         
-printf("etherAddrString1\n");
   ND_PRINT((ndo, "%s > %s", etherAddrString(ndo, ESRC(ep)), etherAddrString(ndo, EDST(ep))));
-printf("after etherAddrString1\n");
   
   length_type = EXTRACT_16BITS(&ep->ether_length_type);
   if (!ndo->ndo_qflag) {
@@ -620,7 +604,6 @@ u_int etherHandler(netdissect_options *ndo, const u_char *p, u_int length, u_int
   int llc_hdrlen;
   struct lladdr_info src, dst;
 
-printf("etherHandler\n");
   if (caplen < ETHER_HDRLEN) {
     ND_PRINT((ndo, "[|ether]"));
     return (caplen);
@@ -644,13 +627,11 @@ printf("etherHandler\n");
   p += ETHER_HDRLEN;
   hdrlen = ETHER_HDRLEN;
 
-printf("etherAddrString2\n");
   src.addr = ESRC(ep);
   src.addr_string = etherAddrString;
   dst.addr = EDST(ep);
   dst.addr_string = etherAddrString;
   length_type = EXTRACT_16BITS(&ep->ether_length_type);
-printf("after etherAddrString2\n");
 
 recurse:
   /*
@@ -725,9 +706,7 @@ printf("ETHERTYPE_JUMBO\n");
     hdrlen += llc_hdrlen;
 #endif
   } else {
-printf("length_type: default\n");
     if (etherTypeHandle(ndo, length_type, p, length, caplen, &src, &dst) == 0) {
-printf("etherTypeHandle returned 0\n");
       /* type not known, print raw packet */
       if (!ndo->ndo_eflag) {
         if (handleEncapHeader != NULL)
@@ -735,8 +714,9 @@ printf("etherTypeHandle returned 0\n");
         etherHdrHandle(ndo, (const u_char *)ep, orig_length);
       }
 
-      if (!ndo->ndo_suppress_default_print)
+      if (!ndo->ndo_suppress_default_print) {
         ND_DEFAULTPRINT(p, caplen);
+      }
     }
   }
   return (hdrlen);

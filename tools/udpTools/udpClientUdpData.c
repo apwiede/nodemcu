@@ -381,7 +381,6 @@ void udpHandler(netdissect_options *ndo, register const u_char *bp, u_int length
   uint16_t sport, dport, ulen;
   register const struct ip6_hdr *ip6;
 
-fprintf(stderr, "udpHandler: length: %d\n", length);
   if (ep > ndo->ndo_snapend)
     ep = ndo->ndo_snapend;
   up = (const struct udphdr *)bp;
@@ -589,7 +588,6 @@ fprintf(stderr, "udpHandler: length: %d\n", length);
         ND_PRINT((ndo, "kip "));
 //      llap_print(ndo, cp, length);
     } else {
-printf("ulen: %d length: %d\n", ulen, length);
       if (ulen > length)
         ND_PRINT((ndo, "UDP, bad length %u > %u",
             ulen, length));
@@ -597,7 +595,6 @@ printf("ulen: %d length: %d\n", ulen, length);
         ND_PRINT((ndo, "UDP, length %u", ulen));
     }
   } else {
-printf("ulen2: %d length: %d\n", ulen, length);
     if (ulen > length)
       ND_PRINT((ndo, "UDP, bad length %u > %u",
           ulen, length));
