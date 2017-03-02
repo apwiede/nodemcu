@@ -1328,14 +1328,14 @@ static uint8_t netSocketRunSSDPMode(compMsgDispatcher_t *self) {
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 1, "getSsid: result: %d\n", result);
   checkErrOK(result);
-stringValue="Wiedemann3";
+stringValue="xxxx";
   c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
 
   c_memset(station_config.password,0,sizeof(station_config.password));
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 1, "getPasswd: result: %d\n", result);
   checkErrOK(result);
-stringValue="58855473601443679162";
+stringValue="yyyy";
   COMP_MSG_DBG(self, "N", 1, "len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
   COMP_MSG_DBG(self, "N", 1, "netSocketRunSSDPMode: ssid: %s password: %s!\n", station_config.ssid, station_config.password);
