@@ -1,0 +1,5 @@
+/home/arnulf/binutils-2.27/binutils/getsymbols -a -p -f -e app/.output/eagle/debug/image/eagle.app.v6.0.out <<EOF
+40280566
+EOF
+
+# 40280534

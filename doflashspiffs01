@@ -1,0 +1,2 @@
+esptool.py --port /dev/ttyUSB0 write_flash -fs 32m 0x90000 bin/spiffs1.img
+

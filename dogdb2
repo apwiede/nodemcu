@@ -1,0 +1,2 @@
+/home/arnulf/binutils-gdb-xtensa/gdb/gdb -b 115200 --command=gdbpre
+

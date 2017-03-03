@@ -1,0 +1,2 @@
+#/home/arnulf/binutils-2.27/binutils/objdump 
+/home/arnulf/esp-open-sdk-apw/crosstool-NG/.build/tools/bin/objdump -W -t -g -S app/.output/eagle/debug/image/eagle.app.v6.0.out

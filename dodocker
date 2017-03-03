@@ -1,0 +1,4 @@
+set -x
+./setmodules.tcl modules.tcl
+./setversion.sh
+VERBOSE=1 docker run --rm -ti -v `pwd`:/opt/nodemcu-firmware marcelstoer/nodemcu-build

@@ -1,0 +1,5 @@
+file /home/arnulf/bene-nodemcu-firmware/app/.output/eagle/debug/image/eagle.app.v6.0.out 
+set remote hardware-breakpoint-limit 1 
+set remote hardware-watchpoint-limit 1 
+set debug xtensa 4 
+target remote /dev/ttyUSB0

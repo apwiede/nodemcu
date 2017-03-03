@@ -1,0 +1,1 @@
+esptool.py --port /dev/ttyUSB0 --baud=74880 write_flash -fs 32m 0x00000 rboot/firmware/rboot.bin 0x04000 bin/rom0.bin
