@@ -14,3 +14,4 @@ dot_files/*
 myConfig.txt
 bin/*
 bin
+sdk/
