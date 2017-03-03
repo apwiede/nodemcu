@@ -11,3 +11,6 @@ tools/compMsgTest/CDTelegram.txt
 tools/compMsgTest/debug_AA.txt
 tools/compMsgTest/do1
 dot_files/*
+myConfig.txt
+bin/*
+bin
