@@ -1,5 +1,6 @@
 doxygen/*
 app/tmp/*
+app/compMsg/.*.swp
 tools/compMsgTest/tmp/*
 tools/structmsgTest/tmp/*
 tools/tmp/*
