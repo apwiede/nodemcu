@@ -1,0 +1,6 @@
+# this is an example use description file
+#,4
+#use,MsgDescHeader.txt
+#use,MsgDescMidPart.txt
+#use,MsgDescTrailer.txt
+#use,MsgValHeader1.txt
