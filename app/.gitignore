@@ -1,4 +1,4 @@
 *.output*
 mapfile
 !.gitignore
-./compmsg_old/
+compmsg_old
