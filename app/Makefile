@@ -42,7 +42,7 @@ SUBDIRS= 					\
 	tsl2561					\
 	rboot					\
 	net					\
-	compmsg					\
+	compMsg					\
 	http
 
 SUBDIRS += gdbstub
@@ -91,7 +91,7 @@ COMPONENTS_eagle.app.v6 = 			\
 	http/libhttp.a				\
 	net/libnodemcu_net.a			\
 	rboot/rboot.a				\
-	compmsg/compmsg.a			\
+	compMsg/compmsg.a			\
 	modules/libmodules.a			
 
 COMPONENTS_eagle.app.v6 += gdbstub/libgdbstub.a
@@ -115,7 +115,7 @@ COMPONENTS_eagle.app.v6.0 = 			\
 	dhtlib/libdhtlib.a 			\
 	tsl2561/tsl2561lib.a			\
 	rboot/rboot.a				\
-	compmsg/compmsg.a			\
+	compMsg/compmsg.a			\
 	http/libhttp.a				\
 	net/libnodemcu_net.a			\
 	modules/libmodules.a			
