@@ -260,7 +260,7 @@ ets_printf(">>>handleMsgFileInternal\n");
 //ets_printf("fileName: %s result: %d\n", fileName, result);
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { ets_printf("err1\n"); compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
   numLines = 0;
   while (1) {
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
@@ -309,14 +309,14 @@ ets_printf("expectedLines: %d\n", self->compMsgMsgDesc->expectedLines);
           checkErrOK(result);
         }
       } else {
-ets_printf("numLines: %d expectedLines: %d\n", numLines, compMsgMsgDesc->expectedLines);
+//ets_printf("numLines: %d expectedLines: %d\n", numLines - 1, compMsgMsgDesc->expectedLines);
         result = handleMsgLine(self);
         checkErrOK(result);
       }
     }
   }
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { ets_printf("err2\n"); return result; }
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { return result; }
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   checkErrOK(result);
 ets_printf("<<<handleMsgFileInternal\n");
@@ -374,13 +374,10 @@ ets_printf("<<<handleMsgFile\n");
 static uint8_t handleMsgUseLine(compMsgDispatcher_t *self) {
   int result;
   int lgth;
-  uint8_t fieldNameId;
   compMsgMsgDesc_t *compMsgMsgDesc;
   msgFieldDesc_t *msgFieldDesc;
+  msgFieldVal_t *msgFieldVal;
   msgDescIncludeInfo_t *msgDescIncludeInfo;
-  int numericValue;
-  uint8_t *stringValue;
-int idx;
 
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
@@ -402,6 +399,7 @@ ets_printf("handleMsgUseLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
 ets_printf("handleMsgUseLine: %s numFieldDesc: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldDesc);
     //field name
     result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
+ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId);
     checkErrOK(result);
     //field type
     result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[1], &msgFieldDesc->fieldTypeId);
@@ -411,47 +409,61 @@ ets_printf("handleMsgUseLine: %s numFieldDesc: %d\n", msgDescIncludeInfo->fileNa
     checkErrOK(result);
     msgFieldDesc->fieldLgth = (uint16_t)lgth;
 
-  idx = 0;
-  while (idx < self->compMsgMsgDesc->numLineFields) {
+int idx;
+idx = 0;
+while (idx < self->compMsgMsgDesc->numLineFields) {
 //ets_printf("field: %d %s\n", idx, self->compMsgMsgDesc->lineFields[idx]);
-    idx++;
-  }
+  idx++;
+}
     msgDescIncludeInfo->numMsgFieldDesc++;
     break;
   case COMP_MSG_VAL_INCLUDE:
+    if (msgDescIncludeInfo->maxMsgFieldVal == 0) {
+      msgDescIncludeInfo->maxMsgFieldVal = self->compMsgMsgDesc->expectedLines;
+      msgDescIncludeInfo->msgFieldVals = os_zalloc(msgDescIncludeInfo->maxMsgFieldVal * sizeof(msgFieldVal_t));
+      checkAllocOK(msgDescIncludeInfo->msgFieldVals);
+    }
+    msgFieldVal = &msgDescIncludeInfo->msgFieldVals[msgDescIncludeInfo->numMsgFieldVal];
+ets_printf("handleMsgUseLine: %s numFieldVal: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldVal);
     //field name
-    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &fieldNameId, COMP_MSG_INCR);
-ets_printf("fieldName: %s result: %d\n", compMsgMsgDesc->lineFields[0], result);
+    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldVal->fieldNameId, COMP_MSG_INCR);
+//ets_printf("fieldName: %s result: %d\n", compMsgMsgDesc->lineFields[0], result);
     checkErrOK(result);
-ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], fieldNameId);
+ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldVal->fieldNameId);
     //field type
-ets_printf("val fieldValueType: %s\n", compMsgMsgDesc->lineFields[1]);
+//ets_printf("val fieldValueType: %s\n", compMsgMsgDesc->lineFields[1]);
     if (c_strlen(compMsgMsgDesc->lineFields[1]) > 1) {
       COMP_MSG_DBG(self, "E", 0, "bad desc file fieldValueType %s!", compMsgMsgDesc->lineFields[1]);
       return COMP_MSG_ERR_BAD_DESC_FILE_FIELD_VALUE_TYPE;
     }
+    msgFieldVal->fieldValueType = compMsgMsgDesc->lineFields[1][0];
     // field value
-    numericValue = 0;
-    stringValue = NULL;
-    switch (compMsgMsgDesc->lineFields[1][0]) {
+    switch (msgFieldVal->fieldValueType) {
     case 'I':
-      if (compMsgMsgDesc->lineFields[2][1] == '@') {
-        // FIXME: need code for valeu callback here !!!
-ets_printf("%s: %s\n", compMsgMsgDesc->lineFields[0], compMsgMsgDesc->lineFields[2]);
+      if (compMsgMsgDesc->lineFields[2][0] == '@') {
+        msgFieldVal->stringValue = os_zalloc(c_strlen(compMsgMsgDesc->lineFields[2]) + 1);
+        checkAllocOK(msgFieldVal->stringValue);
+        c_memcpy(msgFieldVal->stringValue, compMsgMsgDesc->lineFields[2], c_strlen(compMsgMsgDesc->lineFields[2]));
+        // FIXME: need code for value callback here !!!
+ets_printf("%s: %s!\n", compMsgMsgDesc->lineFields[0], msgFieldVal->stringValue);
       } else {
-        result = compMsgMsgDesc->getIntFieldValue(self, 2, &numericValue);
-ets_printf("%s: %d 0x%08x\n", compMsgMsgDesc->lineFields[0], numericValue, numericValue);
+        result = compMsgMsgDesc->getIntFieldValue(self, 2, &msgFieldVal->numericValue);
+ets_printf("%s: %d 0x%08x\n", compMsgMsgDesc->lineFields[0], msgFieldVal->numericValue, msgFieldVal->numericValue);
       }
       checkErrOK(result);
       break;
     case 'S':
-      stringValue = compMsgMsgDesc->lineFields[2];
-ets_printf("%s: %s\n", compMsgMsgDesc->lineFields[0], stringValue);
+      msgFieldVal->stringValue = os_zalloc(c_strlen(compMsgMsgDesc->lineFields[2]) + 1);
+      checkAllocOK(msgFieldVal->stringValue);
+      c_memcpy(msgFieldVal->stringValue, compMsgMsgDesc->lineFields[2], c_strlen(compMsgMsgDesc->lineFields[2]));
+ets_printf("%s: %s!\n", compMsgMsgDesc->lineFields[0], msgFieldVal->stringValue);
+      
       break;
-   default:
+    default:
       COMP_MSG_DBG(self, "E", 0, "bad desc file fieldValueType %s!", compMsgMsgDesc->lineFields[1]);
       return COMP_MSG_ERR_BAD_DESC_FILE_FIELD_VALUE_TYPE;
-   }
+    }
+    msgDescIncludeInfo->numMsgFieldVal++;
     break;
   default:
     COMP_MSG_DBG(self, "E", 0, "bad desc file fieldIncludeType 0x%02x", msgDescIncludeInfo->includeType);

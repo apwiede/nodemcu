@@ -206,8 +206,10 @@ enum compMsgEncyptedCode
 #define MSG_MAX_LINE_FIELDS 10
 
 typedef struct msgFieldDesc msgFieldDesc_t;
+typedef struct msgFieldVal msgFieldVal_t;
 
 typedef uint8_t (* msgFieldSizeCallback_t)(compMsgDispatcher_t *self, msgFieldDesc_t *msgFieldDesc);
+typedef uint8_t (* msgFieldValueCallback_t)(compMsgDispatcher_t *self, msgFieldVal_t *msgFieldVal);
 
 typedef struct msgHeaderValues {
   uint8_t u8Dst;
@@ -285,12 +287,27 @@ typedef struct msgFieldDesc {
   msgFieldSizeCallback_t fieldSizeCallback;
 } msgFieldDesc_t;
 
+// all infos about a message field value
+
+typedef struct msgFieldVal {
+  uint8_t fieldNameId;
+  uint8_t fieldValueType;
+  int numericValue;
+  uint8_t *stringValue;
+  msgFieldValueCallback_t fieldValueCallback;
+} msgFieldVal_t;
+
+// all infos about a message use/include file
+
 typedef struct msgDescIncludeInfo {
   uint8_t includeType;
   char *fileName;
   uint8_t maxMsgFieldDesc;
   uint8_t numMsgFieldDesc;
   msgFieldDesc_t *msgFieldDescs;
+  uint8_t maxMsgFieldVal;
+  uint8_t numMsgFieldVal;
+  msgFieldVal_t *msgFieldVals;
 } msgDescIncludeInfo_t;
 
 
