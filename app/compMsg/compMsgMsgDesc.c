@@ -54,27 +54,36 @@ typedef struct flag2Str {
 } flag2Str_t;
 
 static flag2Str_t flag2Strs [] = {
-  { COMP_DISP_U16_DST,           "COMP_DISP_U16_DST" },
-  { COMP_DISP_U16_SRC,           "COMP_DISP_U16_SRC" },
-  { COMP_DISP_U16_TOTAL_LGTH,    "COMP_DISP_U16_TOTAL_LGTH" },
-  { COMP_DISP_U8_VECTOR_GUID,    "COMP_DISP_U8_VECTOR_GUID" },
-  { COMP_DISP_U16_SRC_ID,        "COMP_DISP_U16_SRC_ID" },
-  { COMP_DISP_IS_ENCRYPTED,      "COMP_DISP_IS_ENCRYPTED" },
-  { COMP_DISP_IS_NOT_ENCRYPTED,  "COMP_DISP_IS_NOT_ENCRYPTED" },
-  { COMP_DISP_U16_CMD_KEY,       "COMP_DISP_U16_CMD_KEY" },
-  { COMP_DISP_U0_CMD_LGTH,       "COMP_DISP_U0_CMD_LGTH" },
-  { COMP_DISP_U8_CMD_LGTH,       "COMP_DISP_U8_CMD_LGTH" },
-  { COMP_DISP_U16_CMD_LGTH,      "COMP_DISP_U16_CMD_LGTH" },
-  { 0,                             NULL },
+  { COMP_MSG_U8_DST,           "COMP_MSG_U8_DST" },
+  { COMP_MSG_U16_DST,          "COMP_MSG_U16_DST" },
+  { COMP_MSG_U8_SRC,           "COMP_MSG_U8_SRC" },
+  { COMP_MSG_U16_SRC,          "COMP_MSG_U16_SRC" },
+  { COMP_MSG_U8_TOTAL_LGTH,    "COMP_MSG_U8_TOTAL_LGTH" },
+  { COMP_MSG_U16_TOTAL_LGTH,   "COMP_MSG_U16_TOTAL_LGTH" },
+  { COMP_MSG_VECTOR_GUID,      "COMP_MSG_VECTOR_GUID" },
+  { COMP_MSG_IP_ADDR,          "COMP_MSG_IP_ADDR" },
+//  { COMP_MSG_IS_ENCRYPTED,     "COMP_MSG_IS_ENCRYPTED" },
+//  { COMP_MSG_IS_NOT_ENCRYPTED, "COMP_MSG_IS_NOT_ENCRYPTED" },
+  { COMP_MSG_U8_CMD_KEY,       "COMP_MSG_U8_CMD_KEY" },
+  { COMP_MSG_U16_CMD_KEY,      "COMP_MSG_U16_CMD_KEY" },
+  { COMP_MSG_U0_CMD_LGTH,      "COMP_MSG_U0_CMD_LGTH" },
+  { COMP_MSG_U8_CMD_LGTH,      "COMP_MSG_U8_CMD_LGTH" },
+  { COMP_MSG_U16_CMD_LGTH,     "COMP_MSG_U16_CMD_LGTH" },
+  { COMP_MSG_U0_CRC,           "COMP_MSG_U0_CRC" },
+  { COMP_MSG_U8_CRC,           "COMP_MSG_U8_CRC" },
+  { COMP_MSG_U16_CRC,          "COMP_MSG_U16_CRC" },
+  { COMP_MSG_U0_TOTAL_CRC,     "COMP_MSG_U0_TOTAL_CRC" },
+  { COMP_MSG_U8_TOTAL_CRC,     "COMP_MSG_U8_TOTAL_CRC" },
+  { COMP_MSG_U16_TOTAL_CRC,    "COMP_MSG_U16_TOTAL_CRC" },
+  { 0,                          NULL },
 };
 
-
-static int compMsgMsgDescId = 0;
 static volatile int fileFd = FS_OPEN_OK - 1;
 
 // ================================= openFile ====================================
 
 static uint8_t openFile(compMsgMsgDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode) {
+ets_printf("openFile: %s!\n", fileName);
   self->fileName = fileName;
   fileFd = fs_open(fileName, fs_mode2flag(fileMode));
   if (fileFd < FS_OPEN_OK) {
@@ -86,6 +95,7 @@ static uint8_t openFile(compMsgMsgDesc_t *self, const uint8_t *fileName, const u
 // ================================= closeFile ====================================
 
 static uint8_t closeFile(compMsgMsgDesc_t *self) {
+ets_printf("closeFile: fileFd: %d\n", fileFd);
   if (fileFd != (FS_OPEN_OK - 1)){
     self->fileName = NULL;
     fs_close(fileFd);
@@ -148,6 +158,311 @@ static uint8_t writeLine(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t 
   }
   return COMP_MSG_ERR_WRITE_FILE;
 }
+
+// ================================= getLineFields ====================================
+
+static uint8_t getLineFields(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t lgth) {
+  char *cp;
+  char *ep;
+  int idx;
+
+  self->compMsgMsgDesc->numLineFields = 0;
+  cp = myStr;
+  ep = myStr + lgth;
+  self->compMsgMsgDesc->lineFields[self->compMsgMsgDesc->numLineFields] = cp;
+  while (cp < ep) {
+    if (*cp == ',') {
+      *cp = '\0';
+      cp++;
+      self->compMsgMsgDesc->numLineFields++;
+      self->compMsgMsgDesc->lineFields[self->compMsgMsgDesc->numLineFields] = cp;
+    } else {
+      if ((*cp == '\r') || (*cp == '\n')) {
+        *cp = '\0';
+      }
+      cp++;
+    }
+  }
+  self->compMsgMsgDesc->numLineFields++;
+  idx = 0;
+while (idx < self->compMsgMsgDesc->numLineFields) {
+//ets_printf("lineField: %d: %s!\n", idx, self->compMsgMsgDesc->lineFields[idx]);
+idx++;
+}
+  return COMP_MSG_ERR_OK;
+}
+// ================================= getIntFieldValue ====================================
+
+static uint8_t getIntFieldValue(compMsgDispatcher_t *self, uint8_t fieldIdx, int *uval) {
+  uint8_t *cp;
+  char *endPtr;
+
+  cp = self->compMsgMsgDesc->lineFields[fieldIdx];
+  *uval = c_strtoul(cp, &endPtr, 10);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= addUseFileName ====================================
+
+static uint8_t addUseFileName(compMsgDispatcher_t *self, char *fileName) {
+  uint8_t result;
+  msgDescIncludeInfo_t *msgDescIncludeInfo;
+
+  result = COMP_MSG_ERR_OK;
+  if (self->compMsgMsgDesc->numMsgDescIncludeInfo >= self->compMsgMsgDesc->maxMsgDescIncludeInfo) {
+    if (self->compMsgMsgDesc->maxMsgDescIncludeInfo == 0) {
+      self->compMsgMsgDesc->maxMsgDescIncludeInfo = 5;
+      self->compMsgMsgDesc->msgDescIncludeInfos = (msgDescIncludeInfo_t *)os_zalloc((self->compMsgMsgDesc->maxMsgDescIncludeInfo * sizeof(msgDescIncludeInfo_t)));
+      checkAllocOK(self->compMsgMsgDesc->msgDescIncludeInfos);
+    } else {
+      self->compMsgMsgDesc->maxMsgDescIncludeInfo += 2;
+      self->compMsgMsgDesc->msgDescIncludeInfos = (msgDescIncludeInfo_t *)os_realloc((self->compMsgMsgDesc->msgDescIncludeInfos), (self->compMsgMsgDesc->maxMsgDescIncludeInfo * sizeof(msgDescIncludeInfo_t)));
+      checkAllocOK(self->compMsgMsgDesc->msgDescIncludeInfos);
+    }
+  }
+  msgDescIncludeInfo = &self->compMsgMsgDesc->msgDescIncludeInfos[self->compMsgMsgDesc->numMsgDescIncludeInfo];
+  msgDescIncludeInfo->fileName = os_zalloc(c_strlen(fileName) + 1);
+  c_memcpy(msgDescIncludeInfo->fileName, fileName, c_strlen(fileName));
+  self->compMsgMsgDesc->numMsgDescIncludeInfo++;
+ets_printf("addUseFileName3: %s %d\n", fileName, self->compMsgMsgDesc->numMsgDescIncludeInfo);
+  return result;
+}
+
+// ================================= handleUseFileName ====================================
+
+static uint8_t handleUseFileName(compMsgDispatcher_t *self, msgDescIncludeInfo_t *msgDescIncludeInfo) {
+  uint8_t result;
+
+  result = COMP_MSG_ERR_OK;
+ets_printf("handleUseFileName: %s\n", msgDescIncludeInfo->fileName);
+
+  return result;
+}
+
+// ================================= handleMsgFileInternal ====================================
+
+static uint8_t handleMsgFileInternal(compMsgDispatcher_t *self, uint8_t *fileName, handleMsgLine_t handleMsgLine) {
+  int result;
+  uint8_t numEntries;
+  uint8_t lgth;
+  uint8_t buf[100];
+  uint8_t *buffer;
+  uint8_t *myStr;
+  int numLines;
+  int idx;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+  msgDescIncludeInfo_t *msgDescIncludeInfo;
+
+ets_printf(">>>handleMsgFileInternal\n");
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  buffer = buf;
+  result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
+//ets_printf("fileName: %s result: %d\n", fileName, result);
+  checkErrOK(result);
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { ets_printf("err1\n"); compMsgMsgDesc->closeFile(compMsgMsgDesc); return result; }
+  numLines = 0;
+  while (1) {
+    result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
+    checkErrOK(result);
+    if (lgth == 0) {
+      if (numLines - 1 != self->compMsgMsgDesc->expectedLines) {
+ets_printf("Error numLines: %d expectedLines: %d\n", numLines, self->compMsgMsgDesc->expectedLines);
+        return COMP_MSG_ERR_BAD_NUM_DESC_FILE_LINES;
+      }
+      break;
+    }
+    buffer[lgth] = 0;
+    result = compMsgMsgDesc->getLineFields(self, buffer, lgth);
+    checkErrOK(result);
+    // check if it is eventually an empty line and ignore that
+    if (compMsgMsgDesc->numLineFields < 2) {
+      if (c_strlen(compMsgMsgDesc->lineFields[0]) == 0) {
+        continue;
+      }
+    }
+    if ((buffer[0] == '#') && (buffer[1] == ' ')) {
+ets_printf("comment\n");
+      // a comment line skip
+      continue;
+    }
+    // numLines is always without any comment lines!!
+    numLines++;
+    if (numLines == 1) {
+      // check if it is the number of lines line
+      if (c_strcmp(compMsgMsgDesc->lineFields[0], "#") == 0) {
+        result = compMsgMsgDesc->getIntFieldValue(self, 1, &self->compMsgMsgDesc->expectedLines);
+        checkErrOK(result);
+ets_printf("expectedLines: %d\n", self->compMsgMsgDesc->expectedLines);
+      } else {
+        COMP_MSG_DBG(self, "E", 0, "wrong desc file number lines line");
+        return COMP_MSG_ERR_WRONG_DESC_FILE_LINE;
+      }
+    } else {
+      // check if it is a #use line
+      if (c_strcmp(compMsgMsgDesc->lineFields[0], "#use") == 0) {
+        if (compMsgMsgDesc->numLineFields != 2) {
+          COMP_MSG_DBG(self, "E", 0, "bad desc file #use line");
+          return COMP_MSG_ERR_BAD_DESC_FILE_USE_LINE;
+        } else {
+          result = compMsgMsgDesc->addUseFileName(self, compMsgMsgDesc->lineFields[1]);
+          checkErrOK(result);
+        }
+      } else {
+ets_printf("numLines: %d expectedLines: %d\n", numLines, compMsgMsgDesc->expectedLines);
+        result = handleMsgLine(self);
+        checkErrOK(result);
+      }
+    }
+  }
+#undef checkErrOK
+#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { ets_printf("err2\n"); return result; }
+  result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
+  checkErrOK(result);
+ets_printf("<<<handleMsgFileInternal\n");
+  return result;
+}
+
+// ================================= handleMsgFile ====================================
+
+static uint8_t handleMsgFile(compMsgDispatcher_t *self, uint8_t *fileName, handleMsgLine_t handleMsgLine) {
+  int result;
+  uint8_t numEntries;
+  uint8_t lgth;
+  uint8_t buf[100];
+  uint8_t *buffer;
+  uint8_t *myStr;
+  int numLines;
+  int idx;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+  msgDescIncludeInfo_t *msgDescIncludeInfo;
+
+ets_printf(">>>handleMsgFile\n");
+  result = handleMsgFileInternal(self, fileName, handleMsgLine);
+  checkErrOK(result);
+  compMsgMsgDesc = self->compMsgMsgDesc;
+  if (compMsgMsgDesc->numMsgDescIncludeInfo > 0) {
+    // handle use files here
+    while (compMsgMsgDesc->currMsgDescIncludeInfo < compMsgMsgDesc->numMsgDescIncludeInfo) {
+      msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[compMsgMsgDesc->currMsgDescIncludeInfo];
+      if (c_strstr(msgDescIncludeInfo->fileName, "MsgDescHeader") != NULL) {
+        msgDescIncludeInfo->includeType = COMP_MSG_DESC_HEADER_INCLUDE;
+      }
+      if (c_strstr(msgDescIncludeInfo->fileName, "MsgDescMidPart") != NULL) {
+        msgDescIncludeInfo->includeType = COMP_MSG_DESC_MID_PART_INCLUDE;
+      }
+      if (c_strstr(msgDescIncludeInfo->fileName, "MsgDescTrailer") != NULL) {
+        msgDescIncludeInfo->includeType = COMP_MSG_DESC_TRAILER_INCLUDE;
+      }
+      if (c_strstr(msgDescIncludeInfo->fileName, "MsgVal") != NULL) {
+        msgDescIncludeInfo->includeType = COMP_MSG_VAL_INCLUDE;
+      }
+ets_printf(">>>%s: msgDescIncludeInfo->maxMsgFieldDesc: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->maxMsgFieldDesc);
+      result = handleMsgFileInternal(self, msgDescIncludeInfo->fileName, handleMsgLine);
+ets_printf(">>>%s: result: %d\n", msgDescIncludeInfo->fileName, result);
+      checkErrOK(result);
+ets_printf(">>>%s: done\n", msgDescIncludeInfo->fileName);
+      compMsgMsgDesc->currMsgDescIncludeInfo++;
+    }
+  }
+ets_printf("<<<handleMsgFile\n");
+  return result;
+}
+
+// ================================= handleMsgUseLine ====================================
+
+static uint8_t handleMsgUseLine(compMsgDispatcher_t *self) {
+  int result;
+  int lgth;
+  uint8_t fieldNameId;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+  msgFieldDesc_t *msgFieldDesc;
+  msgDescIncludeInfo_t *msgDescIncludeInfo;
+  int numericValue;
+  uint8_t *stringValue;
+int idx;
+
+  result = COMP_MSG_ERR_OK;
+  compMsgMsgDesc = self->compMsgMsgDesc;
+ets_printf("handleMsgUseLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
+  if (compMsgMsgDesc->numLineFields < 3) {
+    return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
+  }
+  msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[compMsgMsgDesc->currMsgDescIncludeInfo];
+  switch (msgDescIncludeInfo->includeType) {
+  case COMP_MSG_DESC_HEADER_INCLUDE:
+  case COMP_MSG_DESC_MID_PART_INCLUDE:
+  case COMP_MSG_DESC_TRAILER_INCLUDE:
+    if (msgDescIncludeInfo->maxMsgFieldDesc == 0) {
+      msgDescIncludeInfo->maxMsgFieldDesc = self->compMsgMsgDesc->expectedLines;
+      msgDescIncludeInfo->msgFieldDescs = os_zalloc(msgDescIncludeInfo->maxMsgFieldDesc * sizeof(msgFieldDesc_t));
+      checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
+    }
+    msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
+ets_printf("handleMsgUseLine: %s numFieldDesc: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldDesc);
+    //field name
+    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
+    checkErrOK(result);
+    //field type
+    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[1], &msgFieldDesc->fieldTypeId);
+    checkErrOK(result);
+    //field lgth
+    result = compMsgMsgDesc->getIntFieldValue(self, 2, &lgth);
+    checkErrOK(result);
+    msgFieldDesc->fieldLgth = (uint16_t)lgth;
+
+  idx = 0;
+  while (idx < self->compMsgMsgDesc->numLineFields) {
+//ets_printf("field: %d %s\n", idx, self->compMsgMsgDesc->lineFields[idx]);
+    idx++;
+  }
+    msgDescIncludeInfo->numMsgFieldDesc++;
+    break;
+  case COMP_MSG_VAL_INCLUDE:
+    //field name
+    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &fieldNameId, COMP_MSG_INCR);
+ets_printf("fieldName: %s result: %d\n", compMsgMsgDesc->lineFields[0], result);
+    checkErrOK(result);
+ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], fieldNameId);
+    //field type
+ets_printf("val fieldValueType: %s\n", compMsgMsgDesc->lineFields[1]);
+    if (c_strlen(compMsgMsgDesc->lineFields[1]) > 1) {
+      COMP_MSG_DBG(self, "E", 0, "bad desc file fieldValueType %s!", compMsgMsgDesc->lineFields[1]);
+      return COMP_MSG_ERR_BAD_DESC_FILE_FIELD_VALUE_TYPE;
+    }
+    // field value
+    numericValue = 0;
+    stringValue = NULL;
+    switch (compMsgMsgDesc->lineFields[1][0]) {
+    case 'I':
+      if (compMsgMsgDesc->lineFields[2][1] == '@') {
+        // FIXME: need code for valeu callback here !!!
+ets_printf("%s: %s\n", compMsgMsgDesc->lineFields[0], compMsgMsgDesc->lineFields[2]);
+      } else {
+        result = compMsgMsgDesc->getIntFieldValue(self, 2, &numericValue);
+ets_printf("%s: %d 0x%08x\n", compMsgMsgDesc->lineFields[0], numericValue, numericValue);
+      }
+      checkErrOK(result);
+      break;
+    case 'S':
+      stringValue = compMsgMsgDesc->lineFields[2];
+ets_printf("%s: %s\n", compMsgMsgDesc->lineFields[0], stringValue);
+      break;
+   default:
+      COMP_MSG_DBG(self, "E", 0, "bad desc file fieldValueType %s!", compMsgMsgDesc->lineFields[1]);
+      return COMP_MSG_ERR_BAD_DESC_FILE_FIELD_VALUE_TYPE;
+   }
+    break;
+  default:
+    COMP_MSG_DBG(self, "E", 0, "bad desc file fieldIncludeType 0x%02x", msgDescIncludeInfo->includeType);
+    return COMP_MSG_ERR_BAD_DESC_FILE_FIELD_INCLUDE_TYPE;
+  }
+  return result;
+}
+
+
+
+
 
 // ================================= getIntFromLine ====================================
 
@@ -1537,11 +1852,21 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, uint8_t *fileName
 // ================================= compMsgMsgDescInit ====================================
 
 uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
+  uint8_t result;
+
   self->compMsgMsgDesc->openFile = &openFile;
   self->compMsgMsgDesc->closeFile = &closeFile;
   self->compMsgMsgDesc->flushFile = &flushFile;
   self->compMsgMsgDesc->readLine = &readLine;
   self->compMsgMsgDesc->writeLine = &writeLine;
+  self->compMsgMsgDesc->getLineFields = &getLineFields;
+
+  self->compMsgMsgDesc->getIntFieldValue = &getIntFieldValue;
+  self->compMsgMsgDesc->addUseFileName = &addUseFileName;
+  self->compMsgMsgDesc->handleUseFileName = &handleUseFileName;
+  self->compMsgMsgDesc->handleMsgUseLine = &handleMsgUseLine;
+  self->compMsgMsgDesc->handleMsgFile = &handleMsgFile;
+
   self->compMsgMsgDesc->getIntFromLine = &getIntFromLine;
   self->compMsgMsgDesc->getStrFromLine = &getStrFromLine;
   self->compMsgMsgDesc->getHeaderFieldsFromLine = &getHeaderFieldsFromLine;
@@ -1554,6 +1879,10 @@ uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   self->compMsgMsgDesc->getMsgKeyValueDescParts = &getMsgKeyValueDescParts;
   self->compMsgMsgDesc->getFieldsToSave = &getFieldsToSave;
   self->compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;
+
+  result = self->compMsgMsgDesc->handleMsgFile(self, "MsgUse.txt", handleMsgUseLine);
+ets_printf("readMsgUse: result: %d\n", result);
+  checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
 
@@ -1564,8 +1893,6 @@ compMsgMsgDesc_t *newCompMsgMsgDesc() {
   if (compMsgMsgDesc == NULL) {
     return NULL;
   }
-  compMsgMsgDescId++;
-  compMsgMsgDesc->id = compMsgMsgDescId;
   return compMsgMsgDesc;
 }
 

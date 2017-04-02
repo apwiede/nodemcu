@@ -134,7 +134,7 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
   int hdrIdx;
   int found;
   uint8_t myHeaderLgth;
-  uint16_t seqVal;
+  uint32_t seqVal;
   msgParts_t *received;
   uint8_t *cp;
   uint8_t lgth;
@@ -170,7 +170,7 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U16_SRC_ID:
-      result = dataView->getUint16(dataView, received->fieldOffset, &received->srcId);
+      result = dataView->getUint32(dataView, received->fieldOffset, &received->srcId);
       checkErrOK(result);
       COMP_MSG_DBG(self, "I", 2, "srcId: 0x%04x", received->srcId);
       received->fieldOffset += sizeof(uint16_t);
@@ -245,7 +245,7 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
   compMsgField_t fieldInfo;
   uint16_t u16;
   uint8_t u8;
-  uint16_t sequenceEntry;
+  uint32_t sequenceEntry;
   bool u8TotalCrc;
   bool u16TotalCrc;
   size_t startOffset;
