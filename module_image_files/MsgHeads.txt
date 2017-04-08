@@ -1,0 +1,6 @@
+# example for messages heads file
+# <comma separated header field values>,<encrypted>,<handleType>,@cmdKey
+# for header definition see MsgDescHeader.txt
+#,1
+*,2,21,*,*,*,E,W,A1
+
