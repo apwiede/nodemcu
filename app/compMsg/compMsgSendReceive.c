@@ -71,7 +71,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, s
 
   received = &self->compMsgData->received;
   COMP_MSG_DBG(self, "s", 2, "Rec: 0x%02x lgth: %d", buffer[0] & 0xFF, received->lgth);
-  COMP_MSG_DBG(self, "s", 2, "uartReceiveCb: %c rlen: %d", buffer[0]&0xFF, received->lgth);
+  COMP_MSG_DBG(self, "s", 1, "uartReceiveCb: %c 0x%02x rlen: %d", buffer[0]&0xFF, buffer[0]&0xFF, received->lgth);
   myBuffer = buffer;
   if (lgth == 0) {
     // simulate a '0' char!!
@@ -100,13 +100,14 @@ static uint8_t uartSendAnswer(compMsgDispatcher_t *self, uint8_t *data, uint8_t 
   int result;
   int idx;
 
-  COMP_MSG_DBG(self, "s", 2, "uartSendAnswer start: lgth: %d!", msgLgth);
+  COMP_MSG_DBG(self, "s", 1, "uartSendAnswer start: lgth: %d!", msgLgth);
   idx = 0;
   while (idx < msgLgth) {
     platform_uart_send(0, data[idx]);
     idx++;
   }
-  COMP_MSG_DBG(self, "s", 2, "uartSendAnswer done");
+//  self->compMsgRequest->startNextRequest(self);
+  COMP_MSG_DBG(self, "s", 1, "uartSendAnswer done");
   return COMP_MSG_ERR_OK;
 }
 
@@ -151,6 +152,7 @@ static uint8_t sendCloudMsg(compMsgDispatcher_t *self) {
   os_free(self->cloudPayload);
   self->cloudPayload = NULL;
   self->cloudPayloadLgth = 0;
+//  self->compMsgRequest->startNextRequest(self);
   COMP_MSG_DBG(self, "s", 2, "sendCloudMsg: done result: %d", result);
   return COMP_MSG_ERR_OK;
 }
@@ -185,9 +187,10 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
 
   msgData = self->cloudMsgData;
   msgLgth = self->cloudMsgDataLgth;
-  COMP_MSG_DBG(self, "s", 2, "prepareCloudMsg: msgLgth: %d", msgLgth);
+  COMP_MSG_DBG(self, "s", 1, "prepareCloudMsg: msgLgth: %d", msgLgth);
   result = self->compMsgUtil->toBase64(self, msgData, &msgLgth, &b64Msg);
   checkErrOK(result);
+os_free(msgData);
   COMP_MSG_DBG(self, "s", 2, "prepareCloudMsg: b64msgLgth: %d", msgLgth);
 
 #ifdef CLOUD_1
@@ -334,7 +337,7 @@ static uint8_t checkClientMode(compMsgDispatcher_t *self) {
   COMP_MSG_DBG(self, "s", 2, "checkClientMode: ");
 
   self->compMsgSendReceive->startSendMsg2 = self->compMsgSendReceive->prepareCloudMsg;
-  if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
+  if (!(self->dispatcherCommon->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
 // FIXME !!! TEMPORARY
     // set the callback used after client mode is running
     self->compMsgSendReceive->startSendMsg = self->compMsgSocket->netSocketStartCloudSocket;
@@ -363,11 +366,15 @@ static uint8_t sendMsg(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLg
     COMP_MSG_DBG(self, "s", 1, "remote_ip: %d %d %d %d port: %d\n", self->compMsgData->sud->remote_ip[0], self->compMsgData->sud->remote_ip[1], self->compMsgData->sud->remote_ip[2], self->compMsgData->sud->remote_ip[3], self->compMsgData->sud->remote_port);
     result = self->compMsgSocket->webSocketSendData(self->compMsgData->sud, msgData, msgLgth, OPCODE_BINARY);
     checkErrOK(result);
+//ets_printf("webSocketSendData done2 heap: %d\n", system_get_free_heap_size());
+    self->compMsgData->deleteMsg(self);
+//ets_printf("webSocketSendData done3 heap: %d\n", system_get_free_heap_size());
     break;
   case 'D':
     result = self->compMsgOta->storeUserData(self, msgLgth, msgData);
     COMP_MSG_DBG(self, "Y", 0, "sendMsg D result: %d", result);
     checkErrOK(result);
+    self->compMsgData->deleteMsg(self);
     break;
   case 'G':
     COMP_MSG_DBG(self, "Y", 0, "sendMsg G not yet implemented");
@@ -413,12 +420,16 @@ checkErrOK(result);
 uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
+  /* depends on:
+   *   - compMsgDispatcher
+   *   - compMsgRequest
+   */
   result = self->getNewCompMsgDataPtr(self);
   self->compMsgData->sud = NULL;
   self->compMsgData->receivedData = NULL;
   self->compMsgData->receivedLgth = 0;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
-  result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_UART, NULL, self->compMsgData);
+  result = self->compMsgRequest->addRequest(self, COMP_MSG_INPUT_UART, NULL, self->compMsgData);
 
   self->compMsgSendReceive->startSendMsg = NULL;
   self->compMsgSendReceive->startSendMsg2 = NULL;

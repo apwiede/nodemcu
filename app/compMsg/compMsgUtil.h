@@ -64,6 +64,7 @@ typedef uint8_t (* setFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t *
 typedef uint8_t (* addFieldValueCallbackName_t)(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t callback, uint8_t callbackType);
 typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t *callback, uint8_t callbackType);
 typedef uint8_t (* getFieldValueCallbackName_t)(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t **callbackName, uint8_t callbackType);
+typedef uint8_t (* addFieldDescription_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgUtil {
   uint8_t numFieldValueCallbackInfos;
@@ -78,6 +79,7 @@ typedef struct compMsgUtil {
   addFieldValueCallbackName_t addFieldValueCallbackName;
   getFieldValueCallback_t getFieldValueCallback;
   getFieldValueCallbackName_t getFieldValueCallbackName;
+  addFieldDescription_t addFieldDescription;
 } compMsgUtil_t;
 
 compMsgUtil_t *newCompMsgUtil();

@@ -65,6 +65,7 @@ static uint8_t checkConnectionStatus(compMsgTimerSlot_t *compMsgTimerSlot) {
   char temp[64];
   compMsgTimerSlot_t *tmr;
 
+//ets_printf(">>checkConnectionStatus: %p\n", compMsgTimerSlot);
   timerId = compMsgTimerSlot->timerId;
   self = compMsgTimerSlot->compMsgDispatcher;
   COMP_MSG_DBG(self, "S", 2, "checkConnectionStatus timerId: %d\n", timerId);
@@ -114,25 +115,24 @@ static uint8_t checkConnectionStatus(compMsgTimerSlot_t *compMsgTimerSlot) {
   tmr->ip_addr = pTempIp.ip.addr;
   ets_timer_disarm(&tmr->timer);
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&pTempIp.ip));
-  COMP_MSG_DBG(self, "S", 1, "checkConnectionStatus: IP: %s\n", temp);
-int numericValue;
-uint8_t *stringValue;
-  COMP_MSG_DBG(self, "S", 2, "getMACAddr\n");
-result = self->compMsgModuleData->getMACAddr(self, &numericValue, &stringValue);
+  COMP_MSG_DBG(self, "S", 1, "checkConnectionStatus end: IP: %s\n", temp);
+//ets_printf("followupCallback: %p, followupInterval: %d followupTimer: %d\n", compMsgTimerSlot->followupCallback, compMsgTimerSlot->followupInterval, compMsgTimerSlot->followupTimerId);
+  if (compMsgTimerSlot->followupCallback != NULL) {
+    result = self->compMsgSocket->startConnectionTimer(self, compMsgTimerSlot->followupTimerId, compMsgTimerSlot->followupInterval, 1, compMsgTimerSlot->followupCallback);
+//ets_printf("checkConnectionStatus after startConnectionTimer: result: %d\n", result);
+    checkErrOK(result);
+  }
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= startConnectionTimer ====================================
 
-static uint8_t startConnectionTimer(compMsgDispatcher_t *self, uint8_t timerId, startConnection_t fcn) {
-  int repeat;
-  int interval;
+static uint8_t startConnectionTimer(compMsgDispatcher_t *self, uint8_t timerId, int interval, int repeat, startConnection_t fcn) {
   int mode;
   compMsgTimerSlot_t *compMsgTimerSlot;
   int isMstimer;
 
-  repeat = 1;
-  interval = 1000;
+//  repeat = 1;
   mode = TIMER_MODE_AUTO;
   isMstimer = 1;
   compMsgTimerSlot = &self->compMsgTimer->compMsgTimers[timerId];

@@ -574,6 +574,7 @@ static uint8_t updateSpiffs(compMsgDispatcher_t *self) {
 /**
  * \brief start the connection with the router for doing ota updates
  * \param self The dispatcher struct
+ * \param isSpiffs Wether thie update is for the flash fiel system or the firmware
  * \return Error code or ErrorOK
  *
  */
@@ -586,7 +587,7 @@ static uint8_t checkClientMode(compMsgDispatcher_t *self, bool isSpiffs) {
   } else {
     self->compMsgSendReceive->startSendMsg = self->compMsgOta->updateFirmware;
   }
-  if (!(self->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
+  if (!(self->dispatcherCommon->runningModeFlags & COMP_DISP_RUNNING_MODE_CLIENT)) {
     result = self->compMsgSocket->netSocketRunClientMode(self);
     checkErrOK(result);
   } else {

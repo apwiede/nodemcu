@@ -90,6 +90,16 @@
 #define WIFI_INFO_SSDP_STATUS                 48
 #define WIFI_INFO_NET_SSDP_RECEIVED_CALL_BACK 49
 #define WIFI_INFO_NET_SSDP_TO_SEND_CALL_BACK  50
+#define WIFI_INFO_PROD_TEST_SSID              51
+#define WIFI_INFO_PROD_TEST_PASSWD            52
+#define WIFI_INFO_PROD_TEST_SECURITY_TYPE     53
+#define WIFI_INFO_PROD_TEST_TARGET_PROTOCOL   54
+#define WIFI_INFO_PROD_TEST_IP_ADDR           55
+#define WIFI_INFO_PROD_TEST_SUBNET            56
+#define WIFI_INFO_PROD_TEST_GATEWAY           57
+#define WIFI_INFO_PROD_TEST_DNS               58
+#define WIFI_INFO_PROD_TEST_PING_ADDRESS      59
+#define WIFI_INFO_PROD_TEST_STATUS            60
 
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
@@ -119,7 +129,7 @@
 #define KEY_VALUE_KEY_CLIENT_IP_ADDR         15
 #define KEY_VALUE_KEY_CLIENT_PORT            16
 #define KEY_VALUE_KEY_CLIENT_STATUS          17
-#define KEY_VALUE_KEY_SEQ_NUM                18
+#define KEY_VALUE_KEY_SEQUENCE_NUM           18
 #define KEY_VALUE_KEY_MAC_ADDR               19
 #define KEY_VALUE_KEY_MACHINE_STATE          20
 #define KEY_VALUE_KEY_FIRMWARE_MAIN_BOARD    21
@@ -216,7 +226,7 @@ typedef struct keyValueInfo {
   uint16_t key_clientIPAddr;
   uint16_t key_clientPort;
   uint16_t key_clientStatus;
-  uint16_t key_seqNum;
+  uint16_t key_sequenceNum;
   uint16_t key_MACAddr;
   uint16_t key_machineState;
   uint16_t key_firmwareMainBoard;
@@ -241,7 +251,7 @@ typedef struct keyValueInfo {
   uint8_t key_type_clientIPAddr;
   uint8_t key_type_clientPort;
   uint8_t key_type_clientStatus;
-  uint8_t key_type_seqNum;
+  uint8_t key_type_sequenceNum;
   uint8_t key_type_MACAddr;
   uint8_t key_type_machineState;
   uint8_t key_type_firmwareMainBoard;
@@ -265,6 +275,17 @@ typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 typedef uint8_t (* netSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 typedef uint8_t (* getClientSequenceNum_t)(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue);
+
+typedef uint8_t (* getProdTestSsid_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestPasswd_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestSecurityType_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestTargetProtocol_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestIpAddress_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestSubnet_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestGateway_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestDns_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestPingAddress_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* getProdTestStatus_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 
 typedef struct compMsgWifiData {
   keyValueInfo_t keyValueInfo;
@@ -296,6 +317,18 @@ typedef struct compMsgWifiData {
   uint8_t *cloudUrlTenantId2;
   uint8_t *cloudNodeToken1;
   uint8_t *cloudNodeToken2;
+
+  uint8_t *prodTestSsid;
+  uint8_t *prodTestPasswd;
+  uint8_t prodTestSecurityType;
+  uint8_t prodTestTargetProtocol;
+  uint32_t prodTestIpAddr;
+  uint32_t prodTestSubnet;
+  uint32_t prodTestGateway;
+  uint32_t prodTestDns;
+  uint32_t prodTestPingAddress;
+  uint8_t prodTestStatus;
+
   bssScanSizes_t bssScanSizes;
   bssScanTypes_t bssScanTypes;
   uint16_t flags;
@@ -313,6 +346,17 @@ typedef struct compMsgWifiData {
   getClientSequenceNum_t getClientSequenceNum;
   webSocketSendConnectError_t webSocketSendConnectError;
   netSocketSendConnectError_t netSocketSendConnectError;
+
+  getProdTestSsid_t getProdTestSsid;
+  getProdTestPasswd_t getProdTestPasswd;
+  getProdTestSecurityType_t getProdTestSecurityType;
+  getProdTestTargetProtocol_t getProdTestTargetProtocol;
+  getProdTestIpAddress_t getProdTestIpAddress;
+  getProdTestSubnet_t getProdTestSubnet;
+  getProdTestGateway_t getProdTestGateway;
+  getProdTestDns_t getProdTestDns;
+  getProdTestPingAddress_t getProdTestPingAddress;
+  getProdTestStatus_t getProdTestStatus;
 
   webSocketBinaryReceived_t webSocketBinaryReceived;
   webSocketTextReceived_t webSocketTextReceived;

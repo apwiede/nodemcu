@@ -49,25 +49,29 @@ extern "C" {
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef uint8_t (* resetHeaderInfos_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey);
+typedef uint8_t (* getHeaderIndexFromHeaderFields_t)(compMsgDispatcher_t *self, msgParts_t *received);
+typedef uint8_t (* nextFittingEntry_t)(compMsgDispatcher_t *self, msgParts_t *received, uint8_t u8CmdKey, uint16_t u16CmdKey);
 typedef uint8_t (* handleToSendPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth);
 typedef uint8_t (* prepareAnswerMsg_t)(compMsgDispatcher_t *self, uint8_t type, uint8_t **handle);
-typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleReceivedHeader_t)(compMsgDispatcher_t *self, msgParts_t *received);
+typedef uint8_t (* handleReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received);
+typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *received);
 typedef uint8_t (* sendClientIPMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, size_t lgth);
+typedef uint8_t (* unpackReceivedMsg_t)(compMsgDispatcher_t *self, msgRequestInfo_t *msgRequestInfo);
 
 typedef struct compMsgIdentify {
   resetHeaderInfos_t resetHeaderInfos;
   nextFittingEntry_t nextFittingEntry;
+  getHeaderIndexFromHeaderFields_t getHeaderIndexFromHeaderFields;
   prepareAnswerMsg_t prepareAnswerMsg;
-  handleReceivedPart_t handleReceivedPart;
-  handleToSendPart_t handleToSendPart;
   handleReceivedHeader_t handleReceivedHeader;
   handleReceivedMsg_t handleReceivedMsg;
   storeReceivedMsg_t storeReceivedMsg;
   sendClientIPMsg_t sendClientIPMsg;
+  handleReceivedPart_t handleReceivedPart;
+  unpackReceivedMsg_t unpackReceivedMsg;
+  handleToSendPart_t handleToSendPart;
 } compMsgIdentify_t;
 
 compMsgIdentify_t *newCompMsgIdentify();

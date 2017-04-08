@@ -63,7 +63,7 @@ typedef struct httpHeaderKeyInfo {
   uint8_t id;
 } httpHeaderKeyInfo_t;
 
-static httpHeaderKeyInfo_t httpHeaderKeyInfos[] = {
+static const httpHeaderKeyInfo_t httpHeaderKeyInfos[] = {
   {"content-type",                     "Content-Type",                     COMP_MSG_HTTP_CONTENT_TYPE},
   {"content-length",                   "Content-Length",                   COMP_MSG_HTTP_CONTENT_LENGTH},
   {"connection",                       "Connection",                       COMP_MSG_HTTP_CONNECTION},
@@ -100,7 +100,7 @@ static httpHeaderKeyInfo_t httpHeaderKeyInfos[] = {
 // ================================= getHttpHeaderKeyIdFromKey ====================================
 
 static uint8_t getHttpHeaderKeyIdFromKey(compMsgDispatcher_t *self, const uint8_t *httpHeaderKey, uint8_t *httpHeaderKeyId) {
-  httpHeaderKeyInfo_t *entry;
+  const httpHeaderKeyInfo_t *entry;
 
   entry = &httpHeaderKeyInfos[0];
   while (entry->key != NULL) {
@@ -116,7 +116,7 @@ static uint8_t getHttpHeaderKeyIdFromKey(compMsgDispatcher_t *self, const uint8_
 // ================================= getHttpHeaderKeyIdFromLowerKey ====================================
 
 static uint8_t getHttpHeaderKeyIdFromLowerKey(compMsgDispatcher_t *self, const uint8_t *httpHeaderKey, uint8_t *httpHeaderKeyId) {
-  httpHeaderKeyInfo_t *entry;
+  const httpHeaderKeyInfo_t *entry;
 
   entry = &httpHeaderKeyInfos[0];
   while (entry->key != NULL) {
@@ -133,7 +133,7 @@ COMP_MSG_DBG(self, "Y", 1, "getHttpHeaderKeyIdFromLowerKey: %s not found", httpH
 // ================================= getHttpHeaderKeyFromId ====================================
 
 static uint8_t getHttpHeaderKeyFromId(compMsgDispatcher_t *self, uint8_t httpHeaderKeyId, const uint8_t **key) {
-  httpHeaderKeyInfo_t *entry;
+  const httpHeaderKeyInfo_t *entry;
 
   entry = &httpHeaderKeyInfos[0];
   while (entry->key != NULL) {
@@ -161,7 +161,7 @@ static uint8_t getContentAndNumHeaders(compMsgDispatcher_t *self, char *data, si
   cp = data;
   lastNewLine = cp;
   // get the number of lines of the request
-ets_printf("getContentAndNumHeaders 2: size: %d\n", size);
+//ets_printf("getContentAndNumHeaders 2: size: %d\n", size);
   while (idx < size) {
     if ((*cp == '\n')) {
       // check for end of http header
@@ -178,7 +178,6 @@ ets_printf("getContentAndNumHeaders 2: size: %d\n", size);
     idx++;
     cp++;
   }
-ets_printf("currLgth: %d\n", httpMsgInfo->currLgth);
   return COMP_MSG_ERR_OK;
 }
 
@@ -207,10 +206,10 @@ static uint8_t getHttpRequestCode(compMsgDispatcher_t *self, char * data, socket
   cp = data;
   while (*cp != '\n') {
     if (*cp == ' ') {
-      uval = c_strtoul(cp+1, &endPtr, 10);
+      uval = c_strtoul(cp + 1, &endPtr, 10);
       COMP_MSG_DBG(self, "H", 2, "uval: %d\n", uval);
       httpMsgInfo->httpRequestCode = (int)uval;
-      COMP_MSG_DBG(self, "H", 1, "CODE: %d!\n", httpMsgInfo->httpRequestCode);
+      COMP_MSG_DBG(self, "H", 2, "CODE: %d!\n", httpMsgInfo->httpRequestCode);
       break;
     }
     cp++;
@@ -231,7 +230,6 @@ static uint8_t getHttpHeaders(compMsgDispatcher_t *self, char * data, size_t siz
   httpMsgInfo_t *httpMsgInfo;
   uint8_t *headerStr;
   uint8_t *lowerHeaderStr;
-  char *lowerData;
   char *dp;
 
   idx = 0;
@@ -239,8 +237,8 @@ static uint8_t getHttpHeaders(compMsgDispatcher_t *self, char * data, size_t siz
   httpHeaderIdx = 0;
   cp = data;
   hadColon = false;
-  lowerData = os_zalloc(size + 1);
-  dp = lowerData;
+  httpMsgInfo->lowerData = os_zalloc(size + 1);
+  dp = httpMsgInfo->lowerData;
   lowerHeaderStr = dp;
   headerLgth = (char *)httpMsgInfo->content - data;
   while (idx < headerLgth) {
@@ -255,7 +253,7 @@ static uint8_t getHttpHeaders(compMsgDispatcher_t *self, char * data, size_t siz
       httpHeaderIdx++;
       hadColon = false;
       httpHeaderPart = &httpMsgInfo->receivedHeaders[httpHeaderIdx];
-      dp = lowerData + (cp - data);
+      dp = httpMsgInfo->lowerData + (cp - data);
       lowerHeaderStr = dp;
       headerStr = cp;
       COMP_MSG_DBG(self, "H", 2, "lh: %s!hs: %s!", lowerHeaderStr, headerStr);
@@ -330,7 +328,7 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
   idx = 0;
   while (idx < httpMsgInfo->numHeaders) {
     httpHeaderPart = &httpMsgInfo->receivedHeaders[idx];
-    COMP_MSG_DBG(self, "H", 1, "idx: %d id: %d name: %s value: %s!\n", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
+    COMP_MSG_DBG(self, "H", 2, "idx: %d id: %d name: %s value: %s!\n", idx, httpHeaderPart->httpHeaderId, httpHeaderPart->httpHeaderName, httpHeaderPart->httpHeaderValue);
     if (httpHeaderPart->httpHeaderId == COMP_MSG_HTTP_CONTENT_LENGTH) {
       if (httpMsgInfo->expectedLgth == 0) {
         uval = c_strtoul(httpHeaderPart->httpHeaderValue, &endPtr, 10);
@@ -340,7 +338,7 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "Y", 2, "content: %s lgth: %d", httpMsgInfo->content, httpMsgInfo->currLgth);
+  COMP_MSG_DBG(self, "Y", 1, "content: %s lgth: %d", httpMsgInfo->content, httpMsgInfo->currLgth);
   COMP_MSG_DBG(self, "Y", 2, "Code:: %d", httpMsgInfo->httpRequestCode);
 // FIXME need to call addRequest here !!!
   switch (httpMsgInfo->httpRequestCode) {
@@ -358,7 +356,7 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
       self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
       self->compMsgData->receivedData = msgData;
       self->compMsgData->receivedLgth = msgLgth;
-      result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
+      result = self->compMsgRequest->addRequest(self, COMP_MSG_INPUT_NET_SOCKET, sud, self->compMsgData);
 //      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
       COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
       checkErrOK(result);
@@ -369,17 +367,20 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
     COMP_MSG_DBG(self, "H", 1, "httpRequestCode: 0 OK");
     msgLgth = httpMsgInfo->currLgth;
     switch (sud->connectionType) {
+    case WEB_SOCKET_TYPE_CLIENT:
     case NET_SOCKET_TYPE_CLIENT:
-      self->compMsgData->currHdr->hdrHandleType = 'W';
-      msgData = httpMsgInfo->content;
-      COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
-      self->compMsgData->sud = sud;
-      self->compMsgData->direction = COMP_MSG_TRANSFER_DATA;
-      self->compMsgData->receivedData = msgData;
-      self->compMsgData->receivedLgth = msgLgth;
-      result = self->compMsgRequest->addRequest(self, COMP_DISP_INPUT_NET_SOCKET, sud, self->compMsgData);
-      COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
-      checkErrOK(result);
+      if (msgLgth > 0) {
+        self->compMsgData->currHdr->hdrHandleType = 'W';
+        msgData = httpMsgInfo->content;
+        COMP_MSG_DBG(self, "H", 1, "currHdr: %c", self->compMsgData->currHdr->hdrHandleType);
+        self->compMsgData->sud = sud;
+        self->compMsgData->direction = COMP_MSG_TRANSFER_DATA;
+        self->compMsgData->receivedData = msgData;
+        self->compMsgData->receivedLgth = msgLgth;
+        result = self->compMsgRequest->addRequest(self, COMP_MSG_INPUT_NET_SOCKET, sud, self->compMsgData);
+        COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
+        checkErrOK(result);
+      }
       break;
     }
     break;
@@ -410,6 +411,32 @@ static uint8_t getHttpGetHeaderValueForId(socketUserData_t *sud, uint8_t id, con
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
+
+// ============================ deleteHttpMsgInfo =========================================
+
+static uint8_t deleteHttpMsgInfo(socketUserData_t *sud) {
+  httpMsgInfo_t *httpMsgInfo;
+
+  httpMsgInfo = &sud->httpMsgInfos[sud->numHttpMsgInfos];
+//ets_printf("deletHttpMsgInfo1 received_headers heap: %d\n", system_get_free_heap_size());
+  if (httpMsgInfo->receivedHeaders != NULL) {
+    os_free(httpMsgInfo->receivedHeaders);
+    httpMsgInfo->receivedHeaders = NULL;
+  }
+//ets_printf("deletHttpMsgInfo2 data heap: %d\n", system_get_free_heap_size());
+  if (httpMsgInfo->data != NULL) {
+    os_free(httpMsgInfo->data);
+    httpMsgInfo->data = NULL;
+  }
+//ets_printf("deletHttpMsgInfo3 content heap: %d\n", system_get_free_heap_size());
+  // httpMsgInfo->content is assigned to self->compMsgData->receivedData and freed there
+  if (httpMsgInfo->lowerData != NULL) {
+    os_free(httpMsgInfo->lowerData);
+    httpMsgInfo->lowerData = NULL;
+  }
+//ets_printf("deletHttpMsgInfo4 heap: %d\n", system_get_free_heap_size());
+}
+
 // ================================= compMsgHttpInit ====================================
 
 uint8_t compMsgHttpInit(compMsgDispatcher_t *self) {
@@ -420,6 +447,7 @@ uint8_t compMsgHttpInit(compMsgDispatcher_t *self) {
   self->compMsgHttp->getHttpHeaderKeyFromId = &getHttpHeaderKeyFromId;
   self->compMsgHttp->httpParse = &httpParse;
   self->compMsgHttp->getHttpGetHeaderValueForId = &getHttpGetHeaderValueForId;
+  self->compMsgHttp->deleteHttpMsgInfo = &deleteHttpMsgInfo;
   return COMP_MSG_ERR_OK;
 }
 

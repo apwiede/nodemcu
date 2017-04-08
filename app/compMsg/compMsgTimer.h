@@ -53,6 +53,7 @@ extern "C" {
 #define TIMER_IDLE_FLAG (1<<7) 
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
+typedef void (* startConnection_t)(void *arg);
 
 typedef struct compMsgTimerSlot {
   os_timer_t timer;
@@ -62,6 +63,10 @@ typedef struct compMsgTimerSlot {
   uint8_t connectionMode;
   uint8_t timerId;
   uint32_t ip_addr;
+  startConnection_t followupCallback;
+  uint8_t followupTimerId;
+  uint32_t followupInterval;
+  uint8_t followupMode;
 } compMsgTimerSlot_t;
 
 typedef uint8_t (* initTimers_t)(compMsgDispatcher_t *self);

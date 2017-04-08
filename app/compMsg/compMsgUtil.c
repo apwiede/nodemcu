@@ -60,6 +60,7 @@ static const uint8 b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 /**
  * \brief encode message with base64
+ * \param self The compMsgDispatcher struct
  * \param msg The message
  * \param len The length of the message
  * \param encoded The out param encoded message
@@ -324,6 +325,31 @@ static uint8_t getFieldValueCallbackName(compMsgDispatcher_t *self, fieldValueCa
   return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
+// ================================= addFieldDescription ====================================
+
+static uint8_t addFieldDescription(compMsgDispatcher_t *self) {
+  uint8_t result;
+  msgDescriptionInfos_t *descriptions;
+  msgDescription_t *description;
+
+  descriptions = &self->compMsgMsgDesc->msgDescriptionInfos;
+  if (descriptions->numMsgDescriptions >= descriptions->maxMsgDescriptions) {
+    if (descriptions->maxMsgDescriptions == 0) {
+      descriptions->maxMsgDescriptions = 5;
+      descriptions->msgDescriptions = os_zalloc(descriptions->maxMsgDescriptions * sizeof(msgDescription_t));
+      checkAllocOK(descriptions->msgDescriptions);
+    } else {
+      descriptions->maxMsgDescriptions += 5;
+      descriptions->msgDescriptions = os_realloc((char *)descriptions->msgDescriptions, descriptions->maxMsgDescriptions * sizeof(msgDescription_t));
+      checkAllocOK(descriptions->msgDescriptions);
+    }
+  }
+  description = &descriptions->msgDescriptions[descriptions->numMsgDescriptions];
+
+  descriptions->numMsgDescriptions++;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= compMsgUtilInit ====================================
 
 uint8_t compMsgUtilInit(compMsgDispatcher_t *self) {
@@ -341,6 +367,7 @@ uint8_t compMsgUtilInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName = &addFieldValueCallbackName;
   self->compMsgUtil->getFieldValueCallback = &getFieldValueCallback;
   self->compMsgUtil->getFieldValueCallbackName = &getFieldValueCallbackName;
+  self->compMsgUtil->addFieldDescription = &addFieldDescription;
   return COMP_MSG_ERR_OK;
 }
 

@@ -381,9 +381,9 @@ ets_printf("WWWAAA: %p\n", &WWWAAA);
 ets_printf("dispInit1\n");
 #endif
 //COMP_MSG_DBG(self, "Y", 0, "call DescInit");
-  result = compMsgMsgDescInit(self);
-  checkErrOK(result);
   result = compMsgUtilInit(self);
+  checkErrOK(result);
+  result = compMsgMsgDescInit(self);
   checkErrOK(result);
   result = compMsgRequestInit(self);
   checkErrOK(result);
@@ -487,7 +487,7 @@ ets_printf("dispInit4\n");
     case 'S':
       self->compMsgDebug->setDebugFlags(self, "BEHINOsSwW");
       COMP_MSG_DBG(self, "H", 1, "start RunSSDPMode");
-      result = self->compMsgSocket->netSocketRunSSDPMode(self);
+      result = self->compMsgSocket->startSendSSDPInfo(self);
       checkErrOK(result);
       break;
     case 'U':
@@ -548,82 +548,105 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
 compMsgDispatcher_t *newCompMsgDispatcher() {
   uint8_t result;
 
-  if (compMsgDispatcherSingleton != NULL) {
-    return compMsgDispatcherSingleton;
-  }
   compMsgDispatcher_t *compMsgDispatcher = os_zalloc(sizeof(compMsgDispatcher_t));
   if (compMsgDispatcher == NULL) {
     return NULL;
   }
 
-  // Debug needs to be initialized here for being able to do debug output !!
-  compMsgDispatcher->compMsgDebug = newCompMsgDebug();
-  result = compMsgDebugInit(compMsgDispatcher);
-  if (result != COMP_MSG_ERR_OK) {
-    return NULL;
+  if (compMsgDispatcherSingleton == NULL) {
+    compMsgDispatcher->dispatcherCommon = os_zalloc(sizeof(dispatcherCommon_t));
+    if (compMsgDispatcher == NULL) {
+      return NULL;
+    }
+    // Debug needs to be initialized here for being able to do debug output !!
+    compMsgDispatcher->compMsgDebug = newCompMsgDebug();
+    result = compMsgDebugInit(compMsgDispatcher);
+    if (result != COMP_MSG_ERR_OK) {
+      return NULL;
+    }
+  } else {
+    compMsgDispatcher->dispatcherCommon = compMsgDispatcherSingleton->dispatcherCommon;
+    compMsgDispatcher->compMsgDebug = compMsgDispatcherSingleton->compMsgDebug;
   }
-
-  // TypesAndNames
+  
+  // TypesAndNames always different becuase of message field names
   compMsgDispatcher->compMsgTypesAndNames = newCompMsgTypesAndNames();
-
-  // MsgDesc
-  compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
-
-  // Timer
-  compMsgDispatcher->compMsgTimer = newCompMsgTimer();
-
-  // Http
-  compMsgDispatcher->compMsgHttp = newCompMsgHttp();
-
-  // Action
-  compMsgDispatcher->compMsgAction = newCompMsgAction();
-
-  // WifiData
-  compMsgDispatcher->compMsgWifiData = newCompMsgWifiData();
-
-  // ModuleData
-  compMsgDispatcher->compMsgModuleData = newCompMsgModuleData();
-
-  // BildMsg
-  compMsgDispatcher->compMsgBuildMsg = newCompMsgBuildMsg();
-
-  // Identify
-  compMsgDispatcher->compMsgIdentify = newCompMsgIdentify();
-
-  // SendReceive
-  compMsgDispatcher->compMsgSendReceive = newCompMsgSendReceive();
-
-  // Socket
-  compMsgDispatcher->compMsgSocket = newCompMsgSocket();
-
-  // Util
-  compMsgDispatcher->compMsgUtil = newCompMsgUtil();
-
-  // Request
-  compMsgDispatcher->compMsgRequest = newCompMsgRequest();
-
-  // Ota
-  compMsgDispatcher->compMsgOta = newCompMsgOta();
+  if (compMsgDispatcherSingleton == NULL) {
+    // MsgDesc
+    compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
+    // Timer
+    compMsgDispatcher->compMsgTimer = newCompMsgTimer();
+    // Http
+    compMsgDispatcher->compMsgHttp = newCompMsgHttp();
+    // Action
+    compMsgDispatcher->compMsgAction = newCompMsgAction();
+    // WifiData
+    compMsgDispatcher->compMsgWifiData = newCompMsgWifiData();
+    // ModuleData
+    compMsgDispatcher->compMsgModuleData = newCompMsgModuleData();
+    // BildMsg
+    compMsgDispatcher->compMsgBuildMsg = newCompMsgBuildMsg();
+    // Identify
+    compMsgDispatcher->compMsgIdentify = newCompMsgIdentify();
+    // SendReceive
+    compMsgDispatcher->compMsgSendReceive = newCompMsgSendReceive();
+    // Socket
+    compMsgDispatcher->compMsgSocket = newCompMsgSocket();
+    // Util
+    compMsgDispatcher->compMsgUtil = newCompMsgUtil();
+    // Request
+    compMsgDispatcher->compMsgRequest = newCompMsgRequest();
+    // Ota
+    compMsgDispatcher->compMsgOta = newCompMsgOta();
+  } else {
+    // MsgDesc
+    compMsgDispatcher->compMsgMsgDesc = compMsgDispatcherSingleton->compMsgMsgDesc,
+    // Timer
+    compMsgDispatcher->compMsgTimer = compMsgDispatcherSingleton->compMsgTimer;
+    // Http
+    compMsgDispatcher->compMsgHttp = compMsgDispatcherSingleton->compMsgHttp;
+    // Action
+    compMsgDispatcher->compMsgAction = compMsgDispatcherSingleton->compMsgAction;
+    // WifiData
+    compMsgDispatcher->compMsgWifiData = compMsgDispatcherSingleton->compMsgWifiData;
+    // ModuleData
+    compMsgDispatcher->compMsgModuleData = compMsgDispatcherSingleton->compMsgModuleData;
+    // BildMsg
+    compMsgDispatcher->compMsgBuildMsg = compMsgDispatcherSingleton->compMsgBuildMsg;
+    // Identify
+    compMsgDispatcher->compMsgIdentify = compMsgDispatcherSingleton->compMsgIdentify;
+    // SendReceive
+    compMsgDispatcher->compMsgSendReceive = compMsgDispatcherSingleton->compMsgSendReceive;
+    // Socket
+    compMsgDispatcher->compMsgSocket = compMsgDispatcherSingleton->compMsgSocket;
+    // Util
+    compMsgDispatcher->compMsgUtil = compMsgDispatcherSingleton->compMsgUtil;
+    // Request
+    compMsgDispatcher->compMsgRequest = compMsgDispatcherSingleton->compMsgRequest;
+    // Ota
+    compMsgDispatcher->compMsgOta = compMsgDispatcherSingleton->compMsgOta;
+  }
 
   compMsgDispatcherId++;
   compMsgDispatcher->id = compMsgDispatcherId;
 
-  compMsgDispatcher->runningModeFlags = 0;
-  compMsgDispatcher->stopAccessPoint = false;
+  compMsgDispatcher->dispatcherCommon->runningModeFlags = 0;
+  compMsgDispatcher->dispatcherCommon->stopAccessPoint = false;
+
+  compMsgDispatcher->dispatcherCommon->numMsgKeyValueDescParts = 0;
+  compMsgDispatcher->dispatcherCommon->maxMsgKeyValueDescParts = 0;
+  compMsgDispatcher->dispatcherCommon->msgKeyValueDescParts = NULL;
+
+  compMsgDispatcher->dispatcherCommon->operatingMode = MODULE_OPERATING_MODE_START;
+
+  compMsgDispatcher->dispatcherCommon->msgHeaderInfos.headerParts = NULL;
+  compMsgDispatcher->dispatcherCommon->msgHeaderInfos.numHeaderParts = 0;
+  compMsgDispatcher->dispatcherCommon->msgHeaderInfos.maxHeaderParts = 0;
+
 
   compMsgDispatcher->numMsgHeaders = 0;
   compMsgDispatcher->maxMsgHeaders = 0;
   compMsgDispatcher->msgHeader2MsgPtrs = NULL;
-
-  compMsgDispatcher->numMsgKeyValueDescParts = 0;
-  compMsgDispatcher->maxMsgKeyValueDescParts = 0;
-  compMsgDispatcher->msgKeyValueDescParts = NULL;
-
-  compMsgDispatcher->msgHeaderInfos.headerParts = NULL;
-  compMsgDispatcher->msgHeaderInfos.numHeaderParts = 0;
-  compMsgDispatcher->msgHeaderInfos.maxHeaderParts = 0;
-
-  compMsgDispatcher->operatingMode = MODULE_OPERATING_MODE_AP;
 
   compMsgDispatcher->cloudMsgData = NULL;
   compMsgDispatcher->cloudMsgDataLgth = 0;
@@ -638,7 +661,9 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->resetBuildMsgInfos =&resetBuildMsgInfos;
 
   compMsgDispatcher->getFieldType = &getFieldType;
-  compMsgDispatcherSingleton = compMsgDispatcher;
+  if (compMsgDispatcherSingleton == NULL) {
+    compMsgDispatcherSingleton = compMsgDispatcher;
+  }
   return compMsgDispatcher;
 }
 

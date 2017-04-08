@@ -104,7 +104,7 @@ static uint8_t dumpFieldValue(compMsgDispatcher_t *self, compMsgField_t *fieldIn
     break;
   case DATA_VIEW_FIELD_UINT8_VECTOR:
     valueIdx = 0;
-  COMP_MSG_DBG(self, "d", 1, "heap5: %d", system_get_free_heap_size());
+//COMP_MSG_DBG(self, "d", 1, "heap5: %d", system_get_free_heap_size());
     COMP_MSG_DBG(self, "d", 1, "      values:\n");
     while (valueIdx < fieldInfo->fieldLgth) {
       uch = stringValue[valueIdx];
@@ -156,23 +156,6 @@ break;
 return DATA_VIEW_ERR_OK;
 }
 
-// ============================= dumpKeyValueFields ========================
-
-static uint8_t dumpKeyValueFields(compMsgDispatcher_t *self, size_t offset) {
-  int numEntries;
-  int idx;
-  int result;
-  int row;
-  int col;
-  uint8_t *fieldTypeStr;
-  uint8_t *fieldNameStr;
-  compMsgField_t *fieldInfo;
-
-  numEntries = self->compMsgData->numValueFields;
-  COMP_MSG_DBG(self, "d", 1, "      numKeyValues: %d offset: %d\r\n", numEntries, offset);
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= dumpFieldInfo ====================================
 
 static uint8_t dumpFieldInfo(compMsgDispatcher_t *self, compMsgField_t *fieldInfo) {
@@ -198,6 +181,77 @@ static uint8_t dumpFieldInfo(compMsgDispatcher_t *self, compMsgField_t *fieldInf
   COMP_MSG_DBG(self, "d", 1, "%s", buf);
   ets_sprintf(buf, " fieldNameId: %5d fieldTypeId: %5d fieldKey: 0x%04x %d\r\n", fieldInfo->fieldNameId, fieldInfo->fieldTypeId, fieldInfo->fieldKey, fieldInfo->fieldKey);
   COMP_MSG_DBG(self, "d", 1, "%s", buf);
+  return COMP_MSG_ERR_OK;
+}
+
+// ============================= dumpKeyValueFields ========================
+
+static uint8_t dumpKeyValueFields(compMsgDispatcher_t *self, size_t offset, int *idx) {
+  int numEntries;
+  int result;
+  uint16_t key;
+  uint16_t lgth;
+  uint16_t numValues;
+  uint8_t rw;
+  uint8_t typeId;
+  char buf[512];
+  uint8_t *fieldTypeStr;
+  uint8_t *fieldNameStr;
+  int keyFieldIdx;
+  dataView_t *dataView;
+  compMsgField_t *fieldInfo;
+  compMsgField_t fieldInfo2;
+
+  numEntries = self->compMsgData->numValueFields;
+  dataView = self->compMsgData->compMsgDataView->dataView;
+  COMP_MSG_DBG(self, "d", 1, "      numKeyValues: %2d offset: %d\r\n", numEntries, offset);
+  keyFieldIdx = 0;
+  while (keyFieldIdx < numEntries) {
+    fieldInfo = &self->compMsgData->fields[*idx];
+    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldTypeId, &fieldTypeStr);
+    checkErrOK(result);
+    result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
+    checkErrOK(result);
+    ets_sprintf(buf, "      idx: %2d fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %d flags: ", *idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
+    if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
+      c_strcat(buf, " COMP_MSG_FIELD_IS_SET");
+    }
+    if (fieldInfo->fieldFlags & COMP_MSG_KEY_VALUE_FIELD) {
+      c_strcat(buf, " COMP_MSG_KEY_VALUE_FIELD");
+    }
+    COMP_MSG_DBG(self, "d", 1, "%s", buf);
+    offset = fieldInfo->fieldOffset;
+    key = 0;
+    result = dataView->getUint16(dataView, offset, &key);
+    checkErrOK(result);
+    offset += 2;
+    rw = 0;
+    result = dataView->getUint8(dataView, offset, &rw);
+    checkErrOK(result);
+    offset += 1;
+    typeId = 0;
+    result = dataView->getUint8(dataView, offset, &typeId);
+    checkErrOK(result);
+    offset += 1;
+    lgth = 0;
+    result = dataView->getUint16(dataView, offset, &lgth);
+    checkErrOK(result);
+    offset += 2;
+    numValues = 0;
+    result = dataView->getUint16(dataView, offset, &numValues);
+    checkErrOK(result);
+    offset += 2;
+    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, typeId, &fieldTypeStr);
+    checkErrOK(result);
+    ets_sprintf(buf, "        key: %3d rw: %d fieldType: %-8s lgth: %5d numValues: %5d offset: %d\n", key, rw, fieldTypeStr, lgth, numValues, fieldInfo->fieldOffset);
+    COMP_MSG_DBG(self, "d", 1, "%s", buf);
+    fieldInfo2 = *fieldInfo;
+    fieldInfo2.fieldOffset += (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t));
+    fieldInfo2.fieldLgth -= (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t));
+    dumpFieldValue(self, &fieldInfo2, "    ");
+    keyFieldIdx++;
+    (*idx)++;
+  }
   return COMP_MSG_ERR_OK;
 }
 
@@ -267,9 +321,10 @@ static uint8_t dumpMsg(compMsgDispatcher_t *self) {
         checkErrOK(result);
         self->compMsgData->numValueFields = numericValue;
       }
-      result = dumpKeyValueFields(self, fieldInfo->fieldOffset + fieldInfo->fieldLgth);
-      checkErrOK(result);
       idx++;
+      result = dumpKeyValueFields(self, fieldInfo->fieldOffset + fieldInfo->fieldLgth, &idx);
+      checkErrOK(result);
+//      idx++;
       continue;
     }
     ets_sprintf(buf, "    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %d key: %5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset, fieldInfo->fieldKey);
@@ -428,7 +483,7 @@ static uint8_t createMsg(compMsgDispatcher_t *self, int numFields, uint8_t **han
   compMsgData->cmdLgth = 0;
   compMsgData->headerLgth = 0;
   os_sprintf(compMsgData->handle, "%s%p", HANDLE_PREFIX, self);
-  COMP_MSG_DBG(self, "d", 2, "createMsg: addHandle: %s", compMsgData->handle);
+  COMP_MSG_DBG(self, "d", 2, "createMsg: handle: %s", compMsgData->handle);
   result = addHandle(self, compMsgData->handle);
   if (result != COMP_MSG_ERR_OK) {
     os_free(compMsgData->fields);
@@ -509,17 +564,20 @@ static uint8_t addField(compMsgDispatcher_t *self, const uint8_t *fieldName, con
 
 static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
   compMsgField_t *fieldInfo;
+  compMsgField_t fieldInfo2;
   uint8_t fieldNameId;
   int idx;
   int numEntries;
   int result;
+  dataView_t *dataView;
   compMsgData_t *compMsgData;
-  size_t saveOffset;
+  int offset;
 
   compMsgData = self->compMsgData;
   if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
+  dataView = compMsgData->compMsgDataView->dataView;
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   idx = 0;
@@ -527,13 +585,18 @@ static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
   while (idx < numEntries) {
     fieldInfo = &compMsgData->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
-      saveOffset = fieldInfo->fieldOffset;
+      offset = 0;
       if (c_strncmp(fieldName, "#key_", c_strlen("#key_")) == 0) {
-        fieldInfo->fieldOffset += (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
+        // key + accessType + type + lgth + numValues
+        offset = (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t));
       }
-      result = compMsgData->compMsgDataView->getFieldValue(self, compMsgData->compMsgDataView->dataView, fieldInfo, numericValue, stringValue, 0);
+      *stringValue = NULL;
+      *numericValue = 0;
+      fieldInfo2 = *fieldInfo;
+      fieldInfo2.fieldOffset += offset;
+      fieldInfo2.fieldLgth -= offset;
+      result = compMsgData->compMsgDataView->getFieldValue(self, dataView, &fieldInfo2, numericValue, stringValue, 0);
       checkErrOK(result);
-      fieldInfo->fieldOffset = saveOffset;
       break;
     }
     idx++;
@@ -551,12 +614,14 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
   int numEntries;
   int result;
   size_t offset;
+  dataView_t *dataView;
   compMsgData_t *compMsgData;
 
   compMsgData = self->compMsgData;
   if ((compMsgData->flags & COMP_MSG_IS_INITTED) == 0) {
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
+  dataView = compMsgData->compMsgDataView->dataView;
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   switch (fieldNameId) {
@@ -575,29 +640,49 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
     fieldInfo = &compMsgData->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
       if (fieldName[0] == '#') {
-        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue: name: %s!numeric: %d!string: %s!fieldNameId: %d!fieldKey: %d!fieldSize: %d!fieldType: %d!\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId, fieldInfo->fieldKey, compMsgData->msgDescPart->fieldSize, compMsgData->msgDescPart->fieldType);
+        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue1: name: %s!numeric: %d!string: %s!fieldNameId: %d!fieldKey: %d!fieldSize: %d!fieldKeyType: %d!\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId, fieldInfo->fieldKey, compMsgData->msgDescPart->fieldSize, fieldInfo->fieldKeyTypeId);
         // key value field !!
         // the type is always uint8_t* we set the individual type of the key below
         COMP_MSG_DBG(self, "d", 2, "fieldInfo->fieldLgth: %d offset: %d\n", fieldInfo->fieldLgth, fieldInfo->fieldOffset);
         offset = fieldInfo->fieldOffset;
-        result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldKey);
+        // the key value
+        result = dataView->setUint16(dataView, offset, fieldInfo->fieldKey);
         checkErrOK(result);
         offset += 2;
-        result = compMsgData->compMsgDataView->dataView->setUint8(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldType);
+        // the key access type (we only use read (= 0)
+        result = dataView->setUint8(dataView, offset, compMsgData->msgDescPart->fieldRW);
         checkErrOK(result);
         offset += 1;
-        result = compMsgData->compMsgDataView->dataView->setUint16(compMsgData->compMsgDataView->dataView, offset, compMsgData->msgDescPart->fieldSize);
+        // the key type
+        result = dataView->setUint8(dataView, offset, fieldInfo->fieldKeyTypeId);
         checkErrOK(result);
+        offset += 1;
+        // the key length
+        result = dataView->setUint16(dataView, offset, compMsgData->msgDescPart->fieldSize);
+        checkErrOK(result);
+        offset += 2;
+        // the key numValues
+        if ((c_strcmp(compMsgData->msgDescPart->fieldNameStr, "#key_ssid") == 0) ||
+            (c_strcmp(compMsgData->msgDescPart->fieldNameStr, "#key_rssi") == 0)) {
+          compMsgData->msgDescPart->fieldNumValues = self->dispatcherCommon->bssScanInfos->numScanInfos;
+        } else {
+          compMsgData->msgDescPart->fieldNumValues = 1;
+        }
+        result = dataView->setUint16(dataView, offset, compMsgData->msgDescPart->fieldNumValues);
+        checkErrOK(result);
+        offset += 2;
         // here we need the keyValue fieldType!!
         saveFieldType = fieldInfo->fieldTypeId;
-        fieldInfo->fieldTypeId = fieldInfo->fieldKeyTypeId;
-        result = compMsgData->compMsgDataView->setFieldValue(self, compMsgData->compMsgDataView->dataView, fieldInfo, numericValue, stringValue, sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t));
+        if (c_strcmp(compMsgData->msgDescPart->fieldNameStr, "#key_rssi") == 0) {
+          fieldInfo->fieldTypeId = DATA_VIEW_FIELD_UINT8_VECTOR;
+        } else {
+          fieldInfo->fieldTypeId = fieldInfo->fieldKeyTypeId;
+        }
+        result = compMsgData->compMsgDataView->setFieldValue(self, dataView, fieldInfo, numericValue, stringValue, sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t));
         fieldInfo->fieldTypeId = saveFieldType;
-        
-        
       } else {
-        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue: %s!value: 0x%04x %s type: %d!", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldInfo->fieldTypeId);
-        result = compMsgData->compMsgDataView->setFieldValue(self, compMsgData->compMsgDataView->dataView, fieldInfo, numericValue, stringValue, 0);
+        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue2: %s!value: 0x%04x %s type: %d!", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldInfo->fieldTypeId);
+        result = compMsgData->compMsgDataView->setFieldValue(self, dataView, fieldInfo, numericValue, stringValue, 0);
       }
       checkErrOK(result);
       fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
@@ -657,7 +742,7 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
         break;
       case COMP_MSG_SPEC_FIELD_CRC:
         if (compMsgData->currHdr->hdrEncryption == 'E') {
-          headerLgth = self->msgHeaderInfos.headerLgth;
+          headerLgth = self->dispatcherCommon->msgHeaderInfos.headerLgth;
         } else {
           headerLgth = 0;
         }
@@ -759,6 +844,9 @@ static uint8_t initMsg(compMsgDispatcher_t *self) {
         COMP_MSG_DBG(self, "d", 2, "initMsg2a idx: %d", idx);
         break;
       default:
+        if (c_strncmp(msgDescPart->fieldNameStr, "#key_", 5) == 0) {
+          fieldInfo->fieldFlags |= COMP_MSG_KEY_VALUE_FIELD;
+        }
         compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
         compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
         COMP_MSG_DBG(self, "d", 2, "initMsg2b idx: %d totalLgth: %d", idx, compMsgData->totalLgth);
@@ -831,9 +919,13 @@ static uint8_t initReceivedMsg(compMsgDispatcher_t *self) {
   int col;
   int cellIdx;
   int result;
-  uint16_t u16;
-  uint8_t u8;
+  uint16_t key;
+  uint16_t keyLgth;
+  uint16_t numValues;
+  uint8_t rw;
+  uint8_t typeId;
   uint8_t *stringValue;
+  int numericValue;
   size_t lgth;
   uint8_t *data;
   uint8_t *where;
@@ -843,6 +935,7 @@ static uint8_t initReceivedMsg(compMsgDispatcher_t *self) {
   size_t msgDescPartIdx;
   size_t msgValPartIdx;
   size_t offset;
+  dataView_t *dataView;
   compMsgField_t *fieldInfo;
   compMsgField_t *fieldInfo2;
   compMsgData_t *compMsgData;
@@ -850,6 +943,7 @@ static uint8_t initReceivedMsg(compMsgDispatcher_t *self) {
   msgValPart_t *msgValPart;
 
   compMsgData = self->compMsgData;
+  dataView = compMsgData->compMsgDataView->dataView;
   // initialize field offsets for each field
   // initialize totalLgth, headerLgth, cmdLgth
   if ((compMsgData->flags & COMP_MSG_IS_INITTED) != 0) {
@@ -865,9 +959,9 @@ static uint8_t initReceivedMsg(compMsgDispatcher_t *self) {
     fieldInfo = &compMsgData->fields[idx];
     fieldInfo->fieldOffset = compMsgData->fieldOffset;
     msgDescPart = &self->compMsgData->msgDescParts[idx];
-    self->compMsgData->msgDescPart = msgDescPart;
+    compMsgData->msgDescPart = msgDescPart;
     msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
-    self->compMsgData->msgValPart = msgValPart;
+    compMsgData->msgValPart = msgValPart;
     fieldInfo->fieldFlags |= COMP_MSG_FIELD_IS_SET;
     COMP_MSG_DBG(self, "d", 2, "initReceivedMsg2 idx: %d %s totalLgth: %d", idx, msgDescPart->fieldNameStr, compMsgData->totalLgth);
     switch (fieldInfo->fieldNameId) {
@@ -902,20 +996,37 @@ static uint8_t initReceivedMsg(compMsgDispatcher_t *self) {
         break;
       default:
         if (msgDescPart->fieldNameStr[0] == '#') {
-          offset = self->compMsgData->fieldOffset;
-          result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, offset, &u16);
+          offset = compMsgData->fieldOffset;
+          result = dataView->getUint16(dataView, offset, &key);
           checkErrOK(result);
           offset += 2;
-          result = self->compMsgData->compMsgDataView->dataView->getUint8(self->compMsgData->compMsgDataView->dataView, offset, &u8);
+          result = dataView->getUint8(dataView, offset, &rw);
           checkErrOK(result);
           offset += 1;
-          result = self->compMsgData->compMsgDataView->dataView->getUint16(self->compMsgData->compMsgDataView->dataView, offset, &u16);
+          result = dataView->getUint8(dataView, offset, &typeId);
           checkErrOK(result);
-          fieldInfo->fieldLgth = (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint16_t) + u16);
-          self->compMsgData->totalLgth = self->compMsgData->fieldOffset + fieldInfo->fieldLgth;
+          offset += 1;
+          result = dataView->getUint16(dataView, offset, &keyLgth);
+          checkErrOK(result);
+          offset += 2;
+          result = dataView->getUint16(dataView, offset, &numValues);
+          checkErrOK(result);
+          if (fieldInfo->fieldLgth == 0) {
+            if ((c_strcmp(msgDescPart->fieldNameStr, "#key_clientSsid") == 0) ||
+               (c_strcmp(msgDescPart->fieldNameStr, "#key_clientPasswd") == 0)) {
+              numericValue = keyLgth;
+            } else {
+              stringValue = NULL;
+              numericValue = 0;
+              result = msgDescPart->fieldSizeCallback(self, &numericValue, &stringValue);
+//ets_printf("%s: fieldLgth: %s %d keyLgth: %d\n", msgDescPart->fieldNameStr, stringValue == NULL ? "nil" : (char *)stringValue, numericValue, keyLgth);
+            }
+            fieldInfo->fieldLgth = numericValue;
+          }
+          fieldInfo->fieldLgth += (sizeof(uint16_t) + sizeof(uint8_t)  + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t));
+          compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
         } else {
           compMsgData->totalLgth = compMsgData->fieldOffset + fieldInfo->fieldLgth;
-//          compMsgData->cmdLgth = compMsgData->totalLgth - compMsgData->headerLgth;
         }
         COMP_MSG_DBG(self, "d", 2, "initReceivedMsg2b idx: %d", idx);
         break;
@@ -968,6 +1079,7 @@ static uint8_t deleteMsgDescParts(compMsgDispatcher_t *self) {
   msgDescPart_t *part;
   compMsgData_t *compMsgData;
 
+//ets_printf("deleteMsgDescParts1: heap: %d\n", system_get_free_heap_size());
   compMsgData = self->compMsgData;
   if (compMsgData->numMsgDescParts > 0) {
     idx = 0;
@@ -975,9 +1087,11 @@ static uint8_t deleteMsgDescParts(compMsgDispatcher_t *self) {
       part = &compMsgData->msgDescParts[idx];
       if (part->fieldNameStr != NULL) {
         os_free(part->fieldNameStr);
+        part->fieldNameStr = NULL;
       }
       if (part->fieldTypeStr != NULL) {
         os_free(part->fieldTypeStr);
+        part->fieldTypeStr = NULL;
       }
       idx++;
     }
@@ -990,6 +1104,7 @@ static uint8_t deleteMsgDescParts(compMsgDispatcher_t *self) {
       COMP_MSG_DBG(self, "d", 2, "self->compMsgData->msgDescParts != NULL and numMsgDescParts == 0");
     }
   }
+//ets_printf("deleteMsgDescParts2: heap: %d\n", system_get_free_heap_size());
   return COMP_MSG_ERR_OK;
 }
 
@@ -1000,16 +1115,19 @@ static uint8_t deleteMsgValParts(compMsgDispatcher_t *self) {
   msgValPart_t *part;
   compMsgData_t *compMsgData;
 
+//ets_printf("deleteMsgValParts1: heap: %d\n", system_get_free_heap_size());
   compMsgData = self->compMsgData;
   if (compMsgData->numMsgValParts > 0) {
     idx = 0;
     while (idx < compMsgData->numMsgValParts) {
-    part = &compMsgData->msgValParts[idx];
+      part = &compMsgData->msgValParts[idx];
       if (part->fieldNameStr != NULL) {
         os_free(part->fieldNameStr);
+        part->fieldNameStr = NULL;
       }
       if (part->fieldValueStr != NULL) {
         os_free(part->fieldValueStr);
+        part->fieldValueStr = NULL;
       }
       idx++;
     }
@@ -1022,6 +1140,7 @@ static uint8_t deleteMsgValParts(compMsgDispatcher_t *self) {
       COMP_MSG_DBG(self, "Y", 0, "self->compMsgData->msgValParts != NULL and numMsgValParts == 0");
     }
   }
+//ets_printf("deleteMsgValParts2: heap: %d\n", system_get_free_heap_size());
   return COMP_MSG_ERR_OK;
 }
 
@@ -1035,9 +1154,8 @@ static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
   if (self->compMsgTypesAndNames != NULL) {
     result = self->compMsgTypesAndNames->freeCompMsgTypesAndNames(self->compMsgTypesAndNames);
     checkErrOK(result);
-//    os_free(self->compMsgTypesAndNames);
-//    self->compMsgTypesAndNames = NULL;
   }
+//ets_printf("freeCompMsgData: fields: %p\n", compMsgData->fields);
   if (compMsgData->fields != NULL) {
     os_free(compMsgData->fields);
     compMsgData->fields = NULL;
@@ -1086,6 +1204,7 @@ static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
 
 // ???  os_free(self->compMsgData);
 //  self->compMsgData = NULL;
+//ets_printf("deleteMsg end: heap: %d\n", system_get_free_heap_size());
   return COMP_MSG_ERR_OK;
 }
 
@@ -1109,6 +1228,7 @@ static uint8_t setDispatcher(compMsgData_t *self, compMsgDispatcher_t *dispatche
 // ================================= newCompMsgData ====================================
 
 compMsgData_t *newCompMsgData(void) {
+//ets_printf("size compMsgData_t: %d\n", sizeof (compMsgData_t));
   compMsgData_t *compMsgData = os_zalloc(sizeof(compMsgData_t));
   if (compMsgData == NULL) {
     return NULL;

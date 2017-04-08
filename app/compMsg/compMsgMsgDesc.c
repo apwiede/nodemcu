@@ -369,6 +369,47 @@ ets_printf("<<<handleMsgFile\n");
   return result;
 }
 
+// ================================= handleMsgFileNameLine ====================================
+
+static uint8_t handleMsgFileNameLine(compMsgDispatcher_t *self) {
+  int result;
+  int lgth;
+  uint8_t *field0;
+  uint8_t *field1;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+
+  result = COMP_MSG_ERR_OK;
+  compMsgMsgDesc = self->compMsgMsgDesc;
+ets_printf("handleMsgFileNameLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
+  if (compMsgMsgDesc->numLineFields < 2) {
+    return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
+  }
+  field0 = compMsgMsgDesc->lineFields[0];
+  field1 = compMsgMsgDesc->lineFields[1];
+ets_printf("fileName: %s\n", field1);
+  if (c_strcmp(field0, MSG_USE_FILE_TOKEN) == 0) {
+    compMsgMsgDesc->msgUseFileName = os_zalloc(c_strlen(field1) + 1);
+    c_memcpy(compMsgMsgDesc->msgUseFileName, field1, c_strlen(field1));
+  }
+  if (c_strcmp(field0, MSG_HEADS_FILE_TOKEN) == 0) {
+    compMsgMsgDesc->msgHeadsFileName = os_zalloc(c_strlen(field1) + 1);
+    c_memcpy(compMsgMsgDesc->msgHeadsFileName, field1, c_strlen(field1));
+  }
+  if (c_strcmp(field0, MSG_DESC_HEADER_FILE_TOKEN) == 0) {
+    compMsgMsgDesc->msgDescHeaderFileName = os_zalloc(c_strlen(field1) + 1);
+    c_memcpy(compMsgMsgDesc->msgDescHeaderFileName, field1, c_strlen(field1));
+  }
+  if (c_strcmp(field0, MSG_DESC_MID_PART_FILE_TOKEN) == 0) {
+    compMsgMsgDesc->msgDescMidPartFileName = os_zalloc(c_strlen(field1) + 1);
+    c_memcpy(compMsgMsgDesc->msgDescMidPartFileName, field1, c_strlen(field1));
+  }
+  if (c_strcmp(field0, MSG_DESC_TRAILER_FILE_TOKEN) == 0) {
+    compMsgMsgDesc->msgDescTrailerFileName = os_zalloc(c_strlen(field1) + 1);
+    c_memcpy(compMsgMsgDesc->msgDescTrailerFileName, field1, c_strlen(field1));
+  }
+  return result;
+}
+
 // ================================= handleMsgUseLine ====================================
 
 static uint8_t handleMsgUseLine(compMsgDispatcher_t *self) {
@@ -381,7 +422,7 @@ static uint8_t handleMsgUseLine(compMsgDispatcher_t *self) {
 
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
-ets_printf("handleMsgUseLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
+//ets_printf("handleMsgUseLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
   if (compMsgMsgDesc->numLineFields < 3) {
     return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
   }
@@ -396,10 +437,10 @@ ets_printf("handleMsgUseLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
       checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
     }
     msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
-ets_printf("handleMsgUseLine: %s numFieldDesc: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldDesc);
+//ets_printf("handleMsgUseLine: %s numFieldDesc: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldDesc);
     //field name
     result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
-ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId);
+//ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId);
     checkErrOK(result);
     //field type
     result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[1], &msgFieldDesc->fieldTypeId);
@@ -424,7 +465,7 @@ while (idx < self->compMsgMsgDesc->numLineFields) {
       checkAllocOK(msgDescIncludeInfo->msgFieldVals);
     }
     msgFieldVal = &msgDescIncludeInfo->msgFieldVals[msgDescIncludeInfo->numMsgFieldVal];
-ets_printf("handleMsgUseLine: %s numFieldVal: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldVal);
+//ets_printf("handleMsgUseLine: %s numFieldVal: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldVal);
     //field name
     result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldVal->fieldNameId, COMP_MSG_INCR);
 //ets_printf("fieldName: %s result: %d\n", compMsgMsgDesc->lineFields[0], result);
@@ -445,10 +486,10 @@ ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldVal->fieldName
         checkAllocOK(msgFieldVal->stringValue);
         c_memcpy(msgFieldVal->stringValue, compMsgMsgDesc->lineFields[2], c_strlen(compMsgMsgDesc->lineFields[2]));
         // FIXME: need code for value callback here !!!
-ets_printf("%s: %s!\n", compMsgMsgDesc->lineFields[0], msgFieldVal->stringValue);
+//ets_printf("%s: %s!\n", compMsgMsgDesc->lineFields[0], msgFieldVal->stringValue);
       } else {
         result = compMsgMsgDesc->getIntFieldValue(self, 2, &msgFieldVal->numericValue);
-ets_printf("%s: %d 0x%08x\n", compMsgMsgDesc->lineFields[0], msgFieldVal->numericValue, msgFieldVal->numericValue);
+//ets_printf("%s: %d 0x%08x\n", compMsgMsgDesc->lineFields[0], msgFieldVal->numericValue, msgFieldVal->numericValue);
       }
       checkErrOK(result);
       break;
@@ -456,7 +497,7 @@ ets_printf("%s: %d 0x%08x\n", compMsgMsgDesc->lineFields[0], msgFieldVal->numeri
       msgFieldVal->stringValue = os_zalloc(c_strlen(compMsgMsgDesc->lineFields[2]) + 1);
       checkAllocOK(msgFieldVal->stringValue);
       c_memcpy(msgFieldVal->stringValue, compMsgMsgDesc->lineFields[2], c_strlen(compMsgMsgDesc->lineFields[2]));
-ets_printf("%s: %s!\n", compMsgMsgDesc->lineFields[0], msgFieldVal->stringValue);
+//ets_printf("%s: %s!\n", compMsgMsgDesc->lineFields[0], msgFieldVal->stringValue);
       
       break;
     default:
@@ -469,6 +510,70 @@ ets_printf("%s: %s!\n", compMsgMsgDesc->lineFields[0], msgFieldVal->stringValue)
     COMP_MSG_DBG(self, "E", 0, "bad desc file fieldIncludeType 0x%02x", msgDescIncludeInfo->includeType);
     return COMP_MSG_ERR_BAD_DESC_FILE_FIELD_INCLUDE_TYPE;
   }
+  return result;
+}
+
+// ================================= handleMsgHeadsLine ====================================
+
+static uint8_t handleMsgHeadsLine(compMsgDispatcher_t *self) {
+  uint8_t result;
+  int lgth;
+  int includeIdx;
+  int fieldIdx;
+  uint8_t numHeaderFields;
+  uint8_t *fieldNameStr;
+  uint8_t *value;
+  compMsgMsgDesc_t *compMsgMsgDesc;
+  msgFieldDesc_t *msgFieldDesc;
+  msgFieldVal_t *msgFieldVal;
+  msgDescIncludeInfo_t *msgDescIncludeInfo;
+  msgDescriptionInfos_t *descriptions;
+  msgDescription_t *msgDescription;
+
+  result = COMP_MSG_ERR_OK;
+  compMsgMsgDesc = self->compMsgMsgDesc;
+ets_printf("handleMsgHeadsLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
+  result = self->compMsgUtil->addFieldDescription(self);
+  checkErrOK(result);
+  descriptions = &self->compMsgMsgDesc->msgDescriptionInfos;
+  msgDescription = &descriptions->msgDescriptions[descriptions->numMsgDescriptions - 1];
+  includeIdx = 0;
+  numHeaderFields = 0;
+  while (includeIdx < compMsgMsgDesc->numMsgDescIncludeInfo) {
+    msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[includeIdx];
+    if (msgDescIncludeInfo->includeType == COMP_MSG_DESC_HEADER_INCLUDE) {
+      numHeaderFields = msgDescIncludeInfo->numMsgFieldDesc;
+      break;
+    }
+    includeIdx++;
+  }
+  if (numHeaderFields == 0) {
+    return COMP_MSG_ERR_HEADER_INCLUDE_NOT_FOUND;
+  }
+  if (compMsgMsgDesc->numLineFields < 3) {
+    return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
+  }
+ets_printf("numExpected headerFields: %d includeIdx: %d\n", numHeaderFields, includeIdx);
+  fieldIdx = 0;
+  msgDescription->headerLgth = 0;
+  while (fieldIdx < numHeaderFields) {
+    msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[fieldIdx];
+    msgDescription->headerLgth += msgFieldDesc->fieldLgth;
+    result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, msgFieldDesc->fieldNameId, &fieldNameStr);
+    value = compMsgMsgDesc->lineFields[fieldIdx];
+ets_printf("field: %s %s\n", fieldNameStr, value);
+    fieldIdx++;
+  }
+  if (c_strlen(compMsgMsgDesc->lineFields[fieldIdx]) > 1) {
+    return COMP_MSG_ERR_BAD_ENCRYPTED_VALUE;
+  }
+  msgDescription->encrypted = compMsgMsgDesc->lineFields[fieldIdx][0];
+  fieldIdx++;
+  if (c_strlen(compMsgMsgDesc->lineFields[fieldIdx]) > 1) {
+    return COMP_MSG_ERR_BAD_HANDLE_TYPE_VALUE;
+  }
+  msgDescription->handleType = compMsgMsgDesc->lineFields[fieldIdx][0];
+ets_printf("msgDescription->headerLgth: %d encrypted: %c handleType: %c\n", msgDescription->headerLgth, msgDescription->encrypted, msgDescription->handleType);
   return result;
 }
 
@@ -667,7 +772,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
 
   COMP_MSG_DBG(self, "E", 2, "readHeadersAndSetFlags\n");
   compMsgMsgDesc = self->compMsgMsgDesc;
-  hdrInfos = &self->msgHeaderInfos;
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   hdrInfos->currPartIdx = 0;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
@@ -680,7 +785,7 @@ static uint8_t readHeadersAndSetFlags(compMsgDispatcher_t *self, uint8_t *fileNa
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
   hdrInfos->headerParts = (headerPart_t *)os_zalloc(numEntries * (sizeof(headerPart_t)));
-  checkAllocOK(self->msgHeaderInfos.headerParts);
+  checkAllocOK(self->dispatcherCommon->msgHeaderInfos.headerParts);
   hdrInfos->numHeaderParts = 0;
   hdrInfos->maxHeaderParts = numEntries;
   hdrInfos->headerFlags = 0;
@@ -1114,9 +1219,9 @@ static uint8_t readWifiValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= readModuleValues ====================================
+// ================================= readModuleDataValues ====================================
 
-static uint8_t readModuleValues(compMsgDispatcher_t *self, uint8_t *fileName) {
+static uint8_t readModuleDataValues(compMsgDispatcher_t *self, uint8_t *fileName) {
   int result;
   long uval;
   uint8_t numEntries;
@@ -1199,8 +1304,8 @@ static uint8_t  getHeaderFromUniqueFields (compMsgDispatcher_t *self, uint16_t d
   int idx;
 
   idx = 0;
-  while (idx < self->msgHeaderInfos.numHeaderParts) {
-    *hdr = &self->msgHeaderInfos.headerParts[idx];
+  while (idx < self->dispatcherCommon->msgHeaderInfos.numHeaderParts) {
+    *hdr = &self->dispatcherCommon->msgHeaderInfos.headerParts[idx];
     if ((*hdr)->hdrToPart == dst) {
       if ((*hdr)->hdrFromPart == src) {
         if ((*hdr)->hdrU16CmdKey == cmdKey) {
@@ -1425,7 +1530,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
 //      checkErrOK(result);
     }
     if (ets_strncmp(fieldValueStr, "@run",4) == 0) {
-      msgValPart->fieldValueActionCb = msgValPart->fieldValueStr;
+      msgDescPart->fieldValueActionCb = msgValPart->fieldValueStr;
     }
 //self->compMsgDebug->dumpMsgValPart(self, msgValPart);
     if (!isEnd) {
@@ -1481,10 +1586,10 @@ static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *file
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
-  self->numMsgKeyValueDescParts = 0;
-  self->maxMsgKeyValueDescParts = numEntries;
-  self->msgKeyValueDescParts = os_zalloc(numEntries * sizeof(msgKeyValueDescPart_t));
-  checkAllocOK(self->msgKeyValueDescParts);
+  self->dispatcherCommon->numMsgKeyValueDescParts = 0;
+  self->dispatcherCommon->maxMsgKeyValueDescParts = numEntries;
+  self->dispatcherCommon->msgKeyValueDescParts = os_zalloc(numEntries * sizeof(msgKeyValueDescPart_t));
+  checkAllocOK(self->dispatcherCommon->msgKeyValueDescParts);
   idx = 0;
   while(idx < numEntries) {
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
@@ -1494,7 +1599,7 @@ static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *file
     }
     buffer[lgth] = 0;
     cp = buffer;
-    msgKeyValueDescPart = &self->msgKeyValueDescParts[self->numMsgKeyValueDescParts];
+    msgKeyValueDescPart = &self->dispatcherCommon->msgKeyValueDescParts[self->dispatcherCommon->numMsgKeyValueDescParts];
     // fieldName
     fieldNameStr = cp;
     result = compMsgMsgDesc->getStrFromLine(self, cp, &ep, &isEnd);
@@ -1532,7 +1637,7 @@ static uint8_t getMsgKeyValueDescParts (compMsgDispatcher_t *self, uint8_t *file
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
     cp = ep;
-    self->numMsgKeyValueDescParts++;
+    self->dispatcherCommon->numMsgKeyValueDescParts++;
     idx++;
   }
 #undef checkErrOK
@@ -1563,7 +1668,7 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
   compMsgMsgDesc_t *compMsgMsgDesc;
 
   compMsgMsgDesc = self->compMsgMsgDesc;
-  fieldsToSave = self->fieldsToSave;
+  fieldsToSave = self->dispatcherCommon->fieldsToSave;
   result = compMsgMsgDesc->openFile(compMsgMsgDesc, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
@@ -1576,10 +1681,10 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
   }
   uval = c_strtoul(buffer+2, &endPtr, 10);
   numEntries = (uint8_t)uval;
-  self->numFieldsToSave = 0;
-  self->maxFieldsToSave = numEntries;
-  self->fieldsToSave = os_zalloc(numEntries * sizeof(fieldsToSave_t));
-  checkAllocOK(self->fieldsToSave);
+  self->dispatcherCommon->numFieldsToSave = 0;
+  self->dispatcherCommon->maxFieldsToSave = numEntries;
+  self->dispatcherCommon->fieldsToSave = os_zalloc(numEntries * sizeof(fieldsToSave_t));
+  checkAllocOK(self->dispatcherCommon->fieldsToSave);
   idx = 0;
   while(idx < numEntries) {
     result = compMsgMsgDesc->readLine(compMsgMsgDesc, &buffer, &lgth);
@@ -1589,7 +1694,7 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
     }
     buffer[lgth] = 0;
     cp = buffer;
-    fieldsToSave = &self->fieldsToSave[self->numFieldsToSave];
+    fieldsToSave = &self->dispatcherCommon->fieldsToSave[self->dispatcherCommon->numFieldsToSave];
     // fieldName
     fieldNameStr = cp;
     result = compMsgMsgDesc->getStrFromLine(self, cp, &ep, &isEnd);
@@ -1602,7 +1707,7 @@ static uint8_t getFieldsToSave(compMsgDispatcher_t *self, uint8_t *fileName) {
     if (!isEnd) {
       return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
     }
-    self->numFieldsToSave++;
+    self->dispatcherCommon->numFieldsToSave++;
     idx++;
   }
 #undef checkErrOK
@@ -1719,9 +1824,6 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, uint8_t *fileName
     case KEY_VALUE_KEY_CLIENT_STATUS:
       compMsgWifiData->keyValueInfo.key_clientStatus = (uint16_t)uval;
       break;
-    case KEY_VALUE_KEY_SEQ_NUM:
-      compMsgWifiData->keyValueInfo.key_seqNum = (uint16_t)uval;
-      break;
     case KEY_VALUE_KEY_MAC_ADDR:
       compMsgWifiData->keyValueInfo.key_MACAddr = (uint16_t)uval;
       break;
@@ -1807,9 +1909,6 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, uint8_t *fileName
     case KEY_VALUE_KEY_CLIENT_STATUS:
       compMsgWifiData->keyValueInfo.key_type_clientStatus = (uint8_t)fieldTypeId;
       break;
-    case KEY_VALUE_KEY_SEQ_NUM:
-      compMsgWifiData->keyValueInfo.key_type_seqNum = (uint8_t)fieldTypeId;
-      break;
     case KEY_VALUE_KEY_MAC_ADDR:
       compMsgWifiData->keyValueInfo.key_type_MACAddr = (uint8_t)fieldTypeId;
       break;
@@ -1883,7 +1982,7 @@ uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   self->compMsgMsgDesc->getStrFromLine = &getStrFromLine;
   self->compMsgMsgDesc->getHeaderFieldsFromLine = &getHeaderFieldsFromLine;
   self->compMsgMsgDesc->readActions = &readActions;
-  self->compMsgMsgDesc->readModuleValues = &readModuleValues;
+  self->compMsgMsgDesc->readModuleDataValues = &readModuleDataValues;
   self->compMsgMsgDesc->readWifiValues = &readWifiValues;
   self->compMsgMsgDesc->readHeadersAndSetFlags = &readHeadersAndSetFlags;
   self->compMsgMsgDesc->getMsgPartsFromHeaderPart = &getMsgPartsFromHeaderPart;
@@ -1892,8 +1991,14 @@ uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   self->compMsgMsgDesc->getFieldsToSave = &getFieldsToSave;
   self->compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;
 
-  result = self->compMsgMsgDesc->handleMsgFile(self, "MsgUse.txt", handleMsgUseLine);
+  result = self->compMsgMsgDesc->handleMsgFile(self, MSG_FILES_FILE_NAME, handleMsgFileNameLine);
+ets_printf("readMsgFileNames: result: %d\n", result);
+  checkErrOK(result);
+  result = self->compMsgMsgDesc->handleMsgFile(self, self->compMsgMsgDesc->msgUseFileName, handleMsgUseLine);
 ets_printf("readMsgUse: result: %d\n", result);
+  checkErrOK(result);
+  result = self->compMsgMsgDesc->handleMsgFile(self, self->compMsgMsgDesc->msgHeadsFileName, handleMsgHeadsLine);
+ets_printf("readMsgHeads: result: %d\n", result);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }

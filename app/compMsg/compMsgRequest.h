@@ -46,19 +46,28 @@
 extern "C" {
 #endif
 
-#define COMP_DISP_MAX_REQUESTS     5
+#define COMP_MSG_MAX_UART_REQUESTS 5
+#define COMP_MSG_MAX_REQUESTS      5
 
 // input source types
-#define COMP_DISP_INPUT_UART       0x01
-#define COMP_DISP_INPUT_NET_SOCKET 0x02
-#define COMP_DISP_INPUT_WEB_SOCKET 0x04
+#define COMP_MSG_INPUT_UART       0x01
+#define COMP_MSG_INPUT_NET_SOCKET 0x02
+#define COMP_MSG_INPUT_WEB_SOCKET 0x04
+
+#define COMP_MSG_MAX_REQUEST_LGTH 255
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
+typedef struct msgRequestInfo {
+  uint8_t requestType;
+  void *requestHandle;
+  compMsgData_t *requestData;
+  compMsgDispatcher_t *requestDispatcher;
+  msgParts_t received;
+} msgRequestInfo_t;
+
 typedef struct msgRequestInfos {
-  uint8_t requestTypes[COMP_DISP_MAX_REQUESTS];
-  void *requestHandles[COMP_DISP_MAX_REQUESTS];
-  compMsgData_t *requestData[COMP_DISP_MAX_REQUESTS];
+  msgRequestInfo_t msgRequestInfo[COMP_MSG_MAX_REQUESTS];
   int currRequestIdx;
   int lastRequestIdx;
 } msgRequestInfos_t;
@@ -68,6 +77,7 @@ typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* addUartRequestData_t)(compMsgDispatcher_t *self, uint8_t *data, size_t lgth);
 typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData);
 typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
+typedef uint8_t (* detectMsg_t)(compMsgDispatcher_t *self, const uint8_t * buffer, int lgth, int queueIdx, bool *isComplete);
 
 typedef struct compMsgRequest {
   // request infos
@@ -78,6 +88,7 @@ typedef struct compMsgRequest {
   addUartRequestData_t addUartRequestData;
   addRequest_t addRequest;
   deleteRequest_t deleteRequest;
+  detectMsg_t detectMsg;
 } compMsgRequest_t;
 
 compMsgRequest_t *newCompMsgRequest();

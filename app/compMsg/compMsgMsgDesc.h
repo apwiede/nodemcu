@@ -205,6 +205,13 @@ enum compMsgEncyptedCode
 #define MSG_MAX_HDR_FILLER_LGTH 16
 #define MSG_MAX_LINE_FIELDS 10
 
+#define MSG_FILES_FILE_NAME          "MsgFiles.txt"
+#define MSG_USE_FILE_TOKEN           "msgUse"
+#define MSG_HEADS_FILE_TOKEN         "msgHeads"
+#define MSG_DESC_HEADER_FILE_TOKEN   "msgDescHeader"
+#define MSG_DESC_MID_PART_FILE_TOKEN "msgDescMidPart"
+#define MSG_DESC_TRAILER_FILE_TOKEN  "msgDescTrailer"
+
 typedef struct msgFieldDesc msgFieldDesc_t;
 typedef struct msgFieldVal msgFieldVal_t;
 
@@ -213,7 +220,7 @@ typedef uint8_t (* msgFieldValueCallback_t)(compMsgDispatcher_t *self, msgFieldV
 
 typedef struct msgHeaderValues {
   uint8_t u8Dst;
-  uint8_t u16Dst;
+  uint16_t u16Dst;
   uint8_t u8Src;
   uint16_t u16Src;
   uint8_t u8Group;
@@ -226,16 +233,16 @@ typedef struct msgHeaderValues {
 
 typedef struct msgMidPartValues {
   uint8_t u8CmdKey;
-  uint8_t u16CmdKey;
+  uint16_t u16CmdKey;
   uint8_t u8CmdLgth;
-  uint8_t u16CmdLgth;
+  uint16_t u16CmdLgth;
 } msgMidPartValues_t;
 
 typedef struct msgTrailerValues {
   uint8_t u8Crc;
-  uint8_t u16Crc;
+  uint16_t u16Crc;
   uint8_t u8TotalCrc;
-  uint8_t u16TotalCrc;
+  uint16_t u16TotalCrc;
 } msgTrailerValues_t;
 
 // infos about the fields sequence within a mesgDescription
@@ -243,13 +250,14 @@ typedef struct msgTrailerValues {
 typedef struct msgFieldSequence {
   uint16_t field;
   uint16_t fieldType;
+  uint8_t isJoker;
 } msgFieldSequence_t;
 
 // infos about a message with the message description infos
 
 typedef struct msgDescription {
   msgHeaderValues_t msgHeaderValues;
-  uint8_t headerLgth;
+  uint16_t headerLgth;
   uint8_t encrypted;
   uint8_t handleType;
   msgMidPartValues_t msgMidPartValues;
@@ -449,9 +457,13 @@ typedef struct msgDescPart {
   uint8_t fieldTypeId;
   uint8_t fieldLgth;
   uint8_t fieldType;
+  uint8_t fieldRW;
   uint16_t fieldKey;
   uint16_t fieldSize;
+  uint16_t fieldNumValues;
   fieldValueCallback_t fieldSizeCallback;
+  uint8_t fieldValueCallbackType;
+  uint8_t *fieldValueActionCb; // the name of a callback to run an action
 } msgDescPart_t;
 
 typedef struct msgValPart {
@@ -459,7 +471,6 @@ typedef struct msgValPart {
   uint8_t fieldNameId;
   uint8_t *fieldValueStr;    // the value or the callback for getting the value
   uint8_t *fieldKeyValueStr; // the value for a string
-  uint8_t *fieldValueActionCb; // the name of a callback to run an action
   uint32_t fieldValue;       // the value for an integer
   uint8_t fieldFlags;
   uint8_t fieldValueCallbackType;
@@ -501,7 +512,7 @@ typedef uint8_t (* getIntFromLine_t)(compMsgDispatcher_t *self, uint8_t *myStr, 
 typedef uint8_t (* getStrFromLine_t)(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
 typedef uint8_t (*readActions_t)(compMsgDispatcher_t *self, uint8_t *fileName);
-typedef uint8_t (*readModuleValues_t)(compMsgDispatcher_t *self, uint8_t *fileName);
+typedef uint8_t (*readModuleDataValues_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (*readWifiValues_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* readHeadersAndSetFlags_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* getHeaderFromUniqueFields_t)(compMsgDispatcher_t *self, uint16_t dst, uint16_t src, uint16_t cmdKey, headerPart_t **hdr);
@@ -517,10 +528,16 @@ typedef struct compMsgMsgDesc {
   uint8_t *lineFields[MSG_MAX_LINE_FIELDS];
   int expectedLines;
   int numLineFields;
+  msgDescriptionInfos_t msgDescriptionInfos;
   int numMsgDescIncludeInfo;
   int maxMsgDescIncludeInfo;
   int currMsgDescIncludeInfo;
   msgDescIncludeInfo_t *msgDescIncludeInfos;
+  uint8_t *msgUseFileName;
+  uint8_t *msgHeadsFileName;
+  uint8_t *msgDescHeaderFileName;
+  uint8_t *msgDescMidPartFileName;
+  uint8_t *msgDescTrailerFileName;
 
   openFile_t openFile;
   closeFile_t closeFile;
@@ -540,7 +557,7 @@ typedef struct compMsgMsgDesc {
   getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
   readHeadersAndSetFlags_t readHeadersAndSetFlags;
   readActions_t readActions;
-  readModuleValues_t readModuleValues;
+  readModuleDataValues_t readModuleDataValues;
   readWifiValues_t readWifiValues;
   getHeaderFromUniqueFields_t getHeaderFromUniqueFields;
   getMsgPartsFromHeaderPart_t getMsgPartsFromHeaderPart;

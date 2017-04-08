@@ -67,7 +67,7 @@
 static uint8_t resetHeaderInfos(compMsgDispatcher_t *self) {
   msgHeaderInfos_t *hdrInfos;
 
-  hdrInfos = &self->msgHeaderInfos;
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   hdrInfos->seqIdx = 0;
   hdrInfos->seqIdxAfterHeader = 0;
   hdrInfos->currPartIdx = 0;
@@ -76,15 +76,13 @@ static uint8_t resetHeaderInfos(compMsgDispatcher_t *self) {
 
 // ================================= nextFittingEntry ====================================
 
-static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uint16_t u16CmdKey) {
-  msgParts_t *received;
+static uint8_t nextFittingEntry(compMsgDispatcher_t *self, msgParts_t *received, uint8_t u8CmdKey, uint16_t u16CmdKey) {
   msgHeaderInfos_t *hdrInfos;
   headerPart_t *hdr;
   int hdrIdx;
   int found;
 
-  received = &self->compMsgData->received;
-  hdrInfos = &self->msgHeaderInfos;
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
   COMP_MSG_DBG(self, "I", 2, "HEAD:!to:0x%04x!from:0x%04x!totalLgth:0x%04x!seqIdx!%d!\n", received->toPart, received->fromPart, received->totalLgth, hdrInfos->seqIdx);
@@ -127,24 +125,24 @@ static uint8_t nextFittingEntry(compMsgDispatcher_t *self, uint8_t u8CmdKey, uin
 
 // ================================= getHeaderIndexFromHeaderFields ====================================
 
-static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos) {
+static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgParts_t *received) {
   int result;
   dataView_t *dataView;
   headerPart_t *hdr;
   int hdrIdx;
   int found;
   uint8_t myHeaderLgth;
-  uint32_t seqVal;
-  msgParts_t *received;
+  uint16_t seqVal;
+  msgHeaderInfos_t *hdrInfos;
   uint8_t *cp;
   uint8_t lgth;
 
-  received = &self->compMsgData->received;
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields newCompMsgDataView");
   received->compMsgDataView = newCompMsgDataView(received->buf, received->lgth);
   checkAllocOK(received->compMsgDataView);
   dataView = received->compMsgDataView->dataView;
-  COMP_MSG_DBG(self, "I", 2, "reclgth: %d", received->lgth);
+  COMP_MSG_DBG(self, "I", 2, "lgth: %d", received->lgth);
   received->fieldOffset = 0;
   myHeaderLgth = 0;
   hdrInfos->seqIdx = 0;
@@ -172,7 +170,13 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
     case COMP_DISP_U16_SRC_ID:
       result = dataView->getUint32(dataView, received->fieldOffset, &received->srcId);
       checkErrOK(result);
-      COMP_MSG_DBG(self, "I", 2, "srcId: 0x%04x", received->srcId);
+      COMP_MSG_DBG(self, "I", 2, "srcId: 0x%08x", received->srcId);
+      received->fieldOffset += sizeof(uint32_t);
+      break;
+    case COMP_DISP_HDR_RESERVE:
+      result = dataView->getUint16(dataView, received->fieldOffset, &received->hdrReserve);
+      checkErrOK(result);
+      COMP_MSG_DBG(self, "I", 2, "hdrReserve: 0x%04x", received->hdrReserve);
       received->fieldOffset += sizeof(uint16_t);
       break;
     case COMP_DISP_U8_VECTOR_GUID:
@@ -193,13 +197,13 @@ static uint8_t getHeaderIndexFromHeaderFields(compMsgDispatcher_t *self, msgHead
     hdrInfos->seqIdx++;
     seqVal = hdrInfos->headerSequence[hdrInfos->seqIdx];
   }
-  COMP_MSG_DBG(self, "I", 2, "seqIdx: %d", hdrInfos->seqIdx);
+  COMP_MSG_DBG(self, "I", 2, "seqIdx: %d received->filedOffset: %d received->totalLgth: %d", hdrInfos->seqIdx, received->fieldOffset, received->totalLgth);
   hdrInfos->seqIdxAfterHeader = hdrInfos->seqIdx;
   hdrInfos->currPartIdx = 0;
-  result = nextFittingEntry(self, 0, 0);
+  result = nextFittingEntry(self, received, 0, 0);
   COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields!result!%d!currPartIdx!%d!", result, hdrInfos->currPartIdx);
   if (received->compMsgDataView != NULL) {
-    COMP_MSG_DBG(self, "I", 1, "os getHeaderIndexFromHeaderFields: free dataView: %p compMsgDataView: %p", received->compMsgDataView->dataView, received->compMsgDataView);
+    COMP_MSG_DBG(self, "I", 2, "os getHeaderIndexFromHeaderFields: free dataView: %p compMsgDataView: %p", received->compMsgDataView->dataView, received->compMsgDataView);
     os_free(received->compMsgDataView->dataView);
     os_free(received->compMsgDataView);
     received->compMsgDataView = NULL;
@@ -216,7 +220,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   int hdrIdx;
 
   COMP_MSG_DBG(self, "I", 2, "prepareAnswerMsg");
-  hdrInfos = &self->msgHeaderInfos;
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   switch (type) {
   case COMP_MSG_ACK_MSG:
@@ -236,11 +240,10 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
 
 // ================================= handleReceivedHeader ====================================
     
-static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
+static uint8_t handleReceivedHeader(compMsgDispatcher_t *self, msgParts_t *received) {
   int result;
   headerPart_t *hdr;
   int hdrIdx;
-  msgParts_t *received;
   msgHeaderInfos_t *hdrInfos;
   compMsgField_t fieldInfo;
   uint16_t u16;
@@ -252,8 +255,9 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
   size_t idx;
 
   COMP_MSG_DBG(self, "I", 2, "handleReceivedHeader");
-  hdrInfos = &self->msgHeaderInfos;
-  received = &self->compMsgData->received;
+//ets_printf("data fields3: %p\n", self->compMsgData->fields);
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
+//ets_printf("handleReceivedHeader compMsgData->received1: %p lgth: %d\n", received->buf, received->lgth);
   u8TotalCrc = false;
   u16TotalCrc = false;
   COMP_MSG_DBG(self, "I", 2, "handleReceivedHeader newCompMsgDataView");
@@ -271,6 +275,7 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
  
 //self->compMsgMsgDesc->dumpHeaderPart(self, hdr);
   // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
+//ets_printf("header1 heap: %d\n", system_get_free_heap_size());
   idx = 0;
   while (hdr->fieldSequence[idx] != 0) {
     if (hdr->fieldSequence[idx] == COMP_DISP_U8_TOTAL_CRC) {
@@ -294,7 +299,7 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
       received->partsFlags |= COMP_DISP_U16_CMD_KEY;
       while (received->u16CmdKey != hdr->hdrU16CmdKey) {
         hdrInfos->currPartIdx++;
-        result = self->compMsgIdentify->nextFittingEntry(self, 0, received->u16CmdKey);
+        result = self->compMsgIdentify->nextFittingEntry(self, received, 0, received->u16CmdKey);
         checkErrOK(result);
         hdr = &hdrInfos->headerParts[hdrInfos->currPartIdx];
         COMP_MSG_DBG(self, "I", 2, "2 u16CmdKey: 0x%04x!hdr: 0x%04x", received->u16CmdKey, hdr->hdrU16CmdKey);
@@ -360,24 +365,28 @@ static uint8_t handleReceivedHeader(compMsgDispatcher_t *self) {
     checkErrOK(result);
     hdrInfos->seqIdx++;
   }
+//ets_printf("data fields4: %p\n", self->compMsgData->fields);
+//ets_printf("header2 heap: %d\n", system_get_free_heap_size());
   // free all space of received message
   COMP_MSG_DBG(self, "I", 2, "call deleteMsg");
+//ets_printf("data fields5: %p\n", self->compMsgData->fields);
   self->compMsgData->deleteMsg(self);
   COMP_MSG_DBG(self, "I", 2, "received msg deleted");
+//ets_printf("handleReceivedHeader after deleteMsg heap: %d\n", system_get_free_heap_size());
+//ets_printf("handleReceivedHeader compMsgData->received2: %p lgth: %d\n", received->buf, received->lgth);
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= handleReceivedMsg ====================================
     
-static uint8_t handleReceivedMsg(compMsgDispatcher_t *self) {
+static uint8_t handleReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received) {
   int result;
-  msgParts_t *received;
   uint8_t answerType;
   uint8_t *handle;
 
   COMP_MSG_DBG(self, "I", 2, "handleReceivedMsg");
-  received = &self->compMsgData->received;
-  result = self->compMsgIdentify->handleReceivedHeader(self);
+//ets_printf("data fields1: %p\n", self->compMsgData->fields);
+  result = self->compMsgIdentify->handleReceivedHeader(self, received);
   COMP_MSG_DBG(self, "I", 2, "call prepareAnswerMsg");
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
   checkErrOK(result);
@@ -389,14 +398,13 @@ static uint8_t handleReceivedMsg(compMsgDispatcher_t *self) {
 
 // ================================= storeReceivedMsg ====================================
     
-static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
+static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received) {
   int idx;
   int fieldToSaveIdx;
   int result;
   int hdrIdx;
   int numericValue;
   uint8_t *stringValue;
-  msgParts_t *received;
   msgHeaderInfos_t *hdrInfos;
   headerPart_t *hdr;
   msgDescPart_t *msgDescPart;
@@ -408,20 +416,24 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
   uint8_t *handle;
   bool hadActionCb;
 
-  COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg");
-  received = &self->compMsgData->received;
+  COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg heap: %d", system_get_free_heap_size());
+//ets_printf("storeReceivedMsg1: heap: %d\n", system_get_free_heap_size());
   COMP_MSG_DBG(self, "I", 2, "call handleReceivedHeader");
   // next line deletes compMsgData !!
-  result = self->compMsgIdentify->handleReceivedHeader(self);
+  result = self->compMsgIdentify->handleReceivedHeader(self, received);
+//ets_printf("storeReceivedMsg2: heap: %d\n", system_get_free_heap_size());
   checkErrOK(result);
-  hdrInfos = &self->msgHeaderInfos;
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
   COMP_MSG_DBG(self, "I", 2, "getMsgPartsFromHeaderPart");
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, &handle);
+//ets_printf("storeReceivedMsg3: heap: %d\n", system_get_free_heap_size());
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, &handle);
   checkErrOK(result);
+//ets_printf("storeReceivedMsg4: heap: %d\n", system_get_free_heap_size());
+//ets_printf("data fields11: %p\n", self->compMsgData->fields);
   idx = 0;
   while (idx < self->compMsgData->numMsgDescParts) {
     msgDescPart = &self->compMsgData->msgDescParts[idx];
@@ -430,17 +442,22 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
     idx++;
   }
   self->compMsgData->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
+//ets_printf("data fields12: %p\n", self->compMsgData->fields);
+//ets_printf("storeReceivedMsg5: heap: %d\n", system_get_free_heap_size());
   result = self->compMsgData->initReceivedMsg(self);
   checkErrOK(result);
   fieldToSaveIdx = 0;
 //self->compMsgData->dumpMsg(self);
 //self->compMsgData->compMsgDataView->dataView->dumpBinary(self->compMsgData->compMsgDataView->dataView->data, self->compMsgData->compMsgDataView->dataView->lgth, "MSG");
-  while (fieldToSaveIdx < self->numFieldsToSave) {
-    fieldsToSave = &self->fieldsToSave[fieldToSaveIdx];
+//ets_printf("data fields13: %p\n", self->compMsgData->fields);
+//ets_printf("storeReceivedMsg6: heap: %d\n", system_get_free_heap_size());
+  while (fieldToSaveIdx < self->dispatcherCommon->numFieldsToSave) {
+    fieldsToSave = &self->dispatcherCommon->fieldsToSave[fieldToSaveIdx];
     COMP_MSG_DBG(self, "I", 2, "fieldsToSave: %s!\n", fieldsToSave->fieldNameStr);
     idx = 0;
     while (idx < self->compMsgData->numMsgDescParts) {
       msgDescPart = &self->compMsgData->msgDescParts[idx];
+      fieldInfo = &self->compMsgData->fields[idx];
       if (c_strcmp(msgDescPart->fieldNameStr, fieldsToSave->fieldNameStr) == 0) {
         stringValue = NULL;
         numericValue = 0;
@@ -451,6 +468,9 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
         } else {
           COMP_MSG_DBG(self, "I", 2, "found fieldToSave: %s %d", fieldsToSave->fieldNameStr, numericValue);
         }
+        if (fieldsToSave->fieldValueStr != NULL) {
+          os_free(fieldsToSave->fieldValueStr);
+        }
         fieldsToSave->fieldValueStr = stringValue;
         fieldsToSave->fieldValue = numericValue;
       }
@@ -458,27 +478,37 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self) {
     }
     fieldToSaveIdx++;
   }
+//ets_printf("data fields14: %p\n", self->compMsgData->fields);
+//ets_printf("storeReceivedMsg7: heap: %d\n", system_get_free_heap_size());
   idx = 0;
   hadActionCb = false;
-  while (idx < self->compMsgData->numMsgValParts) {
-    msgValPart = &self->compMsgData->msgValParts[idx];
-    if (msgValPart->fieldValueActionCb != NULL) {
-      COMP_MSG_DBG(self, "I", 2, "have actionCb: %s", msgValPart->fieldValueActionCb);
+  while (idx < self->compMsgData->numMsgDescParts) {
+    msgDescPart = &self->compMsgData->msgDescParts[idx];
+    if (msgDescPart->fieldValueActionCb != NULL) {
+      COMP_MSG_DBG(self, "I", 2, "have actionCb: %s!", msgDescPart->fieldValueActionCb);
       hadActionCb = true;
-      result = self->compMsgAction->getActionCallback(self, msgValPart->fieldValueActionCb+1, &actionCallback);
+//ets_printf("storeReceivedMsg8: heap: %d\n", system_get_free_heap_size());
+      result = self->compMsgAction->getActionCallback(self, msgDescPart->fieldValueActionCb+1, &actionCallback);
       checkErrOK(result);
+      // the actionCallback calls prepareAnswerMsg!
       result = actionCallback(self);
       checkErrOK(result);
+//ets_printf("storeReceivedMsg9: heap: %d\n", system_get_free_heap_size());
+      self->compMsgData->deleteMsg(self);
+      return result;
     }
     idx++;
   }
   if (!hadActionCb) {
+//ets_printf("data fields15: %p\n", self->compMsgData->fields);
+    self->compMsgData->deleteMsg(self);
+    COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg call prepareAnswerMsg");
     result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
     checkErrOK(result);
     result = self->resetMsgInfo(self, received);
     checkErrOK(result);
   }
-  COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg done");
+  COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg done heap: %d", system_get_free_heap_size());
   return COMP_MSG_ERR_OK;
 }
 
@@ -497,7 +527,7 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
 
   COMP_MSG_DBG(self, "I", 2, "sendClientIPMsg");
   self->compMsgSendReceive->startSendMsg = NULL;
-  self->stopAccessPoint = true;
+  self->dispatcherCommon->stopAccessPoint = true;
   received = &self->compMsgData->received;
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
   checkErrOK(result);
@@ -508,11 +538,12 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
   COMP_MSG_DBG(self, "I", 2, "IP: %s port: %d sequenceNum: %d", temp, port, sequenceNum);
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_ACK_MSG, &handle);
-  COMP_MSG_DBG(self, "I", 2, "prepareAnswerMsg: result: %d", result);
+  COMP_MSG_DBG(self, "I", 1, "sendClientIPMsg prepareAnswerMsg: result: %d", result);
   checkErrOK(result);
   result = self->resetMsgInfo(self, received);
   COMP_MSG_DBG(self, "I", 2, "resetMsgInfo: result: %d", result);
   checkErrOK(result);
+  os_free(self->dispatcherCommon->bssScanInfos->infos);
   // saveUserData here (clientSsid, clientPasswd (evtually IP Addr and port?)!!!
   result = self->compMsgOta->saveUserData(self);
   checkErrOK(result);
@@ -527,7 +558,7 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
  * \param self The dispatcher struct
  * \param buffer The input characters
  * \param lgth The number of characters in the input
- * \return Error code or ErrorOK
+ * \return Error code or COMP_MSG_ERR_OK
  *
  */
 static uint8_t handleReceivedPart(compMsgDispatcher_t *self, const uint8_t * buffer, size_t lgth) {
@@ -553,7 +584,7 @@ if (buffer == NULL) {
 } else {
   COMP_MSG_DBG(self, "I", 2, "++++handleReceivedPart: 0x%02x lgth: %d", buffer[0], lgth);
 }
-  hdrInfos = &self->msgHeaderInfos;
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   compMsgData = self->compMsgData;
   received = &compMsgData->received;
 //FIXME need to free at end of message handling !!!
@@ -567,11 +598,12 @@ if (buffer == NULL) {
       COMP_MSG_DBG(self, "I", 2, "received lgth: %d lgth: %d idx: %d", received->lgth, lgth, idx);
 //compMsgData->compMsgDataView->dataView->dumpBinary(received->buf, received->lgth, "Received->buf");
       COMP_MSG_DBG(self, "I", 2, "receveived->lgth: %d", received->lgth);
-      result = getHeaderIndexFromHeaderFields(self, hdrInfos);
+      result = self->compMsgIdentify->getHeaderIndexFromHeaderFields(self, received);
       COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields result: %d currPartIdx: %d", result, hdrInfos->currPartIdx);
+      checkErrOK(result);
     }
     // loop until we have full message then decrypt if necessary and then handle the message
-    COMP_MSG_DBG(self, "I", 2, "totalLgth: %d", received->totalLgth);
+    COMP_MSG_DBG(self, "I", 2, "totalLgth: %d idx: %d lgth: %d", received->totalLgth, idx, lgth);
     if (received->lgth == received->totalLgth) {
       hdrIdx = hdrInfos->currPartIdx;
       hdr = &hdrInfos->headerParts[hdrIdx];
@@ -625,6 +657,7 @@ if (buffer == NULL) {
           int numericValue;
           uint8_t *cryptedPtr;
           uint8_t *cryptKey;
+          uint8_t *cryptIvKey;
           uint8_t *decrypted;;
           size_t mlen;
           size_t klen;
@@ -634,6 +667,9 @@ if (buffer == NULL) {
           // decrypt encrypted message part (after header)
           result = self->compMsgModuleData->getCryptKey(self, &numericValue, &cryptKey);
           checkErrOK(result);
+          result = self->compMsgModuleData->getCryptIvKey(self, &numericValue, &cryptIvKey);
+          checkErrOK(result);
+//ets_printf("cryptKey: %s cryptIvKey: %s\n", cryptKey, cryptIvKey);
           mlen = received->totalLgth - hdrInfos->headerLgth;
           if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
             if (u8TotalCrc) {
@@ -646,14 +682,16 @@ if (buffer == NULL) {
           klen = 16;
 //compMsgData->compMsgDataView->dataView->dumpBinaryWide(received->buf, received->totalLgth, "beforedecrypt");
           cryptedPtr = received->buf + hdrInfos->headerLgth;
-          result = self->compMsgUtil->decryptMsg(self, cryptedPtr, mlen, cryptKey, klen, cryptKey, ivlen, &decrypted, &decryptedLgth);
+          result = self->compMsgUtil->decryptMsg(self, cryptedPtr, mlen, cryptKey, klen, cryptIvKey, ivlen, &decrypted, &decryptedLgth);
           checkErrOK(result);
-          COMP_MSG_DBG(self, "I", 1, "mlen: %d decryptedLgth: %d", mlen, decryptedLgth);
+          COMP_MSG_DBG(self, "I", 2, "mlen: %d decryptedLgth: %d", mlen, decryptedLgth);
           c_memcpy(cryptedPtr, decrypted, decryptedLgth);
+          os_free(decrypted);
+//compMsgData->compMsgDataView->dataView->dumpBinary(received->buf, received->totalLgth, "after decrypt");
 //compMsgData->compMsgDataView->dataView->dumpBinaryWide(received->buf, received->totalLgth, "afterdecrypt");
         }
         COMP_MSG_DBG(self, "I", 2, "call storeReceivedMsg");
-        result = self->compMsgIdentify->storeReceivedMsg(self);
+        result = self->compMsgIdentify->storeReceivedMsg(self, received);
         COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg end buffer idx: %d result: %d", idx, result);
         return result;
       case 'U':
@@ -672,9 +710,153 @@ if (buffer == NULL) {
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= unpackReceivedMsg ====================================
+
+/**
+ * \brief unpack a message from uart or sockets
+ * \param self The dispatcher struct
+ * \param msgRequestInfo The info for the message
+ * \return Error code or COMP_MSG_ERR_OK
+ *
+ */
+static uint8_t unpackReceivedMsg(compMsgDispatcher_t *self, msgRequestInfo_t *msgRequestInfo) {
+  int idx;
+  msgHeaderInfos_t *hdrInfos;
+  headerPart_t *hdr;
+  int startIdx;
+  int hdrIdx;
+  uint8_t u8;
+  compMsgField_t fieldInfo;
+  compMsgData_t *compMsgData;
+  msgParts_t *received;
+  int result;
+  bool u8TotalCrc;
+  bool u16TotalCrc;
+  size_t seqIdx;
+  uint8_t *saveData;
+  size_t saveLgth;
+  bool haveDataView;
+
+  received = &msgRequestInfo->received;
+  COMP_MSG_DBG(self, "I", 2, "++++unpackReceivedMsg: lgth: %d", received->lgth);
+  hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
+  compMsgData = self->compMsgData;
+//FIXME need to free at end of message handling !!!
+  COMP_MSG_DBG(self, "I", 2, "unpackReceivedMsg: !received->buf: %p!", received->buf);
+  COMP_MSG_DBG(self, "I", 2, "receivedLgth: %d realLgth: %d fieldOffset: %d headerLgth: %d!", received->lgth, received->realLgth, received->fieldOffset, hdrInfos->headerLgth);
+  hdrIdx = hdrInfos->currPartIdx;
+  hdr = &hdrInfos->headerParts[hdrIdx];
+  COMP_MSG_DBG(self, "I", 2, "hdrIdx: %d", hdrIdx);
+  COMP_MSG_DBG(self, "I", 2, "receveived->totalLgth: %d", received->totalLgth);
+  // check if we have a U8_TOTAL_CRC or a U16_TOTAL_CRC or no TOTAL_CRC
+  seqIdx = 0;
+  u8TotalCrc = false;
+  u16TotalCrc = false;
+  while (hdr->fieldSequence[seqIdx] != 0) {
+    if (hdr->fieldSequence[seqIdx] == COMP_DISP_U8_TOTAL_CRC) {
+      u8TotalCrc = true;
+    }
+    if (hdr->fieldSequence[seqIdx] == COMP_DISP_U16_TOTAL_CRC) {
+      u16TotalCrc = true;
+    }
+    seqIdx++;
+  }
+  COMP_MSG_DBG(self, "I", 2, "hdr->hdrHandleType: %c", hdr->hdrHandleType);
+  switch (hdr->hdrHandleType) {
+  case 'G':
+  case 'R':
+  case 'D':
+    // have to check totalCrc here because of eventual encryption!!
+    if (u8TotalCrc) {
+      fieldInfo.fieldLgth = 1;
+      fieldInfo.fieldOffset = received->totalLgth - 1;
+    } else {
+      fieldInfo.fieldLgth = 2;
+      fieldInfo.fieldOffset = received->totalLgth - 2;
+    }
+    if (compMsgData->compMsgDataView == NULL) {
+      compMsgData->compMsgDataView = newCompMsgDataView(received->buf, received->lgth);
+      haveDataView = false;
+    } else {
+      haveDataView = true;
+      saveData = compMsgData->compMsgDataView->dataView->data;
+      saveLgth = compMsgData->compMsgDataView->dataView->lgth;
+      compMsgData->compMsgDataView->dataView->data = received->buf;
+      compMsgData->compMsgDataView->dataView->lgth = received->totalLgth;
+    }
+    result = compMsgData->compMsgDataView->getTotalCrc(self, compMsgData->compMsgDataView->dataView, &fieldInfo);
+    COMP_MSG_DBG(self, "I", 2, "getTotalCrc: res!%d!", result);
+    checkErrOK(result);
+    if (haveDataView) {
+      compMsgData->compMsgDataView->dataView->data = saveData;
+      compMsgData->compMsgDataView->dataView->lgth = saveLgth;
+    }
+    COMP_MSG_DBG(self, "I", 2, "hdrEncryption: %c!", hdr->hdrEncryption);
+    if (hdr->hdrEncryption == 'E') {
+      int numericValue;
+      uint8_t *cryptedPtr;
+      uint8_t *cryptKey;
+      uint8_t *cryptIvKey;
+      uint8_t *decrypted;;
+      size_t mlen;
+      size_t klen;
+      size_t ivlen;
+      int decryptedLgth;
+
+      // decrypt encrypted message part (after header)
+      result = self->compMsgModuleData->getCryptKey(self, &numericValue, &cryptKey);
+      checkErrOK(result);
+      result = self->compMsgModuleData->getCryptIvKey(self, &numericValue, &cryptIvKey);
+      checkErrOK(result);
+//ets_printf("cryptKey: %s cryptIvKey: %s\n", cryptKey, cryptIvKey);
+      mlen = received->totalLgth - hdrInfos->headerLgth;
+      if (hdr->hdrFlags & COMP_DISP_TOTAL_CRC) {
+        if (u8TotalCrc) {
+          mlen -= 1;
+        } else {
+          mlen -= 2;
+        }
+      }
+      ivlen = 16;
+      klen = 16;
+//compMsgData->compMsgDataView->dataView->dumpBinaryWide(received->buf, received->totalLgth, "beforedecrypt");
+      cryptedPtr = received->buf + hdrInfos->headerLgth;
+      result = self->compMsgUtil->decryptMsg(self, cryptedPtr, mlen, cryptKey, klen, cryptIvKey, ivlen, &decrypted, &decryptedLgth);
+      checkErrOK(result);
+      COMP_MSG_DBG(self, "I", 2, "mlen: %d decryptedLgth: %d", mlen, decryptedLgth);
+      c_memcpy(cryptedPtr, decrypted, decryptedLgth);
+      os_free(decrypted);
+//compMsgData->compMsgDataView->dataView->dumpBinary(received->buf, received->totalLgth, "after decrypt");
+//compMsgData->compMsgDataView->dataView->dumpBinaryWide(received->buf, received->totalLgth, "afterdecrypt");
+    }
+    COMP_MSG_DBG(self, "I", 2, "call storeReceivedMsg");
+    result = self->compMsgIdentify->storeReceivedMsg(self, received);
+    COMP_MSG_DBG(self, "I", 2, "storeReceivedMsg end buffer idx: %d result: %d", idx, result);
+    received->totalLgth = 0;
+    received->lgth = 0;
+    return result;
+  case 'U':
+  case 'W':
+    self->compMsgData->currHdr = hdr;
+    COMP_MSG_DBG(self, "I", 2, "forwardMsg lgth: %d", received->lgth);
+    if (received->lgth > 0) {
+      result = self->compMsgBuildMsg->forwardMsg(self);
+      COMP_MSG_DBG(self, "I", 2, "forwardMsg result: %d", result);
+      received->totalLgth = 0;
+      received->lgth = 0;
+      checkErrOK(result);
+    }
+    return result;
+  default:
+    COMP_MSG_DBG(self, "Y", 0, "handleReceivedPart: funny handleType: %c 0x%02x", hdr->hdrHandleType, hdr->hdrHandleType);
+    return COMP_MSG_ERR_FUNNY_HANDLE_TYPE;
+  }
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= handleToSendPart ====================================
 
-static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t * buffer, uint8_t lgth) {
+static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t *buffer, uint8_t lgth) {
   int idx;
   uint8_t buf[100];
   msgParts_t *toSend;
@@ -726,14 +908,16 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
   self->compMsgIdentify->resetHeaderInfos = &resetHeaderInfos;
-  self->compMsgIdentify->handleReceivedPart = &handleReceivedPart;
-  self->compMsgIdentify->handleToSendPart = &handleToSendPart;
+  self->compMsgIdentify->getHeaderIndexFromHeaderFields = &getHeaderIndexFromHeaderFields;
   self->compMsgIdentify->nextFittingEntry = &nextFittingEntry;
   self->compMsgIdentify->prepareAnswerMsg = &prepareAnswerMsg;
   self->compMsgIdentify->handleReceivedHeader = &handleReceivedHeader;
   self->compMsgIdentify->handleReceivedMsg = &handleReceivedMsg;
   self->compMsgIdentify->storeReceivedMsg = &storeReceivedMsg;
   self->compMsgIdentify->sendClientIPMsg = &sendClientIPMsg;
+  self->compMsgIdentify->handleReceivedPart = &handleReceivedPart;
+  self->compMsgIdentify->unpackReceivedMsg = &unpackReceivedMsg;
+  self->compMsgIdentify->handleToSendPart = &handleToSendPart;
 
   result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, COMP_MSG_HEADS_FILE_NAME);
   checkErrOK(result);

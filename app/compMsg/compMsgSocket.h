@@ -53,6 +53,7 @@ extern "C" {
 #define COMP_DISP_RUNNING_MODE_APP          0x08
 #define COMP_DISP_RUNNING_MODE_WEBSOCKET    0x10
 #define COMP_DISP_RUNNING_MODE_SSDP         0x20
+#define COMP_DISP_RUNNING_MODE_PROD_TEST    0x40
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -70,6 +71,7 @@ typedef struct httpMsgInfo {
   size_t expectedLgth;
   uint8_t *content;
   char *data;
+  char *lowerData;
 } httpMsgInfo_t;
 
 typedef struct socketUserData  socketUserData_t;
@@ -80,6 +82,7 @@ typedef void (* netSocketToSend_t)(void *arg, socketUserData_t *sud, char *pdata
 typedef void (* netSocketReceived_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
 typedef void (* netSocketSSDPToSend_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
 typedef void (* netSocketSSDPReceived_t)(void *arg, socketUserData_t *sud, char *pdata, unsigned short len);
+typedef void (* netSocketSSDPRecv_t)(void *arg, char *pdata, unsigned short len);
 
 typedef struct socketUserData {
   struct espconn *pesp_conn;
@@ -109,20 +112,30 @@ typedef void (* startConnection_t)(void *arg);
 
 // WebSocket stuff
 typedef uint8_t (* webSocketRunAPMode_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* webSocketRunClientMode_t)(compMsgDispatcher_t *self, uint8_t mode);
+typedef uint8_t (* webSocketRunClientMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* webSocketSendData_t)(socketUserData_t *sud, const char *payload, int size, int opcode);
+typedef void (* startNetClientMode_t)(void *arg);
+typedef void (* startWebClientMode_t)(void *arg);
 typedef void (* startAccessPoint_t)(void *arg);
+typedef void (* stopAccessPoint_t)(void *arg);
 
 // NetSocket stuff
 typedef uint8_t (* netSocketStartCloudSocket_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netSocketRunClientMode_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* netSocketRunSSDPMode_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* netSocketSendData_t)(socketUserData_t *sud, const char *payload, int size);
+typedef void (* netSocketConnected_t)(void *arg);
+typedef void (* socketSent_t)(void *arg);
+typedef void (* socketDnsFound_t)(const char *name, ip_addr_t *ipaddr, void *arg);
+
 typedef void (* startClientMode_t)(void *arg);
-typedef void (* startSSDPMode_t)(void *arg);
+typedef void (* timerFollowupCallback_t)(compMsgDispatcher_t *self);
+typedef void (* startProdTestMode_t)(void *arg);
+typedef void (* sendSSDPInfo_t)(void *arg);
+typedef uint8_t (* startSendSSDPInfo_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* netSocketRunProdTestMode_t)(compMsgDispatcher_t *self);
 
 typedef uint8_t (* checkConnectionStatus_t)(compMsgTimerSlot_t *compMsgTimerSlot);
-typedef uint8_t (* startConnectionTimer_t)(compMsgDispatcher_t *self, uint8_t timerId, startConnection_t fcn);
+typedef uint8_t (* startConnectionTimer_t)(compMsgDispatcher_t *self, uint8_t timerId, int interval, int repeat, startConnection_t fcn);
 
 typedef struct compMsgSocket {
 
@@ -130,13 +143,22 @@ typedef struct compMsgSocket {
   webSocketRunClientMode_t webSocketRunClientMode;
   webSocketSendData_t webSocketSendData;
   startAccessPoint_t startAccessPoint;
+  stopAccessPoint_t stopAccessPoint;
+  startNetClientMode_t startNetClientMode;
+  startWebClientMode_t startWebClientMode;
 
   netSocketStartCloudSocket_t netSocketStartCloudSocket;
   netSocketRunClientMode_t netSocketRunClientMode;
-  netSocketRunSSDPMode_t netSocketRunSSDPMode;
+  netSocketRunProdTestMode_t netSocketRunProdTestMode;
   netSocketSendData_t netSocketSendData;
-  startClientMode_t startClientMode;
-  startSSDPMode_t startSSDPMode;
+  netSocketConnected_t netSocketConnected;
+  netSocketReceived_t netSocketReceived;
+  socketSent_t socketSent;
+  socketDnsFound_t socketDnsFound;
+  startProdTestMode_t startProdTestMode;
+  sendSSDPInfo_t sendSSDPInfo;
+  startSendSSDPInfo_t startSendSSDPInfo;
+  netSocketSSDPRecv_t netSocketSSDPRecv;
 
   startConnectionTimer_t startConnectionTimer;
   checkConnectionStatus_t checkConnectionStatus;
@@ -149,6 +171,7 @@ typedef struct compMsgSocket {
 compMsgSocket_t *newCompMsgSocket();
 uint8_t compMsgWebSocketInit(compMsgDispatcher_t *self);
 uint8_t compMsgNetSocketInit(compMsgDispatcher_t *self);
+uint8_t compMsgSSDPSocketInit(compMsgDispatcher_t *self);
 
 
 #endif  /* COMP_MSG_SOCKET_H */

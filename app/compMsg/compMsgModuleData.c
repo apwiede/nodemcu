@@ -52,40 +52,47 @@
 static compMsgModuleData_t compMsgModuleData;
 
 static str2id_t moduleFieldName2Ids[] = {
-  { "MACAddr",                MODULE_INFO_MACAddr },
-  { "IPAddr",                 MODULE_INFO_IPAddr },
-  { "FirmwareVersion",        MODULE_INFO_FirmwareVersion },
-  { "SerieNumber",            MODULE_INFO_SerieNumber },
-  { "RSSI",                   MODULE_INFO_RSSI },
-  { "RSSIMax",                MODULE_INFO_RSSIMax },
-  { "ConnectionState",        MODULE_INFO_ConnectionState },
-  { "ConnectedUsers",         MODULE_INFO_ConnectedUsers },
-  { "ProgRunningMode",        MODULE_INFO_ProgRunningMode },
-  { "CurrentRunningMode",     MODULE_INFO_CurrentRunningMode },
-  { "IPProtocol",             MODULE_INFO_IPProtocol },
-  { "Region",                 MODULE_INFO_Region },
-  { "DeviceSecurity",         MODULE_INFO_DeviceSecurity },
-  { "ErrorMain",              MODULE_INFO_ErrorMain },
-  { "ErrorSub",               MODULE_INFO_ErrorSub },
-  { "DateAndTime",            MODULE_INFO_DateAndTime },
-  { "SSIDs",                  MODULE_INFO_SSIDs },
-  { "PingState",              MODULE_INFO_PingState },
-  { "Reserve1",               MODULE_INFO_Reserve1 },
-  { "Reserve2",               MODULE_INFO_Reserve2 },
-  { "Reserve3",               MODULE_INFO_Reserve3 },
-  { "Reserve4",               MODULE_INFO_Reserve4 },
-  { "Reserve5",               MODULE_INFO_Reserve5 },
-  { "Reserve6",               MODULE_INFO_Reserve6 },
-  { "Reserve7",               MODULE_INFO_Reserve7 },
-  { "Reserve8",               MODULE_INFO_Reserve8 },
-  { "GUID",                   MODULE_INFO_GUID },
-  { "srcId",                  MODULE_INFO_srcId },
-  { "passwdC",                MODULE_INFO_PASSWDC },
-  { "operatingMode",          MODULE_INFO_operatingMode },
-  { "otaHost",                MODULE_INFO_OTA_HOST },
-  { "otaRomPath",             MODULE_INFO_OTA_ROM_PATH },
-  { "otaFsPath",              MODULE_INFO_OTA_FS_PATH },
-  { "otaPort",                MODULE_INFO_OTA_PORT },
+  { "MACAddr",                 MODULE_INFO_MACAddr },
+  { "IPAddr",                  MODULE_INFO_IPAddr },
+  { "FirmwareVersion",         MODULE_INFO_FirmwareVersion },
+  { "SerieNumber",             MODULE_INFO_SerieNumber },
+  { "RSSI",                    MODULE_INFO_RSSI },
+  { "RSSIMax",                 MODULE_INFO_RSSIMax },
+  { "ConnectionState",         MODULE_INFO_ConnectionState },
+  { "ConnectedUsers",          MODULE_INFO_ConnectedUsers },
+  { "ProgRunningMode",         MODULE_INFO_ProgRunningMode },
+  { "CurrentRunningMode",      MODULE_INFO_CurrentRunningMode },
+  { "IPProtocol",              MODULE_INFO_IPProtocol },
+  { "Region",                  MODULE_INFO_Region },
+  { "DeviceSecurity",          MODULE_INFO_DeviceSecurity },
+  { "ErrorMain",               MODULE_INFO_ErrorMain },
+  { "ErrorSub",                MODULE_INFO_ErrorSub },
+  { "DateAndTime",             MODULE_INFO_DateAndTime },
+  { "SSIDs",                   MODULE_INFO_SSIDs },
+  { "PingState",               MODULE_INFO_PingState },
+  { "Reserve1",                MODULE_INFO_Reserve1 },
+  { "Reserve2",                MODULE_INFO_Reserve2 },
+  { "Reserve3",                MODULE_INFO_Reserve3 },
+  { "Reserve4",                MODULE_INFO_Reserve4 },
+  { "Reserve5",                MODULE_INFO_Reserve5 },
+  { "Reserve6",                MODULE_INFO_Reserve6 },
+  { "Reserve7",                MODULE_INFO_Reserve7 },
+  { "Reserve8",                MODULE_INFO_Reserve8 },
+  { "GUID",                    MODULE_INFO_GUID },
+  { "srcId",                   MODULE_INFO_srcId },
+  { "hdrReserve",              MODULE_INFO_hdrReserve },
+  { "passwdC",                 MODULE_INFO_PASSWDC },
+  { "operatingMode",           MODULE_INFO_operatingMode },
+  { "otaHost",                 MODULE_INFO_OTA_HOST },
+  { "otaRomPath",              MODULE_INFO_OTA_ROM_PATH },
+  { "otaFsPath",               MODULE_INFO_OTA_FS_PATH },
+  { "otaPort",                 MODULE_INFO_OTA_PORT },
+  { "cryptKey",                MODULE_INFO_cryptKey },
+  { "cryptIvKey",              MODULE_INFO_cryptIvKey },
+  { "myU16Src",                MODULE_INFO_myU16Src },
+  { "myU8Src",                 MODULE_INFO_myU8Src },
+  { "myU16SaveUserDataCmdKey", MODULE_INFO_myU16SaveUserDataCmdKey },
+  { "myU8SaveUserDataCmdKey",  MODULE_INFO_myU8SaveUserDataCmdKey },
   {NULL, -1},
 };
   
@@ -396,11 +403,24 @@ static uint8_t getSrcId(compMsgDispatcher_t *self, int *numericValue, uint8_t **
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= getHdrReserve ====================================
+
+static uint8_t getHdrReserve(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+//  if (self->compMsgData->msgValPart->fieldValueStr != NULL) {
+//    os_free(self->compMsgData->msgValPart->fieldValueStr);
+//  }
+//  self->compMsgData->msgValPart->fieldValueStr = compMsgModuleData.hdrReserve;
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.hdrReserve;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= getOperatingMode ====================================
 
 static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.operatingMode;
+  COMP_MSG_DBG(self, "Y", 0, "OperatingMode: 0x%02x", compMsgModuleData.operatingMode);
   *numericValue = compMsgModuleData.operatingMode;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -448,12 +468,60 @@ static uint8_t getCryptKey(compMsgDispatcher_t *self, int *numericValue, uint8_t
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= getCryptIvKey ====================================
+
+static uint8_t getCryptIvKey(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  *numericValue = 0;
+  *stringValue = compMsgModuleData.cryptIvKey;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getMyU16Src ====================================
+
+static uint8_t getMyU16Src(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU16Src;
+  *numericValue = compMsgModuleData.myU16Src;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getMyU8Src ====================================
+
+static uint8_t getMyU8Src(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU8Src;
+  *numericValue = compMsgModuleData.myU8Src;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getMyU16SaveUserDataCmdKey ====================================
+
+static uint8_t getMyU16SaveUserDataCmdKey(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU16SaveUserDataCmdKey;
+  *numericValue = compMsgModuleData.myU16SaveUserDataCmdKey;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= getMyU8SaveUserDataCmdKey ====================================
+
+static uint8_t getMyU8SaveUserDataCmdKey(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
+  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU8SaveUserDataCmdKey;
+  *numericValue = compMsgModuleData.myU8SaveUserDataCmdKey;
+  *stringValue = NULL;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= setOperatingMode ====================================
 
 static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   int result;
 
-  result = self->compMsgModuleData->setModuleValue(self, "operatingMode", self->operatingMode, NULL);
+  result = self->compMsgModuleData->setModuleValue(self, "operatingMode", self->dispatcherCommon->operatingMode, NULL);
   return COMP_MSG_ERR_OK;
 }
 
@@ -487,7 +555,7 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
   uint8_t *stringValue;
   bool userFieldsStarted;
 
-ets_printf("moduleData: restoreUserData called\n");
+//ets_printf("moduleData: restoreUserData called\n");
   userFieldsStarted = false;
   compMsgData = self->compMsgData;
   dataView = compMsgData->compMsgDataView;
@@ -502,7 +570,7 @@ ets_printf("moduleData: restoreUserData called\n");
     if (userFieldsStarted) {
       result = self->compMsgData->getFieldValue(self, msgDescPart->fieldNameStr, &numericValue, &stringValue);
       checkErrOK(result);
-ets_printf("handle field: %s: %d %s\n", msgDescPart->fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
+//ets_printf("handle field: %s: %d %s\n", msgDescPart->fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
       result = self->compMsgModuleData->setModuleValue(self, msgDescPart->fieldNameStr + 1, numericValue, stringValue);
       if (result != COMP_MSG_ERR_OK) {
         // seem to be a wifi value so try that
@@ -650,6 +718,26 @@ static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, 
     c_memcpy(compMsgModuleData.cryptKey, stringValue, c_strlen(stringValue));
     compMsgModuleData.cryptKey[c_strlen(stringValue)] = '\0';
     break;
+  case MODULE_INFO_myU16Src:
+    compMsgModuleData.myU16Src = numericValue;
+    break;
+  case MODULE_INFO_myU8Src:
+    compMsgModuleData.myU8Src = numericValue;
+    break;
+  case MODULE_INFO_myU16SaveUserDataCmdKey:
+    compMsgModuleData.myU16SaveUserDataCmdKey = numericValue;
+    break;
+  case MODULE_INFO_myU8SaveUserDataCmdKey:
+    compMsgModuleData.myU8SaveUserDataCmdKey = numericValue;
+    break;
+  case MODULE_INFO_cryptKey:
+    c_memcpy(compMsgModuleData.cryptKey, stringValue, c_strlen(stringValue));
+    compMsgModuleData.cryptKey[c_strlen(stringValue)] = '\0';
+    break;
+  case MODULE_INFO_cryptIvKey:
+    c_memcpy(compMsgModuleData.cryptIvKey, stringValue, c_strlen(stringValue));
+    compMsgModuleData.cryptIvKey[c_strlen(stringValue)] = '\0';
+    break;
   default:
     return COMP_MSG_ERR_BAD_MODULE_VALUE_WHICH;
     break;
@@ -720,9 +808,10 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   c_memcpy(compMsgModuleData.Reserve8, "ABCDEFGH\0", 9);
   c_memcpy(compMsgModuleData.GUID, "1234-5678-9012-1\0", 17);
   compMsgModuleData.srcId = 12312;
-  c_memcpy(compMsgModuleData.passwdC, "apwiede1apwiede2\0", 17);
+  c_memcpy(compMsgModuleData.hdrReserve, "  \0", 3);
+  c_memcpy(compMsgModuleData.passwdC, "                \0", 17);
   compMsgModuleData.operatingMode = 0xE0;
-  c_memcpy(compMsgModuleData.otaHost, "192.168.178.31\0", 17);
+  c_memcpy(compMsgModuleData.otaHost, "192.168.1.0\0", 15);
   c_memcpy(compMsgModuleData.otaRomPath, "/nodemcu-rboot.bin\0", 19);
   c_memcpy(compMsgModuleData.otaFsPath, "/nodemcu-spiffs.bin\0", 20);
   compMsgModuleData.otaPort = 80;
@@ -745,7 +834,9 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgModuleData->getOtaPort = &getOtaPort;
   self->compMsgModuleData->getMACAddr = &getMACAddr;
   self->compMsgModuleData->getCryptKey = &getCryptKey;
+  self->compMsgModuleData->getCryptIvKey = &getCryptIvKey;
   self->compMsgModuleData->restoreUserData = &restoreUserData;
+  self->compMsgModuleData->getOperatingMode = &getOperatingMode;
 
   self->compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
@@ -775,6 +866,7 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve8", &getReserve8, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getGUID", &getGUID, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getSrcId", &getSrcId, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getHdrReserve", &getHdrReserve, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getPasswdC", &getPasswdC, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@setOperatingMode", &setOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getOperatingMode", &getOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
@@ -783,7 +875,12 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaFsPath", &getOtaFsPath, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaPort", &getOtaPort, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgUtil->addFieldValueCallbackName(self, "@getCryptKey", &getCryptKey, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU16Src", &getMyU16Src, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU8Src", &getMyU8Src, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU16SaveUserDataCmdKey", &getMyU16SaveUserDataCmdKey, COMP_DISP_CALLBACK_TYPE_MODULE);
+  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU8SaveUserDataCmdKey", &getMyU8SaveUserDataCmdKey, COMP_DISP_CALLBACK_TYPE_MODULE);
   self->compMsgModuleData->setModuleValues(self);
+  self->compMsgMsgDesc->readModuleDataValues(self, COMP_MSG_MODULE_DATA_VALUES_FILE_NAME);
   return COMP_MSG_ERR_OK;
 }
 

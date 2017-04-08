@@ -71,14 +71,18 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 //#define CLOUD_1
 #define CLOUD_2
 
+#define UART0 0
+#define UART1 1
+
 // compMsgMsgDesc file names
 
-#define COMP_MSG_ACTIONS_FILE_NAME        "CompMsgActions.txt"
-#define COMP_MSG_WIFI_VALUES_FILE_NAME    "myConfig.txt"
-#define COMP_MSG_KEY_VALUE_KEYS_FILE_NAME "CompMsgKeyValueKeys.txt"
-#define COMP_MSG_HEADS_FILE_NAME          "CompMsgHeads.txt"
-#define COMP_MSG_FIELDS_TO_SAVE_FILE_NAME "CompMsgFieldsToSave.txt"
-//#define COMP_MSG_WIFI_VALUES_FILE_NAME    "CompMsgWifiValues.txt"
+#define COMP_MSG_ACTIONS_FILE_NAME            "CompMsgActions.txt"
+#define COMP_MSG_WIFI_VALUES_FILE_NAME        "myConfig.txt"
+#define COMP_MSG_KEY_VALUE_KEYS_FILE_NAME     "CompMsgKeyValueKeys.txt"
+#define COMP_MSG_HEADS_FILE_NAME              "CompMsgHeads.txt"
+#define COMP_MSG_FIELDS_TO_SAVE_FILE_NAME     "CompMsgFieldsToSave.txt"
+//#define COMP_MSG_WIFI_VALUES_FILE_NAME       "CompMsgWifiValues.txt"
+#define COMP_MSG_MODULE_DATA_VALUES_FILE_NAME "CompMsgModuleDataValues.txt"
 
 // answer message types
 #define COMP_MSG_ACK_MSG 0x01
@@ -104,43 +108,43 @@ typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *com
 typedef uint8_t (* getNewCompMsgDataPtr_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts);
 
-typedef struct compMsgDispatcher {
-  uint8_t id;
-  char handle[20];
-  int numericValue;
-  uint8_t *stringValue;
-  uint8_t actionMode;
+typedef struct dispatcherCommon {
   uint8_t operatingMode;
   uint8_t webSocketError;
   msgKeyValueDescPart_t *msgKeyValueDescParts;
   size_t numMsgKeyValueDescParts;
   size_t maxMsgKeyValueDescParts;
+  uint16_t runningModeFlags;
+  bool stopAccessPoint;
+  bssScanInfos_t *bssScanInfos;
+  msgHeaderInfos_t msgHeaderInfos;
+  uint8_t numFieldsToSave;
+  uint8_t maxFieldsToSave;
+  fieldsToSave_t *fieldsToSave;
+  // station mode
+  uint32_t station_ip;
+} dispatcherCommon_t;
+
+typedef struct compMsgDispatcher {
+  uint8_t id;
+  char handle[20];
+  uint8_t actionMode;
   uint8_t *cloudMsgData;
   size_t cloudMsgDataLgth;
   uint8_t *cloudPayload;
   size_t cloudPayloadLgth;
   uint8_t *msgHandle;
-  bool stopAccessPoint;
-  // running mode flags
-  uint16_t runningModeFlags;
+  socketUserData_t *sud; 
+  socketUserData_t *ssdpSud; 
 
-  bssScanInfos_t *bssScanInfos;
-
-  // station mode
-  uint32_t station_ip;
+  dispatcherCommon_t *dispatcherCommon;
 
   // this is for mapping a msg handle from the header to a compMsgPtr
   uint8_t numMsgHeaders;
   uint8_t maxMsgHeaders;
   msgHeader2MsgPtr_t *msgHeader2MsgPtrs;
 
-  uint8_t numFieldsToSave;
-  uint8_t maxFieldsToSave;
-  fieldsToSave_t *fieldsToSave;
-
   compMsgData_t *compMsgData;
-
-  msgHeaderInfos_t msgHeaderInfos;
 
   // compMsgTypesAndNames
   compMsgTypesAndNames_t *compMsgTypesAndNames;

@@ -130,8 +130,8 @@ static uint8_t ICACHE_FLASH_ATTR fixOffsetsForKeyValues(compMsgDispatcher_t *sel
       // get the corresponding msgKeyValueDescPart
       found = false;
       keyValueIdx = 0;
-      while (keyValueIdx < self->numMsgKeyValueDescParts) {
-        msgKeyValueDescPart = &self->msgKeyValueDescParts[keyValueIdx];
+      while (keyValueIdx < self->dispatcherCommon->numMsgKeyValueDescParts) {
+        msgKeyValueDescPart = &self->dispatcherCommon->msgKeyValueDescParts[keyValueIdx];
         if (c_strcmp(msgKeyValueDescPart->keyNameStr, msgDescPart->fieldNameStr) == 0) {
           found = true;
           break;

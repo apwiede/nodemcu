@@ -86,6 +86,7 @@ typedef uint8_t (* getHttpHeaderKeyIdFromLowerKey_t)(compMsgDispatcher_t *self, 
 typedef uint8_t (* getHttpHeaderKeyFromId_t)(compMsgDispatcher_t *self, uint8_t httpHeaderKeyId, const uint8_t **key);
 typedef uint8_t (* httpParse_t)(socketUserData_t *sud, char * data, size_t size);
 typedef uint8_t ( *getHttpGetHeaderValueForId_t)(socketUserData_t *sud, uint8_t id, const uint8_t **value);
+typedef uint8_t (* deleteHttpMsgInfo_t)(socketUserData_t *sud);
 
 typedef struct compMsgHttp {
 
@@ -94,6 +95,7 @@ typedef struct compMsgHttp {
   getHttpHeaderKeyFromId_t getHttpHeaderKeyFromId;
   httpParse_t httpParse;
   getHttpGetHeaderValueForId_t getHttpGetHeaderValueForId;
+  deleteHttpMsgInfo_t deleteHttpMsgInfo;
 } compMsgHttp_t;
 
 compMsgHttp_t *newCompMsgHttp();

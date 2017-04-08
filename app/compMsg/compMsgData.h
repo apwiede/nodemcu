@@ -74,6 +74,7 @@ extern "C" {
 #define NET_SOCKET_TYPE_CLIENT        0x02
 #define WEB_SOCKET_TYPE_ACCESS_POINT  0x04
 #define NET_SOCKET_TYPE_SSDP          0x08
+#define WEB_SOCKET_TYPE_CLIENT        0x10
 
 #define checkHandleOK(addr) if(addr == NULL) return COMP_MSG_ERR_BAD_HANDLE
 
@@ -94,7 +95,7 @@ typedef uint8_t (* getFieldValue_t)(compMsgDispatcher_t *self, const uint8_t *fi
 typedef uint8_t (* setFieldValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 
 typedef uint8_t (* dumpFieldValue_t)(compMsgDispatcher_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2);
-typedef uint8_t (* dumpKeyValueFields_t)(compMsgDispatcher_t *self, size_t offset);
+typedef uint8_t (* dumpKeyValueFields_t)(compMsgDispatcher_t *self, size_t offset, int *idx);
 typedef uint8_t (* dumpFieldInfo_t)(compMsgDispatcher_t *self, compMsgField_t *fieldInfo);
 typedef uint8_t (* dumpMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* initMsg_t)(compMsgDispatcher_t *self);
