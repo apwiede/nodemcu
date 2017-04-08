@@ -37,7 +37,7 @@
                     <li>compMsgMsgDesc-&gt; \ref readHeadersAndSetFlags (self, MSG_HEADS_FILE_NAME) (compMsgMsgDesc.c)<br>
                   </ul>
                 <li>\ref compMsgBuildMsgInit (self) (compMsgBuildMsg.c)<br>
-                <li>\ref compMsgSendReceiveInit (self) (compMsgSendreceive.c)<br>
+                <li>\ref compMsgSendReceiveInit (self) (compMsgSendReceive.c)<br>
                 <li>\ref compMsgActionInit (self) (compMsgAction.c)<br>
                   <ul>
                     <li>compMsgMsgDesc-&gt; \ref readActions (self, COMP_MSG_ACTIONS_FILE_NAME) (compMsgMsgDesc.c)<br>
@@ -51,7 +51,7 @@
                   <ul>
                     <li>self-&gt; \ref setModuleValues (self)
                   </ul>
-                <li>\ref compMsgWebsocketInit (self);
+                <li>\ref compMsgWebSocketInit (self);
               </ul>
           </ul>
         <br>

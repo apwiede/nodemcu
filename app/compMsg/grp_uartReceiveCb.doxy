@@ -3,13 +3,13 @@
   @{
     <h2>uartReceiveCb -- Input from uart</h2>
       <ul>
-        <li>uartReceiveCb \ref uartReceiveCb<br>
-        <li>queueUartInput \ref compMsgSendReceive.c<br>
+        <li>uartReceiveCb \ref uartReceiveCb <br>
+        <li>queueUartInput \ref compMsgSendReceive.c <br>
         <li>self-&gt;handleReceivedPart<br>
       </ul>
       <br>
       <ul>
-        <li>\ref compMsgSendReceive.c<br>
+        <li>\ref compMsgSendReceive.c <br>
       </ul>
 
     \addtogroup grpCompMsg
