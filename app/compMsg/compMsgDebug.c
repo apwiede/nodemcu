@@ -50,6 +50,7 @@
 
 #define MAX_BUFFER_SIZE 1024
 
+compMsgDispatcher_t *debugCompMsgDispatcher = NULL;
 int ets_vsprintf(char *str, const char *format, va_list argptr);
 int ets_vsnprintf(char *buffer, size_t sizeOfBuffer,  const char *format, va_list argptr);
 
@@ -138,7 +139,9 @@ static uint8_t setDebugFlags(compMsgDispatcher_t *self, uint8_t *dbgChars) {
 
 // ================================= dbgPrintf ====================================
 
-static void dbgPrintf(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...) {
+void uart_tx_one_char(uint8_t uart, uint8_t TxChar);
+
+void dbgPrintf(void *selfParam, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...) {
   uint32_t flags;
   va_list arglist;
   int idx;
@@ -147,7 +150,15 @@ static void dbgPrintf(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debu
   uint8_t *cp;
   size_t lgth;
   bool useUart;
+  compMsgDispatcher_t *self;
 
+  if (selfParam == NULL) {
+     selfParam = debugCompMsgDispatcher;
+  }
+  self = (compMsgDispatcher_t *)selfParam;
+  if (self == NULL) {
+    return;
+  }
   uartId = self->compMsgDebug->debugUartId;
   useUart = self->compMsgDebug->useUart;
   flags = self->compMsgDebug->getDebugFlags(self, dbgChars);
@@ -414,13 +425,14 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
   uint8_t result;
   fieldSizeCallback_t callback;
   uint8_t *callbackName;
+  uint8_t *runActionCallbackName;
 
   callbackName = "nil";
   if (msgDescPart->fieldSizeCallback != NULL) {
     result = self->compMsgUtil->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
     checkErrOK(result);
   }
-  COMP_MSG_DBG(self, "E", 1, "msgDescPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldTypeStr: %-10.10s fieldTypeId: %.3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
+  COMP_MSG_DBG(self, "E", 2, "msgDescPart: fieldNameStr: %-15s fieldNameId: %3d fieldTypeStr: %-10s fieldTypeId: %3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
   return COMP_MSG_ERR_OK;
 }
 
@@ -448,12 +460,13 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
 uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
+  debugCompMsgDispatcher = self;
   self->compMsgDebug->currDebugFlags = DEBUG_COMP_MSG_WEB_SOCKET;
   self->compMsgDebug->addEol = true;
   self->compMsgDebug->useUart = true;
   self->compMsgDebug->debugLevel = 1;
   self->compMsgDebug->debugUartId = 0;
-//  self->compMsgDebug->setDebugFlags(self, "BEHINsSw");
+//  self->compMsgDebug->debugUartId = 1;
 
   self->compMsgDebug->getDebugFlags = &getDebugFlags;
   self->compMsgDebug->setDebugFlags = &setDebugFlags;

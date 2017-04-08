@@ -76,7 +76,7 @@ extern "C" {
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-typedef void (* dbgPrintf_t)(compMsgDispatcher_t *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);
+typedef void (* dbgPrintf_t)(void *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);
 typedef uint32_t (* getDebugFlags_t)(compMsgDispatcher_t *self, uint8_t *dbgChars);
 typedef uint8_t (* setDebugFlags_t)(compMsgDispatcher_t *self, uint8_t *dbgChars);
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
