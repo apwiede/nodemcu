@@ -120,6 +120,10 @@ Macros</h2></td></tr>
 <tr class="separator:ace5bc5179aa441d7b489852962fed845"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26e767417a7ba9a82fb5b690edd38e89"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a26e767417a7ba9a82fb5b690edd38e89">COMP_DISP_RUNNING_MODE_WEBSOCKET</a>&#160;&#160;&#160;0x10</td></tr>
 <tr class="separator:a26e767417a7ba9a82fb5b690edd38e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd61e051a55bc42dc26a6897ddd5f16c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#abd61e051a55bc42dc26a6897ddd5f16c">COMP_DISP_RUNNING_MODE_SSDP</a>&#160;&#160;&#160;0x20</td></tr>
+<tr class="separator:abd61e051a55bc42dc26a6897ddd5f16c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadbbec6c1046084d75bf6f3fc44fffce"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#aadbbec6c1046084d75bf6f3fc44fffce">COMP_DISP_RUNNING_MODE_PROD_TEST</a>&#160;&#160;&#160;0x40</td></tr>
+<tr class="separator:aadbbec6c1046084d75bf6f3fc44fffce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -139,28 +143,56 @@ Typedefs</h2></td></tr>
 <tr class="separator:a834ec4ca726f2d96610e2e44da357ddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f7eac8934c0749de7387e7280ba481f"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a0f7eac8934c0749de7387e7280ba481f">netSocketReceived_t</a> )(void *arg, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char *pdata, unsigned short len)</td></tr>
 <tr class="separator:a0f7eac8934c0749de7387e7280ba481f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a301c51713a491d0b0d59de764458581e"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a301c51713a491d0b0d59de764458581e">netSocketSSDPToSend_t</a> )(void *arg, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char *pdata, unsigned short len)</td></tr>
+<tr class="separator:a301c51713a491d0b0d59de764458581e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7cf8e75ef479db15f0f19067c1a3b6b"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#aa7cf8e75ef479db15f0f19067c1a3b6b">netSocketSSDPReceived_t</a> )(void *arg, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char *pdata, unsigned short len)</td></tr>
+<tr class="separator:aa7cf8e75ef479db15f0f19067c1a3b6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70f5883e5d915eecad5fba7a04a7c552"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a70f5883e5d915eecad5fba7a04a7c552">netSocketSSDPRecv_t</a> )(void *arg, char *pdata, unsigned short len)</td></tr>
+<tr class="separator:a70f5883e5d915eecad5fba7a04a7c552"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0b85b594225b154930d886eb038da3e"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a> )(void *arg)</td></tr>
 <tr class="separator:ab0b85b594225b154930d886eb038da3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a381fc1d2ad8215c5daf6ac2b0124808c"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a381fc1d2ad8215c5daf6ac2b0124808c">webSocketRunAPMode_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a381fc1d2ad8215c5daf6ac2b0124808c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad554aa0a16b9c30ead188754801390a4"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#ad554aa0a16b9c30ead188754801390a4">webSocketRunClientMode_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t mode)</td></tr>
-<tr class="separator:ad554aa0a16b9c30ead188754801390a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a216701ca945c315d87aafc4482838edb"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a216701ca945c315d87aafc4482838edb">webSocketRunClientMode_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a216701ca945c315d87aafc4482838edb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae01e515b8fba2b5d673357462864dcd6"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#ae01e515b8fba2b5d673357462864dcd6">webSocketSendData_t</a> )(<a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, const char *payload, int size, int opcode)</td></tr>
 <tr class="separator:ae01e515b8fba2b5d673357462864dcd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c5ada8ed81e02e5e1709f9ba2c9df98"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a6c5ada8ed81e02e5e1709f9ba2c9df98">startNetClientMode_t</a> )(void *arg)</td></tr>
+<tr class="separator:a6c5ada8ed81e02e5e1709f9ba2c9df98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a047b17023f5a9544c0e74b0243ebe9f0"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a047b17023f5a9544c0e74b0243ebe9f0">startWebClientMode_t</a> )(void *arg)</td></tr>
+<tr class="separator:a047b17023f5a9544c0e74b0243ebe9f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad346c377a37907552697fdf71ad44949"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#ad346c377a37907552697fdf71ad44949">startAccessPoint_t</a> )(void *arg)</td></tr>
 <tr class="separator:ad346c377a37907552697fdf71ad44949"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0f4bf8c3df13cf918b71982401711d2"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#aa0f4bf8c3df13cf918b71982401711d2">stopAccessPoint_t</a> )(void *arg)</td></tr>
+<tr class="separator:aa0f4bf8c3df13cf918b71982401711d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54392b3d15389f2ad80604e01e64f142"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a54392b3d15389f2ad80604e01e64f142">netSocketStartCloudSocket_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a54392b3d15389f2ad80604e01e64f142"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b2b66eb7baff97e1fc6512155c58fa8"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a3b2b66eb7baff97e1fc6512155c58fa8">netSocketRunClientMode_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a3b2b66eb7baff97e1fc6512155c58fa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a856bf5331edb0ece6dd350ae43d963d0"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a856bf5331edb0ece6dd350ae43d963d0">netSocketSendData_t</a> )(<a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, const char *payload, int size)</td></tr>
 <tr class="separator:a856bf5331edb0ece6dd350ae43d963d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb52159ab009897bcb52f01545afa5c7"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#adb52159ab009897bcb52f01545afa5c7">netSocketConnected_t</a> )(void *arg)</td></tr>
+<tr class="separator:adb52159ab009897bcb52f01545afa5c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28619780a1ce0f0ec419575e76d785ea"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a28619780a1ce0f0ec419575e76d785ea">socketSent_t</a> )(void *arg)</td></tr>
+<tr class="separator:a28619780a1ce0f0ec419575e76d785ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45a9d05965019a8f8c520eb23a711547"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a45a9d05965019a8f8c520eb23a711547">socketDnsFound_t</a> )(const char *name, ip_addr_t *ipaddr, void *arg)</td></tr>
+<tr class="separator:a45a9d05965019a8f8c520eb23a711547"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50110651c45f80a7a69991235962ccf8"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a50110651c45f80a7a69991235962ccf8">startClientMode_t</a> )(void *arg)</td></tr>
 <tr class="separator:a50110651c45f80a7a69991235962ccf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a3060d0c57d4b3f5ec81ac2c803b821"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a8a3060d0c57d4b3f5ec81ac2c803b821">timerFollowupCallback_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a8a3060d0c57d4b3f5ec81ac2c803b821"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb8f02038cf6884b53a5068ded98178a"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#afb8f02038cf6884b53a5068ded98178a">startProdTestMode_t</a> )(void *arg)</td></tr>
+<tr class="separator:afb8f02038cf6884b53a5068ded98178a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a732e5570a9ed97c4172f1bc232652a6d"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a732e5570a9ed97c4172f1bc232652a6d">sendSSDPInfo_t</a> )(void *arg)</td></tr>
+<tr class="separator:a732e5570a9ed97c4172f1bc232652a6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb0448ab25627f2a803548c4429b40cf"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#acb0448ab25627f2a803548c4429b40cf">startSendSSDPInfo_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:acb0448ab25627f2a803548c4429b40cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fafe1cc794f9c5e015663dddca860a8"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a0fafe1cc794f9c5e015663dddca860a8">netSocketRunProdTestMode_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a0fafe1cc794f9c5e015663dddca860a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a619424e671ebd02f270b8f23f5cb90"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a3a619424e671ebd02f270b8f23f5cb90">checkConnectionStatus_t</a> )(<a class="el" href="compMsgTimer_8h.html#a0afa7612d5c8dc7d0b9422a00fba4120">compMsgTimerSlot_t</a> *<a class="el" href="structcompMsgTimerSlot.html">compMsgTimerSlot</a>)</td></tr>
 <tr class="separator:a3a619424e671ebd02f270b8f23f5cb90"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99a54377cb750cd3c2e22d69002afd1e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a99a54377cb750cd3c2e22d69002afd1e">startConnectionTimer_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t timerId, <a class="el" href="compMsgSocket_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a> fcn)</td></tr>
-<tr class="separator:a99a54377cb750cd3c2e22d69002afd1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf3ad00eb08443dd251d537789d7d2b4"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#acf3ad00eb08443dd251d537789d7d2b4">startConnectionTimer_t</a> )(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t timerId, int interval, int repeat, <a class="el" href="compMsgTimer_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a> fcn)</td></tr>
+<tr class="separator:acf3ad00eb08443dd251d537789d7d2b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c40a73c352148811e28b63485e16d7c"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structcompMsgSocket.html">compMsgSocket</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a7c40a73c352148811e28b63485e16d7c">compMsgSocket_t</a></td></tr>
 <tr class="separator:a7c40a73c352148811e28b63485e16d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -172,6 +204,8 @@ Functions</h2></td></tr>
 <tr class="separator:a2886f069e24d083e166065895f9a7bc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabd4f65053a6bfc3434ede1afc2ded9a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#aabd4f65053a6bfc3434ede1afc2ded9a">compMsgNetSocketInit</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:aabd4f65053a6bfc3434ede1afc2ded9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0177631ff80b1634b4d236543ee8e674"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8h.html#a0177631ff80b1634b4d236543ee8e674">compMsgSSDPSocketInit</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
+<tr class="separator:a0177631ff80b1634b4d236543ee8e674"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="afbf322f9d1a2649b5a8c9b86dcccea68"></a>
@@ -230,6 +264,34 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aadbbec6c1046084d75bf6f3fc44fffce"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COMP_DISP_RUNNING_MODE_PROD_TEST&#160;&#160;&#160;0x40</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00056">56</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abd61e051a55bc42dc26a6897ddd5f16c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COMP_DISP_RUNNING_MODE_SSDP&#160;&#160;&#160;0x20</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00055">55</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a26e767417a7ba9a82fb5b690edd38e89"></a>
 <div class="memitem">
 <div class="memproto">
@@ -255,7 +317,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00118">118</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00137">137</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -269,7 +331,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00056">56</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00058">58</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -309,6 +371,20 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="adb52159ab009897bcb52f01545afa5c7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  netSocketConnected_t)(void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00126">126</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a0f7eac8934c0749de7387e7280ba481f"></a>
 <div class="memitem">
 <div class="memproto">
@@ -319,7 +395,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00079">79</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00082">82</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -333,7 +409,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00114">114</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00124">124</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0fafe1cc794f9c5e015663dddca860a8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint8_t(*  netSocketRunProdTestMode_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00135">135</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -347,7 +437,49 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00115">115</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00125">125</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa7cf8e75ef479db15f0f19067c1a3b6b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  netSocketSSDPReceived_t)(void *arg, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char *pdata, unsigned short len)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00084">84</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a70f5883e5d915eecad5fba7a04a7c552"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  netSocketSSDPRecv_t)(void *arg, char *pdata, unsigned short len)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00085">85</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a301c51713a491d0b0d59de764458581e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  netSocketSSDPToSend_t)(void *arg, <a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, char *pdata, unsigned short len)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00083">83</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -361,7 +493,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00113">113</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00123">123</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -375,7 +507,49 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00078">78</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00081">81</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a732e5570a9ed97c4172f1bc232652a6d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  sendSSDPInfo_t)(void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00133">133</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a45a9d05965019a8f8c520eb23a711547"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  socketDnsFound_t)(const char *name, ip_addr_t *ipaddr, void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00128">128</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a28619780a1ce0f0ec419575e76d785ea"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  socketSent_t)(void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00127">127</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -389,7 +563,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00074">74</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00077">77</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -403,7 +577,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00110">110</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00119">119</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -417,7 +591,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00116">116</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00130">130</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -431,21 +605,105 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00104">104</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00111">111</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a99a54377cb750cd3c2e22d69002afd1e"></a>
+<a class="anchor" id="acf3ad00eb08443dd251d537789d7d2b4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  startConnectionTimer_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t timerId, <a class="el" href="compMsgSocket_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a> fcn)</td>
+          <td class="memname">typedef uint8_t(*  startConnectionTimer_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t timerId, int interval, int repeat, <a class="el" href="compMsgTimer_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a> fcn)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00119">119</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00138">138</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a6c5ada8ed81e02e5e1709f9ba2c9df98"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  startNetClientMode_t)(void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00117">117</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="afb8f02038cf6884b53a5068ded98178a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  startProdTestMode_t)(void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00132">132</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="acb0448ab25627f2a803548c4429b40cf"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint8_t(*  startSendSSDPInfo_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00134">134</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a047b17023f5a9544c0e74b0243ebe9f0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  startWebClientMode_t)(void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00118">118</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa0f4bf8c3df13cf918b71982401711d2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  stopAccessPoint_t)(void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00120">120</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a8a3060d0c57d4b3f5ec81ac2c803b821"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef void(*  timerFollowupCallback_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00131">131</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -459,7 +717,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00076">76</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00079">79</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -473,21 +731,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00107">107</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00114">114</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ad554aa0a16b9c30ead188754801390a4"></a>
+<a class="anchor" id="a216701ca945c315d87aafc4482838edb"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef uint8_t(*  webSocketRunClientMode_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t mode)</td>
+          <td class="memname">typedef uint8_t(*  webSocketRunClientMode_t)(<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00108">108</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00115">115</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -501,7 +759,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00109">109</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00116">116</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -515,7 +773,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00077">77</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8h_source.html#l00080">80</a> of file <a class="el" href="compMsgSocket_8h_source.html">compMsgSocket.h</a>.</p>
 
 </div>
 </div>
@@ -534,7 +792,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l00860">860</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgNetSocket_8c_source.html#l01193">1193</a> of file <a class="el" href="compMsgNetSocket_8c_source.html">compMsgNetSocket.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0177631ff80b1634b4d236543ee8e674"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t compMsgSSDPSocketInit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -552,7 +826,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00681">681</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgWebSocket_8c_source.html#l00873">873</a> of file <a class="el" href="compMsgWebSocket_8c_source.html">compMsgWebSocket.c</a>.</p>
 
 </div>
 </div>

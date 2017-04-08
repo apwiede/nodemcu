@@ -110,8 +110,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Functions</h2></td></tr>
 <tr class="memitem:a3fa7941f6b3d35fd0bf93aa7862167ae"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8c.html#a3fa7941f6b3d35fd0bf93aa7862167ae">checkConnectionStatus</a> (<a class="el" href="compMsgTimer_8h.html#a0afa7612d5c8dc7d0b9422a00fba4120">compMsgTimerSlot_t</a> *<a class="el" href="structcompMsgTimerSlot.html">compMsgTimerSlot</a>)</td></tr>
 <tr class="separator:a3fa7941f6b3d35fd0bf93aa7862167ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a881e548c423f132d35caff001c3f8e65"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8c.html#a881e548c423f132d35caff001c3f8e65">startConnectionTimer</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t timerId, <a class="el" href="compMsgSocket_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a> fcn)</td></tr>
-<tr class="separator:a881e548c423f132d35caff001c3f8e65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52b8ee98657b126c9b0e6a4272282957"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8c.html#a52b8ee98657b126c9b0e6a4272282957">startConnectionTimer</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t timerId, int interval, int repeat, <a class="el" href="compMsgTimer_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a> fcn)</td></tr>
+<tr class="separator:a52b8ee98657b126c9b0e6a4272282957"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf304905ebb32f650682d39d638ff14d"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8c.html#adf304905ebb32f650682d39d638ff14d">compMsgSocketInit</a> (<a class="el" href="compMsgSocket_8h.html#a7c40a73c352148811e28b63485e16d7c">compMsgSocket_t</a> *<a class="el" href="structcompMsgSocket.html">compMsgSocket</a>)</td></tr>
 <tr class="separator:adf304905ebb32f650682d39d638ff14d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d5fb3c074947fbd0ebdcd8ed77228fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgSocket_8h.html#a7c40a73c352148811e28b63485e16d7c">compMsgSocket_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgSocket_8c.html#a7d5fb3c074947fbd0ebdcd8ed77228fa">newCompMsgSocket</a> ()</td></tr>
@@ -187,7 +187,7 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a881e548c423f132d35caff001c3f8e65"></a>
+<a class="anchor" id="a52b8ee98657b126c9b0e6a4272282957"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -209,7 +209,19 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="compMsgSocket_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>interval</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>repeat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="compMsgTimer_8h.html#ab0b85b594225b154930d886eb038da3e">startConnection_t</a>&#160;</td>
           <td class="paramname"><em>fcn</em>&#160;</td>
         </tr>
         <tr>
@@ -225,7 +237,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgSocket_8c_source.html#l00127">127</a> of file <a class="el" href="compMsgSocket_8c_source.html">compMsgSocket.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgSocket_8c_source.html#l00130">130</a> of file <a class="el" href="compMsgSocket_8c_source.html">compMsgSocket.c</a>.</p>
 
 </div>
 </div>

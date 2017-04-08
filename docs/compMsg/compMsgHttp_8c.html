@@ -145,6 +145,8 @@ Functions</h2></td></tr>
 <tr class="separator:a11da23f6b00a23a0e881f601fa06a155"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a578825be07ab91b2659044ac31c30c74"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgHttp_8c.html#a578825be07ab91b2659044ac31c30c74">getHttpGetHeaderValueForId</a> (<a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud, uint8_t id, const uint8_t **value)</td></tr>
 <tr class="separator:a578825be07ab91b2659044ac31c30c74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5332390dfd5d40202141e2e46b4f656b"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgHttp_8c.html#a5332390dfd5d40202141e2e46b4f656b">deleteHttpMsgInfo</a> (<a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *sud)</td></tr>
+<tr class="separator:a5332390dfd5d40202141e2e46b4f656b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af73ec0eef1483082e2b4c2252510aed1"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgHttp_8c.html#af73ec0eef1483082e2b4c2252510aed1">compMsgHttpInit</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:af73ec0eef1483082e2b4c2252510aed1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94797b8e1bfdf6ec37aaff25c325e397"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgHttp_8h.html#ab7c5f023fd8726f9c3ab01af1e805664">compMsgHttp_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgHttp_8c.html#a94797b8e1bfdf6ec37aaff25c325e397">newCompMsgHttp</a> ()</td></tr>
@@ -152,8 +154,8 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a57d33de079d87f9f68ed10e25e8140e7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="compMsgHttp_8c.html#a06b138e4f1a9a3c7ab07906396909b9f">httpHeaderKeyInfo_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgHttp_8c.html#a57d33de079d87f9f68ed10e25e8140e7">httpHeaderKeyInfos</a> []</td></tr>
-<tr class="separator:a57d33de079d87f9f68ed10e25e8140e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8694f184754a7b83dbc14209ccaaa9fa"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="compMsgHttp_8c.html#a06b138e4f1a9a3c7ab07906396909b9f">httpHeaderKeyInfo_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgHttp_8c.html#a8694f184754a7b83dbc14209ccaaa9fa">httpHeaderKeyInfos</a> []</td></tr>
+<tr class="separator:a8694f184754a7b83dbc14209ccaaa9fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="a0cc9c268eae8abd0b06c0b61289e1afb"></a>
@@ -220,7 +222,33 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00415">415</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00442">442</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a5332390dfd5d40202141e2e46b4f656b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t deleteHttpMsgInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgSocket_8h.html#a1c679a9d5e97f961c696c6105cfa25ac">socketUserData_t</a> *&#160;</td>
+          <td class="paramname"><em>sud</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00417">417</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
 
 </div>
 </div>
@@ -310,7 +338,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00393">393</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00394">394</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
 
 </div>
 </div>
@@ -484,7 +512,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00223">223</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00222">222</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
 
 </div>
 </div>
@@ -526,7 +554,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00187">187</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00186">186</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
 
 </div>
 </div>
@@ -568,7 +596,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00295">295</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00293">293</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
 
 </div>
 </div>
@@ -585,12 +613,12 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00428">428</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgHttp_8c_source.html#l00456">456</a> of file <a class="el" href="compMsgHttp_8c_source.html">compMsgHttp.c</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a class="anchor" id="a57d33de079d87f9f68ed10e25e8140e7"></a>
+<a class="anchor" id="a8694f184754a7b83dbc14209ccaaa9fa"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -598,7 +626,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="compMsgHttp_8c.html#a06b138e4f1a9a3c7ab07906396909b9f">httpHeaderKeyInfo_t</a> httpHeaderKeyInfos[]</td>
+          <td class="memname">const <a class="el" href="compMsgHttp_8c.html#a06b138e4f1a9a3c7ab07906396909b9f">httpHeaderKeyInfo_t</a> httpHeaderKeyInfos[]</td>
         </tr>
       </table>
   </td>

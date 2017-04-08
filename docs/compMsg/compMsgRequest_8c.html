@@ -113,6 +113,11 @@ Functions</h2></td></tr>
 <tr class="separator:a1a7a27d27d9f487cb54c322995304542"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50b9f58acfa186dc44aa350ef55234f7"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgRequest_8c.html#a50b9f58acfa186dc44aa350ef55234f7">deleteRequest</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, uint8_t requestType, void *requestHandle)</td></tr>
 <tr class="separator:a50b9f58acfa186dc44aa350ef55234f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58b053573292d580f77e3505bf2af204"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgRequest_8c.html#a58b053573292d580f77e3505bf2af204">detectMsg</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self, const uint8_t *buffer, int lgth, int queueIdx, bool *isComplete)</td></tr>
+<tr class="memdesc:a58b053573292d580f77e3505bf2af204"><td class="mdescLeft">&#160;</td><td class="mdescRight">handle input characters from uart or sockets collect them until complete message received  <a href="#a58b053573292d580f77e3505bf2af204">More...</a><br /></td></tr>
+<tr class="separator:a58b053573292d580f77e3505bf2af204"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a884fcaf7bdb3df77f4e34c633aadc9ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgRequest_8c.html#a884fcaf7bdb3df77f4e34c633aadc9ee">dbgPrintf</a> (void *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format,...)</td></tr>
+<tr class="separator:a884fcaf7bdb3df77f4e34c633aadc9ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c8d0c7658e7c7a0ac27b73fc3838ea3"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgRequest_8c.html#a5c8d0c7658e7c7a0ac27b73fc3838ea3">compMsgRequestInit</a> (<a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *self)</td></tr>
 <tr class="separator:a5c8d0c7658e7c7a0ac27b73fc3838ea3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c8469a03043d0c401ec408525e0bfef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="compMsgRequest_8h.html#af7f848b05f63ce0be7b133aad76a3ae4">compMsgRequest_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="compMsgRequest_8c.html#a0c8469a03043d0c401ec408525e0bfef">newCompMsgRequest</a> ()</td></tr>
@@ -163,7 +168,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00102">102</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00146">146</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
 
 </div>
 </div>
@@ -205,7 +210,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00083">83</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00115">115</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
 
 </div>
 </div>
@@ -223,7 +228,51 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00223">223</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00380">380</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a884fcaf7bdb3df77f4e34c633aadc9ee"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dbgPrintf </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dbgChars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>debugLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -265,7 +314,87 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00169">169</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00238">238</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a58b053573292d580f77e3505bf2af204"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t detectMsg </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="compMsgAction_8h.html#adfb000b3869f7ef899d0b4f76715184c">compMsgDispatcher_t</a> *&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>lgth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>queueIdx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool *&#160;</td>
+          <td class="paramname"><em>isComplete</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>handle input characters from uart or sockets collect them until complete message received </p>
+<p>For the uart detectMessage collects the input characters.</p><ul>
+<li>if we have headerLgth characters scan the header fields to get the totalLgth</li>
+<li>with totalLgth known collect the characters until we have totalLgth characters.</li>
+<li>if status signals that we can handle a uart request, handle the request</li>
+<li>if status signals we cannot handle that request right now, store the request. There are maximal COMP_MSG_MAX_UART_REQUESTS stored if there are more, we delete the oldest uart request. Eventually we already delete the first request of the same type, if we have already a request with the same type. ???</li>
+<li>we have to define "interrupt" points, where uart requests can be handled for example during provisioning mode etc.</li>
+</ul>
+<p>For other requests detectMessage collects the input characters.too</p><ul>
+<li>normally all characters of a message are handled at once</li>
+<li>we check if we can handle that request (uart requests have eventually higher priority)</li>
+<li>if we can handle requests right now, we handle the request in the order they came in</li>
+<li>if the request queue is full (COMP_MSG_MAX_REQUESTS) new request from the app are ignored in receiving them already see MAX_CONNECTIONS_ALLOWED in the <em>Socket</em> modules <dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">self</td><td>The dispatcher struct </td></tr>
+    <tr><td class="paramname">buffer</td><td>The input characters </td></tr>
+    <tr><td class="paramname">lgth</td><td>The number of characters in the input </td></tr>
+    <tr><td class="paramname">queueIdx</td><td>Which requestQueue tu use </td></tr>
+    <tr><td class="paramname">isComplete</td><td>Signal if message is complete </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Error code or COMP_MSG_ERR_OK </dd></dl>
+</li>
+</ul>
+
+<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00330">330</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
 
 </div>
 </div>
@@ -282,7 +411,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00241">241</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00414">414</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
 
 </div>
 </div>
@@ -308,7 +437,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00062">62</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
+<p>Definition at line <a class="el" href="compMsgRequest_8c_source.html#l00090">90</a> of file <a class="el" href="compMsgRequest_8c_source.html">compMsgRequest.c</a>.</p>
 
 </div>
 </div>

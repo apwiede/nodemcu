@@ -142,6 +142,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>MODULE_INFO_CRYPT_KEY
 : <a class="el" href="compMsgModuleData_8h.html#a19229fb478cee2fd9714055915a65db1">compMsgModuleData.h</a>
 </li>
+<li>MODULE_INFO_cryptIvKey
+: <a class="el" href="compMsgModuleData_8h.html#a8ecf338c2a99572dfea1e4ad441fc767">compMsgModuleData.h</a>
+</li>
+<li>MODULE_INFO_cryptKey
+: <a class="el" href="compMsgModuleData_8h.html#a5d0ed27ace4adfbff605ae8abcc23920">compMsgModuleData.h</a>
+</li>
 <li>MODULE_INFO_CurrentRunningMode
 : <a class="el" href="compMsgModuleData_8h.html#a48e691b9f8ea1764a27a8998d5afbb48">compMsgModuleData.h</a>
 </li>
@@ -163,6 +169,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>MODULE_INFO_GUID
 : <a class="el" href="compMsgModuleData_8h.html#ad8857d9981b1da8ca2f9c744901b4bcb">compMsgModuleData.h</a>
 </li>
+<li>MODULE_INFO_hdrReserve
+: <a class="el" href="compMsgModuleData_8h.html#a1ba53c0d00d73ef734b69abe448d3bb4">compMsgModuleData.h</a>
+</li>
 <li>MODULE_INFO_IPAddr
 : <a class="el" href="compMsgModuleData_8h.html#aa7b4d5ae201d931197982b7ee03bcd2b">compMsgModuleData.h</a>
 </li>
@@ -174,6 +183,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 <li>MODULE_INFO_MODULE
 : <a class="el" href="compMsgModuleData_8h.html#a8d9e29f686671549822993e4bf13d89f">compMsgModuleData.h</a>
+</li>
+<li>MODULE_INFO_myU16SaveUserDataCmdKey
+: <a class="el" href="compMsgModuleData_8h.html#a95cf40dc688724c01983bd6f070b332c">compMsgModuleData.h</a>
+</li>
+<li>MODULE_INFO_myU16Src
+: <a class="el" href="compMsgModuleData_8h.html#a71a738f16c7a74f763b91a22a1f8e909">compMsgModuleData.h</a>
+</li>
+<li>MODULE_INFO_myU8SaveUserDataCmdKey
+: <a class="el" href="compMsgModuleData_8h.html#a17dbaeb3bb26f32f242ab8408339e725">compMsgModuleData.h</a>
+</li>
+<li>MODULE_INFO_myU8Src
+: <a class="el" href="compMsgModuleData_8h.html#a14d97793bbf938a4e916f780d1acd851">compMsgModuleData.h</a>
 </li>
 <li>MODULE_INFO_operatingMode
 : <a class="el" href="compMsgModuleData_8h.html#ae3092d6e4a45bf50aba4acbd0ef51a90">compMsgModuleData.h</a>
@@ -241,26 +262,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>MODULE_INFO_SSIDs
 : <a class="el" href="compMsgModuleData_8h.html#a1999b9c808776debe5918b00102a3efa">compMsgModuleData.h</a>
 </li>
-<li>MODULE_OPERATING_MODE_AP
-: <a class="el" href="compMsgModuleData_8h.html#a26dd6f33f41af0cf8cab01c5c828eb6c">compMsgModuleData.h</a>
-</li>
-<li>MODULE_OPERATING_MODE_CLEAR_PASSWDC
-: <a class="el" href="compMsgModuleData_8h.html#a49376a1fafb45f29e21b99935d600a78">compMsgModuleData.h</a>
-</li>
-<li>MODULE_OPERATING_MODE_CLIENT
-: <a class="el" href="compMsgModuleData_8h.html#a3e3cb9fbfd52d850114b1d9a16098cc2">compMsgModuleData.h</a>
-</li>
 <li>MODULE_OPERATING_MODE_LIGHT_SLEEP
 : <a class="el" href="compMsgModuleData_8h.html#ac95a10c1afffeb1b8e879bfd11124ce7">compMsgModuleData.h</a>
-</li>
-<li>MODULE_OPERATING_MODE_LIGHT_SLEEP_WAKEUP
-: <a class="el" href="compMsgModuleData_8h.html#ab3d1cbbe94aac7c4205f8836cc3d72c0">compMsgModuleData.h</a>
 </li>
 <li>MODULE_OPERATING_MODE_MODULE_TEST
 : <a class="el" href="compMsgModuleData_8h.html#a79b53060c1597da2edfab5b82a46ad10">compMsgModuleData.h</a>
 </li>
-<li>MODULE_OPERATING_MODE_WPS
-: <a class="el" href="compMsgModuleData_8h.html#af09ce77767c620a3ef0b174b2984bc43">compMsgModuleData.h</a>
+<li>MODULE_OPERATING_MODE_PREPARE_DISABLE
+: <a class="el" href="compMsgModuleData_8h.html#aff8f7ff529c904a14589e821f168aa92">compMsgModuleData.h</a>
+</li>
+<li>MODULE_OPERATING_MODE_PROVISIONING
+: <a class="el" href="compMsgModuleData_8h.html#a038b4427a0f96d28d97d8ac6aba45042">compMsgModuleData.h</a>
+</li>
+<li>MODULE_OPERATING_MODE_START
+: <a class="el" href="compMsgModuleData_8h.html#a6fdf249ab00ca2d7efe4631889d71644">compMsgModuleData.h</a>
 </li>
 <li>moduleFieldName2Id()
 : <a class="el" href="compMsgModuleData_8c.html#a4d60204308f8e312dbe108d74c1a44a6">compMsgModuleData.c</a>
@@ -268,8 +283,59 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>moduleFieldName2Ids
 : <a class="el" href="compMsgModuleData_8c.html#a032cbb8531083ce896daa53a57da2478">compMsgModuleData.c</a>
 </li>
+<li>MSG_DESC_HEADER_FILE_TOKEN
+: <a class="el" href="compMsgMsgDesc_8h.html#a8459cc82b20a2b9197e4bd671ccbf511">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_DESC_MID_PART_FILE_TOKEN
+: <a class="el" href="compMsgMsgDesc_8h.html#a67378fff2e42abe1e40988fa396deb98">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_DESC_TRAILER_FILE_TOKEN
+: <a class="el" href="compMsgMsgDesc_8h.html#a2182cc4eeb29abbefcc48636b81940b1">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_FILES_FILE_NAME
+: <a class="el" href="compMsgMsgDesc_8h.html#a762719ccb6fb526c7e9149da0a184460">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_GUID_LGTH
+: <a class="el" href="compMsgMsgDesc_8h.html#abcd65c174a3d653fab063a61d87422f1">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_HEADS_FILE_TOKEN
+: <a class="el" href="compMsgMsgDesc_8h.html#af39638f77e67c8ade106f087d3e10a21">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_MAX_HDR_FILLER_LGTH
+: <a class="el" href="compMsgMsgDesc_8h.html#a107145b75b4c5293a6bb4cbe94fc4219">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_MAX_LINE_FIELDS
+: <a class="el" href="compMsgMsgDesc_8h.html#a3e75e5950455dcb498c6c421336bd52c">compMsgMsgDesc.h</a>
+</li>
+<li>MSG_USE_FILE_TOKEN
+: <a class="el" href="compMsgMsgDesc_8h.html#a50289933a6ecc4f892c80837c67b0e01">compMsgMsgDesc.h</a>
+</li>
+<li>msgDescIncludeInfo_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a5e8c57c5f67818c07d2016bfdb21b3ef">compMsgMsgDesc.h</a>
+</li>
 <li>msgDescPart_t
 : <a class="el" href="compMsgMsgDesc_8h.html#abd0159d4db6e3e3b6ffc7512721320fb">compMsgMsgDesc.h</a>
+</li>
+<li>msgDescription_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a85eea555b2176ce8c2110661226359f5">compMsgMsgDesc.h</a>
+</li>
+<li>msgDescriptionInfos_t
+: <a class="el" href="compMsgMsgDesc_8h.html#acf03f9e9a1134cc2842b7de78f0d8362">compMsgMsgDesc.h</a>
+</li>
+<li>msgFieldDesc_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a82004fcbb497cc9ba8aea7f6f96edf95">compMsgMsgDesc.h</a>
+</li>
+<li>msgFieldSequence_t
+: <a class="el" href="compMsgMsgDesc_8h.html#af2a478e5309182e53fca83a078b5f14f">compMsgMsgDesc.h</a>
+</li>
+<li>msgFieldSizeCallback_t
+: <a class="el" href="compMsgMsgDesc_8h.html#aab2912e8af0ad979c749f16a7f42bd19">compMsgMsgDesc.h</a>
+</li>
+<li>msgFieldVal_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a46b33490f98fa7bc6a206f2b691c9b57">compMsgMsgDesc.h</a>
+</li>
+<li>msgFieldValueCallback_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a30d51460b704205b73c43bef8ae1723c">compMsgMsgDesc.h</a>
 </li>
 <li>msgHeader2MsgPtr_t
 : <a class="el" href="compMsgDispatcher_8h.html#a9be81b1b22f057ba4f8ef4bd0e20ab3d">compMsgDispatcher.h</a>
@@ -277,14 +343,32 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>msgHeaderInfos_t
 : <a class="el" href="compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6">compMsgMsgDesc.h</a>
 </li>
+<li>msgHeaderValues_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a56aacaa631a8397bcf548b71098934b1">compMsgMsgDesc.h</a>
+</li>
+<li>msgInfo_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a14f4084ee10d6b976f1bd20c3baee235">compMsgMsgDesc.h</a>
+</li>
+<li>msgKeyValueDesc_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a4fd9e56de3bf0d8ded196e17b2c603b6">compMsgMsgDesc.h</a>
+</li>
 <li>msgKeyValueDescPart_t
 : <a class="el" href="compMsgMsgDesc_8h.html#a1b42f0ad2de2c3d2dd8522434d75d560">compMsgMsgDesc.h</a>
+</li>
+<li>msgMidPartValues_t
+: <a class="el" href="compMsgMsgDesc_8h.html#a32164fc40246e2c88066a7d6b4615bc2">compMsgMsgDesc.h</a>
 </li>
 <li>msgParts_t
 : <a class="el" href="compMsgMsgDesc_8h.html#affc812285d230ef0b2550ddd9030cbdd">compMsgMsgDesc.h</a>
 </li>
+<li>msgRequestInfo_t
+: <a class="el" href="compMsgRequest_8h.html#abf4e748eb84bfbe11d92086b6c737630">compMsgRequest.h</a>
+</li>
 <li>msgRequestInfos_t
 : <a class="el" href="compMsgRequest_8h.html#a56d1c764781c736d6de641c3d5917919">compMsgRequest.h</a>
+</li>
+<li>msgTrailerValues_t
+: <a class="el" href="compMsgMsgDesc_8h.html#af0e27d5eccc77bd3eee2d081d11c9f7d">compMsgMsgDesc.h</a>
 </li>
 <li>msgValPart_t
 : <a class="el" href="compMsgMsgDesc_8h.html#ae9daf2d9d93eff117588de5772033dad">compMsgMsgDesc.h</a>
