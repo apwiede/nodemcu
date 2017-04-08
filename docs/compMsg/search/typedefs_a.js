@@ -1,10 +1,24 @@
 var searchData=
 [
+  ['msgdescincludeinfo_5ft',['msgDescIncludeInfo_t',['../compMsgMsgDesc_8h.html#a5e8c57c5f67818c07d2016bfdb21b3ef',1,'compMsgMsgDesc.h']]],
   ['msgdescpart_5ft',['msgDescPart_t',['../compMsgMsgDesc_8h.html#abd0159d4db6e3e3b6ffc7512721320fb',1,'compMsgMsgDesc.h']]],
+  ['msgdescription_5ft',['msgDescription_t',['../compMsgMsgDesc_8h.html#a85eea555b2176ce8c2110661226359f5',1,'compMsgMsgDesc.h']]],
+  ['msgdescriptioninfos_5ft',['msgDescriptionInfos_t',['../compMsgMsgDesc_8h.html#acf03f9e9a1134cc2842b7de78f0d8362',1,'compMsgMsgDesc.h']]],
+  ['msgfielddesc_5ft',['msgFieldDesc_t',['../compMsgMsgDesc_8h.html#a82004fcbb497cc9ba8aea7f6f96edf95',1,'compMsgMsgDesc.h']]],
+  ['msgfieldsequence_5ft',['msgFieldSequence_t',['../compMsgMsgDesc_8h.html#af2a478e5309182e53fca83a078b5f14f',1,'compMsgMsgDesc.h']]],
+  ['msgfieldsizecallback_5ft',['msgFieldSizeCallback_t',['../compMsgMsgDesc_8h.html#aab2912e8af0ad979c749f16a7f42bd19',1,'compMsgMsgDesc.h']]],
+  ['msgfieldval_5ft',['msgFieldVal_t',['../compMsgMsgDesc_8h.html#a46b33490f98fa7bc6a206f2b691c9b57',1,'compMsgMsgDesc.h']]],
+  ['msgfieldvaluecallback_5ft',['msgFieldValueCallback_t',['../compMsgMsgDesc_8h.html#a30d51460b704205b73c43bef8ae1723c',1,'compMsgMsgDesc.h']]],
   ['msgheader2msgptr_5ft',['msgHeader2MsgPtr_t',['../compMsgDispatcher_8h.html#a9be81b1b22f057ba4f8ef4bd0e20ab3d',1,'compMsgDispatcher.h']]],
   ['msgheaderinfos_5ft',['msgHeaderInfos_t',['../compMsgMsgDesc_8h.html#a56219d85fdce51ae344f76f2e3b231d6',1,'compMsgMsgDesc.h']]],
+  ['msgheadervalues_5ft',['msgHeaderValues_t',['../compMsgMsgDesc_8h.html#a56aacaa631a8397bcf548b71098934b1',1,'compMsgMsgDesc.h']]],
+  ['msginfo_5ft',['msgInfo_t',['../compMsgMsgDesc_8h.html#a14f4084ee10d6b976f1bd20c3baee235',1,'compMsgMsgDesc.h']]],
+  ['msgkeyvaluedesc_5ft',['msgKeyValueDesc_t',['../compMsgMsgDesc_8h.html#a4fd9e56de3bf0d8ded196e17b2c603b6',1,'compMsgMsgDesc.h']]],
   ['msgkeyvaluedescpart_5ft',['msgKeyValueDescPart_t',['../compMsgMsgDesc_8h.html#a1b42f0ad2de2c3d2dd8522434d75d560',1,'compMsgMsgDesc.h']]],
+  ['msgmidpartvalues_5ft',['msgMidPartValues_t',['../compMsgMsgDesc_8h.html#a32164fc40246e2c88066a7d6b4615bc2',1,'compMsgMsgDesc.h']]],
   ['msgparts_5ft',['msgParts_t',['../compMsgMsgDesc_8h.html#affc812285d230ef0b2550ddd9030cbdd',1,'compMsgMsgDesc.h']]],
+  ['msgrequestinfo_5ft',['msgRequestInfo_t',['../compMsgRequest_8h.html#abf4e748eb84bfbe11d92086b6c737630',1,'compMsgRequest.h']]],
   ['msgrequestinfos_5ft',['msgRequestInfos_t',['../compMsgRequest_8h.html#a56d1c764781c736d6de641c3d5917919',1,'compMsgRequest.h']]],
+  ['msgtrailervalues_5ft',['msgTrailerValues_t',['../compMsgMsgDesc_8h.html#af0e27d5eccc77bd3eee2d081d11c9f7d',1,'compMsgMsgDesc.h']]],
   ['msgvalpart_5ft',['msgValPart_t',['../compMsgMsgDesc_8h.html#ae9daf2d9d93eff117588de5772033dad',1,'compMsgMsgDesc.h']]]
 ];

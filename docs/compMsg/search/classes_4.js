@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['fielddesc',['fieldDesc',['../structfieldDesc.html',1,'']]],
   ['fieldname2id',['fieldName2id',['../structfieldName2id.html',1,'']]],
   ['fieldnames',['fieldNames',['../structfieldNames.html',1,'']]],
   ['fieldstosave',['fieldsToSave',['../structfieldsToSave.html',1,'']]],

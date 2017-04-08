@@ -8,13 +8,13 @@ var searchData=
   ['bssidstrsize',['bssidStrSize',['../structbssScanSizes.html#a699b983288e8fbbbff09a84d7c489ec0',1,'bssScanSizes']]],
   ['bssidstrtype',['bssidStrType',['../structbssScanTypes.html#ab95cc6f9d4c0bdc7daf16df77bf53335',1,'bssScanTypes']]],
   ['bssidtype',['bssidType',['../structbssScanTypes.html#a7f15c51f27d3664420babd76244d89cb',1,'bssScanTypes']]],
-  ['bssscaninfos',['bssScanInfos',['../structcompMsgDispatcher.html#a2a641732c7b6ecfbdd6f145ca26ab70b',1,'compMsgDispatcher::bssScanInfos()'],['../structcompMsgWifiData.html#aeb22828590846e5578ed253b2f313958',1,'compMsgWifiData::bssScanInfos()'],['../compMsgWifiData_8c.html#ae4d812acf00dd2af5065244d62958bdc',1,'bssScanInfos():&#160;compMsgWifiData.c']]],
+  ['bssscaninfos',['bssScanInfos',['../structdispatcherCommon.html#a15b7e653e89273e99b1d96580ffc24ee',1,'dispatcherCommon::bssScanInfos()'],['../structcompMsgWifiData.html#aeb22828590846e5578ed253b2f313958',1,'compMsgWifiData::bssScanInfos()'],['../compMsgWifiData_8c.html#ae4d812acf00dd2af5065244d62958bdc',1,'bssScanInfos():&#160;compMsgWifiData.c']]],
   ['bssscanrunning',['bssScanRunning',['../compMsgWifiData_8c.html#a822c00fe8b11798ad2a75e6b4c6e33d2',1,'compMsgWifiData.c']]],
   ['bssscansizes',['bssScanSizes',['../structcompMsgWifiData.html#a50635981358cb6fcfdfca930a72d8b35',1,'compMsgWifiData']]],
   ['bssscantypes',['bssScanTypes',['../structcompMsgWifiData.html#ab9b9fa35321f6efab0a6b43de1ff37ff',1,'compMsgWifiData']]],
   ['bssstr2bssinfoid',['bssStr2BssInfoId',['../structcompMsgWifiData.html#a6410a41b50f76087a8407357cf0d4ae7',1,'compMsgWifiData']]],
   ['bssstr2bssinfoids',['bssStr2BssInfoIds',['../compMsgWifiData_8c.html#a722e54448ecc379b996f781b2ef8cfaf',1,'compMsgWifiData.c']]],
-  ['buf',['buf',['../structmsgParts.html#a646fec2419212dab015477b4ffcfc35b',1,'msgParts']]],
+  ['buf',['buf',['../structmsgInfo.html#a5b058d45e60b07c164cdd27730ce2e31',1,'msgInfo::buf()'],['../structmsgParts.html#a646fec2419212dab015477b4ffcfc35b',1,'msgParts::buf()']]],
   ['buildmsg',['buildMsg',['../structcompMsgBuildMsg.html#ac0e7335c80be99718c3a77e98c2cdf94',1,'compMsgBuildMsg']]],
   ['buildmsginfos',['buildMsgInfos',['../structcompMsgData.html#aed4fc3f2d45aa0c71b5c2610319284c0',1,'compMsgData']]]
 ];

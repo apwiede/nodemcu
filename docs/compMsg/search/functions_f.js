@@ -3,7 +3,7 @@ var searchData=
   ['readactions',['readActions',['../compMsgMsgDesc_8c.html#a598128b38f81b0fff56e0862b507b100',1,'compMsgMsgDesc.c']]],
   ['readheadersandsetflags',['readHeadersAndSetFlags',['../compMsgMsgDesc_8c.html#a7b245b92b1f832bc5233f161eb574aef',1,'compMsgMsgDesc.c']]],
   ['readline',['readLine',['../compMsgMsgDesc_8c.html#ab43a196ce0f41fb3e4c9168798457747',1,'compMsgMsgDesc.c']]],
-  ['readmodulevalues',['readModuleValues',['../compMsgMsgDesc_8c.html#a346631c85c838a02d6963e5289ea397a',1,'compMsgMsgDesc.c']]],
+  ['readmoduledatavalues',['readModuleDataValues',['../compMsgMsgDesc_8c.html#a5a6f03b5868bd9ad2096213c620cf0b6',1,'compMsgMsgDesc.c']]],
   ['readwifivalues',['readWifiValues',['../compMsgMsgDesc_8c.html#a1f2d20b6be92291e08a78647592fb3b8',1,'compMsgMsgDesc.c']]],
   ['resetbuildmsginfos',['resetBuildMsgInfos',['../compMsgDispatcher_8c.html#ad19afb42b07aebc1a4eebc6b42e72d11',1,'compMsgDispatcher.c']]],
   ['resetheaderinfos',['resetHeaderInfos',['../compMsgIdentify_8c.html#a28b005cb4df37742d49a799e11cb28d6',1,'compMsgIdentify.c']]],

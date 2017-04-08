@@ -10,6 +10,7 @@ var searchData=
   ['timer_5fmode_5foff',['TIMER_MODE_OFF',['../compMsgTimer_8h.html#a20817a864658161f1c9077899729a98a',1,'compMsgTimer.h']]],
   ['timer_5fmode_5fsemi',['TIMER_MODE_SEMI',['../compMsgTimer_8h.html#a20fd95e103e626373c239de06ecdc15f',1,'compMsgTimer.h']]],
   ['timer_5fmode_5fsingle',['TIMER_MODE_SINGLE',['../compMsgTimer_8h.html#a7ac7b5af7a0bfcae1dd2f1f6fce7103e',1,'compMsgTimer.h']]],
+  ['timerfollowupcallback_5ft',['timerFollowupCallback_t',['../compMsgSocket_8h.html#a8a3060d0c57d4b3f5ec81ac2c803b821',1,'compMsgSocket.h']]],
   ['timerid',['timerId',['../structcompMsgTimerSlot.html#ae0996f6b566ff22f5be1011e05ca9e1b',1,'compMsgTimerSlot']]],
   ['tobase64',['toBase64',['../structcompMsgUtil.html#a844c5ff84eb93fc7f6a7f58539183a1f',1,'compMsgUtil::toBase64()'],['../compMsgUtil_8c.html#a2c0a775f4c9f2e00afc9948a7fd38733',1,'toBase64():&#160;compMsgUtil.c']]],
   ['tobase64_5ft',['toBase64_t',['../compMsgUtil_8h.html#a90e4fe5c9b2179db3365fda7ab72eb98',1,'compMsgUtil.h']]],

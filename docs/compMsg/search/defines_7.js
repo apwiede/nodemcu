@@ -25,7 +25,7 @@ var searchData=
   ['key_5fvalue_5fkey_5fmode',['KEY_VALUE_KEY_MODE',['../compMsgWifiData_8h.html#a1b3ae7f32037d94a8e214f0a89d0782a',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fpassword',['KEY_VALUE_KEY_PASSWORD',['../compMsgWifiData_8h.html#a20d9c231b7eb5d2a8b460cf5f6cf7ca2',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5frssi',['KEY_VALUE_KEY_RSSI',['../compMsgWifiData_8h.html#ac0de38080873cea973980e6210ae0d47',1,'compMsgWifiData.h']]],
-  ['key_5fvalue_5fkey_5fseq_5fnum',['KEY_VALUE_KEY_SEQ_NUM',['../compMsgWifiData_8h.html#a53923d0ea335d50fd20d443604637618',1,'compMsgWifiData.h']]],
+  ['key_5fvalue_5fkey_5fsequence_5fnum',['KEY_VALUE_KEY_SEQUENCE_NUM',['../compMsgWifiData_8h.html#a207919545aced475e29ef19a65c9a3b3',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fssid',['KEY_VALUE_KEY_SSID',['../compMsgWifiData_8h.html#a2ccfc8f7a79068cdec4e164a31b0c72f',1,'compMsgWifiData.h']]],
   ['key_5fvalue_5fkey_5fstatus',['KEY_VALUE_KEY_STATUS',['../compMsgWifiData_8h.html#adae3f248ba792aeee90d960863b27bd9',1,'compMsgWifiData.h']]]
 ];

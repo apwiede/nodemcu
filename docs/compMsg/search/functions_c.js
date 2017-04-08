@@ -9,9 +9,12 @@ var searchData=
   ['netsocketreconnected',['netSocketReconnected',['../compMsgNetSocket_8c.html#a2131cf705acaad2df649dc2bf24f0bf2',1,'compMsgNetSocket.c']]],
   ['netsocketrecv',['netSocketRecv',['../compMsgNetSocket_8c.html#a75c2d8a43d8f7a5f61629fb0d5d516d1',1,'compMsgNetSocket.c']]],
   ['netsocketrunclientmode',['netSocketRunClientMode',['../compMsgNetSocket_8c.html#a1927db8850d06759b54db36f826ea461',1,'compMsgNetSocket.c']]],
+  ['netsocketrunprodtestmode',['netSocketRunProdTestMode',['../compMsgNetSocket_8c.html#aecf429e3fc0fddadef4dda0894e6c5f4',1,'compMsgNetSocket.c']]],
   ['netsocketsendconnecterror',['netSocketSendConnectError',['../compMsgWifiData_8c.html#ac4738808533855ed681f7bdd59d4f4b3',1,'compMsgWifiData.c']]],
   ['netsocketsenddata',['netSocketSendData',['../compMsgNetSocket_8c.html#adf6d2bdc4db9359a62e950e2594d26ae',1,'compMsgNetSocket.c']]],
   ['netsocketsent',['netSocketSent',['../compMsgNetSocket_8c.html#aa9474a6de93bd89962db9deff38e4e37',1,'compMsgNetSocket.c']]],
+  ['netsocketssdpreceived',['netSocketSSDPReceived',['../compMsgWifiData_8c.html#a3298666cc8691f38ee7446563ead2275',1,'compMsgWifiData.c']]],
+  ['netsocketssdptosend',['netSocketSSDPToSend',['../compMsgWifiData_8c.html#a5a673c0155381e14c31510e57afa8e70',1,'compMsgWifiData.c']]],
   ['netsocketstart',['netSocketStart',['../compMsgNetSocket_8c.html#ae2fe52f276d28d3a68b80c044be7a910',1,'compMsgNetSocket.c']]],
   ['netsocketstartcloudsocket',['netSocketStartCloudSocket',['../compMsgNetSocket_8c.html#a9501ad4b83dbfbf56a07dc3294bc3add',1,'compMsgNetSocket.c']]],
   ['netsockettosend',['netSocketToSend',['../compMsgWifiData_8c.html#a5721f0b2ebd1b6772a47247a11de9ef9',1,'compMsgWifiData.c']]],
@@ -34,5 +37,5 @@ var searchData=
   ['newcompmsgutil',['newCompMsgUtil',['../compMsgUtil_8c.html#a9478ab1710ef96b12d20a62d3bb39885',1,'newCompMsgUtil():&#160;compMsgUtil.c'],['../compMsgUtil_8h.html#a9478ab1710ef96b12d20a62d3bb39885',1,'newCompMsgUtil():&#160;compMsgUtil.c']]],
   ['newcompmsgwifidata',['newCompMsgWifiData',['../compMsgWifiData_8c.html#a1a620a38d5e46ee31ec5e82841ce992b',1,'newCompMsgWifiData():&#160;compMsgWifiData.c'],['../compMsgWifiData_8h.html#a1a620a38d5e46ee31ec5e82841ce992b',1,'newCompMsgWifiData():&#160;compMsgWifiData.c']]],
   ['newdataview',['newDataView',['../dataView_8c.html#a777e3b5e9fc5dd6fe0fe6cad6432d6d1',1,'newDataView(uint8_t *data, size_t lgth):&#160;dataView.c'],['../dataView_8h.html#a777e3b5e9fc5dd6fe0fe6cad6432d6d1',1,'newDataView(uint8_t *data, size_t lgth):&#160;dataView.c']]],
-  ['nextfittingentry',['nextFittingEntry',['../compMsgIdentify_8c.html#a51f2bace7c496a673b5d5534ed10115c',1,'compMsgIdentify.c']]]
+  ['nextfittingentry',['nextFittingEntry',['../compMsgIdentify_8c.html#ab569961e4ec8a595e372970c0c159c49',1,'compMsgIdentify.c']]]
 ];

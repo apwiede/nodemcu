@@ -1,10 +1,22 @@
 var searchData=
 [
+  ['msgdescincludeinfo',['msgDescIncludeInfo',['../structmsgDescIncludeInfo.html',1,'']]],
   ['msgdescpart',['msgDescPart',['../structmsgDescPart.html',1,'']]],
+  ['msgdescription',['msgDescription',['../structmsgDescription.html',1,'']]],
+  ['msgdescriptioninfos',['msgDescriptionInfos',['../structmsgDescriptionInfos.html',1,'']]],
+  ['msgfielddesc',['msgFieldDesc',['../structmsgFieldDesc.html',1,'']]],
+  ['msgfieldsequence',['msgFieldSequence',['../structmsgFieldSequence.html',1,'']]],
+  ['msgfieldval',['msgFieldVal',['../structmsgFieldVal.html',1,'']]],
   ['msgheader2msgptr',['msgHeader2MsgPtr',['../structmsgHeader2MsgPtr.html',1,'']]],
   ['msgheaderinfos',['msgHeaderInfos',['../structmsgHeaderInfos.html',1,'']]],
+  ['msgheadervalues',['msgHeaderValues',['../structmsgHeaderValues.html',1,'']]],
+  ['msginfo',['msgInfo',['../structmsgInfo.html',1,'']]],
+  ['msgkeyvaluedesc',['msgKeyValueDesc',['../structmsgKeyValueDesc.html',1,'']]],
   ['msgkeyvaluedescpart',['msgKeyValueDescPart',['../structmsgKeyValueDescPart.html',1,'']]],
+  ['msgmidpartvalues',['msgMidPartValues',['../structmsgMidPartValues.html',1,'']]],
   ['msgparts',['msgParts',['../structmsgParts.html',1,'']]],
+  ['msgrequestinfo',['msgRequestInfo',['../structmsgRequestInfo.html',1,'']]],
   ['msgrequestinfos',['msgRequestInfos',['../structmsgRequestInfos.html',1,'']]],
+  ['msgtrailervalues',['msgTrailerValues',['../structmsgTrailerValues.html',1,'']]],
   ['msgvalpart',['msgValPart',['../structmsgValPart.html',1,'']]]
 ];

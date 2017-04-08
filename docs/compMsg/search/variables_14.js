@@ -1,7 +1,7 @@
 var searchData=
 [
   ['websocketbinaryreceived',['webSocketBinaryReceived',['../structsocketUserData.html#a92a1fe0d237bc9a0b35e999cd58ab013',1,'socketUserData::webSocketBinaryReceived()'],['../structcompMsgWifiData.html#a0f69e5eefc5f921e8b1be046c0599f0f',1,'compMsgWifiData::webSocketBinaryReceived()']]],
-  ['websocketerror',['webSocketError',['../structcompMsgDispatcher.html#a6c29240537093d1391640878cc407e5d',1,'compMsgDispatcher']]],
+  ['websocketerror',['webSocketError',['../structdispatcherCommon.html#a3ac103692864987cd7dbf1133d2eb97a',1,'dispatcherCommon']]],
   ['websocketrunapmode',['webSocketRunAPMode',['../structcompMsgSocket.html#a3569e1f22e7a96191b6c7ad9e2a5c653',1,'compMsgSocket']]],
   ['websocketrunclientmode',['webSocketRunClientMode',['../structcompMsgSocket.html#aacbb77b353a156f4f713782bb953348f',1,'compMsgSocket']]],
   ['websocketsendconnecterror',['webSocketSendConnectError',['../structcompMsgWifiData.html#a14e08aaa157d308d8771bc174ae83fbc',1,'compMsgWifiData']]],

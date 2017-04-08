@@ -3,6 +3,7 @@ var searchData=
   ['uartreceivecb',['uartReceiveCb',['../compMsgSendReceive_8c.html#aabc0feb70921c0adbf3d68f419767263',1,'compMsgSendReceive.c']]],
   ['uartsendanswer',['uartSendAnswer',['../compMsgSendReceive_8c.html#a17348594b3adbc6a1d16989b3683e490',1,'compMsgSendReceive.c']]],
   ['uartsetup',['uartSetup',['../compMsgSendReceive_8c.html#aa5cf50b1c194c81b5873720426c64387',1,'compMsgSendReceive.c']]],
+  ['unpackreceivedmsg',['unpackReceivedMsg',['../compMsgIdentify_8c.html#ab296fd197e9cfc9950c256741e72f68f',1,'compMsgIdentify.c']]],
   ['updatefirmware',['updateFirmware',['../compMsgOta_8c.html#ad82e9bc8d956501c596d7b823a967e55',1,'compMsgOta.c']]],
   ['updatemodulevalues',['updateModuleValues',['../compMsgModuleData_8c.html#a295a8eda9b3f59f6f32233691f1a8056',1,'compMsgModuleData.c']]],
   ['updatespiffs',['updateSpiffs',['../compMsgOta_8c.html#aba6ea3a3d19028c483f054bbe8c972da',1,'compMsgOta.c']]],
