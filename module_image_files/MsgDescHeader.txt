@@ -3,6 +3,6 @@
 @src,uint8_t,1
 @grp,uint8_t,1
 @dst,uint8_t,1
-@ipAddr,uint32_t,4
 @totalLgth,uint16_t,2
+@ipAddr,uint32_t,4
 @hdrFiller,uint8_t*,7

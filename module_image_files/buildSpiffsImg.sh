@@ -19,7 +19,9 @@ import startCompMsgS.lua startCompMsgS.lua
 import startCompMsgU.lua startCompMsgU.lua
 import startCompMsgW.lua startCompMsgW.lua
 
+import MsgFiles.txt MsgFiles.txt
 import MsgUse.txt MsgUse.txt
+import MsgHeads.txt MsgHeads.txt
 import MsgDescHeader.txt MsgDescHeader.txt
 import MsgDescMidPart.txt MsgDescMidPart.txt
 import MsgDescTrailer.txt MsgDescTrailer.txt
