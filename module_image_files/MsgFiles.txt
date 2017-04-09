@@ -1,7 +1,9 @@
 # example for messages files file
-#,5
-msgHeads,MsgHeads.txt
-msgUse,MsgUse.txt
-msgDescHeader,MsgDescHeader.txt
-msgDescMidPart,MsgDescMidPart.txt
-msgDescTrailer,MsgDescTrailer.txt
+#,7
+@$msgDescHeader,MsgDescHeader.txt
+@$msgDescMidPart,MsgDescMidPart.txt
+@$msgDescTrailer,MsgDescTrailer.txt
+@$msgFieldsToSave,MsgFieldsToSave.txt
+@$msgHeads,MsgHeads.txt
+@$msgActions,MsgActions.txt
+@$msgValHeader,MsgValHeader.txt

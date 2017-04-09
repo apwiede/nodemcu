@@ -2,5 +2,5 @@
 # <comma separated header field values>,<encrypted>,<handleType>,@cmdKey
 # for header definition see MsgDescHeader.txt
 #,1
-*,2,21,*,*,*,E,W,A1
+12,2,0x15,*,*,*,E,W,A1
 

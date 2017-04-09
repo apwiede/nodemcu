@@ -20,12 +20,13 @@ import startCompMsgU.lua startCompMsgU.lua
 import startCompMsgW.lua startCompMsgW.lua
 
 import MsgFiles.txt MsgFiles.txt
-import MsgUse.txt MsgUse.txt
-import MsgHeads.txt MsgHeads.txt
 import MsgDescHeader.txt MsgDescHeader.txt
 import MsgDescMidPart.txt MsgDescMidPart.txt
 import MsgDescTrailer.txt MsgDescTrailer.txt
-import MsgValHeader1.txt MsgValHeader1.txt
+import MsgFieldsToSave.txt MsgFieldsToSave.txt
+import MsgHeads.txt MsgHeads.txt
+import MsgActions.txt MsgActions.txt
+import MsgValHeader.txt MsgValHeader.txt
 
 EOF
 #rm -rf myConfig.txt

@@ -1,7 +1,7 @@
 # this is an example message value header file
 #,5
-@src,I,12
-@grp,I,2
-@dst,I,15
-@ipAddr,I,@getIpAddr
-@hdrFiller,S,@getHdrFiller
+@src,0xc
+@grp,2
+@dst,0xf
+@ipAddr,@getIpAddr
+@hdrFiller,@getHdrFiller
