@@ -89,6 +89,36 @@
 #define MODULE_INFO_myU16SaveUserDataCmdKey 42
 #define MODULE_INFO_myU8SaveUserDataCmdKey  43
 
+// the defines have to be bigger then the max of COMP_MSG_WIFI_ defines in compMsgWifiData.h!!
+#define COMP_MSG_MODULE_MACAddr             60
+#define COMP_MSG_MODULE_IPAddr              61
+#define COMP_MSG_MODULE_FirmwareVersion     62
+#define COMP_MSG_MODULE_RSSI                63
+#define COMP_MSG_MODULE_RSSIMax             64
+#define COMP_MSG_MODULE_ConnectionState     65
+#define COMP_MSG_MODULE_ConnectedUsers      66
+#define COMP_MSG_MODULE_IPProtocol          67
+#define COMP_MSG_MODULE_ErrorMain           68
+#define COMP_MSG_MODULE_ErrorSub            69
+#define COMP_MSG_MODULE_DateAndTime         70
+#define COMP_MSG_MODULE_SSIDs               71
+
+#define COMP_MSG_MODULE_OperatingMode       72
+#define COMP_MSG_MODULE_OtaHost             73
+#define COMP_MSG_MODULE_OtaRomPath          74
+#define COMP_MSG_MODULE_OtaFsPath           75
+#define COMP_MSG_MODULE_OtaPort             76
+#define COMP_MSG_MODULE_CryptKey            77
+
+#define COMP_MSG_MODULE_Reserve1            78
+#define COMP_MSG_MODULE_Reserve2            79
+#define COMP_MSG_MODULE_Reserve3            80
+#define COMP_MSG_MODULE_Reserve4            81
+#define COMP_MSG_MODULE_Reserve5            82
+#define COMP_MSG_MODULE_Reserve6            83
+#define COMP_MSG_MODULE_Reserve7            84
+#define COMP_MSG_MODULE_Reserve8            85
+
 #define MODULE_OPERATING_MODE_START              0x20
 #define MODULE_OPERATING_MODE_LIGHT_SLEEP        0x21
 #define MODULE_OPERATING_MODE_PREPARE_DISABLE    0x22
@@ -102,6 +132,7 @@ typedef struct compMsgModuleDataName2Value {
   uint8_t *value;
 } compMsgModuleDataName2Value_t;
 
+typedef uint8_t (* callbackStr2CallbackId_t)(uint8_t *callbackName, uint16_t *callbackId);
 typedef uint8_t (* getOtaHost_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getOtaRomPath_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getOtaFsPath_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
@@ -158,6 +189,7 @@ typedef struct compMsgModuleData {
   uint8_t myU8Src;
   uint16_t myU8SaveUserDataCmdKey;
 
+  callbackStr2CallbackId_t callbackStr2CallbackId;
   getOtaHost_t getOtaHost;
   getOtaRomPath_t getOtaRomPath;
   getOtaFsPath_t getOtaFsPath;
