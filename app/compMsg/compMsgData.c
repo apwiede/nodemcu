@@ -1228,12 +1228,16 @@ static uint8_t setDispatcher(compMsgData_t *self, compMsgDispatcher_t *dispatche
 // ================================= newCompMsgData ====================================
 
 compMsgData_t *newCompMsgData(void) {
+  compMsgData_t *compMsgData;
+
 //ets_printf("size compMsgData_t: %d\n", sizeof (compMsgData_t));
-  compMsgData_t *compMsgData = os_zalloc(sizeof(compMsgData_t));
+ets_printf("compMsgData 01 heap: %d\n", system_get_free_heap_size());
+  compMsgData = os_zalloc(sizeof(compMsgData_t));
   if (compMsgData == NULL) {
     return NULL;
   }
   
+ets_printf("compMsgData 02 heap: %d\n", system_get_free_heap_size());
   compMsgData->fields = NULL;
   compMsgData->keyValueFields = NULL;
   compMsgData->flags = 0;

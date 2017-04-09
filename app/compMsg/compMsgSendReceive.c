@@ -419,6 +419,7 @@ checkErrOK(result);
 
 uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgSendReceive_t *compMsgSendReceive;
 
   /* depends on:
    *   - compMsgDispatcher
@@ -431,17 +432,18 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
   result = self->compMsgRequest->addRequest(self, COMP_MSG_INPUT_UART, NULL, self->compMsgData);
 
-  self->compMsgSendReceive->startSendMsg = NULL;
-  self->compMsgSendReceive->startSendMsg2 = NULL;
-  self->compMsgSendReceive->sendCloudMsg = NULL;
+  compMsgSendReceive = self->compMsgSendReceive;
+  compMsgSendReceive->startSendMsg = NULL;
+  compMsgSendReceive->startSendMsg2 = NULL;
+  compMsgSendReceive->sendCloudMsg = NULL;
 
-  self->compMsgSendReceive->uartSetup = &uartSetup;
-  self->compMsgSendReceive->uartReceiveCb = &uartReceiveCb;
-  self->compMsgSendReceive->uartSendAnswer = &uartSendAnswer;
-  self->compMsgSendReceive->prepareCloudMsg = &prepareCloudMsg;
-  self->compMsgSendReceive->checkClientMode = &checkClientMode;
-  self->compMsgSendReceive->sendCloudMsg = &sendCloudMsg;
-  self->compMsgSendReceive->sendMsg = &sendMsg;
+  compMsgSendReceive->uartSetup = &uartSetup;
+  compMsgSendReceive->uartReceiveCb = &uartReceiveCb;
+  compMsgSendReceive->uartSendAnswer = &uartSendAnswer;
+  compMsgSendReceive->prepareCloudMsg = &prepareCloudMsg;
+  compMsgSendReceive->checkClientMode = &checkClientMode;
+  compMsgSendReceive->sendCloudMsg = &sendCloudMsg;
+  compMsgSendReceive->sendMsg = &sendMsg;
   return COMP_MSG_ERR_OK;
 }
 

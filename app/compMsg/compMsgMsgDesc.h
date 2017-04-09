@@ -196,21 +196,13 @@ enum compMsgEncyptedCode
 
 #define COMP_MSG_DESC_VALUE_IS_NUMBER (1 << 0)
 
-#define COMP_MSG_DESC_HEADER_INCLUDE   0x01
-#define COMP_MSG_DESC_MID_PART_INCLUDE 0x02
-#define COMP_MSG_DESC_TRAILER_INCLUDE  0x04
-#define COMP_MSG_VAL_INCLUDE           0x08
+#define COMP_MSG_VAL_IS_JOKER          0x01
 
 #define MSG_GUID_LGTH 16
 #define MSG_MAX_HDR_FILLER_LGTH 16
 #define MSG_MAX_LINE_FIELDS 10
 
-#define MSG_FILES_FILE_NAME          "MsgFiles.txt"
-#define MSG_USE_FILE_TOKEN           "msgUse"
-#define MSG_HEADS_FILE_TOKEN         "msgHeads"
-#define MSG_DESC_HEADER_FILE_TOKEN   "msgDescHeader"
-#define MSG_DESC_MID_PART_FILE_TOKEN "msgDescMidPart"
-#define MSG_DESC_TRAILER_FILE_TOKEN  "msgDescTrailer"
+#define MSG_FILES_FILE_NAME           "MsgFiles.txt"
 
 typedef struct msgFieldDesc msgFieldDesc_t;
 typedef struct msgFieldVal msgFieldVal_t;
@@ -219,10 +211,10 @@ typedef uint8_t (* msgFieldSizeCallback_t)(compMsgDispatcher_t *self, msgFieldDe
 typedef uint8_t (* msgFieldValueCallback_t)(compMsgDispatcher_t *self, msgFieldVal_t *msgFieldVal);
 
 typedef struct msgHeaderValues {
-  uint8_t u8Dst;
-  uint16_t u16Dst;
   uint8_t u8Src;
   uint16_t u16Src;
+  uint8_t u8Dst;
+  uint16_t u16Dst;
   uint8_t u8Group;
   uint16_t u16Group;
   uint32_t ipAddr;
@@ -285,25 +277,39 @@ typedef struct msgKeyValueDesc {
   uint16_t keyNumValues;
 } msgKeyValueDesc_t;
 
+// all infos about a message field value
+
+typedef struct msgFieldVal {
+  union {
+    uint8_t u8;
+    int8_t i8;
+    uint16_t u16;
+    int16_t i16;
+    uint32_t u32;
+    int32_t i32;
+    uint8_t *u8vec;
+    int8_t *i8vec;
+    uint16_t *u16vec;
+    int16_t *i16vec;
+    uint32_t *u32vec;
+    int32_t *i32vec;
+    int intVal;
+  } value;
+  uint8_t fieldValueType;
+  msgFieldValueCallback_t fieldValueCallback;
+} msgFieldVal_t;
+
 // all infos about a message field
 
 typedef struct msgFieldDesc {
   uint8_t fieldNameId;
   uint8_t fieldTypeId;
   uint16_t fieldLgth;
+  uint16_t fieldFlags;
   msgKeyValueDesc_t *msgKeyValueDesc;
   msgFieldSizeCallback_t fieldSizeCallback;
+  msgFieldVal_t msgFieldVal;
 } msgFieldDesc_t;
-
-// all infos about a message field value
-
-typedef struct msgFieldVal {
-  uint8_t fieldNameId;
-  uint8_t fieldValueType;
-  int numericValue;
-  uint8_t *stringValue;
-  msgFieldValueCallback_t fieldValueCallback;
-} msgFieldVal_t;
 
 // all infos about a message use/include file
 
@@ -502,9 +508,16 @@ typedef uint8_t (* readLine_t)(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t
 typedef uint8_t (* writeLine_t)(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t lgth);
 typedef uint8_t (* getLineFields_t)(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t lgth);
 
+typedef uint8_t (* getIntFieldValue_t)(compMsgDispatcher_t *self, uint8_t *cp, char **ep, int base, int *uval);
+typedef uint8_t (* getStringFieldValue_t)(compMsgDispatcher_t *self, uint8_t *cp, uint8_t **strVal);
 typedef uint8_t (* addUseFileName_t)(compMsgDispatcher_t *self, char *fileName);
-typedef uint8_t (* handleUseFileName_t)(compMsgDispatcher_t *self, msgDescIncludeInfo_t *msgDescIncludeInfo);
-typedef uint8_t (* getIntFieldValue_t)(compMsgDispatcher_t *self, uint8_t fieldIdx, int *uval);
+typedef uint8_t (* handleMsgFileNameLine_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleMsgHeadsLine_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleMsgUseLine_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleMsgCommonLine_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleMsgActionsLine_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleMsgValHeaderLine_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleMsgFieldsToSaveLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgFile_t)(compMsgDispatcher_t *self, uint8_t *fileName, handleMsgLine_t handleMsgLine);
 
@@ -535,6 +548,8 @@ typedef struct compMsgMsgDesc {
   msgDescIncludeInfo_t *msgDescIncludeInfos;
   uint8_t *msgUseFileName;
   uint8_t *msgHeadsFileName;
+  uint8_t *msgFieldsToSaveFileName;
+  uint8_t *msgActionsFileName;
   uint8_t *msgDescHeaderFileName;
   uint8_t *msgDescMidPartFileName;
   uint8_t *msgDescTrailerFileName;
@@ -547,10 +562,16 @@ typedef struct compMsgMsgDesc {
   getLineFields_t getLineFields;
 
   addUseFileName_t addUseFileName;
-  handleUseFileName_t handleUseFileName;
   getIntFieldValue_t getIntFieldValue;
+  getStringFieldValue_t getStringFieldValue;
   handleMsgFile_t handleMsgFile;
-  handleMsgLine_t handleMsgUseLine;
+  handleMsgUseLine_t handleMsgUseLine;
+  handleMsgCommonLine_t handleMsgCommonLine;
+  handleMsgFieldsToSaveLine_t handleMsgFieldsToSaveLine;
+  handleMsgActionsLine_t handleMsgActionsLine;
+  handleMsgValHeaderLine_t handleMsgValHeaderLine;
+  handleMsgHeadsLine_t handleMsgHeadsLine;
+  handleMsgFileNameLine_t handleMsgFileNameLine;
 
   getIntFromLine_t getIntFromLine;
   getStrFromLine_t getStrFromLine;

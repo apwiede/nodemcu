@@ -824,62 +824,66 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
 
 uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgModuleData_t *compMsgModuleData;
+  compMsgUtil_t *compMsgUtil;
 
-  self->compMsgModuleData->setModuleValue = &setModuleValue;
-  self->compMsgModuleData->setModuleValues = &setModuleValues;
-  self->compMsgModuleData->updateModuleValues = &updateModuleValues;
-  self->compMsgModuleData->getOtaHost = &getOtaHost;
-  self->compMsgModuleData->getOtaRomPath = &getOtaRomPath;
-  self->compMsgModuleData->getOtaFsPath = &getOtaFsPath;
-  self->compMsgModuleData->getOtaPort = &getOtaPort;
-  self->compMsgModuleData->getMACAddr = &getMACAddr;
-  self->compMsgModuleData->getCryptKey = &getCryptKey;
-  self->compMsgModuleData->getCryptIvKey = &getCryptIvKey;
-  self->compMsgModuleData->restoreUserData = &restoreUserData;
-  self->compMsgModuleData->getOperatingMode = &getOperatingMode;
+  compMsgModuleData = self->compMsgModuleData;
+  compMsgModuleData->setModuleValue = &setModuleValue;
+  compMsgModuleData->setModuleValues = &setModuleValues;
+  compMsgModuleData->updateModuleValues = &updateModuleValues;
+  compMsgModuleData->getOtaHost = &getOtaHost;
+  compMsgModuleData->getOtaRomPath = &getOtaRomPath;
+  compMsgModuleData->getOtaFsPath = &getOtaFsPath;
+  compMsgModuleData->getOtaPort = &getOtaPort;
+  compMsgModuleData->getMACAddr = &getMACAddr;
+  compMsgModuleData->getCryptKey = &getCryptKey;
+  compMsgModuleData->getCryptIvKey = &getCryptIvKey;
+  compMsgModuleData->restoreUserData = &restoreUserData;
+  compMsgModuleData->getOperatingMode = &getOperatingMode;
 
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getFirmwareVersion", &getFirmwareVersion, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getSerieNumber", &getSerieNumber, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getRSSI", &getRSSI, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getRSSIMax", &getRSSIMax, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getConnectionState", &getConnectionState, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getConnectedUsers", &getConnectedUsers, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getProgRunningMode", &getProgRunningMode, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getCurrentRunningMode", &getCurrentRunningMode, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getIPProtocol", &getIPProtocol, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getRegion", &getRegion, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getDeviceSecurity", &getDeviceSecurity, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getErrorMain", &getErrorMain, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getErrorSub", &getErrorSub, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getDateAndTime", &getDateAndTime, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getSSIDs", &getSSIDs, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getPingState", &getPingState, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve1", &getReserve1, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve2", &getReserve2, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve3", &getReserve3, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve4", &getReserve4, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve5", &getReserve5, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve6", &getReserve6, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve7", &getReserve7, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getReserve8", &getReserve8, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getGUID", &getGUID, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getSrcId", &getSrcId, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getHdrReserve", &getHdrReserve, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getPasswdC", &getPasswdC, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@setOperatingMode", &setOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getOperatingMode", &getOperatingMode, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaHost", &getOtaHost, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaRomPath", &getOtaRomPath, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaFsPath", &getOtaFsPath, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getOtaPort", &getOtaPort, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getCryptKey", &getCryptKey, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU16Src", &getMyU16Src, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU8Src", &getMyU8Src, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU16SaveUserDataCmdKey", &getMyU16SaveUserDataCmdKey, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgUtil->addFieldValueCallbackName(self, "@getMyU8SaveUserDataCmdKey", &getMyU8SaveUserDataCmdKey, COMP_DISP_CALLBACK_TYPE_MODULE);
-  self->compMsgModuleData->setModuleValues(self);
+  compMsgUtil = self->compMsgUtil;
+  compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr);
+  compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr);
+  compMsgUtil->addFieldValueCallbackName(self, "@getFirmwareVersion", &getFirmwareVersion);
+  compMsgUtil->addFieldValueCallbackName(self, "@getSerieNumber", &getSerieNumber);
+  compMsgUtil->addFieldValueCallbackName(self, "@getRSSI", &getRSSI);
+  compMsgUtil->addFieldValueCallbackName(self, "@getRSSIMax", &getRSSIMax);
+  compMsgUtil->addFieldValueCallbackName(self, "@getConnectionState", &getConnectionState);
+  compMsgUtil->addFieldValueCallbackName(self, "@getConnectedUsers", &getConnectedUsers);
+  compMsgUtil->addFieldValueCallbackName(self, "@getProgRunningMode", &getProgRunningMode);
+  compMsgUtil->addFieldValueCallbackName(self, "@getCurrentRunningMode", &getCurrentRunningMode);
+  compMsgUtil->addFieldValueCallbackName(self, "@getIPProtocol", &getIPProtocol);
+  compMsgUtil->addFieldValueCallbackName(self, "@getRegion", &getRegion);
+  compMsgUtil->addFieldValueCallbackName(self, "@getDeviceSecurity", &getDeviceSecurity);
+  compMsgUtil->addFieldValueCallbackName(self, "@getErrorMain", &getErrorMain);
+  compMsgUtil->addFieldValueCallbackName(self, "@getErrorSub", &getErrorSub);
+  compMsgUtil->addFieldValueCallbackName(self, "@getDateAndTime", &getDateAndTime);
+  compMsgUtil->addFieldValueCallbackName(self, "@getSSIDs", &getSSIDs);
+  compMsgUtil->addFieldValueCallbackName(self, "@getPingState", &getPingState);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve1", &getReserve1);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve2", &getReserve2);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve3", &getReserve3);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve4", &getReserve4);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve5", &getReserve5);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve6", &getReserve6);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve7", &getReserve7);
+  compMsgUtil->addFieldValueCallbackName(self, "@getReserve8", &getReserve8);
+  compMsgUtil->addFieldValueCallbackName(self, "@getGUID", &getGUID);
+  compMsgUtil->addFieldValueCallbackName(self, "@getSrcId", &getSrcId);
+  compMsgUtil->addFieldValueCallbackName(self, "@getHdrReserve", &getHdrReserve);
+  compMsgUtil->addFieldValueCallbackName(self, "@getPasswdC", &getPasswdC);
+  compMsgUtil->addFieldValueCallbackName(self, "@setOperatingMode", &setOperatingMode);
+  compMsgUtil->addFieldValueCallbackName(self, "@getOperatingMode", &getOperatingMode);
+  compMsgUtil->addFieldValueCallbackName(self, "@getOtaHost", &getOtaHost);
+  compMsgUtil->addFieldValueCallbackName(self, "@getOtaRomPath", &getOtaRomPath);
+  compMsgUtil->addFieldValueCallbackName(self, "@getOtaFsPath", &getOtaFsPath);
+  compMsgUtil->addFieldValueCallbackName(self, "@getOtaPort", &getOtaPort);
+  compMsgUtil->addFieldValueCallbackName(self, "@getCryptKey", &getCryptKey);
+  compMsgUtil->addFieldValueCallbackName(self, "@getMyU16Src", &getMyU16Src);
+  compMsgUtil->addFieldValueCallbackName(self, "@getMyU8Src", &getMyU8Src);
+  compMsgUtil->addFieldValueCallbackName(self, "@getMyU16SaveUserDataCmdKey", &getMyU16SaveUserDataCmdKey);
+  compMsgUtil->addFieldValueCallbackName(self, "@getMyU8SaveUserDataCmdKey", &getMyU8SaveUserDataCmdKey);
+  compMsgModuleData->setModuleValues(self);
   self->compMsgMsgDesc->readModuleDataValues(self, COMP_MSG_MODULE_DATA_VALUES_FILE_NAME);
   return COMP_MSG_ERR_OK;
 }
@@ -887,7 +891,9 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
 // ================================= newCompMsgModuleData ====================================
 
 compMsgModuleData_t *newCompMsgModuleData() {
-  compMsgModuleData_t *compMsgModuleData = os_zalloc(sizeof(compMsgModuleData_t));
+  compMsgModuleData_t *compMsgModuleData;
+
+  compMsgModuleData = os_zalloc(sizeof(compMsgModuleData_t));
   if (compMsgModuleData == NULL) {
     return NULL;
   }

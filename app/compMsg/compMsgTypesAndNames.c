@@ -49,7 +49,7 @@
 
 static uint8_t compMsgTypesAndNamesId;
 
-static str2id_t fieldType2Ids[] = {
+static const str2id_t fieldType2Ids[] = {
   {"none",      DATA_VIEW_FIELD_NONE},
   {"uint8_t",   DATA_VIEW_FIELD_UINT8_T},
   {"int8_t",    DATA_VIEW_FIELD_INT8_T},
@@ -66,7 +66,7 @@ static str2id_t fieldType2Ids[] = {
   {NULL, -1},
 };
 
-static str2id_t specialFieldNames[] = {
+static const str2id_t specialFieldNames[] = {
   {"@src",                    COMP_MSG_SPEC_FIELD_SRC},
   {"@grp",                    COMP_MSG_SPEC_FIELD_GRP},
   {"@dst",                    COMP_MSG_SPEC_FIELD_DST},
@@ -124,11 +124,23 @@ static str2id_t specialFieldNames[] = {
   {NULL, -1},
 };
 
+static const str2id_t specialFileNameTokens[] = {
+  {"@$msgUse",           COMP_MSG_USE_FILE_TOKEN},
+  {"@$msgDescHeader",    COMP_MSG_DESC_HEADER_FILE_TOKEN},
+  {"@$msgDescMidPart",   COMP_MSG_DESC_MID_PART_FILE_TOKEN},
+  {"@$msgDescTrailer",   COMP_MSG_DESC_TRAILER_FILE_TOKEN},
+  {"@$msgFieldsToSave",  COMP_MSG_FIELDS_TO_SAVE_FILE_TOKEN},
+  {"@$msgHeads",         COMP_MSG_HEADS_FILE_TOKEN},
+  {"@$msgActions",       COMP_MSG_ACTIONS_FILE_TOKEN},
+  {"@$msgValHeader",     COMP_MSG_VAL_HEADER_FILE_TOKEN},
+};
+
 // ================================= getFieldTypeIdFromStr ====================================
 
 static uint8_t getFieldTypeIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId) {
-  str2id_t *entry;
+  const str2id_t *entry;
 
+ets_printf("getFieldTypeIdFromStr: %s\n", fieldTypeStr);
   entry = &fieldType2Ids[0];
   while (entry->str != NULL) {
     if (c_strcmp(fieldTypeStr, entry->str) == 0) {
@@ -143,7 +155,7 @@ static uint8_t getFieldTypeIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
 // ================================= getFieldTypeStrFromId ====================================
 
 static uint8_t getFieldTypeStrFromId(compMsgTypesAndNames_t *self, uint8_t fieldTypeId, uint8_t **fieldTypeStr) {
-  str2id_t *entry;
+  const str2id_t *entry;
 
   entry = &fieldType2Ids[0];
   while (entry->str != NULL) {
@@ -162,13 +174,13 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
   int firstFreeEntryId;
   int nameIdx;
   fieldName2id_t fieldNameEntry;
-  str2id_t *entry;
+  const str2id_t *entry;
   fieldName2id_t *newFieldNameEntry;
   fieldName2id_t *nameEntry;
   fieldName2id_t *firstFreeEntry;
 
 ets_printf("getFieldNameIdFromStr: %s\n", fieldName);
-  if (fieldName[0] == '@') {
+  if ((fieldName[0] == '@') && (fieldName[1] != '#')) {
     // find special field name
     entry = &specialFieldNames[0];
     while (entry->str != NULL) {
@@ -260,7 +272,7 @@ ets_printf("DataView FIELD_NOT_FOUND 1\n");
 // ================================= getFieldNameStrFromId ====================================
 
 static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName) {
-  str2id_t *entry;
+  const str2id_t *entry;
   fieldName2id_t *fieldNameEntry;
 
   *fieldName = NULL;
@@ -287,6 +299,23 @@ static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t field
   }
 ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ================================= getFileNameTokenIdFromStr ====================================
+
+static uint8_t getFileNameTokenIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId) {
+  const str2id_t *entry;
+
+ets_printf("getFileNameTokenIdFromStr: %s\n", fileNameTokenStr);
+  entry = &specialFileNameTokens[0];
+  while (entry->str != NULL) {
+    if (c_strcmp(fileNameTokenStr, entry->str) == 0) {
+      *fileNameTokenId = entry->id;
+      return DATA_VIEW_ERR_OK;
+    }
+    entry++;
+  }
+  return DATA_VIEW_ERR_FILE_NAME_TOKEN_NOT_FOUND;
 }
 
 // ================================= freeCompMsgTypesAndNames ====================================
@@ -332,6 +361,8 @@ compMsgTypesAndNames_t *newCompMsgTypesAndNames() {
 
   compMsgTypesAndNames->getFieldNameIdFromStr = &getFieldNameIdFromStr;
   compMsgTypesAndNames->getFieldNameStrFromId = &getFieldNameStrFromId;
+
+  compMsgTypesAndNames->getFileNameTokenIdFromStr = &getFileNameTokenIdFromStr;
 
   compMsgTypesAndNames->freeCompMsgTypesAndNames = &freeCompMsgTypesAndNames;
   return compMsgTypesAndNames;

@@ -76,12 +76,8 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 // compMsgMsgDesc file names
 
-#define COMP_MSG_ACTIONS_FILE_NAME            "CompMsgActions.txt"
 #define COMP_MSG_WIFI_VALUES_FILE_NAME        "myConfig.txt"
-#define COMP_MSG_KEY_VALUE_KEYS_FILE_NAME     "CompMsgKeyValueKeys.txt"
-#define COMP_MSG_HEADS_FILE_NAME              "CompMsgHeads.txt"
-#define COMP_MSG_FIELDS_TO_SAVE_FILE_NAME     "CompMsgFieldsToSave.txt"
-//#define COMP_MSG_WIFI_VALUES_FILE_NAME       "CompMsgWifiValues.txt"
+#define COMP_MSG_HEADS_FILE_NAME              "MsgHeads.txt"
 #define COMP_MSG_MODULE_DATA_VALUES_FILE_NAME "CompMsgModuleDataValues.txt"
 
 // answer message types

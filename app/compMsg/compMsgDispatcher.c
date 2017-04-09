@@ -184,11 +184,11 @@ static uint8_t getNewCompMsgDataPtr(compMsgDispatcher_t *self) {
 
   if (self->numMsgHeaders >= self->maxMsgHeaders) {
     if (self->maxMsgHeaders == 0) {
-      self->maxMsgHeaders = 4;
+      self->maxMsgHeaders = 2;
       self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_zalloc((self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
       checkAllocOK(self->msgHeader2MsgPtrs);
     } else {
-      self->maxMsgHeaders += 2;
+      self->maxMsgHeaders += 1;
       self->msgHeader2MsgPtrs = (msgHeader2MsgPtr_t *)os_realloc(self->msgHeader2MsgPtrs, (self->maxMsgHeaders * sizeof(msgHeader2MsgPtr_t)));
       checkAllocOK(self->msgHeader2MsgPtrs);
     }
@@ -381,10 +381,13 @@ ets_printf("WWWAAA: %p\n", &WWWAAA);
 ets_printf("dispInit1\n");
 #endif
 //COMP_MSG_DBG(self, "Y", 0, "call DescInit");
+ets_printf("0 heap: %d\n", system_get_free_heap_size());
   result = compMsgUtilInit(self);
   checkErrOK(result);
+ets_printf("1 heap: %d\n", system_get_free_heap_size());
   result = compMsgMsgDescInit(self);
   checkErrOK(result);
+ets_printf("2 heap: %d\n", system_get_free_heap_size());
   result = compMsgRequestInit(self);
   checkErrOK(result);
 //COMP_MSG_DBG(self, "Y", 0, "call IdentifyInit");
@@ -392,15 +395,20 @@ ets_printf("dispInit1\n");
   checkErrOK(result);
   result = compMsgBuildMsgInit(self);
   checkErrOK(result);
+ets_printf("5 heap: %d\n", system_get_free_heap_size());
   result = compMsgSendReceiveInit(self);
   checkErrOK(result);
+ets_printf("6 heap: %d\n", system_get_free_heap_size());
   result = compMsgActionInit(self);
   checkErrOK(result);
 //COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
+ets_printf("7 heap: %d\n", system_get_free_heap_size());
   result = compMsgWifiInit(self);
   checkErrOK(result);
+ets_printf("8 heap: %d\n", system_get_free_heap_size());
   result = compMsgModuleDataInit(self);
   checkErrOK(result);
+ets_printf("9 heap: %d\n", system_get_free_heap_size());
   result = compMsgTimerInit(self);
   checkErrOK(result);
   result = compMsgWebSocketInit(self);
@@ -547,12 +555,12 @@ static uint8_t createDispatcher(compMsgDispatcher_t *self, uint8_t **handle) {
 
 compMsgDispatcher_t *newCompMsgDispatcher() {
   uint8_t result;
+  compMsgDispatcher_t *compMsgDispatcher;
 
-  compMsgDispatcher_t *compMsgDispatcher = os_zalloc(sizeof(compMsgDispatcher_t));
+  compMsgDispatcher = os_zalloc(sizeof(compMsgDispatcher_t));
   if (compMsgDispatcher == NULL) {
     return NULL;
   }
-
   if (compMsgDispatcherSingleton == NULL) {
     compMsgDispatcher->dispatcherCommon = os_zalloc(sizeof(dispatcherCommon_t));
     if (compMsgDispatcher == NULL) {

@@ -906,30 +906,30 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t *buffer
 
 uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgIdentify_t *compMsgIdentify;
 
-  self->compMsgIdentify->resetHeaderInfos = &resetHeaderInfos;
-  self->compMsgIdentify->getHeaderIndexFromHeaderFields = &getHeaderIndexFromHeaderFields;
-  self->compMsgIdentify->nextFittingEntry = &nextFittingEntry;
-  self->compMsgIdentify->prepareAnswerMsg = &prepareAnswerMsg;
-  self->compMsgIdentify->handleReceivedHeader = &handleReceivedHeader;
-  self->compMsgIdentify->handleReceivedMsg = &handleReceivedMsg;
-  self->compMsgIdentify->storeReceivedMsg = &storeReceivedMsg;
-  self->compMsgIdentify->sendClientIPMsg = &sendClientIPMsg;
-  self->compMsgIdentify->handleReceivedPart = &handleReceivedPart;
-  self->compMsgIdentify->unpackReceivedMsg = &unpackReceivedMsg;
-  self->compMsgIdentify->handleToSendPart = &handleToSendPart;
+  compMsgIdentify = self->compMsgIdentify;
+  compMsgIdentify->resetHeaderInfos = &resetHeaderInfos;
+  compMsgIdentify->getHeaderIndexFromHeaderFields = &getHeaderIndexFromHeaderFields;
+  compMsgIdentify->nextFittingEntry = &nextFittingEntry;
+  compMsgIdentify->prepareAnswerMsg = &prepareAnswerMsg;
+  compMsgIdentify->handleReceivedHeader = &handleReceivedHeader;
+  compMsgIdentify->handleReceivedMsg = &handleReceivedMsg;
+  compMsgIdentify->storeReceivedMsg = &storeReceivedMsg;
+  compMsgIdentify->sendClientIPMsg = &sendClientIPMsg;
+  compMsgIdentify->handleReceivedPart = &handleReceivedPart;
+  compMsgIdentify->unpackReceivedMsg = &unpackReceivedMsg;
+  compMsgIdentify->handleToSendPart = &handleToSendPart;
 
-  result=self->compMsgMsgDesc->readHeadersAndSetFlags(self, COMP_MSG_HEADS_FILE_NAME);
-  checkErrOK(result);
-  result=self->compMsgMsgDesc->getFieldsToSave(self, COMP_MSG_FIELDS_TO_SAVE_FILE_NAME);
-  checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= newCompMsgIdentify ====================================
 
 compMsgIdentify_t *newCompMsgIdentify() {
-  compMsgIdentify_t *compMsgIdentify = os_zalloc(sizeof(compMsgIdentify_t));
+  compMsgIdentify_t *compMsgIdentify;
+
+  compMsgIdentify = os_zalloc(sizeof(compMsgIdentify_t));
   if (compMsgIdentify == NULL) {
     return NULL;
   }

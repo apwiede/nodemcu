@@ -429,7 +429,7 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
 
   callbackName = "nil";
   if (msgDescPart->fieldSizeCallback != NULL) {
-    result = self->compMsgUtil->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName, 0);
+    result = self->compMsgUtil->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName);
     checkErrOK(result);
   }
   COMP_MSG_DBG(self, "E", 2, "msgDescPart: fieldNameStr: %-15s fieldNameId: %3d fieldTypeStr: %-10s fieldTypeId: %3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
@@ -445,7 +445,7 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
 
   callbackName = "nil";
   if (msgValPart->fieldValueCallback != NULL) {
-    result = self->compMsgUtil->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName, msgValPart->fieldValueCallbackType);
+    result = self->compMsgUtil->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName);
     checkErrOK(result);
   }
   COMP_MSG_DBG(self, "E", 1, "msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
@@ -459,26 +459,28 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
 
 uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgDebug_t *compMsgDebug;
 
   debugCompMsgDispatcher = self;
-  self->compMsgDebug->currDebugFlags = DEBUG_COMP_MSG_WEB_SOCKET;
-  self->compMsgDebug->addEol = true;
-  self->compMsgDebug->useUart = true;
-  self->compMsgDebug->debugLevel = 1;
-  self->compMsgDebug->debugUartId = 0;
-//  self->compMsgDebug->debugUartId = 1;
+  compMsgDebug = self->compMsgDebug;
+  compMsgDebug->currDebugFlags = DEBUG_COMP_MSG_WEB_SOCKET;
+  compMsgDebug->addEol = true;
+  compMsgDebug->useUart = true;
+  compMsgDebug->debugLevel = 1;
+  compMsgDebug->debugUartId = 0;
+//  compMsgDebug->debugUartId = 1;
 
-  self->compMsgDebug->getDebugFlags = &getDebugFlags;
-  self->compMsgDebug->setDebugFlags = &setDebugFlags;
-  self->compMsgDebug->dbgPrintf = &dbgPrintf;
-  self->compMsgDebug->dumpMsgParts = &dumpMsgParts;
-  self->compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
-  self->compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
-  self->compMsgDebug->dumpMsgDescPart = &dumpMsgDescPart;
-  self->compMsgDebug->dumpMsgValPart = &dumpMsgValPart;
-  self->compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
-  self->compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
-self->compMsgDebug->setDebugFlags(self, "BdDEHISw");
+  compMsgDebug->getDebugFlags = &getDebugFlags;
+  compMsgDebug->setDebugFlags = &setDebugFlags;
+  compMsgDebug->dbgPrintf = &dbgPrintf;
+  compMsgDebug->dumpMsgParts = &dumpMsgParts;
+  compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
+  compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
+  compMsgDebug->dumpMsgDescPart = &dumpMsgDescPart;
+  compMsgDebug->dumpMsgValPart = &dumpMsgValPart;
+  compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
+  compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
+compMsgDebug->setDebugFlags(self, "BdDEHISw");
   return COMP_MSG_ERR_OK;
 }
 

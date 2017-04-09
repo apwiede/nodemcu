@@ -50,15 +50,16 @@ extern "C" {
 
 enum DataViewErrorCode
 {
-  DATA_VIEW_ERR_OK                    = 0,
-  DATA_VIEW_ERR_VALUE_NOT_SET         = 255,
-  DATA_VIEW_ERR_VALUE_OUT_OF_RANGE    = 254,
-  DATA_VIEW_ERR_BAD_VALUE             = 253,
-  DATA_VIEW_ERR_BAD_FIELD_TYPE        = 252,
-  DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND  = 251,
-  DATA_VIEW_ERR_VALUE_TOO_BIG         = 250,
-  DATA_VIEW_ERR_OUT_OF_MEMORY         = 249,
-  DATA_VIEW_ERR_OUT_OF_RANGE          = 248,
+  DATA_VIEW_ERR_OK                        = 0,
+  DATA_VIEW_ERR_VALUE_NOT_SET             = 255,
+  DATA_VIEW_ERR_VALUE_OUT_OF_RANGE        = 254,
+  DATA_VIEW_ERR_BAD_VALUE                 = 253,
+  DATA_VIEW_ERR_BAD_FIELD_TYPE            = 252,
+  DATA_VIEW_ERR_FIELD_TYPE_NOT_FOUND      = 251,
+  DATA_VIEW_ERR_VALUE_TOO_BIG             = 250,
+  DATA_VIEW_ERR_OUT_OF_MEMORY             = 249,
+  DATA_VIEW_ERR_OUT_OF_RANGE              = 248,
+  DATA_VIEW_ERR_FILE_NAME_TOKEN_NOT_FOUND = 247,
 };
 
 #define checkAllocOK(addr) if(addr == NULL) return DATA_VIEW_ERR_OUT_OF_MEMORY

@@ -56,6 +56,7 @@ enum CompMsgErrorCodes {
   COMP_MSG_ERR_VALUE_TOO_BIG                  = 250,
   COMP_MSG_ERR_OUT_OF_MEMORY                  = 249,
   COMP_MSG_ERR_OUT_OF_RANGE                   = 248,
+  COMP_MSG_ERR_FILE_NAME_TOKEN_NOT_FOUND      = 247,
   // be carefull the values up to here
   // must correspond to the values in dataView.h !!!
   // with the names like DATA_VIEW_ERR_*
@@ -150,6 +151,8 @@ enum CompMsgErrorCodes {
   COMP_MSG_ERR_HEADER_INCLUDE_NOT_FOUND       = 130,
   COMP_MSG_ERR_BAD_ENCRYPTED_VALUE            = 129,
   COMP_MSG_ERR_BAD_HANDLE_TYPE_VALUE          = 128,
+  COMP_MSG_ERR_FUNNY_FIELD_VALUE_START        = 127,
+  COMP_MSG_ERR_EXPECTED_INT_VALUE             = 126,
 
   COMP_MSG_ERR_CANNOT_CONNECT                 = 99,
 

@@ -124,6 +124,18 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_LOW                       = 189,         // this must be the last entry!!
 };
 
+enum compMsgSpecialFileNameTokens
+{
+  COMP_MSG_USE_FILE_TOKEN            = 0x01,
+  COMP_MSG_HEADS_FILE_TOKEN          = 0x02,
+  COMP_MSG_DESC_HEADER_FILE_TOKEN    = 0x04,
+  COMP_MSG_DESC_MID_PART_FILE_TOKEN  = 0x08,
+  COMP_MSG_DESC_TRAILER_FILE_TOKEN   = 0x10,
+  COMP_MSG_FIELDS_TO_SAVE_FILE_TOKEN = 0x20,
+  COMP_MSG_ACTIONS_FILE_TOKEN        = 0x40,
+  COMP_MSG_VAL_HEADER_FILE_TOKEN     = 0x80,
+};
+
 #define COMP_MSG_NO_INCR 0
 #define COMP_MSG_INCR    1
 #define COMP_MSG_DECR    -1
@@ -155,6 +167,7 @@ typedef uint8_t (* getFieldTypeStrFromId_t)(compMsgTypesAndNames_t *self, uint8_
 
 typedef uint8_t (* getFieldNameIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt);
 typedef uint8_t (* getFieldNameStrFromId_t)(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName);
+typedef uint8_t (* getFileNameTokenIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId);
 
 typedef uint8_t (* freeCompMsgTypesAndNames_t)(compMsgTypesAndNames_t *compMsgTypesAndNames);
 
@@ -167,6 +180,8 @@ typedef struct compMsgTypesAndNames {
 
   getFieldNameIdFromStr_t getFieldNameIdFromStr;
   getFieldNameStrFromId_t getFieldNameStrFromId;
+
+  getFileNameTokenIdFromStr_t getFileNameTokenIdFromStr;
 
   freeCompMsgTypesAndNames_t freeCompMsgTypesAndNames;
 } compMsgTypesAndNames_t;

@@ -458,7 +458,8 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
 
 uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   uint8_t result;
-
+  
+  result = COMP_MSG_ERR_OK;
   self->compMsgAction->startLightSleepWakeupMode = &startLightSleepWakeupMode;
   self->compMsgAction->startTestInterrupt = &startTestInterrupt;
   self->compMsgAction->setActionEntry = &setActionEntry;
@@ -478,7 +479,7 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   checkAllocOK(compMsgActions.actions);
 
   compMsgDispatcher = self;
-  result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
+//  result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
   return result;
 }
 

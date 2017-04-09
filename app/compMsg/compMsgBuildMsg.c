@@ -436,13 +436,15 @@ static uint8_t ICACHE_FLASH_ATTR forwardMsg(compMsgDispatcher_t *self) {
 // ================================= compMsgBuildMsgInit ====================================
 
 uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
-  self->compMsgBuildMsg->createMsgFromHeaderPart = &createMsgFromHeaderPart;
-  self->compMsgBuildMsg->fixOffsetsForKeyValues = &fixOffsetsForKeyValues;
-  self->compMsgBuildMsg->setMsgFieldValue = &setMsgFieldValue;
-  self->compMsgBuildMsg->buildMsg = &buildMsg;
-  self->compMsgBuildMsg->setMsgValues = &setMsgValues;
-  self->compMsgBuildMsg->forwardMsg = &forwardMsg;
+  compMsgBuildMsg_t *compMsgBuildMsg;
 
+  compMsgBuildMsg = self->compMsgBuildMsg;
+  compMsgBuildMsg->createMsgFromHeaderPart = &createMsgFromHeaderPart;
+  compMsgBuildMsg->fixOffsetsForKeyValues = &fixOffsetsForKeyValues;
+  compMsgBuildMsg->setMsgFieldValue = &setMsgFieldValue;
+  compMsgBuildMsg->buildMsg = &buildMsg;
+  compMsgBuildMsg->setMsgValues = &setMsgValues;
+  compMsgBuildMsg->forwardMsg = &forwardMsg;
   return COMP_MSG_ERR_OK;
 }
 
