@@ -235,7 +235,7 @@ static uint8_t decryptMsg(compMsgDispatcher_t *self, const uint8_t *msg, size_t 
 
 // ============================= setFieldValueCallback ========================
 
-static uint8_t setFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t callback) {
+static uint8_t setFieldValueCallback(compMsgDispatcher_t *self, uint8_t callbackId, fieldValueCallback_t callback) {
   uint8_t result;
   fieldValueCallbackInfos_t *fieldValueCallbackInfo;
   int idx;
@@ -243,7 +243,7 @@ static uint8_t setFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
   idx = 0;
   while (idx < self->compMsgUtil->numFieldValueCallbackInfos) {
     fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[idx];
-    if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
+    if (fieldValueCallbackInfo->callbackId, callbackId) {
       fieldValueCallbackInfo->callback = callback;
       return COMP_MSG_ERR_OK;
     }
@@ -252,9 +252,9 @@ static uint8_t setFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbac
   return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
-// ============================= addFieldValueCallbackName ========================
+// ============================= addFieldValueCallbackId ========================
 
-static uint8_t addFieldValueCallbackName(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t callback) {
+static uint8_t addFieldValueCallbackId(compMsgDispatcher_t *self, uint8_t callbackId, fieldValueCallback_t callback) {
   uint8_t result;
   fieldValueCallbackInfos_t *fieldValueCallbackInfo;
 
@@ -270,8 +270,7 @@ static uint8_t addFieldValueCallbackName(compMsgDispatcher_t *self, uint8_t *cal
   }
   fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[self->compMsgUtil->numFieldValueCallbackInfos];
   c_memset(fieldValueCallbackInfo, 0, sizeof(fieldValueCallbackInfos_t));
-  fieldValueCallbackInfo->callbackName = os_zalloc(c_strlen(callbackName) + 1);
-  c_memcpy(fieldValueCallbackInfo->callbackName, callbackName, c_strlen(callbackName));
+  fieldValueCallbackInfo->callbackId = callbackId;
   fieldValueCallbackInfo->callback = callback;
   self->compMsgUtil->numFieldValueCallbackInfos++;
   return COMP_MSG_ERR_OK;
@@ -279,30 +278,30 @@ static uint8_t addFieldValueCallbackName(compMsgDispatcher_t *self, uint8_t *cal
 
 // ============================= getFieldValueCallback ========================
 
-static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t *callback) {
+static uint8_t getFieldValueCallback(compMsgDispatcher_t *self, uint8_t callbackId, fieldValueCallback_t *callback) {
   uint8_t result;
   fieldValueCallbackInfos_t *fieldValueCallbackInfo;
   int idx;
 
-  COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback: %s\n", callbackName);
+  COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback: %d\n", callbackId);
   idx = 0;
   while (idx < self->compMsgUtil->numFieldValueCallbackInfos) {
     fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[idx];
-    COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback: %s %s", fieldValueCallbackInfo->callbackName, callbackName);
-    if (c_strcmp(fieldValueCallbackInfo->callbackName, callbackName) == 0) {
+    COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback: %s %s", fieldValueCallbackInfo->callbackId, callbackId);
+    if (fieldValueCallbackInfo->callbackId, callbackId) {
       *callback = fieldValueCallbackInfo->callback;
-      COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback found: %s\n", callbackName);
+      COMP_MSG_DBG(self, "U", 2, "getFieldValueCallback found: %d\n", callbackId);
       return COMP_MSG_ERR_OK;
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "U", 1, "getFieldValueCallback NOT found: %s\n", callbackName);
+  COMP_MSG_DBG(self, "U", 1, "getFieldValueCallback NOT found: %d\n", callbackId);
   return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
-// ============================= getFieldValueCallbackName ========================
+// ============================= getFieldValueCallbackId ========================
 
-static uint8_t getFieldValueCallbackName(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t **callbackName) {
+static uint8_t getFieldValueCallbackId(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t *callbackId) {
   uint8_t result;
   fieldValueCallbackInfos_t *fieldValueCallbackInfo;
   int idx;
@@ -311,12 +310,12 @@ static uint8_t getFieldValueCallbackName(compMsgDispatcher_t *self, fieldValueCa
   while (idx < self->compMsgUtil->numFieldValueCallbackInfos) {
     fieldValueCallbackInfo = &self->compMsgUtil->fieldValueCallbackInfos[idx];
     if (fieldValueCallbackInfo->callback == callback) {
-      *callbackName = fieldValueCallbackInfo->callbackName;
+      *callbackId = fieldValueCallbackInfo->callbackId;
       return COMP_MSG_ERR_OK;
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "U", 1, "getFieldValueCallbackName NOT found\n");
+  COMP_MSG_DBG(self, "U", 1, "getFieldValueCallbackId NOT found\n");
   return COMP_MSG_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND;
 }
 
@@ -359,9 +358,9 @@ uint8_t compMsgUtilInit(compMsgDispatcher_t *self) {
   self->compMsgUtil->toBase64 = &toBase64;
   self->compMsgUtil->fromBase64 = &fromBase64;
   self->compMsgUtil->setFieldValueCallback = &setFieldValueCallback;
-  self->compMsgUtil->addFieldValueCallbackName = &addFieldValueCallbackName;
+  self->compMsgUtil->addFieldValueCallbackId = &addFieldValueCallbackId;
   self->compMsgUtil->getFieldValueCallback = &getFieldValueCallback;
-  self->compMsgUtil->getFieldValueCallbackName = &getFieldValueCallbackName;
+  self->compMsgUtil->getFieldValueCallbackId = &getFieldValueCallbackId;
   self->compMsgUtil->addFieldDescription = &addFieldDescription;
   return COMP_MSG_ERR_OK;
 }

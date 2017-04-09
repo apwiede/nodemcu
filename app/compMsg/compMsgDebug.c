@@ -429,8 +429,11 @@ static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDesc
 
   callbackName = "nil";
   if (msgDescPart->fieldSizeCallback != NULL) {
+// FIXME !!!
+#ifdef NOTDEF
     result = self->compMsgUtil->getFieldValueCallbackName(self, msgDescPart->fieldSizeCallback, &callbackName);
     checkErrOK(result);
+#endif
   }
   COMP_MSG_DBG(self, "E", 2, "msgDescPart: fieldNameStr: %-15s fieldNameId: %3d fieldTypeStr: %-10s fieldTypeId: %3d field_lgth: %d callback: %s\n", msgDescPart->fieldNameStr, msgDescPart->fieldNameId, msgDescPart->fieldTypeStr, msgDescPart->fieldTypeId, msgDescPart->fieldLgth, callbackName);
   return COMP_MSG_ERR_OK;
@@ -445,8 +448,11 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
 
   callbackName = "nil";
   if (msgValPart->fieldValueCallback != NULL) {
+// FIXME !!!
+#ifdef NOTDEF
     result = self->compMsgUtil->getFieldValueCallbackName(self, msgValPart->fieldValueCallback, &callbackName);
     checkErrOK(result);
+#endif
   }
   COMP_MSG_DBG(self, "E", 1, "msgValPart: fieldNameStr: %-15.15s fieldNameId: %.3d fieldValueStr: %-10.10s callback: %s flags: ", msgValPart->fieldNameStr, msgValPart->fieldNameId, msgValPart->fieldValueStr, callbackName);
   if (msgValPart->fieldFlags & COMP_DISP_DESC_VALUE_IS_NUMBER) {

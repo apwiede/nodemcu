@@ -51,7 +51,7 @@ extern "C" {
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef struct fieldValueCallbackInfos {
-  uint8_t *callbackName;
+  uint8_t callbackId;
   fieldValueCallback_t callback;
 } fieldValueCallbackInfos_t;
 
@@ -59,10 +59,10 @@ typedef uint8_t (* toBase64_t)(compMsgDispatcher_t *self, const uint8_t *msg, si
 typedef uint8_t (* fromBase64_t)(compMsgDispatcher_t *self, const uint8_t *encodedMsg, size_t *len, uint8_t **decodedMsg);
 typedef uint8_t (* encryptMsg_t)(compMsgDispatcher_t *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
 typedef uint8_t (* decryptMsg_t)(compMsgDispatcher_t *self, const uint8_t *msg, size_t mlen, const uint8_t *key, size_t klen, const uint8_t *iv, size_t ivlen, uint8_t **buf, int *lgth);
-typedef uint8_t (* setFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t callback);
-typedef uint8_t (* addFieldValueCallbackName_t)(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t callback);
-typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t *callbackName, fieldValueCallback_t *callback);
-typedef uint8_t (* getFieldValueCallbackName_t)(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t **callbackName);
+typedef uint8_t (* setFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t callbackId, fieldValueCallback_t callback);
+typedef uint8_t (* addFieldValueCallbackId_t)(compMsgDispatcher_t *self, uint8_t callbackId, fieldValueCallback_t callback);
+typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t callbackId, fieldValueCallback_t *callback);
+typedef uint8_t (* getFieldValueCallbackId_t)(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t *callbackId);
 typedef uint8_t (* addFieldDescription_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgUtil {
@@ -75,9 +75,9 @@ typedef struct compMsgUtil {
   toBase64_t toBase64;
   fromBase64_t fromBase64;
   setFieldValueCallback_t setFieldValueCallback;
-  addFieldValueCallbackName_t addFieldValueCallbackName;
+  addFieldValueCallbackId_t addFieldValueCallbackId;
   getFieldValueCallback_t getFieldValueCallback;
-  getFieldValueCallbackName_t getFieldValueCallbackName;
+  getFieldValueCallbackId_t getFieldValueCallbackId;
   addFieldDescription_t addFieldDescription;
 } compMsgUtil_t;
 

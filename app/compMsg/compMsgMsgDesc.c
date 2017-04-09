@@ -1520,6 +1520,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   compMsgMsgDesc_t *compMsgMsgDesc;
 
   COMP_MSG_DBG(self, "E", 2, "getMsgPartsFromHeaderPart1\n");
+#ifdef NOTDEF
   compMsgData = self->compMsgData;
   compMsgMsgDesc = self->compMsgMsgDesc;
   self->compMsgData->currHdr = hdr;
@@ -1714,6 +1715,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   result = compMsgMsgDesc->closeFile(compMsgMsgDesc);
   COMP_MSG_DBG(self, "E", 2, "getMsgPartsFromHeaderPart9 res: %d", result);
   checkErrOK(result);
+#endif
   COMP_MSG_DBG(self, "E", 2, "heap2: %d", system_get_free_heap_size());
 
   return COMP_MSG_ERR_OK;

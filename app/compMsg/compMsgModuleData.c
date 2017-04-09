@@ -842,6 +842,7 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   compMsgModuleData->getOperatingMode = &getOperatingMode;
 
   compMsgUtil = self->compMsgUtil;
+#ifdef NOTDEF
   compMsgUtil->addFieldValueCallbackName(self, "@getMACAddr", &getMACAddr);
   compMsgUtil->addFieldValueCallbackName(self, "@getIPAddr", &getIPAddr);
   compMsgUtil->addFieldValueCallbackName(self, "@getFirmwareVersion", &getFirmwareVersion);
@@ -883,8 +884,9 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   compMsgUtil->addFieldValueCallbackName(self, "@getMyU8Src", &getMyU8Src);
   compMsgUtil->addFieldValueCallbackName(self, "@getMyU16SaveUserDataCmdKey", &getMyU16SaveUserDataCmdKey);
   compMsgUtil->addFieldValueCallbackName(self, "@getMyU8SaveUserDataCmdKey", &getMyU8SaveUserDataCmdKey);
+#endif
   compMsgModuleData->setModuleValues(self);
-  self->compMsgMsgDesc->readModuleDataValues(self, COMP_MSG_MODULE_DATA_VALUES_FILE_NAME);
+//  self->compMsgMsgDesc->readModuleDataValues(self, COMP_MSG_MODULE_DATA_VALUES_FILE_NAME);
   return COMP_MSG_ERR_OK;
 }
 
