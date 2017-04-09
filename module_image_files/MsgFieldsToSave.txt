@@ -1,0 +1,8 @@
+# example fields to save file
+#,6
+clientSsid
+clientPasswd
+@#sequenceNum
+@#clientSsid
+@#clientPasswd
+operatingMode

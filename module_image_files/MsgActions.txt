@@ -1,0 +1,7 @@
+# example message actions file
+#,5
+runAPMode,0x01
+runClientMode,0x02
+runLightSleepWakeupMode,0x03
+runWpsMode,0x04
+runTestMode,0x50
