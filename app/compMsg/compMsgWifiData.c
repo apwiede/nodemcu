@@ -136,6 +136,8 @@ const static str2id_t callbackStr2CallbackIds [] = {
   { "@getSSDPPort",              COMP_MSG_WIFI_SSDPPort},
   { "@getSSDPStatus",            COMP_MSG_WIFI_SSDPStatus},
 
+#include "compMsgWifiCustom_h.inc"
+
 };
 
 // ================================= bssStr2BssInfoId ====================================
@@ -964,94 +966,6 @@ static uint8_t xgetWifiKeyValue(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
-// ================================= getCloudPort ====================================
-
-static uint8_t getCloudPort(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.cloudPort;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudHost1 ====================================
-
-static uint8_t getCloudHost1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudHost1;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudHost2 ====================================
-
-static uint8_t getCloudHost2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudHost2;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudUrl1Part1 ====================================
-
-static uint8_t getCloudUrl1Part1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudUrl1Part1;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudUrl1Part2 ====================================
-
-static uint8_t getCloudUrl1Part2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudUrl1Part2;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudUrlTenantId1 ====================================
-
-static uint8_t getCloudUrlTenantId1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudUrlTenantId1;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudUrl2Part1 ====================================
-
-static uint8_t getCloudUrl2Part1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudUrl2Part1;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudUrl2Part2 ====================================
-
-static uint8_t getCloudUrl2Part2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudUrl2Part2;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudUrlTenantId2 ====================================
-
-static uint8_t getCloudUrlTenantId2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudUrlTenantId2;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudNodeToken1 ====================================
-
-static uint8_t getCloudNodeToken1(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudNodeToken1;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getCloudNodeToken2 ====================================
-
-static uint8_t getCloudNodeToken2(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.cloudNodeToken2;
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getClientSsid ====================================
 
 static uint8_t getClientSsid(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
@@ -1084,85 +998,7 @@ static uint8_t getProvisioningSsid(compMsgDispatcher_t *self, int *numericValue,
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= getProdTestSsid ====================================
-
-static uint8_t getProdTestSsid(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.prodTestSsid;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestPasswd ====================================
-
-static uint8_t getProdTestPasswd(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  *numericValue = 0;
-  *stringValue = compMsgWifiData.prodTestPasswd;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestSecurityType ====================================
-
-static uint8_t getProdTestSecurityType(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestSecurityType;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestTargetProtocol ====================================
-
-static uint8_t getProdTestTargetProtocol(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestTargetProtocol;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestIpAddress ====================================
-
-static uint8_t getProdTestIpAddress(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestIpAddr;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestSubnet ====================================
-
-static uint8_t getProdTestSubnet(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestSubnet;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestGateway ====================================
-
-static uint8_t getProdTestGateway(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestGateway;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestDns ====================================
-
-static uint8_t getProdTestDns(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestDns;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestPingAddress ====================================
-
-static uint8_t getProdTestPingAddress(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestPingAddress;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getProdTestStatus ====================================
-
-static uint8_t getProdTestStatus(compMsgDispatcher_t *self, int* numericValue, uint8_t **stringValue) {
-  *numericValue = compMsgWifiData.prodTestStatus;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
+#include "compMsgWifiCustom_c.inc"
 
 // ================================= getWifiValue ====================================
 
@@ -1470,70 +1306,82 @@ ets_printf("wifi 01 heap: %d\n", system_get_free_heap_size());
   compMsgWifiData->netSocketSSDPReceived = &netSocketSSDPReceived;
 
   compMsgUtil = self->compMsgUtil;
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_BssidSize,       &getWifiAPBssidSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_BssidStrSize,    &getWifiAPBssidStrSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_SsidSize,        &getWifiAPSsidSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Ssid_lenSize,    &getWifiAPSsid_lenSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_ChannelSize,     &getWifiAPChannelSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_RssiSize,        &getWifiAPRssiSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_AuthmodeSize,    &getWifiAPAuthmodeSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Is_hiddenSize,   &getWifiAPIs_hiddenSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freq_offsetSize, &getWifiAPFreq_offsetSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freqcal_valSize, &getWifiAPFreqcal_valSize);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_BssidSize,       &getWifiAPBssidSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_BssidStrSize,    &getWifiAPBssidStrSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_SsidSize,        &getWifiAPSsidSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Ssid_lenSize,    &getWifiAPSsid_lenSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_ChannelSize,     &getWifiAPChannelSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_RssiSize,        &getWifiAPRssiSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_AuthmodeSize,    &getWifiAPAuthmodeSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Is_hiddenSize,   &getWifiAPIs_hiddenSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freq_offsetSize, &getWifiAPFreq_offsetSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freqcal_valSize, &getWifiAPFreqcal_valSize);
+  checkErrOK(result);
 
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Bssids,        &getWifiAPBssids);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_BssidStrs,     &getWifiAPBssidStrs);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Ssids,         &getWifiAPSsids);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Ssid_lens,     &getWifiAPSsid_lens);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Channels,      &getWifiAPChannels);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Rssis,         &getWifiAPRssis);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Authmodes,     &getWifiAPAuthmodes);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Is_hiddens,    &getWifiAPIs_hiddens);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freq_offsets,  &getWifiAPFreq_offsets);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freqcal_vals,  &getWifiAPFreqcal_vals);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientIPAddr,     &getClientIPAddr);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPort,       &getClientPort);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientStatus,     &getClientStatus);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_SSDPIPAddr,       &getSSDPIPAddr);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_SSDPPort,         &getSSDPPort);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_SSDPStatus,       &getSSDPStatus);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ProvisioningSsid, &getProvisioningSsid);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ProvisioningPort, &getProvisioningPort);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPort,       &getClientPort);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientSsid,       &getClientSsid);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPasswd,     &getClientPasswd);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientSsidSize,   &getClientSsidSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPasswdSize, &getClientPasswdSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientIPAddrSize, &getClientIPAddrSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPortSize,   &getClientPortSize);
-  compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientStatusSize, &getClientStatusSize);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Bssids,        &getWifiAPBssids);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_BssidStrs,     &getWifiAPBssidStrs);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Ssids,         &getWifiAPSsids);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Ssid_lens,     &getWifiAPSsid_lens);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Channels,      &getWifiAPChannels);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Rssis,         &getWifiAPRssis);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Authmodes,     &getWifiAPAuthmodes);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Is_hiddens,    &getWifiAPIs_hiddens);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freq_offsets,  &getWifiAPFreq_offsets);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_Freqcal_vals,  &getWifiAPFreqcal_vals);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientIPAddr,     &getClientIPAddr);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPort,       &getClientPort);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientStatus,     &getClientStatus);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_SSDPIPAddr,       &getSSDPIPAddr);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_SSDPPort,         &getSSDPPort);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_SSDPStatus,       &getSSDPStatus);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ProvisioningSsid, &getProvisioningSsid);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ProvisioningPort, &getProvisioningPort);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPort,       &getClientPort);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientSsid,       &getClientSsid);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPasswd,     &getClientPasswd);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientSsidSize,   &getClientSsidSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPasswdSize, &getClientPasswdSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientIPAddrSize, &getClientIPAddrSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientPortSize,   &getClientPortSize);
+  checkErrOK(result);
+  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientStatusSize, &getClientStatusSize);
+  checkErrOK(result);
 
-#ifdef NOTDEF
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudPort", &getCloudPort);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost1", &getCloudHost1);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudHost2", &getCloudHost2);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudUrl1Part1", &getCloudUrl1Part1);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudUrl1Part2", &getCloudUrl1Part2);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudUrlTenantId1", &getCloudUrlTenantId1);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudl2Part1", &getCloudUrl2Part1);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudl2Part2", &getCloudUrl2Part2);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudlTenantId2", &getCloudUrlTenantId2);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudNodeToken1", &getCloudNodeToken1);
-  compMsgUtil->addFieldValueCallbackName(self, "@getCloudNodeToken2", &getCloudNodeToken2);
-  compMsgUtil->addFieldValueCallbackName(self, "@getSequenceNumSize", &getSequenceNumSize);
-  compMsgUtil->addFieldValueCallbackName(self, "@getClientSequenceNum", &getClientSequenceNum);
-
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestSsid", &getProdTestSsid);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestPasswd", &getProdTestPasswd);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestSecurityType", &getProdTestSecurityType);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestTargetProtocol", &getProdTestTargetProtocol);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestIpAddress", &getProdTestIpAddress);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestSubnet", &getProdTestSubnet);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestGateway", &getProdTestGateway);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestDns", &getProdTestDns);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestPingAddress", &getProdTestPingAddress);
-  compMsgUtil->addFieldValueCallbackName(self, "@getProdTestStatus", &getProdTestStatus);
-#endif
+  result = customInit(self);
+  checkErrOK(result);
 ets_printf("wifi 02 heap: %d\n", system_get_free_heap_size());
 
   compMsgWifiData = self->compMsgWifiData;
