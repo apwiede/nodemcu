@@ -135,12 +135,13 @@ static const str2id_t specialFileNameTokens[] = {
   {"@$msgValHeader",     COMP_MSG_VAL_HEADER_FILE_TOKEN},
 };
 
+extern void dbgPrintf(void *selfParam, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);
+
 // ================================= getFieldTypeIdFromStr ====================================
 
 static uint8_t getFieldTypeIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId) {
   const str2id_t *entry;
 
-ets_printf("getFieldTypeIdFromStr: %s\n", fieldTypeStr);
   entry = &fieldType2Ids[0];
   while (entry->str != NULL) {
     if (c_strcmp(fieldTypeStr, entry->str) == 0) {
@@ -179,7 +180,6 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
   fieldName2id_t *nameEntry;
   fieldName2id_t *firstFreeEntry;
 
-ets_printf("getFieldNameIdFromStr: %s\n", fieldName);
   if ((fieldName[0] == '@') && (fieldName[1] != '#')) {
     // find special field name
     entry = &specialFieldNames[0];
@@ -244,7 +244,7 @@ ets_printf("getFieldNameIdFromStr: %s\n", fieldName);
       return COMP_MSG_ERR_OK; // just ignore silently
     } else {
       if (incrRefCnt == 0) {
-ets_printf("DataView FIELD_NOT_FOUND 1\n");
+        dbgPrintf(NULL, "Y", 0, "DataView FIELD_NOT_FOUND 1");
         return COMP_MSG_ERR_FIELD_NOT_FOUND;
       } else {
         if (firstFreeEntry != NULL) {
@@ -297,7 +297,7 @@ static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t field
     fieldNameEntry++;
     idx++;
   }
-ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
+  dbgPrintf(NULL, "Y", 0, "DataView FIELD_NOT_FOUND 2 fieldNameId: %d", fieldNameId);
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
@@ -306,7 +306,6 @@ ets_printf("DataView FIELD_NOT_FOUND 2 fieldNameId: %d\n", fieldNameId);
 static uint8_t getFileNameTokenIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId) {
   const str2id_t *entry;
 
-ets_printf("getFileNameTokenIdFromStr: %s\n", fileNameTokenStr);
   entry = &specialFileNameTokens[0];
   while (entry->str != NULL) {
     if (c_strcmp(fileNameTokenStr, entry->str) == 0) {

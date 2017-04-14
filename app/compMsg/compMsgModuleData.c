@@ -125,6 +125,9 @@ const static str2id_t callbackStr2CallbackIds [] = {
   { "@getReserve6",         COMP_MSG_MODULE_Reserve6},
   { "@getReserve7",         COMP_MSG_MODULE_Reserve7},
   { "@getReserve8",         COMP_MSG_MODULE_Reserve8},
+
+#include "compMsgModuleDataCustom.h"
+
 };
 
 // ================================= callbackStr2CallbackId ====================================
@@ -204,15 +207,6 @@ static uint8_t getFirmwareVersion(compMsgDispatcher_t *self, int *numericValue, 
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= getSerieNumber ====================================
-
-static uint8_t getSerieNumber(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.SerieNumber;
-  *numericValue = 0;
-  *stringValue = compMsgModuleData.SerieNumber;
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getRSSI ====================================
 
 static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
@@ -253,52 +247,12 @@ static uint8_t getConnectedUsers(compMsgDispatcher_t *self, int *numericValue, u
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= getProgRunningMode ====================================
-
-static uint8_t getProgRunningMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ProgRunningMode;
-  *numericValue = compMsgModuleData.ProgRunningMode;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= CurrentProgRunningMode ====================================
-
-static uint8_t getCurrentRunningMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.CurrentRunningMode;
-  *numericValue = compMsgModuleData.CurrentRunningMode;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getIPProtocol ====================================
 
 static uint8_t getIPProtocol(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.IPProtocol;
   *numericValue = compMsgModuleData.IPProtocol;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getRegion ====================================
-
-static uint8_t getRegion(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.Region;
-  *numericValue = compMsgModuleData.Region;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getDeviceSecurity ====================================
-
-static uint8_t getDeviceSecurity(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.DeviceSecurity;
-  *numericValue = compMsgModuleData.DeviceSecurity;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
 }
@@ -338,16 +292,6 @@ static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
   *numericValue = compMsgModuleData.SSIDs;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getPingState ====================================
-
-static uint8_t getPingState(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.PingState;
-  *numericValue = compMsgModuleData.PingState;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
 }
@@ -424,47 +368,6 @@ static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t
   *stringValue = compMsgModuleData.Reserve8;
   return COMP_MSG_ERR_OK;
 }
-
-// ================================= getGUID ====================================
-
-static uint8_t getGUID(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.GUID;
-  *numericValue = 0;
-  *stringValue = compMsgModuleData.GUID;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getPasswdC ====================================
-
-static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.passwdC;
-  *numericValue = 0;
-  *stringValue = compMsgModuleData.passwdC;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getSrcId ====================================
-
-static uint8_t getSrcId(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.srcId;
-  *numericValue = compMsgModuleData.srcId;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getHdrReserve ====================================
-
-static uint8_t getHdrReserve(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-//  if (self->compMsgData->msgValPart->fieldValueStr != NULL) {
-//    os_free(self->compMsgData->msgValPart->fieldValueStr);
-//  }
-//  self->compMsgData->msgValPart->fieldValueStr = compMsgModuleData.hdrReserve;
-  *numericValue = 0;
-  *stringValue = compMsgModuleData.hdrReserve;
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= getOperatingMode ====================================
 
 static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
@@ -523,55 +426,6 @@ static uint8_t getCryptKey(compMsgDispatcher_t *self, int *numericValue, uint8_t
 static uint8_t getCryptIvKey(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   *numericValue = 0;
   *stringValue = compMsgModuleData.cryptIvKey;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getMyU16Src ====================================
-
-static uint8_t getMyU16Src(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU16Src;
-  *numericValue = compMsgModuleData.myU16Src;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getMyU8Src ====================================
-
-static uint8_t getMyU8Src(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU8Src;
-  *numericValue = compMsgModuleData.myU8Src;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getMyU16SaveUserDataCmdKey ====================================
-
-static uint8_t getMyU16SaveUserDataCmdKey(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU16SaveUserDataCmdKey;
-  *numericValue = compMsgModuleData.myU16SaveUserDataCmdKey;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= getMyU8SaveUserDataCmdKey ====================================
-
-static uint8_t getMyU8SaveUserDataCmdKey(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
-  self->compMsgData->msgValPart->fieldValue = compMsgModuleData.myU8SaveUserDataCmdKey;
-  *numericValue = compMsgModuleData.myU8SaveUserDataCmdKey;
-  *stringValue = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= setOperatingMode ====================================
-
-static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
-  int result;
-
-  result = self->compMsgModuleData->setModuleValue(self, "operatingMode", self->dispatcherCommon->operatingMode, NULL);
   return COMP_MSG_ERR_OK;
 }
 
@@ -870,6 +724,8 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_OK;
 }
 
+#include "compMsgModuleDataCustom_c.inc"
+
 // ================================= compMsgModuleDataInit ====================================
 
 uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
@@ -895,52 +751,62 @@ uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   compMsgUtil = self->compMsgUtil;
 
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_MACAddr, &getMACAddr);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_IPAddr, &getIPAddr);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_FirmwareVersion, &getFirmwareVersion);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_RSSI, &getRSSI);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_RSSIMax, &getRSSIMax);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_ConnectionState, &getConnectionState);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_ConnectedUsers, &getConnectedUsers);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_IPProtocol, &getIPProtocol);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_ErrorMain, &getErrorMain);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_ErrorSub, &getErrorSub);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_DateAndTime, &getDateAndTime);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_SSIDs, &getSSIDs);
+  checkErrOK(result);
 
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_OperatingMode, &getOperatingMode);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_OtaHost, &getOtaHost);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_OtaRomPath, &getOtaRomPath);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_OtaFsPath, &getOtaFsPath);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_OtaPort, &getOtaPort);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_CryptKey, &getCryptKey);
+  checkErrOK(result);
 
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve1, &getReserve1);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve2, &getReserve2);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve3, &getReserve3);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve4, &getReserve4);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve5, &getReserve5);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve6, &getReserve6);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve7, &getReserve7);
+  checkErrOK(result);
   compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_MODULE_Reserve8, &getReserve8);
+  checkErrOK(result);
+  result = customInit(self);
+  checkErrOK(result);
 
-#ifdef NOTDEF
-  compMsgUtil->addFieldValueCallbackId(self, "@getPingState", &getPingState);
-  compMsgUtil->addFieldValueCallbackId(self, "@getDeviceSecurity", &getDeviceSecurity);
-  compMsgUtil->addFieldValueCallbackId(self, "@getProgRunningMode", &getProgRunningMode);
-  compMsgUtil->addFieldValueCallbackId(self, "@getCurrentRunningMode", &getCurrentRunningMode);
-  compMsgUtil->addFieldValueCallbackId(self, "@getRegion", &getRegion);
-  compMsgUtil->addFieldValueCallbackId(self, "@getSerieNumber", &getSerieNumber);
-  compMsgUtil->addFieldValueCallbackId(self, "@getHdrReserve", &getHdrReserve);
-  compMsgUtil->addFieldValueCallbackId(self, "@getPasswdC", &getPasswdC);
-  compMsgUtil->addFieldValueCallbackId(self, "@setOperatingMode", &setOperatingMode);
-  compMsgUtil->addFieldValueCallbackId(self, "@getMyU16Src", &getMyU16Src);
-  compMsgUtil->addFieldValueCallbackId(self, "@getMyU8Src", &getMyU8Src);
-  compMsgUtil->addFieldValueCallbackId(self, "@getMyU16SaveUserDataCmdKey", &getMyU16SaveUserDataCmdKey);
-  compMsgUtil->addFieldValueCallbackId(self, "@getMyU8SaveUserDataCmdKey", &getMyU8SaveUserDataCmdKey);
-
-  compMsgUtil->addFieldValueCallbackId(self, "@getSrcId", &getSrcId);
-  compMsgUtil->addFieldValueCallbackId(self, "@getGUID", &getGUID);
-#endif
   compMsgModuleData->setModuleValues(self);
 //  self->compMsgMsgDesc->readModuleDataValues(self, COMP_MSG_MODULE_DATA_VALUES_FILE_NAME);
   return COMP_MSG_ERR_OK;

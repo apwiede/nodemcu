@@ -83,7 +83,6 @@ static volatile int fileFd = FS_OPEN_OK - 1;
 // ================================= openFile ====================================
 
 static uint8_t openFile(compMsgMsgDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode) {
-ets_printf("openFile: %s!\n", fileName);
   self->fileName = fileName;
   fileFd = fs_open(fileName, fs_mode2flag(fileMode));
   if (fileFd < FS_OPEN_OK) {
@@ -297,7 +296,6 @@ ets_printf("Error numLines: %d expectedLines: %d\n", numLines, self->compMsgMsgD
       }
     }
     if ((buffer[0] == '#') && (buffer[1] == ' ')) {
-ets_printf("comment\n");
       // a comment line skip
       continue;
     }
@@ -308,7 +306,7 @@ ets_printf("comment\n");
       if (c_strcmp(compMsgMsgDesc->lineFields[0], "#") == 0) {
         result = compMsgMsgDesc->getIntFieldValue(self, compMsgMsgDesc->lineFields[1], &ep, 0, &self->compMsgMsgDesc->expectedLines);
         checkErrOK(result);
-ets_printf("expectedLines: %d\n", self->compMsgMsgDesc->expectedLines);
+//ets_printf("expectedLines: %d\n", self->compMsgMsgDesc->expectedLines);
       } else {
         COMP_MSG_DBG(self, "E", 0, "wrong desc file number lines line");
         return COMP_MSG_ERR_WRONG_DESC_FILE_LINE;
@@ -360,7 +358,7 @@ static uint8_t handleMsgFile(compMsgDispatcher_t *self, uint8_t *fileName, handl
   compMsgMsgDesc_t *compMsgMsgDesc;
   msgDescIncludeInfo_t *msgDescIncludeInfo;
 
-ets_printf(">>>handleMsgFile %s handler: %p\n", fileName, handleMsgLine);
+ets_printf(">>>handleMsgFile %s\n", fileName);
   result = handleMsgFileInternal(self, fileName, handleMsgLine);
   checkErrOK(result);
   compMsgMsgDesc = self->compMsgMsgDesc;
@@ -391,7 +389,6 @@ static uint8_t handleMsgFileNameLine(compMsgDispatcher_t *self) {
   msgDescIncludeInfo_t *msgDescIncludeInfo;
   compMsgMsgDesc_t *compMsgMsgDesc;
 
-ets_printf("handleMsgFileNameLine\n");
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
   if (compMsgMsgDesc->numLineFields < 2) {
@@ -429,10 +426,9 @@ static uint8_t handleMsgCommonLine(compMsgDispatcher_t *self) {
   msgFieldDesc_t *msgFieldDesc;
   msgDescIncludeInfo_t *msgDescIncludeInfo;
 
-ets_printf("handleMsgCommonLine\n");
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
-//ets_printf("handleMsgUseLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
+//ets_printf("handleMsgCommonLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
   msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[compMsgMsgDesc->currMsgDescIncludeInfo];
   if (compMsgMsgDesc->numLineFields < 3) {
     return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
@@ -443,7 +439,7 @@ ets_printf("handleMsgCommonLine\n");
     checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
   }
   msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
-//ets_printf("handleMsgUseLine: %s numFieldDesc: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldDesc);
+//ets_printf("handleMsgCommonLine: %s numFieldDesc: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldDesc);
   //field name
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
 //ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId);
@@ -479,7 +475,6 @@ static uint8_t handleMsgFieldsToSaveLine(compMsgDispatcher_t *self) {
   msgFieldVal_t *msgFieldVal;
   msgDescIncludeInfo_t *msgDescIncludeInfo;
 
-ets_printf("handleMsgFieldsToSaveLine\n");
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
 //ets_printf("handleMsgFieldsToSaveLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
@@ -493,7 +488,6 @@ ets_printf("handleMsgFieldsToSaveLine\n");
     checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
   }
   msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
-ets_printf("COMP_MSG_FIELDS_TO_SAVE_FILE_INCLUDE:\n");
   //field name
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
 ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId);
@@ -514,7 +508,6 @@ static uint8_t handleMsgActionsLine(compMsgDispatcher_t *self) {
   msgFieldVal_t *msgFieldVal;
   msgDescIncludeInfo_t *msgDescIncludeInfo;
 
-ets_printf("handleMsgActionsLine\n");
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
 //ets_printf("handleMsgActionsLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
@@ -528,7 +521,6 @@ ets_printf("handleMsgActionsLine\n");
     checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
   }
   msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
-ets_printf("COMP_MSG_ACTIONS_FILE_INCLUDE:\n");
   //field name
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
 ets_printf("%s: id: %d\n", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId);
@@ -552,7 +544,6 @@ static uint8_t handleMsgValHeaderLine(compMsgDispatcher_t *self) {
   msgFieldVal_t *msgFieldVal;
   msgDescIncludeInfo_t *msgDescIncludeInfo;
 
-ets_printf("handleMsgValHeaderLine\n");
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
 //ets_printf("handleMsgValHeaderLine: numFields: %d\n", compMsgMsgDesc->numLineFields);
@@ -565,9 +556,7 @@ ets_printf("handleMsgValHeaderLine\n");
     msgDescIncludeInfo->msgFieldVals = os_zalloc(msgDescIncludeInfo->maxMsgFieldVal * sizeof(msgFieldVal_t));
     checkAllocOK(msgDescIncludeInfo->msgFieldVals);
   }
-ets_printf("val header file2: msgDescIncludeInfo->numMsgFieldVal: %d\n", msgDescIncludeInfo->numMsgFieldVal);
   msgFieldVal = &msgDescIncludeInfo->msgFieldVals[msgDescIncludeInfo->numMsgFieldVal];
-ets_printf("val header file3: msgFieldVal: %p\n", msgFieldVal);
 //ets_printf("handleMsgUseLine: %s numFieldVal: %d\n", msgDescIncludeInfo->fileName, msgDescIncludeInfo->numMsgFieldVal);
   //field name
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &fieldNameId, COMP_MSG_INCR);

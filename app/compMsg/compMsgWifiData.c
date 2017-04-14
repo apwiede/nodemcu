@@ -136,7 +136,7 @@ const static str2id_t callbackStr2CallbackIds [] = {
   { "@getSSDPPort",              COMP_MSG_WIFI_SSDPPort},
   { "@getSSDPStatus",            COMP_MSG_WIFI_SSDPStatus},
 
-#include "compMsgWifiCustom_h.inc"
+#include "compMsgWifiDataCustom.h"
 
 };
 
@@ -998,7 +998,7 @@ static uint8_t getProvisioningSsid(compMsgDispatcher_t *self, int *numericValue,
   return COMP_MSG_ERR_OK;
 }
 
-#include "compMsgWifiCustom_c.inc"
+#include "compMsgWifiDataCustom_c.inc"
 
 // ================================= getWifiValue ====================================
 
