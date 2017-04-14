@@ -27,6 +27,8 @@ import MsgFieldsToSave.txt MsgFieldsToSave.txt
 import MsgHeads.txt MsgHeads.txt
 import MsgActions.txt MsgActions.txt
 import MsgValHeader.txt MsgValHeader.txt
+import MsgWifiDataValues.txt MsgWifiDataValues.txt
+import MsgModuleDataValues.txt MsgModuleDataValues.txt
 
 EOF
 #rm -rf myConfig.txt

@@ -1,7 +1,7 @@
 # this is an example message value file
 #,5
-#include,MsgValHeader1.txt
+#include,"MsgValHeader1.txt"
 @numKeyValues,3
-@#sequenceNum,@getClientSequenceNum
-@#ssid,@getWifiAPSsids
-@#channel,@getWifiAPChannels
+@#sequenceNum,"@getClientSequenceNum"
+@#ssid,"@getWifiAPSsids"
+@#channel,"@getWifiAPChannels"

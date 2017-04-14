@@ -3,5 +3,5 @@
 @src,0xc
 @grp,2
 @dst,0xf
-@ipAddr,@getIpAddr
-@hdrFiller,@getHdrFiller
+@ipAddr,"@getIpAddr"
+@hdrFiller,"@getHdrFiller"
