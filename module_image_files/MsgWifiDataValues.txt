@@ -1,0 +1,8 @@
+# example file for wifi data values
+#,6
+@provisioningSsid,"testDevice_connect"
+@provisioningPort,80
+@provisioningIPAddr,"192.168.4.1"
+@SSDPIPAddr,"239.255.255.250"
+@SSDPPort,1900
+@clientPort,8080
