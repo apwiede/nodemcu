@@ -179,9 +179,9 @@ static uint8_t openSSDPSocket(compMsgDispatcher_t *self, char *domain, socketUse
   sud->connectionType = NET_SOCKET_TYPE_SSDP;
 
   // the following 2 calls deliver a callback function address in numericValue !!
-  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback, &flags, &callback, &numericValue, &stringValue);
+  result = self->compMsgDataValue->getDataValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback, &flags, &callback, &numericValue, &stringValue);
   sud->netSocketReceived = (netSocketReceived_t)numericValue;
-  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback, &flags, &callback, &numericValue, &stringValue);
+  result = self->compMsgDataValue->getDataValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback, &flags, &callback, &numericValue, &stringValue);
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
   COMP_MSG_DBG(self, "N", 2, "callback netSocketSSDPReceived: %p callback netSocketSSDPToSend: %p", sud->netSocketReceived, sud->netSocketToSend);
@@ -304,7 +304,7 @@ if (numNotifies > 10) {
 //  checkErrOK(result);
   }
 //ets_printf("sendSSDPInfo local_ip: %d.%d.%d.%d remote_ip: %d.%d.%d.%d\n", IP2STR(self->ssdpSud->pesp_conn->proto.udp->local_ip), IP2STR(self->ssdpSud->pesp_conn->proto.udp->remote_ip));
-  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientPort, &flags, &callback, &port, &stringValue);
+  result = self->compMsgDataValue->getDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientPort, &flags, &callback, &port, &stringValue);
 //  checkErrOK(result);
   wifi_get_ip_info(STATION_IF, &pTempIp);
   if(pTempIp.ip.addr==0){
@@ -346,11 +346,11 @@ ets_printf("startSenSSDPInfo connectStatus: %d\n", status);
   COMP_MSG_DBG(self, "N", 1, "wifi_station_disconnect: boolResult: %d", boolResult);
 //ssid = "950hsch";
 ssid = "test";
-result = self->compMsgWifiData->setWifiValue(self, "@clientSsid", 0, ssid);
+result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSsid, NULL, 0, ssid);
 checkErrOK(result);
 //passwd = "sp1r1t!!!";
 passwd = "kaesebrot";
-result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
+result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientPasswd, NULL, 0, passwd);
 checkErrOK(result);
 self->compMsgSendReceive->startSendMsg = NULL;
   wifi_set_opmode(STATION_MODE);

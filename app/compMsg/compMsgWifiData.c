@@ -438,18 +438,18 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
     fieldsToSave = &self->dispatcherCommon->fieldsToSave[idx];
     if (c_strcmp("#key_clientSsid", fieldsToSave->fieldNameStr) == 0) {
       ssid = fieldsToSave->fieldValueStr;
-      result = self->compMsgWifiData->setWifiValue(self, "@clientSsid", 0, ssid);
+      result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSsid, NULL, 0, ssid);
       checkErrOK(result);
     }
     if (c_strcmp("#key_clientPasswd", fieldsToSave->fieldNameStr) == 0) {
       passwd = fieldsToSave->fieldValueStr;
-      result = self->compMsgWifiData->setWifiValue(self, "@clientPasswd", 0, passwd);
+      result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientPasswd, NULL, 0, passwd);
       checkErrOK(result);
     }
     if (c_strcmp("#key_sequenceNum", fieldsToSave->fieldNameStr) == 0) {
 //ets_printf("seq: %p %d\n", fieldsToSave->fieldValueStr, fieldsToSave->fieldValue);
       sequenceNum = fieldsToSave->fieldValue;
-      result = self->compMsgWifiData->setWifiValue(self, "@sequenceNum", sequenceNum, NULL);
+      result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSequenceNum, NULL, sequenceNum, NULL);
       checkErrOK(result);
       self->compMsgWifiData->flags |= WIFI_USE_SAVED_SEQUENCE_NUM;
     }
@@ -484,7 +484,7 @@ static uint8_t webSocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   msgParts_t *received;
 
   COMP_MSG_DBG(self, "w", 1, "webSocketSendConnectError: status: %d\n", status);
-  result = self->compMsgWifiData->setWifiValue(self, "@clientStatus", (int)status, NULL);
+  result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientStatus, NULL, (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
@@ -504,7 +504,7 @@ static uint8_t netSocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   msgParts_t *received;
 
   COMP_MSG_DBG(self, "w", 1, "netSocketSendConnectError: status: %d\n", status);
-  result = self->compMsgWifiData->setWifiValue(self, "@clientStatus", (int)status, NULL);
+  result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientStatus, NULL, (int)status, NULL);
   checkErrOK(result);
   received = &self->compMsgData->received;
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
@@ -1011,7 +1011,6 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint8_t fieldId, uint8_t 
   *numericValue = 0;
   *stringValue = NULL;
   *fieldValueCallback = NULL;
-ets_printf("getWifiValue: %d\n", fieldId);
   result = self->compMsgDataValue->getDataValue(self, fieldId, flags, fieldValueCallback, numericValue, stringValue);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
@@ -1043,157 +1042,13 @@ static uint8_t getWifiConfig(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= setWifiValue ====================================
-
-static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue) {
-  uint8_t result;
-  uint8_t fieldNameId;
-
-  COMP_MSG_DBG(self, "w", 2, "setWifiValue: %s %d %s\n", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
-  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldNameStr, &fieldNameId, COMP_MSG_NO_INCR); 
-  switch (fieldNameId) {
-  case COMP_MSG_SPEC_FIELD_PROVISIONING_SSID:
-    c_memcpy(compMsgWifiData.provisioningSsid, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_PROVISIONING_PORT:
-    compMsgWifiData.provisioningPort = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR:
-    c_memcpy(compMsgWifiData.provisioningIPAddr, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLIENT_SSID:
-    c_memcpy(compMsgWifiData.clientSsid, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLIENT_PASSWD:
-    c_memcpy(compMsgWifiData.clientPasswd, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR:
-    compMsgWifiData.clientIPAddr = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_CLIENT_PORT:
-    compMsgWifiData.clientPort = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_CLIENT_STATUS:
-    compMsgWifiData.clientStatus = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR:
-    compMsgWifiData.ssdpIPAddr = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_SSDP_PORT:
-    compMsgWifiData.ssdpPort = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_SSDP_STATUS:
-    compMsgWifiData.ssdpStatus = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_PORT:
-    compMsgWifiData.cloudPort = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_HOST_1:
-    compMsgWifiData.cloudHost1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudHost1);
-    c_memcpy(compMsgWifiData.cloudHost1, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_HOST_2:
-    compMsgWifiData.cloudHost2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudHost2);
-    c_memcpy(compMsgWifiData.cloudHost2, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1:
-    compMsgWifiData.cloudUrl1Part1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrl1Part1);
-    c_memcpy(compMsgWifiData.cloudUrl1Part1, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2:
-    compMsgWifiData.cloudUrl1Part2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrl1Part2);
-    c_memcpy(compMsgWifiData.cloudUrl1Part2, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1:
-    compMsgWifiData.cloudUrlTenantId1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrlTenantId1);
-    c_memcpy(compMsgWifiData.cloudUrlTenantId1, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1:
-    compMsgWifiData.cloudUrl2Part1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrl2Part1);
-    c_memcpy(compMsgWifiData.cloudUrl2Part1, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2:
-    compMsgWifiData.cloudUrl2Part2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrl2Part2);
-    c_memcpy(compMsgWifiData.cloudUrl2Part2, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2:
-    compMsgWifiData.cloudUrlTenantId2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudUrlTenantId2);
-    c_memcpy(compMsgWifiData.cloudUrlTenantId2, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1:
-    compMsgWifiData.cloudNodeToken1 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudNodeToken1);
-    c_memcpy(compMsgWifiData.cloudNodeToken1, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2:
-    compMsgWifiData.cloudNodeToken2 = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.cloudNodeToken2);
-    c_memcpy(compMsgWifiData.cloudNodeToken2, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_SEQUENCE_NUM:
-    compMsgWifiData.clientSequenceNum = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_SSID:
-    compMsgWifiData.prodTestSsid = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.prodTestSsid);
-    c_memcpy(compMsgWifiData.prodTestSsid, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD:
-    compMsgWifiData.prodTestPasswd = os_zalloc(c_strlen(stringValue) + 1);
-    checkAllocOK(compMsgWifiData.prodTestPasswd);
-    c_memcpy(compMsgWifiData.prodTestPasswd, stringValue, c_strlen(stringValue));
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE:
-    compMsgWifiData.prodTestSecurityType = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL:
-    compMsgWifiData.prodTestTargetProtocol = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR:
-    compMsgWifiData.prodTestIpAddr = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET:
-    compMsgWifiData.prodTestSubnet = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY:
-    compMsgWifiData.prodTestGateway = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_DNS:
-    compMsgWifiData.prodTestDns = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS:
-    compMsgWifiData.prodTestPingAddress = numericValue;
-    break;
-  case COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS:
-    compMsgWifiData.prodTestStatus = numericValue;
-    break;
-#ifdef CLIENT_SSL_ENABLE
-  case COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT:
-    compMsgWifiData.cloudSecureConnect = numericValue;
-    break;
-#endif
-
-  default:
-    COMP_MSG_DBG(self, "Y", 0, "setWifiValue: %s not found\n", fieldNameStr);
-    return COMP_MSG_ERR_FIELD_NOT_FOUND;
-  }
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= compMsgWifiInit ====================================
 
 static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
   compMsgUtil_t *compMsgUtil;
   compMsgWifiData_t *compMsgWifiData;
+  compMsgDataValue_t *compMsgDataValue;
 
 //ets_printf("wifi 01 heap: %d\n", system_get_free_heap_size());
   compMsgWifiData = self->compMsgWifiData;
@@ -1203,6 +1058,28 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   compMsgWifiData->netSocketReceived = &netSocketReceived;
   compMsgWifiData->netSocketSSDPToSend = &netSocketSSDPToSend;
   compMsgWifiData->netSocketSSDPReceived = &netSocketSSDPReceived;
+
+  compMsgDataValue = self->compMsgDataValue;
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSsid, NULL, 0, "");
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientPasswd, NULL, 0, "");
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSequenceNum, NULL, 0, NULL);
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientStatus, NULL, 0, NULL);
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback, NULL, (int)(&netSocketSSDPReceived), NULL);
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback, NULL, (int)(&netSocketSSDPToSend), NULL);
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback, NULL, (int)(&netSocketReceived), NULL);
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_NetToSendCallback, NULL, (int)(&netSocketToSend), NULL);
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_binaryCallback, NULL, (int)(&webSocketBinaryReceived), NULL);
+  checkErrOK(result);
+  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_textCallback, NULL, (int)(&webSocketTextReceived), NULL);
+  checkErrOK(result);
 
   compMsgUtil = self->compMsgUtil;
   result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_AP_BssidSize,       &getWifiAPBssidSize);
@@ -1290,7 +1167,6 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   compMsgWifiData->callbackStr2CallbackId = &callbackStr2CallbackId;
   compMsgWifiData->getWifiValue = &getWifiValue;
   compMsgWifiData->getWifiConfig = &getWifiConfig;
-  compMsgWifiData->setWifiValue = &setWifiValue;
   compMsgWifiData->getWifiRemotePort = &getWifiRemotePort;
   compMsgWifiData->bssStr2BssInfoId = &bssStr2BssInfoId;
   compMsgWifiData->connectToAP = &connectToAP;

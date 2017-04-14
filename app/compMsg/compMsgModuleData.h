@@ -45,50 +45,6 @@
 
 #define MODULE_INFO_MODULE            (1 << 0)
 
-#define MODULE_INFO_MACAddr                 1
-#define MODULE_INFO_IPAddr                  2
-#define MODULE_INFO_FirmwareVersion         3
-#define MODULE_INFO_SerieNumber             4
-#define MODULE_INFO_RSSI                    5
-#define MODULE_INFO_RSSIMax                 6
-#define MODULE_INFO_ConnectionState         7
-#define MODULE_INFO_ConnectedUsers          8
-#define MODULE_INFO_ProgRunningMode         9
-#define MODULE_INFO_CurrentRunningMode      10
-#define MODULE_INFO_IPProtocol              11
-#define MODULE_INFO_Region                  12
-#define MODULE_INFO_DeviceSecurity          13
-#define MODULE_INFO_ErrorMain               14
-#define MODULE_INFO_ErrorSub                15
-#define MODULE_INFO_DateAndTime             16
-#define MODULE_INFO_SSIDs                   17
-#define MODULE_INFO_PingState               18
-#define MODULE_INFO_Reserve1                19
-#define MODULE_INFO_Reserve2                20
-#define MODULE_INFO_Reserve3                21
-#define MODULE_INFO_Reserve4                22
-#define MODULE_INFO_Reserve5                23
-#define MODULE_INFO_Reserve6                24
-#define MODULE_INFO_Reserve7                25
-#define MODULE_INFO_Reserve8                26
-#define MODULE_INFO_AP_LIST_CALL_BACK       27
-#define MODULE_INFO_GUID                    28
-#define MODULE_INFO_srcId                   29
-#define MODULE_INFO_PASSWDC                 30
-#define MODULE_INFO_operatingMode           31
-#define MODULE_INFO_OTA_HOST                32
-#define MODULE_INFO_OTA_ROM_PATH            33
-#define MODULE_INFO_OTA_FS_PATH             34
-#define MODULE_INFO_OTA_PORT                35
-#define MODULE_INFO_CRYPT_KEY               36
-#define MODULE_INFO_hdrReserve              37
-#define MODULE_INFO_cryptKey                38
-#define MODULE_INFO_cryptIvKey              39
-#define MODULE_INFO_myU16Src                40
-#define MODULE_INFO_myU8Src                 41
-#define MODULE_INFO_myU16SaveUserDataCmdKey 42
-#define MODULE_INFO_myU8SaveUserDataCmdKey  43
-
 // the defines have to be bigger then the max of COMP_MSG_WIFI_ defines in compMsgWifiData.h!!
 #define COMP_MSG_MODULE_MACAddr             60
 #define COMP_MSG_MODULE_IPAddr              61
@@ -142,8 +98,6 @@ typedef uint8_t (* getCryptKey_t)(compMsgDispatcher_t *self, int *numericValue, 
 typedef uint8_t (* getCryptIvKey_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getOperatingMode_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* restoreUserData_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* compMsgModuleDataInit_t)(compMsgDispatcher_t *self);
 
@@ -200,8 +154,6 @@ typedef struct compMsgModuleData {
   getCryptIvKey_t getCryptIvKey;
   getOperatingMode_t getOperatingMode;
   restoreUserData_t restoreUserData;
-  setModuleValue_t setModuleValue;
-  setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;
   compMsgModuleDataInit_t compMsgModuleDataInit;
 } compMsgModuleData_t;

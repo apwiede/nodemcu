@@ -52,30 +52,32 @@
 #define COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr   3
 #define COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr           4
 #define COMP_MSG_WIFI_VALUE_ID_SSDPPort             5
-#define COMP_MSG_WIFI_VALUE_ID_clientIPAddr         6
-#define COMP_MSG_WIFI_VALUE_ID_clientPort           7
-#define COMP_MSG_WIFI_VALUE_ID_clientSequenceNum    8
-#define COMP_MSG_WIFI_VALUE_ID_binaryCallback       9
-#define COMP_MSG_WIFI_VALUE_ID_textCallback         10
+#define COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback 6
+#define COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback   7
+#define COMP_MSG_WIFI_VALUE_ID_clientIPAddr         8
+#define COMP_MSG_WIFI_VALUE_ID_clientPort           9
+#define COMP_MSG_WIFI_VALUE_ID_clientSequenceNum    10
 #define COMP_MSG_WIFI_VALUE_ID_clientSsid           11
 #define COMP_MSG_WIFI_VALUE_ID_clientPasswd         12
-#define COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback 13
-#define COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback   14
-#define COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback  15
-#define COMP_MSG_WIFI_VALUE_ID_NetToSendCallback    16
-#define COMP_MSG_WIFI_VALUE_ID_NetSecureConnect     17
-#define COMP_MSG_WIFI_VALUE_ID_cloudPort            18
+#define COMP_MSG_WIFI_VALUE_ID_clientStatus         13
+#define COMP_MSG_WIFI_VALUE_ID_binaryCallback       14
+#define COMP_MSG_WIFI_VALUE_ID_textCallback         15
+#define COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback  16
+#define COMP_MSG_WIFI_VALUE_ID_NetToSendCallback    17
+#define COMP_MSG_WIFI_VALUE_ID_NetSecureConnect     18
+#define COMP_MSG_WIFI_VALUE_ID_cloudPort            19
+#define COMP_MSG_WIFI_VALUE_ID_operatingMode        20
 
-#define COMP_MSG_MODULE_VALUE_ID_Reserve1         50
-#define COMP_MSG_MODULE_VALUE_ID_Reserve2         51
-#define COMP_MSG_MODULE_VALUE_ID_Reserve3         52
-#define COMP_MSG_MODULE_VALUE_ID_Reserve4         53
-#define COMP_MSG_MODULE_VALUE_ID_Reserve5         54
-#define COMP_MSG_MODULE_VALUE_ID_Reserve6         55
-#define COMP_MSG_MODULE_VALUE_ID_Reserve7         56
-#define COMP_MSG_MODULE_VALUE_ID_Reserve8         57
-#define COMP_MSG_MODULE_VALUE_ID_cryptKey         58
-#define COMP_MSG_MODULE_VALUE_ID_cryptIvKey       59
+#define COMP_MSG_MODULE_VALUE_ID_Reserve1           50
+#define COMP_MSG_MODULE_VALUE_ID_Reserve2           51
+#define COMP_MSG_MODULE_VALUE_ID_Reserve3           52
+#define COMP_MSG_MODULE_VALUE_ID_Reserve4           53
+#define COMP_MSG_MODULE_VALUE_ID_Reserve5           54
+#define COMP_MSG_MODULE_VALUE_ID_Reserve6           55
+#define COMP_MSG_MODULE_VALUE_ID_Reserve7           56
+#define COMP_MSG_MODULE_VALUE_ID_Reserve8           57
+#define COMP_MSG_MODULE_VALUE_ID_cryptKey           58
+#define COMP_MSG_MODULE_VALUE_ID_cryptIvKey         59
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 

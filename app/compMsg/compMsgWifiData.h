@@ -269,7 +269,6 @@ typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startStationCb_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint8_t fieldId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue);
-typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
 typedef uint8_t (* netSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);
@@ -339,7 +338,6 @@ typedef struct compMsgWifiData {
   getBssScanInfo_t getBssScanInfo;
   getWifiValue_t getWifiValue;
   getWifiConfig_t getWifiConfig;
-  setWifiValue_t setWifiValue;
   getWifiRemotePort_t getWifiRemotePort;
   bssStr2BssInfoId_t bssStr2BssInfoId;
   connectToAP_t connectToAP;

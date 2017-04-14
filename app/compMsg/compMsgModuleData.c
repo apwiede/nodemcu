@@ -51,51 +51,6 @@
 
 static compMsgModuleData_t compMsgModuleData;
 
-const static str2id_t moduleFieldName2Ids[] = {
-  { "MACAddr",                 MODULE_INFO_MACAddr },
-  { "IPAddr",                  MODULE_INFO_IPAddr },
-  { "FirmwareVersion",         MODULE_INFO_FirmwareVersion },
-  { "SerieNumber",             MODULE_INFO_SerieNumber },
-  { "RSSI",                    MODULE_INFO_RSSI },
-  { "RSSIMax",                 MODULE_INFO_RSSIMax },
-  { "ConnectionState",         MODULE_INFO_ConnectionState },
-  { "ConnectedUsers",          MODULE_INFO_ConnectedUsers },
-  { "ProgRunningMode",         MODULE_INFO_ProgRunningMode },
-  { "CurrentRunningMode",      MODULE_INFO_CurrentRunningMode },
-  { "IPProtocol",              MODULE_INFO_IPProtocol },
-  { "Region",                  MODULE_INFO_Region },
-  { "DeviceSecurity",          MODULE_INFO_DeviceSecurity },
-  { "ErrorMain",               MODULE_INFO_ErrorMain },
-  { "ErrorSub",                MODULE_INFO_ErrorSub },
-  { "DateAndTime",             MODULE_INFO_DateAndTime },
-  { "SSIDs",                   MODULE_INFO_SSIDs },
-  { "PingState",               MODULE_INFO_PingState },
-  { "Reserve1",                MODULE_INFO_Reserve1 },
-  { "Reserve2",                MODULE_INFO_Reserve2 },
-  { "Reserve3",                MODULE_INFO_Reserve3 },
-  { "Reserve4",                MODULE_INFO_Reserve4 },
-  { "Reserve5",                MODULE_INFO_Reserve5 },
-  { "Reserve6",                MODULE_INFO_Reserve6 },
-  { "Reserve7",                MODULE_INFO_Reserve7 },
-  { "Reserve8",                MODULE_INFO_Reserve8 },
-  { "GUID",                    MODULE_INFO_GUID },
-  { "srcId",                   MODULE_INFO_srcId },
-  { "hdrReserve",              MODULE_INFO_hdrReserve },
-  { "passwdC",                 MODULE_INFO_PASSWDC },
-  { "operatingMode",           MODULE_INFO_operatingMode },
-  { "otaHost",                 MODULE_INFO_OTA_HOST },
-  { "otaRomPath",              MODULE_INFO_OTA_ROM_PATH },
-  { "otaFsPath",               MODULE_INFO_OTA_FS_PATH },
-  { "otaPort",                 MODULE_INFO_OTA_PORT },
-  { "cryptKey",                MODULE_INFO_cryptKey },
-  { "cryptIvKey",              MODULE_INFO_cryptIvKey },
-  { "myU16Src",                MODULE_INFO_myU16Src },
-  { "myU8Src",                 MODULE_INFO_myU8Src },
-  { "myU16SaveUserDataCmdKey", MODULE_INFO_myU16SaveUserDataCmdKey },
-  { "myU8SaveUserDataCmdKey",  MODULE_INFO_myU8SaveUserDataCmdKey },
-  {NULL, -1},
-};
-  
 const static str2id_t callbackStr2CallbackIds [] = {
   { "@getMACAddr",          COMP_MSG_MODULE_MACAddr},
   { "@getIPAddr",           COMP_MSG_MODULE_IPAddr},
@@ -429,23 +384,6 @@ static uint8_t getCryptIvKey(compMsgDispatcher_t *self, int *numericValue, uint8
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= moduleFieldName2Id ====================================
-
-static uint8_t moduleFieldName2Id(compMsgDispatcher_t *self, uint8_t *fieldNameStr, uint8_t *id) {
-  int result;
-  const str2id_t *entry;
-
-  entry = &moduleFieldName2Ids[0];
-  while (entry->str != NULL) {
-    if (c_strcmp(fieldNameStr, entry->str) == 0) {
-      *id = entry->id;
-      return COMP_MSG_ERR_OK;
-    }
-    entry++;
-  }
-  return COMP_MSG_ERR_FIELD_NOT_FOUND;
-}
-
 // ================================= restoreUserData ====================================
 
 static uint8_t restoreUserData(compMsgDispatcher_t *self) {
@@ -456,6 +394,7 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
   msgDescPart_t *msgDescPart;
   compMsgData_t *compMsgData;
   int numericValue;
+  uint8_t valueId;
   uint8_t *stringValue;
   bool userFieldsStarted;
 
@@ -472,14 +411,12 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
       userFieldsStarted = false;
     }
     if (userFieldsStarted) {
+      result = self->compMsgDataValue->dataValueStr2ValueId(self, msgDescPart->fieldNameStr, &valueId);
+      checkErrOK(result);
       result = self->compMsgData->getFieldValue(self, msgDescPart->fieldNameStr, &numericValue, &stringValue);
       checkErrOK(result);
 //ets_printf("handle field: %s: %d %s\n", msgDescPart->fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
-      result = self->compMsgModuleData->setModuleValue(self, msgDescPart->fieldNameStr + 1, numericValue, stringValue);
-      if (result != COMP_MSG_ERR_OK) {
-        // seem to be a wifi value so try that
-        result = self->compMsgWifiData->setWifiValue(self, msgDescPart->fieldNameStr, numericValue, stringValue);
-      }
+      result = self->compMsgDataValue->setDataValue(self, valueId, NULL, numericValue, stringValue);
       checkErrOK(result);
     }
     // check for start handling fields
@@ -490,237 +427,12 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= setModuleValue ====================================
-
-static uint8_t setModuleValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue) {
-  int result;
-  uint8_t id;
-
-  result = moduleFieldName2Id(self, fieldNameStr, &id);
-  checkErrOK(result);
-  switch (id) {
-  case MODULE_INFO_MACAddr:
-    c_memcpy(compMsgModuleData.MACAddr, stringValue, c_strlen(stringValue));
-    compMsgModuleData.MACAddr[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_IPAddr:
-    c_memcpy(compMsgModuleData.IPAddr, stringValue, c_strlen(stringValue));
-    compMsgModuleData.IPAddr[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_FirmwareVersion:
-    c_memcpy(compMsgModuleData.FirmwareVersion, stringValue, c_strlen(stringValue));
-    compMsgModuleData.FirmwareVersion[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_SerieNumber:
-    c_memcpy(compMsgModuleData.SerieNumber, stringValue, c_strlen(stringValue));
-    compMsgModuleData.SerieNumber[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_RSSI:
-    compMsgModuleData.RSSI = numericValue;
-    break;
-  case MODULE_INFO_RSSIMax:
-    compMsgModuleData.RSSIMax = numericValue;
-    break;
-  case MODULE_INFO_ConnectionState:
-    compMsgModuleData.ConnectionState = numericValue;
-    break;
-  case MODULE_INFO_ConnectedUsers:
-    compMsgModuleData.ConnectedUsers = numericValue;
-    break;
-  case MODULE_INFO_ProgRunningMode:
-    compMsgModuleData.ProgRunningMode = numericValue;
-    break;
-  case MODULE_INFO_CurrentRunningMode:
-    compMsgModuleData.CurrentRunningMode = numericValue;
-    break;
-  case MODULE_INFO_IPProtocol:
-    compMsgModuleData.IPProtocol = numericValue;
-    break;
-  case MODULE_INFO_Region:
-    compMsgModuleData.Region = numericValue;
-    break;
-  case MODULE_INFO_DeviceSecurity:
-    compMsgModuleData.DeviceSecurity = numericValue;
-    break;
-  case MODULE_INFO_ErrorMain:
-    compMsgModuleData.ErrorMain = numericValue;
-    break;
-  case MODULE_INFO_ErrorSub:
-    compMsgModuleData.ErrorSub = numericValue;
-    break;
-  case MODULE_INFO_DateAndTime:
-    c_memcpy(compMsgModuleData.DateAndTime, stringValue, c_strlen(stringValue));
-    compMsgModuleData.DateAndTime[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_SSIDs:
-    compMsgModuleData.SSIDs = numericValue;
-    break;
-  case MODULE_INFO_PingState:
-    compMsgModuleData.PingState = numericValue;
-    break;
-  case MODULE_INFO_Reserve1:
-    compMsgModuleData.Reserve1 = numericValue;
-    break;
-  case MODULE_INFO_Reserve2:
-    c_memcpy(compMsgModuleData.Reserve2, stringValue, c_strlen(stringValue));
-    compMsgModuleData.Reserve2[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_Reserve3:
-    c_memcpy(compMsgModuleData.Reserve3, stringValue, c_strlen(stringValue));
-    compMsgModuleData.Reserve3[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_Reserve4:
-    c_memcpy(compMsgModuleData.Reserve4, stringValue, c_strlen(stringValue));
-    compMsgModuleData.Reserve4[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_Reserve5:
-    c_memcpy(compMsgModuleData.Reserve5, stringValue, c_strlen(stringValue));
-    compMsgModuleData.Reserve5[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_Reserve6:
-    c_memcpy(compMsgModuleData.Reserve6, stringValue, c_strlen(stringValue));
-    compMsgModuleData.Reserve6[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_Reserve7:
-    c_memcpy(compMsgModuleData.Reserve7, stringValue, c_strlen(stringValue));
-    compMsgModuleData.Reserve7[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_Reserve8:
-    c_memcpy(compMsgModuleData.Reserve8, stringValue, c_strlen(stringValue));
-    compMsgModuleData.Reserve8[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_GUID:
-    c_memcpy(compMsgModuleData.GUID, stringValue, c_strlen(stringValue));
-    compMsgModuleData.GUID[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_srcId:
-    compMsgModuleData.srcId = numericValue;
-    break;
-  case MODULE_INFO_PASSWDC:
-    c_memcpy(compMsgModuleData.passwdC, stringValue, c_strlen(stringValue));
-    compMsgModuleData.passwdC[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_operatingMode:
-    compMsgModuleData.operatingMode = numericValue;
-    break;
-  case MODULE_INFO_OTA_HOST:
-    c_memcpy(compMsgModuleData.otaHost, stringValue, c_strlen(stringValue));
-    compMsgModuleData.otaHost[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_OTA_ROM_PATH:
-    c_memcpy(compMsgModuleData.otaRomPath, stringValue, c_strlen(stringValue));
-    compMsgModuleData.otaRomPath[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_OTA_FS_PATH:
-    c_memcpy(compMsgModuleData.otaFsPath, stringValue, c_strlen(stringValue));
-    compMsgModuleData.otaFsPath[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_OTA_PORT:
-    compMsgModuleData.otaPort = numericValue;
-    break;
-  case MODULE_INFO_CRYPT_KEY:
-    c_memcpy(compMsgModuleData.cryptKey, stringValue, c_strlen(stringValue));
-    compMsgModuleData.cryptKey[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_myU16Src:
-    compMsgModuleData.myU16Src = numericValue;
-    break;
-  case MODULE_INFO_myU8Src:
-    compMsgModuleData.myU8Src = numericValue;
-    break;
-  case MODULE_INFO_myU16SaveUserDataCmdKey:
-    compMsgModuleData.myU16SaveUserDataCmdKey = numericValue;
-    break;
-  case MODULE_INFO_myU8SaveUserDataCmdKey:
-    compMsgModuleData.myU8SaveUserDataCmdKey = numericValue;
-    break;
-  case MODULE_INFO_cryptKey:
-    c_memcpy(compMsgModuleData.cryptKey, stringValue, c_strlen(stringValue));
-    compMsgModuleData.cryptKey[c_strlen(stringValue)] = '\0';
-    break;
-  case MODULE_INFO_cryptIvKey:
-    c_memcpy(compMsgModuleData.cryptIvKey, stringValue, c_strlen(stringValue));
-    compMsgModuleData.cryptIvKey[c_strlen(stringValue)] = '\0';
-    break;
-  default:
-    return COMP_MSG_ERR_BAD_MODULE_VALUE_WHICH;
-    break;
-  }
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= updateModuleValues ====================================
 
 static uint8_t updateModuleValues(compMsgDispatcher_t *self) {
   int result;
 
   compMsgModuleData.RSSI = (uint8_t)wifi_station_get_rssi();
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= setModuleValues ====================================
-
-static uint8_t setModuleValues(compMsgDispatcher_t *self) {
-  int result;
-
-  COMP_MSG_DBG(self, "M", 2, "setModuleValues\n");
-  compMsgModuleData.MACAddr[0] = '\0';
-  compMsgModuleData.IPAddr[0] = 0xD4;
-  compMsgModuleData.IPAddr[1] = 0xC3;
-  compMsgModuleData.IPAddr[2] = 0x12;
-  compMsgModuleData.IPAddr[3] = 0x34;
-  compMsgModuleData.IPAddr[4] = 0;
-  compMsgModuleData.FirmwareVersion[0] = 0x12;
-  compMsgModuleData.FirmwareVersion[1] = 0x34;
-  compMsgModuleData.FirmwareVersion[2] = 0x56;
-  compMsgModuleData.FirmwareVersion[3] = 0xAB;
-  compMsgModuleData.FirmwareVersion[4] = 0xCD;
-  compMsgModuleData.FirmwareVersion[5] = 0xEF;
-  compMsgModuleData.FirmwareVersion[6] = 0;
-  compMsgModuleData.SerieNumber[0] = 0x02;
-  compMsgModuleData.SerieNumber[1] = 0x13;
-  compMsgModuleData.SerieNumber[2] = 0x2A;
-  compMsgModuleData.SerieNumber[3] = 0x10;
-  compMsgModuleData.SerieNumber[4] = 0;
-  compMsgModuleData.RSSI = (uint8_t)wifi_station_get_rssi();
-  compMsgModuleData.RSSIMax = 5;
-  compMsgModuleData.ConnectionState = 5;
-  compMsgModuleData.ConnectedUsers = 1;
-  compMsgModuleData.ProgRunningMode = 0;
-  compMsgModuleData.CurrentRunningMode = 0;
-  compMsgModuleData.IPProtocol = 1;
-  compMsgModuleData.Region = 0;
-  compMsgModuleData.DeviceSecurity = 0x00;
-  compMsgModuleData.ErrorMain = 0;
-  compMsgModuleData.ErrorSub = 0;
-  compMsgModuleData.DateAndTime[0] = 0x00;
-  compMsgModuleData.DateAndTime[1] = 0x00;
-  compMsgModuleData.DateAndTime[2] = 0x00;
-  compMsgModuleData.DateAndTime[3] = 0x00;
-  compMsgModuleData.DateAndTime[4] = 0x00;
-  compMsgModuleData.DateAndTime[5] = 0x00;
-  compMsgModuleData.DateAndTime[6] = 0;
-  compMsgModuleData.SSIDs = 2;
-  compMsgModuleData.PingState = 1;
-  compMsgModuleData.Reserve1 = 'X';
-  c_memcpy(compMsgModuleData.Reserve2, "XY\0", 3);
-  c_memcpy(compMsgModuleData.Reserve3, "XYZ\0", 4);
-  c_memcpy(compMsgModuleData.Reserve4, "ABCD\0", 5);
-  c_memcpy(compMsgModuleData.Reserve5, "ABCDE\0", 6);
-  c_memcpy(compMsgModuleData.Reserve6, "ABCDEF\0", 7);
-  c_memcpy(compMsgModuleData.Reserve7, "ABCDEFG\0", 8);
-  c_memcpy(compMsgModuleData.Reserve8, "ABCDEFGH\0", 9);
-  c_memcpy(compMsgModuleData.GUID, "1234-5678-9012-1\0", 17);
-  compMsgModuleData.srcId = 12312;
-  c_memcpy(compMsgModuleData.hdrReserve, "  \0", 3);
-  c_memcpy(compMsgModuleData.passwdC, "                \0", 17);
-  compMsgModuleData.operatingMode = 0xE0;
-  c_memcpy(compMsgModuleData.otaHost, "192.168.1.0\0", 15);
-  c_memcpy(compMsgModuleData.otaRomPath, "/nodemcu-rboot.bin\0", 19);
-  c_memcpy(compMsgModuleData.otaFsPath, "/nodemcu-spiffs.bin\0", 20);
-  compMsgModuleData.otaPort = 80;
-  c_memcpy(compMsgModuleData.cryptKey, "a1b2c3d4e5f6g7h8\0", 17);
-  COMP_MSG_DBG(self, "M", 2, "setModuleVaues done\n");
   return COMP_MSG_ERR_OK;
 }
 
@@ -735,8 +447,6 @@ static uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
 
   compMsgModuleData = self->compMsgModuleData;
   compMsgModuleData->callbackStr2CallbackId = &callbackStr2CallbackId;
-  compMsgModuleData->setModuleValue = &setModuleValue;
-  compMsgModuleData->setModuleValues = &setModuleValues;
   compMsgModuleData->updateModuleValues = &updateModuleValues;
   compMsgModuleData->getOtaHost = &getOtaHost;
   compMsgModuleData->getOtaRomPath = &getOtaRomPath;
@@ -807,8 +517,6 @@ static uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   result = customInit(self);
   checkErrOK(result);
 
-  compMsgModuleData->setModuleValues(self);
-//  self->compMsgMsgDesc->readModuleDataValues(self, COMP_MSG_MODULE_DATA_VALUES_FILE_NAME);
   return COMP_MSG_ERR_OK;
 }
 

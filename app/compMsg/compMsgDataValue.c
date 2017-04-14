@@ -41,24 +41,37 @@
 #include "compMsgDispatcher.h"
 
 const static str2id_t dataValueStr2ValueIds [] = {
-  { "@provisioningSsid",    COMP_MSG_WIFI_VALUE_ID_provisioningSsid},
-  { "@provisioningPort",    COMP_MSG_WIFI_VALUE_ID_provisioningPort},
-  { "@provisioningIPAddr",  COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr},
-  { "@SSDPIPAddr",          COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr},
-  { "@SSDPPort",            COMP_MSG_WIFI_VALUE_ID_SSDPPort},
-  { "@clientIPAddr",        COMP_MSG_WIFI_VALUE_ID_clientIPAddr},
-  { "@clientPort",          COMP_MSG_WIFI_VALUE_ID_clientPort},
-  { "@clientSequenceNum",   COMP_MSG_WIFI_VALUE_ID_clientSequenceNum},
-  { "Reserve1",             COMP_MSG_MODULE_VALUE_ID_Reserve1},
-  { "Reserve2",             COMP_MSG_MODULE_VALUE_ID_Reserve2},
-  { "Reserve3",             COMP_MSG_MODULE_VALUE_ID_Reserve3},
-  { "Reserve4",             COMP_MSG_MODULE_VALUE_ID_Reserve4},
-  { "Reserve5",             COMP_MSG_MODULE_VALUE_ID_Reserve5},
-  { "Reserve6",             COMP_MSG_MODULE_VALUE_ID_Reserve6},
-  { "Reserve7",             COMP_MSG_MODULE_VALUE_ID_Reserve7},
-  { "Reserve8",             COMP_MSG_MODULE_VALUE_ID_Reserve8},
-  { "cryptKey",             COMP_MSG_MODULE_VALUE_ID_cryptKey},
-  { "cryptIvKey",           COMP_MSG_MODULE_VALUE_ID_cryptIvKey},
+  { "@provisioningSsid",     COMP_MSG_WIFI_VALUE_ID_provisioningSsid},
+  { "@provisioningPort",     COMP_MSG_WIFI_VALUE_ID_provisioningPort},
+  { "@provisioningIPAddr",   COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr},
+  { "@SSDPIPAddr",           COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr},
+  { "@SSDPPort",             COMP_MSG_WIFI_VALUE_ID_SSDPPort},
+  { "@SSDPReceivedCallback", COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback},
+  { "@SSDPToSendCallback",   COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback},
+  { "@clientIPAddr",         COMP_MSG_WIFI_VALUE_ID_clientIPAddr},
+  { "@clientPort",           COMP_MSG_WIFI_VALUE_ID_clientPort},
+  { "@clientSequenceNum",    COMP_MSG_WIFI_VALUE_ID_clientSequenceNum},
+  { "@clientSsid",           COMP_MSG_WIFI_VALUE_ID_clientSsid},
+  { "@clientPasswd",         COMP_MSG_WIFI_VALUE_ID_clientPasswd},
+  { "@clientStatus",         COMP_MSG_WIFI_VALUE_ID_clientStatus},
+  { "@binaryCallback",       COMP_MSG_WIFI_VALUE_ID_binaryCallback},
+  { "@textCallback",         COMP_MSG_WIFI_VALUE_ID_textCallback},
+  { "@NetReceivedCallback",  COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback},
+  { "@NetToSendCallback",    COMP_MSG_WIFI_VALUE_ID_NetToSendCallback},
+  { "@NetSecureConnect",     COMP_MSG_WIFI_VALUE_ID_NetSecureConnect},
+  { "@cloudPort",            COMP_MSG_WIFI_VALUE_ID_cloudPort},
+  { "@operatingMode",        COMP_MSG_WIFI_VALUE_ID_operatingMode},
+
+  { "Reserve1",              COMP_MSG_MODULE_VALUE_ID_Reserve1},
+  { "Reserve2",              COMP_MSG_MODULE_VALUE_ID_Reserve2},
+  { "Reserve3",              COMP_MSG_MODULE_VALUE_ID_Reserve3},
+  { "Reserve4",              COMP_MSG_MODULE_VALUE_ID_Reserve4},
+  { "Reserve5",              COMP_MSG_MODULE_VALUE_ID_Reserve5},
+  { "Reserve6",              COMP_MSG_MODULE_VALUE_ID_Reserve6},
+  { "Reserve7",              COMP_MSG_MODULE_VALUE_ID_Reserve7},
+  { "Reserve8",              COMP_MSG_MODULE_VALUE_ID_Reserve8},
+  { "cryptKey",              COMP_MSG_MODULE_VALUE_ID_cryptKey},
+  { "cryptIvKey",            COMP_MSG_MODULE_VALUE_ID_cryptIvKey},
   { NULL,          0 },
 };
 
@@ -174,6 +187,16 @@ static uint8_t setDataValue(compMsgDispatcher_t *self, uint8_t valueId, fieldVal
 
 // ================================= getDataValue ====================================
 
+/**
+ * \brief get value from data area
+ * \param self The dispatcher struct
+ * \param fieldId Value id of the value
+ * \param fieldValueCallback The field value callback, if there exists one
+ * \param numericValue The value if it is a numeric one
+ * \param stringValue The value if it is a character string
+ * \return Error code or ErrorOK
+ *
+ */
 static uint8_t getDataValue(compMsgDispatcher_t *self, uint8_t valueId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue) {
   uint8_t result;
   compMsgDataValue_t *compMsgDataValue;
@@ -207,7 +230,7 @@ static uint8_t getDataValue(compMsgDispatcher_t *self, uint8_t valueId, uint8_t 
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "E", 1, "getDataValue: DATA_VALUE_FIELD_NOT_FOUND");
+  COMP_MSG_DBG(self, "E", 1, "getDataValue: DATA_VALUE_FIELD_NOT_FOUND: %d", valueId);
   return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
 }
 

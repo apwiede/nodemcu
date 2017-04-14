@@ -253,8 +253,8 @@ static actionName2Action_t actionName2Actions [] = {
   { "runWpsMode",                (action_t)(&runWpsMode),                0, 0, 0 },
   { "runTestMode",               (action_t)(&runModulTestMode),          0, 0, 0 },
   { "runDeletePasswdCMode",      (action_t)(&runDeletePasswdCMode),      0, 0, 0 },
-  { "getAPList",                 (action_t)(&getAPList),                 0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
-  { "runAPConnect",              (action_t)(&runAPConnect),              0, 0, MODULE_INFO_AP_LIST_CALL_BACK },
+  { "getAPList",                 (action_t)(&getAPList),                 0, 0, 0 },
+  { "runAPConnect",              (action_t)(&runAPConnect),              0, 0, 0 },
   { "runRestoreUserData",        (action_t)(&runRestoreUserData),        0, 0, 0 },
   { "getWifiSrcId",              (action_t)(&getWifiSrcId),              0x4141, 0, 8 },
   { NULL,                        NULL,                                   0, 0, 0 },
@@ -416,7 +416,7 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
     COMP_MSG_DBG(self, "A", 2, "runAction u16!%c%c!%c!\n", (received->u16CmdKey>>8)&0xFF, received->u16CmdKey&0xFF, *answerType);
     switch (self->actionMode) {
     case 8:
-    case MODULE_INFO_AP_LIST_CALL_BACK:
+    case 0:
       idx = 0;
       actionEntry = &actionName2Actions[idx];
       while (actionEntry->actionName != NULL) { 

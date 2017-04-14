@@ -238,24 +238,24 @@ os_free(msgData);
   payloadLgth = c_strlen("POST ");
 
   //url part 1
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_1_PART_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart1);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_URL_1_PART_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart1);
   checkErrOK(result);
   payloadLgth += c_strlen(UrlPart1);
 
   //url tenantId 
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_TENANT_ID_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlTenantId);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_URL_TENANT_ID_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlTenantId);
   checkErrOK(result);
   payloadLgth += c_strlen(UrlTenantId);
 
   //url part 2 
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_1_PART_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart2);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_URL_1_PART_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart2);
   checkErrOK(result);
   payloadLgth += c_strlen(UrlPart2);
 
   // host
   hostPart=" HTTP/1.1\r\nHost: ";
   payloadLgth += c_strlen(hostPart);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
   checkErrOK(result);
   payloadLgth += c_strlen(host);
 
@@ -266,7 +266,7 @@ os_free(msgData);
   // xNodeToken
   xNodeToken="X-Node-Token: ";
   payloadLgth += c_strlen(xNodeToken);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
 
@@ -291,24 +291,24 @@ os_free(msgData);
   payloadLgth = c_strlen("POST ");
 
   //url part 1
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_2_PART_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart1);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_URL_2_PART_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart1);
   checkErrOK(result);
   payloadLgth += c_strlen(UrlPart1);
 
   //url tenantId 
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_TENANT_ID_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlTenantId);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_URL_TENANT_ID_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlTenantId);
   checkErrOK(result);
   payloadLgth += c_strlen(UrlTenantId);
 
   //url part 2 
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_URL_2_PART_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart2);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_URL_2_PART_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &UrlPart2);
   checkErrOK(result);
   payloadLgth += c_strlen(UrlPart2);
 
   // host
   hostPart=" HTTP/1.1\r\nHost: ";
   payloadLgth += c_strlen(hostPart);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &host);
   checkErrOK(result);
   payloadLgth += c_strlen(host);
 
@@ -319,7 +319,7 @@ os_free(msgData);
   // xNodeToken
   xNodeToken="X-Node-Token: ";
   payloadLgth += c_strlen(xNodeToken);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
+  result = self->compMsgDataValue->getDataValue(self, WIFI_INFO_CLOUD_NODE_TOKEN_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &nodeToken);
   checkErrOK(result);
   payloadLgth += c_strlen(nodeToken);
 
