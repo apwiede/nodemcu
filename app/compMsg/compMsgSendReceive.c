@@ -233,6 +233,7 @@ static uint8_t prepareCloudMsg(compMsgDispatcher_t *self) {
 os_free(msgData);
   COMP_MSG_DBG(self, "s", 2, "prepareCloudMsg: b64msgLgth: %d", msgLgth);
 
+#ifdef OLD
 #ifdef CLOUD_1
   payloadLgth = c_strlen("POST ");
 
@@ -339,6 +340,7 @@ os_free(msgData);
 
   // msg
   payloadLgth += (msgLgth + 2 + 3);  // " ... " + \r\n\0
+#endif
 #endif
   
   // FIXME need to free this somehwere!!!

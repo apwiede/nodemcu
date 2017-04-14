@@ -566,9 +566,11 @@ static void startWebClientMode(void *arg) {
   uint8_t *stringValue;
   struct espconn *pesp_conn;
   unsigned port;
+  uint8_t flags;
   unsigned type;
   int result;
   socketUserData_t *sud;
+  fieldValueCallback_t callback;
   compMsgTimerSlot_t *compMsgTimerSlot;
   char temp[64];
 
@@ -591,11 +593,11 @@ static void startWebClientMode(void *arg) {
 
   self->dispatcherCommon->runningModeFlags |= COMP_DISP_RUNNING_MODE_CLIENT;
   result = self->compMsgWifiData->setWifiValue(self, "@clientIPAddr", compMsgTimerSlot->ip_addr, NULL);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientIPAddr, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "ip2: 0x%08x\n", numericValue);
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&numericValue));
 
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientPort, &flags, &callback, &numericValue, &stringValue);
   port = numericValue;
   COMP_MSG_DBG(self, "N", 1, "startWebClientMode IP: %s port: %d result: %d\n", temp, port, result);
 
@@ -616,10 +618,10 @@ static void startWebClientMode(void *arg) {
   sud->curr_url = NULL;
 sud->urls[0] = "/callmcu";
 sud->num_urls = 1;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_binaryCallback, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)numericValue;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_textCallback, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "W", 2, "textCallback: %p!%d!\n", numericValue, result);
   sud->webSocketTextReceived = (webSocketTextReceived_t)numericValue;
   sud->compMsgDispatcher = self;
@@ -674,6 +676,8 @@ static void startAccessPoint(void *arg) {
   unsigned port;
   unsigned type;
   int result;
+  uint8_t flags;
+  fieldValueCallback_t callback;
   socketUserData_t *sud;
   compMsgTimerSlot_t *compMsgTimerSlot;
 
@@ -689,11 +693,11 @@ static void startAccessPoint(void *arg) {
   }
 
   self->dispatcherCommon->runningModeFlags |= COMP_DISP_RUNNING_MODE_ACCESS_POINT;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_PROVISIONING_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_provisioningPort, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "W", 1, "AP port: %d!stringValue: %p!result: %d!\n", numericValue, stringValue, result);
 //  checkErrOK(result);
   port = numericValue;
-//  result = self->getWifiValue(self, WIFI_INFO_PROVISIONING_IP_ADDR, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+//  result = self->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr, &flags, &callback, &numericValue, &stringValue);
 //  checkErrOK(result);
 
   sud = (socketUserData_t *)os_zalloc(sizeof(socketUserData_t));
@@ -712,10 +716,10 @@ static void startAccessPoint(void *arg) {
 sud->urls[0] = "/getaplist";
 sud->urls[1] = "/getapdeflist";
 sud->num_urls = 2;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_BINARY_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_binaryCallback, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)numericValue;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_TEXT_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_textCallback, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketTextReceived = (webSocketTextReceived_t)numericValue;
   sud->compMsgDispatcher = self;
@@ -771,6 +775,8 @@ static uint8_t webSocketRunAPMode(compMsgDispatcher_t *self) {
   bool boolResult;
   uint8_t timerId;
   uint8_t *stringValue;
+  uint8_t flags;
+  fieldValueCallback_t callback;
   
   COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode\n");
   boolResult = wifi_station_disconnect();
@@ -785,7 +791,7 @@ static uint8_t webSocketRunAPMode(compMsgDispatcher_t *self) {
     return COMP_MSG_ERR_CANNOT_SET_OPMODE;
   }
   c_memset(softap_config.ssid,0,sizeof(softap_config.ssid));
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_PROVISIONING_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_provisioningSsid, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode get_PROVISIONING_SSID result: %d\n", result);
   checkErrOK(result);
   c_memcpy(softap_config.ssid, stringValue, c_strlen(stringValue));
@@ -820,6 +826,8 @@ static uint8_t webSocketRunClientMode(compMsgDispatcher_t *self) {
   uint8_t timerId;
   uint8_t *stringValue;
   char *hostName;
+  uint8_t flags;
+  fieldValueCallback_t callback;
 
   COMP_MSG_DBG(self, "W", 2, "webSocketRunClientMode\n");
   COMP_MSG_DBG(self, "N", 1, "webSocketRunClientMode called\n");
@@ -835,13 +843,13 @@ static uint8_t webSocketRunClientMode(compMsgDispatcher_t *self) {
 //  }
   COMP_MSG_DBG(self, "N", 2, "wifi_station_disconnect: boolResult: %d", boolResult);
   c_memset(station_config.ssid,0,sizeof(station_config.ssid));
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientSsid, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "getSsid: result: %d\n", result);
   checkErrOK(result);
   c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
 
   c_memset(station_config.password,0,sizeof(station_config.password));
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientPasswd, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "getPasswd: result: %d\n", result);
   checkErrOK(result);
   COMP_MSG_DBG(self, "N", 2, "len password: %d\n", c_strlen(stringValue));

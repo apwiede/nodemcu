@@ -59,48 +59,6 @@
 
 #define WIFI_INFO_WIFI                 (1 << 1)
 
-#define WIFI_INFO_WIFI_OPMODE                 20
-#define WIFI_INFO_BINARY_CALL_BACK            21
-#define WIFI_INFO_TEXT_CALL_BACK              22
-#define WIFI_INFO_NET_RECEIVED_CALL_BACK      23
-#define WIFI_INFO_NET_TO_SEND_CALL_BACK       24
-#define WIFI_INFO_PROVISIONING_SSID           25
-#define WIFI_INFO_PROVISIONING_PORT           26
-#define WIFI_INFO_PROVISIONING_IP_ADDR        27
-#define WIFI_INFO_CLIENT_SSID                 28
-#define WIFI_INFO_CLIENT_PASSWD               29
-#define WIFI_INFO_CLIENT_IP_ADDR              30
-#define WIFI_INFO_CLIENT_PORT                 31
-#define WIFI_INFO_CLIENT_STATUS               32
-#define WIFI_INFO_CLIENT_SEQUENCE_NUM         33
-#define WIFI_INFO_CLOUD_SECURE_CONNECT        34
-#define WIFI_INFO_CLOUD_PORT                  35
-#define WIFI_INFO_CLOUD_HOST_1                36
-#define WIFI_INFO_CLOUD_URL_1_PART_1          37
-#define WIFI_INFO_CLOUD_URL_TENANT_ID_1       38
-#define WIFI_INFO_CLOUD_URL_1_PART_2          39
-#define WIFI_INFO_CLOUD_NODE_TOKEN_1          40
-#define WIFI_INFO_CLOUD_HOST_2                41
-#define WIFI_INFO_CLOUD_URL_2_PART_1          42
-#define WIFI_INFO_CLOUD_URL_TENANT_ID_2       43
-#define WIFI_INFO_CLOUD_URL_2_PART_2          44
-#define WIFI_INFO_CLOUD_NODE_TOKEN_2          45
-#define WIFI_INFO_SSDP_IP_ADDR                46
-#define WIFI_INFO_SSDP_PORT                   47
-#define WIFI_INFO_SSDP_STATUS                 48
-#define WIFI_INFO_NET_SSDP_RECEIVED_CALL_BACK 49
-#define WIFI_INFO_NET_SSDP_TO_SEND_CALL_BACK  50
-#define WIFI_INFO_PROD_TEST_SSID              51
-#define WIFI_INFO_PROD_TEST_PASSWD            52
-#define WIFI_INFO_PROD_TEST_SECURITY_TYPE     53
-#define WIFI_INFO_PROD_TEST_TARGET_PROTOCOL   54
-#define WIFI_INFO_PROD_TEST_IP_ADDR           55
-#define WIFI_INFO_PROD_TEST_SUBNET            56
-#define WIFI_INFO_PROD_TEST_GATEWAY           57
-#define WIFI_INFO_PROD_TEST_DNS               58
-#define WIFI_INFO_PROD_TEST_PING_ADDRESS      59
-#define WIFI_INFO_PROD_TEST_STATUS            60
-
 #define BSS_INFO_BSSID        1
 #define BSS_INFO_BSSID_STR    2
 #define BSS_INFO_SSID         3
@@ -181,13 +139,6 @@
 #define COMP_MSG_WIFI_SSDPStatus             36
 
 #define WIFI_USE_SAVED_SEQUENCE_NUM          0x01
-
-#define COMP_MSG_WIFI_VALUE_ID_provisioningSsid   1
-#define COMP_MSG_WIFI_VALUE_ID_provisioningPort   2
-#define COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr 3
-#define COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr         4
-#define COMP_MSG_WIFI_VALUE_ID_SSDPPort           5
-#define COMP_MSG_WIFI_VALUE_ID_clientPort         6
 
 enum webSocket_opcode {
   OPCODE_TEXT = 1,
@@ -316,8 +267,8 @@ typedef uint8_t (* callbackStr2CallbackId_t)(uint8_t *callbackName, uint16_t *ca
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startStationCb_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getWifiConfig_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* getWifiValue_t)(compMsgDispatcher_t *self, uint8_t fieldId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* setWifiValue_t)(compMsgDispatcher_t *self, uint8_t *fieldName, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* getWifiRemotePort_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* webSocketSendConnectError_t)(compMsgDispatcher_t *self, uint8_t status);

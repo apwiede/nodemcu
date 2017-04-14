@@ -86,16 +86,6 @@ const static str2id_t keyValueStr2KeyValueIds [] = {
   { NULL,          0 },
 };
 
-const static str2id_t wifiDataValueStr2ValueIds [] = {
-  { "@provisioningSsid",    COMP_MSG_WIFI_VALUE_ID_provisioningSsid},
-  { "@provisioningPort",    COMP_MSG_WIFI_VALUE_ID_provisioningPort},
-  { "@provisioningIPAddr",  COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr},
-  { "@SSDPIPAddr",          COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr},
-  { "@SSDPPort",            COMP_MSG_WIFI_VALUE_ID_SSDPPort},
-  { "@clientPort",          COMP_MSG_WIFI_VALUE_ID_clientPort},
-  { NULL,          0 },
-};
-
 const static str2id_t callbackStr2CallbackIds [] = {
   { "@getWifiAPBssidSize",       COMP_MSG_WIFI_AP_BssidSize},
   { "@getWifiAPBssidStrSize",    COMP_MSG_WIFI_AP_BssidStrSize},
@@ -1007,116 +997,23 @@ static uint8_t getProvisioningSsid(compMsgDispatcher_t *self, int *numericValue,
 /**
  * \brief get a Wifi module value
  * \param self The dispatcher struct
- * \param which Which of the values
- * \param valueTypeId The values type
+ * \param fieldId Field id of the value
+ * \param fieldValueCallback The field value callback, if there exists one
  * \param numericValue The value if it is a numeric one
  * \param stringValue The value if it is a character string
  * \return Error code or ErrorOK
  *
  */
-static uint8_t getWifiValue(compMsgDispatcher_t *self, uint16_t which, uint8_t valueTypeId, int *numericValue, uint8_t **stringValue) {
+static uint8_t getWifiValue(compMsgDispatcher_t *self, uint8_t fieldId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue) {
   uint8_t result;
+  fieldValueCallback_t callback;
 
   *numericValue = 0;
   *stringValue = NULL;
-  switch (which) {
-  case WIFI_INFO_PROVISIONING_SSID:
-    *stringValue = compMsgWifiData.provisioningSsid;
-    break;
-  case WIFI_INFO_PROVISIONING_PORT:
-    *numericValue = compMsgWifiData.provisioningPort;
-    break;
-  case WIFI_INFO_PROVISIONING_IP_ADDR:
-    *stringValue = compMsgWifiData.provisioningIPAddr;
-    break;
-  case WIFI_INFO_BINARY_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.webSocketBinaryReceived;
-    break;
-  case WIFI_INFO_TEXT_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.webSocketTextReceived;
-    break;
-  case WIFI_INFO_NET_RECEIVED_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.netSocketReceived;
-    break;
-  case WIFI_INFO_NET_TO_SEND_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.netSocketToSend;
-    break;
-  case WIFI_INFO_NET_SSDP_RECEIVED_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.netSocketSSDPReceived;
-    break;
-  case WIFI_INFO_NET_SSDP_TO_SEND_CALL_BACK:
-    *numericValue = (int)compMsgWifiData.netSocketSSDPToSend;
-    break;
-  case WIFI_INFO_CLIENT_SSID:
-    *stringValue = compMsgWifiData.clientSsid;
-    break;
-  case WIFI_INFO_CLIENT_PASSWD:
-    *stringValue = compMsgWifiData.clientPasswd;
-    break;
-  case WIFI_INFO_CLIENT_IP_ADDR:
-    *numericValue = compMsgWifiData.clientIPAddr;
-    break;
-  case WIFI_INFO_CLIENT_PORT:
-    *numericValue = compMsgWifiData.clientPort;
-    break;
-  case WIFI_INFO_CLIENT_STATUS:
-    *numericValue = compMsgWifiData.clientStatus;
-    break;
-  case WIFI_INFO_SSDP_IP_ADDR:
-    *numericValue = compMsgWifiData.ssdpIPAddr;
-    break;
-  case WIFI_INFO_SSDP_PORT:
-    *numericValue = compMsgWifiData.ssdpPort;
-    break;
-  case WIFI_INFO_SSDP_STATUS:
-    *numericValue = compMsgWifiData.ssdpStatus;
-    break;
-  case WIFI_INFO_CLOUD_PORT:
-    *numericValue = compMsgWifiData.cloudPort;
-    break;
-  case WIFI_INFO_CLOUD_HOST_1:
-    *stringValue = compMsgWifiData.cloudHost1;
-    break;
-  case WIFI_INFO_CLOUD_HOST_2:
-    *stringValue = compMsgWifiData.cloudHost2;
-    break;
-  case WIFI_INFO_CLOUD_URL_1_PART_1:
-    *stringValue = compMsgWifiData.cloudUrl1Part1;
-    break;
-  case WIFI_INFO_CLOUD_URL_1_PART_2:
-    *stringValue = compMsgWifiData.cloudUrl1Part2;
-    break;
-  case WIFI_INFO_CLOUD_URL_TENANT_ID_1:
-    *stringValue = compMsgWifiData.cloudUrlTenantId1;
-    break;
-  case WIFI_INFO_CLOUD_URL_2_PART_1:
-    *stringValue = compMsgWifiData.cloudUrl2Part1;
-    break;
-  case WIFI_INFO_CLOUD_URL_2_PART_2:
-    *stringValue = compMsgWifiData.cloudUrl2Part2;
-    break;
-  case WIFI_INFO_CLOUD_URL_TENANT_ID_2:
-    *stringValue = compMsgWifiData.cloudUrlTenantId2;
-    break;
-  case WIFI_INFO_CLOUD_NODE_TOKEN_1:
-    *stringValue = compMsgWifiData.cloudNodeToken1;
-    break;
-  case WIFI_INFO_CLOUD_NODE_TOKEN_2:
-    *stringValue = compMsgWifiData.cloudNodeToken2;
-    break;
-  case WIFI_INFO_CLIENT_SEQUENCE_NUM:
-    *numericValue = compMsgWifiData.clientSequenceNum;
-    break;
-#ifdef CLIENT_SSL_ENABLE
-  case WIFI_INFO_CLOUD_SECURE_CONNECT:
-    *numericValue = compMsgWifiData.cloudSecureConnect;
-    break;
-#endif
-  default:
-COMP_MSG_DBG(self, "w", 1, "getWifiValue bad which: %d\n", which);
-    return COMP_MSG_ERR_BAD_WIFI_VALUE_WHICH;
-    break;
-  }
+  *fieldValueCallback = NULL;
+ets_printf("getWifiValue: %d\n", fieldId);
+  result = self->compMsgDataValue->getDataValue(self, fieldId, flags, fieldValueCallback, numericValue, stringValue);
+  checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
 

@@ -163,6 +163,8 @@ static uint8_t openSSDPSocket(compMsgDispatcher_t *self, char *domain, socketUse
   unsigned type;
   int result;
   socketUserData_t *sud;
+  uint8_t flags;
+  fieldValueCallback_t callback;
 
   pesp_conn = NULL;
 
@@ -177,9 +179,9 @@ static uint8_t openSSDPSocket(compMsgDispatcher_t *self, char *domain, socketUse
   sud->connectionType = NET_SOCKET_TYPE_SSDP;
 
   // the following 2 calls deliver a callback function address in numericValue !!
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_SSDP_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback, &flags, &callback, &numericValue, &stringValue);
   sud->netSocketReceived = (netSocketReceived_t)numericValue;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_SSDP_TO_SEND_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback, &flags, &callback, &numericValue, &stringValue);
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
   COMP_MSG_DBG(self, "N", 2, "callback netSocketSSDPReceived: %p callback netSocketSSDPToSend: %p", sud->netSocketReceived, sud->netSocketToSend);
@@ -278,6 +280,8 @@ static void sendSSDPInfo(void *arg) {
   char *tenant;
   char *guid;
   int port;
+  uint8_t flags;
+  fieldValueCallback_t callback;
 
 //ets_printf("free heap 5: %d\n", system_get_free_heap_size());
 //ets_printf("sendSSDPInfo: arg: %p\n", arg);
@@ -300,7 +304,7 @@ if (numNotifies > 10) {
 //  checkErrOK(result);
   }
 //ets_printf("sendSSDPInfo local_ip: %d.%d.%d.%d remote_ip: %d.%d.%d.%d\n", IP2STR(self->ssdpSud->pesp_conn->proto.udp->local_ip), IP2STR(self->ssdpSud->pesp_conn->proto.udp->remote_ip));
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientPort, &flags, &callback, &port, &stringValue);
 //  checkErrOK(result);
   wifi_get_ip_info(STATION_IF, &pTempIp);
   if(pTempIp.ip.addr==0){

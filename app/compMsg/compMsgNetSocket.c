@@ -730,6 +730,8 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   int result;
   const char *domain;
   socketUserData_t *sud;
+  uint8_t flags;
+  fieldValueCallback_t callback;
 
   pesp_conn = NULL;
 
@@ -743,18 +745,18 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   sud->httpMsgInfos = os_zalloc(sud->maxHttpMsgInfos * sizeof(httpMsgInfo_t));
   sud->connectionType = NET_SOCKET_TYPE_SOCKET;
 #ifdef CLIENT_SSL_ENABLE
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_SECURE_CONNECT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_NetSecureConnect, &flags, &callback, &numericValue, &stringValue);
   sud->secure = numericValue;
 #endif
   // the following 2 calls deliver a callback function address in numericValue !!
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback, &flags, &callback, &numericValue, &stringValue);
   sud->netSocketReceived = (netSocketReceived_t)numericValue;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_TO_SEND_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_NetToSendCallback, &flags, &callback, &numericValue, &stringValue);
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
   COMP_MSG_DBG(self, "N", 2, "netSocketReceived: %p netSocketToSend: %p", sud->netSocketReceived, sud->netSocketToSend);
 
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_cloudPort, &flags, &callback, &numericValue, &stringValue);
   port = numericValue;
 
   COMP_MSG_DBG(self, "N", 1, "port: %d", port);
@@ -780,10 +782,12 @@ static uint8_t openCloudSocket(compMsgDispatcher_t *self) {
   pesp_conn->proto.tcp->remote_port = port;
   pesp_conn->proto.tcp->local_port = espconn_port();
 
+#ifdef OLD
 #ifdef CLOUD_1
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_1, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
 #else
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_HOST_2, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+#endif
 #endif
   domain = stringValue;
   COMP_MSG_DBG(self, "N", 1, "domain: %s", domain);
@@ -845,6 +849,8 @@ static  void startNetClientMode(void *arg) {
   uint8_t opmode;
   char temp[64];
   compMsgTimerSlot_t *compMsgTimerSlot;
+  uint8_t flags;
+  fieldValueCallback_t callback;
 
   compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
   self = compMsgTimerSlot->compMsgDispatcher;
@@ -866,11 +872,11 @@ static  void startNetClientMode(void *arg) {
 
   self->dispatcherCommon->runningModeFlags |= COMP_DISP_RUNNING_MODE_CLIENT;
   result = self->compMsgWifiData->setWifiValue(self, "@clientIPAddr", compMsgTimerSlot->ip_addr, NULL);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientIPAddr, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "ip2: 0x%08x\n", numericValue);
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&numericValue));
 
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientPort, &flags, &callback, &numericValue, &stringValue);
   port = numericValue;
   COMP_MSG_DBG(self, "N", 1, "startWebClientMode IP: %s port: %d result: %d\n", temp, port, result);
 
@@ -880,13 +886,13 @@ static  void startNetClientMode(void *arg) {
 //  checkAllocgLOK(sud->urls);
   sud->connectionType = NET_SOCKET_TYPE_CLIENT;
 #ifdef CLIENT_SSL_ENABLE
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLOUD_SECURE_CONNECT, DATA_VIEW_FIELD_UINT8_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_NetSecureConnect, &flags, &callback, &numericValue, &stringValue);
   sud->secure = numericValue;
 #endif
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_RECEIVED_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "netReceivedCallback: %p!%d!\n", numericValue, result);
   sud->netSocketReceived = (netSocketReceived_t)numericValue;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_NET_TO_SEND_CALL_BACK, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_NetToSendCallback, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "netToSendCallback: %p!%d!\n", numericValue, result);
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
@@ -980,6 +986,7 @@ static  void startProdTestMode(void *arg) {
     return;
   }
 
+#ifdef OLD
   self->dispatcherCommon->runningModeFlags |= COMP_DISP_RUNNING_MODE_PROD_TEST;
   result = self->compMsgWifiData->setWifiValue(self, "@prodTestIPAddr", compMsgTimerSlot->ip_addr, NULL);
   result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_PROD_TEST_IP_ADDR, DATA_VIEW_FIELD_UINT32_T, &numericValue, &stringValue);
@@ -1001,6 +1008,7 @@ static  void startProdTestMode(void *arg) {
   COMP_MSG_DBG(self, "N", 1, "netToSendCallback: %p!%d!\n", numericValue, result);
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
+#endif
 
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
   sud->pesp_conn = pesp_conn;
@@ -1065,6 +1073,8 @@ static uint8_t netSocketRunClientMode(compMsgDispatcher_t *self) {
   uint8_t opmode;
   int status;
   char *hostName;
+  uint8_t flags;
+  fieldValueCallback_t callback;
 
 ets_printf(">>>>netSocketRunClientMode runningModeFlags: 0x%08x\n", self->dispatcherCommon->runningModeFlags);
   COMP_MSG_DBG(self, "N", 1, "netSocketRunClientMode called\n");
@@ -1075,13 +1085,13 @@ ets_printf("netSocketRunClientMode connectStatus: %d\n", status);
 //  boolResult = wifi_station_disconnect();
   COMP_MSG_DBG(self, "N", 2, "wifi_station_disconnect: boolResult: %d", boolResult);
   c_memset(station_config.ssid,0,sizeof(station_config.ssid));
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_SSID, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientSsid, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "getSsid: result: %d\n", result);
   checkErrOK(result);
   c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
 
   c_memset(station_config.password,0,sizeof(station_config.password));
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PASSWD, DATA_VIEW_FIELD_UINT8_VECTOR, &numericValue, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientPasswd, &flags, &callback, &numericValue, &stringValue);
   COMP_MSG_DBG(self, "N", 2, "getPasswd: result: %d\n", result);
   checkErrOK(result);
   COMP_MSG_DBG(self, "N", 2, "len password: %d\n", c_strlen(stringValue));

@@ -520,22 +520,24 @@ static uint8_t sendClientIPMsg(compMsgDispatcher_t *self) {
   uint8_t result;
   int ipAddr;
   int port;
+  uint8_t flags;
   int sequenceNum;
   int numericValue;
   char temp[64];
   uint8_t *stringValue;
   uint8_t *handle;
+  fieldValueCallback_t callback;
   msgParts_t *received;
 
   COMP_MSG_DBG(self, "I", 2, "sendClientIPMsg");
   self->compMsgSendReceive->startSendMsg = NULL;
   self->dispatcherCommon->stopAccessPoint = true;
   received = &self->compMsgData->received;
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_IP_ADDR, 0, &ipAddr, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientIPAddr, &flags, &callback, &ipAddr, &stringValue);
   checkErrOK(result);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_PORT, DATA_VIEW_FIELD_UINT8_T, &port, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientPort, &flags, &callback, &port, &stringValue);
   checkErrOK(result);
-  result = self->compMsgWifiData->getWifiValue(self, WIFI_INFO_CLIENT_SEQUENCE_NUM, DATA_VIEW_FIELD_UINT32_T, &sequenceNum, &stringValue);
+  result = self->compMsgWifiData->getWifiValue(self, COMP_MSG_WIFI_VALUE_ID_clientSequenceNum, &flags, &callback, &sequenceNum, &stringValue);
   checkErrOK(result);
   os_sprintf(temp, "%d.%d.%d.%d", IP2STR(&ipAddr));
   COMP_MSG_DBG(self, "I", 2, "IP: %s port: %d sequenceNum: %d", temp, port, sequenceNum);

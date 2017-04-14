@@ -47,12 +47,43 @@
 #define COMP_MSG_FIELD_IS_NUMERIC   0x02
 #define COMP_MSG_FIELD_HAS_CALLBACK 0x04
 
+#define COMP_MSG_WIFI_VALUE_ID_provisioningSsid     1
+#define COMP_MSG_WIFI_VALUE_ID_provisioningPort     2
+#define COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr   3
+#define COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr           4
+#define COMP_MSG_WIFI_VALUE_ID_SSDPPort             5
+#define COMP_MSG_WIFI_VALUE_ID_clientIPAddr         6
+#define COMP_MSG_WIFI_VALUE_ID_clientPort           7
+#define COMP_MSG_WIFI_VALUE_ID_clientSequenceNum    8
+#define COMP_MSG_WIFI_VALUE_ID_binaryCallback       9
+#define COMP_MSG_WIFI_VALUE_ID_textCallback         10
+#define COMP_MSG_WIFI_VALUE_ID_clientSsid           11
+#define COMP_MSG_WIFI_VALUE_ID_clientPasswd         12
+#define COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback 13
+#define COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback   14
+#define COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback  15
+#define COMP_MSG_WIFI_VALUE_ID_NetToSendCallback    16
+#define COMP_MSG_WIFI_VALUE_ID_NetSecureConnect     17
+#define COMP_MSG_WIFI_VALUE_ID_cloudPort            18
+
+#define COMP_MSG_MODULE_VALUE_ID_Reserve1         50
+#define COMP_MSG_MODULE_VALUE_ID_Reserve2         51
+#define COMP_MSG_MODULE_VALUE_ID_Reserve3         52
+#define COMP_MSG_MODULE_VALUE_ID_Reserve4         53
+#define COMP_MSG_MODULE_VALUE_ID_Reserve5         54
+#define COMP_MSG_MODULE_VALUE_ID_Reserve6         55
+#define COMP_MSG_MODULE_VALUE_ID_Reserve7         56
+#define COMP_MSG_MODULE_VALUE_ID_Reserve8         57
+#define COMP_MSG_MODULE_VALUE_ID_cryptKey         58
+#define COMP_MSG_MODULE_VALUE_ID_cryptIvKey       59
+
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-typedef uint8_t (* dataValueStr2ValueId_t)(uint8_t *fieldName, str2id_t *ids, uint8_t *fieldId);
-typedef uint8_t (* addDataValue_t)(uint8_t fieldNameId, uint8_t flags, fieldValueCallback_t fieldValueCallback, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* setDataValue_t)(uint8_t fieldNameId, uint8_t flags, fieldValueCallback_t fieldValueCallback, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* getDataValue_t)(uint8_t fieldNameId, uint8_t flags, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* dataValueStr2ValueId_t)(compMsgDispatcher_t *self, uint8_t *valueStr, uint8_t *valueId);
+typedef uint8_t (* dataValueId2ValueStr_t)(compMsgDispatcher_t *self, uint8_t valueId, uint8_t **valueStr);
+typedef uint8_t (* addDataValue_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, fieldValueCallback_t fieldValueCallback, int numericValue, uint8_t *stringValue);
+typedef uint8_t (* setDataValue_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, fieldValueCallback_t fieldValueCallback, int numericValue, uint8_t *stringValue);
+typedef uint8_t (* getDataValue_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
 
 typedef struct dataValue {
@@ -71,6 +102,7 @@ typedef struct compMsgDataValue {
   dataValue_t *dataValues;
 
   dataValueStr2ValueId_t dataValueStr2ValueId;
+  dataValueId2ValueStr_t dataValueId2ValueStr;
   addDataValue_t addDataValue;
   setDataValue_t setDataValue;
   getDataValue_t getDataValue;
