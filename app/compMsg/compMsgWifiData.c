@@ -95,6 +95,16 @@ const static str2id_t keyValueStr2KeyValueIds [] = {
   { NULL,          0 },
 };
 
+const static str2id_t wifiDataValueStr2ValueIds [] = {
+  { "@provisioningSsid",    COMP_MSG_WIFI_VALUE_ID_provisioningSsid},
+  { "@provisioningPort",    COMP_MSG_WIFI_VALUE_ID_provisioningPort},
+  { "@provisioningIPAddr",  COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr},
+  { "@SSDPIPAddr",          COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr},
+  { "@SSDPPort",            COMP_MSG_WIFI_VALUE_ID_SSDPPort},
+  { "@clientPort",          COMP_MSG_WIFI_VALUE_ID_clientPort},
+  { NULL,          0 },
+};
+
 const static str2id_t callbackStr2CallbackIds [] = {
   { "@getWifiAPBssidSize",       COMP_MSG_WIFI_AP_BssidSize},
   { "@getWifiAPBssidStrSize",    COMP_MSG_WIFI_AP_BssidStrSize},
@@ -138,6 +148,7 @@ const static str2id_t callbackStr2CallbackIds [] = {
 
 #include "compMsgWifiDataCustom.h"
 
+  { NULL,          0 },
 };
 
 // ================================= bssStr2BssInfoId ====================================
@@ -157,6 +168,52 @@ static uint8_t bssStr2BssInfoId(uint8_t *fieldName, uint8_t *fieldId) {
     entry = &bssStr2BssInfoIds[idx];
   }
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ================================= wifiDataValueStr2ValueId ====================================
+
+static uint8_t wifiDataValueStr2ValueId(uint8_t *fieldName, uint16_t *fieldId) {
+  const str2id_t *entry;
+
+  entry = &wifiDataValueStr2ValueIds[0];
+  while (entry->str != NULL) {
+    if (c_strcmp(entry->str, fieldName) == 0) {
+      *fieldId = entry->id;
+      return COMP_MSG_ERR_OK;
+    }
+    entry++;
+  }
+  return COMP_MSG_ERR_FIELD_NOT_FOUND;
+}
+
+// ================================= addDataValue ====================================
+
+static uint8_t addDataValue(uint8_t fieldNameId, bool isString, int numericValue, uint8_t *stringValue) {
+  uint8_t result;
+
+  result = COMP_MSG_ERR_OK;
+
+  return result;
+}
+
+// ================================= setDataValue ====================================
+
+static uint8_t setDataValue(uint8_t fieldNameId, bool isString, int numericValue, uint8_t *stringValue) {
+  uint8_t result;
+
+  result = COMP_MSG_ERR_OK;
+
+  return result;
+}
+
+// ================================= getDataValue ====================================
+
+static uint8_t getDataValue(uint8_t fieldNameId, bool *isString, int *numericValue, uint8_t **stringValue) {
+  uint8_t result;
+
+  result = COMP_MSG_ERR_OK;
+
+  return result;
 }
 
 // ================================= keyValueStr2KeyValueId ====================================
@@ -1386,6 +1443,11 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
 
   compMsgWifiData = self->compMsgWifiData;
   compMsgWifiData->getBssScanInfo = &getBssScanInfo;
+  compMsgWifiData->wifiDataValueStr2ValueId = &wifiDataValueStr2ValueId;
+  compMsgWifiData->addDataValue = &addDataValue;
+  compMsgWifiData->setDataValue = &setDataValue;
+  compMsgWifiData->getDataValue = &getDataValue;
+  
   compMsgWifiData->keyValueStr2KeyValueId = &keyValueStr2KeyValueId;
   compMsgWifiData->callbackStr2CallbackId = &callbackStr2CallbackId;
   compMsgWifiData->getWifiValue = &getWifiValue;

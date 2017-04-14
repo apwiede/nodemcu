@@ -133,6 +133,9 @@ static const str2id_t specialFileNameTokens[] = {
   {"@$msgHeads",         COMP_MSG_HEADS_FILE_TOKEN},
   {"@$msgActions",       COMP_MSG_ACTIONS_FILE_TOKEN},
   {"@$msgValHeader",     COMP_MSG_VAL_HEADER_FILE_TOKEN},
+  {"@$msgWifiData",      COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN},
+  {"@$msgModuleData",    COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN},
+  {NULL, -1},
 };
 
 extern void dbgPrintf(void *selfParam, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);

@@ -182,6 +182,13 @@
 
 #define WIFI_USE_SAVED_SEQUENCE_NUM          0x01
 
+#define COMP_MSG_WIFI_VALUE_ID_provisioningSsid   1
+#define COMP_MSG_WIFI_VALUE_ID_provisioningPort   2
+#define COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr 3
+#define COMP_MSG_WIFI_VALUE_ID_SSDPIPAddr         4
+#define COMP_MSG_WIFI_VALUE_ID_SSDPPort           5
+#define COMP_MSG_WIFI_VALUE_ID_clientPort         6
+
 enum webSocket_opcode {
   OPCODE_TEXT = 1,
   OPCODE_BINARY = 2,
@@ -304,6 +311,10 @@ typedef struct keyValueInfo {
 } keyValueInfo_t;
 
 typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
+typedef uint8_t (* wifiDataValueStr2ValueId_t)(uint8_t *fieldName, uint16_t *fieldId);
+typedef uint8_t (* addDataValue_t)(uint8_t fieldNameId, bool isString, int numericValue, uint8_t *stringValue);
+typedef uint8_t (* setDataValue_t)(uint8_t fieldNameId, bool isString, int numericValue, uint8_t *stringValue);
+typedef uint8_t (* getDataValue_t)(uint8_t fieldNameId, bool *isString, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* keyValueStr2KeyValueId_t)(uint8_t *fieldName, uint16_t *fieldId);
 typedef uint8_t (* callbackStr2CallbackId_t)(uint8_t *callbackName, uint16_t *callbackId);
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
@@ -329,9 +340,21 @@ typedef uint8_t (* getProdTestPingAddress_t)(compMsgDispatcher_t *self, int *num
 typedef uint8_t (* getProdTestStatus_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* compMsgWifiDataInit_t)(compMsgDispatcher_t *self);
 
+typedef struct compMsgWifiDataValue {
+  uint8_t valueId;
+  bool isString;
+  union {
+    uint8_t *stringValue;
+    int numericValue;
+  } value;
+} compMsgWifiDataValue_t;
+
 typedef struct compMsgWifiData {
   keyValueInfo_t keyValueInfo;
 
+  int numCompMsgWifiDataValue;
+  int maxCompMsgWifiDataValue;
+  compMsgWifiDataValue_t *compMsgWifiDataValues;
   uint8_t wifiOpMode;
   uint8_t provisioningSsid[33];
   uint16_t provisioningPort;
@@ -376,6 +399,10 @@ typedef struct compMsgWifiData {
   uint16_t flags;
 
   bssScanInfos_t bssScanInfos;
+  wifiDataValueStr2ValueId_t wifiDataValueStr2ValueId;
+  addDataValue_t addDataValue;
+  setDataValue_t setDataValue;
+  getDataValue_t getDataValue;
   keyValueStr2KeyValueId_t keyValueStr2KeyValueId;
   callbackStr2CallbackId_t callbackStr2CallbackId;
   getBssScanInfo_t getBssScanInfo;

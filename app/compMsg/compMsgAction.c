@@ -481,9 +481,6 @@ static uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   checkAllocOK(compMsgActions.actions);
 
   compMsgDispatcher = self;
-#ifdef OLD
-  result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
-#endif
   return result;
 }
 

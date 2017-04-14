@@ -314,7 +314,7 @@ typedef struct msgFieldDesc {
 // all infos about a message use/include file
 
 typedef struct msgDescIncludeInfo {
-  uint8_t includeType;
+  uint16_t includeType;
   char *fileName;
   uint8_t maxMsgFieldDesc;
   uint8_t numMsgFieldDesc;
@@ -516,6 +516,7 @@ typedef uint8_t (* handleMsgHeadsLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgUseLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgCommonLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgActionsLine_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* handleMsgValuesLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgValHeaderLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgFieldsToSaveLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgLine_t)(compMsgDispatcher_t *self);
@@ -574,6 +575,7 @@ typedef struct compMsgMsgDesc {
   handleMsgCommonLine_t handleMsgCommonLine;
   handleMsgFieldsToSaveLine_t handleMsgFieldsToSaveLine;
   handleMsgActionsLine_t handleMsgActionsLine;
+  handleMsgValuesLine_t handleMsgValuesLine;
   handleMsgValHeaderLine_t handleMsgValHeaderLine;
   handleMsgHeadsLine_t handleMsgHeadsLine;
   handleMsgFileNameLine_t handleMsgFileNameLine;
