@@ -321,12 +321,6 @@ ets_printf("Error numLines: %d expectedLines: %d\n", numLines, self->compMsgMsgD
           } else {
             result = compMsgMsgDesc->addUseFileName(self, compMsgMsgDesc->lineFields[1]);
             checkErrOK(result);
-            msgDescIncludeInfo = &self->compMsgMsgDesc->msgDescIncludeInfos[self->compMsgMsgDesc->numMsgDescIncludeInfo - 1];
-#ifdef NOTDEF
-            if (c_strstr(msgDescIncludeInfo->fileName, "MsgVal") != NULL) {
-              msgDescIncludeInfo->includeType = COMP_MSG_VAL_FILE_INCLUDE;
-            }
-#endif
           }
         }
       } else {
@@ -725,7 +719,7 @@ ets_printf("msgDescription->headerLgth: %d encrypted: %c handleType: %c\n", msgD
 
 
 
-
+#ifdef OLD
 // ================================= getIntFromLine ====================================
 
 static uint8_t getIntFromLine(compMsgDispatcher_t *self, uint8_t *myStr, long *uval, uint8_t **ep, bool *isEnd) {
@@ -1494,7 +1488,7 @@ static uint8_t getMsgPartsFromHeaderPart (compMsgDispatcher_t *self, headerPart_
   compMsgMsgDesc_t *compMsgMsgDesc;
 
   COMP_MSG_DBG(self, "E", 2, "getMsgPartsFromHeaderPart1\n");
-#ifdef NOTDEF
+#ifdef OLD
   compMsgData = self->compMsgData;
   compMsgMsgDesc = self->compMsgMsgDesc;
   self->compMsgData->currHdr = hdr;
@@ -2106,6 +2100,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, uint8_t *fileName
 }
 
 #undef checkIsEnd
+#endif
 
 // ================================= compMsgMsgDescInit ====================================
 
@@ -2133,6 +2128,7 @@ uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   compMsgMsgDesc->handleMsgFileNameLine = &handleMsgFileNameLine;
   compMsgMsgDesc->handleMsgFile = &handleMsgFile;
 
+#ifdef OLD
   compMsgMsgDesc->getIntFromLine = &getIntFromLine;
   compMsgMsgDesc->getStrFromLine = &getStrFromLine;
   compMsgMsgDesc->getHeaderFieldsFromLine = &getHeaderFieldsFromLine;
@@ -2145,6 +2141,7 @@ uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   compMsgMsgDesc->getMsgKeyValueDescParts = &getMsgKeyValueDescParts;
   compMsgMsgDesc->getFieldsToSave = &getFieldsToSave;
   compMsgMsgDesc->getWifiKeyValueKeys = &getWifiKeyValueKeys;
+#endif
 
 ets_printf("readMsgFileNames: %s\n", MSG_FILES_FILE_NAME);
   result = compMsgMsgDesc->handleMsgFile(self, MSG_FILES_FILE_NAME, compMsgMsgDesc->handleMsgFileNameLine);

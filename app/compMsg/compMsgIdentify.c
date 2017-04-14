@@ -427,9 +427,11 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
   hdrIdx = hdrInfos->currPartIdx;
   hdr = &hdrInfos->headerParts[hdrIdx];
   COMP_MSG_DBG(self, "I", 2, "getMsgPartsFromHeaderPart");
+#ifdef OLD
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, &handle);
 //ets_printf("storeReceivedMsg3: heap: %d\n", system_get_free_heap_size());
   checkErrOK(result);
+#endif
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, &handle);
   checkErrOK(result);
 //ets_printf("storeReceivedMsg4: heap: %d\n", system_get_free_heap_size());

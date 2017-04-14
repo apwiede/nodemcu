@@ -421,19 +421,13 @@ ets_printf("9 heap: %d\n", system_get_free_heap_size());
 #ifdef GDB_STUB
 ets_printf("dispInit2\n");
 #endif
+#ifdef OLD
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
+#endif
 
 ets_printf("10 heap: %d\n", system_get_free_heap_size());
   if (typelen > 0) {
     switch(type[0]) {
-    case 'A':
-      COMP_MSG_DBG(self, "B", 1, "start send AA message");
-      result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 16640,22272, 0x4141, &hdr);
-      checkErrOK(result);
-      result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
-      COMP_MSG_DBG(self, "B", 1, "handle: %s result: %d", handle, result);
-      checkErrOK(result);
-      break;
     case 'C':
       COMP_MSG_DBG(self, "H", 1, "start startCloudSocket");
       result = self->compMsgSocket->netSocketStartCloudSocket(self);

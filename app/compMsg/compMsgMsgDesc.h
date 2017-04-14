@@ -521,6 +521,7 @@ typedef uint8_t (* handleMsgFieldsToSaveLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgFile_t)(compMsgDispatcher_t *self, uint8_t *fileName, handleMsgLine_t handleMsgLine);
 
+#ifdef OLD
 typedef uint8_t (* getIntFromLine_t)(compMsgDispatcher_t *self, uint8_t *myStr, long *ulgth, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getStrFromLine_t)(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t **ep, bool *isEnd);
 typedef uint8_t (* getHeaderFieldsFromLine_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx);
@@ -533,6 +534,7 @@ typedef uint8_t (* getMsgPartsFromHeaderPart_t)(compMsgDispatcher_t *self, heade
 typedef uint8_t (* getMsgKeyValueDescParts_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* getFieldsToSave_t)(compMsgDispatcher_t *self, uint8_t *fileName);
 typedef uint8_t (* getWifiKeyValueKeys_t)(compMsgDispatcher_t *self, uint8_t *fileName);
+#endif
 
 typedef struct compMsgMsgDesc {
   const uint8_t *fileName;
@@ -573,6 +575,7 @@ typedef struct compMsgMsgDesc {
   handleMsgHeadsLine_t handleMsgHeadsLine;
   handleMsgFileNameLine_t handleMsgFileNameLine;
 
+#ifdef OLD
   getIntFromLine_t getIntFromLine;
   getStrFromLine_t getStrFromLine;
   getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
@@ -585,6 +588,7 @@ typedef struct compMsgMsgDesc {
   getMsgKeyValueDescParts_t getMsgKeyValueDescParts;
   getFieldsToSave_t getFieldsToSave;
   getWifiKeyValueKeys_t getWifiKeyValueKeys;
+#endif
 } compMsgMsgDesc_t;
 
 uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self);

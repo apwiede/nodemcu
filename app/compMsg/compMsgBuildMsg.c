@@ -59,6 +59,7 @@ static uint8_t ICACHE_FLASH_ATTR createMsgFromHeaderPart (compMsgDispatcher_t *s
   msgValPart_t *msgValPart;
 
   COMP_MSG_DBG(self, "B", 2, "createMsgFromHeaderPart1");
+#ifdef OLD
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, handle);
   checkErrOK(result);
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, handle);
@@ -70,6 +71,7 @@ static uint8_t ICACHE_FLASH_ATTR createMsgFromHeaderPart (compMsgDispatcher_t *s
     checkErrOK(result);
     idx++;
   }
+#endif
 
   COMP_MSG_DBG(self, "B", 1, "heap4: %d", system_get_free_heap_size());
   // runAction calls at the end buildMsg

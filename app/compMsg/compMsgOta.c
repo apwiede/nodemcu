@@ -388,9 +388,11 @@ static uint8_t ICACHE_FLASH_ATTR saveUserData(compMsgDispatcher_t *self) {
   rboot_set_config(&bootconf);
   COMP_MSG_DBG(self, "O", 1, "saveUserData called");
 //FIXME get src dst and cmdKey with an appropriate function call!!
+#ifdef OLD
   result = self->compMsgMsgDesc->getHeaderFromUniqueFields(self, 22272,22272, 0x5544, &hdr);
   COMP_MSG_DBG(self, "O", 1, "saveUserData getHeaderFromUniqueFields result: %d", result);
   checkErrOK(result);
+#endif
   result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, &handle);
   COMP_MSG_DBG(self, "O", 1, "handle: %s result: %d", handle, result);
   checkErrOK(result);
