@@ -64,7 +64,7 @@ static uint8_t initTimers(compMsgDispatcher_t *self) {
 
 // ================================= compMsgTimerInit ====================================
 
-uint8_t compMsgTimerInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgTimerInit(compMsgDispatcher_t *self) {
   uint8_t result;
 
   self->compMsgTimer->initTimers = &initTimers;
@@ -76,9 +76,12 @@ uint8_t compMsgTimerInit(compMsgDispatcher_t *self) {
 // ================================= newCompMsgTimer ====================================
 
 compMsgTimer_t *newCompMsgTimer() {
-  compMsgTimer_t *compMsgTimer = os_zalloc(sizeof(compMsgTimer_t));
+  compMsgTimer_t *compMsgTimer;
+
+  compMsgTimer = os_zalloc(sizeof(compMsgTimer_t));
   if (compMsgTimer == NULL) {
     return NULL;
   }
+  compMsgTimer->compMsgTimerInit = &compMsgTimerInit;
   return compMsgTimer;
 }

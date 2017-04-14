@@ -42,9 +42,6 @@
 #define	COMP_MSG_HTTP_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 enum compMsgHttpHeaderNames
 {
@@ -85,8 +82,9 @@ typedef uint8_t (* getHttpHeaderKeyIdFromKey_t)(compMsgDispatcher_t *self, const
 typedef uint8_t (* getHttpHeaderKeyIdFromLowerKey_t)(compMsgDispatcher_t *self, const uint8_t *httpHeaderStr, uint8_t *httpHeaderKeyId);
 typedef uint8_t (* getHttpHeaderKeyFromId_t)(compMsgDispatcher_t *self, uint8_t httpHeaderKeyId, const uint8_t **key);
 typedef uint8_t (* httpParse_t)(socketUserData_t *sud, char * data, size_t size);
-typedef uint8_t ( *getHttpGetHeaderValueForId_t)(socketUserData_t *sud, uint8_t id, const uint8_t **value);
+typedef uint8_t (* getHttpGetHeaderValueForId_t)(socketUserData_t *sud, uint8_t id, const uint8_t **value);
 typedef uint8_t (* deleteHttpMsgInfo_t)(socketUserData_t *sud);
+typedef uint8_t (* compMsgHttpInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgHttp {
 
@@ -96,14 +94,9 @@ typedef struct compMsgHttp {
   httpParse_t httpParse;
   getHttpGetHeaderValueForId_t getHttpGetHeaderValueForId;
   deleteHttpMsgInfo_t deleteHttpMsgInfo;
+  compMsgHttpInit_t compMsgHttpInit;
 } compMsgHttp_t;
 
 compMsgHttp_t *newCompMsgHttp();
-uint8_t compMsgHttpInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_HTTP_H */
-

@@ -145,6 +145,7 @@ typedef uint8_t (* restoreUserData_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setModuleValue_t)(compMsgDispatcher_t *self, uint8_t *fieldNameStr, int numericValue, uint8_t *stringValue);
 typedef uint8_t (* setModuleValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* updateModuleValues_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* compMsgModuleDataInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgModuleData {
   uint8_t MACAddr[7];
@@ -202,9 +203,9 @@ typedef struct compMsgModuleData {
   setModuleValue_t setModuleValue;
   setModuleValues_t setModuleValues;
   updateModuleValues_t updateModuleValues;
+  compMsgModuleDataInit_t compMsgModuleDataInit;
 } compMsgModuleData_t;
 
 compMsgModuleData_t *newCompMsgModuleData();
-uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_MODULE_DATA_H */

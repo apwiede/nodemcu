@@ -44,10 +44,6 @@
 #include "c_types.h"
 #include "compMsgDataView.h"
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef struct fieldValueCallbackInfos {
@@ -64,6 +60,7 @@ typedef uint8_t (* addFieldValueCallbackId_t)(compMsgDispatcher_t *self, uint8_t
 typedef uint8_t (* getFieldValueCallback_t)(compMsgDispatcher_t *self, uint8_t callbackId, fieldValueCallback_t *callback);
 typedef uint8_t (* getFieldValueCallbackId_t)(compMsgDispatcher_t *self, fieldValueCallback_t callback, uint8_t *callbackId);
 typedef uint8_t (* addFieldDescription_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* compMsgUtilInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgUtil {
   uint8_t numFieldValueCallbackInfos;
@@ -79,14 +76,9 @@ typedef struct compMsgUtil {
   getFieldValueCallback_t getFieldValueCallback;
   getFieldValueCallbackId_t getFieldValueCallbackId;
   addFieldDescription_t addFieldDescription;
+  compMsgUtilInit_t compMsgUtilInit;
 } compMsgUtil_t;
 
 compMsgUtil_t *newCompMsgUtil();
-uint8_t compMsgUtilInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_UTIL_H */
-

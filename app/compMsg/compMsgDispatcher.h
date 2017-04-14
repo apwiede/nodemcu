@@ -74,6 +74,12 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #define UART0 0
 #define UART1 1
 
+// timer id defines
+#define COMP_MSG_UART_TIMER_ID              0
+#define COMP_MSG_WEBSOCKET_TIMER_ID         1
+#define COMP_MSG_ACCESS_POINT_TIMER_ID      2
+#define COMP_MSG_CLIENT_MODE_START_TIMER_ID 3
+  
 // compMsgMsgDesc file names
 
 #define COMP_MSG_WIFI_VALUES_FILE_NAME        "myConfig.txt"
@@ -195,6 +201,8 @@ typedef struct compMsgDispatcher {
   initDispatcher_t initDispatcher;
   getNewCompMsgDataPtr_t getNewCompMsgDataPtr;
 } compMsgDispatcher_t;
+
+extern void dbgPrintf(void *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);
 
 compMsgDispatcher_t *newCompMsgDispatcher();
 uint8_t compMsgDispatcherGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher);

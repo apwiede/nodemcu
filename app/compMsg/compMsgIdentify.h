@@ -42,9 +42,6 @@
 #define	COMP_MSG_IDENTIFY_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -59,6 +56,7 @@ typedef uint8_t (* storeReceivedMsg_t)(compMsgDispatcher_t *self, msgParts_t *re
 typedef uint8_t (* sendClientIPMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleReceivedPart_t)(compMsgDispatcher_t *self, const uint8_t * buffer, size_t lgth);
 typedef uint8_t (* unpackReceivedMsg_t)(compMsgDispatcher_t *self, msgRequestInfo_t *msgRequestInfo);
+typedef uint8_t (* compMsgIdentifyInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgIdentify {
   resetHeaderInfos_t resetHeaderInfos;
@@ -72,14 +70,9 @@ typedef struct compMsgIdentify {
   handleReceivedPart_t handleReceivedPart;
   unpackReceivedMsg_t unpackReceivedMsg;
   handleToSendPart_t handleToSendPart;
+  compMsgIdentifyInit_t compMsgIdentifyInit;
 } compMsgIdentify_t;
 
 compMsgIdentify_t *newCompMsgIdentify();
-uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_IDENTIFY_H */
-

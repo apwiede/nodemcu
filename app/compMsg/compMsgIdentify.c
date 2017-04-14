@@ -906,7 +906,7 @@ static uint8_t handleToSendPart(compMsgDispatcher_t *self, const uint8_t *buffer
 
 // ================================= compMsgIdentifyInit ====================================
 
-uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   uint8_t result;
   compMsgIdentify_t *compMsgIdentify;
 
@@ -922,7 +922,6 @@ uint8_t compMsgIdentifyInit(compMsgDispatcher_t *self) {
   compMsgIdentify->handleReceivedPart = &handleReceivedPart;
   compMsgIdentify->unpackReceivedMsg = &unpackReceivedMsg;
   compMsgIdentify->handleToSendPart = &handleToSendPart;
-
   return COMP_MSG_ERR_OK;
 }
 
@@ -935,5 +934,6 @@ compMsgIdentify_t *newCompMsgIdentify() {
   if (compMsgIdentify == NULL) {
     return NULL;
   }
+  compMsgIdentify->compMsgIdentifyInit = &compMsgIdentifyInit;
   return compMsgIdentify;
 }

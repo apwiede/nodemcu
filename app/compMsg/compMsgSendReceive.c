@@ -60,6 +60,40 @@ static uint8_t uartSetup(compMsgDispatcher_t *self, unsigned id, uint32_t baud, 
   return COMP_MSG_ERR_OK;
 }
 
+// ================================= startUartTimer ====================================
+
+static uint8_t startUartTimer(compMsgDispatcher_t *self, startConnection_t fcn) {
+  int mode;
+  compMsgTimerSlot_t *compMsgTimerSlot;
+  int repeat;
+  int interval;
+  int isMstimer;
+  int timerId;
+
+  mode = TIMER_MODE_AUTO;
+  isMstimer = 0; // µs timer !!
+  repeat = 0;
+  interval = 2500;
+  timerId = COMP_MSG_UART_TIMER_ID;
+  compMsgTimerSlot = &self->compMsgTimer->compMsgTimers[timerId];
+  compMsgTimerSlot->timerId = timerId;
+  compMsgTimerSlot->compMsgDispatcher = self;
+  compMsgTimerSlot_t *tmr = &self->compMsgTimer->compMsgTimers[timerId];
+  if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
+    ets_timer_disarm(&tmr->timer);
+  }
+  // this is only preparing
+  COMP_MSG_DBG(self, "S", 2, "startUartTimer timer_setfcn: %p\n", compMsgTimerSlot);
+  ets_timer_setfn(&tmr->timer, fcn, (void*)compMsgTimerSlot);
+  tmr->mode = mode | TIMER_IDLE_FLAG;
+  // here is the start
+  tmr->interval = interval;
+  tmr->mode &= ~TIMER_IDLE_FLAG;
+  COMP_MSG_DBG(self, "S", 2, "startUartTimer timer_arm_new\n");
+  ets_timer_arm_new(&tmr->timer, interval, repeat, isMstimer);
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= uartReceiveCb ====================================
 
 static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, size_t lgth) {
@@ -68,7 +102,13 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, s
   msgParts_t *received;
   const uint8_t buf[1] = { 0};
   const uint8_t *myBuffer;
+  compMsgTimerSlot_t *tmr;
 
+  tmr = &self->compMsgTimer->compMsgTimers[COMP_MSG_UART_TIMER_ID];
+  if (!(tmr->mode & TIMER_IDLE_FLAG) && (tmr->mode != TIMER_MODE_OFF)) {
+    COMP_MSG_DBG(self, "s", 2, "Rec: timer disarm");
+    ets_timer_disarm(&tmr->timer);
+  }
   received = &self->compMsgData->received;
   COMP_MSG_DBG(self, "s", 2, "Rec: 0x%02x lgth: %d", buffer[0] & 0xFF, received->lgth);
   COMP_MSG_DBG(self, "s", 1, "uartReceiveCb: %c 0x%02x rlen: %d", buffer[0]&0xFF, buffer[0]&0xFF, received->lgth);
@@ -450,9 +490,12 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
 // ================================= newCompMsgSendReceive ====================================
 
 compMsgSendReceive_t *newCompMsgSendReceive() {
-  compMsgSendReceive_t *compMsgSendReceive = os_zalloc(sizeof(compMsgSendReceive_t));
+  compMsgSendReceive_t *compMsgSendReceive;
+
+  compMsgSendReceive = os_zalloc(sizeof(compMsgSendReceive_t));
   if (compMsgSendReceive == NULL) {
     return NULL;
   }
+  compMsgSendReceive->compMsgSendReceiveInit = &compMsgSendReceiveInit;
   return compMsgSendReceive;
 }

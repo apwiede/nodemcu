@@ -327,6 +327,7 @@ typedef uint8_t (* getProdTestGateway_t)(compMsgDispatcher_t *self, int *numeric
 typedef uint8_t (* getProdTestDns_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getProdTestPingAddress_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getProdTestStatus_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* compMsgWifiDataInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgWifiData {
   keyValueInfo_t keyValueInfo;
@@ -406,9 +407,9 @@ typedef struct compMsgWifiData {
   netSocketReceived_t netSocketReceived;
   netSocketSSDPToSend_t netSocketSSDPToSend;
   netSocketSSDPReceived_t netSocketSSDPReceived;
+  compMsgWifiDataInit_t compMsgWifiDataInit;
 } compMsgWifiData_t;
 
 compMsgWifiData_t *newCompMsgWifiData();
-uint8_t compMsgWifiInit(compMsgDispatcher_t *self);
 
 #endif	/* COMP_MSG_WIFI_DATA_H */

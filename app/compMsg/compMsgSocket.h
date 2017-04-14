@@ -42,9 +42,6 @@
 #define	COMP_MSG_SOCKET_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 // running mode flags
 #define COMP_DISP_RUNNING_MODE_ACCESS_POINT 0x01
@@ -164,16 +161,11 @@ typedef struct compMsgSocket {
   checkConnectionStatus_t checkConnectionStatus;
 } compMsgSocket_t;
 
-#ifdef  __cplusplus
-}
-#endif
-
 compMsgSocket_t *newCompMsgSocket();
+
 uint8_t compMsgWebSocketInit(compMsgDispatcher_t *self);
 uint8_t compMsgNetSocketInit(compMsgDispatcher_t *self);
 uint8_t compMsgSSDPSocketInit(compMsgDispatcher_t *self);
 
 
 #endif  /* COMP_MSG_SOCKET_H */
-
-

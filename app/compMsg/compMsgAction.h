@@ -42,9 +42,6 @@
 #define	COMP_MSG_ACTION_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -56,9 +53,9 @@ typedef uint8_t (* runAction_t)(compMsgDispatcher_t *self, uint8_t *answerType);
 typedef uint8_t (* getActionMode_t)(compMsgDispatcher_t *self, uint8_t *actionName, uint8_t *actionMode);
 typedef uint8_t (* getActionCallback_t)(compMsgDispatcher_t *self, uint8_t *actionName, action_t *callback);
 typedef uint8_t (* getActionCallbackName_t)(compMsgDispatcher_t *self, action_t callback, uint8_t **actionName);
+typedef uint8_t (* compMsgActionInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgAction {
-
   startTestInterrupt_t startTestInterrupt;
   startLightSleepWakeupMode_t startLightSleepWakeupMode;
   setActionEntry_t setActionEntry;
@@ -66,14 +63,9 @@ typedef struct compMsgAction {
   getActionCallback_t getActionCallback;
   getActionCallbackName_t getActionCallbackName;
   getActionMode_t getActionMode;
+  compMsgActionInit_t compMsgActionInit;
 } compMsgAction_t;
 
 compMsgAction_t *newCompMsgAction();
-uint8_t compMsgActionInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_ACTION_H */
-

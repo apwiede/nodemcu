@@ -42,9 +42,6 @@
 #define	COMP_MSG_REQUEST_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 #define COMP_MSG_MAX_UART_REQUESTS 5
 #define COMP_MSG_MAX_REQUESTS      5
@@ -72,31 +69,31 @@ typedef struct msgRequestInfos {
   int lastRequestIdx;
 } msgRequestInfos_t;
 
+typedef uint8_t (* uartTimerResetRequest_t)(void *compMsgTimerSlot);
+typedef uint8_t (* resetRequest_t)(compMsgDispatcher_t *self, int slot);
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* addUartRequestData_t)(compMsgDispatcher_t *self, uint8_t *data, size_t lgth);
 typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData);
 typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
 typedef uint8_t (* detectMsg_t)(compMsgDispatcher_t *self, const uint8_t * buffer, int lgth, int queueIdx, bool *isComplete);
+typedef uint8_t (* compMsgRequestInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgRequest {
   // request infos
   msgRequestInfos_t msgRequestInfos;
 
+  uartTimerResetRequest_t uartTimerResetRequest;
+  resetRequest_t resetRequest;
   startRequest_t startRequest;
   startNextRequest_t startNextRequest;
   addUartRequestData_t addUartRequestData;
   addRequest_t addRequest;
   deleteRequest_t deleteRequest;
   detectMsg_t detectMsg;
+  compMsgRequestInit_t compMsgRequestInit;
 } compMsgRequest_t;
 
 compMsgRequest_t *newCompMsgRequest();
-uint8_t compMsgRequestInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_REQUEST_H */
-

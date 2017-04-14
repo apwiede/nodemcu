@@ -493,10 +493,13 @@ compMsgDebug->setDebugFlags(self, "BdDEHISw");
 // ================================= newCompMsgDebug ====================================
 
 compMsgDebug_t *newCompMsgDebug() {
-  compMsgDebug_t *compMsgDebug = os_zalloc(sizeof(compMsgDebug_t));
+  compMsgDebug_t *compMsgDebug;
+
+  compMsgDebug = os_zalloc(sizeof(compMsgDebug_t));
   if (compMsgDebug == NULL) {
     return NULL;
   }
+  compMsgDebug->compMsgDebugInit = &compMsgDebugInit;
   return compMsgDebug;
 }
 

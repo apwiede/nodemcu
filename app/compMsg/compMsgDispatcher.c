@@ -382,41 +382,43 @@ ets_printf("dispInit1\n");
 #endif
 //COMP_MSG_DBG(self, "Y", 0, "call DescInit");
 ets_printf("0 heap: %d\n", system_get_free_heap_size());
-  result = compMsgUtilInit(self);
+  result = self->compMsgUtil->compMsgUtilInit(self);
   checkErrOK(result);
 ets_printf("1 heap: %d\n", system_get_free_heap_size());
-  result = compMsgMsgDescInit(self);
+  result = self->compMsgMsgDesc->compMsgMsgDescInit(self);
   checkErrOK(result);
 ets_printf("2 heap: %d\n", system_get_free_heap_size());
-  result = compMsgRequestInit(self);
+  result = self->compMsgRequest->compMsgRequestInit(self);
   checkErrOK(result);
 //COMP_MSG_DBG(self, "Y", 0, "call IdentifyInit");
-  result = compMsgIdentifyInit(self);
+  result = self->compMsgIdentify->compMsgIdentifyInit(self);
   checkErrOK(result);
-  result = compMsgBuildMsgInit(self);
+  result = self->compMsgBuildMsg->compMsgBuildMsgInit(self);
   checkErrOK(result);
 ets_printf("5 heap: %d\n", system_get_free_heap_size());
-  result = compMsgSendReceiveInit(self);
+  result = self->compMsgSendReceive->compMsgSendReceiveInit(self);
   checkErrOK(result);
 ets_printf("6 heap: %d\n", system_get_free_heap_size());
-  result = compMsgActionInit(self);
+  result = self->compMsgAction->compMsgActionInit(self);
   checkErrOK(result);
 //COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
-  result = compMsgWifiInit(self);
+  result = self->compMsgWifiData->compMsgWifiDataInit(self);
   checkErrOK(result);
-  result = compMsgModuleDataInit(self);
+  result = self->compMsgModuleData->compMsgModuleDataInit(self);
   checkErrOK(result);
 ets_printf("9 heap: %d\n", system_get_free_heap_size());
-  result = compMsgTimerInit(self);
+  result = self->compMsgTimer->compMsgTimerInit(self);
   checkErrOK(result);
   result = compMsgWebSocketInit(self);
   checkErrOK(result);
   result = compMsgNetSocketInit(self);
   checkErrOK(result);
-  result = compMsgHttpInit(self);
+  result = compMsgSSDPSocketInit(self);
+  checkErrOK(result);
+  result = self->compMsgHttp->compMsgHttpInit(self);
   checkErrOK(result);
 //COMP_MSG_DBG(self, "Y", 0, "call OtaInit");
-  result = compMsgOtaInit(self);
+  result = self->compMsgOta->compMsgOtaInit(self);
   checkErrOK(result);
 #ifdef GDB_STUB
 ets_printf("dispInit2\n");
@@ -561,7 +563,7 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
     }
     // Debug needs to be initialized here for being able to do debug output !!
     compMsgDispatcher->compMsgDebug = newCompMsgDebug();
-    result = compMsgDebugInit(compMsgDispatcher);
+    result = compMsgDispatcher->compMsgDebug->compMsgDebugInit(compMsgDispatcher);
     if (result != COMP_MSG_ERR_OK) {
       return NULL;
     }

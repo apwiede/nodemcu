@@ -42,9 +42,6 @@
 #define	COMP_MSG_DEBUG_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 #define DEBUG_COMP_MSG_ACTION          0x00001
 #define DEBUG_COMP_MSG_BUILD_MSG       0x00002
@@ -84,6 +81,7 @@ typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInf
 typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
 typedef uint8_t (* dumpMsgDescPart_t)(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart);
 typedef uint8_t (* dumpMsgValPart_t)(compMsgDispatcher_t *self, msgValPart_t *msgValPart);
+typedef uint8_t (* compMsgDebugInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgDebug {
   uint32_t currDebugFlags;
@@ -100,14 +98,9 @@ typedef struct compMsgDebug {
   dumpHeaderPart_t dumpHeaderPart;
   dumpMsgDescPart_t dumpMsgDescPart;
   dumpMsgValPart_t dumpMsgValPart;
+  compMsgDebugInit_t compMsgDebugInit;
 } compMsgDebug_t;
 
 compMsgDebug_t *newCompMsgDebug();
-uint8_t compMsgDebugInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_DEBUG_H */
-

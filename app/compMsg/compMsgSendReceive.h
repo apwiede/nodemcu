@@ -42,22 +42,21 @@
 #define	COMP_MSG_SEND_RECEIVE_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef uint8_t (* uartSetup_t)(compMsgDispatcher_t *self, unsigned id, uint32_t baud, int databits, int parity, int stopbits);
+typedef uint8_t (* startUartTimer_t)(compMsgDispatcher_t *self, startConnection_t fcn);
 typedef uint8_t (* uartReceiveCb_t)(compMsgDispatcher_t *self, const uint8_t *buffer, size_t lgth);
 typedef uint8_t (* uartSendAnswer_t)(compMsgDispatcher_t *self, uint8_t *data, uint8_t msgLgth);
 typedef uint8_t (* prepareCloudMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startSendMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* sendCloudMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* sendMsg_t)(compMsgDispatcher_t *self, uint8_t *msgData, size_t msgLgth);
+typedef uint8_t (* compMsgSendReceiveInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgSendReceive {
   uartSetup_t uartSetup;
+  startUartTimer_t startUartTimer;
   uartReceiveCb_t uartReceiveCb;
   uartSendAnswer_t uartSendAnswer;
   sendMsg_t sendMsg;
@@ -66,14 +65,9 @@ typedef struct compMsgSendReceive {
   sendCloudMsg_t sendCloudMsg;
   startSendMsg_t startSendMsg;
   startSendMsg_t startSendMsg2;
+  compMsgSendReceiveInit_t compMsgSendReceiveInit;
 } compMsgSendReceive_t;
 
 compMsgSendReceive_t *newCompMsgSendReceive();
-uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_SEND_RECEIVE_H */
-

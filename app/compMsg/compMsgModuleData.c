@@ -728,7 +728,7 @@ static uint8_t setModuleValues(compMsgDispatcher_t *self) {
 
 // ================================= compMsgModuleDataInit ====================================
 
-uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
   compMsgModuleData_t *compMsgModuleData;
   compMsgUtil_t *compMsgUtil;
@@ -821,5 +821,6 @@ compMsgModuleData_t *newCompMsgModuleData() {
   if (compMsgModuleData == NULL) {
     return NULL;
   }
+  compMsgModuleData->compMsgModuleDataInit = &compMsgModuleDataInit;
   return compMsgModuleData;
 }

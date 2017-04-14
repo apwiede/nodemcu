@@ -48,6 +48,48 @@
 #include "c_stdlib.h"
 #include "compMsgDispatcher.h"
 
+// ================================= uartTimerResetRequest ====================================
+
+static uint8_t uartTimerResetRequest(void *arg) {
+  uint8_t result;
+  compMsgDispatcher_t *self;
+  int timerId;
+  compMsgTimerSlot_t *compMsgTimerSlot;
+  compMsgTimerSlot_t *tmr;
+
+ets_printf("uartTimerResetRequest\n");
+  compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
+  self = compMsgTimerSlot->compMsgDispatcher;
+  COMP_MSG_DBG(self, "s", 1, "timerResetRequest");
+  timerId = compMsgTimerSlot->timerId;
+  self = compMsgTimerSlot->compMsgDispatcher;
+  COMP_MSG_DBG(self, "S", 2, "timerResetRequest timerId: %d\n", timerId);
+  tmr = &self->compMsgTimer->compMsgTimers[timerId];
+  result = self->compMsgRequest->resetRequest(self, 0);
+  return COMP_MSG_ERR_OK;
+}
+
+// ================================= resetRequest ====================================
+
+static uint8_t resetRequest(compMsgDispatcher_t *self, int slot) {
+  uint8_t result;
+  msgRequestInfos_t *msgRequestInfos;
+  msgRequestInfo_t *msgRequestInfo;
+  compMsgData_t *compMsgData;
+  int uartRequestIdx;
+  msgParts_t *received;
+
+  // slot 0 is reserved for Uart
+  COMP_MSG_DBG(self, "s", 1, "resetRequest slot: %d", slot);
+  uartRequestIdx = 0;
+  msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
+  msgRequestInfo = &msgRequestInfos->msgRequestInfo[uartRequestIdx];
+  received = &msgRequestInfo->received;
+  received->lgth = 0;
+  received->totalLgth = 999;
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= startRequest ====================================
 
 static uint8_t startRequest(compMsgDispatcher_t *self) {
@@ -373,13 +415,12 @@ if (buffer == NULL) {
   return COMP_MSG_ERR_OK;
 }
 
-extern void dbgPrintf(void *self, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);
-
 // ================================= compMsgRequestInit ====================================
 
-uint8_t compMsgRequestInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgRequestInit(compMsgDispatcher_t *self) {
   uint8_t result;
   int idx;
+  compMsgRequest_t *compMsgRequest;
   msgRequestInfos_t *msgRequestInfos;
   msgRequestInfo_t *msgRequestInfo;
 
@@ -397,24 +438,29 @@ uint8_t compMsgRequestInit(compMsgDispatcher_t *self) {
     idx++;
   }
 
+  compMsgRequest = self->compMsgRequest;
   // request handling
-  self->compMsgRequest->startRequest = &startRequest;
-  self->compMsgRequest->startNextRequest = &startNextRequest;
-  self->compMsgRequest->addRequest = &addRequest;
-  self->compMsgRequest->addUartRequestData = &addUartRequestData;
-  self->compMsgRequest->deleteRequest = &deleteRequest;
-  self->compMsgRequest->detectMsg = &detectMsg;
+  compMsgRequest->uartTimerResetRequest = &uartTimerResetRequest;
+  compMsgRequest->resetRequest = &resetRequest;
+  compMsgRequest->startRequest = &startRequest;
+  compMsgRequest->startNextRequest = &startNextRequest;
+  compMsgRequest->addRequest = &addRequest;
+  compMsgRequest->addUartRequestData = &addUartRequestData;
+  compMsgRequest->deleteRequest = &deleteRequest;
+  compMsgRequest->detectMsg = &detectMsg;
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= newCompMsgRequest ====================================
 
 compMsgRequest_t *newCompMsgRequest() {
-  compMsgRequest_t *compMsgRequest = os_zalloc(sizeof(compMsgRequest_t));
+  compMsgRequest_t *compMsgRequest;
+
+  compMsgRequest = os_zalloc(sizeof(compMsgRequest_t));
   if (compMsgRequest == NULL) {
     return NULL;
   }
-
+  compMsgRequest->compMsgRequestInit = &compMsgRequestInit;
   return compMsgRequest;
 }
 

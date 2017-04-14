@@ -62,10 +62,6 @@
 #include "compMsgDispatcher.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define UPGRADE_FLAG_IDLE    0x00
 #define UPGRADE_FLAG_START    0x01
 #define UPGRADE_FLAG_FINISH    0x02
@@ -601,30 +597,30 @@ static uint8_t checkClientMode(compMsgDispatcher_t *self, bool isSpiffs) {
 
 // ================================= compMsgOtaInit ====================================
 
-uint8_t compMsgOtaInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgOtaInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgOta_t *compMsgOta;
 
-  self->compMsgOta->updateFirmware = &updateFirmware;
-  self->compMsgOta->updateSpiffs = &updateSpiffs;
-  self->compMsgOta->checkClientMode = &checkClientMode;
-  self->compMsgOta->otaStart = &otaStart;
-  self->compMsgOta->storeUserData = &storeUserData;
-  self->compMsgOta->saveUserData = &saveUserData;
-  self->compMsgOta->getUserData = &getUserData;
+  compMsgOta = self->compMsgOta;
+  compMsgOta->updateFirmware = &updateFirmware;
+  compMsgOta->updateSpiffs = &updateSpiffs;
+  compMsgOta->checkClientMode = &checkClientMode;
+  compMsgOta->otaStart = &otaStart;
+  compMsgOta->storeUserData = &storeUserData;
+  compMsgOta->saveUserData = &saveUserData;
+  compMsgOta->getUserData = &getUserData;
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= newCompMsgOta ====================================
 
 compMsgOta_t *newCompMsgOta() {
-  compMsgOta_t *compMsgOta = os_zalloc(sizeof(compMsgOta_t));
+  compMsgOta_t *compMsgOta;
+
+  compMsgOta = os_zalloc(sizeof(compMsgOta_t));
   if (compMsgOta == NULL) {
     return NULL;
   }
+  compMsgOta->compMsgOtaInit = &compMsgOtaInit;
   return compMsgOta;
 }
-
-#ifdef __cplusplus
-}
-#endif
-

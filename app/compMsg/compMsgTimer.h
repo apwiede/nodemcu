@@ -42,9 +42,6 @@
 #define	COMP_MSG_TIMER_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 #define TIMER_MODE_OFF 3
 #define TIMER_MODE_SINGLE 0
@@ -70,21 +67,16 @@ typedef struct compMsgTimerSlot {
 } compMsgTimerSlot_t;
 
 typedef uint8_t (* initTimers_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* compMsgTimerInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgTimer {
   compMsgTimerSlot_t compMsgTimers[NUM_TMR];
   os_timer_t apTimer;
 
   initTimers_t initTimers;
+  compMsgTimerInit_t compMsgTimerInit;
 } compMsgTimer_t;
 
 compMsgTimer_t *newCompMsgTimer();
-uint8_t compMsgTimerInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_TIMER_H */
-
-

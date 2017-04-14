@@ -2104,7 +2104,7 @@ static uint8_t getWifiKeyValueKeys (compMsgDispatcher_t *self, uint8_t *fileName
 
 // ================================= compMsgMsgDescInit ====================================
 
-uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   uint8_t result;
   compMsgMsgDesc_t *compMsgMsgDesc;
 
@@ -2150,18 +2150,22 @@ ets_printf("readMsgFileNames: result: %d\n", result);
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= newCompMsgMsgDesc ====================================
-
-compMsgMsgDesc_t *newCompMsgMsgDesc() {
-  compMsgMsgDesc_t *compMsgMsgDesc = os_zalloc(sizeof(compMsgMsgDesc_t));
-  if (compMsgMsgDesc == NULL) {
-    return NULL;
-  }
-  return compMsgMsgDesc;
-}
 
 // ================================= freeCompMsgMsgDesc ====================================
 
 void freeCompMsgMsgDesc(compMsgMsgDesc_t *compMsgMsgDesc) {
 }
 
+// ================================= newCompMsgMsgDesc ====================================
+
+compMsgMsgDesc_t *newCompMsgMsgDesc() {
+  compMsgMsgDesc_t *compMsgMsgDesc;
+
+  compMsgMsgDesc = os_zalloc(sizeof(compMsgMsgDesc_t));
+  if (compMsgMsgDesc == NULL) {
+    return NULL;
+  }
+  compMsgMsgDesc->freeCompMsgMsgDesc = &freeCompMsgMsgDesc;
+  compMsgMsgDesc->compMsgMsgDescInit = &compMsgMsgDescInit;
+  return compMsgMsgDesc;
+}

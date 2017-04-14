@@ -437,7 +437,7 @@ static uint8_t ICACHE_FLASH_ATTR forwardMsg(compMsgDispatcher_t *self) {
 
 // ================================= compMsgBuildMsgInit ====================================
 
-uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
   compMsgBuildMsg_t *compMsgBuildMsg;
 
   compMsgBuildMsg = self->compMsgBuildMsg;
@@ -453,9 +453,12 @@ uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
 // ================================= newCompMsgBuildMsg ====================================
 
 compMsgBuildMsg_t *newCompMsgBuildMsg() {
-  compMsgBuildMsg_t *compMsgBuildMsg = os_zalloc(sizeof(compMsgBuildMsg_t));
+  compMsgBuildMsg_t *compMsgBuildMsg;
+
+  compMsgBuildMsg = os_zalloc(sizeof(compMsgBuildMsg_t));
   if (compMsgBuildMsg == NULL) {
     return NULL;
   }
+  compMsgBuildMsg->compMsgBuildMsgInit = &compMsgBuildMsgInit;
   return compMsgBuildMsg;
 }

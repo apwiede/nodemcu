@@ -1291,7 +1291,7 @@ static uint8_t setWifiValue(compMsgDispatcher_t *self, uint8_t *fieldNameStr, in
 
 // ================================= compMsgWifiInit ====================================
 
-uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
   compMsgUtil_t *compMsgUtil;
   compMsgWifiData_t *compMsgWifiData;
@@ -1423,9 +1423,12 @@ ets_printf("wifi 03 heap: %d\n", system_get_free_heap_size());
 // ================================= newCompMsgWifiData ====================================
 
 compMsgWifiData_t *newCompMsgWifiData() {
-  compMsgWifiData_t *compMsgWifiData = os_zalloc(sizeof(compMsgWifiData_t));
+  compMsgWifiData_t *compMsgWifiData;
+
+  compMsgWifiData = os_zalloc(sizeof(compMsgWifiData_t));
   if (compMsgWifiData == NULL) {
     return NULL;
   }
+  compMsgWifiData->compMsgWifiDataInit = &compMsgWifiDataInit;
   return compMsgWifiData;
 }

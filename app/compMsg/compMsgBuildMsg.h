@@ -42,9 +42,6 @@
 #define	COMP_MSG_BUILD_MSG_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -54,6 +51,7 @@ typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t type);
 typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* forwardMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* compMsgBuildMsgInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgBuildMsg {
   createMsgFromHeaderPart_t createMsgFromHeaderPart; 
@@ -62,14 +60,9 @@ typedef struct compMsgBuildMsg {
   buildMsg_t buildMsg;
   setMsgValues_t setMsgValues;
   forwardMsg_t forwardMsg;
+  compMsgBuildMsgInit_t compMsgBuildMsgInit;
 } compMsgBuildMsg_t;
 
 compMsgBuildMsg_t *newCompMsgBuildMsg();
-uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_BUILD_MSG_H */
-

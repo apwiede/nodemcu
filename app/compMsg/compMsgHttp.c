@@ -439,24 +439,29 @@ static uint8_t deleteHttpMsgInfo(socketUserData_t *sud) {
 
 // ================================= compMsgHttpInit ====================================
 
-uint8_t compMsgHttpInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgHttpInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgHttp_t *compMsgHttp;
 
-  self->compMsgHttp->getHttpHeaderKeyIdFromKey = &getHttpHeaderKeyIdFromKey;
-  self->compMsgHttp->getHttpHeaderKeyIdFromLowerKey = &getHttpHeaderKeyIdFromLowerKey;
-  self->compMsgHttp->getHttpHeaderKeyFromId = &getHttpHeaderKeyFromId;
-  self->compMsgHttp->httpParse = &httpParse;
-  self->compMsgHttp->getHttpGetHeaderValueForId = &getHttpGetHeaderValueForId;
-  self->compMsgHttp->deleteHttpMsgInfo = &deleteHttpMsgInfo;
+  compMsgHttp = self->compMsgHttp;
+  compMsgHttp->getHttpHeaderKeyIdFromKey = &getHttpHeaderKeyIdFromKey;
+  compMsgHttp->getHttpHeaderKeyIdFromLowerKey = &getHttpHeaderKeyIdFromLowerKey;
+  compMsgHttp->getHttpHeaderKeyFromId = &getHttpHeaderKeyFromId;
+  compMsgHttp->httpParse = &httpParse;
+  compMsgHttp->getHttpGetHeaderValueForId = &getHttpGetHeaderValueForId;
+  compMsgHttp->deleteHttpMsgInfo = &deleteHttpMsgInfo;
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= newCompMsgHttp ====================================
 
 compMsgHttp_t *newCompMsgHttp() {
-  compMsgHttp_t *compMsgHttp = os_zalloc(sizeof(compMsgHttp_t));
+  compMsgHttp_t *compMsgHttp;
+
+  compMsgHttp = os_zalloc(sizeof(compMsgHttp_t));
   if (compMsgHttp == NULL) {
     return NULL;
   }
+  compMsgHttp->compMsgHttpInit = &compMsgHttpInit;
   return compMsgHttp;
 }

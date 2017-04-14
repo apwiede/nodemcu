@@ -346,33 +346,37 @@ static uint8_t addFieldDescription(compMsgDispatcher_t *self) {
 
 // ================================= compMsgUtilInit ====================================
 
-uint8_t compMsgUtilInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgUtilInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgUtil_t *compMsgUtil;
 
-  self->compMsgUtil->numFieldValueCallbackInfos = 0;
-  self->compMsgUtil->maxFieldValueCallbackInfos = 0;
-  self->compMsgUtil->fieldValueCallbackInfos = NULL;
+  compMsgUtil = self->compMsgUtil;
+  compMsgUtil->numFieldValueCallbackInfos = 0;
+  compMsgUtil->maxFieldValueCallbackInfos = 0;
+  compMsgUtil->fieldValueCallbackInfos = NULL;
 
-  self->compMsgUtil->encryptMsg = &encryptMsg;
-  self->compMsgUtil->decryptMsg = &decryptMsg;
-  self->compMsgUtil->toBase64 = &toBase64;
-  self->compMsgUtil->fromBase64 = &fromBase64;
-  self->compMsgUtil->setFieldValueCallback = &setFieldValueCallback;
-  self->compMsgUtil->addFieldValueCallbackId = &addFieldValueCallbackId;
-  self->compMsgUtil->getFieldValueCallback = &getFieldValueCallback;
-  self->compMsgUtil->getFieldValueCallbackId = &getFieldValueCallbackId;
-  self->compMsgUtil->addFieldDescription = &addFieldDescription;
+  compMsgUtil->encryptMsg = &encryptMsg;
+  compMsgUtil->decryptMsg = &decryptMsg;
+  compMsgUtil->toBase64 = &toBase64;
+  compMsgUtil->fromBase64 = &fromBase64;
+  compMsgUtil->setFieldValueCallback = &setFieldValueCallback;
+  compMsgUtil->addFieldValueCallbackId = &addFieldValueCallbackId;
+  compMsgUtil->getFieldValueCallback = &getFieldValueCallback;
+  compMsgUtil->getFieldValueCallbackId = &getFieldValueCallbackId;
+  compMsgUtil->addFieldDescription = &addFieldDescription;
   return COMP_MSG_ERR_OK;
 }
 
 // ================================= newCompMsgUtil ====================================
 
 compMsgUtil_t *newCompMsgUtil() {
-  compMsgUtil_t *compMsgUtil = os_zalloc(sizeof(compMsgUtil_t));
+  compMsgUtil_t *compMsgUtil;
+
+  compMsgUtil = os_zalloc(sizeof(compMsgUtil_t));
   if (compMsgUtil == NULL) {
     return NULL;
   }
-
+  compMsgUtil->compMsgUtilInit = &compMsgUtilInit;
   return compMsgUtil;
 }
 

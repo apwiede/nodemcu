@@ -42,9 +42,6 @@
 #define	COMP_MSG_OTA_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
@@ -55,6 +52,7 @@ typedef uint8_t (* checkClientMode_t)(compMsgDispatcher_t *self, bool isSpiffs);
 typedef uint8_t (* storeUserData_t)(compMsgDispatcher_t *self, size_t msgLgth, uint8_t *msgData);
 typedef uint8_t (* saveUserData_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getUserData_t)(compMsgDispatcher_t *self, uint8_t **msgData, size_t *msgLgth);
+typedef uint8_t (* compMsgOtaInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgOta {
 
@@ -65,14 +63,9 @@ typedef struct compMsgOta {
   storeUserData_t storeUserData;
   saveUserData_t saveUserData;
   getUserData_t getUserData;
+  compMsgOtaInit_t compMsgOtaInit;
 } compMsgOta_t;
 
 compMsgOta_t *newCompMsgOta();
-uint8_t compMsgOtaInit(compMsgDispatcher_t *self);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif  /* COMP_MSG_OTA_H */
-

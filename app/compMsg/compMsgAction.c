@@ -456,17 +456,19 @@ static uint8_t runAction(compMsgDispatcher_t *self, uint8_t *answerType) {
 
 // ================================= compMsgActionInit ====================================
 
-uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
+static uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   uint8_t result;
+  compMsgAction_t *compMsgAction;
   
   result = COMP_MSG_ERR_OK;
-  self->compMsgAction->startLightSleepWakeupMode = &startLightSleepWakeupMode;
-  self->compMsgAction->startTestInterrupt = &startTestInterrupt;
-  self->compMsgAction->setActionEntry = &setActionEntry;
-  self->compMsgAction->runAction = &runAction;
-  self->compMsgAction->getActionCallback = &getActionCallback;
-  self->compMsgAction->getActionCallbackName = &getActionCallbackName;
-  self->compMsgAction->getActionMode = &getActionMode;
+  compMsgAction = self->compMsgAction;
+  compMsgAction->startLightSleepWakeupMode = &startLightSleepWakeupMode;
+  compMsgAction->startTestInterrupt = &startTestInterrupt;
+  compMsgAction->setActionEntry = &setActionEntry;
+  compMsgAction->runAction = &runAction;
+  compMsgAction->getActionCallback = &getActionCallback;
+  compMsgAction->getActionCallbackName = &getActionCallbackName;
+  compMsgAction->getActionMode = &getActionMode;
 
   compMsgActionEntries.numActionEntries = 0;
   compMsgActionEntries.maxActionEntries = 10;
@@ -479,17 +481,21 @@ uint8_t compMsgActionInit(compMsgDispatcher_t *self) {
   checkAllocOK(compMsgActions.actions);
 
   compMsgDispatcher = self;
-//  result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
+#ifdef OLD
+  result = self->compMsgMsgDesc->readActions(self, COMP_MSG_ACTIONS_FILE_NAME);
+#endif
   return result;
 }
 
 // ================================= newCompMsgAction ====================================
 
 compMsgAction_t *newCompMsgAction() {
-  compMsgAction_t *compMsgAction = os_zalloc(sizeof(compMsgAction_t));
+  compMsgAction_t *compMsgAction;
+
+  compMsgAction = os_zalloc(sizeof(compMsgAction_t));
   if (compMsgAction == NULL) {
     return NULL;
   }
-
+  compMsgAction->compMsgActionInit = &compMsgActionInit;
   return compMsgAction;
 }
