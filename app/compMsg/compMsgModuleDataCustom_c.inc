@@ -83,7 +83,7 @@ static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t 
 static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   int result;
 
-  result = self->compMsgModuleData->setModuleValue(self, "operatingMode", self->dispatcherCommon->operatingMode, NULL);
+  result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_operatingMode, NULL, self->dispatcherCommon->operatingMode, NULL);
   return COMP_MSG_ERR_OK;
 }
 
