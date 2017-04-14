@@ -402,10 +402,8 @@ ets_printf("6 heap: %d\n", system_get_free_heap_size());
   result = compMsgActionInit(self);
   checkErrOK(result);
 //COMP_MSG_DBG(self, "Y", 0, "call WifiInit");
-ets_printf("7 heap: %d\n", system_get_free_heap_size());
   result = compMsgWifiInit(self);
   checkErrOK(result);
-ets_printf("8 heap: %d\n", system_get_free_heap_size());
   result = compMsgModuleDataInit(self);
   checkErrOK(result);
 ets_printf("9 heap: %d\n", system_get_free_heap_size());
@@ -425,6 +423,7 @@ ets_printf("dispInit2\n");
 #endif
   result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
 
+ets_printf("10 heap: %d\n", system_get_free_heap_size());
   if (typelen > 0) {
     switch(type[0]) {
     case 'A':

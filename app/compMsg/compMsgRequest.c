@@ -386,7 +386,6 @@ uint8_t compMsgRequestInit(compMsgDispatcher_t *self) {
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
   msgRequestInfos->currRequestIdx = -1;
   msgRequestInfos->lastRequestIdx = -1;
-dbgPrintf(NULL, "Y", 0, "request1 heap: %d", system_get_free_heap_size());
   idx = 0;
   msgRequestInfo = &msgRequestInfos->msgRequestInfo[idx];
   msgRequestInfo->requestDispatcher = self;
@@ -397,7 +396,6 @@ dbgPrintf(NULL, "Y", 0, "request1 heap: %d", system_get_free_heap_size());
     checkAllocOK(msgRequestInfo->requestDispatcher);
     idx++;
   }
-dbgPrintf(NULL, "Y", 0, "request2 heap: %d", system_get_free_heap_size());
 
   // request handling
   self->compMsgRequest->startRequest = &startRequest;

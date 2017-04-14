@@ -1296,7 +1296,7 @@ uint8_t compMsgWifiInit(compMsgDispatcher_t *self) {
   compMsgUtil_t *compMsgUtil;
   compMsgWifiData_t *compMsgWifiData;
 
-ets_printf("wifi 01 heap: %d\n", system_get_free_heap_size());
+//ets_printf("wifi 01 heap: %d\n", system_get_free_heap_size());
   compMsgWifiData = self->compMsgWifiData;
   compMsgWifiData->webSocketBinaryReceived = &webSocketBinaryReceived;
   compMsgWifiData->webSocketTextReceived = &webSocketTextReceived;
@@ -1382,7 +1382,7 @@ ets_printf("wifi 01 heap: %d\n", system_get_free_heap_size());
 
   result = customInit(self);
   checkErrOK(result);
-ets_printf("wifi 02 heap: %d\n", system_get_free_heap_size());
+//ets_printf("wifi 02 heap: %d\n", system_get_free_heap_size());
 
   compMsgWifiData = self->compMsgWifiData;
   compMsgWifiData->getBssScanInfo = &getBssScanInfo;
