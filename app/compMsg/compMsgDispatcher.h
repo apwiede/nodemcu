@@ -45,6 +45,12 @@
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
+#include "osapi.h"
+#include "c_types.h"
+#include "mem.h"
+#include "c_string.h"
+#include "c_stdlib.h"
+#include "c_stdio.h"
 #include "platform.h"
 #include "../rboot/rboot-ota.h"
 
@@ -54,6 +60,7 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgUtil.h"
 #include "compMsgDataView.h"
 #include "compMsgTimer.h"
+#include "compMsgDataValue.h"
 #include "compMsgMsgDesc.h"
 #include "compMsgAction.h"
 #include "compMsgRequest.h"
@@ -68,7 +75,6 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgDebug.h"
 #include "compMsgOta.h"
 
-//#define CLOUD_1
 #define CLOUD_2
 
 #define UART0 0
@@ -150,6 +156,9 @@ typedef struct compMsgDispatcher {
 
   // compMsgTypesAndNames
   compMsgTypesAndNames_t *compMsgTypesAndNames;
+
+  // compMsgDataValue
+  compMsgDataValue_t *compMsgDataValue;
 
   // compMsgMsgDesc
   compMsgMsgDesc_t *compMsgMsgDesc;

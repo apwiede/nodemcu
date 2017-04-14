@@ -385,6 +385,8 @@ ets_printf("0 heap: %d\n", system_get_free_heap_size());
   result = self->compMsgUtil->compMsgUtilInit(self);
   checkErrOK(result);
 ets_printf("1 heap: %d\n", system_get_free_heap_size());
+  result = self->compMsgDataValue->compMsgDataValueInit(self);
+  checkErrOK(result);
   result = self->compMsgMsgDesc->compMsgMsgDescInit(self);
   checkErrOK(result);
 ets_printf("2 heap: %d\n", system_get_free_heap_size());
@@ -575,6 +577,8 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   // TypesAndNames always different becuase of message field names
   compMsgDispatcher->compMsgTypesAndNames = newCompMsgTypesAndNames();
   if (compMsgDispatcherSingleton == NULL) {
+    // DataValue
+    compMsgDispatcher->compMsgDataValue = newCompMsgDataValue();
     // MsgDesc
     compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
     // Timer

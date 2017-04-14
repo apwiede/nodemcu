@@ -38,13 +38,6 @@
  * Created on October 7st, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "c_string.h"
-#include "c_stdlib.h"
-#include "c_stdio.h"
-#include "platform.h"
 #include "compMsgDispatcher.h"
 
 #define FPM_SLEEP_MAX_TIME  0xFFFFFFF

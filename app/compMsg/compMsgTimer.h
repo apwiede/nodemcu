@@ -35,7 +35,7 @@
  * File:   compMsgTimer.h
  * Author: Arnulf P. Wiedemann
  *
- * Created on Descmber 16, 2016
+ * Created on December 16, 2016
  */
 
 #ifndef COMP_MSG_TIMER_H

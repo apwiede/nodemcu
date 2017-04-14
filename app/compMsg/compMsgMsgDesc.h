@@ -584,17 +584,11 @@ typedef struct compMsgMsgDesc {
   compMsgMsgDescInit_t compMsgMsgDescInit;
 
 #ifdef OLD
-  getIntFromLine_t getIntFromLine;
-  getStrFromLine_t getStrFromLine;
   getHeaderFieldsFromLine_t getHeaderFieldsFromLine;
-  readHeadersAndSetFlags_t readHeadersAndSetFlags;
-  readActions_t readActions;
   readModuleDataValues_t readModuleDataValues;
   readWifiValues_t readWifiValues;
-  getHeaderFromUniqueFields_t getHeaderFromUniqueFields;
   getMsgPartsFromHeaderPart_t getMsgPartsFromHeaderPart;
   getMsgKeyValueDescParts_t getMsgKeyValueDescParts;
-  getFieldsToSave_t getFieldsToSave;
   getWifiKeyValueKeys_t getWifiKeyValueKeys;
 #endif
 } compMsgMsgDesc_t;
