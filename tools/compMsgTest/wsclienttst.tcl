@@ -35,8 +35,6 @@
 
 package require websocket
 package require aes
-#package require tls
-#tls::init -tls1 1 ;# forcibly activate support for the TLS1 protocol
 
 package require Tk
 package require tablelist
@@ -45,6 +43,7 @@ package require tablelist
 
 source pdict.tcl
 source dataView.tcl
+source compMsgErrorCodes.tcl
 source compMsgDataView.tcl
 source compMsgMsgDesc.tcl
 source compMsgData.tcl
@@ -69,6 +68,7 @@ set ::host "192.168.4.1"
 proc checkErrOK {result} {
   switch $result {
     0 {
+      return $result
     }
     default {
       error "ERROR result: $result!"

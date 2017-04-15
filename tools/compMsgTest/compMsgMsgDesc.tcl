@@ -184,7 +184,7 @@ namespace eval compMsg {
         puts stderr [format "%d %s" $idx [lindex $fieldSequence $idx]]
         incr idx
       }
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= dumpMsgHeaderInfos ====================================
@@ -212,7 +212,7 @@ namespace eval compMsg {
         incr idx
       }
       puts stderr [format "startLgth: %d numParts: %d maxParts: %d currPartIdx: %d seqIdx: %d seqIdxAfterStart: %d\n" [dict get $hdrInfos headerLgth] [dict get $hdrInfos numHeaderParts] [dict get $hdrInfos maxHeaderParts] [dict get $hdrInfos currPartIdx] [dict get $hdrInfos seqIdx] [dict get $hdrInfos seqIdxAfterStart]]
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= getStartFieldsFromLine ====================================
@@ -229,14 +229,14 @@ namespace eval compMsg {
       while {$fieldIdx < $lgth} {
         set fieldName [lindex $flds $fieldIdx]
         if {[string range $fieldName 0 0] ne "@"} {
-          checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
+          checkErrOK NO_SUCH_FIELD
         }
         set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
         checkErrOK $result
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_SRC {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_HDR_SRC] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              return DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U16_SRC
             incr seqIdx
@@ -244,7 +244,7 @@ namespace eval compMsg {
           }
           COMP_MSG_SPEC_FIELD_DST {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_HDR_DST] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              return DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U16_DST
             incr seqIdx
@@ -252,7 +252,7 @@ namespace eval compMsg {
           }
           COMP_MSG_SPEC_FIELD_TOTAL_LGTH {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_HDR_TOTAL_LGTH] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              return DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U16_TOTAL_LGTH
             incr seqIdx
@@ -260,7 +260,7 @@ namespace eval compMsg {
           }
           COMP_MSG_SPEC_FIELD_SRC_ID {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_HDR_SRC_ID] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              return DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U16_SRC_ID
             incr seqIdx
@@ -268,7 +268,7 @@ namespace eval compMsg {
           }
           COMP_MSG_SPEC_FIELD_GUID {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_HDR_GUID] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              return DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U8_VECTOR_GUID
             incr seqIdx
@@ -276,20 +276,20 @@ namespace eval compMsg {
           }
           COMP_MSG_SPEC_FIELD_HDR_FILLER {
             if {[lsearch [dict get $headerInfos headerFlags] COMP_DISP_HDR_FILLER] >= 0} {
-              return $::COMP_MSG_ERR_DUPLICATE_FIELD
+              return DUPLICATE_FIELD
             }
             dict lappend headerInfos headerSequence COMP_DISP_U8_VECTOR_HDR_FILLER
             incr seqIdx
             dict lappend headerInfos headerFlags COMP_DISP_HDR_FILLER
           }
           default {
-            checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
+            checkErrOK NO_SUCH_FIELD
           }
         }
         incr fieldIdx
       }
       dict set headerInfos seqIdxAfterStart $seqIdx
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
       
     # ================================= readHeadersAndSetFlags ====================================
@@ -319,7 +319,7 @@ namespace eval compMsg {
         dict set headerInfos headerSequence [lrange [dict get $headerInfos headerSequence] 0 [expr {$seqIdx - 1 }]]
         gets $fd line
         if {[string length $line] == 0} {
-          checkErrOK $::COMP_MSG_ERR_TOO_FEW_FILE_LINES
+          checkErrOK TOO_FEW_FILE_LINES
         }
         set hdr [dict create]
         set seqIdx2 0
@@ -380,7 +380,7 @@ namespace eval compMsg {
               }
             }
             default {
-              checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
+              checkErrOK FIELD_NOT_FOUND
             }
           }
           incr seqIdx2
@@ -414,7 +414,7 @@ namespace eval compMsg {
             dict set hdr hdrU16CmdKey $myPart
           }
           default {
-           checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
+           checkErrOK BAD_FIELD_TYPE
           }
         }
         incr seqIdx3
@@ -440,7 +440,7 @@ namespace eval compMsg {
             dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CMD_LGTH
           }
           default {
-            checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
+            checkErrOK BAD_FIELD_TYPE
           }
         }
         # type of crc
@@ -463,7 +463,7 @@ namespace eval compMsg {
               dict lappend hdr hdrFlags COMP_DISP_PAYLOAD_CRC
             }
             default {
-              checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
+              checkErrOK BAD_FIELD_TYPE
             }
           }
         }
@@ -487,7 +487,7 @@ namespace eval compMsg {
               dict lappend hdr hdrFlags COMP_DISP_TOTAL_CRC
             }
             default {
-              checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
+              checkErrOK BAD_FIELD_TYPE
             }
           }
         }
@@ -499,7 +499,7 @@ namespace eval compMsg {
       dict set headerInfos currPartIdx 0
       dict set compMsgDispatcher headerInfos $headerInfos
 #puts stderr "readHeadersAndSetFlags done!"
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= readActions ====================================
@@ -521,7 +521,7 @@ namespace eval compMsg {
         incr idx
       }
       close $fd
-      return $::COMP_MSG_DESC_ERR_OK
+      return [checkErrOK OK]
     }
 
       
@@ -538,13 +538,13 @@ namespace eval compMsg {
         if {[dict get $hdr hdrToPart] eq $dst} {
           if {[dict get $hdr hdrFromPart] eq $src} {
             if {[dict get $hdr hdrU16CmdKey] eq $cmdKey} {
-               return $::COMP_MSG_ERR_OK
+               return [checkErrOK OK]
             }
           }
         }
         incr idx
       }
-      checkErrOK $::COMP_DISP_ERR_HEADER_NOT_FOUND
+      checkErrOK HEADER_NOT_FOUND
     }
 
     # ================================= dumpMsgDescPart ====================================
@@ -558,7 +558,7 @@ namespace eval compMsg {
         checkErrOK $result
       }
       puts stderr [format "msgDescPart: fieldNameStr: %-15.15s fieldNameId: %-35.35s fieldTypeStr: %-10.10s fieldTypeId: %-30.30s field_lgth: %d callback: %s" [dict get $msgDescPart fieldNameStr] [dict get $msgDescPart fieldNameId] [dict get $msgDescPart fieldTypeStr] [dict get $msgDescPart fieldTypeId] [dict get $msgDescPart fieldLgth] $callbackName]
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= dumpMsgValPart ====================================
@@ -576,7 +576,7 @@ namespace eval compMsg {
          puts -nonewline stderr " COMP_DISP_DESC_VALUE_IS_NUMBER"
       }
       puts stderr ""
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= resetMsgDescParts ====================================
@@ -587,7 +587,7 @@ namespace eval compMsg {
       dict set compMsgMsgDesc msgDescParts [list]
       dict set compMsgMsgDesc numMsgDescParts 0
       dict set compMsgMsgDesc maxMsgDescParts 0
-      return $COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= resetMsgValParts ====================================
@@ -598,7 +598,7 @@ namespace eval compMsg {
       dict set compMsgMsgDesc msgValParts [list]
       dict set compMsgMsgDesc numMsgValParts 0
       dict set compMsgMsgDesc maxMsgValParts 0
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= getMsgPartsFromHeaderPart ====================================
@@ -627,7 +627,7 @@ namespace eval compMsg {
       while {$idx < $numEntries} {
         gets $fd line
         if {$line eq ""} {
-          checkErrOK $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+          checkErrOK TOO_FEW_FILE_LINES
         }
         set flds [split $line ","]
         set callback [list]
@@ -674,7 +674,7 @@ namespace eval compMsg {
       while {$idx < $numEntries} {
         gets $fd line
         if {$line eq ""} {
-          checkErrOK $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+          checkErrOK TOO_FEW_FILE_LINES
         }
         set flds [split $line ","]
         set callback [list]
@@ -707,7 +707,7 @@ namespace eval compMsg {
       close $fd
       dict set compMsgDispatcher compMsgData msgValParts $msgValParts
 #puts stderr "getMsgPartsFromHeaderPart done"
-      return $::COMP_MSG_DESC_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= setWifiKeyData ====================================
@@ -777,7 +777,7 @@ namespace eval compMsg {
           dict set wifiData bssTypes is_hidden $fieldTypeId
         }
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= getMsgKeyValueDescParts ====================================
@@ -808,7 +808,7 @@ namespace eval compMsg {
       }
       close $fd
 #puts stderr "getMsgKeyValueDescParts done"
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= getWifiKeyValueKeys ====================================
@@ -863,7 +863,7 @@ puts stderr "should handle key: $key $fieldTypeStr $fieldValueStr $fieldLgth!"
       }
       close $fd
 puts stderr "getWifiKeyValues done"
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
   } ; # namespace compMsgMsgDesc

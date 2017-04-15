@@ -84,6 +84,7 @@ set ::handleInputDbg false
 proc checkErrOK {result} {
   switch $result {
     0 {
+      return $result
     }
     default {
       error "ERROR result: $result!"
@@ -164,7 +165,7 @@ puts stderr "===CD createMsgFromHeaderPart: result!$result!"
 puts stderr "funny state: $myState!"
     }
   }
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ handleAnswer ===============================
@@ -176,7 +177,7 @@ proc handleAnswer {bufVar lgthVar} {
 #puts stderr "handleAnswer receivedMsg: $::receivedMsg!"
   if {!$::receivedMsg} {
 #puts stderr "handleAnswer no message"
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
   set buf $::msg
   set lgth $::msgLgth
@@ -280,7 +281,7 @@ proc handleInput0 {ch bufVar lgthVar} {
       append buf $ch
       incr lgth
       set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     } else {
       set ::inReceiveMsg true
     }
@@ -289,7 +290,7 @@ proc handleInput0 {ch bufVar lgthVar} {
     append buf $ch
     incr lgth
     set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
   if {!$::inDebug && ($ch eq "M")} {
 puts stderr "got 'M'"
@@ -297,12 +298,12 @@ puts stderr "got 'M'"
     append buf $ch
     incr lgth
     set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
   if {!$::inDebug && ($ch eq ">")} {
 puts stderr "got '>'"
     set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
   if {[format 0x%02x [expr {$pch & 0xff}]] eq "0xc2"} {
 #puts stderr "ch: $ch!pch: $pch!"
@@ -345,7 +346,7 @@ puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
         incr lgth
       }
       set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
   }
 #puts stderr "  ==handleInput0 4 inDebug!$::inDebug!"
@@ -371,14 +372,14 @@ puts stderr "received '> '"
       set lgth 0
       set buf ""
       set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
   }
 puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
   append buf $ch
   incr lgth
   set ::lastCh $ch
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ readByte0 ===============================
@@ -422,7 +423,7 @@ if {!$::inDebug && ($ch ne "%") && ([format 0x%02x [expr {$pch & 0xff}]] ne "0xc
 #    puts stderr "1: got message: for $myBuf"
 set ::totalLgth 999
 #puts stderr "readByte0: end"
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
 }
 
@@ -452,7 +453,7 @@ proc getSrcId {compMsgDispatcherVar valueVar} {
   set value 12345
   dict set msgValPart fieldValue $value
   dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getGUID ===============================
@@ -465,7 +466,7 @@ proc getGUID {compMsgDispatcherVar valueVar} {
   set value "1234-5678-9012-1"
   dict set msgValPart fieldValue $value
   dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getSsid ===============================
@@ -478,7 +479,7 @@ proc getSsid {compMsgDispatcherVar valueVar} {
   set value "Wiedemann3"
   dict set msgValPart fieldValue $value
   dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ main ===============================

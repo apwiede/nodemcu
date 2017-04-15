@@ -126,9 +126,9 @@ namespace eval compMsg {
     
       if {[dict exists $bssStr2BssInfoIds $fieldName]} {
         set fieldId [dict get $bssStr2BssInfoIds $fieldName]
-        return $::COMP_MSG_ERR_OK
+        return [checkErrOK OK]
       }
-      checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
+      checkErrOK FIELD_NOT_FOUND
     }
     
     # ================================= websocketBinaryReceived ====================================
@@ -247,7 +247,7 @@ namespace eval compMsg {
     #ets_printf{"getBssScanInfo1: \n"}
       if {$bssScanRunning} {
         # silently ignore 
-        return $::COMP_DISP_ERR_OK
+        return [checkErrOK OK]
       }
       set bssScanRunning true
       dict set scan_config ssid ""
@@ -258,10 +258,10 @@ namespace eval compMsg {
       set result [wifi_station_scan scan_config bssScanDoneCb]
     #ets_printf{"getBssScanInfo2: result: %d\n", result}
       if {$result != true} {
-        checkErrOK $::COMP_DISP_ERR_STATION_SCAN
+        checkErrOK STATION_SCAN
       }
     #ets_printf{"getBssScanInfo3:\n"}
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= getStationConfig ====================================
@@ -272,7 +272,7 @@ namespace eval compMsg {
       compMsgWifiData.wifiOpMode = wifi_get_opmode{}
       result = wifi_station_get_config{&station_config}
       if {result != true} {
-        checkErrOK $::COMP_DISP_ERR_GET_STATION_CONFIG
+        checkErrOK GET_STATION_CONFIG
       }
       c_memset{stationConfig.ssid, 0, sizeof{stationConfig.ssid}}
       if {c_strlen{station_config.ssid} <= sizeof{stationConfig.ssid}} {
@@ -298,7 +298,7 @@ namespace eval compMsg {
     #  freq_offset
     #  freqcal_val
     
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= geScanInfoTableFieldValue ====================================
@@ -311,7 +311,7 @@ namespace eval compMsg {
       self->buildMsgInfos.numericValue = 0
       self->buildMsgInfos.stringValue = NULL
       if {self->buildMsgInfos.tableRow > scanInfos->numScanInfos} {
-        checkErrOK $::COMP_DISP_ERR_BAD_ROW
+        checkErrOK BAD_ROW
       }
       scanInfo = &scanInfos->infos[self->buildMsgInfos.tableRow]
       result = bssStr2BssInfoId{self->msgDescPart->fieldNameStr, &fieldId}
@@ -343,7 +343,7 @@ namespace eval compMsg {
       case  BSS_INFO_FREQ_CAL_VAL:
         break
       }
-      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+      checkErrOK ACTION_NAME_NOT_FOUND
     }
     
     # ================================= getWifiKeyValueInfo ====================================
@@ -362,7 +362,7 @@ namespace eval compMsg {
         self->msgDescPart->fieldKey = compMsgWifiData.key_ssid
         self->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.ssidSize
         self->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.ssidType
-        return COMP_DISP_ERR_OK
+        return [checkErrOK OK]
         break
       case  BSS_INFO_SSID_LEN:
         break
@@ -372,7 +372,7 @@ namespace eval compMsg {
         self->msgDescPart->fieldKey = compMsgWifiData.key_rssi
         self->msgDescPart->fieldSize = compMsgWifiData.bssScanSizes.rssiSize
         self->msgDescPart->fieldType = compMsgWifiData.bssScanTypes.rssiType
-        return COMP_DISP_ERR_OK
+        return [checkErrOK OK]
         break
       case  BSS_INFO_AUTH_MODE:
         break
@@ -383,7 +383,7 @@ namespace eval compMsg {
       case  BSS_INFO_FREQ_CAL_VAL:
         break
       }
-      checkerrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
+      checkerrOK FIELD_NOT_FOUND
     }
     
     # ================================= getWifiKeyValue ====================================
@@ -423,7 +423,7 @@ namespace eval compMsg {
           *cp++ = '\0'
           entryIdx++
         }
-        return $::COMP_DISP_ERR_OK
+        return [checkErrOK OK]
         break
       case  BSS_INFO_SSID_LEN:
         break
@@ -450,7 +450,7 @@ namespace eval compMsg {
           *cp++ = bssScanInfo->rssi
           entryIdx++
         }
-        return $::COMP_DISP_ERR_OK
+        return [checkErrOK OK]
         break
       case  BSS_INFO_AUTH_MODE:
         break
@@ -461,7 +461,7 @@ namespace eval compMsg {
       case  BSS_INFO_FREQ_CAL_VAL:
         break
       }
-      checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
+      checkErrOK FIELD_NOT_FOUND
     }
     
     # ================================= getWifiValue ====================================
@@ -488,10 +488,10 @@ namespace eval compMsg {
         set [dict get $compMsgWifiData websocketTextReceived]
         }
       default {
-        checkErrOK $::COMP_DISP_ERR_BAD_WIFI_VALUE_WHICH
+        checkErrOK BAD_WIFI_VALUE_WHICH
         }
       }
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= setWifiValues ====================================
@@ -507,7 +507,7 @@ namespace eval compMsg {
       dict set compMsgWifiData provisioningIPAddr "192.168.4.1"
       set result [getStationConfig {compMsgWifiData}
       checkErrOK $result
-      return $COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= compMsgWifiInit ====================================
@@ -519,7 +519,7 @@ namespace eval compMsg {
       getWifiKeyValueKeys compMsgDispatcher compMsgWifiData
       set result [setWifiValues compMsgDispatcher]
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK;
+      return [checkErrOK OK]
     }
 
   } ; # namespace compMsgWifiData

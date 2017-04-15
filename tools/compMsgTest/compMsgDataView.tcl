@@ -33,55 +33,6 @@
 
 set ::crcDebug false
 
-set ::COMP_MSG_ERR_OK                    0
-set ::COMP_MSG_ERR_VALUE_NOT_SET         255
-set ::COMP_MSG_ERR_VALUE_OUT_OF_RANGE    254
-set ::COMP_MSG_ERR_BAD_VALUE             253
-set ::COMP_MSG_ERR_BAD_FIELD_TYPE        252
-set ::COMP_MSG_ERR_FIELD_TYPE_NOT_FOUND  251
-set ::COMP_MSG_ERR_VALUE_TOO_BIG         250
-set ::COMP_MSG_ERR_OUT_OF_MEMORY         249
-set ::COMP_MSG_ERR_OUT_OF_RANGE          248
-  # be carefull the values up to here
-  # must correspond to the values in dataView.h !!!
-  # with the names like DATA_VIEW_ERR_*
-  
-set ::COMP_MSG_ERR_FIELD_NOT_FOUND            230
-set ::COMP_MSG_ERR_BAD_SPECIAL_FIELD          229
-set ::COMP_MSG_ERR_BAD_HANDLE                 228
-set ::COMP_MSG_ERR_HANDLE_NOT_FOUND           227
-set ::COMP_MSG_ERR_NOT_ENCODED                226
-set ::COMP_MSG_ERR_ENCODE_ERROR               225
-set ::COMP_MSG_ERR_DECODE_ERROR               224
-set ::COMP_MSG_ERR_BAD_CRC_VALUE              223
-set ::COMP_MSG_ERR_CRYPTO_INIT_FAILED         222
-set ::COMP_MSG_ERR_CRYPTO_OP_FAILED           221
-set ::COMP_MSG_ERR_CRYPTO_BAD_MECHANISM       220
-set ::COMP_MSG_ERR_NOT_ENCRYPTED              219
-set ::COMP_MSG_ERR_DEFINITION_NOT_FOUND       218
-set ::COMP_MSG_ERR_DEFINITION_TOO_MANY_FIELDS 217
-set ::COMP_MSG_ERR_BAD_TABLE_ROW              216
-set ::COMP_MSG_ERR_TOO_MANY_FIELDS            215
-set ::COMP_MSG_ERR_BAD_DEFINTION_CMD_KEY      214
-set ::COMP_MSG_ERR_NO_SLOT_FOUND              213
-set ::COMP_MSG_ERR_BAD_NUM_FIELDS             212
-set ::COMP_MSG_ERR_ALREADY_INITTED            211
-set ::COMP_MSG_ERR_NOT_YET_INITTED            210
-set ::COMP_MSG_ERR_FIELD_CANNOT_BE_SET        209
-set ::COMP_MSG_ERR_NO_SUCH_FIELD              208
-set ::COMP_MSG_ERR_BAD_DATA_LGTH              207
-set ::COMP_MSG_ERR_NOT_YET_PREPARED           206
-set ::COMP_DEF_ERR_ALREADY_INITTED            205
-set ::COMP_DEF_ERR_NOT_YET_INITTED            204
-set ::COMP_DEF_ERR_NOT_YET_PREPARED           203
-set ::COMP_DEF_ERR_ALREADY_CREATED            202
-set ::COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING   201
-set ::COMP_LIST_ERR_ALREADY_INITTED           200
-set ::COMP_LIST_ERR_NOT_YET_INITTED           199
-set ::COMP_LIST_ERR_NOT_YET_PREPARED          198
-set ::COMP_LIST_ERR_ALREADY_CREATED           197
-set ::COMP_MSG_ERR_NO_SUCH_COMMAND            100
-
 set ::COMP_MSG_NO_INCR 0
 set ::COMP_MSG_INCR    1
 set ::COMP_MSG_DECR    -1
@@ -328,9 +279,9 @@ namespace eval ::compMsg {
 
       if {[dict exists $specialFieldIds2Ints $fieldNameId]} {
         set fieldNameInt [dict get $specialFieldId2Ints $fieldNameId]
-        return $::COMP_MSG_ERR_OK
+        return [checkErrOK OK]
       }
-      checkErrOK $::COMP_MSG_ERR_BAD_SPECIAL_FIELD
+      checkErrOK BAD_SPECIAL_FIELD
     }
 
     # ================================= getFieldNameIdFromStr ====================================
@@ -343,9 +294,9 @@ namespace eval ::compMsg {
         # find special field name
         if {[dict exists $specialFieldNames2Ids $fieldName]} {
           set fieldNameId [dict get $specialFieldNames2Ids $fieldName]
-          return $::COMP_MSG_ERR_OK
+          return [checkErrOK OK]
         }
-        checkErrOK $::COMP_MSG_ERR_BAD_SPECIAL_FIELD
+        checkErrOK BAD_SPECIAL_FIELD
       } else {
         set firstFreeEntry [list]
         set firstFreeEntryIdx 0
@@ -372,7 +323,7 @@ namespace eval ::compMsg {
                 }
               }
               set fieldNameId [dict get $entry id]
-              return $::COMP_MSG_ERR_OK
+              return [checkErrOK OK]
             }
             if {($incrVal == $::COMP_MSG_INCR) && ([dict get $entry id] eq $::COMP_MSG_FREE_FIELD_ID) && ($firstFreeEntry eq "")} {
               dict set firstFreeEntry id [expr {$nameIdx + 1}]
@@ -381,11 +332,11 @@ namespace eval ::compMsg {
           }
         }
         if {$incrVal == $::COMP_MSG_DECR} {
-          return $::COMP_MSG_ERR_OK ; # just ignore silently
+          return [checkErrOK OK] ; # just ignore silently
         } else {
           if {$incrVal == $::COMP_MSG_NO_INCR} {
 puts stderr "field not found: $fieldName!incrVal: $incrVal!"
-            checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
+            checkErrOK FIELD_NOT_FOUND
           } else {
             if {$firstFreeEntry ne ""} {
               set fieldNameId [dict get $firstFreeEntry id]
@@ -406,7 +357,7 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
         }
         dict set ::compMsg(fieldNameDefinitions) definitions $definitions
       }
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= getFieldNameStrFromId ====================================
@@ -424,7 +375,7 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
       # first try to find special field name
       if {[dict exists $specialFieldId2Names $fieldNameId]} {
         set fieldName [dict get $specialFieldId2Names $fieldNameId]
-        return $::COMP_MSG_ERR_OK
+        return [checkErrOK OK]
       }
       # find field name
       set idx 0
@@ -433,11 +384,11 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
         set nameEntry [lindex  [dict get $fieldNameDefinitions definitions] $idx]
         if {[dict get $nameEntry id] == $fieldNameId} {
           set fieldName [dict get $nameEntry fieldName]
-          return $::COMP_MSG_ERR_OK
+          return [checkErrOK OK]
         }
         incr idx
       }
-      checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
+      checkErrOK FIELD_NOT_FOUND
     }
     
     # ============================= getRandom ========================
@@ -522,7 +473,7 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
         incr offset 1
         incr lgth -1
       }
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     
@@ -565,7 +516,7 @@ if {$::crcDebug} {
 puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
 }
         if {$crcVal != $crc} {
-          return $::COMP_MSG_ERR_BAD_CRC_VALUE
+          checkErrOK BAD_CRC_VALUE
         }
         set value $crc
       } else  {
@@ -580,11 +531,11 @@ if {$::crcDebug} {
 puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc: [format 0x%02x $crc]!"
 }
         if {[expr {$crcVal & 0xFF}] != $crc} {
-          checkErrOK $::COMP_MSG_ERR_BAD_CRC_VALUE
+          checkErrOK BAD_CRC_VALUE
         }
         set value $crc
       }
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= setCrc ====================================
@@ -628,7 +579,7 @@ puts stderr "crc11: $crc![format 0x%04x $crc]![format 0x%02x [expr {$crc & 0xFF}
         set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]
       }
       checkErrOK $result
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= getTotalCrc ====================================
@@ -669,7 +620,7 @@ if {$::crcDebug} {
 puts stderr "crcVal: [format 0x%04x $crcVal]!offset: $offset!crc: [format 0x%04x $crc]!"
 }
         if {$crcVal != $crc} {
-          return $::COMP_MSG_ERR_BAD_CRC_VALUE
+          checkErrOK BAD_CRC_VALUE
         }
         set value $crc
       } else  {
@@ -684,11 +635,11 @@ if {$::crcDebug} {
 puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc: [format 0x%02x $crc]!"
 }
         if {[expr {$crcVal & 0xFF}] != $crc} {
-          checkErrOK $::COMP_MSG_ERR_BAD_CRC_VALUE
+          checkErrOK BAD_CRC_VALUE
         }
         set value $crc
       }
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= setTotalCrc ====================================
@@ -729,7 +680,7 @@ puts stderr "crc11: $crc![format 0x%04x $crc]!"
         set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]
       }
       checkErrOK $result
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     
@@ -780,14 +731,14 @@ if {[catch {
           set result [::compMsg dataView getUint32 [expr {$offset + $fieldIdx*4}] value]
         }
         default {
-          checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
+          checkErrOK BAD_FIELD_TYPE
         }
       }
 } msg]} {
 puts stderr "getFieldValue: $msg!$fieldInfo!"
 }
       checkErrOK $result
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= setFieldValue ====================================
@@ -799,7 +750,7 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
             set result [::compMsg dataView setInt8 [dict get $fieldInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int8 value too big"
-            checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
+            checkErrOK VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_UINT8_T {
@@ -810,7 +761,7 @@ puts stderr "compMsgDataView setFieldValue int8 value too big"
             set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint8 value too big"
-            checkErrOK $::COMP_MSG_ERR_BAD_VALUE
+            checkErrOK BAD_VALUE
           }
         }
         DATA_VIEW_FIELD_INT16_T {
@@ -818,7 +769,7 @@ puts stderr "compMsgDataView setFieldValue uint8 value too big"
             set result [::compMsg dataView setInt16 [dict get $fieldInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int16 value too big"
-            checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
+            checkErrOK VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_UINT16_T {
@@ -830,7 +781,7 @@ puts stderr "compMsgDataView setFieldValue int16 value too big"
             set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint16 value too big"
-            checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
+            checkErrOK VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_INT32_T {
@@ -838,7 +789,7 @@ puts stderr "compMsgDataView setFieldValue uint16 value too big"
             set result [::compMsg dataView setInt32 [dict get $fieldInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int32 value too big"
-            checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
+            checkErrOK VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_UINT32_T {
@@ -847,7 +798,7 @@ puts stderr "compMsgDataView setFieldValue int32 value too big"
             set result [::compMsg dataView setUint32 [dict get $fieldInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint32 value too big !$value!"
-            checkErrOK $::COMP_MSG_ERR_VALUE_TOO_BIG
+            checkErrOK VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_INT8_VECTOR {
@@ -871,11 +822,11 @@ puts stderr "compMsgDataView setFieldValue uint32 value too big !$value!"
         }
         default {
 puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
-          checkErrOK $::COMP_MSG_ERR_BAD_FIELD_TYPE
+          checkErrOK BAD_FIELD_TYPE
         }
       }
       checkErrOK $result
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= compMsgDataView ====================================
@@ -888,7 +839,7 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
         }
       }
 puts stderr "compMsgDataView!no such command!$command!"
-      return $::COMP_MSG_ERR_NO_SUCH_COMMAND
+      return [checkErrOK NO_SUCH_COMMAND]
     }
 
   } ; # namespace compMsgDataView

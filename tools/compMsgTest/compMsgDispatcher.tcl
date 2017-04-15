@@ -140,10 +140,10 @@ namespace eval compMsg {
         received -
         toSend {
           dict set compMsgDispatcher $which $parts
-          return $::COMP_MSG_ERR_OK
+          return [checkErrOK OK]
         }
         default {
-          checkErrOK $::COMP_MSG_ERR_BAD_VALUE
+          checkErrOK BAD_VALUE
         }
       }
     }
@@ -153,7 +153,7 @@ namespace eval compMsg {
     proc toBase64 {msg len encoded} {
       n = *len
       if {!n} { # handle empty string case 
-        checkErrOK $::COMP_DISP_ERR_OUT_OF_MEMORY
+        checkErrOK OUT_OF_MEMORY
       }
       out = {uint8_t *}os_zalloc((n + 2) / 3 * 4);
       checkAllocOK{out};
@@ -170,7 +170,7 @@ namespace eval compMsg {
       }
       *len = q - out;
       *encoded = out;
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= fromBase64 ========================
@@ -180,10 +180,10 @@ namespace eval compMsg {
       blocks = {n>>2};
       pad = 0;
       if {!n} { # handle empty string case 
-        checkErrOK $::COMP_DISP_ERR_OUT_OF_MEMORY
+        checkErrOK OUT_OF_MEMORY
       } 
       if {n & 3} {
-        checkErrOK $::COMP_DISP_ERR_INVALID_BASE64_STRING
+        checkErrOK INVALID_BASE64_STRING
       } 
       c_memset{unbytes64, BASE64_INVALID, sizeof(unbytes64});
       for {i = 0; i < sizeof(b64}-1; i++) {
@@ -196,7 +196,7 @@ namespace eval compMsg {
     
       for {i = 0; i < n - pad; i++} {
         if {!ISBASE64(encodedMsg[i]}) {
-          checkErrOK $::COMP_DISP_ERR_INVALID_BASE64_STRING
+          checkErrOK INVALID_BASE64_STRING
         }
       }
       unbytes64[BASE64_PADDING] = 0;
@@ -220,7 +220,7 @@ namespace eval compMsg {
       }
       *len = q - msg;
       *decodedMsg = msg;
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= addHandle ========================
@@ -235,7 +235,7 @@ namespace eval compMsg {
         dict set entry compMsgDispatcher $compMsgDispatcher
         dict lappend compMsgDispatcherHandles handles $entry
         dict incr compMsgDispatcherHandles numHandles 1
-        return $::COMP_DISP_ERR_OK
+        return [checkErrOK OK]
       } else {
         # check for unused slot first
         set idx 0
@@ -247,7 +247,7 @@ namespace eval compMsg {
             dict set entry compMsgDispatcher $compMsgDispatcher
             set handles [lreplace $handles $iidx $idx $entry
             dict set compMsgDispatcherHandles $handles
-            return $::COMP_DISP_ERR_OK
+            return [checkErrOK OK]
           }
           incr idx
         }
@@ -258,7 +258,7 @@ namespace eval compMsg {
         dict lappend compMsgDispatcherHandles handles $entry
         dict incr compMsgDispatcherHandles numHandles 1
       }
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= deleteHandle ========================
@@ -267,7 +267,7 @@ namespace eval compMsg {
       variable compMsgDispatcher
 
       if {compMsgDispatcherHandles.handles == NULL} {
-        return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+        checkErrOK HANDLE_NOT_FOUND
       }
       found = 0;
       idx = 0;
@@ -288,9 +288,9 @@ namespace eval compMsg {
         compMsgDispatcherHandles.handles = NULL;
       }
       if {found} {
-          return $::COMP_DISP_ERR_OK
+          return [checkErrOK OK]
       }
-      checkErrOK $::COMP_DISP_ERR_HANDLE_NOT_FOUND
+      checkErrOK HANDLE_NOT_FOUND
     }
     
     # ============================= checkHandle ========================
@@ -299,17 +299,17 @@ namespace eval compMsg {
       variable compMsgDispatcher
     
       if {compMsgDispatcherHandles.handles == NULL} {
-        checkErrOK $::COMP_DISP_ERR_HANDLE_NOT_FOUND
+        checkErrOK HANDLE_NOT_FOUND
       }
       idx = 0;
       while {idx < compMsgDispatcherHandles.numHandles} {
         if {(compMsgDispatcherHandles.handles[idx].handle != NULL} && (c_strcmp(compMsgDispatcherHandles.handles[idx].handle, handle) == 0)) {
           *compMsgDispatcher = compMsgDispatcherHandles.handles[idx].compMsgDispatcher;
-          return $::COMP_DISP_ERR_OK
+          return [checkErrOK OK]
         }
         idx++;
       }
-      checkErrOK $::COMP_DISP_ERR_HANDLE_NOT_FOUND
+      checkErrOK HANDLE_NOT_FOUND
     }
     
     # ================================= dumpMsgParts ====================================
@@ -328,7 +328,7 @@ namespace eval compMsg {
         incr idx
       }
       puts stderr "partFlags: [dict get $msgParts partsFlags]"
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= getMsgPtrFromMsgParts ====================================
@@ -384,11 +384,11 @@ puts stderr "compMsgDispatcher2 setData"
               dict set headerEntry headerLgth 0
               dict set headerEntry compMsgData [list]
               set msgHeader2MsgPtrs [lreplace $msgHeader2MsgPtrs $headerIdx $headerIdx $headerEntry]
-              return $::COMP_DISP_ERR_OK
+              return [checkErrOK OK]
             }
             set compMsgData [dict get $headerEntry compMsgData]
 # FIXME!!            dict set compMsgData flags [dict delete [dict get $compMsgData flags] COMP_MSG_IS_PREPARED]
-            return $::COMP_DISP_ERR_OK
+            return [checkErrOK OK]
           }
           if {($incrRefCnt == $::COMP_MSG_INCR} && ([dict get $headerEntry compMsgData] eq [list]) && ($firstFreeEntry eq [list])) {
             set firstFreeEntry $headerEntry
@@ -402,10 +402,10 @@ puts stderr "compMsgDispatcher2 setData"
         }
       }
       if {$incrRefCnt < 0} {
-        return $::COMP_DISP_ERR_OK; # just ignore silently
+        return [checkErrOK OK] ; # just ignore silently
       } else {
         if {$incrRefCnt == 0} {
-          checkErrOK $::COMP_DISP_ERR_HEADER_NOT_FOUND;
+          checkErrOK HEADER_NOT_FOUND;
         } else {
           if {$firstFreeEntry ne [list]} {
             set compMsgData [dict get $firstFreeEntry compMsgData]
@@ -425,7 +425,7 @@ puts stderr "compMsgDispatcher2 setData"
       }
 puts stderr "compMsgDispatcher3 setData"
       set result [::compMsg dataView setData $saveData $saveLgth]
-      return $::COMP_DISP_ERR_OK;
+      return [checkErrOK OK]
     }
     
     # ================================= setMsgValuesFromLines ====================================
@@ -482,7 +482,7 @@ puts stderr "compMsgDispatcher3 setData"
       set result [::compMsg compMsgData prepareMsg]
 #  ::compMsg compMsgData dumpMsg
       checkErrOK $result
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= createMsgFromHeaderPart ====================================
@@ -522,7 +522,7 @@ puts stderr "compMsgDispatcher3 setData"
         set result [::compMsg compMsgBuildMsg buildMsg compMsgDispatcher]
         # FIXME !! here we need a call to send the (eventually encrypted) message!!
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= createMsgFromLines ====================================
@@ -539,7 +539,7 @@ puts stderr "compMsgDispatcher3 setData"
       set result [getMsgPtrFromMsgParts $parts $::COMP_MSG_INCR]
       checkErrOK $result
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
-        return $::COMP_DISP_ERR_OK
+        return [checkErrOK OK]
       }
       set result [::compMsg compMsgData createMsg $numEntries handle]
       checkErrOK $result
@@ -547,7 +547,7 @@ puts stderr "compMsgDispatcher3 setData"
       while {$idx < $numEntries} {
         gets $fd line
         if {$line eq ""} {
-          checkErrOK $::COMP_DISP_ERR_TOO_FEW_FILE_LINES
+          checkErrOK TOO_FEW_FILE_LINES
         }
         set flds [split $line ","]
         foreach {fieldNameStr fieldTypeStr fieldLgthStr} $flds break
@@ -561,7 +561,7 @@ puts stderr "compMsgDispatcher3 setData"
         incr idx
       }
       ::compMsg compMsgData initMsg 0 0
-      return $::COMP_DISP_ERR_OK;
+      return [checkErrOK OK]
     }
     
     # ================================= resetMsgInfo ====================================
@@ -583,7 +583,7 @@ puts stderr "compMsgDispatcher3 setData"
 #      self->compMsgDataView->dataView->data = parts->buf;
 #      self->compMsgDataView->dataView->lgth = 0;
       dict set compMsgDispatcher $partsVar $parts
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= encryptMsg ========================
@@ -594,7 +594,7 @@ puts stderr "compMsgDispatcher3 setData"
 
       set data [aes::aes -mode cbc -dir encrypt -key $key -iv $iv $msg]
       set lgth [string length $data]
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= decryptMsg ========================
@@ -605,7 +605,7 @@ puts stderr "compMsgDispatcher3 setData"
 
       set buf [aes::aes -mode cbc -dir decrypt -key $key -iv $iv $msg]
       set lgth [string length $buf]
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= compMsgDispatcherGetPtrFromHandle ========================
@@ -616,7 +616,7 @@ puts stderr "compMsgDispatcher3 setData"
       if {checkHandle(handle, compMsgDispatcher} != COMP_DISP_ERR_OK) {
         return COMP_DISP_ERR_HANDLE_NOT_FOUND;
       }
-      return $::COMP_DISP_ERR_OK;
+      return [checkErrOK OK]
     }
     
     # ================================= setSocketForAnswer ====================================
@@ -625,7 +625,7 @@ puts stderr "compMsgDispatcher3 setData"
       upvar $comMsgDispatcherVar compMsgDispatcher
 
       dict set compMsgDispatcher socketForAnswer $sock
-      return $::COMP_DISP_ERR_OK;
+      return [checkErrOK OK]
     }
 
     # ================================= initDispatcher ====================================
@@ -646,7 +646,7 @@ puts stderr "compMsgDispatcher3 setData"
       checkErrOK $result
 #      set result [::compMsg compMsgWebsocket compMsgWebsocketInit compMsgDispatcher]
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= createDispatcher ====================================
@@ -665,7 +665,7 @@ puts stderr "compMsgDispatcher3 setData"
       resetMsgInfo received
       resetMsgInfo toSend
       set handle [dict get $compMsgDispatcher handle]
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= newCompMsgDispatcher ====================================
@@ -684,7 +684,7 @@ puts stderr "compMsgDispatcher3 setData"
     
 #      compMsgDispatcher->compMsgDataDescription = newCompMsgDataDescription{};
     
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= freeCompMsgDispatcher ====================================

@@ -89,7 +89,7 @@ namespace eval compMsg {
 #      self->WifiPart = 0x5700
 #      self->AppPart = 0x4100
 #      self->CloudPart = 0x4300
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= resetHeaderInfos ====================================
@@ -100,7 +100,7 @@ namespace eval compMsg {
       dict set headerInfos seqIdx 0
       dict set headerInfos seqIdxAfterStart 0
       dict set headerInfos currPartIdx 0
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= nextFittingEntry ====================================
@@ -149,7 +149,7 @@ namespace eval compMsg {
       }
       if {!$found} {
 puts stderr "Fitting header not found!"
-        checkErrOK $::COMP_DISP_ERR_HEADER_NOT_FOUND
+        checkErrOK HEADER_NOT_FOUND
       }
       dict set headerInfos currPartIdx $hdrIdx
       # next sequence field is extraLgth {skip, we have it in hdr fields}
@@ -166,7 +166,7 @@ puts stderr "Fitting header not found!"
       }
 #puts stderr "nextFittingEntry found: $found!hdrIdx: $hdrIdx"
       dict set compMsgDispatcher headerInfos $headerInfos
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= getHeaderIndexFromHeaderFields ====================================
@@ -238,7 +238,7 @@ puts stderr "Fitting header not found!"
       dict set compMsgDispatcher headerInfos $headerInfos
       set result [nextFittingEntry compMsgDispatcher received 0 0]
       checkErrOK $result
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= handleReceivedHeader ====================================
@@ -276,7 +276,7 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
         incr idx
         set sequenceEntry [lindex $fieldSequence $idx]
       }
-      set result $::COMP_MSG_ERR_OK
+      set result OK
       dict set headerInfos seqIdx 0
 #puts stderr "seqIdx: [dict get $headerInfos seqIdx]!"
       set sequenceEntry [lindex $fieldSequence [dict get $headerInfos seqIdx]]
@@ -314,7 +314,7 @@ puts stderr "u16cmdkey: $receivedCmdKey![dict get $hdr hdrU16CmdKey]!"
           }
           COMP_DISP_U0_CRC {
 #puts stderr "u0Crc!0!"
-            set result $::COMP_MSG_ERR_OK
+            set result OK
           }
           COMP_DISP_U8_CRC {
             set fieldInfo [dict create]
@@ -353,7 +353,7 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
           }
           COMP_DISP_U0_TOTAL_CRC {
 #puts stderr "u0TotalCrc!0!"
-            set result $COMP_MSG_ERR_OK
+            set result OK
           }
           COMP_DISP_U8_TOTAL_CRC {
             set fieldInfo [dict create]
@@ -361,7 +361,7 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
             dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 1}]
 #puts stderr [format "u8TotalCrc!fieldOffset: %d" [dict get $fieldInfo fieldOffset]]
             # the totalCrc only fits if not yet decrypted and we have decrypted here!!
-            set result $::COMP_MSG_ERR_OK
+            set result [checkErrOK OK]
 #            set result [::compMsg compMsgDataView getTotalCrc $fieldInfo totalCrc]
 #puts stderr [format "u8totalCrc!res!%d!" $result]
 #puts stderr [format "u8totalCrc: currPartIdx: %d" [dict get $headerInfos currPartIdx]]
@@ -370,7 +370,7 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
             set fieldInfo [dict create]
             dict set fieldInfo fieldLgth 2
             dict set fieldInfo fieldOffset [expr {[dict get $received totalLgth] - 2}]
-            set result $::COMP_MSG_ERR_OK
+            set result [checkErrOK OK]
 #            set result [::compMsg compMsgDataView getTotalCrc $fieldInfo totalCrc]
 puts stderr [format "u16TotalCrc!res!%d!" $result]
           }
@@ -384,7 +384,7 @@ puts stderr [format "u16TotalCrc!res!%d!" $result]
 #puts stderr "call deleteMsg"
 #  ::compMsg compMsgData deleteMsg compMsgDispatcher
 #puts stderr "received msg deleted"
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= handleReceivedMsg ====================================
@@ -426,7 +426,7 @@ puts stderr "totalLgth: [dict get $received totalLgth]!"
       checkErrOK $result
 #puts stderr "handleReceivedMsg done"
 #::compMsg compMsgData dumpMsg compMsgDispatcher
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= handleReceivedPart ====================================
@@ -486,7 +486,7 @@ puts stderr "+++handleReceivedPart: lgth: $lgth!"
             set cryptKey "a1b2c3d4e5f6g7h8"
             set result [::compMsg compMsgDispatcher decryptMsg $crypted $mlen $cryptKey 16 $cryptKey 16 decrypted decryptedLgth]
 #puts stderr "decryptedLgth: $decryptedLgth!result!$result!"
-            if {$result != $::COMP_MSG_ERR_OK} {
+            if {$result != [dict get $::COMP_MSG_ERR OK]} {
 puts stderr "decrypt error"
             }
             set buffer "${myHeader}${decrypted}${totalCrc}"
@@ -502,7 +502,7 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen + $totalCr
         }
         incr idx
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= compMsgIdentifyReset ====================================
@@ -519,7 +519,7 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen + $totalCr
       dict set received lgth 0
       set dispFlags [list]
       resetHeaderInfos
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= compMsgIdentifyInit ====================================
@@ -531,7 +531,7 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen + $totalCr
       checkErrOK $result
       set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags compMsgDispatcher ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
       checkErrOK $result
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
   } ; # namespace compMsgIdentify

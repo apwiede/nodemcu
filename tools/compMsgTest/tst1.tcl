@@ -17,6 +17,7 @@ source compMsgModuleData.tcl
 proc checkErrOK {result} {
   switch $result {
     0 {
+      return $result
     }
     default {
       error "ERROR result: $result!"

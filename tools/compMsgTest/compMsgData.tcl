@@ -181,7 +181,7 @@ namespace eval compMsg {
         }
         incr idx
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= getFieldTypeFromFieldNameId ====================================
@@ -195,11 +195,11 @@ namespace eval compMsg {
         set fieldInfo [lindex $fields $idx]
         if {[dict get $fieldInfo fieldNameId] == $fieldNameId} {
           set fieldTypeId [dict get $fieldInfo fieldTypeId]
-          return $::COMP_DISP_ERR_OK
+          return [checkErrOK OK]
         }
         incr idx
       }
-      checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
+      checkErrOK [checkErrOK FIELD_NOT_FOUND]
     }
  
     # ============================= addHandle ========================
@@ -217,7 +217,7 @@ namespace eval compMsg {
         dict lappend compMsgHandles handles $handleDict
         dict incr compMsgHandles numHandles 1
         set header [list]
-        return $::COMP_MSG_ERR_OK
+        return [checkErrOK OK]
       } else {
         # check for unused slot first
         set idx 0
@@ -232,7 +232,7 @@ namespace eval compMsg {
             set handles [lreplace $handles $idx $idx $entry]
             dict set compMsgHandles handles $handles
             set header [list]
-            return $::COMP_MSG_ERR_OK
+            return [checkErrOK OK]
           }
           incr idx
         }
@@ -243,14 +243,14 @@ namespace eval compMsg {
         set header [list]
         dict incr compMsgHandles numHandles 1
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= deleteHandle ========================
     
     proc deleteHandle {handle} {
       if {compMsgHandles.handles == NULL} {
-        checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
+        checkErrOK HANDLE_NOT_FOUND
       }
       found = 0
       idx = 0
@@ -271,9 +271,9 @@ namespace eval compMsg {
         compMsgHandles.handles = NULL
       }
       if {$found} {
-          return COMP_MSG_ERR_OK
+          return [checkErrOK OK]
       }
-      checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
+      checkErrOK [checkErrOK HANDLE_NOT_FOUND]
     }
     
     # ============================= checkHandle ========================
@@ -283,7 +283,7 @@ namespace eval compMsg {
       variable compMsgData
     
       if {[dict get $compMsgHandles handles] eq [list]} {
-        checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
+        checkErrOK [checkErrOK HANDLE_NOT_FOUND]
       }
       set idx 0
       set handles [dict get compMsgHandles handles]
@@ -291,11 +291,11 @@ namespace eval compMsg {
         set entry [lindex $handles $idx]
         if {([dict get $entry handle] ne [list]) && ([dict get $entry handle] eq $handle)} {
           set compMsgData [dict get $entry compMsgData]
-          return $::COMP_MSG_ERR_OK
+          return [checkErrOK OK]
         }
         incr idx
       }
-      checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
+      checkErrOK [checkErrOK HANDLE_NOT_FOUND]
     }
     
     # ============================= getMsgData ========================
@@ -307,15 +307,15 @@ namespace eval compMsg {
 
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_INITTED
+        checkErrOK NOT_YET_INITTED
       }
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_PREPARED] < 0} {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_PREPARED
+        checkErrOK NOT_YET_PREPARED
       }
       set result [::compMsg dataView getData data lgth]
       set lgth [dict get $compMsgData totalLgth]
       checkErrOK $result
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ============================= setMsgData ========================
@@ -324,7 +324,7 @@ namespace eval compMsg {
       variable compMsgData
 
       if {[lsearch [dct get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_INITTED
+        checkErrOK NOT_YET_INITTED
       }
       set found false
       # check lgth
@@ -338,7 +338,7 @@ namespace eval compMsg {
         incr idx
       }
       if {! $found} {
-        checkErrOK $::COMP_MSG_ERR_NO_SUCH_FIELD
+        checkErrOK NO_SUCH_FIELD
       } 
       # temporary replace data entry of dataView by our param data
       # to be able to use the get* functions for gettting totalLgth entry value
@@ -349,7 +349,7 @@ puts stderr "compMsgData1 setData"
       set result [::compMsg dataView getUint16 [dict get $fieldInfo fieldOffset] lgth]
       checkErrOK $result
       if {$lgth != [dict get $compMsgData totalLgth]} {
-        checkErrOK $::COMP_MSG_ERR_BAD_DATA_LGTH
+        checkErrOK BAD_DATA_LGTH
       }
       # now make a copy of the data to be on the safe side
 puts stderr "compMsgData2 setData"
@@ -365,16 +365,16 @@ puts stderr "compMsgData2 setData"
         incr idx
       }
       dict lappend compMsgData flags COMP_MSG_IS_PREPARED
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ============================= compMsgGetPtrFromHandle ========================
     
     proc compMsgGetPtrFromHandle {handle} {
-      if {[checkHandle $handle] != $::COMP_MSG_ERR_OK} {
-        checkErrOK $::COMP_MSG_ERR_HANDLE_NOT_FOUND
+      if {[checkHandle $handle] != [dict get $::COMP_MSG_ERR OK]} {
+        checkErrOK HANDLE_NOT_FOUND
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= createMsg ====================================
@@ -400,7 +400,7 @@ puts stderr "compMsgData2 setData"
       set result [addHandle $handle [dict get $compMsgData header]]
       checkErrOK $result
       set handle [dict get $compMsgData handle]
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= addField ====================================
@@ -409,7 +409,7 @@ puts stderr "compMsgData2 setData"
       upvar $compMsgDataVar compMsgData
     
       if {[dict get $compMsgData numFields] >= [dict get $compMsgData maxFields]} {
-        checkErrOK $::COMP_MSG_ERR_TOO_MANY_FIELDS
+        checkErrOK [TOO_MANY_FIELDS]
       }
       set result [::compMsg dataView getFieldTypeIdFromStr $fieldType fieldTypeId]
       checkErrOK $result
@@ -426,7 +426,7 @@ puts stderr "compMsgData2 setData"
         dict set fieldInfo fieldFlags [list]
         dict lappend compMsgData fields $fieldInfo
         dict incr compMsgData numFields 1
-        return $::COMP_MSG_ERR_OK
+        return [checkErrOK OK]
       }
       if {$fieldName eq "@crc"} {
         dict lappend compMsgData flags COMP_MSG_HAS_CRC
@@ -441,7 +441,7 @@ puts stderr "compMsgData2 setData"
       dict set fieldInfo fieldFlags [list]
       dict lappend compMsgData fields $fieldInfo
       dict incr compMsgData numFields 1
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= getFieldValue ====================================
@@ -452,7 +452,7 @@ puts stderr "compMsgData2 setData"
     
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_INITTED
+        checkErrOK [NOT_YET_INITTED]
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId COMP_MSG_NO_INCR]
       checkErrOK $result
@@ -467,11 +467,11 @@ puts stderr "compMsgData2 setData"
           switch $fieldNameId {
             COMP_MSG_SPEC_FIELD_TABLE_ROWS {
              set value [dict get $compMsgData numTabRows]
-             set result $::COMP_MSG_ERR_OK
+             set result [dict get $::COMP_MSG_ERR OK]
             }
             COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS {
              set value [dict get $compMsgData numTabRowFields]
-             set result $::COMP_MSG_ERR_OK
+             set result [dict get $::COMP_MSG_ERR OK]
             }
             default {
               if {[string range $fieldName 0 0] eq "#"} {
@@ -499,9 +499,9 @@ puts stderr "compMsgData2 setData"
         incr idx
       }
       if {!$found} {
-        return $::COMP_MSG_ERR_FIELD_NOT_FOUND
+        checkErrOK FIELD_NOT_FOUND
       }
-      return $::DATA_VIEW_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= setFieldValue ====================================
@@ -511,7 +511,7 @@ puts stderr "compMsgData2 setData"
 
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_INITTED
+        checkErrOK [NOT_YET_INITTED]
       }
       set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_NO_INCR]
       checkErrOK $result
@@ -522,7 +522,7 @@ puts stderr "compMsgData2 setData"
         COMP_MSG_SPEC_FIELD_CRC -
         COMP_MSG_SPEC_FIELD_RANDOM_NUM -
         COMP_MSG_SPEC_FIELD_SEQUENCE_NUM {
-          checkErrOK $::COMP_MSG_ERR_FIELD_CANNOT_BE_SET
+          checkErrOK FIELD_CANNOT_BE_SET
         }
       }
       set idx 0
@@ -567,13 +567,13 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
           dict set compMsgData fields $fields
           dict set compMsgDispatcher compMsgData $compMsgData
 #dumpMsg compMsgDispatcher
-          return $::DATA_VIEW_ERR_OK
+          return [checkErrOK OK]
         }
         incr idx
       }
     #ets_printf{"idx: %d\n", idx}
       dict set compMsgDispatcher compMsgData $compMsgData
-      checkErrOK $::DATA_VIEW_ERR_FIELD_NOT_FOUND
+      checkErrOK FIELD_NOT_FOUND
     }
     
     # ================================= prepareMsg ====================================
@@ -583,7 +583,7 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
 
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
-        checkErrOK $::COMP_MSG_ERR_NOT_YET_INITTED
+        checkErrOK NOT_YET_INITTED
       }
       # create the values which are different for each message!!
       set numEntries [dict get $compMsgData numFields]
@@ -648,7 +648,7 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
       dict set compMsgData fields $fields
       dict lappend compMsgData flags COMP_MSG_IS_PREPARED
       dict set compMsgDispatcher compMsgData $compMsgData
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= addFlag ====================================
@@ -657,7 +657,7 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
       variable compMsgData
     
       dict lappend compMsgData flags $flag
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
     # ================================= deleteFlag ====================================
@@ -676,7 +676,7 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
       # initialize field offsets for each field
       # initialize totalLgth, headerLgth, cmdLgth
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
-        return $::COMP_MSG_ERR_ALREADY_INITTED
+        return [checkErrOK ALREADY_INITTED]
       }
       dict set compMsgData fieldOffset 0
       set numEntries [dict get $compMsgData numFields]
@@ -731,7 +731,7 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
         incr idx
       }
       if {[dict get $compMsgData totalLgth] == 0} {
-        checkErrOK $::COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING
+        checkErrOK [FIELD_TOTAL_LGTH_MISSING]
       }
       set totalLgth [dict get $compMsgData totalLgth]
 #puts stderr "compMsgData3 setData: totalLgth: $totalLgth!"
@@ -761,7 +761,7 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
       }
       dict set compMsgData fields $fields
       dict set compMsgDispatcher compMsgData $compMsgData
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= initReceivedMsg ====================================
@@ -773,7 +773,7 @@ puts stderr "initReceivedMsg"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       # initialize field offsets for each field
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
-        checkErrOK $::COMP_MSG_ERR_ALREADY_INITTED
+        checkErrOK ALREADY_INITTED
       }
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
       dict set compMsgDispatcher compMsgData $compMsgData
@@ -863,7 +863,7 @@ puts stderr "size: $value offset: $offset!"
         incr idx
       }
       if {[dict get $compMsgData totalLgth] == 0} {
-        checkErrOK $::COMP_MSG_ERR_FIELD_TOTAL_LGTH_MISSING
+        checkErrOK FIELD_TOTAL_LGTH_MISSING
       }
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
       dict set compMsgData fields $fields
@@ -873,7 +873,7 @@ puts stderr "size: $value offset: $offset!"
 #::compMsg compMsgData dumpMsg compMsgDispatcher
 #puts stderr "hexDump"
 #::compMsg dataView dumpBinary $::compMsg::dataView::data $::compMsg::dataView::lgth "MSG_AA"
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     
   } ; # namespace compMsgData

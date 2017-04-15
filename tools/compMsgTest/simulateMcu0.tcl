@@ -67,6 +67,7 @@ set ::totalLgth 999
 proc checkErrOK {result} {
   switch $result {
     0 {
+      return $result
     }
     default {
       error "ERROR result: $result!"
@@ -141,7 +142,7 @@ puts stderr "should send BDMsg"
 puts stderr "funny state: $myState!"
     }
   }
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ handleInput0 ===============================
@@ -165,7 +166,7 @@ puts stderr "reset ::isStart"
       set ::isStart false
 #      return -code return
       set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     append ::startTxt $ch
     if {$ch eq "%"} {
@@ -226,14 +227,14 @@ puts stderr "received '> '"
       set lgth 0
       set buf ""
       set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
   }
 #puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
   append buf $ch
   incr lgth
   set ::lastCh $ch
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ startMsg ===============================
@@ -321,7 +322,7 @@ proc getSrcId {compMsgDispatcherVar} {
   set msgValPart [dict get $compMsgDispatcher msgValPart]
   dict set msgValPart fieldValue 12345
   dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getGUID ===============================
@@ -332,7 +333,7 @@ proc getGUID {compMsgDispatcherVar} {
   set msgValPart [dict get $compMsgDispatcher msgValPart]
   dict set msgValPart fieldValue "1234-5678-9012-1"
   dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ main ===============================

@@ -388,7 +388,7 @@ puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
       variable buildMsgInfos
 
 pdict $hdr
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
 
   } ; # namespace compMsgBuildMsg

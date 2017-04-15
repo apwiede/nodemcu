@@ -58,7 +58,7 @@ namespace eval compMsg {
       }
       result =self->handleReceivedPart myBuffer, lgth
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= typeRSendAnswer ====================================
@@ -71,7 +71,7 @@ namespace eval compMsg {
         platform_uart_send {0, data[idx]}
         idx++
       }
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= sendMsg ====================================
@@ -88,7 +88,7 @@ namespace eval compMsg {
 puts stderr "sendMsg A: Wifi -> App Provisioning encryption: $encryption!"
 puts stderr [format "wud %s", [dict get $compMsgDispatcher wud]
           if {[dict get $compMsgDispatcher wud] eq [list]} {
-            checkErrOK $::COMP_DISP_ERR_NO_WEBSOCKET_OPENED
+            checkErrOK NO_WEBSOCKET_OPENED
           }
         }
         "G" {
@@ -96,7 +96,7 @@ puts stderr [format "wud %s", [dict get $compMsgDispatcher wud]
 puts stderr "sendMsg G: App -> Wifi Provisioning encryption: $encryption!"
 puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
           ::websocket::send [dict get $compMsgDispatcher socketForAnswer] binary $msgData
-          return $::COMP_DISP_ERR_OK
+          return [checkErrOK OK]
         }
         "R" {
 #puts stderr "sendMsg R: Mcu -> Wifi encryption: $encryption!"
@@ -105,7 +105,7 @@ puts stderr "sending on socket: [dict get $compMsgDispatcher socketForAnswer]!"
           puts -nonewline $fd $msgData
           flush $fd
 #puts stderr "sendMsg R: Mcu -> Wifi done!"
-          return $::COMP_DISP_ERR_OK
+          return [checkErrOK OK]
         "S" {
 puts stderr "sendMsg S: Wifi Mcu encryption: $encryption!"
           set fd [dict get $compMsgDispatcher WifiFd]
@@ -113,7 +113,7 @@ puts stderr "Mcu Simulation fd: $fd!lgth: [string length $msgData]!msgData!$msgD
           puts -nonewline $fd $msgData
           flush $fd
 puts stderr "sendMsg S: Wifi -> Mcudone!"
-          return $::COMP_DISP_ERR_OK
+          return [checkErrOK OK]
         }
         }
         "U" {
@@ -139,13 +139,13 @@ puts stderr "\nhandleType U (Mcu Simulation) done!"
         }
         "N" {
           # just ignore
-          return $::COMP_DISP_ERR_OK
+          return [checkErrOK OK]
         }
         default {
-          checkErrOK $::COMP_DISP_ERR_BAD_HANDLE_TYPE
+          checkErrOK BAD_HANDLE_TYPE
         }
       }
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
     
     # ================================= compMsgSendReceiveInit ====================================
@@ -153,7 +153,7 @@ puts stderr "\nhandleType U (Mcu Simulation) done!"
     proc compMsgSendReceiveInit {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      return $::COMP_DISP_ERR_OK
+      return [checkErrOK OK]
     }
 
   } ; # namespace compMsgAction

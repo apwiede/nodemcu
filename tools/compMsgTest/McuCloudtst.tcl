@@ -59,6 +59,7 @@ if {[file exist ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl]} {
 proc checkErrOK {result} {
   switch $result {
     0 {
+      return $result
     }
     default {
       error "ERROR result: $result!"
@@ -87,7 +88,7 @@ proc getStatisticData {compMsgDispatcherVar} {
   dict set msgDescPart fieldSize [string length "[join $lst \x0]\x0"]
   dict set msgDescPart fieldKey 111
   dict set compMsgDispatcher msgDescPart $msgDescPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getCasingData ===============================
@@ -100,7 +101,7 @@ proc getCasingData {compMsgDispatcherVar} {
   dict set msgDescPart fieldSize [string length "[join $lst \x0]\x0"]
   dict set msgDescPart fieldKey 112
   dict set compMsgDispatcher msgDescPart $msgDescPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getSrcId ===============================
@@ -111,7 +112,7 @@ proc getSrcId {compMsgDispatcherVar} {
   set msgValPart [dict get $compMsgDispatcher msgValPart]
   dict set msgValPart fieldValue 12345
   dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getGUID ===============================
@@ -122,7 +123,7 @@ proc getGUID {compMsgDispatcherVar} {
   set msgValPart [dict get $compMsgDispatcher msgValPart]
   dict set msgValPart fieldValue "1234-5678-9012-1"
   dict set compMsgDispatcher msgValPart $msgValPart
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getStatisticValues ===============================
@@ -151,7 +152,7 @@ proc getStatisticValues {compMsgDispatcherVar} {
   dict set msgValPart fieldValue $::compMsg::dataView::data
   dict set compMsgDispatcher msgValPart $msgValPart
   set result [::compMsg dataView setData $saveData $saveLgth]
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ getCasingDataValues ===============================
@@ -180,7 +181,7 @@ proc getCasingDataValues {compMsgDispatcherVar} {
   dict set msgValPart fieldValue $::compMsg::dataView::data
   dict set compMsgDispatcher msgValPart $msgValPart
   set result [::compMsg dataView setData $saveData $saveLgth]
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ readByte1 ===============================

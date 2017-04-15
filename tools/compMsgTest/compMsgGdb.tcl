@@ -172,7 +172,7 @@ puts stderr ">>gdbCmd sent: $::answer!"
 puts stderr "bad cmd: $cmd!"
     }
   }
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ handleInput0 ===============================
@@ -199,14 +199,14 @@ puts stderr "sent command '$::answer' OK"
       set lgth 0
       set ::incrLgth2 true
       set ::lgth2 0
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     "-" {
       if {$::inGdbCmd} {
 puts stderr "sent command '$::answer' NOT OK"
         set buf ""
         set lgth 0
-        return $::COMP_MSG_ERR_OK
+        return [checkErrOK OK]
       }
     }
     "\n" {
@@ -225,7 +225,7 @@ puts stderr "gdbCmd: $::gdbCmd"
           set lgth 0
         }
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     "O" {
       if {$::hadNewLine} {
@@ -233,7 +233,7 @@ puts stderr ">>SET O inGdbCmd true"
         set ::inGdbCmd true
         set ::gdbCmd "O"
         set ::gdbCmdChksum $pch
-        return $::COMP_MSG_ERR_OK
+        return [checkErrOK OK]
       }
     }
     "\$" {
@@ -242,7 +242,7 @@ puts stderr ">>SET \$ inGdbCmd true"
         set ::inGdbCmd true
         set ::gdbCmd ""
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     "=" {
        if {$::hadGdbStub} {
@@ -250,7 +250,7 @@ puts stderr ">>SET = inGdbCmd false"
         set ::inGdbCmd false
         set ::gdbCmd ""
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
     default {
       if {$::inGdbCmd} {
@@ -274,7 +274,7 @@ puts stderr "chksum OK"
               set ::inGdbCmd false
               set ::gdbCmdChksum 0
             }
-            return $::COMP_MSG_ERR_OK
+            return [checkErrOK OK]
           }
           incr ::numGdbChksumChars 1
         }
@@ -287,14 +287,14 @@ puts stderr "::gdbCmd: $::gdbCmd"
         append buf $ch
         incr lgth
       }
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
   }
   if {$::inReceiveMsg} {
     append buf $ch
     incr lgth
     set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
   if {!$::inDebug && ($ch eq "M")} {
 #puts stderr "got 'M'"
@@ -302,12 +302,12 @@ puts stderr "::gdbCmd: $::gdbCmd"
     append buf $ch
     incr lgth
     set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
   if {!$::inDebug && ($ch eq ">")} {
 puts stderr "got '>'"
     set ::lastCh $ch
-    return $::COMP_MSG_ERR_OK
+    return [checkErrOK OK]
   }
   if {[format 0x%02x [expr {$pch & 0xff}]] eq "0xc2"} {
 #puts stderr "ch: $ch!pch: $pch!"
@@ -350,7 +350,7 @@ puts stderr "  ==handleInput0: 3 DBT: $::debugTxt!"
         incr lgth
       }
       set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
   }
 #puts stderr "  ==handleInput0 4 inDebug!$::inDebug!"
@@ -376,14 +376,14 @@ puts stderr "received '> '"
       set lgth 0
       set buf ""
       set ::lastCh $ch
-      return $::COMP_MSG_ERR_OK
+      return [checkErrOK OK]
     }
   }
 puts stderr "  ==handleInput0 6 end: rch: $ch![format 0x%02x [expr {$pch& 0xFF}]]!"
   append buf $ch
   incr lgth
   set ::lastCh $ch
-  return $::COMP_MSG_ERR_OK
+  return [checkErrOK OK]
 }
 
 # ================================ readByte0 ===============================
