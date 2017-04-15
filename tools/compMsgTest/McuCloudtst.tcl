@@ -35,37 +35,8 @@
 
 #package require websocket
 package require aes
-#package require tls
-#tls::init -tls1 1 ;# forcibly activate support for the TLS1 protocol
 
-source pdict.tcl
-source dataView.tcl
-source compMsgDataView.tcl
-source compMsgMsgDesc.tcl
-source compMsgData.tcl
-source compMsgDispatcher.tcl
-source compMsgIdentify.tcl
-source compMsgSendReceive.tcl
-source compMsgAction.tcl
-source compMsgWifiData.tcl
-source compMsgBuildMsg.tcl
-source compMsgModuleData.tcl
-if {[file exist ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl]} {
-  source ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl
-}
-
-# ================================ checkErrOK ===============================
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      return $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
+source compMsgAllFiles.tcl
 
 # ================================ sendMcuData ===============================
 

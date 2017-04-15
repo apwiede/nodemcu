@@ -33,18 +33,7 @@
 # *
 # ==========================================================================
 
-source pdict.tcl
-source dataView.tcl
-source compMsgDataView.tcl
-source compMsgMsgDesc.tcl
-source compMsgData.tcl
-source compMsgDispatcher.tcl
-source compMsgIdentify.tcl
-source compMsgSendReceive.tcl
-source compMsgAction.tcl
-source compMsgWifiData.tcl
-source compMsgBuildMsg.tcl
-source compMsgModuleData.tcl
+source compMsgAllFiles.tcl
 
 set ::crcDebug false
 
@@ -66,19 +55,6 @@ set ::msg ""
 set ::msgLgth 0
 set ::afterId ""
 set ::inReceiveMsg false
-
-# ================================ checkErrOK ===============================
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      retrun $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
 
 # ================================ init0 ===============================
 

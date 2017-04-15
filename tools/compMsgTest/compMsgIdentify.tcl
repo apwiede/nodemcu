@@ -64,7 +64,7 @@ set ::RECEIVED_CHECK_CMD_KEY_SIZE       8
 set ::RECEIVED_CHECK_CMD_LGTH_SIZE      10
 
 
-set ::moduleFilesPath $::env(HOME)/bene-nodemcu-firmware/module_image_files
+set ::moduleFilesPath ../../module_image_files
 set ::MSG_HEADS_FILE_NAME "CompMsgHeads.txt"
 
 namespace eval compMsg {
@@ -529,8 +529,8 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen + $totalCr
 
       set result [initHeadersAndFlags]
       checkErrOK $result
-      set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags compMsgDispatcher ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
-      checkErrOK $result
+#      set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags compMsgDispatcher ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
+#      checkErrOK $result
       return [checkErrOK OK]
     }
     

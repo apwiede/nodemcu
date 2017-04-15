@@ -33,18 +33,7 @@
 # *
 # ==========================================================================
 
-source pdict.tcl
-source dataView.tcl
-source compMsgDataView.tcl
-source compMsgMsgDesc.tcl
-source compMsgData.tcl
-source compMsgDispatcher.tcl
-source compMsgIdentify.tcl
-source compMsgSendReceive.tcl
-source compMsgAction.tcl
-source compMsgWifiData.tcl
-source compMsgBuildMsg.tcl
-source compMsgModuleData.tcl
+source compMsgAllFiles.tcl
 
 set ::crcDebug false
 
@@ -65,19 +54,6 @@ set ::msgLgth 0
 set ::afterId ""
 set ::inReceiveMsg false
 set ::hadGt false
-
-# ================================ checkErrOK ===============================
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      return $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
 
 # ::dev0 is the Wifi module
 # ::dev1 is the Mcu module

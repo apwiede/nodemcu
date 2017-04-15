@@ -1,30 +1,7 @@
 #!/usr/bin/env tclsh8.6
 
 #source autoscroll.tcl   
-source pdict.tcl
-source dataView.tcl
-source compMsgDataView.tcl    
-source compMsgMsgDesc.tcl   
-source compMsgData.tcl  
-source compMsgDispatcher.tcl  
-source compMsgIdentify.tcl  
-source compMsgAction.tcl  
-source compMsgWifiData.tcl  
-source compMsgBuildMsg.tcl  
-source compMsgSendReceive.tcl  
-source compMsgModuleData.tcl  
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      return $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
-
+source compMsgAllFiles.tcl
 
 set compMsgDispatcher [dict create]
 set compMsgWifiData [dict create]

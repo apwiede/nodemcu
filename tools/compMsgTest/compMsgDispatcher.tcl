@@ -633,7 +633,9 @@ puts stderr "compMsgDispatcher3 setData"
     proc initDispatcher {comMsgDispatcherVar} {
       upvar $comMsgDispatcherVar compMsgDispatcher
 
-#puts stderr "initDispatcher"
+puts stderr "initDispatcher!$comMsgDispatcherVar!"
+      set result [::compMsg compMsgMsgDesc compMsgMsgDescInit compMsgDispatcher MsgFiles.txt]
+      checkErrOK $result
       set result [::compMsg compMsgMsgDesc getMsgKeyValueDescParts compMsgDispatcher "CompMsgKeyValueKeys.txt"]
       checkErrOK $result
       set result [::compMsg compMsgIdentify compMsgIdentifyInit compMsgDispatcher]

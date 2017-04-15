@@ -34,37 +34,11 @@
 # ==========================================================================
 
 package require aes
-#package require tls
-#tls::init -tls1 1 ;# forcibly activate support for the TLS1 protocol
 
 package require Tk
 package require tablelist
 
-source pdict.tcl
-source dataView.tcl
-source compMsgDataView.tcl
-source compMsgMsgDesc.tcl
-source compMsgData.tcl
-source compMsgDispatcher.tcl
-source compMsgIdentify.tcl
-source compMsgSendReceive.tcl
-source compMsgAction.tcl
-source compMsgWifiData.tcl
-source compMsgBuildMsg.tcl
-source compMsgModuleData.tcl
-
-# ================================ checkErrOK ===============================
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      return $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
+source compMsgAllFiles.tcl
 
 # ================================ apwWin ===============================
 

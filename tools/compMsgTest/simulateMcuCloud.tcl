@@ -35,21 +35,7 @@
 
 package require aes
 
-source pdict.tcl
-source dataView.tcl
-source compMsgDataView.tcl
-source compMsgMsgDesc.tcl
-source compMsgData.tcl
-source compMsgDispatcher.tcl
-source compMsgIdentify.tcl
-source compMsgSendReceive.tcl
-source compMsgAction.tcl
-source compMsgWifiData.tcl
-source compMsgBuildMsg.tcl
-source compMsgModuleData.tcl
-if {[file exist ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl]} {
-  source ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl
-}
+source compMsgAllFiles.tcl
 
 set ::crcDebug false
 
@@ -78,19 +64,6 @@ set ::handleInputDbg false
 # we simulate the Mcu start and the 4th state is Cloud
 # start Wifi with startCompMsgU.lua renamed to init.lua!
 # ==========================================================================
-
-# ================================ checkErrOK ===============================
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      return $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
 
 # ================================ init0 ===============================
 

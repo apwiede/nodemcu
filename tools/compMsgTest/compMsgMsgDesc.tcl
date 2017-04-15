@@ -31,27 +31,6 @@
 # *
 # ==========================================================================
 
-set ::COMP_MSG_DESC_ERR_OK                    0
-set ::COMP_MSG_DESC_ERR_VALUE_NOT_SET         255
-set ::COMP_MSG_DESC_ERR_VALUE_OUT_OF_RANGE    254
-set ::COMP_MSG_DESC_ERR_BAD_VALUE             253
-set ::COMP_MSG_DESC_ERR_BAD_FIELD_TYPE        252
-set ::COMP_MSG_DESC_ERR_FIELD_TYPE_NOT_FOUND  251
-set ::COMP_MSG_DESC_ERR_VALUE_TOO_BIG         250
-set ::COMP_MSG_DESC_ERR_OUT_OF_MEMORY         249
-set ::COMP_MSG_DESC_ERR_OUT_OF_RANGE          248
-
-  # be carefull the values up to here
-  # must correspond to the values in dataView.h !!!
-  # with the names like DATA_VIEW_ERR_*
-
-set ::COMP_MSG_DESC_ERR_OPEN_FILE             189
-set ::COMP_MSG_DESC_FILE_NOT_OPENED           188
-set ::COMP_MSG_DESC_ERR_FLUSH_FILE            187
-set ::COMP_MSG_DESC_ERR_WRITE_FILE            186
-set ::COMP_MSG_DESC_ERR_FUNNY_EXTRA_FIELDS    185
-set ::COMP_MSG_DESC_ERR_FIELD_TOO_LONG        184
-
 # handle types
 # A/G/R/S/W/U/N
 set ::COMP_DISP_SEND_TO_APP       "A"
@@ -63,7 +42,7 @@ set ::COMP_DISP_TRANSFER_TO_CONN  "U"
 set ::COMP_DISP_NOT_RELEVANT      "N"
 
 set ::GUID_LGTH 16
-set ::HDR_FILLER_LGTH 40
+set ::HDR_FILLER_LGTH 7
 
 # headerPart dict
 #   hdrFromPart
@@ -88,8 +67,6 @@ set ::HDR_FILLER_LGTH 40
 #   fieldSequence
 
 # msgHeaderInfos dict
-#   headerFlags         # these are the flags for the 2nd line in the heads file!!
-#   headerSequence   # this is the sequence of the 2nd line in the heads file!!
 #   headerLgth
 #   lgth
 #   headerParts
@@ -119,6 +96,25 @@ set ::HDR_FILLER_LGTH 40
 #   fieldValueCallback
 #   fieldValueActionCb
 
+# msgDescriptionInfos
+#   numMsgDescriptions
+#   maxMsgDescriptions
+#   msgDescriptions
+#   currMsgDescriptionIdx
+#   currSequenceIdx;
+#   sequenceIdxAfterHeader
+
+# compMsgMsgDesc
+#   lineFields
+#   expectedLines
+#   numLineFields
+#   numMsgDescIncludeInfo
+#   maxMsgDescIncludeInfo
+#   currMsgDescIncludeInfo
+#   msgDescIncludeInfos
+#   msgUseFileName
+#   msgDescriptionInfos
+
 set ::moduleFilesPath $::env(HOME)/bene-nodemcu-firmware/module_image_files
 
 namespace eval compMsg {
@@ -129,14 +125,513 @@ namespace eval compMsg {
   namespace eval compMsgMsgDesc {
     namespace ensemble create
       
+    namespace export getLineFields getIntFieldValue getStringFieldValue addUseFileName
+    namespace export handleMsgFileInternal handleMsgFile handleMsgFileNameLine handleMsgCommonLine
+    namespace export handleMsgFieldsToSaveLine handleMsgActionsLine handleMsgValuesLine
+    namespace export handleMsgValHeaderLine handleMsgUseLine handleMsgHeadsLine
     namespace export readHeadersAndSetFlags dumpHeaderPart getHeaderFromUniqueFields
     namespace export getMsgPartsFromHeaderPart getWifiKeyValueKeys readActions
     namespace export resetMsgDescPart resetMsgValPart dumpMsgDescPart dumpMsgValPart
-    namespace export getMsgKeyValueDescParts
+    namespace export getMsgKeyValueDescParts compMsgMsgDescInit
 
     variable headerInfos [list]
     variable received [list]
     variable dispFlags [list]
+
+    # ================================= getLineFields ====================================
+
+    proc getLineFields {compMsgDispatcherVar myStr lgth} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      dict set compMsgDispatcher compMsgMsgDesc numLineFields 0
+      dict set compMsgDispatcher compMsgMsgDesc lineFields [split [string trim $myStr "\n"] {,}]
+      dict set compMsgDispatcher compMsgMsgDesc numLineFields [llength [dict get $compMsgDispatcher compMsgMsgDesc lineFields]]
+      return [checkErrOK OK]
+    }
+
+    #  ================================= getIntFieldValue ====================================
+
+    proc  getIntFieldValue {compMsgDispatcherVar cp uvalVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $uvalVar uval
+
+      set uval [expr {0 + $cp}]
+      return [checkErrOK OK]
+    }
+
+    # ================================= getStringFieldValue ====================================
+
+    proc getStringFieldValue {compMsgDispatcherVar cp strValVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $strValVar strVal
+
+      set strVal [string trim $cp "\""]
+      return [checkErrOK OK]
+    }
+
+    # ================================= addUseFileName ====================================
+
+    proc addUseFileName {compMsgDispatcherVar fileName} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      if {[dict get $compMsgMsgDesc numMsgDescIncludeInfo] >= [dict get $compMsgMsgDesc maxMsgDescIncludeInfo]} {
+        if {[dict get $compMsgMsgDesc maxMsgDescIncludeInfo] == 0} {
+          dict set compMsgMsgDesc msgDescIncludeInfos [list]
+        }
+        dict lappend compMsgMsgDesc msgDescIncludeInfos [list]
+      }
+      set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
+      set idx [dict get $compMsgMsgDesc numMsgDescIncludeInfo]
+      set msgDescIncludeInfo [lindex $msgDescIncludeInfos $idx]
+      dict set msgDescIncludeInfo fileName $fileName
+      set msgDescIncludeInfos [lreplace $msgDescIncludeInfos $idx $idx $msgDescIncludeInfo]
+      dict set compMsgMsgDesc msgDescIncludeInfos $msgDescIncludeInfos
+      dict incr compMsgMsgDesc numMsgDescIncludeInfo
+      dict incr compMsgMsgDesc maxMsgDescIncludeInfo
+      dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
+      return [checkErrOK OK]
+    }
+
+    # ================================= handleMsgFileInternal ====================================
+
+    proc handleMsgFileInternal {compMsgDispatcherVar fileName handleMsgLine} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      set filePath [format "%s/%s" $::moduleFilesPath $fileName]
+puts stderr "handleMsgFileInternal fileName: $filePath!"
+      set fd [open $filePath "r"]
+      set numLines 0
+puts stderr "handleMsgFileInternal: $fileName $handleMsgLine fd: $fd!"
+      while {true} {
+        set lgth [gets $fd buffer]
+puts stderr "buffer: $buffer!lgth: $lgth!"
+        if {$lgth < 0} {
+          if {[expr {$numLines - 1}] != [dict get $compMsgMsgDesc expectedLines]} {
+            puts stderr [format "Error numLines: %d expectedLines: %d" $numLines [dict get $compMsgMsgDesc expectedLines]]
+            checkErrOK NUM_DESC_FILE_LINES
+          }
+          break
+        }
+        set result [getLineFields compMsgDispatcher $buffer lgth]
+        checkErrOK $result
+        set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+puts stderr "after getLineFields!"
+        set lineFields  [dict get $compMsgMsgDesc lineFields]
+        # check if it is eventually an empty line and ignore that
+        if {[dict get $compMsgMsgDesc numLineFields] < 2} {
+          if {[string length [lindex $lineFields 0]] == 0} {
+            continue
+          }
+        }
+        if {[string range $buffer 0 1] eq "# "} {
+          # a comment line skip
+          continue
+        }
+        # numLines is always without any comment lines!!
+        incr numLines
+        if {$numLines == 1} {
+          # check if it is the number of lines line
+          if {[lindex $lineFields 0] eq "#"} {
+            set result [getIntFieldValue compMsgDispatcher [lindex $lineFields 1] cnt]
+            checkErrOK $result
+            dict set compMsgMsgDesc expectedLines $cnt
+            dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
+          } else {
+            puts stderr [format "wrong desc file number lines line"]
+            checkErrOK WRONG_DESC_FILE_LINE
+          }
+        } else {
+          # check if it is a #use line
+          if {[lindex $lineFields 0] eq "#use"} {
+            if {[dict get $compMsgMsgDesc numLineFields] != 2} {
+              puts stderr [format "bad desc file #use line"]
+              checkErrOK BAD_DESC_FILE_USE_LINE
+            } else {
+              if {[string range [lindex $lineFields 1] 0 0] eq "@"} {
+              } else {
+                dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
+                set result [addUseFileName compMsgDispatcher [lindex $lineFields 1]]
+                checkErrOK $result
+                set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+              }
+            }
+          } else {
+            dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
+puts stderr "handleMsgLine: $handleMsgLine!"
+            set result [$handleMsgLine compMsgDispatcher]
+            checkErrOK $result
+            set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+          }
+        }
+      }
+      dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
+      close $fd
+      return [checkErrOK OK]
+    }
+
+    # ================================= handleMsgFile ====================================
+
+    proc handleMsgFile {compMsgDispatcherVar fileName handleMsgLine} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+puts stderr "1!$fileName!$handleMsgLine!$compMsgDispatcherVar!"
+puts stderr "2"
+      set result [handleMsgFileInternal compMsgDispatcher $fileName $handleMsgLine]
+puts stderr "3 result $result"
+      checkErrOK $result
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      if {[dict get $compMsgMsgDesc numMsgDescIncludeInfo] > 0} {
+        # handle use files here
+        dict set compMsgMsgDesc currMsgDescIncludeInfo 0
+        while {[dict get $compMsgMsgDesc currMsgDescIncludeInfo] < [dict get $compMsgMsgDesc numMsgDescIncludeInfo]} {
+          set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
+          set msgDescIncludeInfo [lindex $msgDescIncludeInfos [dict get $compMsgMsgDesc currMsgDescIncludeInfo]]
+          puts stderr [format ">>>handleFile %s" [dict get $msgDescIncludeInfo fileName]]
+          set result [handleMsgFileInternal compMsgDispatcher [dict get $msgDescIncludeInfo fileName] handleMsgUseLine]
+          checkErrOK $result
+          outs stderr [format "<<<%s: done" [dict get $msgDescIncludeInfo fileName]]
+          dict incr compMsgDispatcher compMsgMsgDesc currMsgDescIncludeInfo
+        }
+      }
+      return [checkErrOK OK]
+    }
+
+    # ================================= handleMsgFileNameLine ====================================
+
+    proc handleMsgFileNameLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      if {[dict get $compMsgMsgDesc numLineFields] < 2} {
+        checkErrOK FIELD_DESC_TOO_FEW_FIELDS
+      }
+      set fileNameTokenId 0
+      set token [lindex [dict get $compMsgMsgDesc lineFields] 0]
+      set result [getStringFieldValue compMsgDispatcher [lindex [dict get $compMsgMsgDesc lineFields] 1] field]
+      checkErrOK $result
+      puts stderr [format "token: %s field: %s" $token $field]
+      if {[string range $token 0 1] eq "@$"} {
+        set result [::compMsg compMsgTypesAndNames getFileNameTokenIdFromStr self->compMsgTypesAndNames $token fileNameTokenId]
+        checkErrOK $result
+        dict set compMsgMsgDesc msgUseFileName $field]
+        if {$fileNameTokenId != 0} {
+          set result [addUseFileName compMsgDispatcher $field]
+          checkErrOK $result
+          set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+          set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
+          set idx [dict get $compMsgMsgDesc currMsgDescIncludeInfo]
+          set msgDescIncludeInfo [lindex $msgDescIncludeInfos $idx]
+          dict set msgDescIncludeInfo includeType $fileNameTokenId
+          set msgDescIncludeInfos [lreplace $msgDescIncludeInfos $idx $idx $msgDescIncludeInfo]
+          dict set compMsgMsgDesc msgDescIncludeInfos $msgDescIncludeInfos
+          dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
+        }
+      }
+      return [checkErrOK OK]
+    }
+
+    # ================================= handleMsgCommonLine ====================================
+
+    proc handleMsgCommonLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      compMsgMsgDesc = self->compMsgMsgDesc;
+      msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[compMsgMsgDesc->currMsgDescIncludeInfo];
+      if (compMsgMsgDesc->numLineFields < 3) {
+        return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
+      }
+      if (msgDescIncludeInfo->maxMsgFieldDesc == 0) {
+        msgDescIncludeInfo->maxMsgFieldDesc = self->compMsgMsgDesc->expectedLines;
+        msgDescIncludeInfo->msgFieldDescs = os_zalloc(msgDescIncludeInfo->maxMsgFieldDesc * sizeof(msgFieldDesc_t));
+        checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
+      }
+      msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
+      //field name
+      result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
+      checkErrOK(result);
+      //field type
+      result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[1], &msgFieldDesc->fieldTypeId);
+      checkErrOK(result);
+      //field lgth
+      result = compMsgMsgDesc->getIntFieldValue(self, compMsgMsgDesc->lineFields[2], &ep, 0, &lgth);
+      checkErrOK(result);
+      msgFieldDesc->fieldLgth = (uint16_t)lgth;
+      COMP_MSG_DBG(self, "E", 2, "%s: id: %d type: %s %d lgth: %d", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId, compMsgMsgDesc->lineFields[1], msgFieldDesc->fieldTypeId, msgFieldDesc->fieldLgth);
+      msgDescIncludeInfo->numMsgFieldDesc++;
+      return result;
+    }
+
+    # ================================= handleMsgFieldsToSaveLine ====================================
+
+    proc handleMsgFieldsToSaveLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      compMsgMsgDesc = self->compMsgMsgDesc;
+      msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[compMsgMsgDesc->currMsgDescIncludeInfo];
+      if (compMsgMsgDesc->numLineFields < 1) {
+        return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
+      }
+      if (msgDescIncludeInfo->maxMsgFieldDesc == 0) {
+        msgDescIncludeInfo->maxMsgFieldDesc = self->compMsgMsgDesc->expectedLines;
+        msgDescIncludeInfo->msgFieldDescs = os_zalloc(msgDescIncludeInfo->maxMsgFieldDesc * sizeof(msgFieldDesc_t));
+        checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
+      }
+      msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
+      //field name
+      result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
+      COMP_MSG_DBG(self, "E", 2, "%s: id: %d", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId);
+      checkErrOK(result);
+      return result;
+    }
+
+    # ================================= handleMsgActionsLine ====================================
+
+    proc handleMsgActionsLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      compMsgMsgDesc = self->compMsgMsgDesc;
+      msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[compMsgMsgDesc->currMsgDescIncludeInfo];
+      if (compMsgMsgDesc->numLineFields < 2) {
+        return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
+      }
+      if (msgDescIncludeInfo->maxMsgFieldDesc == 0) {
+        msgDescIncludeInfo->maxMsgFieldDesc = self->compMsgMsgDesc->expectedLines;
+        msgDescIncludeInfo->msgFieldDescs = os_zalloc(msgDescIncludeInfo->maxMsgFieldDesc * sizeof(msgFieldDesc_t));
+        checkAllocOK(msgDescIncludeInfo->msgFieldDescs);
+      }
+      msgFieldDesc = &msgDescIncludeInfo->msgFieldDescs[msgDescIncludeInfo->numMsgFieldDesc];
+      //field name
+      result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
+      checkErrOK(result);
+      //field value
+      COMP_MSG_DBG(self, "E", 2, "%s: id: %d val: %s", compMsgMsgDesc->lineFields[0], msgFieldDesc->fieldNameId, compMsgMsgDesc->lineFields[1]);
+      checkErrOK(result);
+      return result;
+    }
+
+    # ================================= handleMsgValuesLine ====================================
+
+    proc handleMsgValuesLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
+      set idx [dict get $compMsgMsgDesc currMsgDescIncludeInfo]
+      set msgDescIncludeInfo [lindex $msgDescIncludeInfos $idx]
+      if {[dict get $compMsgMsgDesc numLineFields] < 2} {
+        checkErrOK FIELD_DESC_TOO_FEW_FIELDS
+      }
+      #field name
+      set token [lindex [dict get $compMsgMsgDesc lineFields] 0]
+      set result [::compMsg compMsgTypesAndNames getFieldNameIdFromStr $token fieldNameId $::COMP_MSG_INCR]
+      checkErrOK $result
+      #field value
+      set value [lindex [dict get $compMsgMsgDesc lineFields] 1]
+      set stringValue ""
+      set numericValue 0
+puts stderr "value: $value!"
+      if {[string range $value 0 0] eq "\""} {
+        set result [getStringFieldValue compMsgDispatcher $value stringValue]
+      } else {
+        set result [getIntFieldValue compMsgDispatcher $value numericValue]
+      }
+      checkErrOK $result
+      puts stderr [format "%s: id: %d val: %s %d" $token $fieldNameId $stringValue $numericValue]
+      set result [::compMsg compMsgDataValue dataValueStr2ValueId compMsgDispatcher $token fieldId]
+      checkErrOK $result
+      switch [dict get $msgDescIncludeInfo includeType] {
+        COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN -
+        COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN {
+          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $fieldId "" $numericValue $stringValue]
+          checkErrOK $result
+        }
+        default {
+          checkErrOK BAD_DESC_FILE_FIELD_INCLUDE_TYPE
+        }
+      }
+      return [checkErrOK OK]
+    }
+
+   #  ================================= handleMsgValHeaderLine ====================================
+
+    proc handleMsgValHeaderLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      compMsgMsgDesc = self->compMsgMsgDesc;
+      msgDescIncludeInfo = &compMsgMsgDesc->msgDescIncludeInfos[compMsgMsgDesc->currMsgDescIncludeInfo];
+      if (compMsgMsgDesc->numLineFields < 2) {
+        return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
+      }
+      if (msgDescIncludeInfo->maxMsgFieldVal == 0) {
+        msgDescIncludeInfo->maxMsgFieldVal = self->compMsgMsgDesc->expectedLines;
+        msgDescIncludeInfo->msgFieldVals = os_zalloc(msgDescIncludeInfo->maxMsgFieldVal * sizeof(msgFieldVal_t));
+        checkAllocOK(msgDescIncludeInfo->msgFieldVals);
+      }
+      msgFieldVal = &msgDescIncludeInfo->msgFieldVals[msgDescIncludeInfo->numMsgFieldVal];
+      //field name
+      result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, compMsgMsgDesc->lineFields[0], &fieldNameId, COMP_MSG_INCR);
+      checkErrOK(result);
+      // field value
+      if (compMsgMsgDesc->lineFields[1][0] == '@') {
+        msgFieldVal->value.u8vec = os_zalloc(c_strlen(compMsgMsgDesc->lineFields[1]) + 1);
+        checkAllocOK(msgFieldVal->value.u8vec);
+        c_memcpy(msgFieldVal->value.u8vec, compMsgMsgDesc->lineFields[1], c_strlen(compMsgMsgDesc->lineFields[1]));
+        // FIXME: need code for value callback here !!!
+        COMP_MSG_DBG(self, "E", 2, "%s: id: %d %s!", compMsgMsgDesc->lineFields[0], fieldNameId, msgFieldVal->value.u8vec);
+      } else {
+        if (compMsgMsgDesc->lineFields[1][0] == "\"") {
+          result = compMsgMsgDesc->getStringFieldValue(self, compMsgMsgDesc->lineFields[1], &stringVal);
+          msgFieldVal->value.u8vec = os_zalloc(c_strlen(stringVal) + 1);
+          checkAllocOK(msgFieldVal->value.u8vec);
+          c_memcpy(msgFieldVal->value.u8vec, stringVal, c_strlen(stringVal));
+          COMP_MSG_DBG(self, "E", 2, "%s: id: %d val: %s!", compMsgMsgDesc->lineFields[0], fieldNameId, msgFieldVal->value.u8vec);
+        } else {
+          result = compMsgMsgDesc->getIntFieldValue(self, compMsgMsgDesc->lineFields[1], &ep, 0, &msgFieldVal->value.intVal);
+          COMP_MSG_DBG(self, "E", 2, "%s: id: %d %d 0x%08x", compMsgMsgDesc->lineFields[0], fieldNameId, msgFieldVal->value.intVal, msgFieldVal->value.intVal);
+        }
+        checkErrOK(result);
+      }
+      msgDescIncludeInfo->numMsgFieldVal++;
+      return result;
+    }
+
+    # ================================= handleMsgUseLine ====================================
+
+    proc handleMsgUseLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
+      set idx [dict get $compMsgMsgDesc currMsgDescIncludeInfo]
+      set msgDescIncludeInfo [lindex $msgDescIncludeInfos $idx]
+      switch [dict get $msgDescIncludeInfo includeType] {
+        COMP_MSG_DESC_HEADER_FILE_TOKEN -
+        COMP_MSG_DESC_MID_PART_FILE_TOKEN -
+        COMP_MSG_DESC_TRAILER_FILE_TOKEN {
+          set result [handleMsgCommonLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_FIELDS_TO_SAVE_FILE_TOKEN {
+          set result [handleMsgFieldsToSaveLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_ACTIONS_FILE_TOKEN {
+          set result [handleMsgActionsLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_VAL_HEADER_FILE_TOKEN {
+          set result [handleMsgValHeaderLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_HEADS_FILE_TOKEN {
+          set result [handleMsgHeadsLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN {
+          set result [handleMsgValuesLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN {
+          set result [handleMsgValuesLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        default {
+          puts stderr [format "bad desc file includeType 0x%02x" [dict get $msgDescIncludeInfo includeType]]
+          checkErrOK BAD_DESC_FILE_FIELD_INCLUDE_TYPE
+        }
+      }
+      return [checkErrOK OK]
+    }
+
+    # ================================= handleMsgHeadsLine ====================================
+
+    proc handleMsgHeadsLine {compMsgDispatcherVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result OK
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      set result [::compMsg compMsgUtil addFieldDescription compMsgDispatcher]
+      checkErrOK $result
+      set msgDescriptionInfos [dict get $compMsgMsgDesc msgDescriptionInfos]
+      set idx [dict get $msgDescriptionInfos numMsgDescriptions]
+      set msgDescription [lindex $msgDescriptionInfos $idx]
+      set includeIdx 0
+      set numHeaderFields 0
+      set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
+      while {$includeIdx < [dict get $compMsgMsgDesc numMsgDescIncludeInfo]} {
+        set msgDescIncludeInfo [lindex $msgDescIncludeInfos $includeIdx]
+        if {[dict get $msgDescIncludeInfo includeType] eq COMP_MSG_DESC_HEADER_FILE_TOKEN} {
+          set numHeaderFields [dict get $msgDescIncludeInfo numMsgFieldDesc]
+          break
+        }
+        incr includeIdx
+      }
+      if {$numHeaderFields == 0} {
+        checkErrOK HEADER_INCLUDE_NOT_FOUND
+      }
+      if {[dict get $compMsgMsgDesc numLineFields] < 3} {
+        checkErrOK FIELD_DESC_TOO_FEW_FIELDS
+      }
+      set fieldIdx 0
+      dict set msgDescription headerLgth 0
+      set msgFieldDescs [dict get $msgDescIncludeInfo msgFieldDescs]
+      while {$fieldIdx < $numHeaderFields} {
+        set msgFieldDesc [lindex $msgFieldDescs $fieldIdx]
+        dict incr msgDescription headerLgth [dict get $msgFieldDesc fieldLgth;
+        set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgTypesAndNames [dict get $msgFieldDesc fieldNameId] fieldNameStr]
+        set value [lindex [dict get $compMsgMsgDesc lineFields] $fieldIdx]
+        puts stderr [format "field: %s %s" $fieldNameStr $value]
+        if {$value eq "*"} {
+          dict lappend msgFieldDesc fieldFlags COMP_MSG_VAL_IS_JOKER
+        } else {
+          if {[string range $value 0 0] eq "\""} {
+            switch [dict get $msgFieldDesc fieldTypeId] {
+              DATA_VIEW_FIELD_UINT8_T -
+              DATA_VIEW_FIELD_INT8_T -
+              DATA_VIEW_FIELD_UINT16_T -
+              DATA_VIEW_FIELD_INT16_T -
+              DATA_VIEW_FIELD_UINT32_T -
+              DATA_VIEW_FIELD_INT32_T {
+                checkErrOK EXPECTED_INT_VALUE
+              }
+            }
+            set stringVal ""
+            set result [getStringFieldValue compMsgDispatcher $value stringVal]
+            checkErrOK $result
+            puts stderr [format "value: %s!stringVal: %s" $value $stringVal]
+            dict set msgFieldDesc msgFieldVal $stringVal
+            puts stderr [format "field2: %s %s" $fieldNameStr [dict get $msgFieldDesc msgFieldVal]
+          } else {
+            set result [getIntFieldValue compMsgDispatcher $value intVal]
+            dict set msgFieldDesc msgFieldVal $intVal
+          }
+          checkErrOK $result
+        }
+        incr fieldIdx
+      }
+      if {[string length [lindex [dict get $compMsgMsgDesc lineFields] $fieldIdx]] > 1} {
+        checkErrOK BAD_ENCRYPTED_VALUE
+      }
+      dct set msgDescription encrypted [string range [lindex [dict get $compMsgMsgDesc lineFields] $fieldIdx] 0 0]
+      incr fieldIdx
+      if {[string length [lindex [dict get $compMsgMsgDesc lineFields] $fieldIdx]] > 1} {
+        checkErrOK BAD_HANDLE_TYPE_VALUE
+      }
+      dtc set msgDescription handleType string range [lindex [dict get $compMsgMsgDesc lineFields] $fieldIdx] 0 0]
+      # FIXME need to handle cmdKey here!!!
+      puts stderr [format "msgDescription->headerLgth: %d encrypted: %c handleType: %c" [dict get $msgDescription headerLgth] [dict get $msgDescription encrypted] [dict get $msgDescription handleType]]
+      retuern [checkErrOK OK]
+    }
 
     # ================================= dumpHeaderPart ====================================
     
@@ -863,6 +1358,36 @@ puts stderr "should handle key: $key $fieldTypeStr $fieldValueStr $fieldLgth!"
       }
       close $fd
 puts stderr "getWifiKeyValues done"
+      return [checkErrOK OK]
+    }
+
+    # ================================= compMsgMsgDescInit ====================================
+    
+    proc compMsgMsgDescInit {compMsgDispatcherVar fileName} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set compMsgMsgDesc [dict create]
+      dict set compMsgMsgDesc lineFields [list]
+      dict set compMsgMsgDesc expectedLines 0
+      dict set compMsgMsgDesc numLineFields 0
+      dict set compMsgMsgDesc numMsgDescIncludeInfo 0
+      dict set compMsgMsgDesc maxMsgDescIncludeInfo 0
+      dict set compMsgMsgDesc currMsgDescIncludeInfo 0
+      dict set compMsgMsgDesc msgDescIncludeInfos [list]
+
+      set msgDescriptionInfos [dict create]
+      dict set msgDescriptionInfos numMsgDescriptions 0
+      dict set msgDescriptionInfos maxMsgDescriptions 0
+      dict set msgDescriptionInfos msgDescriptions [list]
+      dict set msgDescriptionInfos currMsgDescriptionIdx 0
+      dict set msgDescriptionInfos currSequenceIdx 0
+      dict set msgDescriptionInfos sequenceIdxAfterHeader 0
+
+      dict set compMsgMsgDesc msgDescriptionInfos $msgDescriptionInfos
+
+      dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
+      set result [handleMsgFile compMsgDispatcher $fileName handleMsgFileNameLine]
+      checkErrOK $result
       return [checkErrOK OK]
     }
 

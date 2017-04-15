@@ -41,40 +41,11 @@ package require tablelist
 
 ::websocket::loglevel debug
 
-source pdict.tcl
-source dataView.tcl
-source compMsgErrorCodes.tcl
-source compMsgDataView.tcl
-source compMsgMsgDesc.tcl
-source compMsgData.tcl
-source compMsgDispatcher.tcl
-source compMsgIdentify.tcl
-source compMsgSendReceive.tcl
-source compMsgAction.tcl
-source compMsgWifiData.tcl
-source compMsgBuildMsg.tcl
-source compMsgModuleData.tcl
-
-if {[file exist ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl]} {
-  source ${::moduleFilesPath}/CompMsgKeyValueCallbacks.tcl
-}
+source compMsgAllFiles.tcl
 
 set ::PORT 80
 set ::path /getaplist
 set ::host "192.168.4.1"
-
-# ================================ checkErrOK ===============================
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      return $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
 
 # ================================ apWin ===============================
 
@@ -465,7 +436,7 @@ proc InitCompMsg {} {
   set result [::compMsg compMsgDispatcher createDispatcher dispatcherHandle]
   checkErrOK $result
 puts stderr "dispatcherHandle!$dispatcherHandle!"
-  set result [::compMsg compMsgDispatcher initDispatcher compMsgDispatcher]
+  set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
   checkErrOK $result
 }
 

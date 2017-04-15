@@ -143,3 +143,17 @@ dict set ::COMP_MSG_ERR DATA_VALUE_FIELD_NOT_FOUND       124
 
 dict set ::COMP_MSG_ERR CANNOT_CONNECT                   99
 
+# ================================ checkErrOK ===============================
+
+proc checkErrOK {result} {
+  switch $result {
+    0 -
+    OK {
+      return [dict get $::COMP_MSG_ERR OK]
+    }
+    default {
+      error "ERROR result: $result!"
+    }
+  }
+}
+

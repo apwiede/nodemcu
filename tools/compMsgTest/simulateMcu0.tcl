@@ -33,18 +33,7 @@
 # *
 # ==========================================================================
 
-source pdict.tcl
-source dataView.tcl
-source compMsgDataView.tcl
-source compMsgMsgDesc.tcl
-source compMsgData.tcl
-source compMsgDispatcher.tcl
-source compMsgIdentify.tcl
-source compMsgSendReceive.tcl
-source compMsgAction.tcl
-source compMsgWifiData.tcl
-source compMsgBuildMsg.tcl
-source compMsgModuleData.tcl
+source compMsgAllFiles.tcl
 
 set ::crcDebug false
 
@@ -61,19 +50,6 @@ set ::isStart true
 set ::inDebug false
 set ::lastCh ""
 set ::totalLgth 999
-
-# ================================ checkErrOK ===============================
-
-proc checkErrOK {result} {
-  switch $result {
-    0 {
-      return $result
-    }
-    default {
-      error "ERROR result: $result!"
-    }
-  }
-}
 
 # ================================ init0 ===============================
 
