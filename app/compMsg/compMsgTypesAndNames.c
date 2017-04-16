@@ -82,6 +82,7 @@ static const str2id_t specialFieldNames[] = {
   {"@srcId",                  COMP_MSG_SPEC_FIELD_SRC_ID},
   {"@hdrFiller",              COMP_MSG_SPEC_FIELD_HDR_FILLER},
   {"@numKeyValues",           COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES},
+
   {"@provisioningSsid",       COMP_MSG_SPEC_FIELD_PROVISIONING_SSID},
   {"@provisioningPort",       COMP_MSG_SPEC_FIELD_PROVISIONING_PORT},
   {"@provisioningIPAddr",     COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR},

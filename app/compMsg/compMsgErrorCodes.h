@@ -42,9 +42,6 @@
 #define	COMP_MSG_ERROR_CODES_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 enum CompMsgErrorCodes {
   COMP_MSG_ERR_OK                             = 0,
@@ -160,10 +157,4 @@ enum CompMsgErrorCodes {
 
 };
 
-
-#ifdef  __cplusplus
-}
-#endif
-
 #endif  /* COMP_MSG_ERROR_CODES_H */
-
