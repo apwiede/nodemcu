@@ -373,7 +373,9 @@ puts stderr "getSpecialFieldNameIntFromId: $fieldNameId!"
       upvar $fieldNameIdVar fieldNameId
       variable specialFieldNames2Ids
 
-      if {[string range $fieldName 0 0] eq "@"} {
+      set ch1 [string range $fieldName 0 0]
+      set ch2 [string range $fieldName 1 1]
+      if {($ch1 eq "@") && ($ch2 ne "#")} {
         # find special field name
         if {[dict exists $specialFieldNames2Ids $fieldName]} {
           set fieldNameId [dict get $specialFieldNames2Ids $fieldName]

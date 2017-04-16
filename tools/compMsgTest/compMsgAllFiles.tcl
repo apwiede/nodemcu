@@ -38,6 +38,8 @@ source compMsgErrorCodes.tcl
 source dataView.tcl
 source compMsgTypesAndNames.tcl
 source compMsgDataView.tcl
+source compMsgUtil.tcl
+source compMsgDataValue.tcl
 source compMsgMsgDesc.tcl
 source compMsgData.tcl
 source compMsgDispatcher.tcl
