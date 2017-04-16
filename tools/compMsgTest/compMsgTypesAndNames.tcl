@@ -37,33 +37,63 @@ set ::COMP_MSG_NO_INCR 0
 set ::COMP_MSG_INCR    1
 set ::COMP_MSG_DECR    -1
 
-set ::COMP_MSG_SPEC_FIELD_SRC                 255
-set ::COMP_MSG_SPEC_FIELD_DST                 254
-set ::COMP_MSG_SPEC_FIELD_TARGET_CMD          253
-set ::COMP_MSG_SPEC_FIELD_TOTAL_LGTH          252
-set ::COMP_MSG_SPEC_FIELD_CMD_KEY             251
-set ::COMP_MSG_SPEC_FIELD_CMD_LGTH            250
-set ::COMP_MSG_SPEC_FIELD_RANDOM_NUM          249
-set ::COMP_MSG_SPEC_FIELD_SEQUENCE_NUM        248
-set ::COMP_MSG_SPEC_FIELD_FILLER              247
-set ::COMP_MSG_SPEC_FIELD_CRC                 246
-set ::COMP_MSG_SPEC_FIELD_ID                  245
-set ::COMP_MSG_SPEC_FIELD_TABLE_ROWS          244
-set ::COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS    243
-set ::COMP_MSG_SPEC_FIELD_GUID                242
-set ::COMP_MSG_SPEC_FIELD_NUM_NORM_FLDS       241
-set ::COMP_MSG_SPEC_FIELD_NORM_FLD_IDS        240
-set ::COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE 239
-set ::COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES      238
-set ::COMP_MSG_SPEC_FIELD_DEFINITIONS_SIZE    237
-set ::COMP_MSG_SPEC_FIELD_DEFINITIONS         236
-set ::COMP_MSG_SPEC_FIELD_NUM_LIST_MSGS       234
-set ::COMP_MSG_SPEC_FIELD_LIST_MSG_SIZES      233
-set ::COMP_MSG_SPEC_FIELD_LIST_MSGS           232
-set ::COMP_MSG_SPEC_FIELD_SRC_ID              231
-set ::COMP_MSG_SPEC_FIELD_HDR_FILLER          230
-set ::COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES      229
-set ::COMP_MSG_SPEC_FIELD_LOW                 228  ; # this must be the last entry!!
+set ::COMP_MSG_SPEC_FIELD_SRC                       255
+set ::COMP_MSG_SPEC_FIELD_GRP                       254
+set ::COMP_MSG_SPEC_FIELD_DST                       253
+set ::COMP_MSG_SPEC_FIELD_TOTAL_LGTH                252
+set ::COMP_MSG_SPEC_FIELD_IP_ADDR                   251
+set ::COMP_MSG_SPEC_FIELD_CMD_KEY                   250
+set ::COMP_MSG_SPEC_FIELD_CMD_LGTH                  249
+set ::COMP_MSG_SPEC_FIELD_RANDOM_NUM                248
+set ::COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              247
+set ::COMP_MSG_SPEC_FIELD_FILLER                    246
+set ::COMP_MSG_SPEC_FIELD_CRC                       245
+set ::COMP_MSG_SPEC_FIELD_GUID                      244
+set ::COMP_MSG_SPEC_FIELD_SRC_ID                    243
+set ::COMP_MSG_SPEC_FIELD_HDR_FILLER                242
+set ::COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            241
+
+set ::COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         240
+set ::COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         239
+set ::COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      238
+set ::COMP_MSG_SPEC_FIELD_CLIENT_SSID               237
+set ::COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             236
+set ::COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            235
+set ::COMP_MSG_SPEC_FIELD_CLIENT_PORT               234
+set ::COMP_MSG_SPEC_FIELD_CLIENT_STATUS             233
+set ::COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              232
+set ::COMP_MSG_SPEC_FIELD_SSDP_PORT                 231
+set ::COMP_MSG_SPEC_FIELD_SSDP_STATUS               230
+set ::COMP_MSG_SPEC_FIELD_CLOUD_PORT                229
+set ::COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              228
+set ::COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              227
+set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        226
+set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        225
+set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     224
+set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        223
+set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        222
+set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     221
+set ::COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        220
+set ::COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        219
+set ::COMP_MSG_SPEC_FIELD_TOTAL_CRC                 218
+
+set ::COMP_MSG_SPEC_FIELD_OTA_PORT                  217
+set ::COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              216
+set ::COMP_MSG_SPEC_FIELD_OTA_FS_PATH               215
+set ::COMP_MSG_SPEC_FIELD_OTA_HOST                  214
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_SSID            213
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD          212
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE   211
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL 210
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR         209
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET          208
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY         207
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_DNS             206
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS    205
+set ::COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          204
+set ::COMP_MSG_SPEC_FIELD_HDR_RESERVE               203
+
+set ::COMP_MSG_SPEC_FIELD_LOW                       202  ; # this must be the last entry!!
 
 set ::COMP_MSG_FREE_FIELD_ID 0xFF
 
@@ -80,191 +110,233 @@ namespace eval ::compMsg {
 
     variable specialFieldNames2Ids
     set specialFieldNames2Ids [dict create]
-    dict set specialFieldNames2Ids "@src"                COMP_MSG_SPEC_FIELD_SRC
-    dict set specialFieldNames2Ids "@dst"                COMP_MSG_SPEC_FIELD_DST
-    dict set specialFieldNames2Ids "@targetCmd"          COMP_MSG_SPEC_FIELD_TARGET_CMD
-    dict set specialFieldNames2Ids "@totalLgth"          COMP_MSG_SPEC_FIELD_TOTAL_LGTH
-    dict set specialFieldNames2Ids "@cmdKey"             COMP_MSG_SPEC_FIELD_CMD_KEY
-    dict set specialFieldNames2Ids "@cmdLgth"            COMP_MSG_SPEC_FIELD_CMD_LGTH
-    dict set specialFieldNames2Ids "@randomNum"          COMP_MSG_SPEC_FIELD_RANDOM_NUM
-    dict set specialFieldNames2Ids "@sequenceNum"        COMP_MSG_SPEC_FIELD_SEQUENCE_NUM
-    dict set specialFieldNames2Ids "@filler"             COMP_MSG_SPEC_FIELD_FILLER
-    dict set specialFieldNames2Ids "@crc"                COMP_MSG_SPEC_FIELD_CRC
-    dict set specialFieldNames2Ids "@id"                 COMP_MSG_SPEC_FIELD_ID
-    dict set specialFieldNames2Ids "@tablerows"          COMP_MSG_SPEC_FIELD_TABLE_ROWS
-    dict set specialFieldNames2Ids "@tablerowfields"     COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS
-    dict set specialFieldNames2Ids "@GUID"               COMP_MSG_SPEC_FIELD_GUID
-    dict set specialFieldNames2Ids "@numNormFlds"        COMP_MSG_SPEC_FIELD_NUM_NORM_FLDS
-    dict set specialFieldNames2Ids "@normFldIds"         COMP_MSG_SPEC_FIELD_NORM_FLD_IDS
-    dict set specialFieldNames2Ids "@normFldNamesSize"   COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE
-    dict set specialFieldNames2Ids "@normFldNames"       COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES
-    dict set specialFieldNames2Ids "@definitionsSize"    COMP_MSG_SPEC_FIELD_DEFINITIONS_SIZE
-    dict set specialFieldNames2Ids "@definitions"        COMP_MSG_SPEC_FIELD_DEFINITIONS
-    dict set specialFieldNames2Ids "@numListMsgs"        COMP_MSG_SPEC_FIELD_NUM_LIST_MSGS
-    dict set specialFieldNames2Ids "@listMsgSizesSize"   COMP_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE
-    dict set specialFieldNames2Ids "@listMsgs"           COMP_MSG_SPEC_FIELD_LIST_MSGS
-    dict set specialFieldNames2Ids "@srcId"              COMP_MSG_SPEC_FIELD_SRC_ID
-    dict set specialFieldNames2Ids "@hdrFiller"          COMP_MSG_SPEC_FIELD_HDR_FILLER 
-    dict set specialFieldNames2Ids "@numKeyValues"       COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES
-    dict set specialFieldNames2Ids "@provisioningSsid"   COMP_MSG_SPEC_FIELD_PROVISIONING_SSID
-    dict set specialFieldNames2Ids "@provisioningPort"   COMP_MSG_SPEC_FIELD_PROVISIONING_PORT
-    dict set specialFieldNames2Ids "@provisioningIPAddr" COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR
-    dict set specialFieldNames2Ids "@clientSsid"         COMP_MSG_SPEC_FIELD_CLIENT_SSID
-    dict set specialFieldNames2Ids "@clientPasswd"       COMP_MSG_SPEC_FIELD_CLIENT_PASSWD
-    dict set specialFieldNames2Ids "@clientIPAddr"       COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR
-    dict set specialFieldNames2Ids "@clientPort"         COMP_MSG_SPEC_FIELD_CLIENT_PORT
-    dict set specialFieldNames2Ids "@clientStatus"       COMP_MSG_SPEC_FIELD_CLIENT_STATUS
-    dict set specialFieldNames2Ids "@cloudDomain"        COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN
-    dict set specialFieldNames2Ids "@cloudPort"          COMP_MSG_SPEC_FIELD_CLOUD_PORT
-    dict set specialFieldNames2Ids "@cloudHost1"         COMP_MSG_SPEC_FIELD_CLOUD_HOST_1
-    dict set specialFieldNames2Ids "@cloudHost2"         COMP_MSG_SPEC_FIELD_CLOUD_HOST_2
-    dict set specialFieldNames2Ids "@cloudSecureConnect" COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT
-    dict set specialFieldNames2Ids "@cloudSubUrl"        COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL
-    dict set specialFieldNames2Ids "@cloudNodeToken"     COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN
-    dict set specialFieldNames2Ids "@totalCrc"           COMP_MSG_SPEC_FIELD_TOTAL_CRC
-
-
+    dict set specialFieldNames2Ids "@src"                     COMP_MSG_SPEC_FIELD_SRC
+    dict set specialFieldNames2Ids "@grp"                     COMP_MSG_SPEC_FIELD_grp
+    dict set specialFieldNames2Ids "@dst"                     COMP_MSG_SPEC_FIELD_DST
+    dict set specialFieldNames2Ids "@totalLgth"               COMP_MSG_SPEC_FIELD_TOTAL_LGTH
+    dict set specialFieldNames2Ids "@ipAddr"                  COMP_MSG_SPEC_FIELD_IP_ADDR
+    dict set specialFieldNames2Ids "@cmdKey"                  COMP_MSG_SPEC_FIELD_CMD_KEY
+    dict set specialFieldNames2Ids "@cmdLgth"                 COMP_MSG_SPEC_FIELD_CMD_LGTH
+    dict set specialFieldNames2Ids "@randomNum"               COMP_MSG_SPEC_FIELD_RANDOM_NUM
+    dict set specialFieldNames2Ids "@sequenceNum"             COMP_MSG_SPEC_FIELD_SEQUENCE_NUM
+    dict set specialFieldNames2Ids "@filler"                  COMP_MSG_SPEC_FIELD_FILLER
+    dict set specialFieldNames2Ids "@crc"                     COMP_MSG_SPEC_FIELD_CRC
+    dict set specialFieldNames2Ids "@GUID"                    COMP_MSG_SPEC_FIELD_GUID
+    dict set specialFieldNames2Ids "@srcId"                   COMP_MSG_SPEC_FIELD_SRC_ID
+    dict set specialFieldNames2Ids "@hdrFiller"               COMP_MSG_SPEC_FIELD_HDR_FILLER 
+    dict set specialFieldNames2Ids "@numKeyValues"            COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES
+    dict set specialFieldNames2Ids "@provisioningSsid"        COMP_MSG_SPEC_FIELD_PROVISIONING_SSID
+    dict set specialFieldNames2Ids "@provisioningPort"        COMP_MSG_SPEC_FIELD_PROVISIONING_PORT
+    dict set specialFieldNames2Ids "@provisioningIPAddr"      COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR
+    dict set specialFieldNames2Ids "@clientSsid"              COMP_MSG_SPEC_FIELD_CLIENT_SSID
+    dict set specialFieldNames2Ids "@clientPasswd"            COMP_MSG_SPEC_FIELD_CLIENT_PASSWD
+    dict set specialFieldNames2Ids "@clientIPAddr"            COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR
+    dict set specialFieldNames2Ids "@clientPort"              COMP_MSG_SPEC_FIELD_CLIENT_PORT
+    dict set specialFieldNames2Ids "@clientStatus"            COMP_MSG_SPEC_FIELD_CLIENT_STATUS
+    dict set specialFieldNames2Ids "@SSDPIPAddr"              COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR
+    dict set specialFieldNames2Ids "@SSDPPort"                COMP_MSG_SPEC_FIELD_SSDP_PORT
+    dict set specialFieldNames2Ids "@SSDPStatus"              COMP_MSG_SPEC_FIELD_SSDP_STATUS
+    dict set specialFieldNames2Ids "@cloudPort"               COMP_MSG_SPEC_FIELD_CLOUD_PORT
+    dict set specialFieldNames2Ids "@cloudHost1"              COMP_MSG_SPEC_FIELD_CLOUD_HOST_1
+    dict set specialFieldNames2Ids "@cloudHost2"              COMP_MSG_SPEC_FIELD_CLOUD_HOST_2
+    dict set specialFieldNames2Ids "@cloudUrl1Part1"          COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1
+    dict set specialFieldNames2Ids "@cloudUrl1Part2"          COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2
+    dict set specialFieldNames2Ids "@cloudUrlTenantId1"       COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1
+    dict set specialFieldNames2Ids "@cloudUrl2Part1"          COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1
+    dict set specialFieldNames2Ids "@cloudUrl2Part2"          COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2
+    dict set specialFieldNames2Ids "@cloudUrlTenantId2"       COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2
+    dict set specialFieldNames2Ids "@cloudNodeToken1"         COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1
+    dict set specialFieldNames2Ids "@cloudNodeToken2"         COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2
+    dict set specialFieldNames2Ids "@totalCrc"                COMP_MSG_SPEC_FIELD_TOTAL_CRC
+    dict set specialFieldNames2Ids "@otaPort"                 COMP_MSG_SPEC_FIELD_OTA_PORT
+    dict set specialFieldNames2Ids "@otaRomPath"              COMP_MSG_SPEC_FIELD_OTA_ROM_PATH
+    dict set specialFieldNames2Ids "@otaFsPath"               COMP_MSG_SPEC_FIELD_OTA_FS_PATH
+    dict set specialFieldNames2Ids "@otaHost"                 COMP_MSG_SPEC_FIELD_OTA_HOST
+    dict set specialFieldNames2Ids "@prodTestSsid"            COMP_MSG_SPEC_FIELD_PROD_TEST_SSID
+    dict set specialFieldNames2Ids "@prodTestPasswd"          COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD
+    dict set specialFieldNames2Ids "@prodTestSecurityType"    COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE
+    dict set specialFieldNames2Ids "@prodTestTargetProtocol"  COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL
+    dict set specialFieldNames2Ids "@prodTestIpAddr"          COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR
+    dict set specialFieldNames2Ids "@prodTestSubnet"          COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET
+    dict set specialFieldNames2Ids "@prodTestGateway"         COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY
+    dict set specialFieldNames2Ids "@prodTestDns"             COMP_MSG_SPEC_FIELD_PROD_TEST_DNS
+    dict set specialFieldNames2Ids "@prodTestPingAddress"     COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS
+    dict set specialFieldNames2Ids "@prodTestStatus"          COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS
+    dict set specialFieldNames2Ids "@hdrReserve"              COMP_MSG_SPEC_FIELD_HDR_RESERVE
 
     variable specialFieldId2Names
     set specialFieldId2Names [dict create]
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SRC                  "@src"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_DST                  "@dst"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_TARGET_CMD           "@targetCmd"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_TOTAL_LGTH           "@totalLgth"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CMD_KEY              "@cmdKey"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CMD_LGTH             "@cmdLgth"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_RANDOM_NUM           "@randomNum"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SEQUENCE_NUM         "@sequenceNum"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_FILLER               "@filler"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CRC                  "@crc"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_ID                   "@id"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_TABLE_ROWS           "@tablerows"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS     "@tablerowfields"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_GUID                 "@GUID"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NUM_NORM_FLDS        "@numNormFlds"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NORM_FLD_IDS         "@normFldIds"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE  "@normFldNamesSize"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES       "@normFldNames"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_DEFINITIONS_SIZE     "@definitionsSize"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_DEFINITIONS          "@definitions"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NUM_LIST_MSGS        "@numListMsgs"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE  "@listMsgSizesSize"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_LIST_MSGS            "@listMsgs"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SRC_ID               "@srcId"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_HDR_FILLER           "@hdrFiller"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES       "@numKeyValues"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROVISIONING_SSID    "@provisioningSsid"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROVISIONING_PORT    "@provisioningPort"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR "@provisioningIPAddr"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_SSID          "@clientSsid"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_PASSWD        "@clientPasswd"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR       "@clientIPAddr"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_PORT          "@clientPort"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_STATUS        "@clientStatus"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN         "@cloudDomain"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_PORT           "@cloudPort"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_HOST_1         "@cloudHost1"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_HOST_2         "@cloudHost2"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT "@cloudSecureConnect"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL        "@cloudSubUrl"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN     "@cloudNodeToken"
-    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_TOTAL_CRC            "@totalCrc"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SRC                       "@src"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_grp                       "@grp"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_DST                       "@dst"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_TOTAL_LGTH                "@totalLgth"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_IP_ADDR                   "@ipAddr"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CMD_KEY                   "@cmdKey"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CMD_LGTH                  "@cmdLgth"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_RANDOM_NUM                "@randomNum"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              "@sequenceNum"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_FILLER                    "@filler"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CRC                       "@crc"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_GUID                      "@GUID"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SRC_ID                    "@srcId"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_HDR_FILLER                "@hdrFiller"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            "@numKeyValues"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         "@provisioningSsid"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         "@provisioningPort"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      "@provisioningIPAddr"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_SSID               "@clientSsid"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             "@clientPasswd"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            "@clientIPAddr"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_PORT               "@clientPort"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLIENT_STATUS             "@clientStatus"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              "@SSDPIPAddr"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SSDP_PORT                 "@SSDPPort"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_SSDP_STATUS               "@SSDPStatus"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_PORT                "@cloudPort"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              "@cloudHost1"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              "@cloudHost2"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        "@cloudUrl1Part1"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        "@cloudUrl1Part2"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     "@cloudUrlTenantId1"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        "@cloudUrl2Part1"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        "@cloudUrl2Part2"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     "@cloudUrlTenantId2"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        "@cloudNodeToken1"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        "@cloudNodeToken2"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_TOTAL_CRC                 "@totalCrc"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_OTA_PORT                  "@otaPort"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              "@otaRomPath"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_OTA_FS_PATH               "@otaFsPath"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_OTA_HOST                  "@otaHost"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_SSID            "@prodTestSsid"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD          "@prodTestPasswd"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE   "@prodTestSecurityType"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL "@prodTestTargetProtocol"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR         "@prodTestIpAddr"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET          "@prodTestSubnet"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY         "@prodTestGateway"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_DNS             "@prodTestDns"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS    "@prodTestPingAddress"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          "@prodTestStatus"
+    dict set specialFieldId2Names COMP_MSG_SPEC_FIELD_HDR_RESERVE               "@hdrReserve"
 
     variable specialFieldIds2Ints
     set specialFieldIds2Ints [dict create]
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SRC                  255
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_DST                  254
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TARGET_CMD           253
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TOTAL_LGTH           252
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CMD_KEY              251
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CMD_LGTH             250
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_RANDOM_NUM           249
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SEQUENCE_NUM         248
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_FILLER               247
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CRC                  246
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_ID                   245
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TABLE_ROWS           244
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS     243
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NUM_FIELDS           242
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_GUID                 241
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NUM_NORM_FLDS        240
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NORM_FLD_IDS         239
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE  238
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES       237
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_DEFINITIONS_SIZE     236
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_DEFINITIONS          235
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NUM_LIST_MSGS        234
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE  233
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LIST_MSGS            232
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SRC_ID               231
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_HDR_FILLER           230
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES       229
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROVISIONING_SSID    228
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROVISIONING_PORT    227
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR 226
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_SSID          225
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_PASSWD        224
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR       223
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_PORT          222
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_STATUS        221
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN         220
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_PORT           219
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_1         218
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_2         217
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT 216
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL        215
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN     214
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TOTAL_CRC            213
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SRC                       255
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_grp                       254
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_DST                       253
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TOTAL_LGTH                252
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_IP_ADDR                   251
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CMD_KEY                   250
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CMD_LGTH                  249
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_RANDOM_NUM                248
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              247
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_FILLER                    246
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CRC                       245
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_GUID                      244
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SRC_ID                    243
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_HDR_FILLER                242
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            241
 
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LOW                  212  ; # this must be the last entry!!
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         240
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         239
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      238
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_SSID               237
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             236
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            235
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_PORT               234
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLIENT_STATUS             233
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              232
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SSDP_PORT                 231
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_SSDP_STATUS               230
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_PORT                229
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              228
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              227
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        226
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        225
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     224
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        223
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        222
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     221
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        220
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        219
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_TOTAL_CRC                 218
+
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_OTA_PORT                  217
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              216
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_OTA_FS_PATH               215
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_OTA_HOST                  214
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_SSID            213
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD          212
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE   211
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL 210
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR         209
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET          208
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY         207
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_DNS             206
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS    205
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          204
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_HDR_RESERVE               203
+
+    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LOW                       202  ; # this must be the last entry!!
 
     variable specialFieldInts2Ids
     set specialFieldInts2Ids [dict create]
-    dict set specialFieldInts2Ids 255 COMP_MSG_SPEC_FIELD_SRC
-    dict set specialFieldInts2Ids 254 COMP_MSG_SPEC_FIELD_DST
-    dict set specialFieldInts2Ids 253 COMP_MSG_SPEC_FIELD_TARGET_CMD
-    dict set specialFieldInts2Ids 252 COMP_MSG_SPEC_FIELD_TOTAL_LGTH
-    dict set specialFieldInts2Ids 251 COMP_MSG_SPEC_FIELD_CMD_KEY 
-    dict set specialFieldInts2Ids 250 COMP_MSG_SPEC_FIELD_CMD_LGTH
-    dict set specialFieldInts2Ids 249 COMP_MSG_SPEC_FIELD_RANDOM_NUM
-    dict set specialFieldInts2Ids 248 COMP_MSG_SPEC_FIELD_SEQUENCE_NUM
-    dict set specialFieldInts2Ids 247 COMP_MSG_SPEC_FIELD_FILLER
-    dict set specialFieldInts2Ids 246 COMP_MSG_SPEC_FIELD_CRC
-    dict set specialFieldInts2Ids 245 COMP_MSG_SPEC_FIELD_ID
-    dict set specialFieldInts2Ids 244 COMP_MSG_SPEC_FIELD_TABLE_ROWS
-    dict set specialFieldInts2Ids 243 COMP_MSG_SPEC_FIELD_TABLE_ROW_FIELDS
-    dict set specialFieldInts2Ids 242 COMP_MSG_SPEC_FIELD_NUM_FIELDS
-    dict set specialFieldInts2Ids 241 COMP_MSG_SPEC_FIELD_GUID
-    dict set specialFieldInts2Ids 240 COMP_MSG_SPEC_FIELD_NUM_NORM_FLDS
-    dict set specialFieldInts2Ids 239 COMP_MSG_SPEC_FIELD_NORM_FLD_IDS
-    dict set specialFieldInts2Ids 238 COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES_SIZE
-    dict set specialFieldInts2Ids 237 COMP_MSG_SPEC_FIELD_NORM_FLD_NAMES
-    dict set specialFieldInts2Ids 236 COMP_MSG_SPEC_FIELD_DEFINITIONS_SIZE
-    dict set specialFieldInts2Ids 235 COMP_MSG_SPEC_FIELD_DEFINITIONS
-    dict set specialFieldInts2Ids 234 COMP_MSG_SPEC_FIELD_NUM_LIST_MSGS
-    dict set specialFieldInts2Ids 233 COMP_MSG_SPEC_FIELD_LIST_MSG_SIZES_SIZE
-    dict set specialFieldInts2Ids 232 COMP_MSG_SPEC_FIELD_LIST_MSGS
-    dict set specialFieldInts2Ids 231 COMP_MSG_SPEC_FIELD_SRC_ID
-    dict set specialFieldInts2Ids 230 COMP_MSG_SPEC_FIELD_HDR_FILLER
-    dict set specialFieldInts2Ids 229 COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES
-    dict set specialFieldInts2Ids 228 COMP_MSG_SPEC_FIELD_PROVISIONING_SSID
-    dict set specialFieldInts2Ids 227 COMP_MSG_SPEC_FIELD_PROVISIONING_PORT
-    dict set specialFieldInts2Ids 226 COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR
-    dict set specialFieldInts2Ids 225 COMP_MSG_SPEC_FIELD_CLIENT_SSID
-    dict set specialFieldInts2Ids 224 COMP_MSG_SPEC_FIELD_CLIENT_PASSWD
-    dict set specialFieldInts2Ids 223 COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR
-    dict set specialFieldInts2Ids 222 COMP_MSG_SPEC_FIELD_CLIENT_PORT
-    dict set specialFieldInts2Ids 221 COMP_MSG_SPEC_FIELD_CLIENT_STATUS
-    dict set specialFieldInts2Ids 220 COMP_MSG_SPEC_FIELD_CLOUD_DOMAIN
-    dict set specialFieldInts2Ids 219 COMP_MSG_SPEC_FIELD_CLOUD_PORT
-    dict set specialFieldInts2Ids 218 COMP_MSG_SPEC_FIELD_CLOUD_HOST_1
-    dict set specialFieldInts2Ids 217 COMP_MSG_SPEC_FIELD_CLOUD_HOST_2
-    dict set specialFieldInts2Ids 216 COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT
-    dict set specialFieldInts2Ids 215 COMP_MSG_SPEC_FIELD_CLOUD_SUB_URL
-    dict set specialFieldInts2Ids 214 COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN
-    dict set specialFieldInts2Ids 213 COMP_MSG_SPEC_FIELD_TOTAL_CRC
+    dict set specialFieldInts2Ids 255 COMP_MSG_SPEC_FIELD_SRC                       
+    dict set specialFieldInts2Ids 254 COMP_MSG_SPEC_FIELD_grp                       
+    dict set specialFieldInts2Ids 253 COMP_MSG_SPEC_FIELD_DST                       
+    dict set specialFieldInts2Ids 252 COMP_MSG_SPEC_FIELD_TOTAL_LGTH                
+    dict set specialFieldInts2Ids 251 COMP_MSG_SPEC_FIELD_IP_ADDR                   
+    dict set specialFieldInts2Ids 250 COMP_MSG_SPEC_FIELD_CMD_KEY                   
+    dict set specialFieldInts2Ids 249 COMP_MSG_SPEC_FIELD_CMD_LGTH                  
+    dict set specialFieldInts2Ids 248 COMP_MSG_SPEC_FIELD_RANDOM_NUM                
+    dict set specialFieldInts2Ids 247 COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              
+    dict set specialFieldInts2Ids 246 COMP_MSG_SPEC_FIELD_FILLER                    
+    dict set specialFieldInts2Ids 245 COMP_MSG_SPEC_FIELD_CRC                       
+    dict set specialFieldInts2Ids 244 COMP_MSG_SPEC_FIELD_GUID                      
+    dict set specialFieldInts2Ids 243 COMP_MSG_SPEC_FIELD_SRC_ID                    
+    dict set specialFieldInts2Ids 242 COMP_MSG_SPEC_FIELD_HDR_FILLER                
+    dict set specialFieldInts2Ids 241 COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            
+    dict set specialFieldInts2Ids 240 COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         
+    dict set specialFieldInts2Ids 239 COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         
+    dict set specialFieldInts2Ids 238 COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      
+    dict set specialFieldInts2Ids 237 COMP_MSG_SPEC_FIELD_CLIENT_SSID               
+    dict set specialFieldInts2Ids 236 COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             
+    dict set specialFieldInts2Ids 235 COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            
+    dict set specialFieldInts2Ids 234 COMP_MSG_SPEC_FIELD_CLIENT_PORT               
+    dict set specialFieldInts2Ids 233 COMP_MSG_SPEC_FIELD_CLIENT_STATUS             
+    dict set specialFieldInts2Ids 232 COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              
+    dict set specialFieldInts2Ids 231 COMP_MSG_SPEC_FIELD_SSDP_PORT                 
+    dict set specialFieldInts2Ids 230 COMP_MSG_SPEC_FIELD_SSDP_STATUS               
+    dict set specialFieldInts2Ids 229 COMP_MSG_SPEC_FIELD_CLOUD_PORT                
+    dict set specialFieldInts2Ids 228 COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              
+    dict set specialFieldInts2Ids 227 COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              
+    dict set specialFieldInts2Ids 226 COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        
+    dict set specialFieldInts2Ids 225 COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        
+    dict set specialFieldInts2Ids 224 COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     
+    dict set specialFieldInts2Ids 223 COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        
+    dict set specialFieldInts2Ids 222 COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        
+    dict set specialFieldInts2Ids 221 COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     
+    dict set specialFieldInts2Ids 220 COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        
+    dict set specialFieldInts2Ids 219 COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        
+    dict set specialFieldInts2Ids 218 COMP_MSG_SPEC_FIELD_TOTAL_CRC                 
+    dict set specialFieldInts2Ids 217 COMP_MSG_SPEC_FIELD_OTA_PORT                  
+    dict set specialFieldInts2Ids 216 COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              
+    dict set specialFieldInts2Ids 215 COMP_MSG_SPEC_FIELD_OTA_FS_PATH               
+    dict set specialFieldInts2Ids 214 COMP_MSG_SPEC_FIELD_OTA_HOST                  
+    dict set specialFieldInts2Ids 213 COMP_MSG_SPEC_FIELD_PROD_TEST_SSID            
+    dict set specialFieldInts2Ids 212 COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD          
+    dict set specialFieldInts2Ids 211 COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE   
+    dict set specialFieldInts2Ids 210 COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL 
+    dict set specialFieldInts2Ids 209 COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR         
+    dict set specialFieldInts2Ids 208 COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET          
+    dict set specialFieldInts2Ids 207 COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY         
+    dict set specialFieldInts2Ids 206 COMP_MSG_SPEC_FIELD_PROD_TEST_DNS             
+    dict set specialFieldInts2Ids 205 COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS    
+    dict set specialFieldInts2Ids 204 COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          
+    dict set specialFieldInts2Ids 203 COMP_MSG_SPEC_FIELD_HDR_RESERVE               
 
-    dict set specialFieldInts2Ids 222 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
+    dict set specialFieldInts2Ids 202 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
 
     variable specialFieldNameTokens2Ids
     set specialFieldNameTokens2Ids [dict create]
@@ -291,6 +363,7 @@ namespace eval ::compMsg {
         set fieldNameInt [dict get $specialFieldId2Ints $fieldNameId]
         return [checkErrOK OK]
       }
+puts stderr "getSpecialFieldNameIntFromId: $fieldNameId!"
       checkErrOK BAD_SPECIAL_FIELD
     }
 
@@ -306,6 +379,7 @@ namespace eval ::compMsg {
           set fieldNameId [dict get $specialFieldNames2Ids $fieldName]
           return [checkErrOK OK]
         }
+puts stderr "getSpecialFieldNameIntFromStr: $fieldName!"
         checkErrOK BAD_SPECIAL_FIELD
       } else {
         set firstFreeEntry [list]
@@ -403,16 +477,17 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
     
     # ================================= getFileNameTokenIdFromStr ====================================
 
-    proc getFileNameTokenIdFromStr {compMsgTypesAndNamesVar fileNameTokenStr fileNameTokenIdVar} {
-      upvar $compMsgTypesAndNamesVar compMsgTypesAndNames
+    proc getFileNameTokenIdFromStr {fileNameTokenStr fileNameTokenIdVar} {
       upvar $fileNameTokenIdVar fileNameTokenId
       variable specialFieldNameTokens2Ids
 
+      set LB "\{"
+      set RB "\}"
       if {[dict exists $specialFieldNameTokens2Ids $fileNameTokenStr]} {
         set fileNameTokenId [dict get $specialFieldNameTokens2Ids $fileNameTokenStr]
         return [checkErrOK OK]
       }
-      checkErrOk FILE_NAME_TOKEN_NOT_FOUND
+      checkErrOK FILE_NAME_TOKEN_NOT_FOUND
     }
 
   } ; # namespace compMsgTypesAndNames
