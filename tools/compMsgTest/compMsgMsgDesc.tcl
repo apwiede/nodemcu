@@ -600,12 +600,8 @@ puts stderr "fieldValue: $fieldValue!valIdx: $valIdx!"
       dict incr msgDescIncludeInfo numMsgFieldVal
       set msgFieldVals [lreplace $msgFieldVals $valIdx $valIdx $msgFieldVal]
       dict set msgDescIncludeInfo msgFieldVals $msgFieldVals
-puts stderr "msgFieldVal"
-pdict $msgFieldVal
       set msgDescIncludeInfos [lreplace $msgDescIncludeInfos $idx $idx $msgDescIncludeInfo]
       dict set compMsgMsgDesc msgDescIncludeInfos $msgDescIncludeInfos
-puts stderr "compMsgMsgDesc"
-pdict $compMsgMsgDesc
       dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
       return [checkErrOK OK]
     }
@@ -748,12 +744,8 @@ puts stderr "handleMsgUseLine: include_type: [dict get $msgDescIncludeInfo inclu
       dict set msgDescription handleType [string range $field 0 0]
       # FIXME need to handle cmdKey here!!!
       puts stderr [format "msgDescription->headerLgth: %d encrypted: %s handleType: %s" [dict get $msgDescription headerLgth] [dict get $msgDescription encrypted] [dict get $msgDescription handleType]]
-puts stderr "MSGDESC0: $msgDescriptionInfos!"
       set msgDescriptions [lreplace $msgDescriptions $descIdx $descIdx $msgDescription]
       dict set msgDescriptionInfos msgDescriptions $msgDescriptions
-puts stderr "MSGDESC1"
-pdict $msgDescription
-puts stderr "MSGDESC2: $msgDescriptionInfos!"
       dict set compMsgMsgDesc msgDescriptionInfos $msgDescriptionInfos
       dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
       return [checkErrOK OK]
