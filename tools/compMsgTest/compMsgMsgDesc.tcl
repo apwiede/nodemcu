@@ -586,28 +586,26 @@ puts stderr "token: $token fieldId: $fieldId!"
       checkErrOK $result
       # field value
       set fieldValue [lindex [dict get $compMsgMsgDesc lineFields] 1]
-puts stderr "fieldValue: $fieldValue!"
-#      if {[string range $fieldValue 0 0] eq "@"} {
-#        dict set msgFieldVal value $fieldValue
-#        # FIXME: need code for value callback here !!!
-#        puts stderr [format "%s: id: %d %s!" $fieldName $fieldNameId [dict get $msgFieldVal value]]
-#      } else {
-        if {[string range $fieldValue 0 0] eq "\""} {
-          set result [getStringFieldValue compMsgDispatcher $fieldValue stringVal]
-          dict set msgFieldVal value $stringVal
-          puts stderr [format "%s: id: %s val: %s!" $fieldName $fieldNameId [dict get $msgFieldVal value]]
-        } else {
-          set result [getIntFieldValue compMsgDispatcher $fieldValue value]
-          dict set msgFieldVal value $value 
-          puts stderr [format "%s: id: %s %s" $fieldName $fieldNameId [dict get $msgFieldVal value]]
-        }
-        checkErrOK $result
-#      }
+puts stderr "fieldValue: $fieldValue!valIdx: $valIdx!"
+      if {[string range $fieldValue 0 0] eq "\""} {
+        set result [getStringFieldValue compMsgDispatcher $fieldValue stringVal]
+        dict set msgFieldVal value $stringVal
+        puts stderr [format "%s: id: %s val: %s!" $fieldName $fieldNameId [dict get $msgFieldVal value]]
+      } else {
+        set result [getIntFieldValue compMsgDispatcher $fieldValue value]
+        dict set msgFieldVal value $value 
+        puts stderr [format "%s: id: %s %s" $fieldName $fieldNameId [dict get $msgFieldVal value]]
+      }
+      checkErrOK $result
       dict incr msgDescIncludeInfo numMsgFieldVal
       set msgFieldVals [lreplace $msgFieldVals $valIdx $valIdx $msgFieldVal]
-      dict set compMsgMsgDesc msgFieldVals $msgFieldVals
+      dict set msgDescIncludeInfo msgFieldVals $msgFieldVals
+puts stderr "msgFieldVal"
+pdict $msgFieldVal
       set msgDescIncludeInfos [lreplace $msgDescIncludeInfos $idx $idx $msgDescIncludeInfo]
       dict set compMsgMsgDesc msgDescIncludeInfos $msgDescIncludeInfos
+puts stderr "compMsgMsgDesc"
+pdict $compMsgMsgDesc
       dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
       return [checkErrOK OK]
     }
@@ -673,9 +671,10 @@ puts stderr "handleMsgUseLine: include_type: [dict get $msgDescIncludeInfo inclu
       checkErrOK $result
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
       set msgDescriptionInfos [dict get $compMsgMsgDesc msgDescriptionInfos]
-      set idx [dict get $msgDescriptionInfos currMsgDescriptionIdx]
       set msgDescriptions [dict get $msgDescriptionInfos msgDescriptions]
-      set msgDescription [lindex $msgDescriptions $idx]
+      set descIdx [dict get $msgDescriptionInfos currMsgDescriptionIdx]
+      set msgDescriptions [dict get $msgDescriptionInfos msgDescriptions]
+      set msgDescription [lindex $msgDescriptions $descIdx]
       set includeIdx 0
       set numHeaderFields 0
       set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
@@ -693,14 +692,15 @@ puts stderr "handleMsgUseLine: include_type: [dict get $msgDescIncludeInfo inclu
       if {[dict get $compMsgMsgDesc numLineFields] < 3} {
         checkErrOK FIELD_DESC_TOO_FEW_FIELDS
       }
-      set fieldIdx 0
       dict set msgDescription headerLgth 0
       set msgFieldDescs [dict get $msgDescIncludeInfo msgFieldDescs]
+      set fieldIdx 0
       while {$fieldIdx < $numHeaderFields} {
         set msgFieldDesc [lindex $msgFieldDescs $fieldIdx]
         dict incr msgDescription headerLgth [dict get $msgFieldDesc fieldLgth]
         set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId [dict get $msgFieldDesc fieldNameId] fieldNameStr]
-        set value [lindex [dict get $compMsgMsgDesc lineFields] $fieldIdx]
+        set lineFields [dict get $compMsgMsgDesc lineFields]
+        set value [lindex $lineFields $fieldIdx]
         puts stderr [format "field: %s %s" $fieldNameStr $value]
         if {$value eq "*"} {
           dict lappend msgFieldDesc fieldFlags COMP_MSG_VAL_IS_JOKER
@@ -728,8 +728,12 @@ puts stderr "handleMsgUseLine: include_type: [dict get $msgDescIncludeInfo inclu
           }
           checkErrOK $result
         }
+        set msgFieldDescs [lreplace $msgFieldDescs $fieldIdx $fieldIdx $msgFieldDesc]
         incr fieldIdx
       }
+      dict set msgDescIncludeInfo msgFieldDescs $msgFieldDescs
+      set msgDescIncludeInfos [lreplace $msgDescIncludeInfos $includeIdx $includeIdx $msgDescIncludeInfo]
+      dict set compMsgMsgDesc msgDescIncludeInfos $msgDescIncludeInfos
       set lineFields [dict get $compMsgMsgDesc lineFields]
       set field [lindex $lineFields $fieldIdx]
       if {[string length $field] > 1} {
@@ -744,7 +748,12 @@ puts stderr "handleMsgUseLine: include_type: [dict get $msgDescIncludeInfo inclu
       dict set msgDescription handleType [string range $field 0 0]
       # FIXME need to handle cmdKey here!!!
       puts stderr [format "msgDescription->headerLgth: %d encrypted: %s handleType: %s" [dict get $msgDescription headerLgth] [dict get $msgDescription encrypted] [dict get $msgDescription handleType]]
-      set msgDescriptionInfos [lreplace $$msgDescriptionInfos $idx $idx $msgDescription]
+puts stderr "MSGDESC0: $msgDescriptionInfos!"
+      set msgDescriptions [lreplace $msgDescriptions $descIdx $descIdx $msgDescription]
+      dict set msgDescriptionInfos msgDescriptions $msgDescriptions
+puts stderr "MSGDESC1"
+pdict $msgDescription
+puts stderr "MSGDESC2: $msgDescriptionInfos!"
       dict set compMsgMsgDesc msgDescriptionInfos $msgDescriptionInfos
       dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
       return [checkErrOK OK]
@@ -1505,6 +1514,7 @@ puts stderr "getWifiKeyValues done"
       dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
       set result [handleMsgFile compMsgDispatcher $fileName handleMsgFileNameLine]
       checkErrOK $result
+pdict $compMsgDispatcher
       return [checkErrOK OK]
     }
 

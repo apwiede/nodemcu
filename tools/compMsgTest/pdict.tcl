@@ -53,14 +53,22 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
     }
     dict for {key val} ${d} {
         puts -nonewline "${prefix}[format "%-${max}s" $key]$s"
-        if {    $fRepExist && [string match "value is a dict*"\
-                    [tcl::unsupported::representation $val]]
-                || ! $fRepExist && [string is list $val]
-                    && [llength $val] % 2 == 0 } {
+        if {$fRepExist && [string match "value is a dict*" [tcl::unsupported::representation $val]]} {
             puts ""
             pdict $val [expr {$i+1}] $p $s
         } else {
-            puts "'${val}'"
+            if {[string is list $val] && ([llength $val] > 1)} {
+              foreach entry $val {
+                if {$fRepExist && [string is list $entry] && [expr {[llength $entry] % 2 == 0}] } {
+                  puts ""
+                  pdict $entry [expr {$i+1}] $p $s
+                } else {
+                  puts "'${entry}'"
+                }
+              }
+            } else {
+              puts "'${val}'"
+            }
         }
     }
     return
