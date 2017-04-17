@@ -40,7 +40,7 @@ namespace eval ::compMsg {
     namespace ensemble create
       
     namespace export dataValueStr2ValueId dataValueId2ValueStr addDataValue
-    namespace export setDataValue getDataValue
+    namespace export setDataValue getDataValue compMsgDataValueInit
 
     variable dataValueStr2ValueIds 
     set dataValueStr2ValueIds [dict create]
@@ -78,107 +78,118 @@ namespace eval ::compMsg {
 
     # ================================= dataValueStr2ValueId ====================================
 
-    proc dataValueStr2ValueId {compMsgDispatcherVar valueStr valueId} {
+    proc dataValueStr2ValueId {compMsgDispatcherVar valueStr valueIdVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueIdVar valueId
+      variable dataValueStr2ValueIds
 
-      entry = &dataValueStr2ValueIds[0];
-      while (entry->str != NULL) {
-        if (c_strcmp(entry->str, valueStr) == 0) {
-          *valueId = entry->id;
-          return COMP_MSG_ERR_OK;
-        }
-        entry++;
+      if {[dict exists $dataValueStr2ValueIds $valueStr]} {
+        set valueId [dict get $dataValueStr2ValueIds $valueStr]
+        return [checkErrOK OK]
       }
-      return COMP_MSG_ERR_FIELD_NOT_FOUND;
+      checkErrOK FIELD_NOT_FOUND
     }
 
     # ================================= dataValueId2ValueStr ====================================
 
-    proc  dataValueId2ValueStr {compMsgDispatcherVar valueId valueStr} {
+    proc  dataValueId2ValueStr {compMsgDispatcherVar valueId valueStrVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $valueStrVar valueStr
+      variable dataValueStr2ValueIds
 
-      entry = &dataValueStr2ValueIds[0];
-      while (entry->str != NULL) {
-        if (entry->id == valueId) {
-          *valueStr = entry->str;
-          return COMP_MSG_ERR_OK;
+      foreach key [dict keys $dataValueStr2ValueIds] {
+        if {[dict get $dataValueStr2ValueIds $key] eq $valueId} {
+          set valueStr $key
+          return [checkErrOK OK]
         }
-        entry++;
       }
-      return COMP_MSG_ERR_FIELD_NOT_FOUND;
+      checkErrOK FIELD_NOT_FOUND
     }
 
     # ================================= addDataValue ====================================
 
-    proc addDataValue {compMsgDispatchervar valueId fieldValueCallback Value} {
+    proc addDataValue {compMsgDispatcherVar valueId fieldValueCallback numericValue stringValue} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      result = COMP_MSG_ERR_OK;
-      compMsgDataValue = self->compMsgDataValue;
-      if (compMsgDataValue->numDataValues >= compMsgDataValue->maxDataValues) {
-        if (compMsgDataValue->maxDataValues == 0) {
-          compMsgDataValue->maxDataValues = 5;
-          compMsgDataValue->dataValues = (dataValue_t *)os_zalloc((compMsgDataValue->maxDataValues * sizeof(dataValue_t)));
-          checkAllocOK(compMsgDataValue->dataValues);
+      set result OK
+      set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
+puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $compMsgDataValue maxDataValues]!"
+      if {[dict get $compMsgDataValue numDataValues] >= [dict get $compMsgDataValue maxDataValues]} {
+        if {[dict get $compMsgDataValue maxDataValues] == 0} {
+          dict set compMsgDataValue maxDataValues 5
+          set lst [list]
+          set valIdx 0
+          while {$valIdx < 5} {
+            lappend lst [list]
+            incr valIdx
+          }
+          dict set compMsgDataValue dataValues $lst
         } else {
-          compMsgDataValue->maxDataValues += 2;
-          compMsgDataValue->dataValues = (dataValue_t *)os_realloc((compMsgDataValue->dataValues), (compMsgDataValue->maxDataValues * sizeof(dataValue_t)));
-          checkAllocOK(compMsgDataValue->dataValues);
+          dict incr compMsgDataValue maxDataValues 2
+          set valIdx 0
+          while {$valIdx < 2} {
+            dict lappend compMsgDataValue dataValues [list]
+            incr valIdx
+          }
         }
       }
-      dataValue = &compMsgDataValue->dataValues[compMsgDataValue->numDataValues];
-      memset(dataValue, 0, sizeof(dataValue_t));
-      dataValue->valueId = valueId;
-      dataValue->flags = 0;
-      if (stringValue == NULL) {
-        dataValue->flags |= COMP_MSG_FIELD_IS_NUMERIC;
-        dataValue->value.numericValue = numericValue;
-      } else {
-        dataValue->flags |= COMP_MSG_FIELD_IS_STRING;
-        dataValue->value.stringValue = os_zalloc(c_strlen(stringValue) + 1);
-        c_memcpy(dataValue->value.stringValue, stringValue, c_strlen(stringValue));
+      set dataValues [dict get $compMsgDataValue dataValues]
+      set dataValueIdx [dict get $compMsgDataValue numDataValues]
+      set dataValue [lindex $dataValues $dataValueIdx]
+      dict set dataValue valueId $valueId
+      dict set dataValue flags ""
+      if {$stringValue eq ""} {
+        dict lappend flags COMP_MSG_FIELD_IS_NUMERIC
+        dict set dataValue value $numericValue
       }
-      if (fieldValueCallback != NULL) {
-        dataValue->flags |= COMP_MSG_FIELD_HAS_CALLBACK;
-        dataValue->fieldValueCallback = fieldValueCallback;
+      if {$stringValue ne ""} {
+        dict lappend flags COMP_MSG_FIELD_IS_STRING
+        dict set dataValue value $stringValue
       }
-      compMsgDataValue->numDataValues++;
-      return result;
+      if {$fieldValueCallback ne ""} {
+        dict lappend dataValue flags COMP_MSG_FIELD_HAS_CALLBACK
+      }
+      dict set dataValue fieldValueCallback $fieldValueCallback
+      set dataValues [lreplace $dataValues $dataValueIdx $dataValueIdx $dataValue]
+      dict incr compMsgDataValue numDataValues
+      dict set compMsgDataValue dataValues $dataValues
+      dict set compMsgDispatcher compMsgDataValue $compMsgDataValue
+      return [checkErrOK OK]
     }
 
     # ================================= setDataValue ====================================
 
-    proc setDataValue {compMsgDispatcherVar valueId fieldValueCallback value} {
+    proc setDataValue {compMsgDispatcherVar valueId fieldValueCallback numericValue stringValue} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      result = COMP_MSG_ERR_OK;
-      compMsgDataValue = self->compMsgDataValue;
-      idx = 0;
-      while (idx < compMsgDataValue->numDataValues) {
-        dataValue = &compMsgDataValue->dataValues[idx];
-        if (dataValue->valueId == valueId) {
-          dataValue->valueId = valueId;
-          if ((dataValue->flags & COMP_MSG_FIELD_IS_STRING) && (dataValue->value.stringValue != NULL)) {
-            os_free(dataValue->value.stringValue);
+      result = OK
+      set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
+      set idx 0
+      while {$idx < [dict get $compMsgDataValue numDataValues} {
+        set dataValues [dict get $compMsgDataValue dataValues]
+        set dataValue [lindex $dataValues $idx]
+        if {[dict get dataValue valueId] eq $valueId} {
+          dict set dataValue flags [list]
+          if {$stringValue eq ""} {
+            dict lappend flags COMP_MSG_FIELD_IS_NUMERIC
+            dict set dataValue value $numericValue
           }
-          dataValue->flags = 0;
-          if (stringValue == NULL) {
-            dataValue->flags |= COMP_MSG_FIELD_IS_NUMERIC;
-            dataValue->value.numericValue = numericValue;
-          } else {
-            dataValue->flags |= COMP_MSG_FIELD_IS_STRING;
-            dataValue->value.stringValue = os_zalloc(c_strlen(stringValue) + 1);
-            c_memcpy(dataValue->value.stringValue, stringValue, c_strlen(stringValue));
+          if {$stringValue ne ""} {
+            dict lappend flags COMP_MSG_FIELD_IS_STRING
+            dict set dataValue value $numericValue
           }
-          if (fieldValueCallback != NULL) {
-            dataValue->flags |= COMP_MSG_FIELD_HAS_CALLBACK;
-            dataValue->fieldValueCallback = fieldValueCallback;
+          if {$fieldValueCallback ne""} {
+            dict lappend dataValue flags COMP_MSG_FIELD_HAS_CALLBACK
           }
-          return result;
+          dict set dataValue fieldValueCallback $fieldValueCallback
+          set dataValues [lreplace $dataValues $idx $idx $dataValue]
+          dict set compMsgDataValue dataValues $dataValues
+          dict set compMsgDispatcher compMsgDataValue $compMsgDataValue
+          return [checkErrOK OK]
         }
-        idx++;
+        incr idx
       }
-      return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
+      checkErrOK DATA_VALUE_FIELD_NOT_FOUND
     }
 
     # ================================= getDataValue ====================================
@@ -193,37 +204,58 @@ namespace eval ::compMsg {
 # * \return Error code or ErrorOK
 # *
 
-    proc getDataValue {compMsgDispatcherVar valueId flags fieldValueCallback value} {
+    proc getDataValue {compMsgDispatcherVar valueId flagsVar fieldValueCallbackVar numericValueVar stringValueVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $flagsVar flags
+      upvar $fieldValueCallbackVar fieldValueCallback
+      upvar $numericValueVar numericValue
+      upvar $stringValueVar stringValue
+
+      set result OK
+      set compMsgDataValue = self->compMsgDataValue;
+      Value ""
+      set flags ""
+      set fieldValueCallback ""
+      set idx 0
+      while {$idx < [dict get $compMsgDataValue numDataValues]} {
+        set dataValues [dict get $compMsgDataValue dataValues]
+        set dataValue [lindex $dataValues $idx]
+        if {[dict get $dataValue valueId] eq $valueId} {
+          set result [dataValueId2ValueStr compMsgDispatcher $valueId value]
+          checkErrOK $result
+          set flags [dict get $dataValue flags]
+          set stringValue ""
+          set numericValue 0
+          if {[lsearch $flags COMP_MSG_FIELD_IS_NUMERIC] >= 0} {
+            set numericValue [dict get $dataValue value]
+          }
+          if {[lsearch $flags COMP_MSG_FIELD_IS_STRING] >= 0} {
+            set stringValue [dict get $dataValue value]
+          }
+          puts stderr [format "getDataValue: %s %s" $numericValue $stringValue]
+          set fieldValueCallback [dict get $dataValue fieldValueCallback]
+          set dataValues [lreplace $dataValues $idx $idx $dataValue]
+          dict set compMsgDataValue dataValues $dataValues
+          dict set compMsgDispatcher compMsgDataValue $compMsgDataValue
+          return [checkErrOK OK]
+        }
+        incr idx
+      }
+      puts stderr [format "getDataValue: DATA_VALUE_FIELD_NOT_FOUND: %s" $valueId]
+      checkErrOK DATA_VALUE_FIELD_NOT_FOUND
+    }
+
+    # ================================= compMsgDataValueInit ====================================
+
+    proc compMsgDataValueInit {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      result = COMP_MSG_ERR_OK;
-      compMsgDataValue = self->compMsgDataValue;
-      *numericValue = 0;
-      *stringValue = NULL;
-      *flags = 0;
-      *fieldValueCallback = NULL;
-      idx = 0;
-      while (idx < compMsgDataValue->numDataValues) {
-        dataValue = &compMsgDataValue->dataValues[idx];
-        if (dataValue->valueId == valueId) {
-          result = compMsgDataValue->dataValueId2ValueStr(self, valueId, &valueStr);
-          checkErrOK(result);
-          *flags = dataValue->flags;
-          if (dataValue->flags & COMP_MSG_FIELD_IS_STRING) {
-            *stringValue = dataValue->value.stringValue;
-            COMP_MSG_DBG(self, "E", 1, "getDataValue: %s %s", valueStr, *stringValue);
-          }
-          if (dataValue->flags & COMP_MSG_FIELD_IS_NUMERIC) {
-            *numericValue = dataValue->value.numericValue;
-            COMP_MSG_DBG(self, "E", 1, "getDataValue: %s 0x%08x %d", valueStr, *numericValue, *numericValue);
-          }
-          *fieldValueCallback = dataValue->fieldValueCallback;
-          return result;
-        }
-        idx++;
-      }
-      COMP_MSG_DBG(self, "E", 1, "getDataValue: DATA_VALUE_FIELD_NOT_FOUND: %d", valueId);
-      return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
+      set compMsgDataValue [dict create]
+      dict set compMsgDataValue numDataValues 0
+      dict set compMsgDataValue maxDataValues 0
+      dict set compMsgDataValue dataValues [list]
+      dict set compMsgDispatcher compMsgDataValue $compMsgDataValue
+      return [checkErrOK OK]
     }
 
   } ; # namespace compMsgDataValue

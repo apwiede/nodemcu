@@ -551,6 +551,7 @@ puts stderr "value: $value!"
       puts stderr [format "%s: id: %s val: %s %d" $token $fieldNameId $stringValue $numericValue]
       set result [::compMsg compMsgDataValue dataValueStr2ValueId compMsgDispatcher $token fieldId]
       checkErrOK $result
+puts stderr "token: $token fieldId: $fieldId!"
       switch [dict get $msgDescIncludeInfo includeType] {
         COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN -
         COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN {

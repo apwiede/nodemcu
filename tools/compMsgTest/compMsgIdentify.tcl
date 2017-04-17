@@ -529,8 +529,6 @@ error "=== ERROR lgth!$lgth != mhl+mlen: [expr {$myHeaderLgth + $mlen + $totalCr
 
       set result [initHeadersAndFlags]
       checkErrOK $result
-#      set result [::compMsg compMsgMsgDesc readHeadersAndSetFlags compMsgDispatcher ${::moduleFilesPath}/$::MSG_HEADS_FILE_NAME]
-#      checkErrOK $result
       return [checkErrOK OK]
     }
     

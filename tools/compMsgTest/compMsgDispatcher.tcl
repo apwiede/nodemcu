@@ -505,8 +505,6 @@ puts stderr "compMsgDispatcher3 setData"
       dict set parts u8CmdKey 0
       dict set parts u8CmdLgth 0
       dict set parts buf "" 
-#      self->compMsgDataView->dataView->data = parts->buf;
-#      self->compMsgDataView->dataView->lgth = 0;
       dict set compMsgDispatcher $partsVar $parts
       return [checkErrOK OK]
     }
@@ -537,9 +535,9 @@ puts stderr "compMsgDispatcher3 setData"
       upvar $comMsgDispatcherVar compMsgDispatcher
 
 puts stderr "initDispatcher!$comMsgDispatcherVar!"
-      set result [::compMsg compMsgMsgDesc compMsgMsgDescInit compMsgDispatcher MsgFiles.txt]
+      set result [::compMsg compMsgDataValue compMsgDataValueInit compMsgDispatcher]
       checkErrOK $result
-      set result [::compMsg compMsgMsgDesc getMsgKeyValueDescParts compMsgDispatcher "CompMsgKeyValueKeys.txt"]
+      set result [::compMsg compMsgMsgDesc compMsgMsgDescInit compMsgDispatcher MsgFiles.txt]
       checkErrOK $result
       set result [::compMsg compMsgIdentify compMsgIdentifyInit compMsgDispatcher]
       checkErrOK $result
@@ -550,7 +548,7 @@ puts stderr "initDispatcher!$comMsgDispatcherVar!"
       set result [::compMsg compMsgModuleData compMsgModuleDataInit compMsgDispatcher]
       checkErrOK $result
 #      set result [::compMsg compMsgWebsocket compMsgWebsocketInit compMsgDispatcher]
-      checkErrOK $result
+#      checkErrOK $result
       return [checkErrOK OK]
     }
     

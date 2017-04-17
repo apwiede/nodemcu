@@ -335,8 +335,6 @@ if {0} {
       dict set compMsgActions maxActions 10
       dict set compMsgActions actions [list]
     
-      set result [::compMsg compMsgMsgDesc readActions compMsgDispatcher $::COMP_MSG_ACTIONS_FILE_NAME]
-      checkErrOK $result
       return $::COMP_DISP_ERR_OK
     }
 
