@@ -108,7 +108,7 @@ namespace eval ::compMsg {
 
     # ================================= addDataValue ====================================
 
-    proc addDataValue {compMsgDispatcherVar cmdKey valueId fieldValueCallback numericValue stringValue} {
+    proc addDataValue {compMsgDispatcherVar dataValue} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set result OK
@@ -135,22 +135,17 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
       }
       set dataValues [dict get $compMsgDataValue dataValues]
       set dataValueIdx [dict get $compMsgDataValue numDataValues]
-      set dataValue [lindex $dataValues $dataValueIdx]
-      dict set dataValue cmdKey $cmdKey
-      dict set dataValue valueId $valueId
-      dict set dataValue flags ""
-      if {$stringValue eq ""} {
-        dict lappend flags COMP_MSG_FIELD_IS_NUMERIC
-        dict set dataValue value $numericValue
+      set myDataValue [lindex $dataValues $dataValueIdx]
+
+      dict set myDataValue cmdKey [dict get $dataValue cmdKey]
+      dict set myDataValue fieldValueId [dict get $dataValue fieldValueId]
+      dict set myDataValue fieldNameId [dict get $dataValue fieldNameId]
+      dict set myDataValue fieldValueCallback [dict get $dataValue fieldValueCallback]
+      dict set myDataValue flags [dict get $dataValue flags]
+      dict set myDataValue value [dict get $dataValue value]
+      if {[dict get $myDataValue fieldValueCallback] ne ""} {
+        dict lappend myDataValue flags FIELD_HAS_CALLBACK
       }
-      if {$stringValue ne ""} {
-        dict lappend flags COMP_MSG_FIELD_IS_STRING
-        dict set dataValue value $stringValue
-      }
-      if {$fieldValueCallback ne ""} {
-        dict lappend dataValue flags COMP_MSG_FIELD_HAS_CALLBACK
-      }
-      dict set dataValue fieldValueCallback $fieldValueCallback
       set dataValues [lreplace $dataValues $dataValueIdx $dataValueIdx $dataValue]
       dict incr compMsgDataValue numDataValues
       dict set compMsgDataValue dataValues $dataValues

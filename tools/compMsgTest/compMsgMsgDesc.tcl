@@ -546,22 +546,33 @@ puts stderr "descIdx: $descIdx![dict get $msgDescIncludeInfo numMsgFieldDesc]!"
 puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
       set includeType [dict get $msgDescIncludeInfo includeType]
       set cmdKey [dict get $msgDescIncludeInfo cmdKey]
+      set lineFields [dict get $compMsgMsgDesc lineFields]
       #field name
-      set token [lindex [dict get $compMsgMsgDesc lineFields] 0]
+      set token [lindex $lineFields 0]
       set result [::compMsg compMsgTypesAndNames getFieldNameIdFromStr $token fieldNameId $::COMP_MSG_INCR]
       checkErrOK $result
       #field value
-      set value [lindex [dict get $compMsgMsgDesc lineFields] 1]
+      set value [lindex $lineFields 1]
       set stringValue ""
       set numericValue 0
-      set fieldValueCallback ""
+      set dataValue [dict create]
+      dict set dataValue cmdKey $cmdKey
+      dict set dataValue fieldValueId 0
+      dict set dataValue fieldNameId 0
+      dict set dataValue fieldValueCallback [list]
       if {[string range $value 0 0] eq "\""} {
         set result [getStringFieldValue compMsgDispatcher $value stringValue]
+        dict set dataValue flags FIELD_IS_STRING
+        dict set dataValue value $stringValue
       } else {
         if {[string range $value 0 0] eq "@"} {
-          set fieldValueCallback $value
+          dict set dataValue flags [list]
+          dict set dataValue value [list]
+          dict set dataValue fieldValueCallback $value
         } else {
           set result [getIntFieldValue compMsgDispatcher $value numericValue]
+          dict set dataValue flags FIELD_IS_NUMERIC
+          dict set dataValue value $numericValue
         }
       }
       checkErrOK $result
@@ -569,15 +580,17 @@ puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
       switch $includeType {
         COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN -
         COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN {
-          set result [::compMsg compMsgDataValue dataValueStr2ValueId compMsgDispatcher $token fieldId]
+          set result [::compMsg compMsgDataValue dataValueStr2ValueId compMsgDispatcher $token fieldValueId]
           checkErrOK $result
-puts stderr "token: $token fieldId: $fieldId!"
-          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $cmdKey $fieldId $fieldValueCallback $numericValue $stringValue]
+puts stderr "token: $token fieldValueId: $fieldValueId!"
+          dict set dataValue fieldValueId $fieldValueId
+          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $dataValue]
           checkErrOK $result
         }
         COMP_MSG_VAL_FILE_TOKEN  {
-puts stderr "token: $token fieldNameId: $fieldNameId!callback: $fieldValueCallback!cmdKey: $cmdKey"
-          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $cmdKey $fieldNameId $fieldValueCallback $numericValue $stringValue]
+puts stderr "token: $token fieldNameId: $fieldNameId!callback: [dict get $dataValue fieldValueCallback]!cmdKey: $cmdKey"
+          dict set dataValue fieldNameId $fieldNameId
+          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $dataValue]
           checkErrOK $result
         }
         default {
