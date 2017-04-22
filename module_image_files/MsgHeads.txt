@@ -1,6 +1,18 @@
 # example for messages heads file
 # <comma separated header field values>,<encrypted>,<handleType>,@cmdKey
 # for header definition see MsgDescHeader.txt
-#,1
-12,2,0x15,*,*,*,E,W,A1
+#,7
+0x12,2,0x15,*,*,*,E,W,A1
+# Provisioning Request
+0x11,2,0x14,*,*,*,E,G,P1
+# Provisioning Request ACK (ssids + rssis)
+0x14,2,0x11,*,*,*,E,A,P2
+# Provisioning Request NAK
+0x14,2,0x11,*,*,*,E,A,P3
+# Provisioning ssid + passwd
+0x11,2,0x14,*,*,*,E,G,P4
+# Provisioning IP + port
+0x14,2,0x11,*,*,*,E,A,P5
+# Provisioning bad ssid or passwd
+0x14,2,0x11,*,*,*,E,A,P6
 
