@@ -80,6 +80,8 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #define UART0 0
 #define UART1 1
 
+#define COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL 0xFFFF
+
 // timer id defines
 #define COMP_MSG_UART_TIMER_ID              0
 #define COMP_MSG_WEBSOCKET_TIMER_ID         1

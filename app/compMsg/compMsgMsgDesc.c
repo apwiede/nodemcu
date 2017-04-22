@@ -520,6 +520,7 @@ static uint8_t handleMsgValuesLine(compMsgDispatcher_t *self) {
   uint8_t *token;
   uint8_t *value;
   compMsgMsgDesc_t *compMsgMsgDesc;
+  dataValue_t dataValue;
   msgDescIncludeInfo_t *msgDescIncludeInfo;
 
   result = COMP_MSG_ERR_OK;
@@ -548,7 +549,18 @@ static uint8_t handleMsgValuesLine(compMsgDispatcher_t *self) {
   switch (msgDescIncludeInfo->includeType) {
   case COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN:
   case COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN:
-    result = self->compMsgDataValue->addDataValue(self, fieldId, NULL, numericValue, stringValue);
+    if (stringValue == NULL) {
+      dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+      dataValue.value.numericValue = numericValue;
+    } else {
+      dataValue.flags = COMP_MSG_FIELD_IS_STRING;
+      dataValue.value.stringValue = stringValue;
+    }
+    dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+    dataValue.fieldNameId = 0;
+    dataValue.fieldValueId = fieldId;
+    dataValue.fieldValueCallback = NULL;
+    result = self->compMsgDataValue->addDataValue(self, &dataValue);
     checkErrOK(result);
     break;
   default:

@@ -427,6 +427,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
   struct station_config *station_config;
   struct ip_info ip_info;
   char temp[64];
+  dataValue_t dataValue;
   int interval;
   int timerId;
 
@@ -438,18 +439,36 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
     fieldsToSave = &self->dispatcherCommon->fieldsToSave[idx];
     if (c_strcmp("#key_clientSsid", fieldsToSave->fieldNameStr) == 0) {
       ssid = fieldsToSave->fieldValueStr;
-      result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSsid, NULL, 0, ssid);
+      dataValue.flags = COMP_MSG_FIELD_IS_STRING;
+      dataValue.value.stringValue = ssid;
+      dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+      dataValue.fieldNameId = 0;
+      dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSsid;
+      dataValue.fieldValueCallback = NULL;
+      result = self->compMsgDataValue->setDataValue(self, &dataValue);
       checkErrOK(result);
     }
     if (c_strcmp("#key_clientPasswd", fieldsToSave->fieldNameStr) == 0) {
       passwd = fieldsToSave->fieldValueStr;
-      result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientPasswd, NULL, 0, passwd);
+      dataValue.flags = COMP_MSG_FIELD_IS_STRING;
+      dataValue.value.stringValue = passwd;
+      dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+      dataValue.fieldNameId = 0;
+      dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientPasswd;
+      dataValue.fieldValueCallback = NULL;
+      result = self->compMsgDataValue->setDataValue(self, &dataValue);
       checkErrOK(result);
     }
     if (c_strcmp("#key_sequenceNum", fieldsToSave->fieldNameStr) == 0) {
 //ets_printf("seq: %p %d\n", fieldsToSave->fieldValueStr, fieldsToSave->fieldValue);
       sequenceNum = fieldsToSave->fieldValue;
-      result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSequenceNum, NULL, sequenceNum, NULL);
+      dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+      dataValue.value.numericValue = sequenceNum;
+      dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+      dataValue.fieldNameId = 0;
+      dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSequenceNum;
+      dataValue.fieldValueCallback = NULL;
+      result = self->compMsgDataValue->setDataValue(self, &dataValue);
       checkErrOK(result);
       self->compMsgWifiData->flags |= WIFI_USE_SAVED_SEQUENCE_NUM;
     }
@@ -481,10 +500,17 @@ static uint8_t startStationCb(compMsgDispatcher_t *self) {
 static uint8_t webSocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
   uint8_t result;
   uint8_t *handle;
+  dataValue_t dataValue;
   msgParts_t *received;
 
   COMP_MSG_DBG(self, "w", 1, "webSocketSendConnectError: status: %d\n", status);
-  result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientStatus, NULL, (int)status, NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = status;
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientStatus;
+  dataValue.fieldValueCallback = NULL;
+  result = self->compMsgDataValue->setDataValue(self, &dataValue);
   checkErrOK(result);
   received = &self->compMsgData->received;
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
@@ -501,10 +527,17 @@ static uint8_t webSocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
 static uint8_t netSocketSendConnectError(compMsgDispatcher_t *self, uint8_t status) {
   uint8_t result;
   uint8_t *handle;
+  dataValue_t dataValue;
   msgParts_t *received;
 
   COMP_MSG_DBG(self, "w", 1, "netSocketSendConnectError: status: %d\n", status);
-  result = self->compMsgDataValue->setDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientStatus, NULL, (int)status, NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = status;
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientStatus;
+  dataValue.fieldValueCallback = NULL;
+  result = self->compMsgDataValue->setDataValue(self, &dataValue);
   checkErrOK(result);
   received = &self->compMsgData->received;
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
@@ -997,22 +1030,37 @@ static uint8_t getProvisioningSsid(compMsgDispatcher_t *self, int *numericValue,
 /**
  * \brief get a Wifi module value
  * \param self The dispatcher struct
- * \param fieldId Field id of the value
+ * \param fieldvalueId Field id of the value
  * \param fieldValueCallback The field value callback, if there exists one
  * \param numericValue The value if it is a numeric one
  * \param stringValue The value if it is a character string
  * \return Error code or ErrorOK
  *
  */
-static uint8_t getWifiValue(compMsgDispatcher_t *self, uint8_t fieldId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue) {
+static uint8_t getWifiValue(compMsgDispatcher_t *self, uint8_t fieldValueId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue) {
   uint8_t result;
+  dataValue_t dataValue;
+  uint8_t *strValue;
   fieldValueCallback_t callback;
 
   *numericValue = 0;
   *stringValue = NULL;
   *fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getDataValue(self, fieldId, flags, fieldValueCallback, numericValue, stringValue);
+  dataValue.flags = 0;
+  dataValue.value.stringValue = NULL;
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = fieldValueId;
+  dataValue.fieldValueCallback = NULL;
+  result = self->compMsgDataValue->getDataValue(self, &dataValue, &strValue);
   checkErrOK(result);
+  if (dataValue.flags & COMP_MSG_FIELD_IS_STRING) {
+    *stringValue = dataValue.value.stringValue;
+  } else {
+    *numericValue = dataValue.value.numericValue;
+  }
+  *flags = dataValue.flags;
+  *fieldValueCallback = dataValue.fieldValueCallback;
   return COMP_MSG_ERR_OK;
 }
 
@@ -1047,6 +1095,7 @@ static uint8_t getWifiConfig(compMsgDispatcher_t *self) {
 static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   uint8_t result;
   compMsgUtil_t *compMsgUtil;
+  dataValue_t dataValue;
   compMsgWifiData_t *compMsgWifiData;
   compMsgDataValue_t *compMsgDataValue;
 
@@ -1060,25 +1109,85 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   compMsgWifiData->netSocketSSDPReceived = &netSocketSSDPReceived;
 
   compMsgDataValue = self->compMsgDataValue;
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSsid, NULL, 0, "");
+  dataValue.flags = COMP_MSG_FIELD_IS_STRING;
+  dataValue.value.stringValue = NULL;
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSsid;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientPasswd, NULL, 0, "");
+  dataValue.flags = COMP_MSG_FIELD_IS_STRING;
+  dataValue.value.stringValue = "";
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientPasswd;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientSequenceNum, NULL, 0, NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = 0;
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSequenceNum;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_clientStatus, NULL, 0, NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = 0;
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientStatus;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback, NULL, (int)(&netSocketSSDPReceived), NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = (int)(&netSocketSSDPReceived);
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback, NULL, (int)(&netSocketSSDPToSend), NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = (int)(&netSocketSSDPToSend);
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback, NULL, (int)(&netSocketReceived), NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = (int)(&netSocketReceived);
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_NetReceivedCallback;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_NetToSendCallback, NULL, (int)(&netSocketToSend), NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = (int)(&netSocketToSend);
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_NetToSendCallback;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_binaryCallback, NULL, (int)(&webSocketBinaryReceived), NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = (int)(&webSocketBinaryReceived);
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_binaryCallback;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
-  result = compMsgDataValue->addDataValue(self, COMP_MSG_WIFI_VALUE_ID_textCallback, NULL, (int)(&webSocketTextReceived), NULL);
+  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  dataValue.value.numericValue = (int)(&webSocketTextReceived);
+  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  dataValue.fieldNameId = 0;
+  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_textCallback;
+  dataValue.fieldValueCallback = NULL;
+  result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
 
   compMsgUtil = self->compMsgUtil;

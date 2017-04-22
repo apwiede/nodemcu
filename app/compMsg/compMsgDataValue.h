@@ -80,16 +80,19 @@
 #define COMP_MSG_MODULE_VALUE_ID_cryptIvKey         59
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
+typedef struct dataValue dataValue_t;
 
 typedef uint8_t (* dataValueStr2ValueId_t)(compMsgDispatcher_t *self, uint8_t *valueStr, uint8_t *valueId);
 typedef uint8_t (* dataValueId2ValueStr_t)(compMsgDispatcher_t *self, uint8_t valueId, uint8_t **valueStr);
-typedef uint8_t (* addDataValue_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, fieldValueCallback_t fieldValueCallback, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* setDataValue_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, fieldValueCallback_t fieldValueCallback, int numericValue, uint8_t *stringValue);
-typedef uint8_t (* getDataValue_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, uint8_t *flags, fieldValueCallback_t *fieldValueCallback, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* addDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
+typedef uint8_t (* setDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
+typedef uint8_t (* getDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue, uint8_t **valueStr);
 typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
 
 typedef struct dataValue {
-  uint8_t valueId;
+  uint16_t cmdKey;
+  uint8_t fieldValueId;
+  uint8_t fieldNameId;
   uint8_t flags;
   union {
     uint8_t *stringValue;
