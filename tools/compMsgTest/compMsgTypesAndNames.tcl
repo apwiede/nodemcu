@@ -350,6 +350,8 @@ namespace eval ::compMsg {
     dict set specialFieldNameTokens2Ids "@\$msgValHeader"     COMP_MSG_VAL_HEADER_FILE_TOKEN
     dict set specialFieldNameTokens2Ids "@\$msgWifiData"      COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN
     dict set specialFieldNameTokens2Ids "@\$msgModuleData"    COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN
+    dict set specialFieldNameTokens2Ids "@\$msgDesc"          COMP_MSG_DESC_FILE_TOKEN
+    dict set specialFieldNameTokens2Ids "@\$msgVal"           COMP_MSG_VAL_FILE_TOKEN
 
     dict set ::compMsg(fieldNameDefinitions) numDefinitions 0
 

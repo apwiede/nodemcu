@@ -171,7 +171,7 @@ namespace eval compMsg {
 
     # ================================= addUseFileName ====================================
 
-    proc addUseFileName {compMsgDispatcherVar fileName} {
+    proc addUseFileName {compMsgDispatcherVar fileName cmdKey} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set result OK
@@ -188,6 +188,7 @@ namespace eval compMsg {
 
       dict set msgDescIncludeInfo includeType UNKNOWN
       dict set msgDescIncludeInfo fileName $fileName
+      dict set msgDescIncludeInfo cmdKey $cmdKey
       dict set msgDescIncludeInfo maxMsgFieldDesc 0
       dict set msgDescIncludeInfo numMsgFieldDesc 0
       dict set msgDescIncludeInfo msgFieldDescs [list]
@@ -262,7 +263,7 @@ puts stderr "buffer: $buffer!lgth: $lgth!"
               if {[string range [lindex $lineFields 1] 0 0] eq "@"} {
               } else {
                 dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
-                set result [addUseFileName compMsgDispatcher [lindex $lineFields 1]]
+                set result [addUseFileName compMsgDispatcher [lindex $lineFields 1] "??"]
                 checkErrOK $result
                 set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
               }
@@ -321,21 +322,30 @@ puts stderr "file: $fileName idx: $idx!"
 
       set result OK
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
-      if {[dict get $compMsgMsgDesc numLineFields] < 2} {
+      set numLineFields [dict get $compMsgMsgDesc numLineFields]
+      if {$numLineFields < 2} {
         checkErrOK FIELD_DESC_TOO_FEW_FIELDS
       }
       set fileNameTokenId 0
-      set token [lindex [dict get $compMsgMsgDesc lineFields] 0]
-      set result [getStringFieldValue compMsgDispatcher [lindex [dict get $compMsgMsgDesc lineFields] 1] field]
+      set lineFields [dict get $compMsgMsgDesc lineFields]
+      set token [lindex $lineFields 0]
+      set field [lindex $lineFields 1]
+      set result [getStringFieldValue compMsgDispatcher $field field]
       checkErrOK $result
-      puts stderr [format "token: %s field: %s" $token $field]
+      set cmdKey "**"
+      if {$numLineFields > 2} {
+        set value [lindex $lineFields 2]
+        set result [getStringFieldValue compMsgDispatcher $value cmdKey]
+        checkErrOK $result
+      }
+      puts stderr [format "token: %s field: %s cmdKey: %s" $token $field, $cmdKey]
       if {[string range $token 0 1] eq "@$"} {
         set result [::compMsg compMsgTypesAndNames getFileNameTokenIdFromStr $token fileNameTokenId]
         checkErrOK $result
         dict set compMsgMsgDesc msgUseFileName $field]
 puts stderr "fileNameTokenId: $token!$fileNameTokenId!"
         if {$fileNameTokenId != 0} {
-          set result [addUseFileName compMsgDispatcher $field]
+          set result [addUseFileName compMsgDispatcher $field $cmdKey]
           checkErrOK $result
           set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
           set msgDescIncludeInfos [dict get $compMsgMsgDesc msgDescIncludeInfos]
@@ -533,6 +543,9 @@ puts stderr "descIdx: $descIdx![dict get $msgDescIncludeInfo numMsgFieldDesc]!"
       if {[dict get $compMsgMsgDesc numLineFields] < 2} {
         checkErrOK FIELD_DESC_TOO_FEW_FIELDS
       }
+puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
+      set includeType [dict get $msgDescIncludeInfo includeType]
+      set cmdKey [dict get $msgDescIncludeInfo cmdKey]
       #field name
       set token [lindex [dict get $compMsgMsgDesc lineFields] 0]
       set result [::compMsg compMsgTypesAndNames getFieldNameIdFromStr $token fieldNameId $::COMP_MSG_INCR]
@@ -541,21 +554,30 @@ puts stderr "descIdx: $descIdx![dict get $msgDescIncludeInfo numMsgFieldDesc]!"
       set value [lindex [dict get $compMsgMsgDesc lineFields] 1]
       set stringValue ""
       set numericValue 0
-puts stderr "value: $value!"
+      set fieldValueCallback ""
       if {[string range $value 0 0] eq "\""} {
         set result [getStringFieldValue compMsgDispatcher $value stringValue]
       } else {
-        set result [getIntFieldValue compMsgDispatcher $value numericValue]
+        if {[string range $value 0 0] eq "@"} {
+          set fieldValueCallback $value
+        } else {
+          set result [getIntFieldValue compMsgDispatcher $value numericValue]
+        }
       }
       checkErrOK $result
       puts stderr [format "%s: id: %s val: %s %d" $token $fieldNameId $stringValue $numericValue]
-      set result [::compMsg compMsgDataValue dataValueStr2ValueId compMsgDispatcher $token fieldId]
-      checkErrOK $result
-puts stderr "token: $token fieldId: $fieldId!"
-      switch [dict get $msgDescIncludeInfo includeType] {
+      switch $includeType {
         COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN -
         COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN {
-          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $fieldId "" $numericValue $stringValue]
+          set result [::compMsg compMsgDataValue dataValueStr2ValueId compMsgDispatcher $token fieldId]
+          checkErrOK $result
+puts stderr "token: $token fieldId: $fieldId!"
+          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $cmdKey $fieldId $fieldValueCallback $numericValue $stringValue]
+          checkErrOK $result
+        }
+        COMP_MSG_VAL_FILE_TOKEN  {
+puts stderr "token: $token fieldNameId: $fieldNameId!callback: $fieldValueCallback!cmdKey: $cmdKey"
+          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $cmdKey $fieldNameId $fieldValueCallback $numericValue $stringValue]
           checkErrOK $result
         }
         default {
@@ -647,6 +669,14 @@ puts stderr "handleMsgUseLine: include_type: [dict get $msgDescIncludeInfo inclu
         COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN {
           set result [handleMsgValuesLine compMsgDispatcher]
           checkErrOK $result
+        }
+        COMP_MSG_VAL_FILE_TOKEN {
+          set result [handleMsgValuesLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_DESC_FILE_TOKEN {
+#          set result [handleMsgValuesLine compMsgDispatcher]
+#          checkErrOK $result
         }
         default {
           puts stderr [format "bad desc file includeType 0x%02x" [dict get $msgDescIncludeInfo includeType]]

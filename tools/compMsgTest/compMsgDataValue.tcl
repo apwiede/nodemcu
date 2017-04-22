@@ -108,7 +108,7 @@ namespace eval ::compMsg {
 
     # ================================= addDataValue ====================================
 
-    proc addDataValue {compMsgDispatcherVar valueId fieldValueCallback numericValue stringValue} {
+    proc addDataValue {compMsgDispatcherVar cmdKey valueId fieldValueCallback numericValue stringValue} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set result OK
@@ -136,6 +136,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
       set dataValues [dict get $compMsgDataValue dataValues]
       set dataValueIdx [dict get $compMsgDataValue numDataValues]
       set dataValue [lindex $dataValues $dataValueIdx]
+      dict set dataValue cmdKey $cmdKey
       dict set dataValue valueId $valueId
       dict set dataValue flags ""
       if {$stringValue eq ""} {
@@ -159,7 +160,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
 
     # ================================= setDataValue ====================================
 
-    proc setDataValue {compMsgDispatcherVar valueId fieldValueCallback numericValue stringValue} {
+    proc setDataValue {compMsgDispatcherVar cmdKey valueId fieldValueCallback numericValue stringValue} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       result = OK
@@ -168,7 +169,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
       while {$idx < [dict get $compMsgDataValue numDataValues} {
         set dataValues [dict get $compMsgDataValue dataValues]
         set dataValue [lindex $dataValues $idx]
-        if {[dict get dataValue valueId] eq $valueId} {
+        if {([dict get dataValue valueId] eq $valueId) && ([dict get dataValue cmdKey] eq $cmdKey)} {
           dict set dataValue flags [list]
           if {$stringValue eq ""} {
             dict lappend flags COMP_MSG_FIELD_IS_NUMERIC
@@ -197,6 +198,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
 #*
 # * \brief get value from data area
 # * \param self The dispatcher struct
+# * \param cmdKey Cmd key of the value
 # * \param fieldId Value id of the value
 # * \param fieldValueCallback The field value callback, if there exists one
 # * \param numericValue The value if it is a numeric one
@@ -204,7 +206,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
 # * \return Error code or ErrorOK
 # *
 
-    proc getDataValue {compMsgDispatcherVar valueId flagsVar fieldValueCallbackVar numericValueVar stringValueVar} {
+    proc getDataValue {compMsgDispatcherVar cmdKey valueId flagsVar fieldValueCallbackVar numericValueVar stringValueVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $flagsVar flags
       upvar $fieldValueCallbackVar fieldValueCallback
@@ -220,7 +222,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
       while {$idx < [dict get $compMsgDataValue numDataValues]} {
         set dataValues [dict get $compMsgDataValue dataValues]
         set dataValue [lindex $dataValues $idx]
-        if {[dict get $dataValue valueId] eq $valueId} {
+        if {([dict get $dataValue valueId] eq $valueId) && ([dict get $dataValue cmdKey] eq $cmdKey)} {
           set result [dataValueId2ValueStr compMsgDispatcher $valueId value]
           checkErrOK $result
           set flags [dict get $dataValue flags]
@@ -241,7 +243,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
         }
         incr idx
       }
-      puts stderr [format "getDataValue: DATA_VALUE_FIELD_NOT_FOUND: %s" $valueId]
+      puts stderr [format "getDataValue: DATA_VALUE_FIELD_NOT_FOUND: %s %s" $cmdKey $valueId]
       checkErrOK DATA_VALUE_FIELD_NOT_FOUND
     }
 
