@@ -1,0 +1,8 @@
+# this is an example message value file for cmdKey P5
+# ACK message for connect to AP
+#,4
+@numKeyValues,3
+@#sequenceNum,@getClientSequenceNum
+@#clientIPAddr,@getClientIPAddr
+@#clientPort,@getClientPort
+

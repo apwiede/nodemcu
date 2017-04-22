@@ -1,0 +1,6 @@
+# this is an example message value file for cmdKey P3
+# NAK message for request access point
+#,2
+@numKeyValues,1
+@#sequenceNum,@getClientSequenceNum
+

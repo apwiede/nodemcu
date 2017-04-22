@@ -1,0 +1,8 @@
+# this is an example message value file for cmdKey P4
+# request for connect to access point
+#,4
+@numKeyValues,3
+@#sequenceNum,@getClientSequenceNum
+@#clientSsid,@getAPSssid
+@#clientPasswd,@getAPPassword
+

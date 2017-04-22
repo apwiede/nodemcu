@@ -1,0 +1,6 @@
+# this is an example message desc file for cmdKey P6
+# NAK message for connect to AP
+#,3
+@numKeyValues,uint8_t,1
+@$sequenceNum,uint32_t,4,0,@getSequenceNumSize
+@$clientStatus,uint8_t,0,0,@getClientStatusSize

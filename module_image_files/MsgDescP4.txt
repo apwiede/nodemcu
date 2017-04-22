@@ -1,0 +1,7 @@
+# this is an example message desc file for cmdKey P4
+# request for connect to access point
+#,4
+@numKeyValues,uint8_t,1
+@$sequenceNum,uint32_t,4,0,@getSequenceNumSize
+@$clientSsid,uint8_t*,0,0,@getClientSsidSize
+@$clientPasswd,uint8_t*,0,0,@getClientPasswdSize,@runAPConnect

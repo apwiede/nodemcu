@@ -1,0 +1,5 @@
+# this is an example message desc file for cmdKey P3
+# NAK message for request access point
+#,2
+@numKeyValues,uint8_t,1
+@$sequenceNum,uint32_t,4,0,@getSequenceNumSize

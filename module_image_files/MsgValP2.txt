@@ -1,0 +1,7 @@
+# this is an example message value file for cmdKey P2
+# ACK message for request access point list with info
+#,4
+@numKeyValues,3
+@#sequenceNum,@getClientSequenceNum
+@#ssid,@getWifiAPSssids
+@#rssi,@getWifiAPRssis

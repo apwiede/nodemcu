@@ -1,0 +1,7 @@
+# this is an example message desc file for cmdKey P3
+# ACK message for request access point list with info
+#,4
+@numKeyValues,uint8_t,1
+@$sequenceNum,uint32_t,4,0,@getSequenceNumSize
+@$ssid,uint8_t*,0,0,@getWifiAPSsidSize
+@$rssi,uint8_t*,0,0,@getWifiAPRssiSize

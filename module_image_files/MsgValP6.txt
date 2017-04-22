@@ -1,0 +1,7 @@
+# this is an example message value file for cmdKey P5
+# NAK message for connect to AP
+#,3
+@numKeyValues,2
+@#sequenceNum,@getClientSequenceNum
+@#clientStatus,@getClientStatus
+
