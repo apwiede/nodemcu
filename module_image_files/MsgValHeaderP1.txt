@@ -1,0 +1,7 @@
+# this is an example message value header file
+# this is the header for cmdKey P1
+#,4
+@src,0xc
+@grp,2
+@dst,0xf
+@ipAddr,@getIpAddr
