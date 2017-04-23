@@ -1,6 +1,5 @@
 # this is an example message value file
-#,5
-#include,"MsgValHeader1.txt"
+#,4
 @numKeyValues,3
 @#sequenceNum,"@getClientSequenceNum"
 @#ssid,"@getWifiAPSsids"
