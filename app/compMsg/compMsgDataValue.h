@@ -93,10 +93,23 @@ typedef struct dataValue {
   uint16_t cmdKey;
   uint8_t fieldValueId;
   uint8_t fieldNameId;
-  uint8_t flags;
+  uint8_t fieldValueType;
+  uint16_t flags;
   union {
     uint8_t *stringValue;
     int numericValue;
+    uint8_t u8;
+    int8_t i8;
+    uint16_t u16;
+    int16_t i16;
+    uint32_t u32;
+    int32_t i32;
+    uint8_t *u8vec;
+    int8_t *i8vec;
+    uint16_t *u16vec;
+    int16_t *i16vec;
+    uint32_t *u32vec;
+    int32_t *i32vec;
   } value;
   fieldValueCallback_t fieldValueCallback;
 } dataValue_t;

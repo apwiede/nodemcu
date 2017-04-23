@@ -124,18 +124,20 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_LOW                       = 189,         // this must be the last entry!!
 };
 
-enum compMsgSpecialFileNameTokens
+enum compMsgFieldGroups
 {
-  COMP_MSG_USE_FILE_TOKEN                = 1,
-  COMP_MSG_HEADS_FILE_TOKEN              = 2,
-  COMP_MSG_DESC_HEADER_FILE_TOKEN        = 3,
-  COMP_MSG_DESC_MID_PART_FILE_TOKEN      = 4,
-  COMP_MSG_DESC_TRAILER_FILE_TOKEN       = 5,
-  COMP_MSG_FIELDS_TO_SAVE_FILE_TOKEN     = 6,
-  COMP_MSG_ACTIONS_FILE_TOKEN            = 7,
-  COMP_MSG_VAL_HEADER_FILE_TOKEN         = 8,
-  COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN   = 9,
-  COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN = 10,
+  COMP_MSG_USE_FIELD_GROUP                = 1,
+  COMP_MSG_HEADS_FIELD_GROUP              = 2,
+  COMP_MSG_DESC_HEADER_FIELD_GROUP        = 3,
+  COMP_MSG_DESC_MID_PART_FIELD_GROUP      = 4,
+  COMP_MSG_DESC_TRAILER_FIELD_GROUP       = 5,
+  COMP_MSG_FIELDS_TO_SAVE_FIELD_GROUP     = 6,
+  COMP_MSG_ACTIONS_FIELD_GROUP            = 7,
+  COMP_MSG_VAL_HEADER_FIELD_GROUP         = 8,
+  COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP   = 9,
+  COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP = 10,
+  COMP_MSG_DESC_FIELD_GROUP               = 11,
+  COMP_MSG_VAL_FIELD_GROUP                = 12,
 };
 
 #define COMP_MSG_NO_INCR 0

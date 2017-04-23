@@ -125,17 +125,18 @@ static const str2id_t specialFieldNames[] = {
   {NULL, -1},
 };
 
-static const str2id_t specialFileNameTokens[] = {
-  {"@$msgUse",           COMP_MSG_USE_FILE_TOKEN},
-  {"@$msgDescHeader",    COMP_MSG_DESC_HEADER_FILE_TOKEN},
-  {"@$msgDescMidPart",   COMP_MSG_DESC_MID_PART_FILE_TOKEN},
-  {"@$msgDescTrailer",   COMP_MSG_DESC_TRAILER_FILE_TOKEN},
-  {"@$msgFieldsToSave",  COMP_MSG_FIELDS_TO_SAVE_FILE_TOKEN},
-  {"@$msgHeads",         COMP_MSG_HEADS_FILE_TOKEN},
-  {"@$msgActions",       COMP_MSG_ACTIONS_FILE_TOKEN},
-  {"@$msgValHeader",     COMP_MSG_VAL_HEADER_FILE_TOKEN},
-  {"@$msgWifiData",      COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN},
-  {"@$msgModuleData",    COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN},
+static const str2id_t fieldGroupStr2Ids [] = {
+  {"@$msgDescHeader",    COMP_MSG_DESC_HEADER_FIELD_GROUP},
+  {"@$msgDescMidPart",   COMP_MSG_DESC_MID_PART_FIELD_GROUP},
+  {"@$msgDescTrailer",   COMP_MSG_DESC_TRAILER_FIELD_GROUP},
+  {"@$msgFieldsToSave",  COMP_MSG_FIELDS_TO_SAVE_FIELD_GROUP},
+  {"@$msgHeads",         COMP_MSG_HEADS_FIELD_GROUP},
+  {"@$msgActions",       COMP_MSG_ACTIONS_FIELD_GROUP},
+  {"@$msgValHeader",     COMP_MSG_VAL_HEADER_FIELD_GROUP},
+  {"@$msgWifiData",      COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP},
+  {"@$msgModuleData",    COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP},
+  {"@$msgDesc",          COMP_MSG_DESC_FIELD_GROUP},
+  {"@$msgVal",           COMP_MSG_VAL_FIELD_GROUP},
   {NULL, -1},
 };
 
@@ -310,7 +311,7 @@ static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t field
 static uint8_t getFileNameTokenIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId) {
   const str2id_t *entry;
 
-  entry = &specialFileNameTokens[0];
+  entry = &fieldGroupStr2Ids[0];
   while (entry->str != NULL) {
     if (c_strcmp(fileNameTokenStr, entry->str) == 0) {
       *fileNameTokenId = entry->id;
