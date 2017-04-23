@@ -338,20 +338,20 @@ namespace eval ::compMsg {
 
     dict set specialFieldInts2Ids 202 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
 
-    variable specialFieldNameTokens2Ids
-    set specialFieldNameTokens2Ids [dict create]
-    dict set specialFieldNameTokens2Ids "@\$msgUse"           COMP_MSG_USE_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgDescHeader"    COMP_MSG_DESC_HEADER_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgDescMidPart"   COMP_MSG_DESC_MID_PART_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgDescTrailer"   COMP_MSG_DESC_TRAILER_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgFieldsToSave"  COMP_MSG_FIELDS_TO_SAVE_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgHeads"         COMP_MSG_HEADS_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgActions"       COMP_MSG_ACTIONS_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgValHeader"     COMP_MSG_VAL_HEADER_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgWifiData"      COMP_MSG_WIFI_DATA_VALUES_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgModuleData"    COMP_MSG_MODULE_DATA_VALUES_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgDesc"          COMP_MSG_DESC_FILE_TOKEN
-    dict set specialFieldNameTokens2Ids "@\$msgVal"           COMP_MSG_VAL_FILE_TOKEN
+    variable fieldGroupStr2Ids
+    set fieldGroupStr2Ids [dict create]
+    dict set fieldGroupStr2Ids "@\$msgUse"           COMP_MSG_USE_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgDescHeader"    COMP_MSG_DESC_HEADER_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgDescMidPart"   COMP_MSG_DESC_MID_PART_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgDescTrailer"   COMP_MSG_DESC_TRAILER_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgFieldsToSave"  COMP_MSG_FIELDS_TO_SAVE_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgHeads"         COMP_MSG_HEADS_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgActions"       COMP_MSG_ACTIONS_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgValHeader"     COMP_MSG_VAL_HEADER_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgWifiData"      COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgModuleData"    COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgDesc"          COMP_MSG_DESC_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgVal"           COMP_MSG_VAL_FIELD_GROUP
 
     dict set ::compMsg(fieldNameDefinitions) numDefinitions 0
 
@@ -377,7 +377,7 @@ puts stderr "getSpecialFieldNameIntFromId: $fieldNameId!"
 
       set ch1 [string range $fieldName 0 0]
       set ch2 [string range $fieldName 1 1]
-      if {($ch1 eq "@") && ($ch2 ne "#")} {
+      if {($ch1 eq "@") && ($ch2 ne "#") && ($ch2 ne "\$")} {
         # find special field name
         if {[dict exists $specialFieldNames2Ids $fieldName]} {
           set fieldNameId [dict get $specialFieldNames2Ids $fieldName]
@@ -483,12 +483,12 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
 
     proc getFileNameTokenIdFromStr {fileNameTokenStr fileNameTokenIdVar} {
       upvar $fileNameTokenIdVar fileNameTokenId
-      variable specialFieldNameTokens2Ids
+      variable fieldGroupStr2Ids
 
       set LB "\{"
       set RB "\}"
-      if {[dict exists $specialFieldNameTokens2Ids $fileNameTokenStr]} {
-        set fileNameTokenId [dict get $specialFieldNameTokens2Ids $fileNameTokenStr]
+      if {[dict exists $fieldGroupStr2Ids $fileNameTokenStr]} {
+        set fileNameTokenId [dict get $fieldGroupStr2Ids $fileNameTokenStr]
         return [checkErrOK OK]
       }
       checkErrOK FILE_NAME_TOKEN_NOT_FOUND

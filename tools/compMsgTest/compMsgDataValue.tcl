@@ -108,8 +108,9 @@ namespace eval ::compMsg {
 
     # ================================= addDataValue ====================================
 
-    proc addDataValue {compMsgDispatcherVar dataValue} {
+    proc addDataValue {compMsgDispatcherVar dataValue dataValueIdxVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $dataValueIdxVar dataValueIdx
 
       set result OK
       set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
@@ -147,6 +148,7 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
         dict lappend myDataValue flags FIELD_HAS_CALLBACK
       }
       set dataValues [lreplace $dataValues $dataValueIdx $dataValueIdx $dataValue]
+      set dataValueIdx [dict get $compMsgDataValue numDataValues]
       dict incr compMsgDataValue numDataValues
       dict set compMsgDataValue dataValues $dataValues
       dict set compMsgDispatcher compMsgDataValue $compMsgDataValue
