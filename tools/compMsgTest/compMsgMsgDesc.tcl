@@ -444,9 +444,6 @@ puts stderr "fieldGroupId: $fieldGroupId cmdKey: $cmdKey!"
       set msgFieldDescs [lreplace $msgFieldDescs $descIdx $descIdx $msgFieldDesc]
       dict set msgFieldGroupInfo msgFieldDescs $msgFieldDescs
       dict incr msgFieldGroupInfo numMsgFieldDesc
-puts stderr "COM"
-#pdict $msgFieldGroupInfo
-puts stderr "COM DONE"
       dict set msgFieldGroupInfos $fieldGroupId $cmdKey $msgFieldGroupInfo
       dict set compMsgMsgDesc msgFieldGroupInfos $msgFieldGroupInfos
       dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
