@@ -707,8 +707,6 @@ sud->num_urls = 1;
 
 static void startAccessPoint(void *arg) {
   compMsgDispatcher_t *self;
-  int numericValue;
-  uint8_t *stringValue;
   struct espconn *pesp_conn;
   unsigned port;
   unsigned type;
@@ -739,9 +737,9 @@ static void startAccessPoint(void *arg) {
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_provisioningPort;
   dataValue.fieldValueCallback = NULL;
   result = self->compMsgDataValue->getDataValue(self, &dataValue, &strValue);
-  COMP_MSG_DBG(self, "W", 1, "AP port: %d!stringValue: %p!result: %d!\n", numericValue, stringValue, result);
+  COMP_MSG_DBG(self, "W", 1, "AP port: %d!result: %d!\n", dataValue.value.numericValue, result);
 //  checkErrOK(result);
-  port = numericValue;
+  port = dataValue.value.numericValue;
 //  result = self->compMsgDataValue->getDataValue(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr, &flags, &callback, &numericValue, &stringValue);
 //  checkErrOK(result);
 
@@ -768,9 +766,8 @@ sud->num_urls = 2;
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_binaryCallback;
   dataValue.fieldValueCallback = NULL;
   result = self->compMsgDataValue->getDataValue(self, &dataValue, &strValue);
-  numericValue = dataValue.value.numericValue;
-  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
-  sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)numericValue;
+  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", dataValue.value.numericValue, result);
+  sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)dataValue.value.numericValue;
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = 0;
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -778,9 +775,8 @@ sud->num_urls = 2;
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_textCallback;
   dataValue.fieldValueCallback = NULL;
   result = self->compMsgDataValue->getDataValue(self, &dataValue, &strValue);
-  numericValue = dataValue.value.numericValue;
-  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
-  sud->webSocketTextReceived = (webSocketTextReceived_t)numericValue;
+  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", dataValue.value.numericValue, result);
+  sud->webSocketTextReceived = (webSocketTextReceived_t)dataValue.value.numericValue;
   sud->compMsgDispatcher = self;
 
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));
@@ -858,6 +854,7 @@ static uint8_t webSocketRunAPMode(compMsgDispatcher_t *self) {
   dataValue.fieldNameId = 0;
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_provisioningSsid;
   dataValue.fieldValueCallback = NULL;
+  strValue = NULL;
   result = self->compMsgDataValue->getDataValue(self, &dataValue, &strValue);
   COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode get_PROVISIONING_SSID result: %d\n", result);
   checkErrOK(result);

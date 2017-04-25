@@ -247,7 +247,8 @@ typedef struct msgFieldDesc {
 // all infos about a message fieldGroup
 
 typedef struct msgFieldGroupInfo {
-  uint16_t fieldGroupType;
+  uint16_t fieldGroupId;
+  uint16_t cmdKey;
   char *fileName;
   uint8_t maxMsgFieldDesc;
   uint8_t numMsgFieldDesc;
@@ -440,7 +441,7 @@ typedef uint8_t (* getLineFields_t)(compMsgDispatcher_t *self, uint8_t *myStr, u
 
 typedef uint8_t (* getIntFieldValue_t)(compMsgDispatcher_t *self, uint8_t *cp, char **ep, int base, int *uval);
 typedef uint8_t (* getStringFieldValue_t)(compMsgDispatcher_t *self, uint8_t *cp, uint8_t **strVal);
-typedef uint8_t (* addFieldGroup_t)(compMsgDispatcher_t *self, char *fileName);
+typedef uint8_t (* addFieldGroup_t)(compMsgDispatcher_t *self, char *fileName, uint16_t fieldGroupId, uint16_t cmdKey);
 typedef uint8_t (* handleMsgFileNameLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgHeadsLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgFieldGroupLine_t)(compMsgDispatcher_t *self);

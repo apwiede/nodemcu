@@ -185,7 +185,7 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
   fieldName2id_t *nameEntry;
   fieldName2id_t *firstFreeEntry;
 
-  if ((fieldName[0] == '@') && (fieldName[1] != '#')) {
+  if ((fieldName[0] == '@') && (fieldName[1] != '#') && (fieldName[1] != '$')) {
     // find special field name
     entry = &specialFieldNames[0];
     while (entry->str != NULL) {

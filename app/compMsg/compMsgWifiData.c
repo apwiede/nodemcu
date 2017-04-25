@@ -1109,14 +1109,18 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   compMsgWifiData->netSocketSSDPReceived = &netSocketSSDPReceived;
 
   compMsgDataValue = self->compMsgDataValue;
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_STRING;
-  dataValue.value.stringValue = NULL;
+  dataValue.value.stringValue = "";
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
   dataValue.fieldNameId = 0;
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSsid;
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_STRING;
   dataValue.value.stringValue = "";
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1125,6 +1129,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = 0;
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1133,6 +1139,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = 0;
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1141,6 +1149,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = (int)(&netSocketSSDPReceived);
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1149,6 +1159,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = (int)(&netSocketSSDPToSend);
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1157,6 +1169,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = (int)(&netSocketReceived);
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1165,6 +1179,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = (int)(&netSocketToSend);
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1173,6 +1189,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = (int)(&webSocketBinaryReceived);
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -1181,6 +1199,8 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   dataValue.fieldValueCallback = NULL;
   result = compMsgDataValue->addDataValue(self, &dataValue);
   checkErrOK(result);
+
+  c_memset(&dataValue, 0, sizeof(dataValue_t));
   dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   dataValue.value.numericValue = (int)(&webSocketTextReceived);
   dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;

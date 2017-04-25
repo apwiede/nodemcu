@@ -128,7 +128,8 @@ static uint8_t addDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
     }
   }
   myDataValue = &compMsgDataValue->dataValues[compMsgDataValue->numDataValues];
-  memset(dataValue, 0, sizeof(dataValue_t));
+//COMP_MSG_DBG(self, "E", 1, "addDataValue numDataValues %d", compMsgDataValue->numDataValues);
+  memset(myDataValue, 0, sizeof(dataValue_t));
   myDataValue->cmdKey = dataValue->cmdKey;
   myDataValue->fieldValueId = dataValue->fieldValueId;
   myDataValue->fieldNameId = dataValue->fieldNameId;
@@ -203,6 +204,7 @@ static uint8_t getDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue, u
   dataValue_t *myDataValue;
   int idx;
 
+//COMP_MSG_DBG(self, "E", 1, "getDataValue: %p %d %d 0x%04x", dataValue, dataValue->fieldValueId, dataValue->fieldNameId, dataValue->cmdKey);
   result = COMP_MSG_ERR_OK;
   compMsgDataValue = self->compMsgDataValue;
   dataValue->flags = 0;
@@ -214,16 +216,15 @@ static uint8_t getDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue, u
     if ((myDataValue->fieldValueId == dataValue->fieldValueId) &&
         (myDataValue->fieldNameId == dataValue->fieldNameId) &&
         (myDataValue->cmdKey == dataValue->cmdKey)) {
+      *valueStr = NULL;
       result = compMsgDataValue->dataValueId2ValueStr(self, dataValue->fieldValueId, valueStr);
       checkErrOK(result);
       dataValue->flags = myDataValue->flags;
       if (myDataValue->flags & COMP_MSG_FIELD_IS_STRING) {
         dataValue->value.stringValue = myDataValue->value.stringValue;
-        COMP_MSG_DBG(self, "E", 1, "getDataValue: %s %s", valueStr, dataValue->value.stringValue);
       }
       if (myDataValue->flags & COMP_MSG_FIELD_IS_NUMERIC) {
         dataValue->value.numericValue = myDataValue->value.numericValue;
-        COMP_MSG_DBG(self, "E", 1, "getDataValue: %s 0x%08x %d", valueStr, dataValue->value.numericValue, dataValue->value.numericValue);
       }
       dataValue->fieldValueCallback = myDataValue->fieldValueCallback;
       return result;
