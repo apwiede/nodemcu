@@ -26,9 +26,20 @@ import MsgDescTrailer.txt MsgDescTrailer.txt
 import MsgFieldsToSave.txt MsgFieldsToSave.txt
 import MsgHeads.txt MsgHeads.txt
 import MsgActions.txt MsgActions.txt
-import MsgValHeader.txt MsgValHeader.txt
 import MsgWifiDataValues.txt MsgWifiDataValues.txt
 import MsgModuleDataValues.txt MsgModuleDataValues.txt
+import MsgDescP1.txt MsgDescP1.txt
+import MsgDescP2.txt MsgDescP2.txt
+import MsgDescP3.txt MsgDescP3.txt
+import MsgDescP4.txt MsgDescP4.txt
+import MsgDescP5.txt MsgDescP5.txt
+import MsgDescP6.txt MsgDescP6.txt
+import MsgValP1.txt MsgValP1.txt
+import MsgValP2.txt MsgValP2.txt
+import MsgValP3.txt MsgValP3.txt
+import MsgValP4.txt MsgValP4.txt
+import MsgValP5.txt MsgValP5.txt
+import MsgValP6.txt MsgValP6.txt
 
 EOF
 #rm -rf myConfig.txt
