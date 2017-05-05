@@ -42,9 +42,6 @@
 #define	COMP_MSG_TYPES_AND_NAMES_H
 
 #include "c_types.h"
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 enum CompMsgFieldType
 {
@@ -65,63 +62,64 @@ enum CompMsgFieldType
 
 enum compMsgSpecialFieldNames
 {
-  COMP_MSG_SPEC_FIELD_SRC                       = 255,
-  COMP_MSG_SPEC_FIELD_GRP                       = 254,
-  COMP_MSG_SPEC_FIELD_DST                       = 253,
-  COMP_MSG_SPEC_FIELD_TOTAL_LGTH                = 252,
-  COMP_MSG_SPEC_FIELD_IP_ADDR                   = 251,
-  COMP_MSG_SPEC_FIELD_CMD_KEY                   = 250,
-  COMP_MSG_SPEC_FIELD_CMD_LGTH                  = 249,
-  COMP_MSG_SPEC_FIELD_RANDOM_NUM                = 248,
-  COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              = 247,
-  COMP_MSG_SPEC_FIELD_FILLER                    = 246,
-  COMP_MSG_SPEC_FIELD_CRC                       = 245,
-  COMP_MSG_SPEC_FIELD_GUID                      = 244,
-  COMP_MSG_SPEC_FIELD_SRC_ID                    = 243,
-  COMP_MSG_SPEC_FIELD_HDR_FILLER                = 242,
-  COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            = 241,
+  COMP_MSG_SPEC_FIELD_NONE                      = 0,
+  COMP_MSG_SPEC_FIELD_SRC                       = 1,
+  COMP_MSG_SPEC_FIELD_GRP                       = 2,
+  COMP_MSG_SPEC_FIELD_DST                       = 3,
+  COMP_MSG_SPEC_FIELD_TOTAL_LGTH                = 4,
+  COMP_MSG_SPEC_FIELD_IP_ADDR                   = 5,
+  COMP_MSG_SPEC_FIELD_CMD_KEY                   = 6,
+  COMP_MSG_SPEC_FIELD_CMD_LGTH                  = 7,
+  COMP_MSG_SPEC_FIELD_RANDOM_NUM                = 8,
+  COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              = 9,
+  COMP_MSG_SPEC_FIELD_FILLER                    = 10,
+  COMP_MSG_SPEC_FIELD_CRC                       = 11,
+  COMP_MSG_SPEC_FIELD_GUID                      = 12,
+  COMP_MSG_SPEC_FIELD_SRC_ID                    = 13,
+  COMP_MSG_SPEC_FIELD_HDR_FILLER                = 14,
+  COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            = 15,
 
-  COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         = 240,
-  COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         = 239,
-  COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      = 238,
-  COMP_MSG_SPEC_FIELD_CLIENT_SSID               = 237,
-  COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             = 236,
-  COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            = 235,
-  COMP_MSG_SPEC_FIELD_CLIENT_PORT               = 234,
-  COMP_MSG_SPEC_FIELD_CLIENT_STATUS             = 233,
-  COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              = 232,
-  COMP_MSG_SPEC_FIELD_SSDP_PORT                 = 231,
-  COMP_MSG_SPEC_FIELD_SSDP_STATUS               = 230,
-  COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT      = 229,
-  COMP_MSG_SPEC_FIELD_CLOUD_PORT                = 228,
-  COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              = 227,
-  COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              = 226,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        = 225,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        = 224,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     = 223,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        = 222,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        = 221,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     = 220,
-  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        = 219,
-  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        = 218,
-  COMP_MSG_SPEC_FIELD_TOTAL_CRC                 = 217,
-  COMP_MSG_SPEC_FIELD_OTA_PORT                  = 216,
-  COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              = 215,
-  COMP_MSG_SPEC_FIELD_OTA_FS_PATH               = 214,
-  COMP_MSG_SPEC_FIELD_OTA_HOST                  = 213,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_SSID            = 212,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD          = 211,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE   = 210,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL = 197,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR         = 196,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET          = 195,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY         = 194,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_DNS             = 193,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS    = 192,
-  COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          = 191,
-  COMP_MSG_SPEC_FIELD_HDR_RESERVE               = 190,
+  COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         = 16,
+  COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         = 17,
+  COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      = 18,
+  COMP_MSG_SPEC_FIELD_CLIENT_SSID               = 19,
+  COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             = 20,
+  COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            = 21,
+  COMP_MSG_SPEC_FIELD_CLIENT_PORT               = 22,
+  COMP_MSG_SPEC_FIELD_CLIENT_STATUS             = 23,
+  COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              = 24,
+  COMP_MSG_SPEC_FIELD_SSDP_PORT                 = 25,
+  COMP_MSG_SPEC_FIELD_SSDP_STATUS               = 26,
+  COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT      = 27,
+  COMP_MSG_SPEC_FIELD_CLOUD_PORT                = 28,
+  COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              = 29,
+  COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              = 30,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        = 31,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        = 32,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     = 33,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        = 34,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        = 35,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     = 36,
+  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        = 37,
+  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        = 38,
+  COMP_MSG_SPEC_FIELD_TOTAL_CRC                 = 39,
+  COMP_MSG_SPEC_FIELD_OTA_PORT                  = 40,
+  COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              = 41,
+  COMP_MSG_SPEC_FIELD_OTA_FS_PATH               = 42,
+  COMP_MSG_SPEC_FIELD_OTA_HOST                  = 43,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_SSID            = 44,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD          = 45,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE   = 46,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL = 47,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR         = 48,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET          = 49,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY         = 50,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_DNS             = 51,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS    = 52,
+  COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          = 53,
+  COMP_MSG_SPEC_FIELD_HDR_RESERVE               = 54,
 
-  COMP_MSG_SPEC_FIELD_LOW                       = 189,         // this must be the last entry!!
+  COMP_MSG_SPEC_FIELD_LOW                       = 55,         // this must be the last entry!!
 };
 
 enum compMsgFieldGroups
@@ -131,13 +129,14 @@ enum compMsgFieldGroups
   COMP_MSG_DESC_HEADER_FIELD_GROUP        = 3,
   COMP_MSG_DESC_MID_PART_FIELD_GROUP      = 4,
   COMP_MSG_DESC_TRAILER_FIELD_GROUP       = 5,
-  COMP_MSG_FIELDS_TO_SAVE_FIELD_GROUP     = 6,
-  COMP_MSG_ACTIONS_FIELD_GROUP            = 7,
-  COMP_MSG_VAL_HEADER_FIELD_GROUP         = 8,
-  COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP   = 9,
-  COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP = 10,
-  COMP_MSG_DESC_FIELD_GROUP               = 11,
-  COMP_MSG_VAL_FIELD_GROUP                = 12,
+  COMP_MSG_DESC_KEY_VALUE_FIELD_GROUP     = 6,
+  COMP_MSG_FIELDS_TO_SAVE_FIELD_GROUP     = 7,
+  COMP_MSG_ACTIONS_FIELD_GROUP            = 8,
+  COMP_MSG_VAL_HEADER_FIELD_GROUP         = 9,
+  COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP   = 10,
+  COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP = 11,
+  COMP_MSG_DESC_FIELD_GROUP               = 12,
+  COMP_MSG_VAL_FIELD_GROUP                = 13,
 };
 
 #define COMP_MSG_NO_INCR 0
@@ -145,6 +144,12 @@ enum compMsgFieldGroups
 #define COMP_MSG_DECR    -1
 
 #define COMP_MSG_FREE_FIELD_ID 0xFF
+
+#define COMP_MSG_FIELD_WIFI           0x01
+#define COMP_MSG_FIELD_MODULE         0x02
+#define COMP_MSG_FIELD_SAVE           0x04
+#define COMP_MSG_FIELD_KEY_VALUE      0x08
+#define COMP_MSG_FIELD_HEADER         0x10
 
 typedef struct str2id {
   uint8_t *str;
@@ -157,27 +162,47 @@ typedef struct fieldName2id {
   uint8_t refCnt;
 } fieldName2id_t;
 
-typedef struct fieldNames
-{
+typedef struct fieldNames {
   size_t numNames;
   size_t maxNames; 
   fieldName2id_t *names;
 } fieldNames_t;
 
-typedef struct compMsgTypesAndNames compMsgTypesAndNames_t;
+typedef struct keyValueDesc keyValueDesc_t;
 
-typedef uint8_t (* getFieldTypeIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId);
-typedef uint8_t (* getFieldTypeStrFromId_t)(compMsgTypesAndNames_t *self, uint8_t fieldTypeId, uint8_t **fieldTypeStr);
+typedef struct fieldInfo {
+  uint32_t fieldFlags;
+  uint8_t fieldTypeId;
+  uint16_t fieldLgth;
+  keyValueDesc_t *keyValueDesc;
+} fieldInfo_t;
 
-typedef uint8_t (* getFieldNameIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt);
-typedef uint8_t (* getFieldNameStrFromId_t)(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName);
-typedef uint8_t (* getFileNameTokenIdFromStr_t)(compMsgTypesAndNames_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId);
+typedef struct msgFieldInfos {
+  uint16_t numMsgFields;
+  fieldInfo_t **fieldInfos;
+} msgFieldInfos_t;
 
-typedef uint8_t (* freeCompMsgTypesAndNames_t)(compMsgTypesAndNames_t *compMsgTypesAndNames);
+typedef struct compMsgDispatcher compMsgDispatcher_t;
+
+typedef uint8_t (* getFieldTypeIdFromStr_t)(compMsgDispatcher_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId);
+typedef uint8_t (* getFieldTypeStrFromId_t)(compMsgDispatcher_t *self, uint8_t fieldTypeId, uint8_t **fieldTypeStr);
+
+typedef uint8_t (* getFieldNameIdFromStr_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt);
+typedef uint8_t (* getFieldNameStrFromId_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, uint8_t **fieldName);
+typedef uint8_t (* getFileNameTokenIdFromStr_t)(compMsgDispatcher_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId);
+
+typedef uint8_t (* dumpMsgFieldInfos_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* addMsgFieldInfos_t)(compMsgDispatcher_t *self, uint8_t numEntries);
+typedef uint8_t (* setMsgFieldInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldInfo_t *fieldInfo);
+typedef uint8_t (* getMsgFieldInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldInfo_t *fieldInfo);
+
+typedef uint8_t (* freeCompMsgTypesAndNames_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgTypesAndNames {
   uint8_t id;
   fieldNames_t fieldNames;
+  uint8_t numSpecFieldIds;
+  msgFieldInfos_t msgFieldInfos;
   
   getFieldTypeIdFromStr_t getFieldTypeIdFromStr;
   getFieldTypeStrFromId_t getFieldTypeStrFromId;
@@ -187,13 +212,15 @@ typedef struct compMsgTypesAndNames {
 
   getFileNameTokenIdFromStr_t getFileNameTokenIdFromStr;
 
+  dumpMsgFieldInfos_t dumpMsgFieldInfos;
+  addMsgFieldInfos_t addMsgFieldInfos;
+  getMsgFieldInfo_t getMsgFieldInfo;
+  setMsgFieldInfo_t setMsgFieldInfo;
+
   freeCompMsgTypesAndNames_t freeCompMsgTypesAndNames;
 } compMsgTypesAndNames_t;
 
+uint8_t compMsgTypesAndNamesInit(compMsgDispatcher_t *self);
 compMsgTypesAndNames_t *newCompMsgTypesAndNames();
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* COMP_MSG_TYPES_AND_NAMES_H */

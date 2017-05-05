@@ -67,6 +67,8 @@ enum DataViewErrorCode
 
 typedef struct dataView dataView_t;
 
+typedef uint8_t (* getValue_t)(dataView_t *self, int offset, uint8_t *value);
+
 typedef uint8_t (* getUint8_t)(dataView_t *self, int offset, uint8_t *value);
 typedef uint8_t (* getInt8_t)(dataView_t *self, int offset, int8_t *value);
 typedef uint8_t (* setUint8_t)(dataView_t *self, int offset, uint8_t value);

@@ -32,20 +32,13 @@
 */
 
 /* 
- * File:   dataView.c
+ * File:   compMsgTypesAndNames.c
  * Author: Arnulf P. Wiedemann
  *
  * Created on November 24, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "c_string.h"
-
-#include "dataView.h"
-#include "compMsgErrorCodes.h"
-#include "compMsgTypesAndNames.h"
+#include "compMsgDispatcher.h"
 
 static uint8_t compMsgTypesAndNamesId;
 
@@ -129,6 +122,7 @@ static const str2id_t fieldGroupStr2Ids [] = {
   {"@$msgDescHeader",    COMP_MSG_DESC_HEADER_FIELD_GROUP},
   {"@$msgDescMidPart",   COMP_MSG_DESC_MID_PART_FIELD_GROUP},
   {"@$msgDescTrailer",   COMP_MSG_DESC_TRAILER_FIELD_GROUP},
+  {"@$msgDescKeyValue",  COMP_MSG_DESC_KEY_VALUE_FIELD_GROUP},
   {"@$msgFieldsToSave",  COMP_MSG_FIELDS_TO_SAVE_FIELD_GROUP},
   {"@$msgHeads",         COMP_MSG_HEADS_FIELD_GROUP},
   {"@$msgActions",       COMP_MSG_ACTIONS_FIELD_GROUP},
@@ -140,11 +134,9 @@ static const str2id_t fieldGroupStr2Ids [] = {
   {NULL, -1},
 };
 
-extern void dbgPrintf(void *selfParam, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...);
-
 // ================================= getFieldTypeIdFromStr ====================================
 
-static uint8_t getFieldTypeIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId) {
+static uint8_t getFieldTypeIdFromStr(compMsgDispatcher_t *self, const uint8_t *fieldTypeStr, uint8_t *fieldTypeId) {
   const str2id_t *entry;
 
   entry = &fieldType2Ids[0];
@@ -160,7 +152,7 @@ static uint8_t getFieldTypeIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
 
 // ================================= getFieldTypeStrFromId ====================================
 
-static uint8_t getFieldTypeStrFromId(compMsgTypesAndNames_t *self, uint8_t fieldTypeId, uint8_t **fieldTypeStr) {
+static uint8_t getFieldTypeStrFromId(compMsgDispatcher_t *self, uint8_t fieldTypeId, uint8_t **fieldTypeStr) {
   const str2id_t *entry;
 
   entry = &fieldType2Ids[0];
@@ -176,7 +168,8 @@ static uint8_t getFieldTypeStrFromId(compMsgTypesAndNames_t *self, uint8_t field
 
 // ================================= getFieldNameIdFromStr ====================================
 
-static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt) {
+static uint8_t getFieldNameIdFromStr(compMsgDispatcher_t *self, const uint8_t *fieldName, uint8_t *fieldNameId, uint8_t incrRefCnt) {
+  uint8_t result;
   int firstFreeEntryId;
   int nameIdx;
   fieldName2id_t fieldNameEntry;
@@ -184,7 +177,9 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
   fieldName2id_t *newFieldNameEntry;
   fieldName2id_t *nameEntry;
   fieldName2id_t *firstFreeEntry;
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
 
+  compMsgTypesAndNames = self->compMsgTypesAndNames;
   if ((fieldName[0] == '@') && (fieldName[1] != '#') && (fieldName[1] != '$')) {
     // find special field name
     entry = &specialFieldNames[0];
@@ -200,24 +195,24 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
     }
     return COMP_MSG_ERR_BAD_SPECIAL_FIELD;
   } else {
-    if ((incrRefCnt == COMP_MSG_INCR) && (self->fieldNames.numNames >= self->fieldNames.maxNames)) {
-      if (self->fieldNames.maxNames == 0) {
-        self->fieldNames.maxNames = 4;
-        self->fieldNames.names = (fieldName2id_t *)os_zalloc((self->fieldNames.maxNames * sizeof(fieldName2id_t)));
-        checkAllocOK(self->fieldNames.names);
+    if ((incrRefCnt == COMP_MSG_INCR) && (compMsgTypesAndNames->fieldNames.numNames >= compMsgTypesAndNames->fieldNames.maxNames)) {
+      if (compMsgTypesAndNames->fieldNames.maxNames == 0) {
+        compMsgTypesAndNames->fieldNames.maxNames = 4;
+        compMsgTypesAndNames->fieldNames.names = (fieldName2id_t *)os_zalloc((compMsgTypesAndNames->fieldNames.maxNames * sizeof(fieldName2id_t)));
+        checkAllocOK(compMsgTypesAndNames->fieldNames.names);
       } else {
-        self->fieldNames.maxNames += 2;
-        self->fieldNames.names = (fieldName2id_t *)os_realloc((self->fieldNames.names), (self->fieldNames.maxNames * sizeof(fieldName2id_t)));
-        checkAllocOK(self->fieldNames.names);
+        compMsgTypesAndNames->fieldNames.maxNames += 2;
+        compMsgTypesAndNames->fieldNames.names = (fieldName2id_t *)os_realloc((compMsgTypesAndNames->fieldNames.names), (compMsgTypesAndNames->fieldNames.maxNames * sizeof(fieldName2id_t)));
+        checkAllocOK(compMsgTypesAndNames->fieldNames.names);
       }
     }
     firstFreeEntry = NULL;
     firstFreeEntryId = 0;
-    if (self->fieldNames.numNames > 0) {
+    if (compMsgTypesAndNames->fieldNames.numNames > 0) {
       // find field name
       nameIdx = 0;
-      while (nameIdx < self->fieldNames.numNames) {
-        nameEntry = &self->fieldNames.names[nameIdx];
+      while (nameIdx < compMsgTypesAndNames->fieldNames.numNames) {
+        nameEntry = &compMsgTypesAndNames->fieldNames.names[nameIdx];
         if ((nameEntry->fieldName != NULL) && (c_strcmp(nameEntry->fieldName, fieldName) == 0)) {
           if (incrRefCnt < 0) {
             if (nameEntry->refCnt > 0) {
@@ -235,7 +230,7 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
               // just get the entry, do not modify
             }
           }
-          *fieldNameId = nameEntry->fieldNameId;
+          *fieldNameId = (nameEntry->fieldNameId + compMsgTypesAndNames->numSpecFieldIds);
           return COMP_MSG_ERR_OK;
         }
         if ((incrRefCnt == COMP_MSG_INCR) && (nameEntry->fieldNameId == COMP_MSG_FREE_FIELD_ID) && (firstFreeEntry == NULL)) {
@@ -253,20 +248,23 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
         return COMP_MSG_ERR_FIELD_NOT_FOUND;
       } else {
         if (firstFreeEntry != NULL) {
-          *fieldNameId = firstFreeEntry->fieldNameId;
+          *fieldNameId = (firstFreeEntry->fieldNameId + compMsgTypesAndNames->numSpecFieldIds);
           firstFreeEntry->refCnt = 1;
           firstFreeEntry->fieldName = os_zalloc(c_strlen(fieldName) + 1);
           firstFreeEntry->fieldName[c_strlen(fieldName)] = '\0';
           c_memcpy(firstFreeEntry->fieldName, fieldName, c_strlen(fieldName));
         } else {
-          newFieldNameEntry = &self->fieldNames.names[self->fieldNames.numNames];
+          // add a free slot in msgFieldInfos
+	  result = compMsgTypesAndNames->addMsgFieldInfos(self, 1);
+	  checkErrOK(result);
+          newFieldNameEntry = &compMsgTypesAndNames->fieldNames.names[compMsgTypesAndNames->fieldNames.numNames];
           newFieldNameEntry->refCnt = 1;
-          newFieldNameEntry->fieldNameId = self->fieldNames.numNames + 1;
+          newFieldNameEntry->fieldNameId = compMsgTypesAndNames->fieldNames.numNames + 1;
           newFieldNameEntry->fieldName = os_zalloc(c_strlen(fieldName) + 1);
           newFieldNameEntry->fieldName[c_strlen(fieldName)] = '\0';
           c_memcpy(newFieldNameEntry->fieldName, fieldName, c_strlen(fieldName));
-          self->fieldNames.numNames++;
-          *fieldNameId = newFieldNameEntry->fieldNameId;
+          compMsgTypesAndNames->fieldNames.numNames++;
+          *fieldNameId = (newFieldNameEntry->fieldNameId + compMsgTypesAndNames->numSpecFieldIds);
         }
       }
     }
@@ -276,10 +274,12 @@ static uint8_t getFieldNameIdFromStr(compMsgTypesAndNames_t *self, const uint8_t
 
 // ================================= getFieldNameStrFromId ====================================
 
-static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t fieldNameId, uint8_t **fieldName) {
+static uint8_t getFieldNameStrFromId(compMsgDispatcher_t *self, uint8_t fieldNameId, uint8_t **fieldName) {
   const str2id_t *entry;
   fieldName2id_t *fieldNameEntry;
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
 
+  compMsgTypesAndNames = self->compMsgTypesAndNames;
   *fieldName = NULL;
   // first try to find special field name
   entry = &specialFieldNames[0];
@@ -292,9 +292,11 @@ static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t field
   }
   // find field name
   int idx = 0;
-
-  while (idx < self->fieldNames.numNames) {
-    fieldNameEntry = &self->fieldNames.names[idx];
+  // these field names have also ids starting at 1 but for fieldInfo handling we add the numSpecFieldIds to get
+  // unique ids!
+  fieldNameId -= compMsgTypesAndNames->numSpecFieldIds;
+  while (idx < compMsgTypesAndNames->fieldNames.numNames) {
+    fieldNameEntry = &compMsgTypesAndNames->fieldNames.names[idx];
     if (fieldNameEntry->fieldNameId == fieldNameId) {
       *fieldName = fieldNameEntry->fieldName;
       return COMP_MSG_ERR_OK;
@@ -302,13 +304,13 @@ static uint8_t getFieldNameStrFromId(compMsgTypesAndNames_t *self, uint8_t field
     fieldNameEntry++;
     idx++;
   }
-  dbgPrintf(NULL, "Y", 0, "DataView FIELD_NOT_FOUND 2 fieldNameId: %d", fieldNameId);
+  dbgPrintf(NULL, "Y", 0, "TypesAndNames FIELD_NOT_FOUND 2 fieldNameId: %d", fieldNameId);
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
 // ================================= getFileNameTokenIdFromStr ====================================
 
-static uint8_t getFileNameTokenIdFromStr(compMsgTypesAndNames_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId) {
+static uint8_t getFileNameTokenIdFromStr(compMsgDispatcher_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId) {
   const str2id_t *entry;
 
   entry = &fieldGroupStr2Ids[0];
@@ -322,12 +324,138 @@ static uint8_t getFileNameTokenIdFromStr(compMsgTypesAndNames_t *self, const uin
   return DATA_VIEW_ERR_FILE_NAME_TOKEN_NOT_FOUND;
 }
 
+// ================================= dumpMsgFieldInfos ====================================
+
+static uint8_t dumpMsgFieldInfos(compMsgDispatcher_t *self) {
+  int idx;
+  int result;
+  char buf[512];
+  uint8_t *fieldName;
+  uint8_t *fieldType;
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
+  fieldInfo_t *fieldInfo;
+
+  result = COMP_MSG_ERR_OK;
+  compMsgTypesAndNames = self->compMsgTypesAndNames;
+  COMP_MSG_DBG(self, "d", 1, "dumpMsgFieldInfos");
+  // entry 0 is not used, fieldNameIds start at 1!
+  idx = 1;
+  while (idx < compMsgTypesAndNames->msgFieldInfos.numMsgFields) {
+    if (idx == compMsgTypesAndNames->numSpecFieldIds) {
+      idx++;
+      continue;
+    }
+    fieldInfo = compMsgTypesAndNames->msgFieldInfos.fieldInfos[idx];
+    result = compMsgTypesAndNames->getFieldNameStrFromId(self, idx, &fieldName);
+    checkErrOK(result);
+    if (fieldInfo == NULL) {
+      ets_sprintf(buf, "%3d %-20s empty", idx, fieldName);
+    } else {
+      result = compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldInfo->fieldTypeId, &fieldType);
+      checkErrOK(result);
+      ets_sprintf(buf, "%3d %-20s type: %-10s %d lgth: %3d", idx, fieldName, fieldType, fieldInfo->fieldTypeId, fieldInfo->fieldLgth);
+    }
+    COMP_MSG_DBG(self, "d", 1, "%s", buf);
+    idx++;
+  }
+  return result;
+}
+
+// ================================= addMsgFieldInfos ====================================
+
+static uint8_t addMsgFieldInfos(compMsgDispatcher_t *self, uint8_t numEntries) {
+  uint8_t result;
+  int idx;
+  msgFieldInfos_t *msgFieldInfos;
+  fieldInfo_t *fieldInfo;
+
+  result = COMP_MSG_ERR_OK;
+  msgFieldInfos = &self->compMsgTypesAndNames->msgFieldInfos;
+  if (msgFieldInfos->numMsgFields == 0) {
+    msgFieldInfos->fieldInfos = (fieldInfo_t **)os_zalloc(((msgFieldInfos->numMsgFields + numEntries) * sizeof(fieldInfo_t *)));
+  } else {
+    msgFieldInfos->fieldInfos = (fieldInfo_t **)os_realloc(msgFieldInfos->fieldInfos, ((msgFieldInfos->numMsgFields + numEntries) * sizeof(fieldInfo_t *)));
+  }
+  checkAllocOK(msgFieldInfos->fieldInfos);
+  idx = msgFieldInfos->numMsgFields;
+  COMP_MSG_DBG(self, "E", 2, "addMsgFieldInfos: numEntries: %d, numMsgFields: %d", numEntries, msgFieldInfos->numMsgFields);
+  while (idx < msgFieldInfos->numMsgFields + numEntries) {
+    msgFieldInfos->fieldInfos[idx] = (fieldInfo_t *)NULL;
+    idx++;
+  }
+  msgFieldInfos->numMsgFields += numEntries;
+  return result;
+}
+
+// ================================= getMsgFieldInfo ====================================
+
+static uint8_t getMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo_t *fieldInfo) {
+  uint8_t result;
+  msgFieldInfos_t *msgFieldInfos;
+  fieldInfo_t *entry;
+
+  result = COMP_MSG_ERR_OK;
+  msgFieldInfos = &self->compMsgTypesAndNames->msgFieldInfos;
+  if (idx >= msgFieldInfos->numMsgFields) {
+    return COMP_MSG_ERR_BAD_MSG_FIELD_INFO_IDX;
+  }
+  entry = msgFieldInfos->fieldInfos[idx];
+  if (entry == NULL) {
+    msgFieldInfos->fieldInfos[idx] = os_zalloc(sizeof(fieldInfo_t *));
+    checkAllocOK(msgFieldInfos->fieldInfos[idx]);
+    entry = msgFieldInfos->fieldInfos[idx];
+  }
+  fieldInfo->fieldFlags = entry->fieldFlags;
+  fieldInfo->fieldTypeId = entry->fieldTypeId;
+  fieldInfo->fieldLgth = entry->fieldLgth;
+  fieldInfo->keyValueDesc = entry->keyValueDesc;
+  return result;
+}
+
+// ================================= setMsgFieldInfo ====================================
+
+static uint8_t setMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo_t *fieldInfo) {
+  uint8_t result;
+  msgFieldInfos_t *msgFieldInfos;
+  fieldInfo_t *entry;
+
+  result = COMP_MSG_ERR_OK;
+  msgFieldInfos = &self->compMsgTypesAndNames->msgFieldInfos;
+  if (idx >= msgFieldInfos->numMsgFields) {
+    return COMP_MSG_ERR_BAD_MSG_FIELD_INFO_IDX;
+  }
+  entry = msgFieldInfos->fieldInfos[idx];
+  if (entry == NULL) {
+    msgFieldInfos->fieldInfos[idx] = os_zalloc(sizeof(fieldInfo_t *));
+    checkAllocOK(msgFieldInfos->fieldInfos[idx]);
+    entry = msgFieldInfos->fieldInfos[idx];
+  }
+  entry->fieldFlags = fieldInfo->fieldFlags;
+  entry->fieldTypeId = fieldInfo->fieldTypeId;
+  entry->fieldLgth = fieldInfo->fieldLgth;
+  if ((entry->keyValueDesc == NULL) && (fieldInfo->keyValueDesc != NULL)) {
+    entry->keyValueDesc = os_zalloc(sizeof(keyValueDesc_t));
+    checkAllocOK(entry->keyValueDesc);
+  }
+  if (fieldInfo->keyValueDesc != NULL) {
+    entry->keyValueDesc->keyId = fieldInfo->keyValueDesc->keyId;
+    entry->keyValueDesc->keyAccess = fieldInfo->keyValueDesc->keyAccess; 
+    entry->keyValueDesc->keyType = fieldInfo->keyValueDesc->keyType;
+    entry->keyValueDesc->keyLgth = fieldInfo->keyValueDesc->keyLgth;
+    entry->keyValueDesc->keyNumValues = fieldInfo->keyValueDesc->keyNumValues;
+  }
+  COMP_MSG_DBG(self, "E", 0, "setMsgFieldInfos: idx: %d fieldFlags: 0x%08x fieldType: %d fieldLgth: %d", idx, entry->fieldFlags, entry->fieldTypeId, entry->fieldLgth);
+  return result;
+}
+
 // ================================= freeCompMsgTypesAndNames ====================================
 
-static uint8_t freeCompMsgTypesAndNames(compMsgTypesAndNames_t *compMsgTypesAndNames) {
+static uint8_t freeCompMsgTypesAndNames(compMsgDispatcher_t *self) {
   int idx;
   fieldName2id_t *entry;
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
 
+  compMsgTypesAndNames = self->compMsgTypesAndNames;
   if (compMsgTypesAndNames->fieldNames.numNames != 0) {
     idx = 0;
     while (idx < compMsgTypesAndNames->fieldNames.numNames) {
@@ -346,6 +474,33 @@ static uint8_t freeCompMsgTypesAndNames(compMsgTypesAndNames_t *compMsgTypesAndN
   return DATA_VIEW_ERR_OK;
 }
 
+// ================================= compMsgTypesAndNamesInit ====================================
+
+uint8_t compMsgTypesAndNamesInit(compMsgDispatcher_t *self) {
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
+
+  compMsgTypesAndNames = self->compMsgTypesAndNames;
+  compMsgTypesAndNames->dumpMsgFieldInfos = &dumpMsgFieldInfos;
+  compMsgTypesAndNames->addMsgFieldInfos = &addMsgFieldInfos;
+  compMsgTypesAndNames->setMsgFieldInfo = &setMsgFieldInfo;
+  compMsgTypesAndNames->getMsgFieldInfo = &getMsgFieldInfo;
+
+  compMsgTypesAndNames->getFieldTypeIdFromStr = &getFieldTypeIdFromStr;
+  compMsgTypesAndNames->getFieldTypeStrFromId = &getFieldTypeStrFromId;
+
+  compMsgTypesAndNames->getFieldNameIdFromStr = &getFieldNameIdFromStr;
+  compMsgTypesAndNames->getFieldNameStrFromId = &getFieldNameStrFromId;
+
+  compMsgTypesAndNames->getFileNameTokenIdFromStr = &getFileNameTokenIdFromStr;
+
+  compMsgTypesAndNames->freeCompMsgTypesAndNames = &freeCompMsgTypesAndNames;
+
+  compMsgTypesAndNames->numSpecFieldIds = sizeof(specialFieldNames) / sizeof(str2id_t);
+  // +1 as the following entries also start at 1!!
+  compMsgTypesAndNames->addMsgFieldInfos(self, compMsgTypesAndNames->numSpecFieldIds + 1);
+  return COMP_MSG_ERR_OK;
+}
+
 // ================================= newCompMsgTypesAndNames ====================================
 
 compMsgTypesAndNames_t *newCompMsgTypesAndNames() {
@@ -359,16 +514,6 @@ compMsgTypesAndNames_t *newCompMsgTypesAndNames() {
   compMsgTypesAndNames->fieldNames.numNames = 0;
   compMsgTypesAndNames->fieldNames.maxNames = 0;
   compMsgTypesAndNames->fieldNames.names = NULL;
-
-  compMsgTypesAndNames->getFieldTypeIdFromStr = &getFieldTypeIdFromStr;
-  compMsgTypesAndNames->getFieldTypeStrFromId = &getFieldTypeStrFromId;
-
-  compMsgTypesAndNames->getFieldNameIdFromStr = &getFieldNameIdFromStr;
-  compMsgTypesAndNames->getFieldNameStrFromId = &getFieldNameStrFromId;
-
-  compMsgTypesAndNames->getFileNameTokenIdFromStr = &getFileNameTokenIdFromStr;
-
-  compMsgTypesAndNames->freeCompMsgTypesAndNames = &freeCompMsgTypesAndNames;
   return compMsgTypesAndNames;
 }
 

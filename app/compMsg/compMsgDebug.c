@@ -139,8 +139,6 @@ static uint8_t setDebugFlags(compMsgDispatcher_t *self, uint8_t *dbgChars) {
 
 // ================================= dbgPrintf ====================================
 
-void uart_tx_one_char(uint8_t uart, uint8_t TxChar);
-
 void dbgPrintf(void *selfParam, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *format, ...) {
   uint32_t flags;
   va_list arglist;

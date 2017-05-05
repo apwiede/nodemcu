@@ -159,28 +159,28 @@ enum compMsgEncyptedCode
 // the next value must be equal to the number of defines above!!
 #define COMP_MSG_MAX_SEQUENCE         11
 
-#define COMP_MSG_U8_DST               1
-#define COMP_MSG_U16_DST              2
-#define COMP_MSG_U8_SRC               3
-#define COMP_MSG_U16_SRC              4
-#define COMP_MSG_U8_GROUP             5
-#define COMP_MSG_U16_GROUP            6
-#define COMP_MSG_U8_TOTAL_LGTH        7
-#define COMP_MSG_U16_TOTAL_LGTH       8
+#define COMP_MSG_DST_U8               1
+#define COMP_MSG_DST_U16              2
+#define COMP_MSG_SRC_U8               3
+#define COMP_MSG_SRC_U16              4
+#define COMP_MSG_GROUP_U8             5
+#define COMP_MSG_GROUP_U16            6
+#define COMP_MSG_TOTAL_LGTH_U8        7
+#define COMP_MSG_TOTAL_LGTH_U16       8
 #define COMP_MSG_IP_ADDR              9
-#define COMP_MSG_VECTOR_GUID          10
-#define COMP_MSG_VECTOR_HDR_FILLER    12
-//#define COMP_MSG_U8_CMD_KEY           13
-#define COMP_MSG_U16_CMD_KEY          14
-#define COMP_MSG_U0_CMD_LGTH          15
-#define COMP_MSG_U8_CMD_LGTH          16
-#define COMP_MSG_U16_CMD_LGTH         17
-#define COMP_MSG_U0_CRC               18
-#define COMP_MSG_U8_CRC               19
-#define COMP_MSG_U16_CRC              20
-#define COMP_MSG_U0_TOTAL_CRC         21
-#define COMP_MSG_U8_TOTAL_CRC         22
-#define COMP_MSG_U16_TOTAL_CRC        23
+#define COMP_MSG_GUID_VECTOR          10
+#define COMP_MSG_HDR_FILLER_VECTOR    12
+#define COMP_MSG_CMD_KEY_U8           13
+#define COMP_MSG_CMD_KEY_U16          14
+#define COMP_MSG_CMD_LGTH_U0          15
+#define COMP_MSG_CMD_LGTH_U8          16
+#define COMP_MSG_CMD_LGTH_U16         17
+#define COMP_MSG_CRC_U0               18
+#define COMP_MSG_CRC_U8               19
+#define COMP_MSG_CRC_U16              20
+#define COMP_MSG_TOTAL_CRC_U0         21
+#define COMP_MSG_TOTAL_CRC_U8         22
+#define COMP_MSG_TOTAL_CRC_U16        23
 
 #define COMP_MSG_DESC_VALUE_IS_NUMBER (1 << 0)
 
@@ -188,11 +188,36 @@ enum compMsgEncyptedCode
 
 #define MSG_GUID_LGTH 16
 #define MSG_MAX_HDR_FILLER_LGTH 16
-#define MSG_MAX_LINE_FIELDS 10
 
 #define MSG_FILES_FILE_NAME           "MsgFiles.txt"
 
-// typedef struct msgFieldDesc msgFieldDesc_t;
+typedef struct msgHeaderInfo {
+  uint8_t numHeaderFields;
+  uint16_t headerLgth;
+  uint8_t *headerFieldIds;
+} msgHeaderInfo_t;
+
+typedef struct msgHeader {
+  uint32_t headerKey;
+  dataValue_t *dataValues;
+} msgHeader_t;
+
+typedef struct keyValueDesc {
+  uint16_t keyId;
+  uint8_t keyAccess;
+  uint8_t keyType;
+  uint16_t keyLgth;
+  uint16_t keyNumValues;
+} keyValueDesc_t;
+
+
+
+
+typedef struct msgHeaders {
+  int numMsgHeaderInfos;
+  int maxMsgHeaderInfos;
+  msgHeader_t *msgHeaderInfos;
+} msgHeaders_t;
 
 // infos about the fields sequence within a mesgDescription
 
@@ -271,14 +296,6 @@ typedef struct msgInfo {
   uint8_t buf[DISP_BUF_LGTH];
   compMsgDataView_t *compMsgDataView;
 } msgInfo_t;
-
-typedef struct keyValueDesc {
-  uint16_t keyId;
-  uint8_t keyAccess;
-  uint8_t keyType;
-  uint16_t keyLgth;
-  uint16_t keyNumValues;
-} keyValueDesc_t;
 
 typedef struct fieldDesc {
   uint8_t *fieldNameStr;
@@ -432,15 +449,8 @@ typedef struct compMsgMsgDesc compMsgMsgDesc_t;
 typedef struct compMsgData compMsgData_t;
 typedef struct compMsgWifiData compMsgWifiData_t;
 
-typedef uint8_t (* openFile_t)(compMsgMsgDesc_t *self, const uint8_t *fileName, const uint8_t *fileMode);
-typedef uint8_t (* closeFile_t)(compMsgMsgDesc_t *self);
-typedef uint8_t (* flushFile_t)(compMsgMsgDesc_t *self);
-typedef uint8_t (* readLine_t)(compMsgMsgDesc_t *self, uint8_t **buffer, uint8_t *lgth);
-typedef uint8_t (* writeLine_t)(compMsgMsgDesc_t *self, const uint8_t *buffer, uint8_t lgth);
-typedef uint8_t (* getLineFields_t)(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t lgth);
+typedef uint8_t (* addHeaderInfo_t)(compMsgDispatcher_t *self, uint16_t fieldLgth, uint8_t fieldId);
 
-typedef uint8_t (* getIntFieldValue_t)(compMsgDispatcher_t *self, uint8_t *cp, char **ep, int base, int *uval);
-typedef uint8_t (* getStringFieldValue_t)(compMsgDispatcher_t *self, uint8_t *cp, uint8_t **strVal);
 typedef uint8_t (* addFieldGroup_t)(compMsgDispatcher_t *self, char *fileName, uint16_t fieldGroupId, uint16_t cmdKey);
 typedef uint8_t (* handleMsgFileNameLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgHeadsLine_t)(compMsgDispatcher_t *self);
@@ -456,12 +466,7 @@ typedef uint8_t (* compMsgMsgDescInit_t)(compMsgDispatcher_t *self);
 typedef void (* freeCompMsgMsgDesc_t)(compMsgMsgDesc_t *compMsgMsgDesc);
 
 typedef struct compMsgMsgDesc {
-  const uint8_t *fileName;
-  uint8_t fileId;
-  size_t fileSize;
-  uint8_t *lineFields[MSG_MAX_LINE_FIELDS];
   int expectedLines;
-  int numLineFields;
   msgDescriptionInfos_t msgDescriptionInfos;
   int numMsgFieldGroupInfo;
   int maxMsgFieldGroupInfo;
@@ -469,16 +474,10 @@ typedef struct compMsgMsgDesc {
   msgFieldGroupInfo_t *msgFieldGroupInfos;
   uint8_t *msgFieldGroupFileName;
 
-  openFile_t openFile;
-  closeFile_t closeFile;
-  flushFile_t flushFile;
-  readLine_t readLine;
-  writeLine_t writeLine;
-  getLineFields_t getLineFields;
-
+  msgHeaderInfo_t msgHeaderInfo;
+  addHeaderInfo_t addHeaderInfo;
   addFieldGroup_t addFieldGroup;
-  getIntFieldValue_t getIntFieldValue;
-  getStringFieldValue_t getStringFieldValue;
+
   handleMsgFile_t handleMsgFile;
   handleMsgFieldGroupLine_t handleMsgFieldGroupLine;
   handleMsgCommonLine_t handleMsgCommonLine;

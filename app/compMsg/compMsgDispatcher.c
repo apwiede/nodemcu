@@ -38,23 +38,13 @@
  * Created on October 2st, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "flash_fs.h"
-
-#include "c_string.h"
-#include "c_stdlib.h"
-#include "c_stdio.h"
-#include "platform.h"
-#include "driver/uart.h"
 #include "compMsgDispatcher.h"
 
 #ifdef GDB_STUB
 #include "../gdbstub/gdbstub.h"
 #endif
 
-#define DISP_HANDLE_PREFIX "stmsgdisp_"
+#define DISP_HANDLE_PREFIX "compmsgdisp_"
 #define KEY_VALUE_DESC_PARTS_FILE "CompMsgKeyValueKeys.txt"
 
 typedef struct handle2Dispatcher
@@ -296,6 +286,8 @@ ets_printf("parity: %p\n", &parity);
 ets_printf("databits: %p\n", &databits);
 #ifdef NOTDEF
 //COMP_MSG_DBG(self, "Y", 0, "call DescInit");
+  result = compMsgTypesAndNamesInit(self);
+  checkErrOK(result);
   result = compMsgMsgDescInit(self);
   checkErrOK(result);
   result = compMsgUtilInit(self);
@@ -386,6 +378,12 @@ ets_printf("0 heap: %d\n", system_get_free_heap_size());
   checkErrOK(result);
 ets_printf("1 heap: %d\n", system_get_free_heap_size());
   result = self->compMsgDataValue->compMsgDataValueInit(self);
+  checkErrOK(result);
+COMP_MSG_DBG(self, "Y", 0, "call TypesAndNamesInit");
+  result = compMsgTypesAndNamesInit(self);
+  checkErrOK(result);
+COMP_MSG_DBG(self, "Y", 0, "call MsgDescInit");
+  result = self->compMsgFile->compMsgFileInit(self);
   checkErrOK(result);
   result = self->compMsgMsgDesc->compMsgMsgDescInit(self);
   checkErrOK(result);
@@ -581,6 +579,8 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   if (compMsgDispatcherSingleton == NULL) {
     // DataValue
     compMsgDispatcher->compMsgDataValue = newCompMsgDataValue();
+    // File
+    compMsgDispatcher->compMsgFile = newCompMsgFile();
     // MsgDesc
     compMsgDispatcher->compMsgMsgDesc = newCompMsgMsgDesc();
     // Timer
@@ -608,6 +608,8 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
     // Ota
     compMsgDispatcher->compMsgOta = newCompMsgOta();
   } else {
+    // MsgDesc
+    compMsgDispatcher->compMsgFile = compMsgDispatcherSingleton->compMsgFile,
     // MsgDesc
     compMsgDispatcher->compMsgMsgDesc = compMsgDispatcherSingleton->compMsgMsgDesc,
     // Timer

@@ -167,9 +167,9 @@ static uint8_t dumpFieldInfo(compMsgDispatcher_t *self, compMsgField_t *fieldInf
   char buf[512];
 
   compMsgData = self->compMsgData;
-  result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldTypeId, &fieldTypeStr);
+  result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldInfo->fieldTypeId, &fieldTypeStr);
   checkErrOK(result);
-  result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
+  result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, fieldInfo->fieldNameId, &fieldNameStr);
   checkErrOK(result);
   ets_sprintf(buf, " fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %d flags: ", fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
   if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
@@ -208,9 +208,9 @@ static uint8_t dumpKeyValueFields(compMsgDispatcher_t *self, size_t offset, int 
   keyFieldIdx = 0;
   while (keyFieldIdx < numEntries) {
     fieldInfo = &self->compMsgData->fields[*idx];
-    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldTypeId, &fieldTypeStr);
+    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldInfo->fieldTypeId, &fieldTypeStr);
     checkErrOK(result);
-    result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
+    result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, fieldInfo->fieldNameId, &fieldNameStr);
     checkErrOK(result);
     ets_sprintf(buf, "      idx: %2d fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %d flags: ", *idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
     if (fieldInfo->fieldFlags & COMP_MSG_FIELD_IS_SET) {
@@ -241,7 +241,7 @@ static uint8_t dumpKeyValueFields(compMsgDispatcher_t *self, size_t offset, int 
     result = dataView->getUint16(dataView, offset, &numValues);
     checkErrOK(result);
     offset += 2;
-    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, typeId, &fieldTypeStr);
+    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self, typeId, &fieldTypeStr);
     checkErrOK(result);
     ets_sprintf(buf, "        key: %3d rw: %d fieldType: %-8s lgth: %5d numValues: %5d offset: %d\n", key, rw, fieldTypeStr, lgth, numValues, fieldInfo->fieldOffset);
     COMP_MSG_DBG(self, "d", 1, "%s", buf);
@@ -301,9 +301,9 @@ static uint8_t dumpMsg(compMsgDispatcher_t *self) {
   idx = 0;
   while (idx < numEntries) {
     fieldInfo = &compMsgData->fields[idx];
-    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldTypeId, &fieldTypeStr);
+    result = self->compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldInfo->fieldTypeId, &fieldTypeStr);
     checkErrOK(result);
-    result = self->compMsgTypesAndNames->getFieldNameStrFromId(self->compMsgTypesAndNames, fieldInfo->fieldNameId, &fieldNameStr);
+    result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, fieldInfo->fieldNameId, &fieldNameStr);
     checkErrOK(result);
     if (c_strcmp(fieldNameStr, "@numKeyValues") == 0) {
       ets_sprintf(buf, "    idx %d: fieldName: %-20s fieldType: %-8s fieldLgth: %5d offset: %5d flags: ", idx, fieldNameStr, fieldTypeStr, fieldInfo->fieldLgth, fieldInfo->fieldOffset);
@@ -524,9 +524,9 @@ static uint8_t addField(compMsgDispatcher_t *self, const uint8_t *fieldName, con
   if (compMsgData->numFields >= compMsgData->maxFields) {
     return COMP_MSG_ERR_TOO_MANY_FIELDS;
   }
-  result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self->compMsgTypesAndNames, fieldType, &fieldTypeId);
+  result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, fieldType, &fieldTypeId);
   checkErrOK(result);
-  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_INCR);
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, fieldName, &fieldNameId, COMP_MSG_INCR);
   checkErrOK(result);
   fieldInfo = &compMsgData->fields[compMsgData->numFields];
   // need to check for duplicate here !!
@@ -578,7 +578,7 @@ static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
   dataView = compMsgData->compMsgDataView->dataView;
-  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   idx = 0;
   numEntries = compMsgData->numFields;
@@ -622,7 +622,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
     return COMP_MSG_ERR_NOT_YET_INITTED;
   }
   dataView = compMsgData->compMsgDataView->dataView;
-  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self->compMsgTypesAndNames, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, fieldName, &fieldNameId, COMP_MSG_NO_INCR);
   checkErrOK(result);
   switch (fieldNameId) {
     case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
@@ -1152,7 +1152,7 @@ static uint8_t freeCompMsgData(compMsgDispatcher_t *self) {
 
   compMsgData = self->compMsgData;
   if (self->compMsgTypesAndNames != NULL) {
-    result = self->compMsgTypesAndNames->freeCompMsgTypesAndNames(self->compMsgTypesAndNames);
+    result = self->compMsgTypesAndNames->freeCompMsgTypesAndNames(self);
     checkErrOK(result);
   }
 //ets_printf("freeCompMsgData: fields: %p\n", compMsgData->fields);

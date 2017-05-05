@@ -48,10 +48,14 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "osapi.h"
 #include "c_types.h"
 #include "mem.h"
+#include "flash_fs.h"
+
 #include "c_string.h"
 #include "c_stdlib.h"
 #include "c_stdio.h"
 #include "platform.h"
+#include "driver/uart.h"
+
 #include "../rboot/rboot-ota.h"
 
 #include "dataView.h"
@@ -61,6 +65,7 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 #include "compMsgDataView.h"
 #include "compMsgTimer.h"
 #include "compMsgDataValue.h"
+#include "compMsgFile.h"
 #include "compMsgMsgDesc.h"
 #include "compMsgAction.h"
 #include "compMsgRequest.h"
@@ -161,6 +166,9 @@ typedef struct compMsgDispatcher {
 
   // compMsgDataValue
   compMsgDataValue_t *compMsgDataValue;
+
+  // compMsgFile
+  compMsgFile_t *compMsgFile;
 
   // compMsgMsgDesc
   compMsgMsgDesc_t *compMsgMsgDesc;
