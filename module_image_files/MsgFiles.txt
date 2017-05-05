@@ -1,8 +1,9 @@
 # example for messages files file
-#,20
+#,21
 @$msgDescHeader,"MsgDescHeader.txt"
 @$msgDescMidPart,"MsgDescMidPart.txt"
 @$msgDescTrailer,"MsgDescTrailer.txt"
+@$msgDescKeyValue,"MsgDescKeyValue.txt"
 @$msgFieldsToSave,"MsgFieldsToSave.txt"
 @$msgHeads,"MsgHeads.txt"
 @$msgActions,"MsgActions.txt"

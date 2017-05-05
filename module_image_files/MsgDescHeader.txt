@@ -1,8 +1,9 @@
 # this is an example message header file
 #,6
-@src,uint8_t,1
-@grp,uint8_t,1
-@dst,uint8_t,1
-@totalLgth,uint16_t,2
-@ipAddr,uint32_t,4
-@hdrFiller,uint8_t*,7
+# <special field name>,<field type>,<field length>,<is relevant for header recognition checksum>
+@src,uint8_t,1,1
+@grp,uint8_t,1,1
+@dst,uint8_t,1,1
+@totalLgth,uint16_t,2,2
+@ipAddr,uint32_t,4,0
+@hdrFiller,uint8_t*,7,0

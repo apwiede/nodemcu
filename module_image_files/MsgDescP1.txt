@@ -2,4 +2,4 @@
 # request for access point list
 #,2
 @numKeyValues,uint8_t,1
-@$sequenceNum,uint32_t,4
+@#sequenceNum,uint32_t,4,0,@getSequenceNumSize

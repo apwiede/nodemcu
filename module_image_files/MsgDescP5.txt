@@ -2,6 +2,6 @@
 # ACK message for connect to AP
 #,4
 @numKeyValues,uint8_t,1
-@$sequenceNum,uint32_t,4,0,@getSequenceNumSize
-@$clientIPAddr,uint8_t*,0,0,@getClientIPAddrSize
-@$clientPasswd,uint8_t*,0,0,@getClientPortSize
+@#sequenceNum,uint32_t,4,0,@getSequenceNumSize
+@#clientIPAddr,uint8_t*,0,0,@getClientIPAddrSize
+@#clientPasswd,uint8_t*,0,0,@getClientPortSize

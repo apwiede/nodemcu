@@ -23,6 +23,7 @@ import MsgFiles.txt MsgFiles.txt
 import MsgDescHeader.txt MsgDescHeader.txt
 import MsgDescMidPart.txt MsgDescMidPart.txt
 import MsgDescTrailer.txt MsgDescTrailer.txt
+import MsgDescKeyValue.txt MsgDescKeyValue.txt
 import MsgFieldsToSave.txt MsgFieldsToSave.txt
 import MsgHeads.txt MsgHeads.txt
 import MsgActions.txt MsgActions.txt

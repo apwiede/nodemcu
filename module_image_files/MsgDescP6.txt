@@ -2,5 +2,5 @@
 # NAK message for connect to AP
 #,3
 @numKeyValues,uint8_t,1
-@$sequenceNum,uint32_t,4,0,@getSequenceNumSize
-@$clientStatus,uint8_t,0,0,@getClientStatusSize
+@#sequenceNum,uint32_t,4,0,@getSequenceNumSize
+@#clientStatus,uint8_t,0,0,@getClientStatusSize
