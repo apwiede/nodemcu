@@ -1,0 +1,11 @@
+# this is an example message key/value info file
+#,8
+# <special field name>,<field type>,<field length>,<key/value id>
+@#sequenceNum,uint32_t,4,1
+@#ssid,uint8_t*,0,301
+@#rssi,int8_t,0,302
+@#clientSsid,uint8_t*,0,303
+@#clientPasswd,uint8_t*,0,304
+@#clientIPAddr,uint32_t,4,305
+@#clientPort,uint16_t,2,306
+@#clientStatus,uint8_t,1,307
