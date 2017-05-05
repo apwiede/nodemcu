@@ -1559,6 +1559,9 @@ puts stderr "getWifiKeyValues done"
       set result [handleMsgFile compMsgDispatcher $fileName handleMsgFileNameLine]
       checkErrOK $result
 pdict $compMsgDispatcher
+puts stderr "================="
+set val [::dict2json $compMsgDispatcher]
+puts $val
       return [checkErrOK OK]
     }
 

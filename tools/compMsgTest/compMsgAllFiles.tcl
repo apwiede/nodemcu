@@ -34,6 +34,7 @@
 # ==========================================================================
 
 source pdict.tcl
+source genjson.tcl
 source compMsgErrorCodes.tcl
 source dataView.tcl
 source compMsgTypesAndNames.tcl
