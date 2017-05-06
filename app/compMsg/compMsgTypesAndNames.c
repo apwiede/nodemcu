@@ -257,6 +257,8 @@ static uint8_t getFieldNameIdFromStr(compMsgDispatcher_t *self, const uint8_t *f
           // add a free slot in msgFieldInfos
 	  result = compMsgTypesAndNames->addMsgFieldInfos(self, 1);
 	  checkErrOK(result);
+	  result = self->compMsgDataValue->addMsgFieldValues(self, 1);
+	  checkErrOK(result);
           newFieldNameEntry = &compMsgTypesAndNames->fieldNames.names[compMsgTypesAndNames->fieldNames.numNames];
           newFieldNameEntry->refCnt = 1;
           newFieldNameEntry->fieldNameId = compMsgTypesAndNames->fieldNames.numNames + 1;
@@ -353,7 +355,28 @@ static uint8_t dumpMsgFieldInfos(compMsgDispatcher_t *self) {
     } else {
       result = compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldInfo->fieldTypeId, &fieldType);
       checkErrOK(result);
-      ets_sprintf(buf, "%3d %-20s type: %-10s %d lgth: %3d", idx, fieldName, fieldType, fieldInfo->fieldTypeId, fieldInfo->fieldLgth);
+      ets_sprintf(buf, "%3d %-20s type: %-10s %d lgth: %3d flags: 0x%04x", idx, fieldName, fieldType, fieldInfo->fieldTypeId, fieldInfo->fieldLgth, fieldInfo->fieldFlags);
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_WIFI_DATA) {
+        c_strcat(buf, " WIFI_DATA");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_MODULE_DATA) {
+        c_strcat(buf, " MODULE_DATA");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_TO_SAVE) {
+        c_strcat(buf, " TO_SAVE");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_KEY_VALUE) {
+        c_strcat(buf, " KEY_VALUE");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER) {
+        c_strcat(buf, " HEADER");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM) {
+        c_strcat(buf, " HEADER_CHKSUM");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO) {
+        c_strcat(buf, " HEADER_CHKSUM_NON_ZERO");
+      }
     }
     COMP_MSG_DBG(self, "d", 1, "%s", buf);
     idx++;
@@ -401,7 +424,7 @@ static uint8_t getMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo
   }
   entry = msgFieldInfos->fieldInfos[idx];
   if (entry == NULL) {
-    msgFieldInfos->fieldInfos[idx] = os_zalloc(sizeof(fieldInfo_t *));
+    msgFieldInfos->fieldInfos[idx] = os_zalloc(sizeof(fieldInfo_t));
     checkAllocOK(msgFieldInfos->fieldInfos[idx]);
     entry = msgFieldInfos->fieldInfos[idx];
   }

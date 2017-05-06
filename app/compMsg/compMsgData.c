@@ -560,9 +560,9 @@ static uint8_t addField(compMsgDispatcher_t *self, const uint8_t *fieldName, con
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= getFieldValue ====================================
+// ================================= getDataValue ====================================
 
-static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
+static uint8_t getDataValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue) {
   compMsgField_t *fieldInfo;
   compMsgField_t fieldInfo2;
   uint8_t fieldNameId;
@@ -604,9 +604,9 @@ static uint8_t getFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
   return DATA_VIEW_ERR_OK;
 }
 
-// ================================= setFieldValue ====================================
+// ================================= setDataValue ====================================
 
-static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
+static uint8_t setDataValue(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue) {
   compMsgField_t *fieldInfo;
   uint8_t fieldNameId;
   uint8_t saveFieldType;
@@ -640,7 +640,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
     fieldInfo = &compMsgData->fields[idx];
     if (fieldNameId == fieldInfo->fieldNameId) {
       if (fieldName[0] == '#') {
-        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue1: name: %s!numeric: %d!string: %s!fieldNameId: %d!fieldKey: %d!fieldSize: %d!fieldKeyType: %d!\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId, fieldInfo->fieldKey, compMsgData->msgDescPart->fieldSize, fieldInfo->fieldKeyTypeId);
+        COMP_MSG_DBG(self, "d", 2, "compMsgData setDataValue1: name: %s!numeric: %d!string: %s!fieldNameId: %d!fieldKey: %d!fieldSize: %d!fieldKeyType: %d!\n", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldNameId, fieldInfo->fieldKey, compMsgData->msgDescPart->fieldSize, fieldInfo->fieldKeyTypeId);
         // key value field !!
         // the type is always uint8_t* we set the individual type of the key below
         COMP_MSG_DBG(self, "d", 2, "fieldInfo->fieldLgth: %d offset: %d\n", fieldInfo->fieldLgth, fieldInfo->fieldOffset);
@@ -681,7 +681,7 @@ static uint8_t setFieldValue(compMsgDispatcher_t *self, const uint8_t *fieldName
         result = compMsgData->compMsgDataView->setFieldValue(self, dataView, fieldInfo, numericValue, stringValue, sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint16_t));
         fieldInfo->fieldTypeId = saveFieldType;
       } else {
-        COMP_MSG_DBG(self, "d", 2, "compMsgData setFieldValue2: %s!value: 0x%04x %s type: %d!", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldInfo->fieldTypeId);
+        COMP_MSG_DBG(self, "d", 2, "compMsgData setDataValue2: %s!value: 0x%04x %s type: %d!", fieldName, numericValue, stringValue == NULL ? "nil" : (char *)stringValue, fieldInfo->fieldTypeId);
         result = compMsgData->compMsgDataView->setFieldValue(self, dataView, fieldInfo, numericValue, stringValue, 0);
       }
       checkErrOK(result);
@@ -1259,8 +1259,8 @@ compMsgData_t *newCompMsgData(void) {
   compMsgData->createMsg = &createMsg;
   compMsgData->deleteMsg = &deleteMsg;
   compMsgData->addField = &addField;
-  compMsgData->getFieldValue = &getFieldValue;
-  compMsgData->setFieldValue = &setFieldValue;
+  compMsgData->getDataValue = &getDataValue;
+  compMsgData->setDataValue = &setDataValue;
   compMsgData->dumpFieldValue = &dumpFieldValue;
   compMsgData->dumpKeyValueFields = &dumpKeyValueFields;
   compMsgData->dumpFieldInfo = &dumpFieldInfo;

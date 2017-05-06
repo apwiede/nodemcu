@@ -211,8 +211,6 @@ typedef struct keyValueDesc {
 } keyValueDesc_t;
 
 
-
-
 typedef struct msgHeaders {
   int numMsgHeaderInfos;
   int maxMsgHeaderInfos;
@@ -449,8 +447,8 @@ typedef struct compMsgMsgDesc compMsgMsgDesc_t;
 typedef struct compMsgData compMsgData_t;
 typedef struct compMsgWifiData compMsgWifiData_t;
 
+typedef uint8_t (* getHeaderChksumKey_t)(compMsgDispatcher_t *self, uint8_t *data);
 typedef uint8_t (* addHeaderInfo_t)(compMsgDispatcher_t *self, uint16_t fieldLgth, uint8_t fieldId);
-
 typedef uint8_t (* addFieldGroup_t)(compMsgDispatcher_t *self, char *fileName, uint16_t fieldGroupId, uint16_t cmdKey);
 typedef uint8_t (* handleMsgFileNameLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgHeadsLine_t)(compMsgDispatcher_t *self);
@@ -475,6 +473,9 @@ typedef struct compMsgMsgDesc {
   uint8_t *msgFieldGroupFileName;
 
   msgHeaderInfo_t msgHeaderInfo;
+  msgFieldValues_t msgFieldValues;
+
+  getHeaderChksumKey_t getHeaderChksumKey;
   addHeaderInfo_t addHeaderInfo;
   addFieldGroup_t addFieldGroup;
 

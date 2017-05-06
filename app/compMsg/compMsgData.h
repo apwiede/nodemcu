@@ -91,8 +91,8 @@ typedef struct buildMsgInfos {
 
 typedef uint8_t (* createMsg_t)(compMsgDispatcher_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* addField_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
-typedef uint8_t (* getFieldValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
-typedef uint8_t (* setFieldValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
+typedef uint8_t (* getDataValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int *numericValue, uint8_t **stringValue);
+typedef uint8_t (* setDataValue_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, int numericValue, const uint8_t *stringValue);
 
 typedef uint8_t (* dumpFieldValue_t)(compMsgDispatcher_t *self, compMsgField_t *fieldInfo, const uint8_t *indent2);
 typedef uint8_t (* dumpKeyValueFields_t)(compMsgDispatcher_t *self, size_t offset, int *idx);
@@ -149,8 +149,8 @@ typedef struct compMsgData {
   createMsg_t createMsg;
   deleteMsg_t deleteMsg;
   addField_t addField;
-  getFieldValue_t getFieldValue;
-  setFieldValue_t setFieldValue;
+  getDataValue_t getDataValue;
+  setDataValue_t setDataValue;
   dumpFieldValue_t dumpFieldValue;
   dumpKeyValueFields_t dumpKeyValueFields;
   dumpFieldInfo_t dumpFieldInfo;

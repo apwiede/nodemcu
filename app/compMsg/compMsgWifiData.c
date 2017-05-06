@@ -445,7 +445,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
       dataValue.fieldNameId = 0;
       dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSsid;
       dataValue.fieldValueCallback = NULL;
-      result = self->compMsgDataValue->setDataValue(self, &dataValue);
+      result = self->compMsgDataValue->setDataVal(self, &dataValue);
       checkErrOK(result);
     }
     if (c_strcmp("#key_clientPasswd", fieldsToSave->fieldNameStr) == 0) {
@@ -456,7 +456,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
       dataValue.fieldNameId = 0;
       dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientPasswd;
       dataValue.fieldValueCallback = NULL;
-      result = self->compMsgDataValue->setDataValue(self, &dataValue);
+      result = self->compMsgDataValue->setDataVal(self, &dataValue);
       checkErrOK(result);
     }
     if (c_strcmp("#key_sequenceNum", fieldsToSave->fieldNameStr) == 0) {
@@ -468,7 +468,7 @@ static uint8_t connectToAP(compMsgDispatcher_t *self) {
       dataValue.fieldNameId = 0;
       dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSequenceNum;
       dataValue.fieldValueCallback = NULL;
-      result = self->compMsgDataValue->setDataValue(self, &dataValue);
+      result = self->compMsgDataValue->setDataVal(self, &dataValue);
       checkErrOK(result);
       self->compMsgWifiData->flags |= WIFI_USE_SAVED_SEQUENCE_NUM;
     }
@@ -510,7 +510,7 @@ static uint8_t webSocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   dataValue.fieldNameId = 0;
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientStatus;
   dataValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->setDataValue(self, &dataValue);
+  result = self->compMsgDataValue->setDataVal(self, &dataValue);
   checkErrOK(result);
   received = &self->compMsgData->received;
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
@@ -537,7 +537,7 @@ static uint8_t netSocketSendConnectError(compMsgDispatcher_t *self, uint8_t stat
   dataValue.fieldNameId = 0;
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientStatus;
   dataValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->setDataValue(self, &dataValue);
+  result = self->compMsgDataValue->setDataVal(self, &dataValue);
   checkErrOK(result);
   received = &self->compMsgData->received;
   result = self->compMsgIdentify->prepareAnswerMsg(self, COMP_MSG_NAK_MSG, &handle);
@@ -1052,7 +1052,7 @@ static uint8_t getWifiValue(compMsgDispatcher_t *self, uint8_t fieldValueId, uin
   dataValue.fieldNameId = 0;
   dataValue.fieldValueId = fieldValueId;
   dataValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getDataValue(self, &dataValue, &strValue);
+  result = self->compMsgDataValue->getDataVal(self, &dataValue, &strValue);
   checkErrOK(result);
   if (dataValue.flags & COMP_MSG_FIELD_IS_STRING) {
     *stringValue = dataValue.value.stringValue;

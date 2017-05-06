@@ -145,11 +145,13 @@ enum compMsgFieldGroups
 
 #define COMP_MSG_FREE_FIELD_ID 0xFF
 
-#define COMP_MSG_FIELD_WIFI           0x01
-#define COMP_MSG_FIELD_MODULE         0x02
-#define COMP_MSG_FIELD_SAVE           0x04
-#define COMP_MSG_FIELD_KEY_VALUE      0x08
-#define COMP_MSG_FIELD_HEADER         0x10
+#define COMP_MSG_FIELD_WIFI_DATA               0x01
+#define COMP_MSG_FIELD_MODULE_DATA             0x02
+#define COMP_MSG_FIELD_TO_SAVE                 0x04
+#define COMP_MSG_FIELD_KEY_VALUE               0x08
+#define COMP_MSG_FIELD_HEADER                  0x10
+#define COMP_MSG_FIELD_HEADER_CHKSUM           0x20
+#define COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO  0x40
 
 typedef struct str2id {
   uint8_t *str;

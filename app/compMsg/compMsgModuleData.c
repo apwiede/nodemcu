@@ -414,7 +414,7 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
     if (userFieldsStarted) {
       result = self->compMsgDataValue->dataValueStr2ValueId(self, msgDescPart->fieldNameStr, &valueId);
       checkErrOK(result);
-      result = self->compMsgData->getFieldValue(self, msgDescPart->fieldNameStr, &numericValue, &stringValue);
+      result = self->compMsgData->getDataValue(self, msgDescPart->fieldNameStr, &numericValue, &stringValue);
       checkErrOK(result);
 //ets_printf("handle field: %s: %d %s\n", msgDescPart->fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
       if (stringValue == NULL) {
@@ -428,7 +428,7 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
       dataValue.fieldNameId = 0;
       dataValue.fieldValueId = valueId;
       dataValue.fieldValueCallback = NULL;
-      result = self->compMsgDataValue->setDataValue(self, &dataValue);
+      result = self->compMsgDataValue->setDataVal(self, &dataValue);
       checkErrOK(result);
     }
     // check for start handling fields

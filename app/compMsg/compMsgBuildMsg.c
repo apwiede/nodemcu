@@ -176,7 +176,7 @@ static uint8_t ICACHE_FLASH_ATTR fixOffsetsForKeyValues(compMsgDispatcher_t *sel
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= setMsgFieldValue ====================================
+// ================================= setFieldValue ====================================
 
 /**
  * \brief the value of a message field
@@ -185,18 +185,18 @@ static uint8_t ICACHE_FLASH_ATTR fixOffsetsForKeyValues(compMsgDispatcher_t *sel
  * \return Error code or ErrorOK
  *
  */
-static uint8_t ICACHE_FLASH_ATTR setMsgFieldValue(compMsgDispatcher_t *self, uint8_t type) {
+static uint8_t ICACHE_FLASH_ATTR setFieldValue(compMsgDispatcher_t *self, uint8_t type) {
   uint8_t result;
   uint8_t *fieldNameStr;
   uint8_t *stringValue;
   int numericValue;
   compMsgData_t *compMsgData;
 
-  COMP_MSG_DBG(self, "B", 2, "setMsgFieldValue: %s %s\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
+  COMP_MSG_DBG(self, "B", 2, "setFieldValue: %s %s\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
   compMsgData = self->compMsgData;
   if (ets_strncmp(self->compMsgData->msgValPart->fieldValueStr, "@get", 4) == 0) {
     // call the callback function for the field!!
-    COMP_MSG_DBG(self, "B", 2, "setMsgFieldValue:cb %s!%p!size: %d", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
+    COMP_MSG_DBG(self, "B", 2, "setFieldValue:cb %s!%p!size: %d", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
     if (self->compMsgData->msgValPart->fieldValueCallback != NULL) {
       result = self->compMsgData->msgValPart->fieldValueCallback(self, &numericValue, &stringValue);
@@ -215,7 +215,7 @@ static uint8_t ICACHE_FLASH_ATTR setMsgFieldValue(compMsgDispatcher_t *self, uin
       numericValue = 0;
     }
     COMP_MSG_DBG(self, "B", 2, "cb field2: %s!value: 0x%04x %s!", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
-    result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
+    result = self->compMsgData->setDataValue(self, fieldNameStr, numericValue, stringValue);
   } else {
     fieldNameStr = self->compMsgData->msgValPart->fieldNameStr;
     COMP_MSG_DBG(self, "B", 2, "fieldName: %s!id: %d!", fieldNameStr, self->compMsgData->msgValPart->fieldNameId);
@@ -228,25 +228,25 @@ static uint8_t ICACHE_FLASH_ATTR setMsgFieldValue(compMsgDispatcher_t *self, uin
     }
     switch (self->compMsgData->msgValPart->fieldNameId) {
       case COMP_MSG_SPEC_FIELD_DST:
-        result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
+        result = compMsgData->setDataValue(self, fieldNameStr, numericValue, stringValue);
         break;
       case COMP_MSG_SPEC_FIELD_SRC:
-        result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
+        result = compMsgData->setDataValue(self, fieldNameStr, numericValue, stringValue);
         break;
       case COMP_MSG_SPEC_FIELD_CMD_KEY:
         numericValue = self->compMsgData->currHdr->hdrU16CmdKey;
         stringValue = NULL;
         COMP_MSG_DBG(self, "B", 2, "cmdKey value: 0x%04x", numericValue);
-        result = compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
+        result = compMsgData->setDataValue(self, fieldNameStr, numericValue, stringValue);
         break;
       default:
         COMP_MSG_DBG(self, "B", 2, "fieldName: %s!value: 0x%04x %s", fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
-        result = self->compMsgData->setFieldValue(self, fieldNameStr, numericValue, stringValue);
+        result = self->compMsgData->setDataValue(self, fieldNameStr, numericValue, stringValue);
         break;
     }
     checkErrOK(result);
   }
-  COMP_MSG_DBG(self, "B", 2, "setMsgFieldValue: done");
+  COMP_MSG_DBG(self, "B", 2, "setFieldValue: done");
   return COMP_MSG_ERR_OK;
 }
 
@@ -291,7 +291,7 @@ static uint8_t ICACHE_FLASH_ATTR setMsgValues(compMsgDispatcher_t *self) {
     fieldInfo = &compMsgData->fields[msgDescPartIdx++];
     COMP_MSG_DBG(self, "B", 2, "default fieldNameId: %d\n", fieldInfo->fieldNameId);
     if (fieldInfo->fieldNameId == msgValPart->fieldNameId) {
-      result = self->compMsgBuildMsg->setMsgFieldValue(self, type);
+      result = self->compMsgBuildMsg->setFieldValue(self, type);
       checkErrOK(result);
       msgValPartIdx++;
     }
@@ -299,7 +299,7 @@ static uint8_t ICACHE_FLASH_ATTR setMsgValues(compMsgDispatcher_t *self) {
   numericValue = compMsgData->currHdr->hdrU16CmdKey;
   stringValue = NULL;
   COMP_MSG_DBG(self, "B", 2, "cmdKey value: 0x%04x", numericValue);
-  result = compMsgData->setFieldValue(self, "@cmdKey", numericValue, stringValue);
+  result = compMsgData->setDataValue(self, "@cmdKey", numericValue, stringValue);
   COMP_MSG_DBG(self, "B", 2, "cmdKey result: %d", result);
   checkErrOK(result);
   compMsgData->prepareMsg(self);
@@ -443,7 +443,7 @@ static uint8_t compMsgBuildMsgInit(compMsgDispatcher_t *self) {
   compMsgBuildMsg = self->compMsgBuildMsg;
   compMsgBuildMsg->createMsgFromHeaderPart = &createMsgFromHeaderPart;
   compMsgBuildMsg->fixOffsetsForKeyValues = &fixOffsetsForKeyValues;
-  compMsgBuildMsg->setMsgFieldValue = &setMsgFieldValue;
+  compMsgBuildMsg->setFieldValue = &setFieldValue;
   compMsgBuildMsg->buildMsg = &buildMsg;
   compMsgBuildMsg->setMsgValues = &setMsgValues;
   compMsgBuildMsg->forwardMsg = &forwardMsg;

@@ -150,9 +150,9 @@ static uint8_t addDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
   return result;
 }
 
-// ================================= setDataValue ====================================
+// ================================= setDataVal ====================================
 
-static uint8_t setDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
+static uint8_t setDataVal(compMsgDispatcher_t *self, dataValue_t *dataValue) {
   uint8_t result;
   int idx;
   compMsgDataValue_t *compMsgDataValue;
@@ -189,7 +189,7 @@ static uint8_t setDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
   return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
 }
 
-// ================================= getDataValue ====================================
+// ================================= getDataVal ====================================
 
 /**
  * \brief get value from data area
@@ -198,13 +198,13 @@ static uint8_t setDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
  * \return Error code or ErrorOK
  *
  */
-static uint8_t getDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue, uint8_t **valueStr) {
+static uint8_t getDataVal(compMsgDispatcher_t *self, dataValue_t *dataValue, uint8_t **valueStr) {
   uint8_t result;
   compMsgDataValue_t *compMsgDataValue;
   dataValue_t *myDataValue;
   int idx;
 
-//COMP_MSG_DBG(self, "E", 1, "getDataValue: %p %d %d 0x%04x", dataValue, dataValue->fieldValueId, dataValue->fieldNameId, dataValue->cmdKey);
+//COMP_MSG_DBG(self, "E", 1, "getDataVal: %p %d %d 0x%04x", dataValue, dataValue->fieldValueId, dataValue->fieldNameId, dataValue->cmdKey);
   result = COMP_MSG_ERR_OK;
   compMsgDataValue = self->compMsgDataValue;
   dataValue->flags = 0;
@@ -231,8 +231,165 @@ static uint8_t getDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue, u
     }
     idx++;
   }
-  COMP_MSG_DBG(self, "E", 1, "getDataValue: DATA_VALUE_FIELD_NOT_FOUND: %d %d 0x%04x", dataValue->fieldValueId, dataValue->fieldNameId, dataValue->cmdKey);
+  COMP_MSG_DBG(self, "E", 1, "getDataVal: DATA_VALUE_FIELD_NOT_FOUND: %d %d 0x%04x", dataValue->fieldValueId, dataValue->fieldNameId, dataValue->cmdKey);
   return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
+}
+
+// ================================= dumpMsgFieldValues ====================================
+
+static uint8_t dumpMsgFieldValues(compMsgDispatcher_t *self) {
+  int result;
+  int idx;
+  char buf[512];
+  uint8_t *fieldName;
+  uint8_t *fieldType;
+  int numericValue;
+  uint8_t *stringValue;
+  compMsgTypesAndNames_t *compMsgTypesAndNames;
+  compMsgDataValue_t *compMsgDataValue;
+  fieldInfo_t *fieldInfo;
+  fieldValue_t *fieldValue;
+
+  result = COMP_MSG_ERR_OK;
+  compMsgTypesAndNames = self->compMsgTypesAndNames;
+  compMsgDataValue = self->compMsgDataValue;
+  COMP_MSG_DBG(self, "d", 1, "dumpMsgFieldValues");
+  // entry 0 is not used, fieldNameIds start at 1!
+  idx = 1;
+  while (idx < compMsgDataValue->msgFieldValues.numMsgFields) {
+    if (idx == compMsgTypesAndNames->numSpecFieldIds) {
+      idx++;
+      continue;
+    }
+    fieldInfo = compMsgTypesAndNames->msgFieldInfos.fieldInfos[idx];
+    fieldValue = compMsgDataValue->msgFieldValues.fieldValues[idx];
+    result = compMsgTypesAndNames->getFieldNameStrFromId(self, idx, &fieldName);
+    checkErrOK(result);
+    if (fieldValue == NULL) {
+      ets_sprintf(buf, "%3d %-20s empty", idx, fieldName);
+    } else {
+      result = compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldInfo->fieldTypeId, &fieldType);
+      checkErrOK(result);
+      numericValue = 0;
+      stringValue = NULL;
+      switch (fieldInfo->fieldTypeId) {
+      case DATA_VIEW_FIELD_NONE:
+        break;
+      case DATA_VIEW_FIELD_UINT8_T:
+        numericValue = (int)fieldValue->dataValue.value.u8;
+        break;
+      case DATA_VIEW_FIELD_INT8_T:
+        numericValue = (int)fieldValue->dataValue.value.i8;
+        break;
+      case DATA_VIEW_FIELD_UINT16_T:
+        numericValue = (int)fieldValue->dataValue.value.u16;
+        break;
+      case DATA_VIEW_FIELD_INT16_T:
+        numericValue = (int)fieldValue->dataValue.value.i16;
+        break;
+      case DATA_VIEW_FIELD_UINT32_T:
+        numericValue = (int)fieldValue->dataValue.value.u32;
+        break;
+      case DATA_VIEW_FIELD_INT32_T:
+        numericValue = (int)fieldValue->dataValue.value.i32;
+        break;
+      case DATA_VIEW_FIELD_UINT8_VECTOR:
+        stringValue = fieldValue->dataValue.value.u8vec;
+        break;
+      case DATA_VIEW_FIELD_INT8_VECTOR:
+        stringValue = fieldValue->dataValue.value.i8vec;
+        break;
+      case DATA_VIEW_FIELD_UINT16_VECTOR:
+//        stringValue = fieldValue->dataValue.value.u16vec;
+        break;
+      case DATA_VIEW_FIELD_INT16_VECTOR:
+//        stringValue = fieldValue->dataValue.value.i16vec;
+        break;
+      case DATA_VIEW_FIELD_UINT32_VECTOR:
+//        stringValue = fieldValue->dataValue.value.u32vec;
+        break;
+      case DATA_VIEW_FIELD_INT32_VECTOR:
+//        stringValue = fieldValue->dataValue.value.i32vec;
+        break;
+      default:
+        return COMP_MSG_ERR_BAD_FIELD_TYPE;
+      }
+      ets_sprintf(buf, "%3d %-20s type: %-10s %d lgth: %3d value: %s %d 0x%08x flags: 0x%04x", idx, fieldName, fieldType, fieldInfo->fieldTypeId, fieldInfo->fieldLgth, stringValue == NULL ? "nil" : (char *)stringValue, numericValue, numericValue, fieldInfo->fieldFlags);
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_WIFI_DATA) {
+        c_strcat(buf, " WIFI_DATA");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_MODULE_DATA) {
+        c_strcat(buf, " MODULE_DATA");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_TO_SAVE) {
+        c_strcat(buf, " TO_SAVE");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_KEY_VALUE) {
+        c_strcat(buf, " KEY_VALUE");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER) {
+        c_strcat(buf, " HEADER");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM) {
+        c_strcat(buf, " HEADER_CHKSUM");
+      }
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO) {
+        c_strcat(buf, " HEADER_CHKSUM_NON_ZERO");
+      }
+    }
+    COMP_MSG_DBG(self, "d", 1, "%s", buf);
+    idx++;
+  }
+  return result;
+  return result;
+}
+
+// ================================= addMsgFieldValues ====================================
+
+static uint8_t addMsgFieldValues(compMsgDispatcher_t *self, uint8_t numEntries) {
+  uint8_t result;
+
+  result = COMP_MSG_ERR_OK;
+  int idx;
+  msgFieldValues_t *msgFieldValues;
+  fieldValue_t *fieldValue;
+
+  result = COMP_MSG_ERR_OK;
+  msgFieldValues = &self->compMsgDataValue->msgFieldValues;
+  if (msgFieldValues->numMsgFields == 0) {       
+    msgFieldValues->fieldValues = (fieldValue_t **)os_zalloc(((msgFieldValues->numMsgFields + numEntries) * sizeof(fieldValue_t *)));
+  } else {
+    msgFieldValues->fieldValues = (fieldValue_t **)os_realloc(msgFieldValues->fieldValues, ((msgFieldValues->numMsgFields + numEntries) * sizeof(fieldValue_t *)));
+  }
+  checkAllocOK(msgFieldValues->fieldValues);
+  idx = msgFieldValues->numMsgFields;
+  COMP_MSG_DBG(self, "E", 1, "addMsgFieldValues: numEntries: %d, numMsgFields: %d", numEntries, msgFieldValues->numMsgFields);
+  while (idx < msgFieldValues->numMsgFields + numEntries) {
+    msgFieldValues->fieldValues[idx] = (fieldValue_t *)NULL;
+    idx++;
+  }
+  msgFieldValues->numMsgFields += numEntries;
+  return result;
+}
+
+// ================================= setMsgFieldValue ====================================
+
+static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue) {
+  uint8_t result;
+
+  result = COMP_MSG_ERR_OK;
+
+  return result;
+}
+
+// ================================= getMsgFieldValue ====================================
+
+static uint8_t getMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue) {
+  uint8_t result;
+
+  result = COMP_MSG_ERR_OK;
+
+  return result;
 }
 
 // ================================= compMsgDataValueInit ====================================
@@ -245,8 +402,14 @@ static uint8_t compMsgDataValueInit(compMsgDispatcher_t *self) {
   compMsgDataValue->dataValueStr2ValueId = &dataValueStr2ValueId;
   compMsgDataValue->dataValueId2ValueStr = &dataValueId2ValueStr;
   compMsgDataValue->addDataValue = &addDataValue;
-  compMsgDataValue->setDataValue = &setDataValue;
-  compMsgDataValue->getDataValue = &getDataValue;
+  compMsgDataValue->setDataVal = &setDataVal;
+  compMsgDataValue->getDataVal = &getDataVal;
+  compMsgDataValue->dumpMsgFieldValues = &dumpMsgFieldValues;
+  compMsgDataValue->addMsgFieldValues = &addMsgFieldValues;
+  compMsgDataValue->getMsgFieldValue = &getMsgFieldValue;
+  compMsgDataValue->setMsgFieldValue = &setMsgFieldValue;
+  // +1 as the following entries also start at 1!!
+  compMsgDataValue->addMsgFieldValues(self, self->compMsgTypesAndNames->numSpecFieldIds + 1);  
   return COMP_MSG_ERR_OK;
 }
 

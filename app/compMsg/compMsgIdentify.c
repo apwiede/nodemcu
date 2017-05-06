@@ -463,7 +463,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
       if (c_strcmp(msgDescPart->fieldNameStr, fieldsToSave->fieldNameStr) == 0) {
         stringValue = NULL;
         numericValue = 0;
-        result = self->compMsgData->getFieldValue(self, fieldsToSave->fieldNameStr, &numericValue, &stringValue);
+        result = self->compMsgData->getDataValue(self, fieldsToSave->fieldNameStr, &numericValue, &stringValue);
         checkErrOK(result);
         if (stringValue != NULL) {
           COMP_MSG_DBG(self, "I", 2, "found fieldToSave: %s %s", fieldsToSave->fieldNameStr, stringValue);

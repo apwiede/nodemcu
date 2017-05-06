@@ -82,13 +82,6 @@
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 typedef struct dataValue dataValue_t;
 
-typedef uint8_t (* dataValueStr2ValueId_t)(compMsgDispatcher_t *self, uint8_t *valueStr, uint8_t *valueId);
-typedef uint8_t (* dataValueId2ValueStr_t)(compMsgDispatcher_t *self, uint8_t valueId, uint8_t **valueStr);
-typedef uint8_t (* addDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
-typedef uint8_t (* setDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
-typedef uint8_t (* getDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue, uint8_t **valueStr);
-typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
-
 typedef struct dataValue {
   uint16_t cmdKey;
   uint8_t fieldValueId;
@@ -114,16 +107,42 @@ typedef struct dataValue {
   fieldValueCallback_t fieldValueCallback;
 } dataValue_t;
 
+typedef struct fieldValue {
+  uint32_t fieldValueFlags;
+  dataValue_t dataValue;
+} fieldValue_t;
+
+typedef struct msgFieldValues {
+  uint16_t numMsgFields;
+  fieldValue_t **fieldValues;
+} msgFieldValues_t;
+
+typedef uint8_t (* dataValueStr2ValueId_t)(compMsgDispatcher_t *self, uint8_t *valueStr, uint8_t *valueId);
+typedef uint8_t (* dataValueId2ValueStr_t)(compMsgDispatcher_t *self, uint8_t valueId, uint8_t **valueStr);
+typedef uint8_t (* addDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
+typedef uint8_t (* setDataVal_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
+typedef uint8_t (* getDataVal_t)(compMsgDispatcher_t *self, dataValue_t *dataValue, uint8_t **valueStr);
+typedef uint8_t (* dumpMsgFieldValues_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* addMsgFieldValues_t)(compMsgDispatcher_t *self, uint8_t numEntries);
+typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
+typedef uint8_t (* getMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
+typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
+
 typedef struct compMsgDataValue {
   int numDataValues;
   int maxDataValues;
   dataValue_t *dataValues;
+  msgFieldValues_t msgFieldValues;
 
   dataValueStr2ValueId_t dataValueStr2ValueId;
   dataValueId2ValueStr_t dataValueId2ValueStr;
   addDataValue_t addDataValue;
-  setDataValue_t setDataValue;
-  getDataValue_t getDataValue;
+  setDataVal_t setDataVal;
+  getDataVal_t getDataVal;
+  dumpMsgFieldValues_t dumpMsgFieldValues;
+  addMsgFieldValues_t addMsgFieldValues;
+  getMsgFieldValue_t getMsgFieldValue;
+  setMsgFieldValue_t setMsgFieldValue;
   compMsgDataValueInit_t compMsgDataValueInit;
 } compMsgDataValue_t;
 

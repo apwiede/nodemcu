@@ -95,8 +95,47 @@ static uint8_t addHeaderInfo(compMsgDispatcher_t *self, uint16_t fieldLgth, uint
   msgHeaderInfo->headerLgth += fieldLgth;
   msgHeaderInfo->headerFieldIds[msgHeaderInfo->numHeaderFields] = fieldId;
   msgHeaderInfo->numHeaderFields++;
-COMP_MSG_DBG(self, "Y", 0, "addHeaderInfo: %d: fieldLgth: %d headerLgth: %d fieldId: %d", msgHeaderInfo->numHeaderFields, fieldLgth, msgHeaderInfo->headerLgth, fieldId);
+COMP_MSG_DBG(self, "Y", 2, "addHeaderInfo: %d: fieldLgth: %d headerLgth: %d fieldId: %d", msgHeaderInfo->numHeaderFields, fieldLgth, msgHeaderInfo->headerLgth, fieldId);
 
+  return result;
+}
+
+// ================================= getHeaderChksumKey ====================================
+
+static uint8_t getHeaderChksumKey(compMsgDispatcher_t *self, uint8_t *data) {
+  uint8_t result;
+  uint16_t key;
+  int idx;
+  int isNonZero;
+  int offset;
+  int myOffset;
+  int lgth;
+  msgHeaderInfo_t *msgHeaderInfo;
+  fieldInfo_t *fieldInfo;
+
+  result = COMP_MSG_ERR_OK;
+  msgHeaderInfo = &self->compMsgMsgDesc->msgHeaderInfo;
+  key = 0;
+  idx = 1;
+  offset = 0;
+  while (idx < msgHeaderInfo->numHeaderFields) {
+COMP_MSG_DBG(self, "Y", 0, "getHeaderChksumKey: idx: %d id: %d", idx, msgHeaderInfo->headerFieldIds[idx]);
+    fieldInfo = self->compMsgTypesAndNames->msgFieldInfos.fieldInfos[idx];
+    if (fieldInfo == NULL) {
+      return COMP_MSG_ERR_MSG_FIELD_INFO_IDX_NOT_SET;
+    }
+    lgth = offset + fieldInfo->fieldLgth;
+    if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM) {
+      myOffset = offset;
+      while (myOffset < lgth) {
+	key += data[myOffset];
+        myOffset++;
+      }
+    }
+    offset += fieldInfo->fieldLgth;
+    idx++;
+  }
+COMP_MSG_DBG(self, "Y", 0, "getHeaderChksumKey: 0x%04x", key);
   return result;
 }
 
@@ -106,7 +145,7 @@ static uint8_t addFieldGroup(compMsgDispatcher_t *self, char *fileName, uint16_t
   uint8_t result;
   msgFieldGroupInfo_t *msgFieldGroupInfo;
 
-COMP_MSG_DBG(self, "E", 0, "addFieldGroup: %s!fieldGroupId: %d", fileName, fieldGroupId);
+COMP_MSG_DBG(self, "E", 2, "addFieldGroup: %s!fieldGroupId: %d", fileName, fieldGroupId);
   result = COMP_MSG_ERR_OK;
   if (self->compMsgMsgDesc->numMsgFieldGroupInfo >= self->compMsgMsgDesc->maxMsgFieldGroupInfo) {
     if (self->compMsgMsgDesc->maxMsgFieldGroupInfo == 0) {
@@ -272,7 +311,7 @@ static uint8_t handleMsgFileNameLine(compMsgDispatcher_t *self) {
         return COMP_MSG_ERR_BAD_CMD_KEY_VALUE;
       }
       cmdKey = (cmdKeyStr[0] << 8) | cmdKeyStr[1];
-      COMP_MSG_DBG(self, "E", 1, "cmdKey: %s 0x%04x", cmdKeyStr, cmdKey);
+      COMP_MSG_DBG(self, "E", 2, "cmdKey: %s 0x%04x", cmdKeyStr, cmdKey);
     }
     if (fieldGroupId != 0) {
       result = addFieldGroup(self, fileName, fieldGroupId, cmdKey);
@@ -290,6 +329,7 @@ static uint8_t handleMsgCommonLine(compMsgDispatcher_t *self) {
   int result;
   int lgth;
   int keyValueId;
+  int headerFlag;
   uint32_t fieldFlags;
   uint8_t fieldNameId;
   fieldInfo_t fieldInfo;
@@ -316,33 +356,50 @@ static uint8_t handleMsgCommonLine(compMsgDispatcher_t *self) {
   }
   msgFieldDesc = &msgFieldGroupInfo->msgFieldDescs[msgFieldGroupInfo->numMsgFieldDesc];
 //COMP_MSG_DBG(self, "E", 1, "handleMsgCommonLine: %s: %s", compMsgFile->lineFields[0], compMsgFile->lineFields[1]);
+  fieldInfo.fieldFlags = 0;
 
-  //field name
+  // field name
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, compMsgFile->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
   checkErrOK(result);
 
-  //field type
+  // field type
   result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, compMsgFile->lineFields[1], &msgFieldDesc->fieldTypeId);
   checkErrOK(result);
 
-  //field lgth
+  // field lgth
   result = compMsgFile->getIntFieldValue(self, compMsgFile->lineFields[2], &ep, 0, &lgth);
   checkErrOK(result);
   msgFieldDesc->fieldLgth = (uint16_t)lgth;
 
-  //field key/value id
+  // field key/value id
   if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_DESC_KEY_VALUE_FIELD_GROUP) {
     result = compMsgFile->getIntFieldValue(self, compMsgFile->lineFields[3], &ep, 0, &keyValueId);
     checkErrOK(result);
 //    msgFieldDesc->fieldLgth = (uint16_t)lgth;
   }
 
+  // field headerFlag
   if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_DESC_HEADER_FIELD_GROUP) {
+    result = compMsgFile->getIntFieldValue(self, compMsgFile->lineFields[3], &ep, 0, &headerFlag);
+    checkErrOK(result);
+    switch (headerFlag) {
+    case 0:
+      break;
+    case 1:
+      fieldInfo.fieldFlags |= COMP_MSG_FIELD_HEADER_CHKSUM;
+      break;
+    case 2:
+      fieldInfo.fieldFlags |= COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO;
+      break;
+    default:
+      return COMP_MSG_ERR_BAD_HEADER_FIELD_FLAG;
+      break;
+    }
     result = compMsgMsgDesc->addHeaderInfo(self, msgFieldDesc->fieldLgth, msgFieldDesc->fieldNameId);
     checkErrOK(result);
   }
+
   COMP_MSG_DBG(self, "E", 2, "%s: id: %d type: %s %d lgth: %d", compMsgFile->lineFields[0], msgFieldDesc->fieldNameId, compMsgFile->lineFields[1], msgFieldDesc->fieldTypeId, msgFieldDesc->fieldLgth);
-  fieldInfo.fieldFlags = 0;
   fieldInfo.fieldTypeId = msgFieldDesc->fieldTypeId;
   fieldInfo.fieldLgth = msgFieldDesc->fieldLgth;
   fieldInfo.keyValueDesc = NULL;
@@ -382,6 +439,7 @@ static uint8_t handleMsgFieldsToSaveLine(compMsgDispatcher_t *self) {
   compMsgFile_t *compMsgFile;
   msgFieldDesc_t *msgFieldDesc;
   msgFieldGroupInfo_t *msgFieldGroupInfo;
+  fieldInfo_t fieldInfo;
 
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
@@ -399,7 +457,13 @@ static uint8_t handleMsgFieldsToSaveLine(compMsgDispatcher_t *self) {
 //COMP_MSG_DBG(self, "E", 1, "handleFieldsToSaveLine: %s", compMsgFile->lineFields[0]);
   //field name
   result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, compMsgFile->lineFields[0], &msgFieldDesc->fieldNameId, COMP_MSG_INCR);
-  COMP_MSG_DBG(self, "E", 2, "%s: id: %d", compMsgFile->lineFields[0], msgFieldDesc->fieldNameId);
+  checkErrOK(result);
+  COMP_MSG_DBG(self, "E", 2, "fieldToSave: %s: id: %d", compMsgFile->lineFields[0], msgFieldDesc->fieldNameId);
+  c_memset(&fieldInfo, 0, sizeof(fieldInfo_t));
+  result = self->compMsgTypesAndNames->getMsgFieldInfo(self, msgFieldDesc->fieldNameId, &fieldInfo);
+  checkErrOK(result);
+  fieldInfo.fieldFlags |= COMP_MSG_FIELD_TO_SAVE;
+  result = self->compMsgTypesAndNames->setMsgFieldInfo(self, msgFieldDesc->fieldNameId, &fieldInfo);
   checkErrOK(result);
   return result;
 }
@@ -482,6 +546,12 @@ static uint8_t handleMsgValuesLine(compMsgDispatcher_t *self) {
   value = compMsgFile->lineFields[1];
   stringValue = NULL;
   numericValue = 0;
+  if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP) {
+    fieldInfo.fieldFlags |= COMP_MSG_FIELD_WIFI_DATA;
+  }
+  if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP) {
+    fieldInfo.fieldFlags |= COMP_MSG_FIELD_MODULE_DATA;
+  }
   if (value[0] == '"') {
     dataValue.flags |= COMP_MSG_FIELD_IS_STRING;
     result = compMsgFile->getStringFieldValue(self, value, &stringValue);
@@ -791,8 +861,8 @@ static uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
 
   compMsgMsgDesc = self->compMsgMsgDesc;
 
+  compMsgMsgDesc->getHeaderChksumKey = &getHeaderChksumKey;
   compMsgMsgDesc->addHeaderInfo = &addHeaderInfo;
-
   compMsgMsgDesc->addFieldGroup = &addFieldGroup;
 
   compMsgMsgDesc->handleMsgCommonLine = &handleMsgCommonLine;
@@ -807,7 +877,12 @@ static uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
 
   result = compMsgMsgDesc->handleMsgFile(self, MSG_FILES_FILE_NAME, compMsgMsgDesc->handleMsgFileNameLine);
   checkErrOK(result);
+uint8_t data[10] = {0x12, 0x2, 0x15, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+  result = compMsgMsgDesc->getHeaderChksumKey(self, data);
+  checkErrOK(result);
   result = self->compMsgTypesAndNames->dumpMsgFieldInfos(self);
+  checkErrOK(result);
+  result = self->compMsgDataValue->dumpMsgFieldValues(self);
   checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }

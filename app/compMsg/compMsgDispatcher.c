@@ -377,10 +377,11 @@ ets_printf("0 heap: %d\n", system_get_free_heap_size());
   result = self->compMsgUtil->compMsgUtilInit(self);
   checkErrOK(result);
 ets_printf("1 heap: %d\n", system_get_free_heap_size());
-  result = self->compMsgDataValue->compMsgDataValueInit(self);
-  checkErrOK(result);
 COMP_MSG_DBG(self, "Y", 0, "call TypesAndNamesInit");
   result = compMsgTypesAndNamesInit(self);
+  checkErrOK(result);
+  // must be aufter TypesAndNames!
+  result = self->compMsgDataValue->compMsgDataValueInit(self);
   checkErrOK(result);
 COMP_MSG_DBG(self, "Y", 0, "call MsgDescInit");
   result = self->compMsgFile->compMsgFileInit(self);
