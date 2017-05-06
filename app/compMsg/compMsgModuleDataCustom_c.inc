@@ -90,7 +90,7 @@ static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
   dataValue.fieldNameId = 0;
   dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_operatingMode;
   dataValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->setDataValue(self, &dataValue);
+  result = self->compMsgDataValue->setDataVal(self, &dataValue);
   return COMP_MSG_ERR_OK;
 }
 
