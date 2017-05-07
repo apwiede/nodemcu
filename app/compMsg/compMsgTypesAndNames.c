@@ -371,8 +371,8 @@ static uint8_t dumpMsgFieldInfos(compMsgDispatcher_t *self) {
       if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER) {
         c_strcat(buf, " HEADER");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM) {
-        c_strcat(buf, " HEADER_CHKSUM");
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_UNIQUE) {
+        c_strcat(buf, " HEADER_UNIQUE");
       }
       if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO) {
         c_strcat(buf, " HEADER_CHKSUM_NON_ZERO");
@@ -431,6 +431,7 @@ static uint8_t getMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo
   fieldInfo->fieldFlags = entry->fieldFlags;
   fieldInfo->fieldTypeId = entry->fieldTypeId;
   fieldInfo->fieldLgth = entry->fieldLgth;
+  fieldInfo->fieldOffset = entry->fieldOffset;
   fieldInfo->keyValueDesc = entry->keyValueDesc;
   return result;
 }
@@ -449,13 +450,14 @@ static uint8_t setMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo
   }
   entry = msgFieldInfos->fieldInfos[idx];
   if (entry == NULL) {
-    msgFieldInfos->fieldInfos[idx] = os_zalloc(sizeof(fieldInfo_t *));
+    msgFieldInfos->fieldInfos[idx] = os_zalloc(sizeof(fieldInfo_t));
     checkAllocOK(msgFieldInfos->fieldInfos[idx]);
     entry = msgFieldInfos->fieldInfos[idx];
   }
   entry->fieldFlags = fieldInfo->fieldFlags;
   entry->fieldTypeId = fieldInfo->fieldTypeId;
   entry->fieldLgth = fieldInfo->fieldLgth;
+  entry->fieldOffset = fieldInfo->fieldOffset;
   if ((entry->keyValueDesc == NULL) && (fieldInfo->keyValueDesc != NULL)) {
     entry->keyValueDesc = os_zalloc(sizeof(keyValueDesc_t));
     checkAllocOK(entry->keyValueDesc);

@@ -192,8 +192,8 @@ enum compMsgEncyptedCode
 #define MSG_FILES_FILE_NAME           "MsgFiles.txt"
 
 typedef struct msgHeaderInfo {
-  uint8_t numHeaderFields;
   uint16_t headerLgth;
+  uint8_t numHeaderFields;
   uint8_t *headerFieldIds;
 } msgHeaderInfo_t;
 
@@ -228,9 +228,10 @@ typedef struct msgFieldSequence {
 // infos about a message with the message description infos
 
 typedef struct msgDescription {
-  uint16_t headerLgth;
+  uint8_t *headerFieldValues;
   uint8_t encrypted;
   uint8_t handleType;
+  uint16_t cmdKey;
   msgFieldSequence_t fieldSequence[COMP_MSG_MAX_SEQUENCE];
 } msgDescription_t;
 
@@ -257,6 +258,7 @@ typedef struct msgKeyValueDesc {
 
 // all infos about a message field
 
+#ifdef NOTDEF
 typedef struct msgFieldDesc {
   uint8_t fieldNameId;
   uint8_t fieldTypeId;
@@ -266,6 +268,7 @@ typedef struct msgFieldDesc {
   fieldSizeCallback_t fieldSizeCallback;
   dataValue_t *fieldValue;
 } msgFieldDesc_t;
+#endif
 
 // all infos about a message fieldGroup
 
@@ -273,9 +276,9 @@ typedef struct msgFieldGroupInfo {
   uint16_t fieldGroupId;
   uint16_t cmdKey;
   char *fileName;
-  uint8_t maxMsgFieldDesc;
-  uint8_t numMsgFieldDesc;
-  msgFieldDesc_t *msgFieldDescs;
+//  uint8_t maxMsgFieldDesc;
+//  uint8_t numMsgFieldDesc;
+//  msgFieldDesc_t *msgFieldDescs;
   uint8_t maxDataValues;
   uint8_t numMsgDataValues;
   dataValue_t *dataValues;

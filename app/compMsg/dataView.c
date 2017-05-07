@@ -376,6 +376,14 @@ static uint8_t setInt32Vector(dataView_t *self, int offset, int32_t *value, size
   return DATA_VIEW_ERR_OK;
 }
 
+// ================================= setDataViewData ====================================
+
+static uint8_t setDataViewData(dataView_t *self, uint8_t *data, size_t lgth) {
+  self->data = data;
+  self->lgth = lgth;
+  return DATA_VIEW_ERR_OK;
+}
+
 // ================================= getDataViewData ====================================
 
 static uint8_t getDataViewData(dataView_t *self, uint8_t **data, size_t *lgth) {
@@ -466,6 +474,7 @@ dataView_t *newDataView(uint8_t *data, size_t lgth) {
   dataView->setUint32Vector = &setUint32Vector;
   dataView->setInt32Vector = &setInt32Vector;
 
+  dataView->setDataViewData = &setDataViewData;
   dataView->getDataViewData = &getDataViewData;
   dataView->dumpBinary = &dumpBinary;
   dataView->dumpBinaryWide = &dumpBinaryWide;

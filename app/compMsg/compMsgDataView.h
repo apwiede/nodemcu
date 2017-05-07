@@ -32,7 +32,7 @@
 */
 
 /* 
- * File:   dataView.h
+ * File:   compMsgDataView.h
  * Author: Arnulf P. Wiedemann
  *
  * Created on September 24, 2016
@@ -42,10 +42,6 @@
 #define	COMP_MSG_DATA_VIEW_H
 
 #include "c_types.h"
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 typedef uint8_t (* fieldSizeCallback_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
@@ -84,6 +80,8 @@ typedef uint8_t (* setTotalCrc_t)(compMsgDispatcher_t *self, dataView_t *dataVie
 
 typedef uint8_t (* dvGetFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx);
 typedef uint8_t (* dvSetFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx);
+typedef uint8_t (* getIdFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, int *numericValue, uint8_t **stringValue, int fieldIdx);
+typedef uint8_t (* setIdFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, int numericValue, const uint8_t *stringValue, int fieldIdx);
 
 typedef struct compMsgDataView {
   dataView_t *dataView;
@@ -108,13 +106,11 @@ typedef struct compMsgDataView {
 
   dvGetFieldValue_t getFieldValue;
   dvSetFieldValue_t setFieldValue;
+  getIdFieldValue_t getIdFieldValue;
+  setIdFieldValue_t setIdFieldValue;
 
 } compMsgDataView_t;
 
 compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth);
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* COMP_MSG_DATA_VIEW_H */

@@ -333,13 +333,13 @@ static uint8_t addFieldDescription(compMsgDispatcher_t *self) {
       descriptions->msgDescriptions = os_zalloc(descriptions->maxMsgDescriptions * sizeof(msgDescription_t));
       checkAllocOK(descriptions->msgDescriptions);
     } else {
-      descriptions->maxMsgDescriptions += 5;
+      descriptions->maxMsgDescriptions += 1;
       descriptions->msgDescriptions = os_realloc((char *)descriptions->msgDescriptions, descriptions->maxMsgDescriptions * sizeof(msgDescription_t));
       checkAllocOK(descriptions->msgDescriptions);
     }
   }
   description = &descriptions->msgDescriptions[descriptions->numMsgDescriptions];
-
+  c_memset(description, 0, sizeof(msgDescription_t));
   descriptions->numMsgDescriptions++;
   return COMP_MSG_ERR_OK;
 }

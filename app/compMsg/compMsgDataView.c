@@ -551,6 +551,266 @@ COMP_MSG_DBG(self, "v", 1, "bad type in setFieldValue: %d\n", fieldInfo->fieldTy
   return DATA_VIEW_ERR_OK;
 }
 
+// ================================= getIdFieldValue ====================================
+
+static uint8_t getIdFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, int *numericValue, uint8_t **stringValue, int fieldIdx) {
+  int idx;
+  int result;
+  int numEntries;
+  int8_t i8;
+  uint8_t ui8;
+  int16_t i16;
+  uint16_t ui16;
+  int32_t i32;
+  uint32_t ui32;
+  fieldInfo_t *fieldInfo;
+
+  fieldInfo = self->compMsgTypesAndNames->msgFieldInfos.fieldInfos[fieldId];
+  if (fieldInfo == NULL) {
+    return COMP_MSG_ERR_FIELD_NOT_FOUND;
+  }
+  *stringValue = NULL;
+  *numericValue = 0;
+  switch (fieldInfo->fieldTypeId) {
+    case DATA_VIEW_FIELD_INT8_T:
+      result = dataView->getInt8(dataView, fieldInfo->fieldOffset, &i8);
+      checkErrOK(result);
+      *numericValue = (int)i8;
+      break;
+    case DATA_VIEW_FIELD_UINT8_T:
+      result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &ui8);
+      checkErrOK(result);
+      *numericValue = (int)ui8;
+      break;
+    case DATA_VIEW_FIELD_INT16_T:
+      result = dataView->getInt16(dataView, fieldInfo->fieldOffset, &i16);
+      checkErrOK(result);
+      *numericValue = (int)i16;
+      break;
+    case DATA_VIEW_FIELD_UINT16_T:
+      result = dataView->getUint16(dataView, fieldInfo->fieldOffset, &ui16);
+      checkErrOK(result);
+      *numericValue = (int)ui16;
+      break;
+    case DATA_VIEW_FIELD_INT32_T:
+      result = dataView->getInt32(dataView, fieldInfo->fieldOffset, &i32);
+      checkErrOK(result);
+      *numericValue = (int)i32;
+      break;
+    case DATA_VIEW_FIELD_UINT32_T:
+      result = dataView->getUint32(dataView, fieldInfo->fieldOffset, &ui32);
+      checkErrOK(result);
+      *numericValue = (int)ui32;
+      break;
+    case DATA_VIEW_FIELD_INT8_VECTOR:
+      *numericValue = fieldInfo->fieldLgth;
+      *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
+      checkAllocOK(stringValue);
+      (*stringValue)[fieldInfo->fieldLgth] = 0;
+      os_memcpy(*stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      break;
+    case DATA_VIEW_FIELD_UINT8_VECTOR:
+      *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
+      checkAllocOK(stringValue);
+      (*stringValue)[fieldInfo->fieldLgth] = 0;
+      os_memcpy(*stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      break;
+    case DATA_VIEW_FIELD_INT16_VECTOR:
+      if (*stringValue == NULL) {
+        // check for length needed!!
+        result = dataView->getInt16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(int16_t), &i16);
+        checkErrOK(result);
+        *numericValue = (int)i16;
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT16_VECTOR:
+      if (*stringValue == NULL) {
+        // check for length needed!!
+        result = dataView->getUint16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(uint16_t), &ui16);
+        checkErrOK(result);
+        *numericValue = (int)ui16;
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+#ifdef NOTDEF
+    case DATA_VIEW_FIELD_INT32_VECTOR:
+      if (stringValue != NULL) {
+        // check for length needed!!
+        os_memcpy((int8_t *)fieldInfo->value.int32Vector, stringValue, fieldInfo->fieldLgth);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT32_VECTOR:
+      if (stringValue != NULL) {
+        // check for length needed!!
+        os_memcpy((uint8_t *)fieldInfo->value.uint32Vector, stringValue, fieldInfo->fieldLgth);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+#endif
+    default:
+      return COMP_MSG_ERR_BAD_FIELD_TYPE;
+      break;
+  }
+  return DATA_VIEW_ERR_OK;
+}
+
+// ================================= setIdFieldValue ====================================
+
+static uint8_t setIdFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, int numericValue, const uint8_t *stringValue, int fieldIdx) {
+  int idx;
+  int result;
+  int numEntries;
+  fieldInfo_t *fieldInfo;
+
+  COMP_MSG_DBG(self, "v", 2, "compMsgDataView setIdFieldValue: data: %p lgth: %d", dataView->data, dataView->lgth);
+  fieldInfo = self->compMsgTypesAndNames->msgFieldInfos.fieldInfos[fieldId];
+  if (fieldInfo == NULL) {
+    return COMP_MSG_ERR_FIELD_NOT_FOUND;
+  }
+  switch (fieldInfo->fieldTypeId) {
+    case DATA_VIEW_FIELD_INT8_T:
+      if (stringValue == NULL) {
+        if ((numericValue > -128) && (numericValue < 128)) {
+          result= dataView->setInt8(dataView, fieldInfo->fieldOffset + fieldIdx, (int8_t)numericValue);
+          checkErrOK(result);
+        } else {
+          return COMP_MSG_ERR_VALUE_TOO_BIG;
+        }
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT8_T:
+      if (stringValue == NULL) {
+        if ((numericValue >= 0) && (numericValue <= 256)) {
+          result= dataView->setUint8(dataView, fieldInfo->fieldOffset + fieldIdx, (uint8_t)numericValue);
+          checkErrOK(result);
+        }
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_INT16_T:
+      if (stringValue == NULL) {
+        if ((numericValue > -32767) && (numericValue < 32767)) {
+          result= dataView->setInt16(dataView, fieldInfo->fieldOffset + fieldIdx, (int16_t)numericValue);
+          checkErrOK(result);
+        } else {
+          return COMP_MSG_ERR_VALUE_TOO_BIG;
+        }
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT16_T:
+      if (stringValue == NULL) {
+        if ((numericValue >= 0) && (numericValue <= 65535)) {
+          result= dataView->setUint16(dataView, fieldInfo->fieldOffset + fieldIdx, (uint16_t)numericValue);
+          checkErrOK(result);
+        } else {
+          return COMP_MSG_ERR_VALUE_TOO_BIG;
+        }
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_INT32_T:
+      if (stringValue == NULL) {
+        if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
+          result= dataView->setInt32(dataView, fieldInfo->fieldOffset + fieldIdx, (int32_t)numericValue);
+          checkErrOK(result);
+        } else {
+          return COMP_MSG_ERR_VALUE_TOO_BIG;
+        }
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT32_T:
+      if (stringValue == NULL) {
+        // we have to do the signed check as numericValue is a signed integer!!
+        if ((numericValue > -0x7FFFFFFF) && (numericValue <= 0x7FFFFFFF)) {
+          result= dataView->setUint32(dataView, fieldInfo->fieldOffset + fieldIdx, (uint32_t)numericValue);
+          checkErrOK(result);
+        } else {
+          return COMP_MSG_ERR_VALUE_TOO_BIG;
+        }
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_INT8_VECTOR:
+      if (stringValue != NULL) {
+        // check for length needed!!
+        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > dataView->lgth) {
+          return COMP_MSG_ERR_VALUE_TOO_BIG;
+        }
+        os_memcpy(dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT8_VECTOR:
+      if (stringValue != NULL) {
+        if (fieldInfo->fieldOffset + fieldInfo->fieldLgth > dataView->lgth) {
+          return COMP_MSG_ERR_VALUE_TOO_BIG;
+        }
+        COMP_MSG_DBG(self, "v", 2, "compMsgDataView: u8vector: offset: %d lgth: %d val: %s", fieldInfo->fieldOffset + fieldIdx, fieldInfo->fieldLgth, stringValue);
+        os_memcpy(dataView->data + fieldInfo->fieldOffset + fieldIdx, stringValue, fieldInfo->fieldLgth);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_INT16_VECTOR:
+      if (stringValue == NULL) {
+        // check for length needed!!
+        result= dataView->setInt16(dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(int16_t), (int16_t)numericValue);
+        checkErrOK(result);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT16_VECTOR:
+      if (stringValue == NULL) {
+        // check for length needed!!
+        result= dataView->setUint16(dataView, fieldInfo->fieldOffset+fieldIdx*sizeof(uint16_t), (uint16_t)numericValue);
+        checkErrOK(result);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+#ifdef NOTDEF
+    case DATA_VIEW_FIELD_INT32_VECTOR:
+      if (stringValue != NULL) {
+        // check for length needed!!
+        os_memcpy((int8_t *)fieldInfo->value.int32Vector, stringValue, fieldInfo->fieldLgth);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+    case DATA_VIEW_FIELD_UINT32_VECTOR:
+      if (stringValue != NULL) {
+        // check for length needed!!
+        os_memcpy((uint8_t *)fieldInfo->value.uint32Vector, stringValue, fieldInfo->fieldLgth);
+      } else {
+        return COMP_MSG_ERR_BAD_VALUE;
+      }
+      break;
+#endif
+    default:
+COMP_MSG_DBG(self, "v", 1, "bad type in setFieldValue: %d\n", fieldInfo->fieldTypeId);
+      return COMP_MSG_ERR_BAD_FIELD_TYPE;
+      break;
+  }
+  return DATA_VIEW_ERR_OK;
+}
+
 // ================================= newCompMsgDataView ====================================
 
 compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
@@ -584,6 +844,8 @@ compMsgDataView_t *newCompMsgDataView(uint8_t *data, size_t lgth) {
 
   compMsgDataView->getFieldValue = &getFieldValue;
   compMsgDataView->setFieldValue = &setFieldValue;
+  compMsgDataView->getIdFieldValue = &getIdFieldValue;
+  compMsgDataView->setIdFieldValue = &setIdFieldValue;
 
   return compMsgDataView;
 }

@@ -330,8 +330,8 @@ static uint8_t dumpMsgFieldValues(compMsgDispatcher_t *self) {
       if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER) {
         c_strcat(buf, " HEADER");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM) {
-        c_strcat(buf, " HEADER_CHKSUM");
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_UNIQUE) {
+        c_strcat(buf, " HEADER_UNIQUE");
       }
       if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO) {
         c_strcat(buf, " HEADER_CHKSUM_NON_ZERO");
@@ -363,7 +363,7 @@ static uint8_t addMsgFieldValues(compMsgDispatcher_t *self, uint8_t numEntries) 
   }
   checkAllocOK(msgFieldValues->fieldValues);
   idx = msgFieldValues->numMsgFields;
-  COMP_MSG_DBG(self, "E", 1, "addMsgFieldValues: numEntries: %d, numMsgFields: %d", numEntries, msgFieldValues->numMsgFields);
+  COMP_MSG_DBG(self, "E", 2, "addMsgFieldValues: numEntries: %d, numMsgFields: %d", numEntries, msgFieldValues->numMsgFields);
   while (idx < msgFieldValues->numMsgFields + numEntries) {
     msgFieldValues->fieldValues[idx] = (fieldValue_t *)NULL;
     idx++;
@@ -376,9 +376,22 @@ static uint8_t addMsgFieldValues(compMsgDispatcher_t *self, uint8_t numEntries) 
 
 static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue) {
   uint8_t result;
+  msgFieldValues_t *msgFieldValues;
+  fieldValue_t *entry;
 
   result = COMP_MSG_ERR_OK;
-
+  msgFieldValues = &self->compMsgDataValue->msgFieldValues;
+  if (idx >= msgFieldValues->numMsgFields) {
+    return COMP_MSG_ERR_BAD_MSG_FIELD_INFO_IDX;
+  }
+  entry = msgFieldValues->fieldValues[idx];
+  if (entry == NULL) {
+    msgFieldValues->fieldValues[idx] = os_zalloc(sizeof(fieldValue_t));
+    checkAllocOK(msgFieldValues->fieldValues[idx]);
+    entry = msgFieldValues->fieldValues[idx];
+  }
+  entry->fieldValueFlags = fieldValue->fieldValueFlags;
+  COMP_MSG_DBG(self, "E", 0, "setMsgFieldValues: idx: %d fieldValueFlags: 0x%08x", idx, entry->fieldValueFlags);
   return result;
 }
 
@@ -386,9 +399,22 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldVal
 
 static uint8_t getMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue) {
   uint8_t result;
+  msgFieldValues_t *msgFieldValues;
+  fieldValue_t *entry;
 
   result = COMP_MSG_ERR_OK;
-
+  msgFieldValues = &self->compMsgDataValue->msgFieldValues;
+  if (idx >= msgFieldValues->numMsgFields) {
+    return COMP_MSG_ERR_BAD_MSG_FIELD_INFO_IDX;
+  }
+  entry = msgFieldValues->fieldValues[idx];
+  if (entry == NULL) {
+    msgFieldValues->fieldValues[idx] = os_zalloc(sizeof(fieldValue_t));
+    checkAllocOK(msgFieldValues->fieldValues[idx]);
+    entry = msgFieldValues->fieldValues[idx];
+  }
+  fieldValue->fieldValueFlags = entry->fieldValueFlags;
+  fieldValue->dataValue = entry->dataValue;
   return result;
 }
 

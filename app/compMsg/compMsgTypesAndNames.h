@@ -150,7 +150,7 @@ enum compMsgFieldGroups
 #define COMP_MSG_FIELD_TO_SAVE                 0x04
 #define COMP_MSG_FIELD_KEY_VALUE               0x08
 #define COMP_MSG_FIELD_HEADER                  0x10
-#define COMP_MSG_FIELD_HEADER_CHKSUM           0x20
+#define COMP_MSG_FIELD_HEADER_UNIQUE           0x20
 #define COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO  0x40
 
 typedef struct str2id {
@@ -176,6 +176,7 @@ typedef struct fieldInfo {
   uint32_t fieldFlags;
   uint8_t fieldTypeId;
   uint16_t fieldLgth;
+  uint16_t fieldOffset;
   keyValueDesc_t *keyValueDesc;
 } fieldInfo_t;
 
@@ -204,6 +205,7 @@ typedef struct compMsgTypesAndNames {
   uint8_t id;
   fieldNames_t fieldNames;
   uint8_t numSpecFieldIds;
+  uint8_t numHeaderFields;
   msgFieldInfos_t msgFieldInfos;
   
   getFieldTypeIdFromStr_t getFieldTypeIdFromStr;
