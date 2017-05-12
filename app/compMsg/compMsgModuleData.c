@@ -396,7 +396,7 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
   int numericValue;
   uint8_t valueId;
   uint8_t *stringValue;
-  dataValue_t dataValue;
+  fieldValue_t fieldValue;
   bool userFieldsStarted;
 
 //ets_printf("moduleData: restoreUserData called\n");
@@ -418,17 +418,17 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
       checkErrOK(result);
 //ets_printf("handle field: %s: %d %s\n", msgDescPart->fieldNameStr, numericValue, stringValue == NULL ? "nil" : (char *)stringValue);
       if (stringValue == NULL) {
-        dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-        dataValue.value.numericValue = numericValue;
+        fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+        fieldValue.dataValue.value.numericValue = numericValue;
       } else {
-        dataValue.flags = COMP_MSG_FIELD_IS_STRING;
-        dataValue.value.stringValue = stringValue;
+        fieldValue.flags = COMP_MSG_FIELD_IS_STRING;
+        fieldValue.dataValue.value.stringValue = stringValue;
       }
-      dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-      dataValue.fieldNameId = 0;
-      dataValue.fieldValueId = valueId;
-      dataValue.fieldValueCallback = NULL;
-      result = self->compMsgDataValue->setDataVal(self, &dataValue);
+      fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+      fieldValue.fieldNameId = 0;
+      fieldValue.fieldValueId = valueId;
+      fieldValue.fieldValueCallback = NULL;
+      result = self->compMsgDataValue->setFieldValueInfo(self, &fieldValue);
       checkErrOK(result);
     }
     // check for start handling fields

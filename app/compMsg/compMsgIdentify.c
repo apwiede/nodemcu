@@ -741,7 +741,10 @@ static uint8_t unpackReceivedMsg(compMsgDispatcher_t *self, msgRequestInfo_t *ms
   size_t saveLgth;
   bool haveDataView;
 
+//FIXME
+#ifdef NOTDEF
   received = &msgRequestInfo->received;
+#endif
   COMP_MSG_DBG(self, "I", 2, "++++unpackReceivedMsg: lgth: %d", received->lgth);
   hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   compMsgData = self->compMsgData;

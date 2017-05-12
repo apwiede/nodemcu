@@ -356,7 +356,7 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
       self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
       self->compMsgData->receivedData = msgData;
       self->compMsgData->receivedLgth = msgLgth;
-      result = self->compMsgRequest->addRequest(self, COMP_MSG_INPUT_NET_SOCKET, sud, self->compMsgData);
+      result = self->compMsgRequest->addRequestData(self, COMP_MSG_INPUT_NET_SOCKET, sud, msgData, msgLgth);
 //      result = self->compMsgSendReceive->sendMsg(self, msgData, msgLgth);
       COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
       checkErrOK(result);
@@ -377,7 +377,7 @@ static uint8_t ICACHE_FLASH_ATTR httpParse(socketUserData_t *sud, char *data, si
         self->compMsgData->direction = COMP_MSG_TRANSFER_DATA;
         self->compMsgData->receivedData = msgData;
         self->compMsgData->receivedLgth = msgLgth;
-        result = self->compMsgRequest->addRequest(self, COMP_MSG_INPUT_NET_SOCKET, sud, self->compMsgData);
+        result = self->compMsgRequest->addRequestData(self, COMP_MSG_INPUT_NET_SOCKET, sud, msgData, msgLgth);
         COMP_MSG_DBG(self, "H", 1, "sendMsg: result: %d", result);
         checkErrOK(result);
       }

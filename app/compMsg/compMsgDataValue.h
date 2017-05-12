@@ -83,10 +83,6 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 typedef struct dataValue dataValue_t;
 
 typedef struct dataValue {
-  uint16_t cmdKey;
-  uint8_t fieldValueId;
-  uint8_t fieldNameId;
-  uint8_t fieldValueType;
   uint16_t flags;
   union {
     uint8_t *stringValue;
@@ -104,12 +100,16 @@ typedef struct dataValue {
     uint32_t *u32vec;
     int32_t *i32vec;
   } value;
-  fieldValueCallback_t fieldValueCallback;
 } dataValue_t;
 
 typedef struct fieldValue {
-  uint32_t fieldValueFlags;
+  uint32_t flags;
+  uint16_t cmdKey;
+  uint8_t fieldValueId;
+  uint8_t fieldNameId;
+  uint8_t fieldValueType;
   dataValue_t dataValue;
+  fieldValueCallback_t fieldValueCallback;
 } fieldValue_t;
 
 typedef struct msgFieldValues {
@@ -122,6 +122,9 @@ typedef uint8_t (* dataValueId2ValueStr_t)(compMsgDispatcher_t *self, uint8_t va
 typedef uint8_t (* addDataValue_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
 typedef uint8_t (* setDataVal_t)(compMsgDispatcher_t *self, dataValue_t *dataValue);
 typedef uint8_t (* getDataVal_t)(compMsgDispatcher_t *self, dataValue_t *dataValue, uint8_t **valueStr);
+typedef uint8_t (* addFieldValueInfo_t)(compMsgDispatcher_t *self, fieldValue_t *fieldValue);
+typedef uint8_t (* setFieldValueInfo_t)(compMsgDispatcher_t *self, fieldValue_t *fieldValue);
+typedef uint8_t (* getFieldValueInfo_t)(compMsgDispatcher_t *self, fieldValue_t *fieldValue, uint8_t **valueStr);
 typedef uint8_t (* dumpMsgFieldValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* addMsgFieldValues_t)(compMsgDispatcher_t *self, uint8_t numEntries);
 typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
@@ -131,7 +134,7 @@ typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
 typedef struct compMsgDataValue {
   int numDataValues;
   int maxDataValues;
-  dataValue_t *dataValues;
+  fieldValue_t *fieldValues;
   msgFieldValues_t msgFieldValues;
 
   dataValueStr2ValueId_t dataValueStr2ValueId;
@@ -139,6 +142,9 @@ typedef struct compMsgDataValue {
   addDataValue_t addDataValue;
   setDataVal_t setDataVal;
   getDataVal_t getDataVal;
+  addFieldValueInfo_t addFieldValueInfo;
+  setFieldValueInfo_t setFieldValueInfo;
+  getFieldValueInfo_t getFieldValueInfo;
   dumpMsgFieldValues_t dumpMsgFieldValues;
   addMsgFieldValues_t addMsgFieldValues;
   getMsgFieldValue_t getMsgFieldValue;

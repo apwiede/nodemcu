@@ -75,18 +75,14 @@ static uint8_t resetRequest(compMsgDispatcher_t *self, int slot) {
   uint8_t result;
   msgRequestInfos_t *msgRequestInfos;
   msgRequestInfo_t *msgRequestInfo;
-  compMsgData_t *compMsgData;
-  int uartRequestIdx;
-  msgParts_t *received;
 
-  // slot 0 is reserved for Uart
   COMP_MSG_DBG(self, "s", 1, "resetRequest slot: %d", slot);
-  uartRequestIdx = 0;
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[uartRequestIdx];
-  received = &msgRequestInfo->received;
-  received->lgth = 0;
-  received->totalLgth = 999;
+  msgRequestInfo = &msgRequestInfos->msgRequestInfo[slot];
+  if (msgRequestInfo->data != NULL) {
+    os_free(msgRequestInfo->data);
+  }
+  c_memset(msgRequestInfo, 0, sizeof(msgRequestInfo_t));
   return COMP_MSG_ERR_OK;
 }
 
@@ -101,7 +97,10 @@ static uint8_t startRequest(compMsgDispatcher_t *self) {
   result = COMP_MSG_ERR_OK;
   COMP_MSG_DBG(self, "R", 1, "should start request: %d\n", self->compMsgRequest->msgRequestInfos.currRequestIdx);
   msgRequestInfo = &self->compMsgRequest->msgRequestInfos.msgRequestInfo[self->compMsgRequest->msgRequestInfos.currRequestIdx];
+//FIXME
+#ifdef NOTDEF
   compMsgData = msgRequestInfo->requestData;
+#endif
   if (compMsgData->direction == COMP_MSG_RECEIVED_DATA) {
     switch (compMsgData->direction) {
     case COMP_MSG_TRANSFER_DATA:
@@ -152,134 +151,56 @@ static uint8_t startNextRequest(compMsgDispatcher_t *self) {
   return COMP_MSG_ERR_OK;
 }
 
-// ================================= addUartRequestData ====================================
+// ================================= addRequestData ====================================
 
-static uint8_t addUartRequestData(compMsgDispatcher_t *self, uint8_t *data, size_t lgth) {
+static uint8_t addRequestData(compMsgDispatcher_t *self, uint8_t requestType, socketUserData_t *sud, uint8_t *data, uint16_t lgth) {
   uint8_t result;
-  int uartRequestIdx;
-  msgRequestInfos_t *msgRequestInfos;
-  msgRequestInfo_t *msgRequestInfo;
-  compMsgData_t *compMsgData;
-  bool isComplete;
-
-  // slot 0 is reserved for Uart
-  uartRequestIdx = 0;
-  msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[uartRequestIdx];
-  if (msgRequestInfo->requestType != COMP_MSG_INPUT_UART) {
-    return COMP_MSG_ERR_UART_REQUEST_NOT_SET;
-  }
-  isComplete = false;
-  compMsgData = msgRequestInfo->requestData;
-  compMsgData->direction = COMP_MSG_RECEIVED_DATA;
-  COMP_MSG_DBG(self, "R", 2, "call handleReceivePart: lgth: %d", lgth);
-  self->compMsgData = compMsgData;
-  result = self->compMsgRequest->detectMsg(self, data, lgth, uartRequestIdx, &isComplete);
-  checkErrOK(result);
-  if (isComplete) {
-    result = self->compMsgIdentify->unpackReceivedMsg(self, msgRequestInfo);
-    checkErrOK(result);
-  }
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= addRequest ====================================
-
-static uint8_t addRequest(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData) {
-  uint8_t result;
-  bool isComplete;
   compMsgDispatcher_t *requestSelf;
   msgRequestInfos_t *msgRequestInfos;
   msgRequestInfo_t *msgRequestInfo;
-  compMsgData_t *compMsgData;
+  int requestIdx;
 
   result = COMP_MSG_ERR_OK;
-  isComplete = false;
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[msgRequestInfos->currRequestIdx];
-  if (msgRequestInfos->lastRequestIdx >= COMP_MSG_MAX_REQUESTS) {
+  requestIdx = 0;
+  while (requestIdx < COMP_MSG_MAX_REQUESTS) {
+    msgRequestInfo = &msgRequestInfos->msgRequestInfo[requestIdx];
+    if (msgRequestInfo->sud == sud) {
+      break;
+    }
+    if (((msgRequestInfo->sud == NULL) && (msgRequestInfo->requestType == 0)) ||
+        ((requestType == COMP_MSG_INPUT_UART) && (lgth == 0))) {
+      // the second if clause is used in compMsgRequestInit for uart!!
+      msgRequestInfo->requestType = requestType;
+      msgRequestInfo->sud = sud;
+      msgRequestInfo->data = os_zalloc(lgth);
+      checkAllocOK(msgRequestInfo->data);
+      msgRequestInfo->lgth = lgth;
+      msgRequestInfo->totalLgth = 999;  // just a dummy value until we have the real totalLgth
+                                        // (after reading header)
+      break;
+    }
+    requestIdx++;
+  }
+  if (requestIdx >= COMP_MSG_MAX_REQUESTS) {
     COMP_MSG_DBG(self, "Y", 0, "COMP_MSG_ERR_TOO_MANY_REQUESTS");
     return COMP_MSG_ERR_TOO_MANY_REQUESTS;
   }
-  msgRequestInfos->lastRequestIdx++;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[msgRequestInfos->lastRequestIdx];
-  msgRequestInfo->requestType = requestType;
-  msgRequestInfo->requestHandle = requestHandle;
-  msgRequestInfo->requestData = requestData;
-  COMP_MSG_DBG(self, "R", 2, "addRequest: lastRequestIdx: %d requestType: %d requestData: %p\n", msgRequestInfos->lastRequestIdx, requestType, requestData);
-  COMP_MSG_DBG(self, "R", 2, "addRequest 2 %d requestData: %p\n", msgRequestInfos->currRequestIdx, requestData);
   requestSelf = msgRequestInfo->requestDispatcher;
-//ets_printf("compMsgData: %p requestSelf: %p self: %p\n", compMsgData, requestSelf, self);
-//FIXME TEMPORARY last 2 if clauses!!
-  if ((msgRequestInfos->currRequestIdx < 1) 
-      || (requestData->direction == COMP_MSG_TRANSFER_DATA)
-      || (requestData->direction == COMP_MSG_TO_SEND_DATA)) {
-    msgRequestInfos->currRequestIdx++;
-//    checkErrOK(result);
-    msgRequestInfo = &msgRequestInfos->msgRequestInfo[msgRequestInfos->currRequestIdx];
-    compMsgData = msgRequestInfo->requestData;
-    requestSelf->compMsgData = compMsgData;
-    switch (compMsgData->direction) {
-    case COMP_MSG_TO_SEND_DATA:
-      COMP_MSG_DBG(self, "R", 2, "addRequest: toSendData: %p %d\n", compMsgData->toSendData, compMsgData->toSendLgth);
-      result = self->compMsgIdentify->handleToSendPart(requestSelf, compMsgData->toSendData, compMsgData->toSendLgth);
-      break;
-    case COMP_MSG_RECEIVED_DATA:
-      COMP_MSG_DBG(self, "R", 2, "addRequest: receivedData: %p %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
-      result = self->compMsgRequest->detectMsg(requestSelf, compMsgData->receivedData, compMsgData->receivedLgth, msgRequestInfos->currRequestIdx, &isComplete);
-      checkErrOK(result);
-      if (isComplete) {
-        result = self->compMsgIdentify->unpackReceivedMsg(requestSelf, msgRequestInfo);
-      }
-//ets_printf("addRequest handleReceivedPart2: heap: %d\n", system_get_free_heap_size());
-      break;
-    case COMP_MSG_TRANSFER_DATA:
-      result = self->compMsgSendReceive->sendMsg(requestSelf, compMsgData->receivedData, compMsgData->receivedLgth);
-      break;
-    default:
-      COMP_MSG_DBG(self, "R", 2, "bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
-      return COMP_MSG_ERR_BAD_VALUE;
-    }
-  } else {
-    COMP_MSG_DBG(self, "R", 2, "direction: %d %d\n", requestData->direction, COMP_MSG_RECEIVED_DATA);
-    msgRequestInfos->currRequestIdx = msgRequestInfos->lastRequestIdx;
-    msgRequestInfo = &msgRequestInfos->msgRequestInfo[msgRequestInfos->currRequestIdx];
-    compMsgData = msgRequestInfo->requestData;
-    requestData = compMsgData;
-    requestSelf->compMsgData = compMsgData;
-    if (requestData->direction == COMP_MSG_RECEIVED_DATA) {
-// FIXME TEMPORARY need flag to see if no uart activity!!
-      switch (compMsgData->direction) {
-      case COMP_MSG_TRANSFER_DATA:
-        result = self->compMsgSendReceive->sendMsg(requestSelf, compMsgData->receivedData, compMsgData->receivedLgth);
-        break;
-      case COMP_MSG_TO_SEND_DATA:
-        break;
-      case COMP_MSG_RECEIVED_DATA:
-        COMP_MSG_DBG(self, "R", 2, "COMP_MSG_RECEIVED_DATA: compMsgData: %p\n", compMsgData);
-        COMP_MSG_DBG(self, "R", 2, "received: %p lgth: %d\n", compMsgData->receivedData, compMsgData->receivedLgth);
-//        result = self->compMsgIdentify->handleReceivedPart(requestSelf, compMsgData->receivedData, compMsgData->receivedLgth);
-        result = self->compMsgRequest->detectMsg(requestSelf, compMsgData->receivedData, compMsgData->receivedLgth, msgRequestInfos->currRequestIdx, &isComplete);
-        checkErrOK(result);
-        if (isComplete) {
-          result = self->compMsgIdentify->unpackReceivedMsg(requestSelf, msgRequestInfo);
-        }
-        break;
-      default:
-        COMP_MSG_DBG(self, "Y", 0, "bad direction: 0x%02x 0x%02x\n", compMsgData->direction, requestData->direction);
-        return COMP_MSG_ERR_BAD_VALUE;
-      }
-    }
-  }
+  result = self->compMsgRequest->detectMsg(requestSelf, data, lgth, requestIdx, &msgRequestInfo->isComplete);
   checkErrOK(result);
+  if (msgRequestInfo->isComplete) {
+    result = self->compMsgIdentify->unpackReceivedMsg(requestSelf, msgRequestInfo);
+    checkErrOK(result);
+  }
   return result;
 }
 
 // ================================= deleteRequest ====================================
 
-static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle) {
+static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, socketUserData_t *sud) {
   uint8_t result;
-  int idx;
+  int requestIdx;
   bool found;
   int idxToStart;
   int idxDeleted;
@@ -287,52 +208,34 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
   msgRequestInfo_t *msgRequestInfo;
   msgRequestInfo_t *msgRequestInfo1;
 
-  idx = 0;
+  requestIdx = 0;
   idxToStart = -1;
   idxDeleted = -1;
   found = false;
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
-  while (idx < self->compMsgRequest->msgRequestInfos.lastRequestIdx) {
-    if (idx >= COMP_MSG_MAX_REQUESTS) {
-      return COMP_MSG_ERR_REQUEST_NOT_FOUND;
-    }
-    if (!found) {
-      msgRequestInfo = &msgRequestInfos->msgRequestInfo[idx];
-      if ((msgRequestInfo->requestType == requestType) && (msgRequestInfo->requestHandle == requestHandle)) {
-        found = true;
-        idxDeleted = idx;
-        if (idx == msgRequestInfos->currRequestIdx) {
-          if (idx < msgRequestInfos->lastRequestIdx) {
-            idxToStart = idx;
-          }
-          msgRequestInfos->currRequestIdx = -1;
-        }
-      }
-    } else {
-      // move the following entries one idx down
-      if (idx < msgRequestInfos->lastRequestIdx) {
-        msgRequestInfo = &msgRequestInfos->msgRequestInfo[idx];
-        msgRequestInfo1 = &msgRequestInfos->msgRequestInfo[idx + 1];
-        msgRequestInfo->requestType = msgRequestInfo1->requestType;
-        msgRequestInfo->requestHandle = msgRequestInfo1->requestHandle;
-        if (idx + 1 == msgRequestInfos->currRequestIdx) {
-          msgRequestInfos->currRequestIdx--;
+  while (requestIdx < COMP_MSG_MAX_REQUESTS) {
+    msgRequestInfo = &msgRequestInfos->msgRequestInfo[requestIdx];
+    if ((msgRequestInfo->requestType == requestType) && (msgRequestInfo->sud == sud)) {
+      idxDeleted = requestIdx;
+      if (requestIdx == msgRequestInfos->currRequestIdx) {
+        if (requestIdx < msgRequestInfos->lastRequestIdx) {
+          idxToStart = requestIdx;
         }
       }
     }
-    idx++;
+    requestIdx++;
   }
-  if (msgRequestInfos->lastRequestIdx >= 0) {
-    msgRequestInfos->lastRequestIdx--;
+  // move the following entries one idx down
+  if (requestIdx < COMP_MSG_MAX_REQUESTS) {
+    msgRequestInfo = &msgRequestInfos->msgRequestInfo[requestIdx];
+    msgRequestInfo1 = &msgRequestInfos->msgRequestInfo[requestIdx + 1];
+    msgRequestInfo->requestType = msgRequestInfo1->requestType;
+    msgRequestInfo->sud = msgRequestInfo1->sud;
   }
-  if (msgRequestInfos->currRequestIdx < 0) {
-    msgRequestInfos->currRequestIdx++;
-    // start handling the request
-    self->compMsgRequest->startNextRequest(self);
-  } else {
-    // nothing to do the current request is different from the deleted one
-    // so just let the current one continue
+  if (requestIdx >= COMP_MSG_MAX_REQUESTS) {
+    return COMP_MSG_ERR_REQUEST_NOT_FOUND;
   }
+  self->compMsgRequest->startNextRequest(self);
   return COMP_MSG_ERR_OK;
 }
 
@@ -369,7 +272,7 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, voi
  * \return Error code or COMP_MSG_ERR_OK
  *
  */
-static uint8_t detectMsg(compMsgDispatcher_t *self, const uint8_t * buffer, int lgth, int queueIdx, bool *isComplete) {
+static uint8_t detectMsg(compMsgDispatcher_t *self, const uint8_t *buffer, int lgth, int queueIdx, bool *isComplete) {
   int idx;
   msgHeaderInfos_t *hdrInfos;
   headerPart_t *hdr;
@@ -381,32 +284,54 @@ static uint8_t detectMsg(compMsgDispatcher_t *self, const uint8_t * buffer, int 
   msgParts_t *received;
   int result;
 
-if (buffer == NULL) {
-  COMP_MSG_DBG(self, "I", 2, "++++detectMessage: buffer == NULL lgth: %d queueIdx: %d isComplete: %d", lgth, queueIdx, *isComplete);
-} else {
-  COMP_MSG_DBG(self, "I", 2, "++++detectMessage: 0x%02x lgth: %d queueIdx: %d isComplete: %d", buffer[0], lgth, queueIdx, *isComplete);
-}
+  if (buffer == NULL) {
+    COMP_MSG_DBG(self, "I", 2, "++++detectMessage: buffer == NULL lgth: %d queueIdx: %d isComplete: %d", lgth, queueIdx, *isComplete);
+  } else {
+    COMP_MSG_DBG(self, "I", 2, "++++detectMessage: 0x%02x lgth: %d queueIdx: %d isComplete: %d", buffer[0], lgth, queueIdx, *isComplete);
+  }
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
   msgRequestInfo = &msgRequestInfos->msgRequestInfo[queueIdx];
   hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
+//FIXME
+#ifdef NOTDEF
   received = &msgRequestInfo->received;
+#endif
 //FIXME need to free at end of message handling !!!
-  COMP_MSG_DBG(self, "I", 2, "detectMessage: !received->buf: %p!", received->buf);
-  COMP_MSG_DBG(self, "I", 2, "receivedLgth: %d lgth: %d headerLgth: %d!", received->lgth, lgth, hdrInfos->headerLgth);
+  COMP_MSG_DBG(self, "I", 2, "detectMessage: !msgRequestInfo->data: %p!", msgRequestInfo->data);
+  COMP_MSG_DBG(self, "I", 2, "msgRequestInfo->lgth: %d lgth: %d headerLgth: %d!", msgRequestInfo->lgth, lgth, hdrInfos->headerLgth);
+  // check for msgRequestInfo->data has enough free space
+  if (msgRequestInfo->currLgth < lgth) {
+    if (msgRequestInfo->requestType == COMP_MSG_INPUT_UART) {
+      if (msgRequestInfo->currLgth == 0) {
+        msgRequestInfo->currLgth = 255; // make uart input fast
+      } else {
+        msgRequestInfo->currLgth += 10;
+      }
+    } else {
+      msgRequestInfo->currLgth += lgth;
+    }
+    if (msgRequestInfo->data == NULL) {
+      msgRequestInfo->data = os_zalloc(msgRequestInfo->currLgth);
+      checkAllocOK(msgRequestInfo->data);
+    } else {
+      msgRequestInfo->data = os_realloc(msgRequestInfo->data, msgRequestInfo->currLgth);
+      checkAllocOK(msgRequestInfo->data);
+    }
+  }
   idx = 0;
   while (idx < lgth) {
-    received->buf[received->lgth++] = buffer[idx];
-    if (received->lgth == hdrInfos->headerLgth) {
-      COMP_MSG_DBG(self, "I", 2, "received lgth: %d lgth: %d idx: %d", received->lgth, lgth, idx);
-//compMsgData->compMsgDataView->dataView->dumpBinary(received->buf, received->lgth, "received->buf");
-      COMP_MSG_DBG(self, "I", 2, "msgRequestInfo->requestBufferIdx: %d", received->lgth);
+    msgRequestInfo->data[msgRequestInfo->currIdx++] = buffer[idx];
+    if (msgRequestInfo->currIdx == hdrInfos->headerLgth) {
+      COMP_MSG_DBG(self, "I", 2, "msgRequestInfo->currIdx: %d lgth: %d idx: %d", msgRequestInfo->currIdx, lgth, idx);
+//compMsgData->compMsgDataView->dataView->dumpBinary(msgRequestInfo->data, lgth, "received data");
+      COMP_MSG_DBG(self, "I", 2, "msgRequestInfo->currIdx: %d", msgRequestInfo->currIdx);
       result = self->compMsgIdentify->getHeaderIndexFromHeaderFields(self, received);
       COMP_MSG_DBG(self, "I", 2, "getHeaderIndexFromHeaderFields result: %d currPartIdx: %d", result, hdrInfos->currPartIdx);
       checkErrOK(result);
     }
     // loop until we have full message then decrypt if necessary and then handle the message
-    COMP_MSG_DBG(self, "I", 2, "totalLgth: %d idx: %d lgth: %d", received->lgth, idx, lgth);
-    if ((received->lgth == received->totalLgth) && (received->totalLgth > 0)) {
+    COMP_MSG_DBG(self, "I", 2, "totalLgth: %d idx: %d lgth: %d", msgRequestInfo->currIdx, idx, lgth);
+    if ((msgRequestInfo->currIdx == msgRequestInfo->totalLgth) && (msgRequestInfo->totalLgth > 0)) {
       *isComplete = true;
       return COMP_MSG_ERR_OK;
     }
@@ -439,13 +364,11 @@ static uint8_t compMsgRequestInit(compMsgDispatcher_t *self) {
   }
 
   compMsgRequest = self->compMsgRequest;
-  // request handling
   compMsgRequest->uartTimerResetRequest = &uartTimerResetRequest;
   compMsgRequest->resetRequest = &resetRequest;
   compMsgRequest->startRequest = &startRequest;
   compMsgRequest->startNextRequest = &startNextRequest;
-  compMsgRequest->addRequest = &addRequest;
-  compMsgRequest->addUartRequestData = &addUartRequestData;
+  compMsgRequest->addRequestData = &addRequestData;
   compMsgRequest->deleteRequest = &deleteRequest;
   compMsgRequest->detectMsg = &detectMsg;
   return COMP_MSG_ERR_OK;
@@ -463,5 +386,3 @@ compMsgRequest_t *newCompMsgRequest() {
   compMsgRequest->compMsgRequestInit = &compMsgRequestInit;
   return compMsgRequest;
 }
-
-

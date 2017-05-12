@@ -133,10 +133,12 @@
 #define COMP_MSG_WIFI_ClientIPAddrSize       31
 #define COMP_MSG_WIFI_ClientPortSize         32
 #define COMP_MSG_WIFI_ClientStatusSize       33
+#define COMP_MSG_WIFI_ClientSequenceNumSize  34
+#define COMP_MSG_WIFI_ClientSequenceNum      35
 
-#define COMP_MSG_WIFI_SSDPIPAddr             34
-#define COMP_MSG_WIFI_SSDPPort               35
-#define COMP_MSG_WIFI_SSDPStatus             36
+#define COMP_MSG_WIFI_SSDPIPAddr             36
+#define COMP_MSG_WIFI_SSDPPort               37
+#define COMP_MSG_WIFI_SSDPStatus             38
 
 #define WIFI_USE_SAVED_SEQUENCE_NUM          0x01
 

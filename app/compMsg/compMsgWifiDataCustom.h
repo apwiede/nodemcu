@@ -11,19 +11,17 @@
 #define COMP_MSG_WIFI_CloudlTenantId2         58
 #define COMP_MSG_WIFI_CloudNodeToken1         59
 #define COMP_MSG_WIFI_CloudNodeToken2         60
-#define COMP_MSG_WIFI_SequenceNumSize         61
-#define COMP_MSG_WIFI_ClientSequenceNum       62
 
-#define COMP_MSG_WIFI_ProdTestSsid            63
-#define COMP_MSG_WIFI_ProdTestPasswd          64
-#define COMP_MSG_WIFI_ProdTestSecurityType    65
-#define COMP_MSG_WIFI_ProdTestTargetProtocol  66
-#define COMP_MSG_WIFI_ProdTestIpAddress       67
-#define COMP_MSG_WIFI_ProdTestSubnet          68
-#define COMP_MSG_WIFI_ProdTestGateway         69
-#define COMP_MSG_WIFI_ProdTestDns             70
-#define COMP_MSG_WIFI_ProdTestPingAddress     71
-#define COMP_MSG_WIFI_ProdTestStatus          72
+#define COMP_MSG_WIFI_ProdTestSsid            61
+#define COMP_MSG_WIFI_ProdTestPasswd          62
+#define COMP_MSG_WIFI_ProdTestSecurityType    63
+#define COMP_MSG_WIFI_ProdTestTargetProtocol  64
+#define COMP_MSG_WIFI_ProdTestIpAddress       65
+#define COMP_MSG_WIFI_ProdTestSubnet          66
+#define COMP_MSG_WIFI_ProdTestGateway         67
+#define COMP_MSG_WIFI_ProdTestDns             68
+#define COMP_MSG_WIFI_ProdTestPingAddress     69
+#define COMP_MSG_WIFI_ProdTestStatus          70
 
   {"@getCloudPort",   COMP_MSG_WIFI_CloudPort},
   {"@getCloudHost1", COMP_MSG_WIFI_CloudHost1},
@@ -36,8 +34,6 @@
   {"@getCloudUrlTenantId2", COMP_MSG_WIFI_CloudlTenantId2},
   {"@getCloudNodeToken1", COMP_MSG_WIFI_CloudNodeToken1},
   {"@getCloudNodeToken2", COMP_MSG_WIFI_CloudNodeToken2},
-  {"@getSequenceNumSize", COMP_MSG_WIFI_SequenceNumSize},
-  {"@getClientSequenceNum", COMP_MSG_WIFI_ClientSequenceNum},
 
   {"@getProdTestSsid", COMP_MSG_WIFI_ProdTestSsid},
   {"@getProdTestPasswd", COMP_MSG_WIFI_ProdTestPasswd},

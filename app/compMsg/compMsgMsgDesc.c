@@ -369,6 +369,7 @@ static uint8_t handleMsgCommonLine(compMsgDispatcher_t *self) {
   // field lgth
   result = compMsgFile->getIntFieldValue(self, fieldLgth, &ep, 0, &lgth);
   checkErrOK(result);
+ets_printf("%s id: %d lgth: %d fieldLgth: %s\n", fieldName, fieldNameId, lgth, fieldLgth);
   fieldInfo.fieldLgth = (uint16_t)lgth;
 
   // field key/value id
@@ -415,6 +416,11 @@ static uint8_t handleMsgCommonLine(compMsgDispatcher_t *self) {
     checkErrOK(result);
     break;
   case COMP_MSG_DESC_KEY_VALUE_FIELD_GROUP:
+    fieldInfo.fieldFlags |= COMP_MSG_FIELD_KEY_VALUE;
+    result = compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
+    checkErrOK(result);
+    break;
+  case COMP_MSG_DESC_FIELD_GROUP:
     fieldInfo.fieldFlags |= COMP_MSG_FIELD_KEY_VALUE;
     result = compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
     checkErrOK(result);
@@ -497,11 +503,11 @@ static uint8_t handleMsgValuesLine(compMsgDispatcher_t *self) {
   char *ep;
   uint8_t *stringValue;
   int numericValue;
-  uint8_t *token;
-  uint8_t *value;
+  char *fieldName;
+  char *fieldVal;
   compMsgMsgDesc_t *compMsgMsgDesc;
   compMsgFile_t *compMsgFile;
-  dataValue_t dataValue;
+  fieldValue_t fieldValue;
   msgFieldGroupInfo_t *msgFieldGroupInfo;
   fieldInfo_t fieldInfo;
 
@@ -512,20 +518,20 @@ static uint8_t handleMsgValuesLine(compMsgDispatcher_t *self) {
   if (compMsgFile->numLineFields < 2) {
     return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
   }
-  c_memset(&dataValue, 0, sizeof(dataValue_t));
-  dataValue.fieldValueCallback = NULL;
-  dataValue.cmdKey = msgFieldGroupInfo->cmdKey;
+  c_memset(&fieldValue, 0, sizeof(fieldValue_t));
+  fieldValue.fieldValueCallback = NULL;
+  fieldValue.cmdKey = msgFieldGroupInfo->cmdKey;
  
   //field name
-  token = compMsgFile->lineFields[0];
-  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, token, &fieldNameId, COMP_MSG_INCR);
+  fieldName = compMsgFile->lineFields[0];
+  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, fieldName, &fieldNameId, COMP_MSG_INCR);
   checkErrOK(result);
   // get the fieldInfo for the name to eventually set fieldFlags or other info.
   result = self->compMsgTypesAndNames->getMsgFieldInfo(self, fieldNameId, &fieldInfo);
   checkErrOK(result);
 
   //field value
-  value = compMsgFile->lineFields[1];
+  fieldVal = compMsgFile->lineFields[1];
   stringValue = NULL;
   numericValue = 0;
   if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP) {
@@ -534,59 +540,67 @@ static uint8_t handleMsgValuesLine(compMsgDispatcher_t *self) {
   if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP) {
     fieldInfo.fieldFlags |= COMP_MSG_FIELD_MODULE_DATA;
   }
-  if (value[0] == '"') {
-    dataValue.flags |= COMP_MSG_FIELD_IS_STRING;
-    result = compMsgFile->getStringFieldValue(self, value, &stringValue);
+  result = self->compMsgTypesAndNames->getMsgFieldInfo(self, fieldNameId, &fieldInfo);
+  checkErrOK(result);
+  if (fieldVal[0] == '"') {
+    fieldValue.flags |= COMP_MSG_FIELD_IS_STRING;
+    result = compMsgFile->getStringFieldValue(self, fieldVal, &stringValue);
     checkErrOK(result);
-    dataValue.value.stringValue = stringValue;
-    result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, "uint8_t*", &fieldInfo.fieldTypeId);
-    checkErrOK(result);
-    fieldInfo.fieldLgth = c_strlen(stringValue);
-    result = self->compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
-    checkErrOK(result);
-  } else {
-    if (value[0] == '@') {
-      dataValue.flags |= COMP_MSG_FIELD_HAS_CALLBACK;
-      result = compMsgFile->getStringFieldValue(self, value, &stringValue);
-      checkErrOK(result);
-      dataValue.value.stringValue = stringValue;
+    fieldValue.dataValue.value.stringValue = stringValue;
+    if ((fieldInfo.fieldTypeId == 0) && (fieldInfo.fieldLgth == 0)) {
       result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, "uint8_t*", &fieldInfo.fieldTypeId);
       checkErrOK(result);
       fieldInfo.fieldLgth = c_strlen(stringValue);
       result = self->compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
       checkErrOK(result);
+    }
+  } else {
+    if (fieldVal[0] == '@') {
+      fieldValue.flags |= COMP_MSG_FIELD_HAS_CALLBACK;
+      result = compMsgFile->getStringFieldValue(self, fieldVal, &stringValue);
+      checkErrOK(result);
+      fieldValue.dataValue.value.stringValue = stringValue;
+      if ((fieldInfo.fieldTypeId == 0) && (fieldInfo.fieldLgth == 0)) {
+        result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, "uint8_t*", &fieldInfo.fieldTypeId);
+        checkErrOK(result);
+        fieldInfo.fieldLgth = c_strlen(stringValue);
+        result = self->compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
+        checkErrOK(result);
+      }
     } else {
-      dataValue.flags |= COMP_MSG_FIELD_IS_NUMERIC;
-      result = compMsgFile->getIntFieldValue(self, value, &ep, 0, &numericValue);
+      fieldValue.flags |= COMP_MSG_FIELD_IS_NUMERIC;
+      result = compMsgFile->getIntFieldValue(self, fieldVal, &ep, 0, &numericValue);
       checkErrOK(result);
-      dataValue.value.numericValue = numericValue;
-      result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, "uint32_t", &fieldInfo.fieldTypeId);
-      checkErrOK(result);
-      fieldInfo.fieldLgth = sizeof(uint32_t);
-      result = self->compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
-      checkErrOK(result);
+      fieldValue.dataValue.value.numericValue = numericValue;
+      if ((fieldInfo.fieldTypeId == 0) && (fieldInfo.fieldLgth == 0)) {
+        result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, "uint32_t", &fieldInfo.fieldTypeId);
+        checkErrOK(result);
+        fieldInfo.fieldLgth = sizeof(uint32_t);
+        result = self->compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
+        checkErrOK(result);
+      }
     }
   }
-  COMP_MSG_DBG(self, "E", 1, "handleMsgValuesLine: %s: id: %d val: %s %d cb: %s", token, fieldNameId, stringValue == NULL ? "nil" : (char *)stringValue, numericValue, dataValue.fieldValueCallback == NULL ? "nil" : (char *)dataValue.fieldValueCallback);
+  COMP_MSG_DBG(self, "E", 2, "handleMsgValuesLine: %s: id: %d val: %s %d cb: %s", fieldName, fieldNameId, stringValue == NULL ? "nil" : (char *)stringValue, numericValue, fieldValue.fieldValueCallback == NULL ? "nil" : (char *)fieldValue.fieldValueCallback);
   switch (msgFieldGroupInfo->fieldGroupId) {
   case COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP:
   case COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP:
-    result = self->compMsgDataValue->dataValueStr2ValueId(self, token, &fieldId);
+    result = self->compMsgDataValue->dataValueStr2ValueId(self, fieldName, &fieldId);
     checkErrOK(result);
-    dataValue.fieldNameId = 0;
-    dataValue.fieldValueId = fieldId;
-    result = self->compMsgDataValue->addDataValue(self, &dataValue);
+    fieldValue.fieldNameId = 0;
+    fieldValue.fieldValueId = fieldId;
+    result = self->compMsgDataValue->addFieldValueInfo(self, &fieldValue);
     checkErrOK(result);
     break;
   case COMP_MSG_VAL_FIELD_GROUP:
-    dataValue.fieldNameId = fieldNameId;
-    dataValue.fieldValueId = 0;
-    result = self->compMsgDataValue->addDataValue(self, &dataValue);
+    fieldValue.fieldNameId = fieldNameId;
+    fieldValue.fieldValueId = 0;
+    result = self->compMsgDataValue->addFieldValueInfo(self, &fieldValue);
     break;
   default:
     return COMP_MSG_ERR_BAD_DESC_FILE_FIELD_GROUP_TYPE;
   }
-//COMP_MSG_DBG(self, "E", 1, "handleMsgValuesLine: done");
+COMP_MSG_DBG(self, "E", 2, "handleMsgValuesLine: done");
   return result;
 }
 

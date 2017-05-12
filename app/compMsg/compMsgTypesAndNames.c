@@ -440,6 +440,7 @@ static uint8_t getMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo
 
 static uint8_t setMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo_t *fieldInfo) {
   uint8_t result;
+  uint8_t *fieldName;
   msgFieldInfos_t *msgFieldInfos;
   fieldInfo_t *entry;
 
@@ -469,7 +470,9 @@ static uint8_t setMsgFieldInfo(compMsgDispatcher_t *self, uint8_t idx, fieldInfo
     entry->keyValueDesc->keyLgth = fieldInfo->keyValueDesc->keyLgth;
     entry->keyValueDesc->keyNumValues = fieldInfo->keyValueDesc->keyNumValues;
   }
-  COMP_MSG_DBG(self, "E", 0, "setMsgFieldInfos: idx: %d fieldFlags: 0x%08x fieldType: %d fieldLgth: %d", idx, entry->fieldFlags, entry->fieldTypeId, entry->fieldLgth);
+  result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, idx, &fieldName);
+  checkErrOK(result);
+  COMP_MSG_DBG(self, "E", 0, "setMsgFieldInfo: %s idx: %d fieldFlags: 0x%08x fieldType: %d fieldLgth: %d", fieldName, idx, entry->fieldFlags, entry->fieldTypeId, entry->fieldLgth);
   return result;
 }
 

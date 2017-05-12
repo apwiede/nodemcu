@@ -54,13 +54,19 @@
 #define COMP_MSG_MAX_REQUEST_LGTH 255
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
+typedef struct socketUserData socketUserData_t;
 
 typedef struct msgRequestInfo {
   uint8_t requestType;
-  void *requestHandle;
-  compMsgData_t *requestData;
+  socketUserData_t *sud;
   compMsgDispatcher_t *requestDispatcher;
-  msgParts_t received;
+  uint8_t *data;
+  uint16_t lgth;
+  uint16_t currLgth;
+  uint16_t currIdx;
+  uint16_t totalLgth;
+  bool isComplete;
+  uint32_t IPAddr;
 } msgRequestInfo_t;
 
 typedef struct msgRequestInfos {
@@ -73,9 +79,8 @@ typedef uint8_t (* uartTimerResetRequest_t)(void *compMsgTimerSlot);
 typedef uint8_t (* resetRequest_t)(compMsgDispatcher_t *self, int slot);
 typedef uint8_t (* startRequest_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startNextRequest_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* addUartRequestData_t)(compMsgDispatcher_t *self, uint8_t *data, size_t lgth);
-typedef uint8_t (* addRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle, compMsgData_t *requestData);
-typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, void *requestHandle);
+typedef uint8_t (* addRequestData_t)(compMsgDispatcher_t *self, uint8_t requestType, socketUserData_t *sud, uint8_t *data, uint16_t lgth);
+typedef uint8_t (* deleteRequest_t)(compMsgDispatcher_t *self, uint8_t requestType, socketUserData_t *sud);
 typedef uint8_t (* detectMsg_t)(compMsgDispatcher_t *self, const uint8_t * buffer, int lgth, int queueIdx, bool *isComplete);
 typedef uint8_t (* compMsgRequestInit_t)(compMsgDispatcher_t *self);
 
@@ -87,8 +92,7 @@ typedef struct compMsgRequest {
   resetRequest_t resetRequest;
   startRequest_t startRequest;
   startNextRequest_t startNextRequest;
-  addUartRequestData_t addUartRequestData;
-  addRequest_t addRequest;
+  addRequestData_t addRequestData;
   deleteRequest_t deleteRequest;
   detectMsg_t detectMsg;
   compMsgRequestInit_t compMsgRequestInit;

@@ -115,6 +115,7 @@ static uint8_t addDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
   dataValue_t *myDataValue;
 
   result = COMP_MSG_ERR_OK;
+#ifdef NOTDEF
   compMsgDataValue = self->compMsgDataValue;
   if (compMsgDataValue->numDataValues >= compMsgDataValue->maxDataValues) {
     if (compMsgDataValue->maxDataValues == 0) {
@@ -130,6 +131,8 @@ static uint8_t addDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
   myDataValue = &compMsgDataValue->dataValues[compMsgDataValue->numDataValues];
 //COMP_MSG_DBG(self, "E", 1, "addDataValue numDataValues %d", compMsgDataValue->numDataValues);
   memset(myDataValue, 0, sizeof(dataValue_t));
+#endif
+#ifdef NOTDEF
   myDataValue->cmdKey = dataValue->cmdKey;
   myDataValue->fieldValueId = dataValue->fieldValueId;
   myDataValue->fieldNameId = dataValue->fieldNameId;
@@ -146,6 +149,7 @@ static uint8_t addDataValue(compMsgDispatcher_t *self, dataValue_t *dataValue) {
     myDataValue->flags |= COMP_MSG_FIELD_HAS_CALLBACK;
     myDataValue->fieldValueCallback = dataValue->fieldValueCallback;
   }
+#endif
   compMsgDataValue->numDataValues++;
   return result;
 }
@@ -160,6 +164,7 @@ static uint8_t setDataVal(compMsgDispatcher_t *self, dataValue_t *dataValue) {
 
   result = COMP_MSG_ERR_OK;
   compMsgDataValue = self->compMsgDataValue;
+#ifdef NOTDEF
   idx = 0;
   while (idx < compMsgDataValue->numDataValues) {
     myDataValue = &compMsgDataValue->dataValues[idx];
@@ -186,6 +191,7 @@ static uint8_t setDataVal(compMsgDispatcher_t *self, dataValue_t *dataValue) {
     }
     idx++;
   }
+#endif
   return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
 }
 
@@ -207,6 +213,7 @@ static uint8_t getDataVal(compMsgDispatcher_t *self, dataValue_t *dataValue, uin
 //COMP_MSG_DBG(self, "E", 1, "getDataVal: %p %d %d 0x%04x", dataValue, dataValue->fieldValueId, dataValue->fieldNameId, dataValue->cmdKey);
   result = COMP_MSG_ERR_OK;
   compMsgDataValue = self->compMsgDataValue;
+#ifdef NOTDEF
   dataValue->flags = 0;
   dataValue->value.stringValue = NULL;
   dataValue->fieldValueCallback = NULL;
@@ -232,6 +239,135 @@ static uint8_t getDataVal(compMsgDispatcher_t *self, dataValue_t *dataValue, uin
     idx++;
   }
   COMP_MSG_DBG(self, "E", 1, "getDataVal: DATA_VALUE_FIELD_NOT_FOUND: %d %d 0x%04x", dataValue->fieldValueId, dataValue->fieldNameId, dataValue->cmdKey);
+#endif
+  return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
+}
+
+// ================================= addFieldValueInfo ====================================
+
+static uint8_t addFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldValue) {
+  uint8_t result;
+  compMsgDataValue_t *compMsgDataValue;
+  fieldValue_t *myFieldValue;
+
+  result = COMP_MSG_ERR_OK;
+  compMsgDataValue = self->compMsgDataValue;
+  if (compMsgDataValue->numDataValues >= compMsgDataValue->maxDataValues) {
+    if (compMsgDataValue->maxDataValues == 0) {
+      compMsgDataValue->maxDataValues = 5;
+      compMsgDataValue->fieldValues = (fieldValue_t *)os_zalloc((compMsgDataValue->maxDataValues * sizeof(fieldValue_t)));
+      checkAllocOK(compMsgDataValue->fieldValues);
+    } else {
+      compMsgDataValue->maxDataValues += 2;
+      compMsgDataValue->fieldValues = (fieldValue_t *)os_realloc((compMsgDataValue->fieldValues), (compMsgDataValue->maxDataValues * sizeof(fieldValue_t)));
+      checkAllocOK(compMsgDataValue->fieldValues);
+    }
+  }
+  myFieldValue = &compMsgDataValue->fieldValues[compMsgDataValue->numDataValues];
+//COMP_MSG_DBG(self, "E", 1, "addFieldValueInfo numFieldValueInfos %d", compMsgDataValue->numDataValues);
+  memset(myFieldValue, 0, sizeof(fieldValue_t));
+  myFieldValue->cmdKey = fieldValue->cmdKey;
+  myFieldValue->fieldValueId = fieldValue->fieldValueId;
+  myFieldValue->fieldNameId = fieldValue->fieldNameId;
+  myFieldValue->flags = 0;
+  if (fieldValue->flags & COMP_MSG_FIELD_IS_NUMERIC) {
+    myFieldValue->flags |= COMP_MSG_FIELD_IS_NUMERIC;
+    myFieldValue->dataValue.value.numericValue = fieldValue->dataValue.value.numericValue;
+  } else {
+    myFieldValue->flags |= COMP_MSG_FIELD_IS_STRING;
+    myFieldValue->dataValue.value.stringValue = os_zalloc(c_strlen(fieldValue->dataValue.value.stringValue) + 1);
+    c_memcpy(myFieldValue->dataValue.value.stringValue, fieldValue->dataValue.value.stringValue, c_strlen(fieldValue->dataValue.value.stringValue));
+  }
+  if (fieldValue->fieldValueCallback != NULL) {
+    myFieldValue->flags |= COMP_MSG_FIELD_HAS_CALLBACK;
+    myFieldValue->fieldValueCallback = fieldValue->fieldValueCallback;
+  }
+  compMsgDataValue->numDataValues++;
+  return result;
+}
+
+// ================================= setFieldValueInfo ====================================
+
+static uint8_t setFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldValue) {
+  uint8_t result;
+  int idx;
+  compMsgDataValue_t *compMsgDataValue;
+  fieldValue_t *myFieldValue;
+
+  result = COMP_MSG_ERR_OK;
+  compMsgDataValue = self->compMsgDataValue;
+  idx = 0;
+  while (idx < compMsgDataValue->numDataValues) {
+    myFieldValue = &compMsgDataValue->fieldValues[idx];
+    if ((myFieldValue->fieldValueId == fieldValue->fieldValueId) &&
+        (myFieldValue->fieldNameId == fieldValue->fieldNameId) &&
+        (myFieldValue->cmdKey == fieldValue->cmdKey)) {
+      if ((myFieldValue->flags & COMP_MSG_FIELD_IS_STRING) && (myFieldValue->dataValue.value.stringValue != NULL)) {
+        os_free(myFieldValue->dataValue.value.stringValue);
+      }
+      myFieldValue->flags = 0;
+      if (fieldValue->flags & COMP_MSG_FIELD_IS_NUMERIC) {
+        myFieldValue->flags |= COMP_MSG_FIELD_IS_NUMERIC;
+        myFieldValue->dataValue.value.numericValue = fieldValue->dataValue.value.numericValue;
+      } else {
+        myFieldValue->flags |= COMP_MSG_FIELD_IS_STRING;
+        myFieldValue->dataValue.value.stringValue = os_zalloc(c_strlen(fieldValue->dataValue.value.stringValue) + 1);
+        c_memcpy(myFieldValue->dataValue.value.stringValue, fieldValue->dataValue.value.stringValue, c_strlen(fieldValue->dataValue.value.stringValue));
+      }
+      if (fieldValue->fieldValueCallback != NULL) {
+        myFieldValue->flags |= COMP_MSG_FIELD_HAS_CALLBACK;
+        myFieldValue->fieldValueCallback = fieldValue->fieldValueCallback;
+      }
+      return result;
+    }
+    idx++;
+  }
+  return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
+}
+
+// ================================= getFieldValueInfo ====================================
+
+/**
+ * \brief get value from data area
+ * \param self The dispatcher struct
+ * \param fieldValueInfo Data value struct pointer for passing values in and out
+ * \return Error code or ErrorOK
+ *
+ */
+static uint8_t getFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldValue, uint8_t **valueStr) {
+  uint8_t result;
+  compMsgDataValue_t *compMsgDataValue;
+  fieldValue_t *myFieldValue;
+  int idx;
+
+//COMP_MSG_DBG(self, "E", 1, "getFieldValueInfo: %p %d %d 0x%04x", fieldValue, fieldValue->fieldValueId, fieldValue->fieldNameId, fieldValue->cmdKey);
+  result = COMP_MSG_ERR_OK;
+  compMsgDataValue = self->compMsgDataValue;
+  fieldValue->flags = 0;
+  fieldValue->dataValue.value.stringValue = NULL;
+  fieldValue->fieldValueCallback = NULL;
+  idx = 0;
+  while (idx < compMsgDataValue->numDataValues) {
+    myFieldValue = &compMsgDataValue->fieldValues[idx];
+    if ((myFieldValue->fieldValueId == fieldValue->fieldValueId) &&
+        (myFieldValue->fieldNameId == fieldValue->fieldNameId) &&
+        (myFieldValue->cmdKey == fieldValue->cmdKey)) {
+      *valueStr = NULL;
+      result = compMsgDataValue->dataValueId2ValueStr(self, fieldValue->fieldValueId, valueStr);
+      checkErrOK(result);
+      fieldValue->flags = myFieldValue->flags;
+      if (myFieldValue->flags & COMP_MSG_FIELD_IS_STRING) {
+        fieldValue->dataValue.value.stringValue = myFieldValue->dataValue.value.stringValue;
+      }
+      if (myFieldValue->flags & COMP_MSG_FIELD_IS_NUMERIC) {
+        fieldValue->dataValue.value.numericValue = myFieldValue->dataValue.value.numericValue;
+      }
+      fieldValue->fieldValueCallback = myFieldValue->fieldValueCallback;
+      return result;
+    }
+    idx++;
+  }
+  COMP_MSG_DBG(self, "E", 1, "getFieldValueInfo: DATA_VALUE_FIELD_NOT_FOUND: %d %d 0x%04x", fieldValue->fieldValueId, fieldValue->fieldNameId, fieldValue->cmdKey);
   return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
 }
 
@@ -390,8 +526,8 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldVal
     checkAllocOK(msgFieldValues->fieldValues[idx]);
     entry = msgFieldValues->fieldValues[idx];
   }
-  entry->fieldValueFlags = fieldValue->fieldValueFlags;
-  COMP_MSG_DBG(self, "E", 0, "setMsgFieldValues: idx: %d fieldValueFlags: 0x%08x", idx, entry->fieldValueFlags);
+  entry->flags = fieldValue->flags;
+  COMP_MSG_DBG(self, "E", 0, "setMsgFieldValues: idx: %d fieldValueFlags: 0x%08x", idx, entry->flags);
   return result;
 }
 
@@ -413,7 +549,7 @@ static uint8_t getMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldVal
     checkAllocOK(msgFieldValues->fieldValues[idx]);
     entry = msgFieldValues->fieldValues[idx];
   }
-  fieldValue->fieldValueFlags = entry->fieldValueFlags;
+  fieldValue->flags = entry->flags;
   fieldValue->dataValue = entry->dataValue;
   return result;
 }
@@ -430,6 +566,9 @@ static uint8_t compMsgDataValueInit(compMsgDispatcher_t *self) {
   compMsgDataValue->addDataValue = &addDataValue;
   compMsgDataValue->setDataVal = &setDataVal;
   compMsgDataValue->getDataVal = &getDataVal;
+  compMsgDataValue->addFieldValueInfo = &addFieldValueInfo;
+  compMsgDataValue->setFieldValueInfo = &setFieldValueInfo;
+  compMsgDataValue->getFieldValueInfo = &getFieldValueInfo;
   compMsgDataValue->dumpMsgFieldValues = &dumpMsgFieldValues;
   compMsgDataValue->addMsgFieldValues = &addMsgFieldValues;
   compMsgDataValue->getMsgFieldValue = &getMsgFieldValue;

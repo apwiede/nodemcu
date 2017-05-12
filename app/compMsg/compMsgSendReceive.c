@@ -118,7 +118,7 @@ static uint8_t uartReceiveCb(compMsgDispatcher_t *self, const uint8_t *buffer, s
     lgth = 1;
     myBuffer = buf;
   }
-  result =self->compMsgRequest->addUartRequestData(self, (uint8_t *)myBuffer, lgth);
+  result =self->compMsgRequest->addRequestData(self, COMP_MSG_INPUT_UART, NULL, (uint8_t *)myBuffer, lgth);
 if (result != COMP_MSG_ERR_OK) {
   COMP_MSG_DBG(self, "s", 1, "uartReceiveCb end result: %d", result);
 }
@@ -472,7 +472,7 @@ uint8_t compMsgSendReceiveInit(compMsgDispatcher_t *self) {
   self->compMsgData->receivedData = NULL;
   self->compMsgData->receivedLgth = 0;
   self->compMsgData->direction = COMP_MSG_RECEIVED_DATA;
-  result = self->compMsgRequest->addRequest(self, COMP_MSG_INPUT_UART, NULL, self->compMsgData);
+  result = self->compMsgRequest->addRequestData(self, COMP_MSG_INPUT_UART, NULL, "", 0);
 
   compMsgSendReceive = self->compMsgSendReceive;
   compMsgSendReceive->startSendMsg = NULL;

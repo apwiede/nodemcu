@@ -48,7 +48,7 @@
  *                                        before building this message
  *   @<special field name>,<type>,<lgth>[,<R/W>[,@<field size callback>[,<runAction>]]]
                                           special fields
- *   @#<key/value field name>,<type>,<lgth>,[<R/W>[,@<field size callback>][,@<runAction>]
+ *   @#<key/value field name>,<type>,<lgth>,[<R/W>[,@<field size callback>[,@<runAction>]]]
  *                                        (see key/value fields description)
  *   <field name>,<type>,<lgth>[,<R/W>[,@<field size callback>[,@<runAction>]]]
                                           normal fields
