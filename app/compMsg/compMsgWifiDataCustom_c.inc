@@ -195,10 +195,6 @@ static uint8_t customInit(compMsgDispatcher_t *self) {
   checkErrOK(result);
   result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_CloudNodeToken2, &getCloudNodeToken2);
   checkErrOK(result);
-  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_SequenceNumSize, &getSequenceNumSize);
-  checkErrOK(result);
-  result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ClientSequenceNum, &getClientSequenceNum);
-  checkErrOK(result);
 
   result = compMsgUtil->addFieldValueCallbackId(self, COMP_MSG_WIFI_ProdTestSsid, &getProdTestSsid);
   checkErrOK(result);

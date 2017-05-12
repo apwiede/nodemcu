@@ -82,15 +82,15 @@ static uint8_t getPasswdC(compMsgDispatcher_t *self, int *numericValue, uint8_t 
 
 static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
   int result;
-  dataValue_t dataValue;
+  fieldValue_t fieldValue;
 
-  dataValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  dataValue.value.numericValue = self->dispatcherCommon->operatingMode;
-  dataValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  dataValue.fieldNameId = 0;
-  dataValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_operatingMode;
-  dataValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->setDataVal(self, &dataValue);
+  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  fieldValue.dataValue.value.numericValue = self->dispatcherCommon->operatingMode;
+  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
+  fieldValue.fieldNameId = 0;
+  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_operatingMode;
+  fieldValue.fieldValueCallback = NULL;
+  result = self->compMsgDataValue->setFieldValueInfo(self, &fieldValue);
   return COMP_MSG_ERR_OK;
 }
 
