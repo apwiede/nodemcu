@@ -32,16 +32,16 @@
 # ==========================================================================
 
 set ::COMP_MSG_ERR [dict create]
-dict set ::COMP_MSG_ERR OK                        0
-dict set ::COMP_MSG_ERR VALUE_NOT_SET                  255
-dict set ::COMP_MSG_ERR VALUE_OUT_OF_RANGE             254
-dict set ::COMP_MSG_ERR BAD_VALUE                      253
-dict set ::COMP_MSG_ERR BAD_FIELD_TYPE                 252
-dict set ::COMP_MSG_ERR FIELD_TYPE_NOT_FOUND           251
-dict set ::COMP_MSG_ERR VALUE_TOO_BIG                  250
-dict set ::COMP_MSG_ERR OUT_OF_MEMORY                  249
-dict set ::COMP_MSG_ERR OUT_OF_RANGE                   248
-dict set ::COMP_MSG_ERR FILE_NAME_TOKEN_NOT_FOUND      247
+dict set ::COMP_MSG_ERR OK                               0
+dict set ::COMP_MSG_ERR VALUE_NOT_SET                    255
+dict set ::COMP_MSG_ERR VALUE_OUT_OF_RANGE               254
+dict set ::COMP_MSG_ERR BAD_VALUE                        253
+dict set ::COMP_MSG_ERR BAD_FIELD_TYPE                   252
+dict set ::COMP_MSG_ERR FIELD_TYPE_NOT_FOUND             251
+dict set ::COMP_MSG_ERR VALUE_TOO_BIG                    250
+dict set ::COMP_MSG_ERR OUT_OF_MEMORY                    249
+dict set ::COMP_MSG_ERR OUT_OF_RANGE                     248
+dict set ::COMP_MSG_ERR FILE_NAME_TOKEN_NOT_FOUND        247
   # be carefull the values up to here
   # must correspond to the values in dataView.h !!!
   # with the names like DATA_VIEW_ERR *
@@ -142,6 +142,8 @@ dict set ::COMP_MSG_ERR CALLBACK_NAME_NOT_FOUND          125
 dict set ::COMP_MSG_ERR DATA_VALUE_FIELD_NOT_FOUND       124
 
 dict set ::COMP_MSG_ERR CANNOT_CONNECT                   99
+
+set ::COMP_MSG_ERR_OK 0
 
 # ================================ checkErrOK ===============================
 

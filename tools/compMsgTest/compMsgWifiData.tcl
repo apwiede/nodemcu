@@ -168,7 +168,7 @@ namespace eval compMsg {
       if {arg == NULL} {
         return
       }
-      if {status != COMP_DISP_ERR_OK} {
+      if {status != COMP_MSG_ERR_OK} {
         return
       }
       if {bssScanRunning == false} {
@@ -324,7 +324,7 @@ namespace eval compMsg {
         break
       case  BSS_INFO_SSID:
         self->buildMsgInfos.stringValue = scanInfo->ssid
-        return COMP_DISP_ERR_OK
+        return COMP_MSG_ERR_OK
         break
       case  BSS_INFO_SSID_LEN:
         break
@@ -332,7 +332,7 @@ namespace eval compMsg {
         break
       case  BSS_INFO_RSSI:
         self->buildMsgInfos.numericValue = scanInfo->rssi
-        return COMP_DISP_ERR_OK
+        return COMP_MSG_ERR_OK
         break
       case  BSS_INFO_AUTH_MODE:
         break

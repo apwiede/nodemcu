@@ -103,7 +103,7 @@ puts stderr "==fixOffsetsForKeyValues!"
         if {$callback ne [list]} {
           # the key name must have the prefix: "#key_"!
           if {[string range $fieldNameStr 0 0] ne "#"} {
-            checkErrOK $::COMP_DISP_ERR_FIELD_NOT_FOUND
+            checkErrOK $::COMP_MSG_ERR_FIELD_NOT_FOUND
           }
           # that is the callback to eventually get the size of the key/value field
           set callback [string range $callback 1 end] ; # strip off '@' character
@@ -154,7 +154,7 @@ puts stderr "fieldLgth2: [dict get $fieldInfo fieldLgth]!"
         incr msgDescPartIdx
         incr fieldIdx
       }
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= setMsgFieldValue ====================================
@@ -210,7 +210,7 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
         checkErrOK $result
       }
 #puts stderr "setMsgFieldValue: done\n"
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= setMsgValues ====================================
@@ -271,7 +271,7 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
       checkErrOK $result
 #puts stderr "setMsgValues end"
 #::compMsg compMsgData dumpMsg compMsgDispatcher
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
 
     # ================================= buildMsg ====================================

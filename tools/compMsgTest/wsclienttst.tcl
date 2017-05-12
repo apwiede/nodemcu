@@ -415,6 +415,7 @@ puts stderr "statusVal: [string length $statusVal] $statusVal"
 
 proc getAPInfos { sock } {
   puts stderr "[::websocket::conninfo $sock type] from [::websocket::conninfo $sock sockname] to [::websocket::conninfo $sock peername]"
+pdict [dict get $::compMsgDispatcher compMsgMsgDesc]
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 AD hdr]
   checkErrOK $result
 #puts stderr "===after getHeaderFromUniqueFields"

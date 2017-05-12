@@ -69,7 +69,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
       compMsgDispatcher websocketRunClientMode{cmdisp, mode};
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= runAPMode ====================================
@@ -78,7 +78,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
       compMsgDispatcher websocketRunAPMode{cmdisp};
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= runLightSleepWakeupMode ====================================
@@ -86,7 +86,7 @@ namespace eval compMsg {
     proc runLightSleepWakeupMode {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= runLightSleepNoWakeupMode ====================================
@@ -94,7 +94,7 @@ namespace eval compMsg {
     proc runLightSleepNoWakeupMode {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= runWpsMode ====================================
@@ -102,7 +102,7 @@ namespace eval compMsg {
     proc runWpsMode {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= runModulTestMode ====================================
@@ -110,7 +110,7 @@ namespace eval compMsg {
     proc runModulTestMode {compMsgDispatcherBVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= runDeletePasswdCMode ====================================
@@ -119,7 +119,7 @@ namespace eval compMsg {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
 puts stderr "runDeletePasswdC"
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= getAPList ====================================
@@ -129,7 +129,7 @@ puts stderr "runDeletePasswdC"
     
       set result [::compMsg compMsgDispatcher getBssScanInfo{cmdisp};
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= getTableValue ====================================
@@ -139,7 +139,7 @@ puts stderr "runDeletePasswdC"
     
       set result [::compMsg compMsgDispatcher getModuleTableFieldValue{cmdisp, MODULE_INFO_AP_LIST_CALL_BACK};
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= getWifiKeyValueInfos ====================================
@@ -149,7 +149,7 @@ puts stderr "runDeletePasswdC"
     
       set result [::compMsg compMsgDispatcher getWifiKeyValueInfo{cmdisp};
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= getWifiKeyValues ====================================
@@ -159,7 +159,7 @@ puts stderr "runDeletePasswdC"
     
       set result [::compMsg compMsgDispatcher getWifiKeyValue{cmdisp};
       checkErrOK $result
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= getActionMode ====================================
@@ -173,12 +173,12 @@ puts stderr "runDeletePasswdC"
         if {c_strcmp{actionEntry->actionName, actionName} == 0} {
           *actionMode = actionEntry->mode
     ets_printf{"actionMode: %d\n", *actionMode}
-          return $::COMP_DISP_ERR_OK
+          return $::COMP_MSG_ERR_OK
         }
         idx++;
         actionEntry = &actionName2Actions[idx]
       }
-      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+      checkErrOK $::COMP_MSG_ERR_ACTION_NAME_NOT_FOUND
     }
     
     # ================================= getActionCallback ====================================
@@ -191,12 +191,12 @@ puts stderr "runDeletePasswdC"
       while {actionEntry->actionName != NULL} { 
         if {c_strcmp{actionEntry->actionName, actionName} == 0} {
           *callback = actionEntry->action;
-          return $::COMP_DISP_ERR_OK;
+          return $::COMP_MSG_ERR_OK;
         }
         idx++;
         actionEntry = &actionName2Actions[idx];
       }
-      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND;
+      checkErrOK $::COMP_MSG_ERR_ACTION_NAME_NOT_FOUND;
     }
     
     # ================================= getActionCallbackName ====================================
@@ -210,7 +210,7 @@ puts stderr "runDeletePasswdC"
       } else {
         set actionName $callback
       }
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= setActionEntry ====================================
@@ -229,20 +229,20 @@ if {0} {
         if {c_strcmp{actionEntry->actionName, actionName} == 0} {
           compMsgActionEntries.actionEntries[compMsgActionEntries.numActionEntries] = actionEntry
           if {actionEntry->mode != 0} {
-            checkErrOK $::COMP_DISP_ERR_DUPLICATE_ENTRY
+            checkErrOK $::COMP_MSG_ERR_DUPLICATE_ENTRY
           }
           actionEntry->mode = mode
           actionEntry->u8CmdKey = u8CmdKey
           actionEntry->u16CmdKey = u16CmdKey
           compMsgActionEntries.numActionEntries++
-          return $::COMP_DISP_ERR_OK
+          return $::COMP_MSG_ERR_OK
         }
         incr idx
         actionEntry = &actionName2Actions[idx]
       }
-      return $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+      return $::COMP_MSG_ERR_ACTION_NAME_NOT_FOUND
 }
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
     
     # ================================= runAction ====================================
@@ -264,12 +264,12 @@ if {0} {
     ets_printf{"runAction!%s!%d!", actionEntry->actionName, actionEntry->mode};
             set result [::compMsg actionEntry->action{compMsgDispatcher};
             checkErrOK{result};
-            return $::COMP_DISP_ERR_OK
+            return $::COMP_MSG_ERR_OK
           }
           idx++;
           actionEntry = &actionName2Actions[idx];
         }
-        checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+        checkErrOK $::COMP_MSG_ERR_ACTION_NAME_NOT_FOUND
       } else {
     #ets_printf{"runAction u16!%c%c!%c!\n", {received->u16CmdKey>>8}&0xFF, received->u16CmdKey&0xFF, *answerType};
         dataView = compMsgDispatcher compMsgDataView->dataView;
@@ -285,16 +285,16 @@ if {0} {
     ets_printf{"runAction!%s!%d!", actionEntry->actionName, actionEntry->mode};
               set result [::compMsg actionEntry->action{compMsgDispatcher};
               checkErrOK{result};
-              return $::COMP_DISP_ERR_OK
+              return $::COMP_MSG_ERR_OK
             }
             idx++;
             actionEntry = &actionName2Actions[idx];
           }
-          checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+          checkErrOK $::COMP_MSG_ERR_ACTION_NAME_NOT_FOUND
           break;
         }
       }
-      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+      checkErrOK $::COMP_MSG_ERR_ACTION_NAME_NOT_FOUND
     }
     
     # ================================= fillMsgValue ====================================
@@ -310,12 +310,12 @@ if {0} {
         if {c_strcmp{actionEntry->actionName, callbackName} == 0} {
           set result [::compMsg actionEntry->action{compMsgDispatcher};
           checkErrOK{result};
-          return $::COMP_DISP_ERR_OK
+          return $::COMP_MSG_ERR_OK
         }
         idx++;
         actionEntry = &actionName2Actions[idx];
       }
-      checkErrOK $::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND
+      checkErrOK $::COMP_MSG_ERR_ACTION_NAME_NOT_FOUND
     }
     
     # ================================= compMsgActionInit ====================================
@@ -335,7 +335,7 @@ if {0} {
       dict set compMsgActions maxActions 10
       dict set compMsgActions actions [list]
     
-      return $::COMP_DISP_ERR_OK
+      return $::COMP_MSG_ERR_OK
     }
 
   } ; # namespace compMsgAction

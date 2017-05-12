@@ -61,47 +61,6 @@
 
 set ::DISP_HANDLE_PREFIX "stmsgdisp_"
 
-set ::COMP_DISP_ERR_OK                    0
-set ::COMP_DISP_ERR_VALUE_NOT_SET         255
-set ::COMP_DISP_ERR_VALUE_OUT_OF_RANGE    254
-set ::COMP_DISP_ERR_BAD_VALUE             253
-set ::COMP_DISP_ERR_BAD_FIELD_TYPE        252
-set ::COMP_DISP_ERR_FIELD_TYPE_NOT_FOUND  251
-set ::COMP_DISP_ERR_VALUE_TOO_BIG         250
-set ::COMP_DISP_ERR_OUT_OF_MEMORY         249
-set ::COMP_DISP_ERR_OUT_OF_RANGE          248
-  # be carefull the values up to here
-  # must correspond to the values in dataView.tcl !!!
-  # with the names like DATA_VIEW_ERR_*
-
-set ::COMP_DISP_ERR_FIELD_NOT_FOUND       230
-set ::COMP_DISP_ERR_HANDLE_NOT_FOUND      227
-  # be carefull the values up to here
-  # must correspond to the values in compMsgDataView.tcl !!!
-  # with the names like COMP_MSG_ERR_*
-
-  # be carefull the values 189-180
-  # must correspond to the values in compMsgMsgDesc.tcl !!!
-  # with the names like COMP_DESC_ERR_*
-
-set ::COMP_DISP_ERR_BAD_RECEIVED_LGTH     179
-set ::COMP_DISP_ERR_BAD_FILE_CONTENTS     178
-set ::COMP_DISP_ERR_HEADER_NOT_FOUND      177
-set ::COMP_DISP_ERR_DUPLICATE_FIELD       176
-set ::COMP_DISP_ERR_BAD_FIELD_NAME        175
-set ::COMP_DISP_ERR_BAD_HANDLE_TYPE       174
-set ::COMP_DISP_ERR_INVALID_BASE64_STRING 173
-set ::COMP_DISP_ERR_TOO_FEW_FILE_LINES    172
-set ::COMP_DISP_ERR_ACTION_NAME_NOT_FOUND 171
-set ::COMP_DISP_ERR_DUPLICATE_ENTRY       170
-set ::COMP_DISP_ERR_NO_WEBSOCKET_OPENED   169
-set ::COMP_DISP_ERR_TOO_MANY_REQUESTS     168
-set ::COMP_DISP_ERR_REQUEST_NOT_FOUND     167
-set ::COMP_DISP_ERR_UART_REQUEST_NOT_SET  166
-set ::COMP_DISP_ERR_FUNNY_HANDLE_TYPE     165
-set ::COMP_DISP_ERR_FIELD_VALUE_CALLBACK_NOT_FOUND 164
-set ::COMP_DISP_ERR_BAD_MODULE_VALUE_WHICH 163
-
 namespace eval compMsg {
   namespace ensemble create
 
@@ -514,8 +473,8 @@ puts stderr "compMsgDispatcher3 setData"
     proc compMsgDispatcherGetPtrFromHandle {handle} {
       variablle compMsgDispatcher
     
-      if {checkHandle(handle, compMsgDispatcher} != COMP_DISP_ERR_OK) {
-        return COMP_DISP_ERR_HANDLE_NOT_FOUND;
+      if {checkHandle(handle, compMsgDispatcher} != COMP_MSG_ERR_OK) {
+        return COMP_MSG_ERR_HANDLE_NOT_FOUND;
       }
       return [checkErrOK OK]
     }
@@ -529,12 +488,14 @@ puts stderr "compMsgDispatcher3 setData"
       return [checkErrOK OK]
     }
 
-    # ================================= initDispatcher ====================================
+    # ================================= initDispatcher ===============================
     
     proc initDispatcher {comMsgDispatcherVar} {
       upvar $comMsgDispatcherVar compMsgDispatcher
 
 puts stderr "initDispatcher!$comMsgDispatcherVar!"
+      set result [::compMsg compMsgTypesAndNames compMsgTypesAndNamesInit compMsgDispatcher]
+      checkErrOK $result
       set result [::compMsg compMsgDataValue compMsgDataValueInit compMsgDispatcher]
       checkErrOK $result
       set result [::compMsg compMsgMsgDesc compMsgMsgDescInit compMsgDispatcher MsgFiles.txt]
@@ -561,7 +522,7 @@ puts stderr "initDispatcher!$comMsgDispatcherVar!"
       dict incr compMsgDispatcher id 1
       dict set compMsgDispatcher handle "${::DISP_HANDLE_PREFIX}efff00[format %02d [dict get $compMsgDispatcher id]]"
       set result [addHandle [dict get $compMsgDispatcher handle]]
-      if {$result != $::COMP_DISP_ERR_OK} {
+      if {$result != $::COMP_MSG_ERR_OK} {
 #        deleteHandle(self->handle)
         return $result;
       }
