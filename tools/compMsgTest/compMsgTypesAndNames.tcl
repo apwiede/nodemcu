@@ -37,64 +37,6 @@ set ::COMP_MSG_NO_INCR 0
 set ::COMP_MSG_INCR    1
 set ::COMP_MSG_DECR    -1
 
-set ::COMP_MSG_SPEC_FIELD_SRC                       255
-set ::COMP_MSG_SPEC_FIELD_GRP                       254
-set ::COMP_MSG_SPEC_FIELD_DST                       253
-set ::COMP_MSG_SPEC_FIELD_TOTAL_LGTH                252
-set ::COMP_MSG_SPEC_FIELD_IP_ADDR                   251
-set ::COMP_MSG_SPEC_FIELD_CMD_KEY                   250
-set ::COMP_MSG_SPEC_FIELD_CMD_LGTH                  249
-set ::COMP_MSG_SPEC_FIELD_RANDOM_NUM                248
-set ::COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              247
-set ::COMP_MSG_SPEC_FIELD_FILLER                    246
-set ::COMP_MSG_SPEC_FIELD_CRC                       245
-set ::COMP_MSG_SPEC_FIELD_GUID                      244
-set ::COMP_MSG_SPEC_FIELD_SRC_ID                    243
-set ::COMP_MSG_SPEC_FIELD_HDR_FILLER                242
-set ::COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            241
-
-set ::COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         240
-set ::COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         239
-set ::COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      238
-set ::COMP_MSG_SPEC_FIELD_CLIENT_SSID               237
-set ::COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             236
-set ::COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            235
-set ::COMP_MSG_SPEC_FIELD_CLIENT_PORT               234
-set ::COMP_MSG_SPEC_FIELD_CLIENT_STATUS             233
-set ::COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              232
-set ::COMP_MSG_SPEC_FIELD_SSDP_PORT                 231
-set ::COMP_MSG_SPEC_FIELD_SSDP_STATUS               230
-set ::COMP_MSG_SPEC_FIELD_CLOUD_PORT                229
-set ::COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              228
-set ::COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              227
-set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        226
-set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        225
-set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     224
-set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        223
-set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        222
-set ::COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     221
-set ::COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        220
-set ::COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        219
-set ::COMP_MSG_SPEC_FIELD_TOTAL_CRC                 218
-
-set ::COMP_MSG_SPEC_FIELD_OTA_PORT                  217
-set ::COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              216
-set ::COMP_MSG_SPEC_FIELD_OTA_FS_PATH               215
-set ::COMP_MSG_SPEC_FIELD_OTA_HOST                  214
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_SSID            213
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_PASSWD          212
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_SECURITY_TYPE   211
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_TARGET_PROTOCOL 210
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_IP_ADDR         209
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_SUBNET          208
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_GATEWAY         207
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_DNS             206
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_PING_ADDRESS    205
-set ::COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          204
-set ::COMP_MSG_SPEC_FIELD_HDR_RESERVE               203
-
-set ::COMP_MSG_SPEC_FIELD_LOW                       202  ; # this must be the last entry!!
-
 set ::COMP_MSG_FREE_FIELD_ID 0xFF
 
 namespace eval ::compMsg {
@@ -281,8 +223,6 @@ namespace eval ::compMsg {
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS          53
     dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_HDR_RESERVE               54
 
-    dict set specialFieldIds2Ints COMP_MSG_SPEC_FIELD_LOW                       55  ; # this must be the last entry!!
-
     variable specialFieldInts2Ids
     set specialFieldInts2Ids [dict create]
     dict set specialFieldInts2Ids 0 COMP_MSG_SPEC_FIELD_NONE
@@ -341,8 +281,6 @@ namespace eval ::compMsg {
     dict set specialFieldInts2Ids 53 COMP_MSG_SPEC_FIELD_PROD_TEST_STATUS
     dict set specialFieldInts2Ids 54 COMP_MSG_SPEC_FIELD_HDR_RESERVE
 
-    dict set specialFieldInts2Ids 55 COMP_MSG_SPEC_FIELD_LOW  ; # this must be the last entry!!
-
     variable fieldGroupStr2Ids
     set fieldGroupStr2Ids [dict create]
     dict set fieldGroupStr2Ids "@\$msgUse"           COMP_MSG_USE_FIELD_GROUP
@@ -377,7 +315,8 @@ puts stderr "getSpecialFieldNameIntFromId: $fieldNameId!"
 
     # ================================= getFieldNameIdFromStr ====================================
 
-    proc getFieldNameIdFromStr {fieldName fieldNameIdVar incrVal} {
+    proc getFieldNameIdFromStr {compMsgDispatcherVar fieldName fieldNameIdVar incrVal} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $fieldNameIdVar fieldNameId
       variable specialFieldNames2Ids
 
@@ -394,12 +333,15 @@ puts stderr "getSpecialFieldNameIntFromId: $fieldNameId!"
         set firstFreeEntry [list]
         set firstFreeEntryIdx 0
         set numDefinitions [dict get $::compMsg(fieldNameDefinitions) numDefinitions]
+	set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
         if {$numDefinitions > 0} {
           # find fieldName
           set nameIdx 0
           set definitions [dict get $::compMsg(fieldNameDefinitions) definitions]
+puts stderr "numDefinitions: $numDefinitions!"
           foreach entry $definitions {
             if {[dict get $entry fieldName] eq $fieldName} {
+puts stderr "fieldName: $fieldName![dict get $entry fieldName]!"
               if {$incrVal < 0} {
                 if {[dict get $entry refCnt] > 0} {
                   dict set entry refCnt [expr {[dict get $entry refCnt] - 1}]
@@ -415,7 +357,8 @@ puts stderr "getSpecialFieldNameIntFromId: $fieldNameId!"
                   # just get the entry, do not modify
                 }
               }
-              set fieldNameId [dict get $entry id]
+puts stderr "fieldName2: $fieldName![dict get $entry id]!"
+              set fieldNameId [expr {[dict get $entry id] + [dict get $compMsgTypesAndNames numSpecFieldIds]}]
               return [checkErrOK OK]
             }
             if {($incrVal == $::COMP_MSG_INCR) && ([dict get $entry id] eq $::COMP_MSG_FREE_FIELD_ID) && ($firstFreeEntry eq "")} {
@@ -432,18 +375,23 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
             checkErrOK FIELD_NOT_FOUND
           } else {
             if {$firstFreeEntry ne ""} {
-              set fieldNameId [dict get $firstFreeEntry id]
+              set fieldNameId [expr {[dict get $firstFreeEntry id] + [dict get $compMsgTypesAndNames numSpecFieldIds]}]
               dict set firstFreeEntry refCnt 1
               dict set firstFreeEntry fieldName $fieldName
               set definitions [lreplace $definitions $firstFreeEntryIdx $firstFreeEntryIdx $firstFreeEntry]
             } else {
+              # add a free slot in msgFieldInfos
+              set result [::compMsg compMsgTypesAndNames addMsgFieldInfos compMsgDispatcher 1]
+              checkErrOK $result
+              set result [::compMsg compMsgDataValue addMsgFieldValues compMsgDispatcher 1]
+              checkErrOK $result
               incr numDefinitions
               dict set ::compMsg(fieldNameDefinitions) numDefinitions $numDefinitions
               set entry [dict create]
               dict set entry refCnt 1
               dict set entry id $numDefinitions
               dict set entry fieldName $fieldName
-              set fieldNameId $numDefinitions
+              set fieldNameId [expr {$numDefinitions + [dict get $compMsgTypesAndNames numSpecFieldIds]}]
               lappend definitions $entry
             }
           }
@@ -455,7 +403,8 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
 
     # ================================= getFieldNameStrFromId ====================================
 
-    proc getFieldNameStrFromId {fieldNameId fieldNameVar} {
+    proc getFieldNameStrFromId {compMsgDispatcherVar fieldNameId fieldNameVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $fieldNameVar fieldName
       variable specialFieldId2Names
       variable specialFieldInts2Ids
@@ -472,6 +421,13 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
       }
       # find field name
       set idx 0
+      # these field names have also ids starting at 1 but for fieldInfo handling we add the numSpecFieldIds to get
+      # unique ids!
+      set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+puts stderr "fieldNameId: $fieldNameId![dict get $compMsgTypesAndNames numSpecFieldIds]!"
+      if {![string is integer $fieldNameId]} {
+      }
+      set fieldNameId [expr {$fieldNameId - [dict get $compMsgTypesAndNames numSpecFieldIds]}]
       set fieldNameDefinitions $::compMsg(fieldNameDefinitions)
       while {$idx < [dict get $fieldNameDefinitions numDefinitions]} {
         set nameEntry [lindex  [dict get $fieldNameDefinitions definitions] $idx]
@@ -517,6 +473,7 @@ puts stderr "fileNameTokenStr: $fileNameTokenStr!"
       }
       dict set msgFieldInfos fieldInfos $fieldInfos
       dict set compMsgDispatcher compMsgTypesAndNames msgFieldInfos $msgFieldInfos
+puts stderr "addMsgFieldInfos:$msgFieldInfos"
       return $result
     }
 
@@ -547,9 +504,11 @@ puts stderr "fileNameTokenStr: $fileNameTokenStr!"
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $fieldInfoVar fieldInfo
 
+puts stderr "setMsgFieldInfo: idx: $idx!"
       set result $::COMP_MSG_ERR_OK
       set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
       if {$idx >= [dict get $msgFieldInfos numMsgFields]} {
+puts stderr "idx: $idx numMsgFields: [dict get $msgFieldInfos numMsgFields]!"
         return [checkErrOK BAD_MSG_FIELD_INFO_IDX]
       }
       set fieldInfos [dict get $msgFieldInfos fieldInfos]
@@ -566,9 +525,12 @@ puts stderr "fileNameTokenStr: $fileNameTokenStr!"
         dict set entry keyValueDesc keyLgth [dict get $fieldInfo keyValueDesc keyLgth]
         dict set entry keyValueDesc keyNumValues [dict get $fieldInfo keyValueDesc keyNumValues]
       }
-      set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId $idx fieldName]
+      set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgDispatcher $idx fieldName]
       checkErrOK $result
-puts stderr [format "setMsgFieldInfo: %s idx: %d fieldFlags: %s fieldType: %s fieldLgth: %d" $fieldName $idx [dict get $entry fieldFlags] [dict get $entry fieldTypeId] [dict get $entry fieldLgth]]
+#puts stderr [format "setMsgFieldInfo: %s idx: %d fieldFlags: %s fieldType: %s fieldLgth: %d" $fieldName $idx [dict get $entry fieldFlags] [dict get $entry fieldTypeId] [dict get $entry fieldLgth]]
+      set fieldInfos [lreplace $fieldInfos $idx $idx $entry]
+      dict set msgFieldInfos fieldInfos $fieldInfos
+      dict set compMsgDispatcher compMsgTypesAndNames msgFieldInfos $msgFieldInfos
       return $result
     }
 
@@ -583,7 +545,7 @@ puts stderr [format "setMsgFieldInfo: %s idx: %d fieldFlags: %s fieldType: %s fi
       dict set msgFieldInfos numMsgFields 0
       dict set msgFieldInfos fieldInfos [list]
       dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos
-      dict set compMsgTypesAndNames numSpecFieldIds [llength [dict keys $specialFieldNames2Ids]]
+      dict set compMsgTypesAndNames numSpecFieldIds [expr {[llength [dict keys $specialFieldNames2Ids]] + 1}]
 puts stderr "numSpecFieldIds: [dict get $compMsgTypesAndNames numSpecFieldIds]!"
       dict set compMsgDispatcher compMsgTypesAndNames $compMsgTypesAndNames
       addMsgFieldInfos compMsgDispatcher [expr {[dict get $compMsgTypesAndNames numSpecFieldIds] + 1}]

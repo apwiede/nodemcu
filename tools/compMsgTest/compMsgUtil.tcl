@@ -145,8 +145,8 @@ namespace eval ::compMsg {
 
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
       set msgDescriptionInfos [dict get $compMsgMsgDesc msgDescriptionInfos]
-puts stderr "num: [dict get $msgDescriptionInfos numMsgDescriptions]!max: [dict get $msgDescriptionInfos maxMsgDescriptions]!"
-pdict msgDescriptionInfos
+#puts stderr "num: [dict get $msgDescriptionInfos numMsgDescriptions]!max: [dict get $msgDescriptionInfos maxMsgDescriptions]!"
+#pdict msgDescriptionInfos
       if {[dict get $msgDescriptionInfos numMsgDescriptions] >= [dict get $msgDescriptionInfos maxMsgDescriptions]} {
         set description [dict create]
         dict set description msgHeaderValues [dict create]

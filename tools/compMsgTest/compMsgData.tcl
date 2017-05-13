@@ -125,7 +125,7 @@ namespace eval compMsg {
         set fieldInfo [lindex $fields $idx]
         set result [::compMsg dataView getFieldTypeStrFromId [dict get $fieldInfo fieldTypeId] fieldType]
         checkErrOK $result
-        set result [::compMsg compMsgDataView getFieldNameStrFromId [dict get $fieldInfo fieldNameId] fieldName]
+        set result [::compMsg compMsgDataView getFieldNameStrFromId compMsgDispatcher [dict get $fieldInfo fieldNameId] fieldName]
         checkErrOK $result
         puts stderr [format "    idx %d: key: %-20s type: %-8s lgth: %.5d offset: %.3d flags: %s" $idx $fieldName $fieldType [dict get $fieldInfo fieldLgth] [dict get $fieldInfo fieldOffset] [dict get $fieldInfo fieldFlags]]
         if {[lsearch [dict get $fieldInfo fieldFlags] "COMP_MSG_FIELD_IS_SET"] >= 0} {
@@ -413,7 +413,7 @@ puts stderr "compMsgData2 setData"
       }
       set result [::compMsg dataView getFieldTypeIdFromStr $fieldType fieldTypeId]
       checkErrOK $result
-      set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId $::COMP_MSG_INCR]
+      set result [::compMsg compMsgDataView getFieldNameIdFromStr compMsgDispatcher $fieldName fieldNameId $::COMP_MSG_INCR]
       checkErrOK $result
       set fieldInfo [dict create]
       # need to check for duplicate here !!
@@ -454,7 +454,7 @@ puts stderr "compMsgData2 setData"
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
         checkErrOK [NOT_YET_INITTED]
       }
-      set result [::compMsg compMsgDataView getFieldNameIdFromStr $fieldName fieldNameId COMP_MSG_NO_INCR]
+      set result [::compMsg compMsgDataView getFieldNameIdFromStr compMsgDispatcher $fieldName fieldNameId COMP_MSG_NO_INCR]
       checkErrOK $result
       set found false
       set idx 0

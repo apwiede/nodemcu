@@ -41,6 +41,7 @@ namespace eval ::compMsg {
       
     namespace export dataValueStr2ValueId dataValueId2ValueStr addDataValue
     namespace export setDataValue getDataValue compMsgDataValueInit
+    namespace export addMsgFieldValues setMsgFieldValue getMsgFieldValue
 
     variable dataValueStr2ValueIds 
     set dataValueStr2ValueIds [dict create]
@@ -244,6 +245,68 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
       checkErrOK DATA_VALUE_FIELD_NOT_FOUND
     }
 
+    # ================================= addMsgFieldValues ====================================
+
+    proc addMsgFieldValues {compMsgDispatcherVar numEntries} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result $::COMP_MSG_ERR_OK
+      set msgFieldValues [dict get $compMsgDispatcher compMsgDataValue msgFieldValues]
+      if {[dict get $msgFieldValues numMsgFields] == 0} {       
+        set fieldValues [list]
+      } else {
+        set fieldValues [dict get $msgFieldValues fieldValues]
+      }
+      set idx [dict get $msgFieldValues numMsgFields]
+      while {$idx < [expr {[dict get $msgFieldValues numMsgFields] + $numEntries}]} {
+        lappend fieldValues [list]
+        incr idx
+      }
+      dict set msgFieldValues fieldValues $fieldValues
+      dict incr msgFieldValues numMsgFields $numEntries
+      dict set compMsgDispatcher compMsgDataValue msgFieldValues $msgFieldValues
+      return $result
+    }
+
+    # ================================= setMsgFieldValue ====================================
+
+    proc setMsgFieldValue {compMsgDispatcherVar idx fieldValue} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set result $::COMP_MSG_ERR_OK
+      set msgFieldValues [dict get $compMsgDispatcher compMsgDataValue msgFieldValues]
+      if {$idx >= [dict get $msgFieldValues numMsgFields]} {
+        checkErrOK BAD_MSG_FIELD_INFO_IDX
+      }
+      set fieldValues [dict get $msgFieldValues fieldValues]
+      set entry [lindex $fieldValues $idx]
+      dict set entry flags [ðict get $fieldValue flags]
+#      COMP_MSG_DBG(self, "E", 0, "setMsgFieldValues: idx: %d fieldValueFlags: 0x%08x", idx, entry->flags);
+      return $result
+    }
+
+    #  ================================= getMsgFieldValue ====================================
+
+    proc getMsgFieldValue {compMsgDispatcherVar idx fieldValueVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $fieldValueVar fieldValue
+
+      set result $::COMP_MSG_ERR_OK
+      set msgFieldValues [dict get $compMsgDispatcher compMsgDataValue msgFieldValues]
+      if {$idx >= [dict get $msgFieldValues numMsgFields]} {
+        checkErrOK BAD_MSG_FIELD_INFO_IDX
+      }
+      set fieldValues [dict get $msgFieldValues fieldValues]
+      set entry [lindex $fieldValues $idx]
+      if {$entry eq [list]} {
+        dict set entry flags [list]
+        dict set entry dataValue [list]
+      }
+      dict set fieldValue flags [dict get $entry flags]
+      dict set fieldValue dataValue [dict get $entry dataValue]
+      return $result
+    }
+
     # ================================= compMsgDataValueInit ====================================
 
     proc compMsgDataValueInit {compMsgDispatcherVar} {
@@ -253,6 +316,12 @@ puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $com
       dict set compMsgDataValue numDataValues 0
       dict set compMsgDataValue maxDataValues 0
       dict set compMsgDataValue dataValues [list]
+
+      set msgFieldValues [dict create]
+      dict set msgFieldValues numMsgFields 0
+      dict set msgFieldValues fieldValues [list]
+      dict set compMsgDataValue msgFieldValues $msgFieldValues
+
       dict set compMsgDispatcher compMsgDataValue $compMsgDataValue
       return [checkErrOK OK]
     }
