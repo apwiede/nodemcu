@@ -379,8 +379,7 @@ puts stderr "compMsgData2 setDataViewData"
 
     # ================================= createMsg ====================================
 
-    proc createMsg {compMsgDataVar numFields handleVar} {
-      upvar $handleVar handle
+    proc createMsg {compMsgDataVar numFields} {
       upvar $compMsgDataVar compMsgData
       variable numHandles
 
@@ -394,12 +393,6 @@ puts stderr "compMsgData2 setDataViewData"
       dict set compMsgData cmdLgth 0
       dict set compMsgData headerLgth 0
       dict set compMsgData header [list]
-      incr numHandles
-      set handle [format "${::HANDLE_PREFIX}efff00%02d" $numHandles]
-      dict set compMsgData handle $handle
-      set result [addHandle $handle [dict get $compMsgData header]]
-      checkErrOK $result
-      set handle [dict get $compMsgData handle]
       return [checkErrOK OK]
     }
 

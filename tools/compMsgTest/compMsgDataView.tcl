@@ -496,7 +496,7 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
 
     # ================================= getIdFieldValue ====================================
     
-    proc getIdFieldValue {compMsgDispatcherVar fieldId value fieldIdx} {
+    proc getIdFieldValue {compMsgDispatcherVar fieldId valueVar fieldIdx} {
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $valueVar value
 
@@ -507,6 +507,7 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
       set value ""
       set offset [dict get $fieldInfo fieldOffset]
       set shortOffset [expr {$offset + $fieldIdx}]
+puts stderr "getIdFieldValue: $fieldInfo!"
       switch [dict get $fieldInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           set result [::compMsg dataView getInt8 $shortOffset value]

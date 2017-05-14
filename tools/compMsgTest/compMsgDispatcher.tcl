@@ -371,16 +371,15 @@ puts stderr "compMsgDispatcher3 setDataViewData"
 
     # ================================= createMsgFromHeaderPart ====================================
     
-    proc createMsgFromHeaderPart {compMsgDispatcherVar hdr handleVar} {
+    proc createMsgFromHeaderPart {compMsgDispatcherVar msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
-      upvar $handleVar handle 
     
 #puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
 #::compMsg compMsgMsgDesc dumpHeaderPart $hdr
-      set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $hdr handle]
+      set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $msgDescription]
       checkErrOK $result
       set compMsgData [dict get $compMsgDispatcher compMsgData]
-      set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts] handle]
+      set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]]
       checkErrOK $result
       set idx 0
       while {$idx < [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]} {
@@ -409,9 +408,9 @@ puts stderr "compMsgDispatcher3 setDataViewData"
       return [checkErrOK OK]
     }
 
-    # ================================= createMsgFromLines ====================================
+    # ================================= xcreateMsgFromLines ====================================
     
-    proc createMsgFromLines {fd parts numEntries numRows type handleVar} {
+    proc xcreateMsgFromLines {fd parts numEntries numRows type handleVar} {
       variable compMsgDispatcher
       variable compMsgData
       variable numMsgHeaders

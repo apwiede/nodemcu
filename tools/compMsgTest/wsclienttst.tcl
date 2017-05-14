@@ -415,16 +415,21 @@ puts stderr "statusVal: [string length $statusVal] $statusVal"
 
 proc getAPInfos { sock } {
   puts stderr "[::websocket::conninfo $sock type] from [::websocket::conninfo $sock sockname] to [::websocket::conninfo $sock peername]"
-pdict [dict get $::compMsgDispatcher compMsgMsgDesc]
-  set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields 22272 16640 AD hdr]
+#  set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
+#  checkErrOK $result
+  set headerValueInfos [list]
+  lappend headerValueInfos [list @src 0x11]
+  lappend headerValueInfos [list @grp 2]
+  lappend headerValueInfos [list @dst 0x14]
+  lappend headerValueInfos [list @cmdKey 0x5031]
+  set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields ::compMsgDispatcher $headerValueInfos msgDescription]
   checkErrOK $result
-#puts stderr "===after getHeaderFromUniqueFields"
-  set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
-  checkErrOK $result
+puts stderr "===after getHeaderFromUniqueFields"
   set result [::compMsg compMsgDispatcher setSocketForAnswer ::compMsgDispatcher $sock]
-#puts stderr "===after setSocket"
+puts stderr "===after setSocket"
   checkErrOK $result
-  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $hdr handle]
+puts stderr "CD: [dict keys $::compMsgDispatcher]!"
+  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $msgDescription]
   checkErrOK $result
   $::startBtn configure -text "Quit" -command [list exit 0]
 }
@@ -439,6 +444,7 @@ proc InitCompMsg {} {
 puts stderr "dispatcherHandle!$dispatcherHandle!"
   set result [::compMsg compMsgDispatcher initDispatcher ::compMsgDispatcher]
   checkErrOK $result
+puts stderr "EXI1: [info exists ::compMsgDispatcher]!"
 }
 
 # ================================ sendAppMsgToMcu ===============================
