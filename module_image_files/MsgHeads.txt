@@ -2,17 +2,17 @@
 # <comma separated header field values>,<encrypted>,<handleType>,@cmdKey
 # for header definition see MsgDescHeader.txt
 #,7
-0x12,2,0x15,0,*,*,"E","W","A1"
+0x12,2,0x15,0,*,*,"E","W","A1",0,1,1
 # Provisioning Request
-0x11,2,0x14,0,*,*,"E","G","P1"
+0x11,2,0x14,0,*,*,"E","G","P1",0,1,1
 # Provisioning Request ACK (ssids + rssis)
-0x14,2,0x11,0,*,*,"E","A","P2"
+0x14,2,0x11,0,*,*,"E","A","P2",0,1,1
 # Provisioning Request NAK
-0x14,2,0x11,0,*,*,"E","A","P3"
+0x14,2,0x11,0,*,*,"E","A","P3",0,1,1
 # Provisioning ssid + passwd
-0x11,2,0x14,0,*,*,"E","G","P4"
+0x11,2,0x14,0,*,*,"E","G","P4",0,1,1
 # Provisioning IP + port
-0x14,2,0x11,0,*,*,"E","A","P5"
+0x14,2,0x11,0,*,*,"E","A","P5",0,1,1
 # Provisioning bad ssid or passwd
-0x14,2,0x11,0,*,*,"E","A","P6"
+0x14,2,0x11,0,*,*,"E","A","P6",0,1,1
 
