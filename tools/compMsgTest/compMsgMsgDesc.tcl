@@ -200,7 +200,7 @@ puts stderr [format "addHeaderInfo: numHeaderFields %d: fieldLgth: %d headerLgth
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set result OK
-puts stderr ">>>handle a: $fileName!$fieldGroupId!$cmdKey!"
+#puts stderr ">>>handle a: $fileName!$fieldGroupId!$cmdKey!"
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
       set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
 
@@ -232,7 +232,7 @@ puts stderr ">>>handle a: $fileName!$fieldGroupId!$cmdKey!"
       set numLines 0
 #puts stderr "handleMsgFileInternal: $fileName $handleMsgLine fd: $fd!"
 if {[dict exists $compMsgMsgDesc msgFieldGroupInfos COMP_MSG_VAL_FIELD_GROUP]} {
-puts stderr ">>>handle I: $fileName!keys: [dict keys [dict get $compMsgMsgDesc msgFieldGroupInfos COMP_MSG_VAL_FIELD_GROUP]]!"
+#puts stderr ">>>handle I: $fileName!keys: [dict keys [dict get $compMsgMsgDesc msgFieldGroupInfos COMP_MSG_VAL_FIELD_GROUP]]!"
 }
       while {true} {
         set lgth [gets $fd buffer]
@@ -288,41 +288,32 @@ puts stderr ">>>handle I: $fileName!keys: [dict keys [dict get $compMsgMsgDesc m
     proc handleMsgFile {compMsgDispatcherVar fileName handleMsgLine} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-puts stderr "handleMsgFile: $fileName!$handleMsgLine!"
+#puts stderr "handleMsgFile: $fileName!$handleMsgLine!"
       set result [handleMsgFileInternal compMsgDispatcher $fileName $handleMsgLine]
       checkErrOK $result
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
-puts stderr "handleMsgFile1 done"
+#puts stderr "handleMsgFile1 done"
       if {[dict get $compMsgMsgDesc currFieldGroupId] ne [list]} {
         # handle fieldGroup files here
         set msgFieldGroupInfos [dict get $compMsgDispatcher compMsgMsgDesc msgFieldGroupInfos]
-puts stderr "MFGI"
-#pdict $msgFieldGroupInfos
-puts stderr "MFGI DONE"
         set fieldGroupIds [dict keys $msgFieldGroupInfos]
-puts stderr ">>>handle0: Ids: $fieldGroupIds!"
+#puts stderr ">>>handle0: Ids: $fieldGroupIds!"
         foreach fieldGroupId $fieldGroupIds {
           set cmdKeys [dict keys [dict get $msgFieldGroupInfos $fieldGroupId]]
-puts stderr ">>>handle1: $fieldGroupId $cmdKeys!"
-puts stderr "FF fieldGroupId: $fieldGroupId!$cmdKeys!"
           foreach cmdKey $cmdKeys {
-puts stderr "CK cmdKey: $cmdKey!"
-puts stderr ">>>handle2: $cmdKey"
-#pdict $cmdKeyDicts
             set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
             set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
             dict set compMsgMsgDesc currFieldGroupId $fieldGroupId
             dict set compMsgMsgDesc currCmdKey $cmdKey
-puts stderr "file: $fileName fieldGroupId: $fieldGroupId!cmdKey: $cmdKey!"
+#puts stderr "file: $fileName fieldGroupId: $fieldGroupId!cmdKey: $cmdKey!"
 
             set msgFieldGroupInfo [dict get $msgFieldGroupInfos $fieldGroupId $cmdKey]
             set fieldGroupFileName [dict get $msgFieldGroupInfo fileName]
-            puts stderr [format ">>>handleFile %s %s %s" $fieldGroupFileName $fieldGroupId $cmdKey]
+#puts stderr [format ">>>handleFile %s %s %s" $fieldGroupFileName $fieldGroupId $cmdKey]
             dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
             set result [handleMsgFileInternal compMsgDispatcher $fieldGroupFileName handleMsgFieldGroupLine]
             checkErrOK $result
-#pdict [dict get $compMsgDispatcher compMsgMsgDesc msgFieldGroupInfos]
-            puts stderr [format "<<<%s: %s %s done" $fieldGroupFileName $fieldGroupId $cmdKey]
+#puts stderr [format "<<<%s: %s %s done" $fieldGroupFileName $fieldGroupId $cmdKey]
           }
         }
       }
@@ -335,7 +326,7 @@ puts stderr "file: $fileName fieldGroupId: $fieldGroupId!cmdKey: $cmdKey!"
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set result OK
-puts stderr "handleMsgFileNameLine:"
+#puts stderr "handleMsgFileNameLine:"
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
       set numLineFields [dict get $compMsgMsgDesc numLineFields]
       if {$numLineFields < 2} {
@@ -353,7 +344,7 @@ puts stderr "handleMsgFileNameLine:"
         set result [getStringFieldValue compMsgDispatcher $value cmdKey]
         checkErrOK $result
       }
-      puts stderr [format "token: %s field: %s cmdKey: %s" $token $field $cmdKey]
+#puts stderr [format "token: %s field: %s cmdKey: %s" $token $field $cmdKey]
       if {[string range $token 0 1] eq "@\$"} {
         set result [::compMsg compMsgTypesAndNames getFileNameTokenIdFromStr $token fieldGroupId]
         checkErrOK $result
@@ -436,8 +427,8 @@ puts stderr "maxMsgFieldVal: $numExpectedLines!"
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set result OK
-set fieldName [lindex [dict get $compMsgDispatcher compMsgMsgDesc lineFields] 0]
-puts stderr "common line fieldName!$fieldName!"
+#set fieldName [lindex [dict get $compMsgDispatcher compMsgMsgDesc lineFields] 0]
+#puts stderr "common line fieldName!$fieldName!"
 if {0} {
       set result [checkMsgFieldDesc compMsgDispatcher 3]
       checkErrOK $result
@@ -446,7 +437,7 @@ if {0} {
       set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
       set fieldGroupId [dict get $compMsgMsgDesc currFieldGroupId]
       set cmdKey [dict get $compMsgMsgDesc currCmdKey]
-puts stderr "fieldGroupId: $fieldGroupId cmdKey: $cmdKey!"
+#puts stderr "fieldGroupId: $fieldGroupId cmdKey: $cmdKey!"
       set msgFieldGroupInfo [dict get $msgFieldGroupInfos $fieldGroupId $cmdKey]
       set lineFields [dict get $compMsgMsgDesc lineFields]
 
@@ -494,7 +485,6 @@ puts stderr "fieldGroupId: $fieldGroupId cmdKey: $cmdKey!"
         set result [getIntFieldValue compMsgDispatcher $headerFlagValue headerFlag]
         checkErrOK $result
         dict set fieldInfo fieldOffset [dict get $compMsgMsgDesc msgHeaderInfo headerLgth]
-puts stderr "headerFlag: $headerFlag!"
         dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_HEADER
         switch $headerFlag {
           0 {
@@ -514,7 +504,7 @@ puts stderr "headerFlag: $headerFlag!"
 
       switch $fieldGroupId {
         COMP_MSG_DESC_HEADER_FIELD_GROUP {
-puts stderr "HEADER: fieldInfo: $fieldInfo!"
+#puts stderr "HEADER: fieldInfo: $fieldInfo!"
           set result [::compMsg compMsgTypesAndNames setMsgFieldInfo compMsgDispatcher $fieldNameId fieldInfo]
           checkErrOK $result
         }
@@ -609,7 +599,7 @@ puts stderr "HEADER: fieldInfo: $fieldInfo!"
     proc handleMsgValuesLine {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-puts stderr "handleMsgValuesLine"
+#puts stderr "handleMsgValuesLine"
       set result OK
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
       set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
@@ -619,7 +609,7 @@ puts stderr "handleMsgValuesLine"
       if {[dict get $compMsgMsgDesc numLineFields] < 2} {
         checkErrOK FIELD_DESC_TOO_FEW_FIELDS
       }
-puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
+#puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
       set lineFields [dict get $compMsgMsgDesc lineFields]
       #field name
       set token [lindex $lineFields 0]
@@ -644,7 +634,6 @@ puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
           dict set dataValue value [list]
           dict set dataValue fieldValueCallback $value
         } else {
-puts stderr "VA: $value!"
           set result [getIntFieldValue compMsgDispatcher $value numericValue]
           dict set dataValue flags FIELD_IS_NUMERIC
           dict set dataValue value $numericValue
@@ -731,14 +720,14 @@ puts stderr "fieldValue: $fieldValue!valIdx: $valIdx!"
     proc handleMsgFieldGroupLine {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-puts stderr "handleMsgFieldGroupLine"
+#puts stderr "handleMsgFieldGroupLine"
       set result OK
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
       set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
       set fieldGroupId [dict get $compMsgMsgDesc currFieldGroupId]
       set cmdKey [dict get $compMsgMsgDesc currCmdKey]
       set msgFieldGroupInfo [dict get $msgFieldGroupInfos $fieldGroupId $cmdKey]
-puts stderr "handleMsgFieldGroupLine: fieldGroupId: $fieldGroupId cmdkey: $cmdKey!"
+#puts stderr "handleMsgFieldGroupLine: fieldGroupId: $fieldGroupId cmdkey: $cmdKey!"
       switch $fieldGroupId {
         COMP_MSG_DESC_HEADER_FIELD_GROUP -
         COMP_MSG_DESC_MID_PART_FIELD_GROUP -
@@ -809,6 +798,7 @@ puts stderr "handleMsgFieldGroupLine: fieldGroupId: $fieldGroupId cmdkey: $cmdKe
       if {[dict get $compMsgMsgDesc numLineFields] < 3} {
         checkErrOK FIELD_DESC_TOO_FEW_FIELDS
       }
+      set result [::compMsg dataView setDataViewData [dict get $msgDescription headerFieldValues] [dict get $msgHeaderInfo headerLgth]]
       set fieldIdx 1
       set headerFieldIdx 0
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
@@ -819,14 +809,14 @@ puts stderr "handleMsgFieldGroupLine: fieldGroupId: $fieldGroupId cmdkey: $cmdKe
           incr fieldIdx
 	  continue
         }
-puts stderr "FLD: fieldIdx: $fieldIdx!fieldInfo: $fieldInfo!"
+#puts stderr "FLD: fieldIdx: $fieldIdx!fieldInfo: $fieldInfo!"
 	if {[lsearch [dict get $fieldInfo fieldFlags] COMP_MSG_FIELD_HEADER] >= 0} {
-puts stderr "handleMsgHeadsLine: fieldIdx: $fieldIdx"
+#puts stderr "handleMsgHeadsLine: fieldIdx: $fieldIdx"
           set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compsMsgDispatcher $fieldIdx fieldNameStr]
 	  checkErrOK $result
           set lineFields [dict get $compMsgMsgDesc lineFields]
           set value [lindex $lineFields $headerFieldIdx]
-          puts stderr [format "field: %s %s" $fieldNameStr $value]
+puts stderr [format "field: %s fieldIdx: $fieldIdx value: %s!" $fieldNameStr $value]
           if {[lsearch [dict get $fieldInfo fieldFlags] COMP_MSG_FIELD_HEADER_UNIQUE] >= 0} {
             if {$value eq "*"} {
 # FIXME what to do with joker char?
@@ -847,7 +837,7 @@ puts stderr "handleMsgHeadsLine: fieldIdx: $fieldIdx"
                 set stringVal ""
                 set result [getStringFieldValue compMsgDispatcher $value stringVal]
                 checkErrOK $result
-                puts stderr [format "value: %s!stringVal: %s" $value $stringVal]
+#puts stderr [format "value: %s!stringVal: %s" $value $stringVal]
 	        set result [::compMsg compMsgDataView setIdFieldValue compMsgDispatcher dataView $fieldIdx $stringVal 0]
 	        checkErrOK $result
               } else {
@@ -878,7 +868,7 @@ puts stderr "handleMsgHeadsLine: fieldIdx: $fieldIdx"
       }
       dict set msgDescription handleType [string range $field 0 0]
       # FIXME need to handle cmdKey here!!!
-      puts stderr [format "msgDescription->headerLgth: %d encrypted: %s handleType: %s" [dict get $msgDescription headerLgth] [dict get $msgDescription encrypted] [dict get $msgDescription handleType]]
+puts stderr [format "msgDescription->headerLgth: %d encrypted: %s handleType: %s" [dict get $msgHeaderInfo headerLgth] [dict get $msgDescription encrypted] [dict get $msgDescription handleType]]
       set msgDescriptions [lreplace $msgDescriptions $descIdx $descIdx $msgDescription]
       dict set msgDescriptionInfos msgDescriptions $msgDescriptions
       dict set compMsgMsgDesc msgDescriptionInfos $msgDescriptionInfos
@@ -1648,9 +1638,9 @@ puts stderr "getWifiKeyValues done"
       set result [handleMsgFile compMsgDispatcher $fileName handleMsgFileNameLine]
       checkErrOK $result
 pdict $compMsgDispatcher
-puts stderr "================="
-set val [::dict2json $compMsgDispatcher]
-puts $val
+#puts stderr "================="
+#set val [::dict2json $compMsgDispatcher]
+#puts $val
       return [checkErrOK OK]
     }
 

@@ -562,9 +562,7 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
       set fieldInfos [dict get $msgFieldInfos fieldInfos]
-puts stderr "fieldId: $fieldId!"
-puts stderr "msgFieldInfos:!$msgFieldInfos!"
-puts stderr "fieldInfos:!$fieldInfos!"
+#puts stderr "fieldId: $fieldId!value:$value!"
       set fieldInfo [lindex $fieldInfos $fieldId]
       switch [dict get $fieldInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
@@ -647,7 +645,7 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
           checkErrOK BAD_FIELD_TYPE
         }
       }
-      set fieldInfos [lreplace $msgFieldInfos $fieldId $fieldId $fieldInfo]
+      set fieldInfos [lreplace $fieldInfos $fieldId $fieldId $fieldInfo]
       dict set msgFieldInfos fieldInfos $fieldInfos
       dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos
       dict set compMsgDispatcher compMsgTypesAndNames $compMsgTypesAndNames

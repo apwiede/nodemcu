@@ -115,7 +115,7 @@ namespace eval ::compMsg {
 
       set result OK
       set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
-puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $compMsgDataValue maxDataValues]!"
+#puts stderr "num: [dict get $compMsgDataValue numDataValues] max: [dict get $compMsgDataValue maxDataValues]!"
       if {[dict get $compMsgDataValue numDataValues] >= [dict get $compMsgDataValue maxDataValues]} {
         if {[dict get $compMsgDataValue maxDataValues] == 0} {
           dict set compMsgDataValue maxDataValues 5

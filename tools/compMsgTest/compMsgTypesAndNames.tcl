@@ -338,10 +338,9 @@ puts stderr "getSpecialFieldNameIntFromId: $fieldNameId!"
           # find fieldName
           set nameIdx 0
           set definitions [dict get $::compMsg(fieldNameDefinitions) definitions]
-puts stderr "numDefinitions: $numDefinitions!"
+#puts stderr "numDefinitions: $numDefinitions!"
           foreach entry $definitions {
             if {[dict get $entry fieldName] eq $fieldName} {
-puts stderr "fieldName: $fieldName![dict get $entry fieldName]!"
               if {$incrVal < 0} {
                 if {[dict get $entry refCnt] > 0} {
                   dict set entry refCnt [expr {[dict get $entry refCnt] - 1}]
@@ -357,7 +356,7 @@ puts stderr "fieldName: $fieldName![dict get $entry fieldName]!"
                   # just get the entry, do not modify
                 }
               }
-puts stderr "fieldName2: $fieldName![dict get $entry id]!"
+#puts stderr "fieldName: $fieldName!id: [dict get $entry id]!"
               set fieldNameId [expr {[dict get $entry id] + [dict get $compMsgTypesAndNames numSpecFieldIds]}]
               return [checkErrOK OK]
             }
@@ -392,6 +391,7 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
               dict set entry id $numDefinitions
               dict set entry fieldName $fieldName
               set fieldNameId [expr {$numDefinitions + [dict get $compMsgTypesAndNames numSpecFieldIds]}]
+#puts stderr "fieldName: $fieldName!fieldNameId: $fieldNameId!"
               lappend definitions $entry
             }
           }
@@ -424,7 +424,7 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
       # these field names have also ids starting at 1 but for fieldInfo handling we add the numSpecFieldIds to get
       # unique ids!
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
-puts stderr "fieldNameId: $fieldNameId![dict get $compMsgTypesAndNames numSpecFieldIds]!"
+#puts stderr "fieldNameId: $fieldNameId![dict get $compMsgTypesAndNames numSpecFieldIds]!"
       if {![string is integer $fieldNameId]} {
       }
       set fieldNameId [expr {$fieldNameId - [dict get $compMsgTypesAndNames numSpecFieldIds]}]
@@ -448,12 +448,11 @@ puts stderr "fieldNameId: $fieldNameId![dict get $compMsgTypesAndNames numSpecFi
 
       set LB "\{"
       set RB "\}"
-puts stderr "EXI: [dict keys $fieldGroupStr2Ids]!"
       if {[dict exists $fieldGroupStr2Ids $fileNameTokenStr]} {
         set fileNameTokenId [dict get $fieldGroupStr2Ids $fileNameTokenStr]
         return [checkErrOK OK]
       }
-puts stderr "fileNameTokenStr: $fileNameTokenStr!"
+puts stderr "ERROR fileNameTokenStr: $fileNameTokenStr!FILE_NAME_TOKEN_NOT_FOUND"
       checkErrOK FILE_NAME_TOKEN_NOT_FOUND
     }
 
@@ -473,7 +472,7 @@ puts stderr "fileNameTokenStr: $fileNameTokenStr!"
       }
       dict set msgFieldInfos fieldInfos $fieldInfos
       dict set compMsgDispatcher compMsgTypesAndNames msgFieldInfos $msgFieldInfos
-puts stderr "addMsgFieldInfos:$msgFieldInfos"
+#puts stderr "addMsgFieldInfos:$msgFieldInfos"
       return $result
     }
 
@@ -504,7 +503,7 @@ puts stderr "addMsgFieldInfos:$msgFieldInfos"
       upvar $compMsgDispatcherVar compMsgDispatcher
       upvar $fieldInfoVar fieldInfo
 
-puts stderr "setMsgFieldInfo: idx: $idx!"
+#puts stderr "setMsgFieldInfo: idx: $idx!"
       set result $::COMP_MSG_ERR_OK
       set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
       if {$idx >= [dict get $msgFieldInfos numMsgFields]} {

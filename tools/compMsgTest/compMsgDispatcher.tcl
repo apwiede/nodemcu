@@ -226,10 +226,10 @@ namespace eval compMsg {
 
       # build header from msgParts
       set offset 0
-      set result [::compMsg dataView getData saveData saveLgth]
+      set result [::compMsg dataView getDataViewData saveData saveLgth]
       set lgth [dict get $msgParts totalLgth]
-puts stderr "compMsgDispatcher1 setData"
-      ::compMsg dataView setData [string repeat "\x00" $lgth] $lgth
+puts stderr "compMsgDispatcher1 setDataViewData"
+      ::compMsg dataView setDataViewData [string repeat "\x00" $lgth] $lgth
       set result [::compMsg dataView setUint16 $offset [dict get $msgParts fromPart]]
       checkErrOK $result
       incr offset 2
@@ -249,10 +249,10 @@ puts stderr "compMsgDispatcher1 setData"
         checkErrOK $result
         incr offset 2
       }
-      set result [::compMsg dataView getData header headerLgth]
+      set result [::compMsg dataView getDataViewData header headerLgth]
       checkErrOK $result
-puts stderr "compMsgDispatcher2 setData"
-      set result [::compMsg dataView setData $saveData $saveLgth]
+puts stderr "compMsgDispatcher2 setDataViewData"
+      set result [::compMsg dataView setDataViewData $saveData $saveLgth]
       checkErrOK $result
       # end build header from msgParts
       
@@ -307,8 +307,8 @@ puts stderr "compMsgDispatcher2 setData"
           }
         }
       }
-puts stderr "compMsgDispatcher3 setData"
-      set result [::compMsg dataView setData $saveData $saveLgth]
+puts stderr "compMsgDispatcher3 setDataViewData"
+      set result [::compMsg dataView setDataViewData $saveData $saveLgth]
       return [checkErrOK OK]
     }
     

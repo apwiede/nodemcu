@@ -58,13 +58,21 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
             pdict $val [expr {$i+1}] $p $s
         } else {
             if {[string is list $val] && ([llength $val] > 1)} {
+              set listIdx 0
               foreach entry $val {
-                if {$fRepExist && [string is list $entry] && [expr {[llength $entry] % 2 == 0}] } {
+                if {$listIdx == 0} {
+#                  puts "Z[string length $p]"
                   puts ""
+                }
+                if {$fRepExist && [string is list $entry] && [expr {[llength $entry] % 2 == 0}] } {
+#                  puts "$listIdx: "
+                  puts "${prefix} $listIdx: "
                   pdict $entry [expr {$i+1}] $p $s
                 } else {
-                  puts "'${entry}'"
+#                  puts "'$listIdx: ${entry}'"
+                  puts "${prefix} $listIdx: '${entry}'"
                 }
+                incr listIdx
               }
             } else {
               puts "'${val}'"

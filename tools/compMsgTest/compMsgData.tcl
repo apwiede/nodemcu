@@ -312,7 +312,7 @@ namespace eval compMsg {
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_PREPARED] < 0} {
         checkErrOK NOT_YET_PREPARED
       }
-      set result [::compMsg dataView getData data lgth]
+      set result [::compMsg dataView getDataViewData data lgth]
       set lgth [dict get $compMsgData totalLgth]
       checkErrOK $result
       return [checkErrOK OK]
@@ -342,9 +342,9 @@ namespace eval compMsg {
       } 
       # temporary replace data entry of dataView by our param data
       # to be able to use the get* functions for gettting totalLgth entry value
-      set result [::compMsg dataView getData saveData saveLgth]
-puts stderr "compMsgData1 setData"
-      set result [::compMsg dataView setData $data [expr {[dict get $fieldOffset fieldOffset] + 4}]]
+      set result [::compMsg dataView getDataViewData saveData saveLgth]
+puts stderr "compMsgData1 setDataViewData"
+      set result [::compMsg dataView setDataViewData $data [expr {[dict get $fieldOffset fieldOffset] + 4}]]
       # get totalLgth value from data
       set result [::compMsg dataView getUint16 [dict get $fieldInfo fieldOffset] lgth]
       checkErrOK $result
@@ -352,8 +352,8 @@ puts stderr "compMsgData1 setData"
         checkErrOK BAD_DATA_LGTH
       }
       # now make a copy of the data to be on the safe side
-puts stderr "compMsgData2 setData"
-      set result [::compMsg dataView setData $data [dict get $compMsgDate totalLgth]
+puts stderr "compMsgData2 setDataViewData"
+      set result [::compMsg dataView setDataViewData $data [dict get $compMsgDate totalLgth]
       # and now set the IS_SET flags and other stuff
       set idx 0
       while {$idx < [dict get $compMsgData numFields]} {
@@ -734,8 +734,8 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
         checkErrOK [FIELD_TOTAL_LGTH_MISSING]
       }
       set totalLgth [dict get $compMsgData totalLgth]
-#puts stderr "compMsgData3 setData: totalLgth: $totalLgth!"
-      set result [::compMsg dataView setData [string repeat "\x00" $totalLgth] $totalLgth]
+#puts stderr "compMsgData3 setDataViewData: totalLgth: $totalLgth!"
+      set result [::compMsg dataView setDataViewData [string repeat "\x00" $totalLgth] $totalLgth]
       checkErrOK $result
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
       # set the appropriate field values for the lgth entries

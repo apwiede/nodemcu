@@ -148,19 +148,18 @@ namespace eval ::compMsg {
 #puts stderr "num: [dict get $msgDescriptionInfos numMsgDescriptions]!max: [dict get $msgDescriptionInfos maxMsgDescriptions]!"
 #pdict msgDescriptionInfos
       if {[dict get $msgDescriptionInfos numMsgDescriptions] >= [dict get $msgDescriptionInfos maxMsgDescriptions]} {
-        set description [dict create]
-        dict set description msgHeaderValues [dict create]
-        dict set description headerLgth 0
-        dict set description encrypted N
-        dict set description handleType ""
-        dict set description msgMidPartValues [dict create]
-        dict set description fieldSequence [list]
+        set msgDescription [dict create]
+        dict set msgDescription headerFieldValues [dict create]
+        dict set msgDescription encrypted N
+        dict set msgDescription handleType ""
+        dict set msgDescription cmdKey ""
+        dict set msgDescription fieldSequence [list]
         if {[dict get $msgDescriptionInfos maxMsgDescriptions] == 0} {
           dict set msgDescriptionInfos maxMsgDescriptions 5
           set idx 0
           set lst [list]
           while {$idx < [dict get $msgDescriptionInfos maxMsgDescriptions]} {
-            lappend lst $description
+            lappend lst $msgDescription
             incr idx
           }
           dict set msgDescriptionInfos msgDescriptions $lst
@@ -168,7 +167,7 @@ namespace eval ::compMsg {
           dict incr msgDescriptionInfos maxMsgDescriptions 5
           set idx 0
           while {$idx < 5} {
-            dict lappend msgDescriptionInfos $description
+            dict lappend msgDescriptionInfos $msgDescription
             incr idx
           }
           

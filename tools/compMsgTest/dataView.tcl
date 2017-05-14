@@ -50,7 +50,8 @@ namespace eval compMsg {
   namespace eval dataView {
     namespace ensemble create
       
-    namespace export dataView freeDataView setData getFieldTypeIdFromStr getFieldTypeStrFromId appendData getData
+    namespace export dataView freeDataView getFieldTypeIdFromStr getFieldTypeStrFromId
+    namespace export setDataViewData getDataViewData
     namespace export getFieldTypeIntFromId dumpBinary
     namespace export getUint8 getInt8 setUint8 setInt8
     namespace export getUint16 getInt16 setUint16 setInt16
@@ -664,13 +665,13 @@ puts stderr "getUint8Vector OUT_OF_RANGE!$offset!$lgth!"
     }
     
     
-    # ================================= setData ====================================
+    # ================================= setDataViewData ====================================
     
-    proc setData {buffer size} {
+    proc setDataViewData {buffer size} {
       variable data
       variable lgth
 
-#puts stderr "setData: size: $size!ll buffer: [string length $buffer]!"
+#puts stderr "setDataViewData: size: $size!ll buffer: [string length $buffer]!"
       if {[string length $data] != 0} {
         set data ""
       }
@@ -679,9 +680,9 @@ puts stderr "getUint8Vector OUT_OF_RANGE!$offset!$lgth!"
       return [checkErrOK OK]
     }
     
-    # ================================= getData ====================================
+    # ================================= getDataViewData ====================================
     
-    proc getData {bufferVar sizeVar} {
+    proc getDataViewData {bufferVar sizeVar} {
       upvar $bufferVar buffer
       upvar $sizeVar size
       variable data
