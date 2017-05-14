@@ -496,9 +496,8 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
 
     # ================================= getIdFieldValue ====================================
     
-    proc getIdFieldValue {compMsgDispatcherVar dataViewVar fieldId value fieldIdx} {
+    proc getIdFieldValue {compMsgDispatcherVar fieldId value fieldIdx} {
       upvar $compMsgDispatcherVar compMsgDispatcher
-      upvar $dataViewVar dataView
       upvar $valueVar value
 
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
@@ -555,14 +554,12 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
     
     # ================================= setIdFieldValue ====================================
     
-    proc setIdFieldValue {compMsgDispatcherVar dataViewVar fieldId value fieldIdx} {
+    proc setIdFieldValue {compMsgDispatcherVar fieldId value fieldIdx} {
       upvar $compMsgDispatcherVar compMsgDispatcher
-      upvar $dataViewVar dataView
 
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
       set fieldInfos [dict get $msgFieldInfos fieldInfos]
-#puts stderr "fieldId: $fieldId!value:$value!"
       set fieldInfo [lindex $fieldInfos $fieldId]
       switch [dict get $fieldInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
@@ -574,9 +571,6 @@ puts stderr "compMsgDataView setFieldValue int8 value too big"
           }
         }
         DATA_VIEW_FIELD_UINT8_T {
-          binary scan $value c pch
-          set pch [expr {$pch & 0xFF}]
-          set value $pch
           if {($value >= 0) && ($value <= 256)} {
             set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
           } else {

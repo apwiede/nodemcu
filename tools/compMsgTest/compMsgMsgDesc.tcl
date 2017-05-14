@@ -789,6 +789,7 @@ puts stderr "fieldValue: $fieldValue!valIdx: $valIdx!"
       set msgHeaderInfo [dict get $compMsgMsgDesc msgHeaderInfo]
       set msgDescriptionInfos [dict get $compMsgMsgDesc msgDescriptionInfos]
       set msgDescriptions [dict get $msgDescriptionInfos msgDescriptions]
+puts stderr "msgDescriptionInfos: $msgDescriptionInfos!curr: [dict get $msgDescriptionInfos currMsgDescriptionIdx]"
       set descIdx [dict get $msgDescriptionInfos currMsgDescriptionIdx]
       set msgDescription [lindex $msgDescriptions $descIdx]
       set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
@@ -798,7 +799,14 @@ puts stderr "fieldValue: $fieldValue!valIdx: $valIdx!"
       if {[dict get $compMsgMsgDesc numLineFields] < 3} {
         checkErrOK FIELD_DESC_TOO_FEW_FIELDS
       }
-      set result [::compMsg dataView setDataViewData [dict get $msgDescription headerFieldValues] [dict get $msgHeaderInfo headerLgth]]
+      if {![dict exists $msgDescription headerFieldValues]} {
+        dict set msgDescription headerFieldValues [list]
+      }
+      set headerFieldValues [dict get $msgDescription headerFieldValues]
+      if {[string length $headerFieldValues] == 0} {
+        set headerFieldValues [string repeat " " [dict get $msgHeaderInfo headerLgth]]
+      }
+      set result [::compMsg dataView setDataViewData $headerFieldValues [dict get $msgHeaderInfo headerLgth]]
       set fieldIdx 1
       set headerFieldIdx 0
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
@@ -838,11 +846,12 @@ puts stderr [format "field: %s fieldIdx: $fieldIdx value: %s!" $fieldNameStr $va
                 set result [getStringFieldValue compMsgDispatcher $value stringVal]
                 checkErrOK $result
 #puts stderr [format "value: %s!stringVal: %s" $value $stringVal]
-	        set result [::compMsg compMsgDataView setIdFieldValue compMsgDispatcher dataView $fieldIdx $stringVal 0]
+	        set result [::compMsg compMsgDataView setIdFieldValue compMsgDispatcher $fieldIdx $stringVal 0]
 	        checkErrOK $result
               } else {
                 set result [getIntFieldValue compMsgDispatcher $value intVal]
-	        set result [::compMsg compMsgDataView setIdFieldValue compMsgDispatcher dataView $fieldIdx $intVal 0]
+	        checkErrOK $result
+	        set result [::compMsg compMsgDataView setIdFieldValue compMsgDispatcher $fieldIdx $intVal 0]
 	        checkErrOK $result
               }
             }
@@ -851,17 +860,18 @@ puts stderr [format "field: %s fieldIdx: $fieldIdx value: %s!" $fieldNameStr $va
         }
         incr fieldIdx
       }
-#      dict set msgFieldGroupInfos $fieldGroupId $cmdKey $msgFieldGroupInfo
-#      dict set compMsgMsgDesc msgFieldGroupInfos $msgFieldGroupInfos
+      set result [::compMsg dataView getDataViewData headerFieldValues lgth]
+      checkErrOK $result
+      dict set msgDescription headerFieldValues $headerFieldValues
       set lineFields [dict get $compMsgMsgDesc lineFields]
-      set field [lindex $lineFields $fieldIdx]
+      set field [lindex $lineFields $headerFieldIdx]
       set field [string trim $field {\"}]
       if {[string length $field] > 1} {
         checkErrOK BAD_ENCRYPTED_VALUE
       }
       dict set msgDescription encrypted [string range $field 0 0]
-      incr fieldIdx
-      set field [lindex $lineFields $fieldIdx]
+      incr headerFieldIdx
+      set field [lindex $lineFields $headerFieldIdx]
       set field [string trim $field {\"}]
       if {[string length $field] > 1} {
         checkErrOK BAD_HANDLE_TYPE_VALUE
@@ -869,8 +879,10 @@ puts stderr [format "field: %s fieldIdx: $fieldIdx value: %s!" $fieldNameStr $va
       dict set msgDescription handleType [string range $field 0 0]
       # FIXME need to handle cmdKey here!!!
 puts stderr [format "msgDescription->headerLgth: %d encrypted: %s handleType: %s" [dict get $msgHeaderInfo headerLgth] [dict get $msgDescription encrypted] [dict get $msgDescription handleType]]
+puts stderr "msgDescription: $msgDescription!descidx: $descIdx!"
       set msgDescriptions [lreplace $msgDescriptions $descIdx $descIdx $msgDescription]
       dict set msgDescriptionInfos msgDescriptions $msgDescriptions
+      dict incr msgDescriptionInfos currMsgDescriptionIdx
       dict set compMsgMsgDesc msgDescriptionInfos $msgDescriptionInfos
       dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
       return [checkErrOK OK]
