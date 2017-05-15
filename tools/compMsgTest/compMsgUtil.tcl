@@ -150,10 +150,12 @@ namespace eval ::compMsg {
       if {[dict get $msgDescriptionInfos numMsgDescriptions] >= [dict get $msgDescriptionInfos maxMsgDescriptions]} {
         set msgDescription [dict create]
         dict set msgDescription headerFieldValues [list]
-        dict set msgDescription encrypted N
+        dict set msgDescription encrypted ""
         dict set msgDescription handleType ""
         dict set msgDescription cmdKey ""
         dict set msgDescription fieldSequence [list]
+        dict set msgDescription fieldOffsets [list]
+        dict set msgDescription fieldFlags [list]
         if {[dict get $msgDescriptionInfos maxMsgDescriptions] == 0} {
           dict set msgDescriptionInfos maxMsgDescriptions 5
           set idx 0
