@@ -209,18 +209,6 @@ static uint8_t getFieldType(compMsgDispatcher_t *self, compMsgData_t *compMsgDat
   return COMP_MSG_ERR_FIELD_NOT_FOUND;
 }
 
-// ================================= resetBuildMsgInfos ====================================
-
-static uint8_t resetBuildMsgInfos(compMsgDispatcher_t *self) {
-  self->compMsgData->buildMsgInfos.numRows = 0;
-  self->compMsgData->buildMsgInfos.tableRow = 0;
-  self->compMsgData->buildMsgInfos.tableCol = 0;
-  self->compMsgData->buildMsgInfos.numericValue = 0;
-  self->compMsgData->buildMsgInfos.stringValue = NULL;
-  self->compMsgData->buildMsgInfos.actionName = NULL;
-  return COMP_MSG_ERR_OK;
-}
-
 // ================================= resetMsgInfo ====================================
 
 static uint8_t resetMsgInfo(compMsgDispatcher_t *self, msgParts_t *parts) {
@@ -669,8 +657,6 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->initDispatcher = &initDispatcher;
   compMsgDispatcher->resetMsgInfo = &resetMsgInfo;
   compMsgDispatcher->getNewCompMsgDataPtr = &getNewCompMsgDataPtr;
-
-  compMsgDispatcher->resetBuildMsgInfos =&resetBuildMsgInfos;
 
   compMsgDispatcher->getFieldType = &getFieldType;
   if (compMsgDispatcherSingleton == NULL) {

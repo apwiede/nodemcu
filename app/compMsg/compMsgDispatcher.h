@@ -118,7 +118,6 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 typedef uint8_t (* createDispatcher_t)(compMsgDispatcher_t *self, uint8_t **handle);
 typedef uint8_t (* initDispatcher_t)(compMsgDispatcher_t *self, const uint8_t *type, size_t typelen);
-typedef uint8_t (* resetBuildMsgInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* getFieldType_t)(compMsgDispatcher_t *self, compMsgData_t *compMsgData, uint8_t fieldNameId, uint8_t *fieldTypeId);
 typedef uint8_t (* getNewCompMsgDataPtr_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts);
@@ -213,7 +212,6 @@ typedef struct compMsgDispatcher {
   compMsgRequest_t *compMsgRequest;
 
   // Dispatcher function pointers
-  resetBuildMsgInfos_t resetBuildMsgInfos;
   getFieldType_t getFieldType;
   resetMsgInfo_t resetMsgInfo;
   createDispatcher_t createDispatcher;

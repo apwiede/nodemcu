@@ -189,6 +189,10 @@ enum compMsgEncyptedCode
 #define MSG_GUID_LGTH 16
 #define MSG_MAX_HDR_FILLER_LGTH 16
 
+#define COMP_MSG_HAS_CMD_LGTH         1
+#define COMP_MSG_HAS_CRC              2
+#define COMP_MSG_HAS_TOTAL_CRC        4
+
 #define MSG_FILES_FILE_NAME           "MsgFiles.txt"
 
 typedef struct msgHeaderInfo {
@@ -196,6 +200,18 @@ typedef struct msgHeaderInfo {
   uint8_t numHeaderFields;
   uint8_t *headerFieldIds;
 } msgHeaderInfo_t;
+
+typedef struct msgMidPartInfo {
+  uint16_t midPartLgth;
+  uint8_t numMidPartFields;
+  uint8_t *midPartFieldIds;
+} msgMidPartInfo_t;
+
+typedef struct msgTrailerInfo {
+  uint16_t trailerLgth;
+  uint8_t numTrailerFields;
+  uint8_t *trailerFieldIds;
+} msgTrailerInfo_t;
 
 typedef struct msgHeader {
   uint32_t headerKey;
@@ -232,7 +248,8 @@ typedef struct msgDescription {
   uint8_t encrypted;
   uint8_t handleType;
   uint16_t cmdKey;
-  msgFieldSequence_t fieldSequence[COMP_MSG_MAX_SEQUENCE];
+  uint8_t *fieldSequence;
+  uint16_t fieldFlags;
 } msgDescription_t;
 
 // infos about all possible messages used here
@@ -255,20 +272,6 @@ typedef struct msgKeyValueDesc {
   uint16_t keyLgth;
   uint16_t keyNumValues;
 } msgKeyValueDesc_t;
-
-// all infos about a message field
-
-#ifdef NOTDEF
-typedef struct msgFieldDesc {
-  uint8_t fieldNameId;
-  uint8_t fieldTypeId;
-  uint16_t fieldLgth;
-  uint16_t fieldFlags;
-  msgKeyValueDesc_t *msgKeyValueDesc;
-  fieldSizeCallback_t fieldSizeCallback;
-  dataValue_t *fieldValue;
-} msgFieldDesc_t;
-#endif
 
 // all infos about a message fieldGroup
 
@@ -452,6 +455,8 @@ typedef struct compMsgWifiData compMsgWifiData_t;
 
 typedef uint8_t (* getHeaderChksumKey_t)(compMsgDispatcher_t *self, uint8_t *data);
 typedef uint8_t (* addHeaderInfo_t)(compMsgDispatcher_t *self, uint16_t fieldLgth, uint8_t fieldId);
+typedef uint8_t (* addMidPartInfo_t)(compMsgDispatcher_t *self, uint16_t fieldLgth, uint8_t fieldId);
+typedef uint8_t (* addTrailerInfo_t)(compMsgDispatcher_t *self, uint16_t fieldLgth, uint8_t fieldId);
 typedef uint8_t (* addFieldGroup_t)(compMsgDispatcher_t *self, char *fileName, uint16_t fieldGroupId, uint16_t cmdKey);
 typedef uint8_t (* handleMsgFileNameLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgHeadsLine_t)(compMsgDispatcher_t *self);
@@ -468,6 +473,7 @@ typedef void (* freeCompMsgMsgDesc_t)(compMsgMsgDesc_t *compMsgMsgDesc);
 
 typedef struct compMsgMsgDesc {
   int expectedLines;
+  int currLineNo;
   msgDescriptionInfos_t msgDescriptionInfos;
   int numMsgFieldGroupInfo;
   int maxMsgFieldGroupInfo;
@@ -476,10 +482,14 @@ typedef struct compMsgMsgDesc {
   uint8_t *msgFieldGroupFileName;
 
   msgHeaderInfo_t msgHeaderInfo;
+  msgMidPartInfo_t msgMidPartInfo;
+  msgTrailerInfo_t msgTrailerInfo;
   msgFieldValues_t msgFieldValues;
 
   getHeaderChksumKey_t getHeaderChksumKey;
   addHeaderInfo_t addHeaderInfo;
+  addMidPartInfo_t addMidPartInfo;
+  addTrailerInfo_t addTrailerInfo;
   addFieldGroup_t addFieldGroup;
 
   handleMsgFile_t handleMsgFile;

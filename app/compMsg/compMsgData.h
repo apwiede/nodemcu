@@ -45,11 +45,7 @@
 typedef struct compMsgData compMsgData_t;
 #include "compMsgDispatcher.h"
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
-#define COMP_MSG_HAS_CRC              (1 << 0)
+//#define COMP_MSG_HAS_CRC              (1 << 0)
 #define COMP_MSG_UINT8_CRC            (1 << 1)
 #define COMP_MSG_HAS_FILLER           (1 << 2)
 #define COMP_MSG_U8_CMD_KEY           (1 << 3)
@@ -57,7 +53,7 @@ extern "C" {
 #define COMP_MSG_IS_INITTED           (1 << 5)
 #define COMP_MSG_IS_PREPARED          (1 << 6)
 #define COMP_MSG_CRC_USE_HEADER_LGTH  (1 << 7)
-#define COMP_MSG_HAS_TOTAL_CRC        (1 << 8)
+//#define COMP_MSG_HAS_TOTAL_CRC        (1 << 8)
 #define COMP_MSG_UINT8_TOTAL_CRC      (1 << 9)
 
 #define COMP_MSG_FIELD_IS_SET         (1 << 0)
@@ -77,17 +73,6 @@ extern "C" {
 #define WEB_SOCKET_TYPE_CLIENT        0x10
 
 #define checkHandleOK(addr) if(addr == NULL) return COMP_MSG_ERR_BAD_HANDLE
-
-typedef struct buildMsgInfos {
-  uint8_t numRows; 
-  uint8_t tableRow;
-  uint8_t tableCol;
-  int numericValue;
-  size_t sizeValue;
-  uint8_t *stringValue;
-  uint8_t *actionName;
-  uint16_t srcId;
-} buildMsgInfos_t;
 
 typedef uint8_t (* createMsg_t)(compMsgDispatcher_t *self, int numFields, uint8_t **handle);
 typedef uint8_t (* addField_t)(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth);
@@ -139,7 +124,6 @@ typedef struct compMsgData {
   size_t maxMsgValParts;
   uint8_t *prepareValuesCbName;
   
-  buildMsgInfos_t buildMsgInfos;
   socketUserData_t *sud;
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
@@ -169,8 +153,4 @@ typedef struct compMsgData {
 compMsgData_t *newCompMsgData(void);
 uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMsgDispatcher);
  
-#ifdef	__cplusplus
-}
-#endif
-
 #endif	/* COMP_MSG_DATA_H */

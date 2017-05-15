@@ -61,12 +61,13 @@ typedef struct msgRequestInfo {
   socketUserData_t *sud;
   compMsgDispatcher_t *requestDispatcher;
   uint8_t *data;
+  uint32_t IPAddr;
   uint16_t lgth;
   uint16_t currLgth;
   uint16_t currIdx;
   uint16_t totalLgth;
   bool isComplete;
-  uint32_t IPAddr;
+  bool isUsed;
 } msgRequestInfo_t;
 
 typedef struct msgRequestInfos {
