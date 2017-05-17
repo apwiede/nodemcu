@@ -41,7 +41,7 @@
 #ifndef COMP_MSG_FILE_H
 #define	COMP_MSG_FILE_H
 
-#define MSG_MAX_LINE_FIELDS 10
+#define MSG_MAX_LINE_FIELDS 15
 
 typedef uint8_t (* openFile_t)(compMsgDispatcher_t *self, const uint8_t *fileName, const uint8_t *fileMode);
 typedef uint8_t (* closeFile_t)(compMsgDispatcher_t *self);

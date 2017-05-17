@@ -131,17 +131,22 @@ static uint8_t getLineFields(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t 
   char *cp;
   char *ep;
   int idx;
+  compMsgFile_t *compMsgFile;
 
-  self->compMsgFile->numLineFields = 0;
+  compMsgFile = self->compMsgFile;
+  compMsgFile->numLineFields = 0;
   cp = myStr;
   ep = myStr + lgth;
-  self->compMsgFile->lineFields[self->compMsgFile->numLineFields] = cp;
+  compMsgFile->lineFields[compMsgFile->numLineFields] = cp;
   while (cp < ep) {
     if (*cp == ',') {
       *cp = '\0';
       cp++;
-      self->compMsgFile->numLineFields++;
-      self->compMsgFile->lineFields[self->compMsgFile->numLineFields] = cp;
+      compMsgFile->numLineFields++;
+      if (compMsgFile->numLineFields >= MSG_MAX_LINE_FIELDS) {
+        return COMP_MSG_ERR_TOO_MANY_LINE_FIELDS;
+      }
+      compMsgFile->lineFields[self->compMsgFile->numLineFields] = cp;
     } else {
       if ((*cp == '\r') || (*cp == '\n')) {
         *cp = '\0';
@@ -149,12 +154,12 @@ static uint8_t getLineFields(compMsgDispatcher_t *self, uint8_t *myStr, uint8_t 
       cp++;
     }
   }
-  self->compMsgFile->numLineFields++;
-  idx = 0;
-while (idx < self->compMsgFile->numLineFields) {
-//ets_printf("lineField: %d: %s!\n", idx, self->compMsgFile->lineFields[idx]);
-idx++;
-}
+  compMsgFile->numLineFields++;
+//  idx = 0;
+//while (idx < compMsgFile->numLineFields) {
+//ets_printf("lineField: %d: %s!\n", idx, compMsgFile->lineFields[idx]);
+//idx++;
+//}
   return COMP_MSG_ERR_OK;
 }
 
@@ -205,6 +210,8 @@ static uint8_t compMsgFileInit(compMsgDispatcher_t *self) {
   compMsgFile = self->compMsgFile;
   compMsgFile->openFile = &openFile;
   compMsgFile->closeFile = &closeFile;
+ets_printf("compMsgFileInit\n");
+ets_printf("compMsgFile->closeFile: %p\n", compMsgFile->closeFile);
   compMsgFile->flushFile = &flushFile;
   compMsgFile->readLine = &readLine;
   compMsgFile->writeLine = &writeLine;

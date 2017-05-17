@@ -225,6 +225,7 @@ static uint8_t handleMsgFileInternal(compMsgDispatcher_t *self, uint8_t *fileNam
   char *ep;
   int numLines;
   int idx;
+  char *cp;
   compMsgMsgDesc_t *compMsgMsgDesc;
   compMsgFile_t *compMsgFile;
   msgFieldGroupInfo_t *msgFieldGroupInfo;
@@ -235,17 +236,28 @@ static uint8_t handleMsgFileInternal(compMsgDispatcher_t *self, uint8_t *fileNam
   result = compMsgFile->openFile(self, fileName, "r");
   checkErrOK(result);
 #undef checkErrOK
-#define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { self->compMsgFile->closeFile(self); return result; }
+#define checkErrOK(result) if (result != COMP_MSG_ERR_OK) { compMsgFile->closeFile(self); return result; }
   numLines = 0;
   while (1) {
     result = compMsgFile->readLine(self, &buffer, &lgth);
     checkErrOK(result);
     if (lgth == 0) {
-      if (numLines - 1 != self->compMsgMsgDesc->expectedLines) {
-        COMP_MSG_DBG(self, "Y", 0, "Error numLines: %d expectedLines: %d", numLines, self->compMsgMsgDesc->expectedLines);
+      if (numLines - 1 > compMsgMsgDesc->expectedLines) {
+        COMP_MSG_DBG(self, "Y", 0, "Error numLines: %d expectedLines: %d", numLines, compMsgMsgDesc->expectedLines);
+        result = compMsgFile->closeFile(self);
         return COMP_MSG_ERR_BAD_NUM_DESC_FILE_LINES;
       }
       break;
+    }
+    // check for empty line or line with spaces only
+    cp = buffer;
+    while ((*cp == ' ') || (*cp == '\r') || (*cp == '\n')) {
+      cp++;
+    }
+    if ((cp - (char *)buffer) == lgth) {
+      // skip empty line
+      COMP_MSG_DBG(self, "Y", 0, "Warning skipping empty line %d", numLines);
+      continue;
     }
     buffer[lgth] = 0;
     result = compMsgFile->getLineFields(self, buffer, lgth);
@@ -278,9 +290,9 @@ static uint8_t handleMsgFileInternal(compMsgDispatcher_t *self, uint8_t *fileNam
       checkErrOK(result);
     }
   }
+  result = compMsgFile->closeFile(self);
 #undef checkErrOK
 #define checkErrOK(result) if(result != COMP_MSG_ERR_OK) { return result; }
-  result = compMsgFile->closeFile(self);
   checkErrOK(result);
   return result;
 }
@@ -302,7 +314,7 @@ static uint8_t handleMsgFile(compMsgDispatcher_t *self, uint8_t *fileName, handl
   result = handleMsgFileInternal(self, fileName, handleMsgLine);
   checkErrOK(result);
   compMsgMsgDesc = self->compMsgMsgDesc;
-COMP_MSG_DBG(self, "E", 1, "handleMsgFiles done");
+  COMP_MSG_DBG(self, "E", 1, "handleMsgFiles done");
   if (compMsgMsgDesc->numMsgFieldGroupInfo > 0) {
     // handle fieldGroup files here
     compMsgMsgDesc->currMsgFieldGroupInfo = 0;
@@ -403,11 +415,17 @@ static uint8_t handleMsgCommonLine(compMsgDispatcher_t *self) {
   msgTrailerInfo_t *msgTrailerInfo;
   uint8_t *trailerFieldIds;
   uint8_t *fieldNameStr;
+  fieldInfo_t *fieldInfoPtr;
+  int fieldIdx;
 
   result = COMP_MSG_ERR_OK;
   compMsgMsgDesc = self->compMsgMsgDesc;
-  compMsgFile = self->compMsgFile;
   compMsgTypesAndNames = self->compMsgTypesAndNames;
+  msgHeaderInfo = &compMsgMsgDesc->msgHeaderInfo;
+  msgMidPartInfo = &compMsgMsgDesc->msgMidPartInfo;
+  msgTrailerInfo = &compMsgMsgDesc->msgTrailerInfo;
+  msgDescription = NULL;
+  compMsgFile = self->compMsgFile;
   msgFieldGroupInfo = &compMsgMsgDesc->msgFieldGroupInfos[compMsgMsgDesc->currMsgFieldGroupInfo];
   if (compMsgFile->numLineFields < 3) {
     return COMP_MSG_ERR_FIELD_DESC_TOO_FEW_FIELDS;
@@ -415,7 +433,7 @@ static uint8_t handleMsgCommonLine(compMsgDispatcher_t *self) {
   fieldName = compMsgFile->lineFields[0];
   fieldType = compMsgFile->lineFields[1];
   fieldLgth = compMsgFile->lineFields[2];
-  COMP_MSG_DBG(self, "E", 2, "handleMsgCommonLine: %s: %s", fieldName, fieldType);
+  COMP_MSG_DBG(self, "E", 1, "handleMsgCommonLine: %s: %s", fieldName, fieldType);
   fieldInfo.fieldFlags = 0;
   fieldInfo.keyValueDesc = NULL;
 
@@ -443,7 +461,7 @@ ets_printf("%s id: %d lgth: %d fieldLgth: %s\n", fieldName, fieldNameId, lgth, f
   if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_DESC_HEADER_FIELD_GROUP) {
     result = compMsgFile->getIntFieldValue(self, compMsgFile->lineFields[3], &ep, 0, &headerFlag);
     checkErrOK(result);
-    fieldInfo.fieldOffset = compMsgMsgDesc->msgHeaderInfo.headerLgth;
+    fieldInfo.fieldOffset = msgHeaderInfo->headerLgth;
     switch (headerFlag) {
     case 0:
       break;
@@ -461,82 +479,7 @@ ets_printf("%s id: %d lgth: %d fieldLgth: %s\n", fieldName, fieldNameId, lgth, f
     checkErrOK(result);
   }
 
-  // add description infos
-  if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_DESC_FIELD_GROUP) {
-    msgDescriptionInfos = &compMsgMsgDesc->msgDescriptionInfos;
-    descIdx = 0;
-//        binary scan $cmdKey S cmdKeyVal
-    while (descIdx < msgDescriptionInfos->numMsgDescriptions) {
-      msgDescription = &msgDescriptionInfos->msgDescriptions[descIdx];
-//      if (cmdKeyVal == msgDescription->cmdKey) {
-//        break;
-//      }
-      descIdx++;
-    }
-    if (msgDescription->fieldSequence == NULL) {
-      // FIXME need to allocate correct space here !!!
-      sequenceLgth = msgHeaderInfo->numHeaderFields + msgMidPartInfo->numMidPartFields + msgTrailerInfo->numTrailerFields + /* ??? */ 10;
-      msgDescription->fieldSequence = os_zalloc(sequenceLgth * sizeof(uint8_t));
-      checkAllocOK(msgDescription->fieldSequence);
-      // add the header and midPart field ids before appending the message specific ids
-      msgHeaderInfo  = &compMsgMsgDesc->msgHeaderInfo;
-      headerIdx = 0;
-      headerFieldIds = msgHeaderInfo->headerFieldIds;
-      if (headerFieldIds == NULL) {
-ets_printf("headerFieldIds is NULL\n");
-return COMP_MSG_ERR_BAD_HEADER_FIELD_FLAG;
-      }
-      while (headerIdx < msgHeaderInfo->numHeaderFields) {
-        msgDescription->fieldSequence[headerIdx] = headerFieldIds[headerIdx];
-        headerIdx++;
-      }
-      // add the midpart ids!!
-      msgMidPartInfo = &compMsgMsgDesc->msgMidPartInfo;
-      midPartIdx = 0;
-      midPartFieldIds = msgMidPartInfo->midPartFieldIds;
-      while (midPartIdx < msgMidPartInfo->numMidPartFields) {
-        fldId = midPartFieldIds[midPartIdx];
-        result = compMsgTypesAndNames->getFieldNameStrFromId(self, fldId, &fieldNameStr);
-        checkErrOK(result);
-        if (c_strcmp(fieldNameStr, "@cmdLgth") == 0) {
-          if (msgDescription->fieldFlags & COMP_MSG_HAS_CMD_LGTH) {
-            msgDescription->fieldSequence[midPartIdx] = fldId;
-          }
-        } else {
-          msgDescription->fieldSequence[midPartIdx] = fldId;
-        }
-        midPartIdx++;
-      }
-    }
-    msgDescription->fieldSequence[midPartIdx] = fieldNameId;
-    if (compMsgMsgDesc->expectedLines == compMsgMsgDesc->currLineNo) {
-      // add the trailer info
-      msgTrailerInfo = &compMsgMsgDesc->msgTrailerInfo;
-      trailerIdx = 0;
-      trailerFieldIds = msgTrailerInfo->trailerFieldIds;
-      while (trailerIdx < msgTrailerInfo->numTrailerFields) {
-        fldId = trailerFieldIds[trailerIdx];
-        result = compMsgTypesAndNames->getFieldNameStrFromId(self, fldId, &fieldNameStr);
-        checkErrOK(result);
-        if (c_strcmp(fieldNameStr, "@crc") == 0) {
-          if(msgDescription->fieldFlags & COMP_MSG_HAS_CRC) {
-            msgDescription->fieldSequence[trailerIdx] = fldId;
-          }
-        } else {
-          if (c_strcmp(fieldNameStr, "@totalCrc") == 0) {
-            if (msgDescription->fieldFlags & COMP_MSG_HAS_TOTAL_CRC) {
-              msgDescription->fieldSequence[trailerIdx] = fldId;
-            }
-          } else {
-            msgDescription->fieldSequence[trailerIdx] = fldId;
-          }
-        }
-        trailerIdx++;
-      }
-    }
-  }
-
-  COMP_MSG_DBG(self, "E", 2, "%s: id: %d type: %s %d lgth: %d", compMsgFile->lineFields[0], fieldNameId, compMsgFile->lineFields[1], fieldInfo.fieldTypeId, fieldInfo.fieldLgth);
+  COMP_MSG_DBG(self, "E", 1, "%s: id: %d type: %s %d lgth: %d", compMsgFile->lineFields[0], fieldNameId, compMsgFile->lineFields[1], fieldInfo.fieldTypeId, fieldInfo.fieldLgth);
   switch (msgFieldGroupInfo->fieldGroupId) {
   case COMP_MSG_DESC_HEADER_FIELD_GROUP:
     fieldInfo.fieldFlags |= COMP_MSG_FIELD_HEADER;
@@ -567,6 +510,115 @@ return COMP_MSG_ERR_BAD_HEADER_FIELD_FLAG;
     result = compMsgTypesAndNames->setMsgFieldInfo(self, fieldNameId, &fieldInfo);
     checkErrOK(result);
     break;
+  }
+  // add description infos
+  if (msgFieldGroupInfo->fieldGroupId == COMP_MSG_DESC_FIELD_GROUP) {
+    msgDescriptionInfos = &compMsgMsgDesc->msgDescriptionInfos;
+    descIdx = 0;
+ets_printf("numDescriptions: %d\n", msgDescriptionInfos->numMsgDescriptions);
+    while (descIdx < msgDescriptionInfos->numMsgDescriptions) {
+      msgDescription = &msgDescriptionInfos->msgDescriptions[descIdx];
+      if (msgFieldGroupInfo->cmdKey == msgDescription->cmdKey) {
+        break;
+      }
+      descIdx++;
+    }
+ets_printf("descIdx: %d\n", descIdx);
+    if (msgDescription->fieldSequence == NULL) {
+      // FIXME need to allocate correct space here !!!
+      sequenceLgth = msgHeaderInfo->numHeaderFields + msgMidPartInfo->numMidPartFields + msgTrailerInfo->numTrailerFields + /* ??? */ 10;
+      msgDescription->fieldSequence = os_zalloc(sequenceLgth * sizeof(uint8_t));
+      checkAllocOK(msgDescription->fieldSequence);
+      msgDescription->fieldOffsets = os_zalloc(sequenceLgth * sizeof(uint16_t));
+      checkAllocOK(msgDescription->fieldOffsets);
+      // add the header and midPart field ids before appending the message specific ids
+      msgHeaderInfo  = &compMsgMsgDesc->msgHeaderInfo;
+      fieldIdx = 0;
+      headerIdx = 0;
+      headerFieldIds = msgHeaderInfo->headerFieldIds;
+      while (headerIdx < msgHeaderInfo->numHeaderFields) {
+        msgDescription->fieldSequence[fieldIdx] = headerFieldIds[headerIdx];
+        msgDescription->fieldOffsets[fieldIdx] = msgDescription->lastFieldOffset;
+        fieldInfoPtr = compMsgTypesAndNames->msgFieldInfos.fieldInfos[headerFieldIds[headerIdx]];
+        msgDescription->lastFieldOffset += fieldInfoPtr->fieldLgth;
+ets_printf("offset: %d\n", msgDescription->lastFieldOffset);
+        fieldIdx++;
+        headerIdx++;
+      }
+      // add the midpart ids!!
+      msgMidPartInfo = &compMsgMsgDesc->msgMidPartInfo;
+      midPartIdx = 0;
+      midPartFieldIds = msgMidPartInfo->midPartFieldIds;
+      while (midPartIdx < msgMidPartInfo->numMidPartFields) {
+        fldId = midPartFieldIds[midPartIdx];
+        result = compMsgTypesAndNames->getFieldNameStrFromId(self, fldId, &fieldNameStr);
+        checkErrOK(result);
+        fieldInfoPtr = compMsgTypesAndNames->msgFieldInfos.fieldInfos[fldId];
+        if (c_strcmp(fieldNameStr, "@cmdLgth") == 0) {
+          if (msgDescription->fieldFlags & COMP_MSG_HAS_CMD_LGTH) {
+            msgDescription->fieldSequence[fieldIdx] = fldId;
+            msgDescription->fieldOffsets[fieldIdx] = msgDescription->lastFieldOffset;
+            fieldIdx++;
+            msgDescription->lastFieldOffset += fieldInfoPtr->fieldLgth;
+ets_printf("offset: %d\n", msgDescription->lastFieldOffset);
+          }
+        } else {
+          msgDescription->fieldSequence[fieldIdx] = fldId;
+          msgDescription->fieldOffsets[fieldIdx] = msgDescription->lastFieldOffset;
+          fieldIdx++;
+          msgDescription->lastFieldOffset += fieldInfoPtr->fieldLgth;
+ets_printf("offset: %d\n", msgDescription->lastFieldOffset);
+        }
+        midPartIdx++;
+      }
+    }
+    fieldInfoPtr = compMsgTypesAndNames->msgFieldInfos.fieldInfos[fieldNameId];
+    msgDescription->fieldSequence[fieldIdx] = fieldNameId;
+    msgDescription->fieldOffsets[fieldIdx] = msgDescription->lastFieldOffset;
+    fieldIdx++;
+    if (fieldInfoPtr == NULL) {
+      return COMP_MSG_ERR_BAD_FIELD_INFO;
+    }
+    msgDescription->lastFieldOffset += fieldInfoPtr->fieldLgth;
+ets_printf("offset: %d\n", msgDescription->lastFieldOffset);
+    if (compMsgMsgDesc->expectedLines == compMsgMsgDesc->currLineNo) {
+      // add the trailer info
+      msgTrailerInfo = &compMsgMsgDesc->msgTrailerInfo;
+      trailerIdx = 0;
+      trailerFieldIds = msgTrailerInfo->trailerFieldIds;
+      while (trailerIdx < msgTrailerInfo->numTrailerFields) {
+        fldId = trailerFieldIds[trailerIdx];
+        result = compMsgTypesAndNames->getFieldNameStrFromId(self, fldId, &fieldNameStr);
+        checkErrOK(result);
+        fieldInfoPtr = compMsgTypesAndNames->msgFieldInfos.fieldInfos[fldId];
+        if (c_strcmp(fieldNameStr, "@crc") == 0) {
+          if(msgDescription->fieldFlags & COMP_MSG_HAS_CRC) {
+            msgDescription->fieldSequence[fieldIdx] = fldId;
+            msgDescription->fieldOffsets[fieldIdx] = msgDescription->lastFieldOffset;
+            msgDescription->lastFieldOffset += fieldInfoPtr->fieldLgth;
+ets_printf("offset: %d\n", msgDescription->lastFieldOffset);
+            fieldIdx++;
+          }
+        } else {
+          if (c_strcmp(fieldNameStr, "@totalCrc") == 0) {
+            if (msgDescription->fieldFlags & COMP_MSG_HAS_TOTAL_CRC) {
+              msgDescription->fieldSequence[fieldIdx] = fldId;
+              msgDescription->fieldOffsets[fieldIdx] = msgDescription->lastFieldOffset;
+              msgDescription->lastFieldOffset += fieldInfoPtr->fieldLgth;
+ets_printf("offset: %d\n", msgDescription->lastFieldOffset);
+              fieldIdx++;
+            }
+          } else {
+            msgDescription->fieldSequence[fieldIdx] = fldId;
+            msgDescription->fieldOffsets[fieldIdx] = msgDescription->lastFieldOffset;
+            msgDescription->lastFieldOffset += fieldInfoPtr->fieldLgth;
+ets_printf("offset: %d\n", msgDescription->lastFieldOffset);
+            fieldIdx++;
+          }
+        }
+        trailerIdx++;
+      }
+    }
   }
   return result;
 }
@@ -802,7 +854,7 @@ ets_printf("handleMsgHeadsLine: compMsgData: %p\n", self->compMsgData);
   fieldIdx = 1;
   headerFieldIdx = 0;
   offset = 0;
-  COMP_MSG_DBG(self, "E", 2, "handleMsgHeadsLine: %s: %s", compMsgFile->lineFields[0], compMsgFile->lineFields[1]);
+  COMP_MSG_DBG(self, "E", 1, "handleMsgHeadsLine: %s: %s", compMsgFile->lineFields[0], compMsgFile->lineFields[1]);
   while (fieldIdx < compMsgTypesAndNames->numSpecFieldIds) {
     fieldInfo = compMsgTypesAndNames->msgFieldInfos.fieldInfos[fieldIdx];
     if (fieldInfo == NULL) {

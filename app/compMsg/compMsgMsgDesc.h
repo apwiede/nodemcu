@@ -249,6 +249,8 @@ typedef struct msgDescription {
   uint8_t handleType;
   uint16_t cmdKey;
   uint8_t *fieldSequence;
+  uint16_t *fieldOffsets;
+  uint16_t lastFieldOffset;
   uint16_t fieldFlags;
 } msgDescription_t;
 
