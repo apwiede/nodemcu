@@ -4,4 +4,3 @@
 @numKeyValues,2
 @#sequenceNum,@getClientSequenceNum
 @#clientStatus,@getClientStatus
-
