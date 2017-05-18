@@ -38,7 +38,7 @@
  * Created on October 7st, 2016
  */
 
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 static bool bssScanRunning = false;
 static bssScanInfos_t bssScanInfos = { NULL, 0, 0};

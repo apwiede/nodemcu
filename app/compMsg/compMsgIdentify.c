@@ -38,16 +38,7 @@
  * Created on October 6st, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "flash_fs.h"
-
-#include "c_string.h"
-#include "c_stdlib.h"
-#include "c_stdio.h"
-#include "platform.h"
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 #define DISP_FLAG_SHORT_CMD_KEY    (1 << 0)
 #define DISP_FLAG_HAVE_CMD_LGTH    (1 << 1)

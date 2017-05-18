@@ -38,7 +38,7 @@
  * Created on May 5st, 2017
  */
 
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 static volatile int fileFd = FS_OPEN_OK - 1;
 

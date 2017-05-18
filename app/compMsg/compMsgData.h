@@ -41,9 +41,9 @@
 #ifndef COMP_MSG_DATA_H
 #define	COMP_MSG_DATA_H
 
-#include "c_types.h"
+//#include "c_types.h"
 typedef struct compMsgData compMsgData_t;
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 //#define COMP_MSG_HAS_CRC              (1 << 0)
 #define COMP_MSG_UINT8_CRC            (1 << 1)

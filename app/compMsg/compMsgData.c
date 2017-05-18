@@ -31,11 +31,7 @@
 *
 */
 
-#include "osapi.h"
-#include "mem.h"
-#include "c_string.h"
-#include "c_stdlib.h"
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 #define HANDLE_PREFIX "stmsg_"
 

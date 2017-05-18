@@ -38,15 +38,7 @@
  * Created on October 1st, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "flash_fs.h"
-
-#include "c_string.h"
-#include "c_stdio.h"
-#include "c_stdlib.h"
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 typedef struct flag2Str {
   uint32_t flagVal;

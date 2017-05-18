@@ -50,16 +50,8 @@
 
 #include "user_interface.h"
 #include "espconn.h"
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "flash_fs.h"
-//#include "../rboot/rboot-ota.h"
 
-#include "c_string.h"
-#include "c_stdio.h"
-#include "c_stdlib.h"
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 
 #define UPGRADE_FLAG_IDLE    0x00

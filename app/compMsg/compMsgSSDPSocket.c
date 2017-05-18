@@ -38,21 +38,12 @@
  * Created on March 10th, 2017
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "flash_fs.h"
-
 #include "lwip/err.h"
 #include "lwip/ip_addr.h"
 #include "espconn.h"
 #include "lwip/dns.h"
 
-#include "c_string.h"
-#include "c_stdlib.h"
-#include "c_stdio.h"
-#include "platform.h"
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 typedef struct socketInfo {
   struct espconn *pesp_conn;

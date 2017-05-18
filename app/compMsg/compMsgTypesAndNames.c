@@ -38,7 +38,7 @@
  * Created on November 24, 2016
  */
 
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 static uint8_t compMsgTypesAndNamesId;
 

@@ -38,15 +38,7 @@
  * Created on December 16th, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "flash_fs.h"
-
-#include "c_string.h"
-#include "c_stdio.h"
-#include "c_stdlib.h"
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 // ================================= uartTimerResetRequest ====================================
 
@@ -78,7 +70,7 @@ static uint8_t resetRequest(compMsgDispatcher_t *self, int slot) {
 
   COMP_MSG_DBG(self, "s", 1, "resetRequest slot: %d", slot);
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[slot];
+  msgRequestInfo = msgRequestInfos->msgRequestInfo[slot];
   if (msgRequestInfo->data != NULL) {
     os_free(msgRequestInfo->data);
   }
@@ -96,7 +88,7 @@ static uint8_t startRequest(compMsgDispatcher_t *self) {
 
   result = COMP_MSG_ERR_OK;
   COMP_MSG_DBG(self, "R", 1, "should start request: %d\n", self->compMsgRequest->msgRequestInfos.currRequestIdx);
-  msgRequestInfo = &self->compMsgRequest->msgRequestInfos.msgRequestInfo[self->compMsgRequest->msgRequestInfos.currRequestIdx];
+  msgRequestInfo = self->compMsgRequest->msgRequestInfos.msgRequestInfo[self->compMsgRequest->msgRequestInfos.currRequestIdx];
 //FIXME
 #ifdef NOTDEF
   compMsgData = msgRequestInfo->requestData;
@@ -134,7 +126,7 @@ static uint8_t startNextRequest(compMsgDispatcher_t *self) {
   msgRequestInfos_t *msgRequestInfos;
 
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[msgRequestInfos->currRequestIdx];
+  msgRequestInfo = msgRequestInfos->msgRequestInfo[msgRequestInfos->currRequestIdx];
   if (msgRequestInfos->currRequestIdx < 0) {
     if (msgRequestInfos->currRequestIdx < msgRequestInfos->lastRequestIdx) {
       msgRequestInfos->currRequestIdx = 0;
@@ -164,7 +156,7 @@ static uint8_t addRequestData(compMsgDispatcher_t *self, uint8_t requestType, so
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
   requestIdx = 0;
   while (requestIdx < COMP_MSG_MAX_REQUESTS) {
-    msgRequestInfo = &msgRequestInfos->msgRequestInfo[requestIdx];
+    msgRequestInfo = msgRequestInfos->msgRequestInfo[requestIdx];
     if (msgRequestInfo->sud == sud) {
       break;
     }
@@ -214,7 +206,7 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, soc
   found = false;
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
   while (requestIdx < COMP_MSG_MAX_REQUESTS) {
-    msgRequestInfo = &msgRequestInfos->msgRequestInfo[requestIdx];
+    msgRequestInfo = msgRequestInfos->msgRequestInfo[requestIdx];
     if ((msgRequestInfo->requestType == requestType) && (msgRequestInfo->sud == sud)) {
       idxDeleted = requestIdx;
       if (requestIdx == msgRequestInfos->currRequestIdx) {
@@ -227,8 +219,8 @@ static uint8_t deleteRequest(compMsgDispatcher_t *self, uint8_t requestType, soc
   }
   // move the following entries one idx down
   if (requestIdx < COMP_MSG_MAX_REQUESTS) {
-    msgRequestInfo = &msgRequestInfos->msgRequestInfo[requestIdx];
-    msgRequestInfo1 = &msgRequestInfos->msgRequestInfo[requestIdx + 1];
+    msgRequestInfo = msgRequestInfos->msgRequestInfo[requestIdx];
+    msgRequestInfo1 = msgRequestInfos->msgRequestInfo[requestIdx + 1];
     msgRequestInfo->requestType = msgRequestInfo1->requestType;
     msgRequestInfo->sud = msgRequestInfo1->sud;
   }
@@ -290,7 +282,7 @@ static uint8_t detectMsg(compMsgDispatcher_t *self, const uint8_t *buffer, int l
     COMP_MSG_DBG(self, "I", 2, "++++detectMessage: 0x%02x lgth: %d queueIdx: %d isComplete: %d", buffer[0], lgth, queueIdx, *isComplete);
   }
   msgRequestInfos = &self->compMsgRequest->msgRequestInfos;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[queueIdx];
+  msgRequestInfo = msgRequestInfos->msgRequestInfo[queueIdx];
   hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
 //FIXME
 #ifdef NOTDEF
@@ -353,13 +345,16 @@ static uint8_t compMsgRequestInit(compMsgDispatcher_t *self) {
   msgRequestInfos->currRequestIdx = -1;
   msgRequestInfos->lastRequestIdx = -1;
   idx = 0;
-  msgRequestInfo = &msgRequestInfos->msgRequestInfo[idx];
-  msgRequestInfo->requestDispatcher = self;
-  idx++;
   while (idx < COMP_MSG_MAX_REQUESTS) {
-    msgRequestInfo = &msgRequestInfos->msgRequestInfo[idx];
-    msgRequestInfo->requestDispatcher = newCompMsgDispatcher();
-    checkAllocOK(msgRequestInfo->requestDispatcher);
+    msgRequestInfos->msgRequestInfo[idx] = os_zalloc(sizeof(msgRequestInfo_t));
+    checkAllocOK(msgRequestInfos->msgRequestInfo[idx]);
+    msgRequestInfo = msgRequestInfos->msgRequestInfo[idx];
+    if (idx == 0) {
+      msgRequestInfo->requestDispatcher = self;
+    } else {
+      msgRequestInfo->requestDispatcher = newCompMsgDispatcher();
+      checkAllocOK(msgRequestInfo->requestDispatcher);
+    }
     idx++;
   }
 

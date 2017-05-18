@@ -38,12 +38,7 @@
  * Created on September 24, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "c_string.h"
-#include "c_stdlib.h"
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 static int sequenceNum = 0;
 static uint8_t compMsgDataViewId;

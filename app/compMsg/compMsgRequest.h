@@ -59,9 +59,9 @@ typedef struct socketUserData socketUserData_t;
 typedef struct msgRequestInfo {
   uint8_t requestType;
   socketUserData_t *sud;
+  uint32_t IPAddr;
   compMsgDispatcher_t *requestDispatcher;
   uint8_t *data;
-  uint32_t IPAddr;
   uint16_t lgth;
   uint16_t currLgth;
   uint16_t currIdx;
@@ -71,7 +71,7 @@ typedef struct msgRequestInfo {
 } msgRequestInfo_t;
 
 typedef struct msgRequestInfos {
-  msgRequestInfo_t msgRequestInfo[COMP_MSG_MAX_REQUESTS];
+  msgRequestInfo_t *msgRequestInfo[COMP_MSG_MAX_REQUESTS];
   int currRequestIdx;
   int lastRequestIdx;
 } msgRequestInfos_t;

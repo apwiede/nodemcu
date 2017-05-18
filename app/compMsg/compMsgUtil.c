@@ -38,17 +38,10 @@
  * Created on December 16th, 2016
  */
 
-#include "osapi.h"
-#include "c_types.h"
-#include "mem.h"
-#include "flash_fs.h"
-
 #include "c_limits.h"
-#include "c_string.h"
-#include "c_stdio.h"
-#include "c_stdlib.h"
 #include "../crypto/mech.h"
-#include "compMsgDispatcher.h"
+
+#include "compMsg.h"
 
 #define BASE64_INVALID '\xff'
 #define BASE64_PADDING '='

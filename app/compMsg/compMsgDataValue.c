@@ -38,7 +38,7 @@
  * Created on April 14th, 2017
  */
 
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 const static str2id_t dataValueStr2ValueIds [] = {
   { "@provisioningSsid",     COMP_MSG_WIFI_VALUE_ID_provisioningSsid},

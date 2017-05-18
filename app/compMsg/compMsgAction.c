@@ -38,7 +38,7 @@
  * Created on October 7st, 2016
  */
 
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 #define FPM_SLEEP_MAX_TIME  0xFFFFFFF
 

@@ -38,7 +38,7 @@
  * Created on October 2st, 2016
  */
 
-#include "compMsgDispatcher.h"
+#include "compMsg.h"
 
 #ifdef GDB_STUB
 #include "../gdbstub/gdbstub.h"
