@@ -35,14 +35,14 @@
 
 #include "module.h"
 #include "lauxlib.h"
-#include "platform.h"
+//#include "platform.h"
 
-#include "c_types.h"
-#include "c_string.h"
-#include "c_stdarg.h"
+//#include "c_types.h"
+//#include "c_string.h"
+//#include "c_stdarg.h"
 #include "rom.h"
-#include "../compMsg/compMsgDispatcher.h"
-#include "osapi.h"
+#include "../compMsg/compMsg.h"
+//#include "osapi.h"
 #define MEMLEAK_DEBUG 1
 #include "mem.h"
 
