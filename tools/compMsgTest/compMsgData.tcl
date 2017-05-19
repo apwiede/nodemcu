@@ -396,47 +396,6 @@ puts stderr "compMsgData2 setDataViewData"
       return [checkErrOK OK]
     }
 
-    # ================================= addField ====================================
-    
-    proc  addField {compMsgDataVar fieldName fieldType fieldLgth} {
-      upvar $compMsgDataVar compMsgData
-    
-      if {[dict get $compMsgData numFields] >= [dict get $compMsgData maxFields]} {
-        checkErrOK [TOO_MANY_FIELDS]
-      }
-      set result [::compMsg dataView getFieldTypeIdFromStr $fieldType fieldTypeId]
-      checkErrOK $result
-      set result [::compMsg compMsgDataView getFieldNameIdFromStr compMsgDispatcher $fieldName fieldNameId $::COMP_MSG_INCR]
-      checkErrOK $result
-      set fieldInfo [dict create]
-      # need to check for duplicate here !!
-      if {$fieldName eq "@filler"} {
-        dict lappend compMsgData flags COMP_MSG_HAS_FILLER
-        set fieldLgth 0
-        dict set fieldInfo fieldNameId $fieldNameId
-        dict set fieldInfo fieldTypeId $fieldTypeId
-        dict set fieldInfo fieldLgth $fieldLgth
-        dict set fieldInfo fieldFlags [list]
-        dict lappend compMsgData fields $fieldInfo
-        dict incr compMsgData numFields 1
-        return [checkErrOK OK]
-      }
-      if {$fieldName eq "@crc"} {
-        dict lappend compMsgData flags COMP_MSG_HAS_CRC
-        if {$fieldType eq "uint8_t"} {
-          dict lappend compMsgData flags COMP_MSG_UINT8_CRC
-        }
-      }
-      dict set fieldInfo fieldNameId $fieldNameId
-      dict set fieldInfo fieldTypeId $fieldTypeId
-      dict set fieldInfo fieldKeyTypeId $fieldTypeId
-      dict set fieldInfo fieldLgth $fieldLgth
-      dict set fieldInfo fieldFlags [list]
-      dict lappend compMsgData fields $fieldInfo
-      dict incr compMsgData numFields 1
-      return [checkErrOK OK]
-    }
-
     # ================================= getFieldValue ====================================
     
     proc getFieldValue {compMsgDispatcherVar fieldName valueVar} {
@@ -662,9 +621,10 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
 
     # ================================= initMsg ====================================
     
-    proc initMsg {compMsgDispatcherVar} {
+    proc initMsg {compMsgDispatcherVar msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
+puts stderr "initMsg: $msgDescription!"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       # initialize field offsets for each field
       # initialize totalLgth, headerLgth, cmdLgth
@@ -672,24 +632,25 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
         return [checkErrOK ALREADY_INITTED]
       }
       dict set compMsgData fieldOffset 0
-      set numEntries [dict get $compMsgData numFields]
-      set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
-      set msgDescPartIdx 0
+      set numEntries [dict get $msgDescription numFields]
       set idx 0
       dict set compMsgData headerLgth 0
+      set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+      set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
+      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+puts stderr "numEntries: $numEntries!"
+      set fieldSequence [dict get $msgDescription fieldSequence]
       while {$idx < $numEntries} {
-        set fields [dict get $compMsgData fields]
-        set fieldInfo [lindex $fields $idx]
-        set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
+        set fieldNameId [lindex $fieldSequence $idx]
+        set fieldInfo [lindex $fieldInfos $fieldNameId]
         dict set fieldInfo fieldOffset [dict get $compMsgData fieldOffset]
-        switch [dict get $fieldInfo fieldNameId] {
+        switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_SRC -
           COMP_MSG_SPEC_FIELD_DST -
           COMP_MSG_SPEC_FIELD_TOTAL_LGTH -
           COMP_MSG_SPEC_FIELD_GUID -
           COMP_MSG_SPEC_FIELD_SRC_ID -
           COMP_MSG_SPEC_FIELD_HDR_FILLER {
-            dict incr compMsgData headerLgth [dict get $fieldInfo fieldLgth]
             dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldInfo fieldLgth]}]
           }
           COMP_MSG_SPEC_FIELD_FILLER {
@@ -717,27 +678,26 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
             dict set compMsgData cmdLgth [expr {[dict get $compMsgData totalLgth] - [dict get $compMsgData headerLgth]}]
           }
         }
-        set fields [lreplace $fields $idx $idx $fieldInfo]
-        dict set compMsgData fields $fields
+        set fieldInfos [lreplace $fieldInfos $fieldNameId $fieldNameId $fieldInfo]
+        dict set compMsgTypesAndNames fieldInfos $fieldInfos
         dict incr compMsgData fieldOffset [dict get $fieldInfo fieldLgth]
-        incr msgDescPartIdx
         incr idx
       }
       if {[dict get $compMsgData totalLgth] == 0} {
         checkErrOK [FIELD_TOTAL_LGTH_MISSING]
       }
       set totalLgth [dict get $compMsgData totalLgth]
-#puts stderr "compMsgData3 setDataViewData: totalLgth: $totalLgth!"
+puts stderr "compMsgData3 setDataViewData: totalLgth: $totalLgth!"
       set result [::compMsg dataView setDataViewData [string repeat "\x00" $totalLgth] $totalLgth]
       checkErrOK $result
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
       # set the appropriate field values for the lgth entries
       set idx 0
-      set numEntries [dict get $compMsgData numFields]
-      set fields [dict get $compMsgData fields]
+      set numEntries [dict get $msgDescription numFields]
       while {$idx < $numEntries} {
-        set fieldInfo [lindex $fields $idx]
-        switch [dict get $fieldInfo fieldNameId] {
+        set fieldNameId [lindex $fieldSequence $idx]
+        set fieldInfo [lindex $fieldInfos $fieldNameId]
+        switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_TOTAL_LGTH {
             set result [::compMsg compMsgDataView setFieldValue $fieldInfo [dict get $compMsgData totalLgth] 0]
             checkErrOK $result
@@ -749,10 +709,10 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
             dict lappend fieldInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }
         }
-        set fields [lreplace $fields $idx $idx $fieldInfo]
+        set fieldInfos [lreplace $fieldInfos $fieldNameId $fieldNameId $fieldInfo]
         incr idx
       }
-      dict set compMsgData fields $fields
+      dict set compMsgData fieldInfos $fieldInfos
       dict set compMsgDispatcher compMsgData $compMsgData
       return [checkErrOK OK]
     }

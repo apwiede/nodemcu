@@ -56,27 +56,64 @@ namespace eval compMsg {
   namespace eval compMsgBuildMsg {
     namespace ensemble create
       
-    namespace export setMsgValues buildMsg buildMsgFromHeaderPart
+    namespace export setMsgValues buildMsg buildMsgFromHeaderPart createMsgFromHeaderPart
 
     variable buildMsgInfos
 
     set buildMsgInfos [dict create]
 
-    # ================================= fixOffsetsForKeyValues ====================================
+    # ================================= createMsgFromHeaderPart ====================================
     
-    proc fixOffsetsForKeyValues {compMsgDispatcherVar} {
+    proc createMsgFromHeaderPart {compMsgDispatcherVar msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-puts stderr "==fixOffsetsForKeyValues!"
+puts stderr "===createMsgFromHeaderPart![dict keys $msgDescription]!"
+#      set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $msgDescription]
+#      checkErrOK $result
+      set compMsgData [dict create]
+      dict set compMsgData flags [list]
+#      set compMsgData [dict get $compMsgDispatcher compMsgData]
+      dict set compMsgData msgDescription $msgDescription
+      dict set compMsgDispatcher compMsgData $compMsgData
+    
+      # runAction calls at the end buildMsg
+      set prepareValuesCb [list]
+      if {[dict exists $compMsgDispatcher compMsgMsgDesc prepareValuesCbName]} {
+        set prepareValuesCb [dict get $compMsgDispatcher compMsgMsgDesc prepareValuesCbName]
+#puts stderr "prepareValuesCb: $prepareValuesCb!"
+      }
+      if {$prepareValuesCb ne [list]} {
+        $prepareValuesCb compMsgDispatcher
+        # runAction starts a call with a callback and returns here before the callback has been running!!
+        # when coming here we are finished and the callback will do the work later on!
+#puts stderr "runAction done![dict keys $compMsgDispatcher]!"
+        return $result
+      } else {
+        # buildMsg calls sendMsg at the end
+puts stderr "call buildMsg: [dict keys $compMsgDispatcher]!"
+        set result [::compMsg compMsgBuildMsg buildMsg compMsgDispatcher $msgDescription]
+      }
+      return [checkErrOK OK]
+    }
+
+    # ================================= fixOffsetsForKeyValues ====================================
+    
+    proc fixOffsetsForKeyValues {compMsgDispatcherVar msgDescription} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+    
+puts stderr "==fixOffsetsForKeyValues![dict keys $compMsgDispatcher]!"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
+      set msgDescription [dict get $compMsgData msgDescription]
+      set numFields [dict get $msgDescription numFields]
       set fieldIdx 0
-      set msgDescPartIdx 0
-      while {$fieldIdx < [dict get $compMsgData numFields]} {
-        set fields [dict get $compMsgData fields]
-        set fieldInfo [lindex $fields $fieldIdx]
-        set msgDescParts [dict get $compMsgData msgDescParts]
-        set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
-        dict set compMsgDispatcher msgDescPart $msgDescPart
+      set fieldSequence [dict get $msgDescription fieldSequence]
+      set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+      set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
+      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+      while {$fieldIdx < $numFields} {
+        set fieldId [lindex $fieldSequence $fieldIdx]
+        set fieldInfo [lindex $fieldInfos $fieldId]
+if {0} {
         set msgKeyValueDescPart [list]
         set fieldNameStr [dict get $msgDescPart fieldNameStr]
         set msgKeyValueDescPartIdx -1
@@ -150,8 +187,9 @@ puts stderr "fieldLgth2: [dict get $fieldInfo fieldLgth]!"
             dict set compMsgDispatcher compMsgData $compMsgData
           }
         }
+}
         set compMsgData [dict get $compMsgDispatcher compMsgData]
-        incr msgDescPartIdx
+#        incr msgDescPartIdx
         incr fieldIdx
       }
       return $::COMP_MSG_ERR_OK
@@ -215,20 +253,14 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
     
     # ================================= setMsgValues ====================================
     
-    proc setMsgValues {compMsgDispatcherVar} {
+    proc setMsgValues {compMsgDispatcherVar msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
 #puts stderr "setMsgValues"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
-      set msgDescPartIdx 0
-      set msgValPartIdx 0
-      set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
-      set msgKeyValueDescParts [dict get $compMsgDispatcher msgKeyValueDescParts]
-      set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
-      set msgValPart [lindex $msgValParts $msgValPartIdx]
-      while {($msgDescPartIdx < [dict get $compMsgData numFields]) && ($msgValPartIdx <= [dict get $compMsgDispatcher compMsgMsgDesc numMsgValParts])} {
-        set msgDescPart [lindex $msgDescParts $msgDescPartIdx]
-        dict set compMsgDispatcher msgDescPart $msgDescPart
+      set numEntries [dict get $msgDescription numFields]
+      set fieldIdx 0
+      while {$fieldIdx < $numEntries} {
         set idx 0
         set found false
         if {[string range [dict get $msgDescPart fieldNameStr] 0 0] eq "#"} {
@@ -276,10 +308,10 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
 
     # ================================= buildMsg ====================================
     
-    proc buildMsg {compMsgDispatcherVar} {
+    proc buildMsg {compMsgDispatcherVar msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-    #//ets_printf{"buildMsg\n"}
+puts stderr "buildMsg: msgDescription: $msgDescription!"
       # at this point an eventual callback for getting the values 
       # has been already done using runAction in createMsgFromHeaderPart
       # so now we can fix the offsets if needed for key value list entries
@@ -295,11 +327,11 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
       # this could if needed also be an array of uint16_t etc. depending on the key
       # the receiver must know how the value is built depending on the key!!
       
-      set result [fixOffsetsForKeyValues compMsgDispatcher]
+      set result [fixOffsetsForKeyValues compMsgDispatcher $msgDescription]
       checkErrOK $result
-      set result [::compMsg compMsgData initMsg compMsgDispatcher]
+      set result [::compMsg compMsgData initMsg compMsgDispatcher $msgDescription]
       checkErrOK $result
-      set result [setMsgValues compMsgDispatcher]
+      set result [setMsgValues compMsgDispatcher $msgDescription]
       checkErrOK $result
       set result [::compMsg compMsgData getMsgData compMsgDispatcher msgData msgLgth]
       checkErrOK $result

@@ -156,6 +156,8 @@ namespace eval ::compMsg {
         dict set msgDescription fieldSequence [list]
         dict set msgDescription fieldOffsets [list]
         dict set msgDescription fieldFlags [list]
+        dict set msgDescription lastFieldOffset 0
+        dict set msgDescription numFields 0
         if {[dict get $msgDescriptionInfos maxMsgDescriptions] == 0} {
           dict set msgDescriptionInfos maxMsgDescriptions 5
           set idx 0

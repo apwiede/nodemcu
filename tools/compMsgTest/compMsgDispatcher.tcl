@@ -69,11 +69,11 @@ namespace eval compMsg {
   namespace eval compMsgDispatcher {
     namespace ensemble create
       
-    namespace export compMsgDispatcherInit newCompMsgDispatcher createMsgFromLines
-    namespace export createMsgFromLines setMsgValuesFromLines createDispatcher setMsgParts
+    namespace export compMsgDispatcherInit newCompMsgDispatcher
+    namespace export setMsgValuesFromLines createDispatcher setMsgParts
     namespace export encryptMsg decryptMsg resetMsgInfo initDispatcher
     namespace export dumpMsgParts dumpHeaderParts dumpMsgHeaderInfos
-    namespace export createMsgFromHeaderPart setSocketForAnswer
+    namespace export setSocketForAnswer
 
     variable compMsgDispatcher [dict create]
     variable compMsgDispatcherHandles
@@ -369,84 +369,6 @@ puts stderr "compMsgDispatcher3 setDataViewData"
       return [checkErrOK OK]
     }
 
-    # ================================= createMsgFromHeaderPart ====================================
-    
-    proc createMsgFromHeaderPart {compMsgDispatcherVar msgDescription} {
-      upvar $compMsgDispatcherVar compMsgDispatcher
-    
-#puts stderr "===createMsgFromHeaderPart![dict keys $compMsgDispatcher]!"
-#::compMsg compMsgMsgDesc dumpHeaderPart $hdr
-      set result [::compMsg compMsgMsgDesc getMsgPartsFromHeaderPart compMsgDispatcher $msgDescription]
-      checkErrOK $result
-      set compMsgData [dict get $compMsgDispatcher compMsgData]
-      set result [::compMsg compMsgData createMsg compMsgData [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]]
-      checkErrOK $result
-      set idx 0
-      while {$idx < [dict get $compMsgDispatcher compMsgMsgDesc numMsgDescParts]} {
-        set msgDescParts [dict get $compMsgDispatcher compMsgData msgDescParts]
-        set msgDescPart [lindex $msgDescParts $idx]
-#puts stderr "idx: $idx!$msgDescPart!"
-        set result [::compMsg compMsgData addField compMsgData [dict get $msgDescPart fieldNameStr] [dict get $msgDescPart fieldTypeStr] [dict get $msgDescPart fieldLgth]]
-        checkErrOK $result
-        incr idx
-      }
-      dict set compMsgDispatcher compMsgData $compMsgData
-    
-      # runAction calls at the end buildMsg
-      set prepareValuesCb [dict get $compMsgDispatcher compMsgMsgDesc prepareValuesCbName]
-#puts stderr "prepareValuesCb: $prepareValuesCb!"
-      if {$prepareValuesCb ne [list]} {
-        $prepareValuesCb compMsgDispatcher
-        # runAction starts a call with a callback and returns here before the callback has been running!!
-        # when coming here we are finished and the callback will do the work later on!
-#puts stderr "runAction done![dict keys $compMsgDispatcher]!"
-        return $result
-      } else {
-        set result [::compMsg compMsgBuildMsg buildMsg compMsgDispatcher]
-        # FIXME !! here we need a call to send the (eventually encrypted) message!!
-      }
-      return [checkErrOK OK]
-    }
-
-    # ================================= xcreateMsgFromLines ====================================
-    
-    proc xcreateMsgFromLines {fd parts numEntries numRows type handleVar} {
-      variable compMsgDispatcher
-      variable compMsgData
-      variable numMsgHeaders
-      variable maxMsgHeaders
-      upvar $handleVar handle
-
-    #ets_printf{"createMsgFromLines:%d!%d! \n" $numMsgHeaders $maxMsgHeaders};
-      dict set compMsgDispatcher received $parts
-      set result [getMsgPtrFromMsgParts $parts $::COMP_MSG_INCR]
-      checkErrOK $result
-      if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
-        return [checkErrOK OK]
-      }
-      set result [::compMsg compMsgData createMsg $numEntries handle]
-      checkErrOK $result
-      set idx 0
-      while {$idx < $numEntries} {
-        gets $fd line
-        if {$line eq ""} {
-          checkErrOK TOO_FEW_FILE_LINES
-        }
-        set flds [split $line ","]
-        foreach {fieldNameStr fieldTypeStr fieldLgthStr} $flds break
-        if {$fieldLgthStr eq "@numRows"} {
-          set fieldLgth $numRows
-        } else {
-          set fieldLgth $fieldLgthStr
-        }
-        set result [::compMsg compMsgData addField $fieldNameStr $fieldTypeStr $fieldLgth]
-        checkErrOK $result
-        incr idx
-      }
-      ::compMsg compMsgData initMsg 0 0
-      return [checkErrOK OK]
-    }
-    
     # ================================= resetMsgInfo ====================================
     
     proc resetMsgInfo {partsVar} {

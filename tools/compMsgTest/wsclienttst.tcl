@@ -424,12 +424,12 @@ proc getAPInfos { sock } {
   lappend headerValueInfos [list @cmdKey 0x5031]
   set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields ::compMsgDispatcher $headerValueInfos msgDescription]
   checkErrOK $result
-puts stderr "===after getHeaderFromUniqueFields"
+puts stderr "===after getHeaderFromUniqueFields: msgDescription: $msgDescription!"
   set result [::compMsg compMsgDispatcher setSocketForAnswer ::compMsgDispatcher $sock]
 puts stderr "===after setSocket"
   checkErrOK $result
 puts stderr "CD: [dict keys $::compMsgDispatcher]!"
-  set result [::compMsg compMsgDispatcher createMsgFromHeaderPart ::compMsgDispatcher $msgDescription]
+  set result [::compMsg compMsgBuildMsg createMsgFromHeaderPart ::compMsgDispatcher $msgDescription]
   checkErrOK $result
   $::startBtn configure -text "Quit" -command [list exit 0]
 }
