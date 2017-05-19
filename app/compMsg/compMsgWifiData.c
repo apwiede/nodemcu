@@ -384,7 +384,8 @@ static void bssScanDoneCb(void *arg, STATUS status) {
     bssScanInfos.numScanInfos++;
   }
   bssScanInfos.scanInfoComplete = true;
-  bssScanInfos.compMsgDispatcher->compMsgBuildMsg->buildMsg(bssScanInfos.compMsgDispatcher);
+  // FIXME need msgDescription instead of NULL!!!
+  bssScanInfos.compMsgDispatcher->compMsgBuildMsg->buildMsg(bssScanInfos.compMsgDispatcher, NULL);
 }
 
 // ================================= getBssScanInfo ====================================

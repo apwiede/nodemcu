@@ -248,6 +248,7 @@ typedef struct msgDescription {
   uint8_t encrypted;
   uint8_t handleType;
   uint16_t cmdKey;
+  uint8_t numFields;
   uint8_t *fieldSequence;
   uint16_t *fieldOffsets;
   uint16_t lastFieldOffset;
@@ -289,7 +290,16 @@ typedef struct msgFieldGroupInfo {
   dataValue_t *dataValues;
 } msgFieldGroupInfo_t;
 
+typedef struct headerValueInfo {
+  uint8_t *fieldName;
+  dataValue_t dataValue;
+} headerValueInfo_t;
 
+typedef struct headerValueInfos {
+  uint8_t maxHeaderValues;
+  uint8_t numHeaderValues;
+  headerValueInfo_t *headerValues;
+} headerValueInfos_t;
 
 
 
@@ -470,6 +480,7 @@ typedef uint8_t (* handleMsgFieldsToSaveLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgLine_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* handleMsgFile_t)(compMsgDispatcher_t *self, uint8_t *fileName, handleMsgLine_t handleMsgLine);
 
+typedef uint8_t (* getMsgDescriptionFromUniqueFields_t)(compMsgDispatcher_t *self, headerValueInfos_t *headerValueInfos, msgDescription_t **msgDescription);
 typedef uint8_t (* compMsgMsgDescInit_t)(compMsgDispatcher_t *self);
 typedef void (* freeCompMsgMsgDesc_t)(compMsgMsgDesc_t *compMsgMsgDesc);
 
@@ -503,6 +514,7 @@ typedef struct compMsgMsgDesc {
   handleMsgHeadsLine_t handleMsgHeadsLine;
   handleMsgFileNameLine_t handleMsgFileNameLine;
 
+  getMsgDescriptionFromUniqueFields_t getMsgDescriptionFromUniqueFields;
   freeCompMsgMsgDesc_t freeCompMsgMsgDesc;
   compMsgMsgDescInit_t compMsgMsgDescInit;
 

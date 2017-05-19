@@ -208,9 +208,11 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   int result;
   headerPart_t *hdr;
   msgHeaderInfos_t *hdrInfos;
+  msgDescription_t *msgDescription;
   int hdrIdx;
 
   COMP_MSG_DBG(self, "I", 2, "prepareAnswerMsg");
+  // FIXME !! need to initialize msgDescription or get it as param!!
   hdrInfos = &self->dispatcherCommon->msgHeaderInfos;
   hdrIdx = hdrInfos->currPartIdx;
   switch (type) {
@@ -223,7 +225,7 @@ static uint8_t prepareAnswerMsg(compMsgDispatcher_t *self, uint8_t type, uint8_t
   }
   hdr = &hdrInfos->headerParts[hdrIdx];
   COMP_MSG_DBG(self, "I", 2, "hdrCmdKey: 0x%04x", hdr->hdrU16CmdKey);
-  result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, hdr, handle);
+  result = self->compMsgBuildMsg->createMsgFromHeaderPart(self, msgDescription);
   COMP_MSG_DBG(self, "I", 2, "createMsgFromHeaderPart result: %d", result);
   checkErrOK(result);
   return result;
@@ -423,17 +425,10 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
 //ets_printf("storeReceivedMsg3: heap: %d\n", system_get_free_heap_size());
   checkErrOK(result);
 #endif
-  result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts, &handle);
+  result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts);
   checkErrOK(result);
 //ets_printf("storeReceivedMsg4: heap: %d\n", system_get_free_heap_size());
 //ets_printf("data fields11: %p\n", self->compMsgData->fields);
-  idx = 0;
-  while (idx < self->compMsgData->numMsgDescParts) {
-    msgDescPart = &self->compMsgData->msgDescParts[idx];
-    result = self->compMsgData->addField(self, msgDescPart->fieldNameStr, msgDescPart->fieldTypeStr, msgDescPart->fieldLgth);
-    checkErrOK(result);
-    idx++;
-  }
   self->compMsgData->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
 //ets_printf("data fields12: %p\n", self->compMsgData->fields);
 //ets_printf("storeReceivedMsg5: heap: %d\n", system_get_free_heap_size());

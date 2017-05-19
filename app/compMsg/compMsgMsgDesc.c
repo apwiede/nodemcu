@@ -829,7 +829,7 @@ ets_printf("handleMsgHeadsLine: compMsgData: %p\n", self->compMsgData);
   msgHeaderInfo = &self->compMsgMsgDesc->msgHeaderInfo;
   result = self->compMsgUtil->addFieldDescription(self);
   checkErrOK(result);
-  descriptions = &self->compMsgMsgDesc->msgDescriptionInfos;
+  descriptions = &compMsgMsgDesc->msgDescriptionInfos;
   msgDescription = &descriptions->msgDescriptions[descriptions->numMsgDescriptions - 1];
   if (msgDescription->headerFieldValues == NULL) {
     msgDescription->headerFieldValues = os_zalloc(msgHeaderInfo->headerLgth);
@@ -991,94 +991,38 @@ static uint8_t handleMsgFieldGroupLine(compMsgDispatcher_t *self) {
   return result;
 }
 
+// ================================= getMsgDescriptionFromUniqueFields ====================================
 
+static uint8_t  getMsgDescriptionFromUniqueFields (compMsgDispatcher_t *self, headerValueInfos_t *headerValueInfos, msgDescription_t **msgDescription) {
+  int idx;
+  int fieldIdx;
+  headerValueInfo_t *headerValueInfo;
+  msgDescriptionInfos_t *descriptions;
 
-
-
-#ifdef OLD
-
-// ================================= getHeaderFieldsFromLine ====================================
-
-static uint8_t getHeaderFieldsFromLine(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos, uint8_t *myStr, uint8_t **ep, int *seqIdx) {
-  int result;
-  bool isEnd;
-  long uval;
-  uint8_t *cp;
-  uint8_t fieldNameId;
-
-  COMP_MSG_DBG(self, "E", 2, "numHeaderParts: %d seqidx: %d\n", hdrInfos->numHeaderParts, *seqIdx);
-  cp = myStr;
-  result = getIntFromLine(self, cp, &uval, ep, &isEnd);
-  checkErrOK(result);
-  COMP_MSG_DBG(self, "E", 2, "desc: headerLgth: %d\n", uval);
-  hdrInfos->headerLgth = (uint8_t)uval;
-  checkIsEnd(isEnd);
-  cp = *ep;
-  while (!isEnd) {
-    result = getStrFromLine(self, cp, ep, &isEnd);
-    checkErrOK(result);
-    if (cp[0] != '@') {
-      return COMP_MSG_ERR_NO_SUCH_FIELD;
+  idx = 0;
+  descriptions = &self->compMsgMsgDesc->msgDescriptionInfos;
+  *msgDescription = NULL;
+  while (idx < descriptions->numMsgDescriptions) {
+    *msgDescription = &descriptions->msgDescriptions[idx];
+    fieldIdx = 0;
+    while (fieldIdx < headerValueInfos->numHeaderValues) {
+      headerValueInfo = &headerValueInfos->headerValues[idx];
+// FIXME!!!
+#ifdef NOTDEF
+    if ((*hdr)->hdrToPart == dst) {
+      if ((*hdr)->hdrFromPart == src) {
+        if ((*hdr)->hdrU16CmdKey == cmdKey) {
+          return COMP_MSG_ERR_OK;
+        }
+      }
     }
-    result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, cp, &fieldNameId, COMP_MSG_NO_INCR);
-    checkErrOK(result);
-    switch (fieldNameId) {
-    case COMP_MSG_SPEC_FIELD_SRC:
-      if (hdrInfos->headerFlags & COMP_DISP_HDR_SRC) {
-        return COMP_MSG_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC;
-      hdrInfos->headerFlags |= COMP_DISP_HDR_SRC;
-      break;
-    case COMP_MSG_SPEC_FIELD_DST:
-      if (hdrInfos->headerFlags & COMP_DISP_HDR_DST) {
-        return COMP_MSG_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_DST;
-      hdrInfos->headerFlags |= COMP_DISP_HDR_DST;
-      break;
-    case COMP_MSG_SPEC_FIELD_TOTAL_LGTH:
-      if (hdrInfos->headerFlags & COMP_DISP_HDR_TOTAL_LGTH) {
-        return COMP_MSG_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_TOTAL_LGTH;
-      hdrInfos->headerFlags |= COMP_DISP_HDR_TOTAL_LGTH;
-      break;
-    case COMP_MSG_SPEC_FIELD_SRC_ID:
-      if (hdrInfos->headerFlags & COMP_DISP_HDR_SRC_ID) {
-        return COMP_MSG_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U16_SRC_ID;
-      hdrInfos->headerFlags |= COMP_DISP_HDR_SRC_ID;
-      break;
-    case COMP_MSG_SPEC_FIELD_GUID:
-      if (hdrInfos->headerFlags & COMP_DISP_HDR_GUID) {
-        return COMP_MSG_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_GUID;
-      hdrInfos->headerFlags |= COMP_DISP_HDR_GUID;;
-      break;
-    case COMP_MSG_SPEC_FIELD_HDR_FILLER:
-      if (hdrInfos->headerFlags & COMP_DISP_HDR_FILLER) {
-        return COMP_MSG_ERR_DUPLICATE_FIELD;
-      }
-      hdrInfos->headerSequence[(*seqIdx)++] = COMP_DISP_U8_VECTOR_HDR_FILLER;
-      hdrInfos->headerFlags |= COMP_DISP_HDR_FILLER;
-      break;
-    default:
-      checkErrOK(COMP_MSG_ERR_NO_SUCH_FIELD);
-      break;
-    }
-    cp = *ep;
-  }
-  hdrInfos->seqIdxAfterHeader = *seqIdx;
-  if (!isEnd) {
-    return COMP_MSG_ERR_FUNNY_EXTRA_FIELDS;
-  }
-  return COMP_MSG_ERR_OK;
-}
-  
 #endif
+      fieldIdx++;
+    }
+    idx++;
+  }
+  return COMP_MSG_ERR_HEADER_NOT_FOUND;
+}
 
 // ================================= compMsgMsgDescInit ====================================
 
@@ -1103,6 +1047,8 @@ static uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   compMsgMsgDesc->handleMsgHeadsLine = &handleMsgHeadsLine;
   compMsgMsgDesc->handleMsgFileNameLine = &handleMsgFileNameLine;
   compMsgMsgDesc->handleMsgFile = &handleMsgFile;
+
+  compMsgMsgDesc->getMsgDescriptionFromUniqueFields = &getMsgDescriptionFromUniqueFields;
 
   result = compMsgMsgDesc->handleMsgFile(self, MSG_FILES_FILE_NAME, compMsgMsgDesc->handleMsgFileNameLine);
   checkErrOK(result);

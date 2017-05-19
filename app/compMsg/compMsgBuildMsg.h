@@ -45,11 +45,11 @@
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
 
-typedef uint8_t (* createMsgFromHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle);
+typedef uint8_t (* createMsgFromHeaderPart_t)(compMsgDispatcher_t *self, msgDescription_t *msgDescription);
 typedef uint8_t (* fixOffsetsForKeyValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setMsgValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setFieldValue_t)(compMsgDispatcher_t *self, uint8_t type);
-typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* buildMsg_t)(compMsgDispatcher_t *self, msgDescription_t *msgDescription);
 typedef uint8_t (* forwardMsg_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* compMsgBuildMsgInit_t)(compMsgDispatcher_t *self);
 

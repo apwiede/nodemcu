@@ -462,7 +462,7 @@ uint8_t compMsgGetPtrFromHandle(const char *handle, compMsgDispatcher_t **compMs
  * \return Error code or ErrorOK
  *
  */
-static uint8_t createMsg(compMsgDispatcher_t *self, int numFields, uint8_t **handle) {
+static uint8_t createMsg(compMsgDispatcher_t *self, int numFields) {
   uint8_t result;
   compMsgData_t *compMsgData;
 
@@ -478,81 +478,6 @@ static uint8_t createMsg(compMsgDispatcher_t *self, int numFields, uint8_t **han
   compMsgData->totalLgth = 0;
   compMsgData->cmdLgth = 0;
   compMsgData->headerLgth = 0;
-  os_sprintf(compMsgData->handle, "%s%p", HANDLE_PREFIX, self);
-  COMP_MSG_DBG(self, "d", 2, "createMsg: handle: %s", compMsgData->handle);
-  result = addHandle(self, compMsgData->handle);
-  if (result != COMP_MSG_ERR_OK) {
-    os_free(compMsgData->fields);
-    deleteHandle(self, compMsgData->handle);
-    os_free(compMsgData);
-    return result;
-  }
-  *handle = compMsgData->handle;
-  return COMP_MSG_ERR_OK;
-}
-
-// ================================= addField ====================================
-
-/**
- * \brief add a field to the internal representation of a message
- * 
- * \param self The dispatcher struct
- * \param fieldName The field name
- * \param fieldType The field type name
- * \param fieldLgth The field lgth in bytes
- * \return Error code or ErrorOK
- *
- */
-static uint8_t addField(compMsgDispatcher_t *self, const uint8_t *fieldName, const uint8_t *fieldType, uint8_t fieldLgth) {
-  uint8_t numTableFields;
-  uint8_t numTableRowFields;
-  uint8_t numTableRows;
-  uint8_t fieldTypeId = 0;
-  uint8_t fieldNameId = 213;
-  int row;
-  int cellIdx;
-  int result = COMP_MSG_ERR_OK;
-  compMsgField_t *fieldInfo;
-  compMsgData_t *compMsgData;
-
-  compMsgData = self->compMsgData;
-  COMP_MSG_DBG(self, "d", 2, "addfield: %s fieldType: %s fieldLgth: %d\n", fieldName, fieldType, fieldLgth);
-  if (compMsgData->numFields >= compMsgData->maxFields) {
-    return COMP_MSG_ERR_TOO_MANY_FIELDS;
-  }
-  result = self->compMsgTypesAndNames->getFieldTypeIdFromStr(self, fieldType, &fieldTypeId);
-  checkErrOK(result);
-  result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, fieldName, &fieldNameId, COMP_MSG_INCR);
-  checkErrOK(result);
-  fieldInfo = &compMsgData->fields[compMsgData->numFields];
-  // need to check for duplicate here !!
-  if (c_strcmp(fieldName, "@filler") == 0) {
-    compMsgData->flags |= COMP_MSG_HAS_FILLER;
-    fieldLgth = 0;
-    fieldInfo->fieldNameId = fieldNameId;
-    fieldInfo->fieldTypeId = fieldTypeId;
-    fieldInfo->fieldLgth = fieldLgth;
-    compMsgData->numFields++;
-    return COMP_MSG_ERR_OK;
-  }
-  if (c_strcmp(fieldName, "@crc") == 0) {
-    compMsgData->flags |= COMP_MSG_HAS_CRC;
-    if (c_strcmp(fieldType, "uint8_t") == 0) {
-      compMsgData->flags |= COMP_MSG_UINT8_CRC;
-    }
-    COMP_MSG_DBG(self, "d", 2, "flags: 0x%02x HAS_CRC: 0x%02x HAS_FILLER: 0x%02x UINT8_CRC: 0x%02x\n", compMsgData->flags, COMP_MSG_HAS_CRC, COMP_MSG_HAS_FILLER, COMP_MSG_UINT8_CRC);
-  }
-  if (c_strcmp(fieldName, "@totalCrc") == 0) {
-    compMsgData->flags |= COMP_MSG_HAS_TOTAL_CRC;
-    if (c_strcmp(fieldType, "uint8_t") == 0) {
-      compMsgData->flags |= COMP_MSG_UINT8_TOTAL_CRC;
-    }
-    COMP_MSG_DBG(self, "d", 2, "flags: 0x%02x HAS_CRC: 0x%02x HAS_FILLER: 0x%02x UINT8_CRC: 0x%02x\n", compMsgData->flags, COMP_MSG_HAS_CRC, COMP_MSG_HAS_FILLER, COMP_MSG_UINT8_CRC);
-  }
-  fieldInfo->fieldNameId = fieldNameId;
-  fieldInfo->fieldTypeId = fieldTypeId;
-  fieldInfo->fieldLgth = fieldLgth;
-  compMsgData->numFields++;  
   return COMP_MSG_ERR_OK;
 }
 
@@ -776,7 +701,7 @@ static uint8_t prepareMsg(compMsgDispatcher_t *self) {
  * \return Error code or ErrorOK
  *
  */
-static uint8_t initMsg(compMsgDispatcher_t *self) {
+static uint8_t initMsg(compMsgDispatcher_t *self, msgDescription_t *msgDescription) {
   int numEntries;
   int idx;
   int row;
@@ -1254,7 +1179,6 @@ compMsgData_t *newCompMsgData(void) {
   // normalMsg
   compMsgData->createMsg = &createMsg;
   compMsgData->deleteMsg = &deleteMsg;
-  compMsgData->addField = &addField;
   compMsgData->getDataValue = &getDataValue;
   compMsgData->setDataValue = &setDataValue;
   compMsgData->dumpFieldValue = &dumpFieldValue;

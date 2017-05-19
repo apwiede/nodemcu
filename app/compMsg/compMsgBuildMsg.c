@@ -42,7 +42,7 @@
 
 // ================================= createMsgFromHeaderPart ====================================
 
-static uint8_t ICACHE_FLASH_ATTR createMsgFromHeaderPart (compMsgDispatcher_t *self, headerPart_t *hdr, uint8_t **handle) {
+static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, msgDescription_t *msgDescription) {
   uint8_t result;
   int idx;
   bool isEnd;
@@ -83,7 +83,7 @@ static uint8_t ICACHE_FLASH_ATTR createMsgFromHeaderPart (compMsgDispatcher_t *s
     // actionCallback starts a call with eventually a callback and returns here before the callback has been running!!
     // when coming here we are finished and the callback will do the work later on!
   } else {
-    result = self->compMsgBuildMsg->buildMsg(self);
+    result = self->compMsgBuildMsg->buildMsg(self, msgDescription);
   }
   return result;
 }
@@ -309,7 +309,7 @@ static uint8_t ICACHE_FLASH_ATTR setMsgValues(compMsgDispatcher_t *self) {
  * \return Error code or ErrorOK
  *
  */
-static uint8_t ICACHE_FLASH_ATTR buildMsg(compMsgDispatcher_t *self) {
+static uint8_t buildMsg(compMsgDispatcher_t *self, msgDescription_t *msgDescription) {
   uint8_t result;
   size_t msgLgth;
   uint8_t *msgData;
@@ -343,7 +343,7 @@ static uint8_t ICACHE_FLASH_ATTR buildMsg(compMsgDispatcher_t *self) {
   checkErrOK(result);
   self->compMsgData->direction = COMP_MSG_TO_SEND_DATA;
   COMP_MSG_DBG(self, "B", 2, "heap2: %d", system_get_free_heap_size());
-  result = self->compMsgData->initMsg(self);
+  result = self->compMsgData->initMsg(self, msgDescription);
   checkErrOK(result);
   result = setMsgValues(self);
   checkErrOK(result);
