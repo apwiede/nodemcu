@@ -45,6 +45,7 @@
 #include "compMsgDataView.h"
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
+typedef struct dataValue dataValue_t;
 
 typedef struct fieldValueCallbackInfos {
   uint8_t callbackId;

@@ -100,6 +100,8 @@ typedef struct dataValue {
     uint32_t *u32vec;
     int32_t *i32vec;
   } value;
+  uint8_t fieldTypeId;
+  uint16_t fieldLgth;
 } dataValue_t;
 
 typedef struct fieldValue {
@@ -129,6 +131,7 @@ typedef uint8_t (* dumpMsgFieldValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* addMsgFieldValues_t)(compMsgDispatcher_t *self, uint8_t numEntries);
 typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
 typedef uint8_t (* getMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
+typedef uint8_t (* compareDataValues_t)(compMsgDispatcher_t *self, fieldInfo_t *fieldInfo, dataValue_t *dataValue1, dataValue_t *dataValue2);
 typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgDataValue {
@@ -149,6 +152,7 @@ typedef struct compMsgDataValue {
   addMsgFieldValues_t addMsgFieldValues;
   getMsgFieldValue_t getMsgFieldValue;
   setMsgFieldValue_t setMsgFieldValue;
+  compareDataValues_t compareDataValues;
   compMsgDataValueInit_t compMsgDataValueInit;
 } compMsgDataValue_t;
 

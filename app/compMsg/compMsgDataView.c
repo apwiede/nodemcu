@@ -548,7 +548,7 @@ COMP_MSG_DBG(self, "v", 1, "bad type in setFieldValue: %d\n", fieldInfo->fieldTy
 
 // ================================= getIdFieldValue ====================================
 
-static uint8_t getIdFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, int *numericValue, uint8_t **stringValue, int fieldIdx) {
+static uint8_t getIdFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, dataValue_t *dataValue, int fieldIdx) {
   int idx;
   int result;
   int numEntries;
@@ -564,73 +564,66 @@ static uint8_t getIdFieldValue(compMsgDispatcher_t *self, dataView_t *dataView, 
   if (fieldInfo == NULL) {
     return COMP_MSG_ERR_FIELD_NOT_FOUND;
   }
-  *stringValue = NULL;
-  *numericValue = 0;
+  dataValue->fieldTypeId = fieldInfo->fieldTypeId;
+  dataValue->fieldLgth = fieldInfo->fieldLgth;
   switch (fieldInfo->fieldTypeId) {
     case DATA_VIEW_FIELD_INT8_T:
-      result = dataView->getInt8(dataView, fieldInfo->fieldOffset, &i8);
+      result = dataView->getInt8(dataView, fieldInfo->fieldOffset, &dataValue->value.i8);
       checkErrOK(result);
-      *numericValue = (int)i8;
       break;
     case DATA_VIEW_FIELD_UINT8_T:
-      result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &ui8);
+      result = dataView->getUint8(dataView, fieldInfo->fieldOffset, &dataValue->value.u8);
       checkErrOK(result);
-      *numericValue = (int)ui8;
       break;
     case DATA_VIEW_FIELD_INT16_T:
-      result = dataView->getInt16(dataView, fieldInfo->fieldOffset, &i16);
+      result = dataView->getInt16(dataView, fieldInfo->fieldOffset, &dataValue->value.i16);
       checkErrOK(result);
-      *numericValue = (int)i16;
       break;
     case DATA_VIEW_FIELD_UINT16_T:
-      result = dataView->getUint16(dataView, fieldInfo->fieldOffset, &ui16);
+      result = dataView->getUint16(dataView, fieldInfo->fieldOffset, &dataValue->value.u16);
       checkErrOK(result);
-      *numericValue = (int)ui16;
       break;
     case DATA_VIEW_FIELD_INT32_T:
-      result = dataView->getInt32(dataView, fieldInfo->fieldOffset, &i32);
+      result = dataView->getInt32(dataView, fieldInfo->fieldOffset, &dataValue->value.i32);
       checkErrOK(result);
-      *numericValue = (int)i32;
       break;
     case DATA_VIEW_FIELD_UINT32_T:
-      result = dataView->getUint32(dataView, fieldInfo->fieldOffset, &ui32);
+      result = dataView->getUint32(dataView, fieldInfo->fieldOffset, &dataValue->value.u32);
       checkErrOK(result);
-      *numericValue = (int)ui32;
       break;
     case DATA_VIEW_FIELD_INT8_VECTOR:
-      *numericValue = fieldInfo->fieldLgth;
-      *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
-      checkAllocOK(stringValue);
-      (*stringValue)[fieldInfo->fieldLgth] = 0;
-      os_memcpy(*stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
+      dataValue->value.stringValue = os_zalloc(fieldInfo->fieldLgth+1);
+      checkAllocOK(dataValue->value.stringValue);
+      dataValue->value.stringValue[fieldInfo->fieldLgth] = 0;
+      os_memcpy(dataValue->value.stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
     case DATA_VIEW_FIELD_UINT8_VECTOR:
-      *stringValue = os_zalloc(fieldInfo->fieldLgth+1);
-      checkAllocOK(stringValue);
-      (*stringValue)[fieldInfo->fieldLgth] = 0;
-      os_memcpy(*stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
-      break;
-    case DATA_VIEW_FIELD_INT16_VECTOR:
-      if (*stringValue == NULL) {
-        // check for length needed!!
-        result = dataView->getInt16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(int16_t), &i16);
-        checkErrOK(result);
-        *numericValue = (int)i16;
-      } else {
-        return COMP_MSG_ERR_BAD_VALUE;
-      }
-      break;
-    case DATA_VIEW_FIELD_UINT16_VECTOR:
-      if (*stringValue == NULL) {
-        // check for length needed!!
-        result = dataView->getUint16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(uint16_t), &ui16);
-        checkErrOK(result);
-        *numericValue = (int)ui16;
-      } else {
-        return COMP_MSG_ERR_BAD_VALUE;
-      }
+      dataValue->value.stringValue = os_zalloc(fieldInfo->fieldLgth+1);
+      checkAllocOK(dataValue->value.stringValue);
+      dataValue->value.stringValue[fieldInfo->fieldLgth] = 0;
+      os_memcpy(dataValue->value.stringValue, dataView->data + fieldInfo->fieldOffset, fieldInfo->fieldLgth);
       break;
 #ifdef NOTDEF
+    case DATA_VIEW_FIELD_INT16_VECTOR:
+//      if (*stringValue == NULL) {
+//        // check for length needed!!
+//        result = dataView->getInt16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(int16_t), &i16);
+//        checkErrOK(result);
+//        *numericValue = (int)i16;
+//      } else {
+//        return COMP_MSG_ERR_BAD_VALUE;
+//      }
+      break;
+    case DATA_VIEW_FIELD_UINT16_VECTOR:
+//      if (*stringValue == NULL) {
+//        // check for length needed!!
+//        result = dataView->getUint16(dataView, fieldInfo->fieldOffset + fieldIdx * sizeof(uint16_t), &ui16);
+//        checkErrOK(result);
+//        *numericValue = (int)ui16;
+//      } else {
+//        return COMP_MSG_ERR_BAD_VALUE;
+//      }
+      break;
     case DATA_VIEW_FIELD_INT32_VECTOR:
       if (stringValue != NULL) {
         // check for length needed!!

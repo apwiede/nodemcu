@@ -994,32 +994,72 @@ static uint8_t handleMsgFieldGroupLine(compMsgDispatcher_t *self) {
 // ================================= getMsgDescriptionFromUniqueFields ====================================
 
 static uint8_t  getMsgDescriptionFromUniqueFields (compMsgDispatcher_t *self, headerValueInfos_t *headerValueInfos, msgDescription_t **msgDescription) {
+  uint8_t result;
   int idx;
   int fieldIdx;
+  int headerFieldIdx;
+  uint8_t fieldNameId;
+  uint8_t fieldId;
+  bool found;
   headerValueInfo_t *headerValueInfo;
   msgDescriptionInfos_t *descriptions;
+  fieldInfo_t *fieldInfo;
+  dataView_t *dataView;
+  dataValue_t checkValue;
+  compMsgMsgDesc_t *compMsgMsgDesc;
 
   idx = 0;
+  dataView = self->compMsgData->compMsgDataView->dataView;
+  compMsgMsgDesc = self->compMsgMsgDesc;
   descriptions = &self->compMsgMsgDesc->msgDescriptionInfos;
   *msgDescription = NULL;
   while (idx < descriptions->numMsgDescriptions) {
     *msgDescription = &descriptions->msgDescriptions[idx];
+    found = true;
+    result = dataView->setDataViewData(dataView, (*msgDescription)->headerFieldValues, compMsgMsgDesc->msgHeaderInfo.headerLgth);
+    checkErrOK(result);
+    // for every field in headerValueInfos check for the equivalent field in msgDescription->fieldIds
+    // and if found check if the value in headerValueInfos is the same as the value
+    // in msgDescription for that field
     fieldIdx = 0;
     while (fieldIdx < headerValueInfos->numHeaderValues) {
       headerValueInfo = &headerValueInfos->headerValues[idx];
-// FIXME!!!
-#ifdef NOTDEF
-    if ((*hdr)->hdrToPart == dst) {
-      if ((*hdr)->hdrFromPart == src) {
-        if ((*hdr)->hdrU16CmdKey == cmdKey) {
-          return COMP_MSG_ERR_OK;
+      result = self->compMsgTypesAndNames->getFieldNameIdFromStr(self, headerValueInfo->fieldName, &fieldNameId, COMP_MSG_NO_INCR);
+      checkErrOK(result);
+      fieldInfo = self->compMsgTypesAndNames->msgFieldInfos.fieldInfos[fieldNameId];
+      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_UNIQUE) {
+        result = self->compMsgData->compMsgDataView->getIdFieldValue(self, dataView, fieldNameId, &checkValue, 0);
+        checkErrOK(result);
+        // check fieldValue here for equality
+        // we have to compare the value und a dataValue struct to the value in a message (which is a byte string)
+        // FIXME! need code here!!
+        result = self->compMsgDataValue->compareDataValues(self, fieldInfo, &headerValueInfo->dataValue, &checkValue);
+        if (result != COMP_MSG_ERR_OK) {
+          found = false;
+          break;
+        }
+      } else {
+        if (c_strcmp(headerValueInfo->fieldName, "@cmdKey") == 0) {
+          // FIXME !! need to set checkValue here !!!
+          result = self->compMsgDataValue->compareDataValues(self, fieldInfo, &headerValueInfo->dataValue, &checkValue);
+          if (result != COMP_MSG_ERR_OK) {
+            found = false;
+            break;
+          }
         }
       }
-    }
-#endif
+      if (!found) {
+        break;
+      }
       fieldIdx++;
     }
+    if (found) {
+      break;
+    }
     idx++;
+  }
+  if (found) {
+    return COMP_MSG_ERR_OK;
   }
   return COMP_MSG_ERR_HEADER_NOT_FOUND;
 }

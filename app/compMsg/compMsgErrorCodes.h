@@ -159,6 +159,7 @@ enum CompMsgErrorCodes {
   COMP_MSG_ERR_BAD_HEADER_FIELD_FLAG          = 119,
   COMP_MSG_ERR_BAD_FIELD_INFO                 = 118,
   COMP_MSG_ERR_TOO_MANY_LINE_FIELDS           = 117,
+  COMP_MSG_ERR_DIFFERENT_FIELD_VALUE          = 116,
 
   COMP_MSG_ERR_CANNOT_CONNECT                 = 99,
 

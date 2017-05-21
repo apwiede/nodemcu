@@ -554,6 +554,18 @@ static uint8_t getMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldVal
   return result;
 }
 
+// ================================= compareDataValues ====================================
+
+static uint8_t compareDataValues(compMsgDispatcher_t *self, fieldInfo_t *fieldInfo, dataValue_t *dataValue1, dataValue_t *dataValue2) {
+  switch (fieldInfo->fieldTypeId) {
+  case DATA_VIEW_FIELD_UINT8_T:
+    break;
+  default:
+    return COMP_MSG_ERR_BAD_FIELD_TYPE;
+  }
+  return COMP_MSG_ERR_DIFFERENT_FIELD_VALUE;
+}
+
 // ================================= compMsgDataValueInit ====================================
 
 static uint8_t compMsgDataValueInit(compMsgDispatcher_t *self) {
@@ -573,6 +585,7 @@ static uint8_t compMsgDataValueInit(compMsgDispatcher_t *self) {
   compMsgDataValue->addMsgFieldValues = &addMsgFieldValues;
   compMsgDataValue->getMsgFieldValue = &getMsgFieldValue;
   compMsgDataValue->setMsgFieldValue = &setMsgFieldValue;
+  compMsgDataValue->compareDataValues = &compareDataValues;
   // +1 as the following entries also start at 1!!
   compMsgDataValue->addMsgFieldValues(self, self->compMsgTypesAndNames->numSpecFieldIds + 1);  
   return COMP_MSG_ERR_OK;

@@ -58,8 +58,8 @@ typedef struct compMsgField {
   fieldSizeCallback_t fieldSizeCallback;
 } compMsgField_t;
 
-typedef struct compMsgDispatcher compMsgDispatcher_t;
 typedef struct compMsgDataView compMsgDataView_t;
+typedef struct dataValue dataValue_t;
 
 typedef uint8_t (* getRandomNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, uint32_t *value);
 typedef uint8_t (* setRandomNum_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo);
@@ -80,7 +80,7 @@ typedef uint8_t (* setTotalCrc_t)(compMsgDispatcher_t *self, dataView_t *dataVie
 
 typedef uint8_t (* dvGetFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int *numericValue, uint8_t **stringValue, int fieldIdx);
 typedef uint8_t (* dvSetFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, compMsgField_t *fieldInfo, int numericValue, const uint8_t *stringValue, int fieldIdx);
-typedef uint8_t (* getIdFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, int *numericValue, uint8_t **stringValue, int fieldIdx);
+typedef uint8_t (* getIdFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, dataValue_t *dataValue, int fieldIdx);
 typedef uint8_t (* setIdFieldValue_t)(compMsgDispatcher_t *self, dataView_t *dataView, uint8_t fieldId, int numericValue, const uint8_t *stringValue, int fieldIdx);
 
 typedef struct compMsgDataView {
