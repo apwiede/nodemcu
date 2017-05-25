@@ -1,6 +1,3 @@
-# this is an example message value header file
-#,4
-@src,0xc
-@grp,2
-@dst,0xf
+# this is an example message header value file
+#,1
 @ipAddr,"@getIpAddr"

@@ -41,6 +41,7 @@ import MsgValP3.txt MsgValP3.txt
 import MsgValP4.txt MsgValP4.txt
 import MsgValP5.txt MsgValP5.txt
 import MsgValP6.txt MsgValP6.txt
+import MsgValHeader.txt MsgValHeader.txt
 
 EOF
 #rm -rf myConfig.txt

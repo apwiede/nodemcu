@@ -1,5 +1,5 @@
 # example for messages files file
-#,21
+#,22
 @$msgDescHeader,"MsgDescHeader.txt"
 @$msgDescMidPart,"MsgDescMidPart.txt"
 @$msgDescTrailer,"MsgDescTrailer.txt"
@@ -7,7 +7,6 @@
 @$msgFieldsToSave,"MsgFieldsToSave.txt"
 @$msgHeads,"MsgHeads.txt"
 @$msgActions,"MsgActions.txt"
-# @$msgValHeader,"MsgValHeader.txt"
 @$msgWifiData,"MsgWifiDataValues.txt"
 @$msgModuleData,"MsgModuleDataValues.txt"
 @$msgDesc,"MsgDescP1.txt","P1"
@@ -22,3 +21,4 @@
 @$msgVal,"MsgValP4.txt","P4"
 @$msgVal,"MsgValP5.txt","P5"
 @$msgVal,"MsgValP6.txt","P6"
+@$msgValHeader,"MsgValHeader.txt","__"
