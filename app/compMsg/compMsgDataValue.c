@@ -247,6 +247,8 @@ static uint8_t getDataVal(compMsgDispatcher_t *self, dataValue_t *dataValue, uin
 
 static uint8_t addFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldValue) {
   uint8_t result;
+  int numericValue;
+  uint8_t *stringValue;
   compMsgDataValue_t *compMsgDataValue;
   fieldValue_t *myFieldValue;
 
@@ -269,19 +271,25 @@ static uint8_t addFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldV
   myFieldValue->cmdKey = fieldValue->cmdKey;
   myFieldValue->fieldValueId = fieldValue->fieldValueId;
   myFieldValue->fieldNameId = fieldValue->fieldNameId;
+ets_printf("cmd_key: 0x%04x fieldValueId: %d fieldNameId: %d\n", myFieldValue->cmdKey, myFieldValue->fieldValueId, myFieldValue->fieldNameId);
   myFieldValue->flags = 0;
   if (fieldValue->flags & COMP_MSG_FIELD_IS_NUMERIC) {
     myFieldValue->flags |= COMP_MSG_FIELD_IS_NUMERIC;
     myFieldValue->dataValue.value.numericValue = fieldValue->dataValue.value.numericValue;
+stringValue = "nil";
+numericValue = myFieldValue->dataValue.value.numericValue;
   } else {
     myFieldValue->flags |= COMP_MSG_FIELD_IS_STRING;
     myFieldValue->dataValue.value.stringValue = os_zalloc(c_strlen(fieldValue->dataValue.value.stringValue) + 1);
     c_memcpy(myFieldValue->dataValue.value.stringValue, fieldValue->dataValue.value.stringValue, c_strlen(fieldValue->dataValue.value.stringValue));
+stringValue = myFieldValue->dataValue.value.stringValue;
+numericValue = 0;
   }
   if (fieldValue->fieldValueCallback != NULL) {
     myFieldValue->flags |= COMP_MSG_FIELD_HAS_CALLBACK;
     myFieldValue->fieldValueCallback = fieldValue->fieldValueCallback;
   }
+ets_printf("addFieldValueInfo: flags: 0x%04x numeric: 0x%04x %d string: %s callback: %p\n", fieldValue->flags, numericValue, numericValue, stringValue, myFieldValue->fieldValueCallback);
   compMsgDataValue->numDataValues++;
   return result;
 }
@@ -291,6 +299,8 @@ static uint8_t addFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldV
 static uint8_t setFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldValue) {
   uint8_t result;
   int idx;
+  int numericValue;
+  uint8_t *stringValue;
   compMsgDataValue_t *compMsgDataValue;
   fieldValue_t *myFieldValue;
 
@@ -309,15 +319,20 @@ static uint8_t setFieldValueInfo(compMsgDispatcher_t *self, fieldValue_t *fieldV
       if (fieldValue->flags & COMP_MSG_FIELD_IS_NUMERIC) {
         myFieldValue->flags |= COMP_MSG_FIELD_IS_NUMERIC;
         myFieldValue->dataValue.value.numericValue = fieldValue->dataValue.value.numericValue;
+stringValue = "nil";
+numericValue = myFieldValue->dataValue.value.numericValue;
       } else {
         myFieldValue->flags |= COMP_MSG_FIELD_IS_STRING;
         myFieldValue->dataValue.value.stringValue = os_zalloc(c_strlen(fieldValue->dataValue.value.stringValue) + 1);
         c_memcpy(myFieldValue->dataValue.value.stringValue, fieldValue->dataValue.value.stringValue, c_strlen(fieldValue->dataValue.value.stringValue));
+stringValue = myFieldValue->dataValue.value.stringValue;
+numericValue = 0;
       }
       if (fieldValue->fieldValueCallback != NULL) {
         myFieldValue->flags |= COMP_MSG_FIELD_HAS_CALLBACK;
         myFieldValue->fieldValueCallback = fieldValue->fieldValueCallback;
       }
+ets_printf("setFieldValueInfo: flags: 0x%04x numeric: 0x%04x %d string: %s callback: %p\n", fieldValue->flags, numericValue, numericValue, stringValue, myFieldValue->fieldValueCallback);
       return result;
     }
     idx++;
@@ -527,7 +542,7 @@ static uint8_t setMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldVal
     entry = msgFieldValues->fieldValues[idx];
   }
   entry->flags = fieldValue->flags;
-  COMP_MSG_DBG(self, "E", 0, "setMsgFieldValues: idx: %d fieldValueFlags: 0x%08x", idx, entry->flags);
+  COMP_MSG_DBG(self, "E", 0, "setMsgFieldValue: idx: %d fieldValueFlags: 0x%08x", idx, entry->flags);
   return result;
 }
 

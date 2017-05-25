@@ -392,6 +392,8 @@ static uint8_t dumpMsgFieldValInfos(compMsgDispatcher_t *self) {
   char buf[512];
   uint8_t *fieldName;
   uint8_t *fieldType;
+  int numericValue;
+  uint8_t *stringValue;
   compMsgTypesAndNames_t *compMsgTypesAndNames;
   fieldValInfo_t *fieldValInfo;
 
@@ -411,27 +413,22 @@ static uint8_t dumpMsgFieldValInfos(compMsgDispatcher_t *self) {
     if (fieldValInfo == NULL) {
       ets_sprintf(buf, "%3d %-20s empty", idx, fieldName);
     } else {
-      ets_sprintf(buf, "%3d %-20s flags: 0x%04x", idx, fieldName, fieldValInfo->fieldFlags);
-      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_WIFI_DATA) {
-        c_strcat(buf, " WIFI_DATA");
+      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_IS_STRING) {
+        stringValue = fieldValInfo->dataValue.value.stringValue;
+        numericValue = 0;
+      } else {
+        stringValue = "nil";
+        numericValue = fieldValInfo->dataValue.value.numericValue;
       }
-      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_MODULE_DATA) {
-        c_strcat(buf, " MODULE_DATA");
+      ets_sprintf(buf, "%3d %-20s fieldCallbackId: %d value: %s 0x%08x %d flags: 0x%04x", idx, fieldName, fieldValInfo->fieldCallbackId, stringValue, numericValue, numericValue, fieldValInfo->fieldFlags);
+      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_HAS_CALLBACK) {
+        c_strcat(buf, " HAS_CALLBACK");
       }
-      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_TO_SAVE) {
-        c_strcat(buf, " TO_SAVE");
+      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_IS_STRING) {
+        c_strcat(buf, " IS_STRING");
       }
-      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_KEY_VALUE) {
-        c_strcat(buf, " KEY_VALUE");
-      }
-      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_HEADER) {
-        c_strcat(buf, " HEADER");
-      }
-      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_HEADER_UNIQUE) {
-        c_strcat(buf, " HEADER_UNIQUE");
-      }
-      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO) {
-        c_strcat(buf, " HEADER_CHKSUM_NON_ZERO");
+      if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_IS_NUMERIC) {
+        c_strcat(buf, " IS_NUMERIC");
       }
     }
     COMP_MSG_DBG(self, "d", 1, "%s", buf);
@@ -528,7 +525,7 @@ static uint8_t setMsgFieldDescInfo(compMsgDispatcher_t *self, uint8_t idx, field
   }
   result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, idx, &fieldName);
   checkErrOK(result);
-  COMP_MSG_DBG(self, "E", 0, "setMsgFieldDescInfo: %s idx: %d fieldFlags: 0x%08x fieldType: %d fieldLgth: %d", fieldName, idx, entry->fieldFlags, entry->fieldTypeId, entry->fieldLgth);
+  COMP_MSG_DBG(self, "E", 2, "setMsgFieldDescInfo: %s idx: %d fieldFlags: 0x%08x fieldType: %d fieldLgth: %d", fieldName, idx, entry->fieldFlags, entry->fieldTypeId, entry->fieldLgth);
   return result;
 }
 
@@ -576,13 +573,9 @@ static uint8_t getMsgFieldValInfo(compMsgDispatcher_t *self, uint8_t idx, fieldV
     checkAllocOK(msgFieldInfos->fieldValInfos[idx]);
     entry = msgFieldInfos->fieldValInfos[idx];
   }
-#ifdef NOTDEF
   fieldValInfo->fieldFlags = entry->fieldFlags;
-  fieldValInfo->fieldTypeId = entry->fieldTypeId;
-  fieldValInfo->fieldLgth = entry->fieldLgth;
-  fieldValInfo->fieldOffset = entry->fieldOffset;
-  fieldValInfo->keyValueVal = entry->keyValueVal;
-#endif
+  fieldValInfo->fieldCallbackId = entry->fieldCallbackId;
+  fieldValInfo->dataValue = entry->dataValue;
   return result;
 }
 
@@ -605,26 +598,12 @@ static uint8_t setMsgFieldValInfo(compMsgDispatcher_t *self, uint8_t idx, fieldV
     checkAllocOK(msgFieldInfos->fieldValInfos[idx]);
     entry = msgFieldInfos->fieldValInfos[idx];
   }
-#ifdef NOTDEF
   entry->fieldFlags = fieldValInfo->fieldFlags;
-  entry->fieldTypeId = fieldValInfo->fieldTypeId;
-  entry->fieldLgth = fieldValInfo->fieldLgth;
-  entry->fieldOffset = fieldValInfo->fieldOffset;
-  if ((entry->keyValueVal == NULL) && (fieldValInfo->keyValueVal != NULL)) {
-    entry->keyValueVal = os_zalloc(sizeof(keyValueVal_t));
-    checkAllocOK(entry->keyValueVal);
-  }
-  if (fieldValInfo->keyValueVal != NULL) {
-    entry->keyValueVal->keyId = fieldValInfo->keyValueVal->keyId;
-    entry->keyValueVal->keyAccess = fieldValInfo->keyValueVal->keyAccess; 
-    entry->keyValueVal->keyType = fieldValInfo->keyValueVal->keyType;
-    entry->keyValueVal->keyLgth = fieldValInfo->keyValueVal->keyLgth;
-    entry->keyValueVal->keyNumValues = fieldValInfo->keyValueVal->keyNumValues;
-  }
-#endif
+  entry->fieldCallbackId = fieldValInfo->fieldCallbackId;
+  entry->dataValue = fieldValInfo->dataValue;
   result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, idx, &fieldName);
   checkErrOK(result);
-  COMP_MSG_DBG(self, "E", 0, "setMsgFieldValInfo: %s idx: %d fieldFlags: 0x%08x", fieldName, idx, entry->fieldFlags);
+  COMP_MSG_DBG(self, "E", 2, "setMsgFieldValInfo: %s idx: %d fieldFlags: 0x%08x fieldCallbackId: %d", fieldName, idx, entry->fieldFlags, entry->fieldCallbackId);
   return result;
 }
 

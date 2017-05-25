@@ -210,8 +210,6 @@ static uint8_t compMsgFileInit(compMsgDispatcher_t *self) {
   compMsgFile = self->compMsgFile;
   compMsgFile->openFile = &openFile;
   compMsgFile->closeFile = &closeFile;
-ets_printf("compMsgFileInit\n");
-ets_printf("compMsgFile->closeFile: %p\n", compMsgFile->closeFile);
   compMsgFile->flushFile = &flushFile;
   compMsgFile->readLine = &readLine;
   compMsgFile->writeLine = &writeLine;

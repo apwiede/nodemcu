@@ -567,6 +567,7 @@ static void startWebClientMode(void *arg) {
   fieldValueCallback_t callback;
   compMsgTimerSlot_t *compMsgTimerSlot;
   char temp[64];
+  fieldValInfo_t fieldValInfo;
   fieldValue_t fieldValue;
   uint8_t valueId;
 
@@ -589,31 +590,16 @@ static void startWebClientMode(void *arg) {
 
   self->dispatcherCommon->runningModeFlags |= COMP_DISP_RUNNING_MODE_CLIENT;
   result = self->compMsgDataValue->dataValueStr2ValueId(self, "@clientIPAddr", &valueId);
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = compMsgTimerSlot->ip_addr;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = valueId;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->setFieldValueInfo(self, &fieldValue);
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientIPAddr;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
+  fieldValInfo.fieldFlags = COMP_MSG_FIELD_IS_NUMERIC;
+  fieldValInfo.dataValue.value.numericValue = compMsgTimerSlot->ip_addr;
+  fieldValInfo.fieldValueCallback = NULL;
+  result = self->compMsgTypesAndNames->setMsgFieldValInfo(self, COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR, &fieldValInfo);
+  result = self->compMsgTypesAndNames->getMsgFieldValInfo(self, COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR, &fieldValInfo);
   numericValue = fieldValue.dataValue.value.numericValue;
   COMP_MSG_DBG(self, "N", 2, "ip2: 0x%08x\n", numericValue);
   c_sprintf(temp, "%d.%d.%d.%d", IP2STR(&numericValue));
 
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientPort;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
+  result = self->compMsgTypesAndNames->getMsgFieldValInfo(self, COMP_MSG_SPEC_FIELD_CLIENT_PORT, &fieldValInfo);
   port = fieldValue.dataValue.value.numericValue;
   COMP_MSG_DBG(self, "N", 1, "startWebClientMode IP: %s port: %d result: %d\n", temp, port, result);
 
@@ -634,6 +620,7 @@ static void startWebClientMode(void *arg) {
   sud->curr_url = NULL;
 sud->urls[0] = "/callmcu";
 sud->num_urls = 1;
+ets_printf("before callbacks\n");
   fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   fieldValue.dataValue.value.numericValue = 0;
   fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
@@ -708,6 +695,7 @@ static void startAccessPoint(void *arg) {
   uint8_t *strValue;
   fieldValueCallback_t callback;
   socketUserData_t *sud;
+  fieldValInfo_t fieldValInfo;
   fieldValue_t fieldValue;
   compMsgTimerSlot_t *compMsgTimerSlot;
 
@@ -723,16 +711,10 @@ static void startAccessPoint(void *arg) {
   }
 
   self->dispatcherCommon->runningModeFlags |= COMP_DISP_RUNNING_MODE_ACCESS_POINT;
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_provisioningPort;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  COMP_MSG_DBG(self, "W", 1, "AP port: %d!result: %d!\n", fieldValue.dataValue.value.numericValue, result);
+  result = self->compMsgTypesAndNames->getMsgFieldValInfo(self, COMP_MSG_SPEC_FIELD_PROVISIONING_PORT, &fieldValInfo);
+  COMP_MSG_DBG(self, "W", 1, "AP port: %d!result: %d!\n", fieldValInfo.dataValue.value.numericValue, result);
 //  checkErrOK(result);
-  port = fieldValue.dataValue.value.numericValue;
+  port = fieldValInfo.dataValue.value.numericValue;
 //  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_VALUE_ID_provisioningIPAddr, &flags, &callback, &numericValue, &stringValue);
 //  checkErrOK(result);
 
@@ -758,8 +740,9 @@ sud->num_urls = 2;
   fieldValue.fieldNameId = 0;
   fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_binaryCallback;
   fieldValue.fieldValueCallback = NULL;
+ets_printf("before binary callbacks2\n");
   result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", fieldValue.dataValue.value.numericValue, result);
+  COMP_MSG_DBG(self, "W", 1, "binaryCallback: %p!result: %d!\n", fieldValue.dataValue.value.numericValue, result);
   sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)fieldValue.dataValue.value.numericValue;
   fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
   fieldValue.dataValue.value.numericValue = 0;
@@ -768,7 +751,7 @@ sud->num_urls = 2;
   fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_textCallback;
   fieldValue.fieldValueCallback = NULL;
   result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", fieldValue.dataValue.value.numericValue, result);
+  COMP_MSG_DBG(self, "W", 1, "textCallback: %p!result: %d!\n", fieldValue.dataValue.value.numericValue, result);
   sud->webSocketTextReceived = (webSocketTextReceived_t)fieldValue.dataValue.value.numericValue;
   sud->compMsgDispatcher = self;
 
@@ -825,7 +808,7 @@ static uint8_t webSocketRunAPMode(compMsgDispatcher_t *self) {
   uint8_t *stringValue;
   uint8_t *strValue;
   uint8_t flags;
-  fieldValue_t fieldValue;
+  fieldValInfo_t fieldValInfo;
   fieldValueCallback_t callback;
   
   COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode\n");
@@ -841,17 +824,10 @@ static uint8_t webSocketRunAPMode(compMsgDispatcher_t *self) {
     return COMP_MSG_ERR_CANNOT_SET_OPMODE;
   }
   c_memset(softap_config.ssid,0,sizeof(softap_config.ssid));
-  fieldValue.flags = COMP_MSG_FIELD_IS_STRING;
-  fieldValue.dataValue.value.stringValue = NULL;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_provisioningSsid;
-  fieldValue.fieldValueCallback = NULL;
-  strValue = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
+  result = self->compMsgTypesAndNames->getMsgFieldValInfo(self, COMP_MSG_SPEC_FIELD_PROVISIONING_SSID, &fieldValInfo);
   COMP_MSG_DBG(self, "W", 2, "webSocketRunAPMode get_PROVISIONING_SSID result: %d\n", result);
   checkErrOK(result);
-  stringValue = fieldValue.dataValue.value.stringValue;
+  stringValue = fieldValInfo.dataValue.value.stringValue;
   c_memcpy(softap_config.ssid, stringValue, c_strlen(stringValue));
   softap_config.ssid_len = c_strlen(stringValue);
   softap_config.ssid_hidden = 0;
@@ -886,7 +862,7 @@ static uint8_t webSocketRunClientMode(compMsgDispatcher_t *self) {
   uint8_t *strValue;
   char *hostName;
   uint8_t flags;
-  fieldValue_t fieldValue;
+  fieldValInfo_t fieldValInfo;
   fieldValueCallback_t callback;
 
   COMP_MSG_DBG(self, "W", 2, "webSocketRunClientMode\n");
@@ -903,29 +879,17 @@ static uint8_t webSocketRunClientMode(compMsgDispatcher_t *self) {
 //  }
   COMP_MSG_DBG(self, "N", 2, "wifi_station_disconnect: boolResult: %d", boolResult);
   c_memset(station_config.ssid,0,sizeof(station_config.ssid));
-  fieldValue.flags = COMP_MSG_FIELD_IS_STRING;
-  fieldValue.dataValue.value.stringValue = NULL;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSsid;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
+  result = self->compMsgTypesAndNames->getMsgFieldValInfo(self, COMP_MSG_SPEC_FIELD_CLIENT_SSID, &fieldValInfo);
   COMP_MSG_DBG(self, "N", 2, "getSsid: result: %d\n", result);
   checkErrOK(result);
-  stringValue = fieldValue.dataValue.value.stringValue;
+  stringValue = fieldValInfo.dataValue.value.stringValue;
   c_memcpy(station_config.ssid, stringValue, c_strlen(stringValue));
 
   c_memset(station_config.password,0,sizeof(station_config.password));
-  fieldValue.flags = COMP_MSG_FIELD_IS_STRING;
-  fieldValue.dataValue.value.stringValue = NULL;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientPasswd;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
+  result = self->compMsgTypesAndNames->getMsgFieldValInfo(self, COMP_MSG_SPEC_FIELD_CLIENT_PASSWD, &fieldValInfo);
   COMP_MSG_DBG(self, "N", 2, "getPasswd: result: %d\n", result);
   checkErrOK(result);
-  stringValue = fieldValue.dataValue.value.stringValue;
+  stringValue = fieldValInfo.dataValue.value.stringValue;
   COMP_MSG_DBG(self, "N", 2, "len password: %d\n", c_strlen(stringValue));
   c_memcpy(station_config.password, stringValue, c_strlen(stringValue));
   COMP_MSG_DBG(self, "N", 1, "webSocketRunClientMode: ssid: %s password: %s!\n", station_config.ssid, station_config.password);

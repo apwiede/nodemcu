@@ -185,7 +185,8 @@ typedef struct dataValue dataValue_t;
 
 typedef struct fieldValInfo {
   uint32_t fieldFlags;
-  dataValue_t *dataValue;
+  dataValue_t dataValue;
+  uint8_t fieldCallbackId;
   fieldValueCallback_t fieldValueCallback;
 } fieldValInfo_t;
 
