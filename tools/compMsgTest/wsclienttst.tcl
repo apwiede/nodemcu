@@ -422,7 +422,7 @@ proc getAPInfos { sock } {
   lappend headerValueInfos [list @grp 2]
   lappend headerValueInfos [list @dst 0x14]
   lappend headerValueInfos [list @cmdKey 0x5031]
-  set result [::compMsg compMsgMsgDesc getHeaderFromUniqueFields ::compMsgDispatcher $headerValueInfos msgDescription]
+  set result [::compMsg compMsgMsgDesc getMsgDescriptionFromUniqueFields ::compMsgDispatcher $headerValueInfos msgDescription]
   checkErrOK $result
 puts stderr "===after getHeaderFromUniqueFields: msgDescription: $msgDescription!"
   set result [::compMsg compMsgDispatcher setSocketForAnswer ::compMsgDispatcher $sock]

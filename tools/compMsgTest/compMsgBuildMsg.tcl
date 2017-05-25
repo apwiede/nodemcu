@@ -72,7 +72,6 @@ puts stderr "===createMsgFromHeaderPart![dict keys $msgDescription]!"
 #      checkErrOK $result
       set compMsgData [dict create]
       dict set compMsgData flags [list]
-#      set compMsgData [dict get $compMsgDispatcher compMsgData]
       dict set compMsgData msgDescription $msgDescription
       dict set compMsgDispatcher compMsgData $compMsgData
     
@@ -259,20 +258,34 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
 #puts stderr "setMsgValues"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set numEntries [dict get $msgDescription numFields]
+      set fieldSequence [dict get $msgDescription fieldSequence]
+      set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+      set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
+      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
+      set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
+      set cmdKeyVal [dict get $msgDescription cmdKey]
+      set val1 [format %c [expr {$cmdKeyVal >> 8}]]
+      set val2 [format %c [expr {$cmdKeyVal & 0xFF}]]
+puts stderr "keys: [dict keys [dict get $compMsgMsgDesc msgHeaderInfo]]!\nkeys2: [dict keys $msgDescription]!"
+puts stderr "val1: $val1!$val2!headerLgth: [dict get $compMsgMsgDesc msgHeaderInfo headerLgth]!"
+      set msgFieldGroupInfo [dict get $msgFieldGroupInfos COMP_MSG_VAL_FIELD_GROUP "${val1}${val2}"]
+puts stderr "numMsgFieldVal: [dict get $msgFieldGroupInfo numMsgFieldVal]!"
+      set numHeaderFields [dict get $compMsgMsgDesc msgHeaderInfo numHeaderFields]
+      set result [::compMsg dataView setDataViewData [dict get $msgDescription headerFieldValues] [dict get $compMsgMsgDesc msgHeaderInfo headerLgth]]
+      checkErrOK $result
       set fieldIdx 0
-      while {$fieldIdx < $numEntries} {
-        set idx 0
-        set found false
-        if {[string range [dict get $msgDescPart fieldNameStr] 0 0] eq "#"} {
-          while {$idx < [llength $msgKeyValueDescParts]} {
-            set msgKeyValueDescPart [lindex $msgKeyValueDescParts $idx]
-            if {[dict get $msgKeyValueDescPart keyNameStr] eq [dict get $msgDescPart fieldNameStr]} {
-              set found true
-              break
-            }
-            incr idx
-          }
-        }
+      while {$fieldIdx < $numHeaderFields} {
+        set fieldId [lindex $fieldSequence $fieldIdx]
+puts stderr "fieldId: $fieldIdx!$fieldId!$fieldSequence!"
+        set fieldInfo [lindex $fieldInfos $fieldId]
+set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId ::compMsgDispatcher $fieldId fieldName]
+checkErrOK $result
+puts stderr "fieldName: $fieldName!"
+        set result [::compMsg compMsgDataView getIdFieldValue compMsgDispatcher $fieldId dataValue 0]
+        checkErrOK $result
+puts stderr "val: $dataValue!"
+if {0} {
         if {$found} {
           dict set compMsgDispatcher msgKeyValueDescPart $msgKeyValueDescPart
         } else {
@@ -294,15 +307,18 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
           dict set compMsgDispatcher compMsgData msgValParts $msgValParts
           incr msgValPartIdx
         }
-        incr msgDescPartIdx
+}
+        incr fieldIdx
       }
+if {0} {
       set msgCmdKey [dict get $compMsgDispatcher currHdr hdrU16CmdKey]
       set result [::compMsg compMsgData setFieldValue compMsgDispatcher "@cmdKey" $msgCmdKey]
       checkErrOK $result
+}
       set result [::compMsg compMsgData prepareMsg compMsgDispatcher]
       checkErrOK $result
-#puts stderr "setMsgValues end"
-#::compMsg compMsgData dumpMsg compMsgDispatcher
+puts stderr "setMsgValues end"
+::compMsg compMsgData dumpMsg compMsgDispatcher
       return $::COMP_MSG_ERR_OK
     }
 

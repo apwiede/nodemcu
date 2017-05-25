@@ -296,6 +296,7 @@ namespace eval ::compMsg {
     dict set fieldGroupStr2Ids "@\$msgModuleData"    COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP
     dict set fieldGroupStr2Ids "@\$msgDesc"          COMP_MSG_DESC_FIELD_GROUP
     dict set fieldGroupStr2Ids "@\$msgVal"           COMP_MSG_VAL_FIELD_GROUP
+    dict set fieldGroupStr2Ids "@\$msgHeaderVal"     COMP_MSG_HEADER_VAL_FIELD_GROUP
 
     dict set ::compMsg(fieldNameDefinitions) numDefinitions 0
 
