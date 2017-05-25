@@ -635,9 +635,11 @@ compMsgDispatcher_t *newCompMsgDispatcher() {
   compMsgDispatcher->dispatcherCommon->runningModeFlags = 0;
   compMsgDispatcher->dispatcherCommon->stopAccessPoint = false;
 
+#ifdef OLD
   compMsgDispatcher->dispatcherCommon->numMsgKeyValueDescParts = 0;
   compMsgDispatcher->dispatcherCommon->maxMsgKeyValueDescParts = 0;
   compMsgDispatcher->dispatcherCommon->msgKeyValueDescParts = NULL;
+#endif
 
   compMsgDispatcher->dispatcherCommon->operatingMode = MODULE_OPERATING_MODE_START;
 

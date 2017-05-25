@@ -80,7 +80,7 @@
 #define COMP_MSG_MODULE_VALUE_ID_cryptIvKey         59
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
-typedef struct dataValue dataValue_t;
+typedef struct fieldDescInfo fieldDescInfo_t;
 
 typedef struct dataValue {
   uint16_t flags;
@@ -131,7 +131,7 @@ typedef uint8_t (* dumpMsgFieldValues_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* addMsgFieldValues_t)(compMsgDispatcher_t *self, uint8_t numEntries);
 typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
 typedef uint8_t (* getMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
-typedef uint8_t (* compareDataValues_t)(compMsgDispatcher_t *self, fieldInfo_t *fieldInfo, dataValue_t *dataValue1, dataValue_t *dataValue2);
+typedef uint8_t (* compareDataValues_t)(compMsgDispatcher_t *self, fieldDescInfo_t *fieldDescInfo, dataValue_t *dataValue1, dataValue_t *dataValue2);
 typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgDataValue {

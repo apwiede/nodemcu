@@ -138,7 +138,9 @@ COMP_MSG_DBG(self, "MY", 2, "\n");
 // ================================= getIPAddr ====================================
 
 static uint8_t getIPAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
+#endif
   *numericValue = 0;
   *stringValue = compMsgModuleData.IPAddr;
   return COMP_MSG_ERR_OK;
@@ -147,7 +149,14 @@ static uint8_t getIPAddr(compMsgDispatcher_t *self, int *numericValue, uint8_t *
 // ================================= getFirmwareVersion ====================================
 
 static uint8_t getFirmwareVersion(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
+  self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.IPAddr;
+#endif
+  *numericValue = 0;
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.FirmwareVersion;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.FirmwareVersion;
   return COMP_MSG_ERR_OK;
@@ -156,8 +165,11 @@ static uint8_t getFirmwareVersion(compMsgDispatcher_t *self, int *numericValue, 
 // ================================= getRSSI ====================================
 
 static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSI;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.RSSI;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -166,8 +178,11 @@ static uint8_t getRSSI(compMsgDispatcher_t *self, int *numericValue, uint8_t **s
 // ================================= getRSSIMax ====================================
 
 static uint8_t getRSSIMax(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.RSSIMax;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.RSSIMax;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -176,8 +191,11 @@ static uint8_t getRSSIMax(compMsgDispatcher_t *self, int *numericValue, uint8_t 
 // ================================= getConnectionState ====================================
 
 static uint8_t getConnectionState(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectionState;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.ConnectionState;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -186,8 +204,11 @@ static uint8_t getConnectionState(compMsgDispatcher_t *self, int *numericValue, 
 // ================================= getConnectedUsers ====================================
 
 static uint8_t getConnectedUsers(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ConnectedUsers;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.ConnectedUsers;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -196,8 +217,11 @@ static uint8_t getConnectedUsers(compMsgDispatcher_t *self, int *numericValue, u
 // ================================= getIPProtocol ====================================
 
 static uint8_t getIPProtocol(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.IPProtocol;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.IPProtocol;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -206,8 +230,11 @@ static uint8_t getIPProtocol(compMsgDispatcher_t *self, int *numericValue, uint8
 // ================================= getErrorMain ====================================
 
 static uint8_t getErrorMain(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorMain;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.ErrorMain;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -216,8 +243,11 @@ static uint8_t getErrorMain(compMsgDispatcher_t *self, int *numericValue, uint8_
 // ================================= getErrorSub ====================================
 
 static uint8_t getErrorSub(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.ErrorSub;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.ErrorSub;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -226,7 +256,10 @@ static uint8_t getErrorSub(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getDateAndTime ====================================
 
 static uint8_t getDateAndTime(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.DateAndTime;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.DateAndTime;
   return COMP_MSG_ERR_OK;
@@ -235,8 +268,11 @@ static uint8_t getDateAndTime(compMsgDispatcher_t *self, int *numericValue, uint
 // ================================= getSSIDs ====================================
 
 static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.SSIDs;
+#endif
+  *numericValue = 0;
   *numericValue = compMsgModuleData.SSIDs;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -245,8 +281,11 @@ static uint8_t getSSIDs(compMsgDispatcher_t *self, int *numericValue, uint8_t **
 // ================================= getReserve1 ====================================
 
 static uint8_t getReserve1(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = (int)compMsgModuleData.Reserve1;
+#endif
+  *numericValue = 0;
   *numericValue = (int)compMsgModuleData.Reserve1;
   *stringValue = NULL;
   return COMP_MSG_ERR_OK;
@@ -255,7 +294,10 @@ static uint8_t getReserve1(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getReserve2 ====================================
 
 static uint8_t getReserve2(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve2;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve2;
   return COMP_MSG_ERR_OK;
@@ -264,7 +306,10 @@ static uint8_t getReserve2(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getReserve3 ====================================
 
 static uint8_t getReserve3(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve3;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve3;
   return COMP_MSG_ERR_OK;
@@ -273,7 +318,10 @@ static uint8_t getReserve3(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getReserve4 ====================================
 
 static uint8_t getReserve4(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve4;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve4;
   return COMP_MSG_ERR_OK;
@@ -282,7 +330,10 @@ static uint8_t getReserve4(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getReserve5 ====================================
 
 static uint8_t getReserve5(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve5;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve5;
   return COMP_MSG_ERR_OK;
@@ -291,7 +342,10 @@ static uint8_t getReserve5(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getReserve6 ====================================
 
 static uint8_t getReserve6(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve6;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve6;
   return COMP_MSG_ERR_OK;
@@ -300,7 +354,10 @@ static uint8_t getReserve6(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getReserve7 ====================================
 
 static uint8_t getReserve7(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve7;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve7;
   return COMP_MSG_ERR_OK;
@@ -309,7 +366,10 @@ static uint8_t getReserve7(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getReserve8 ====================================
 
 static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldKeyValueStr = compMsgModuleData.Reserve8;
+#endif
+  *numericValue = 0;
   *numericValue = 0;
   *stringValue = compMsgModuleData.Reserve8;
   return COMP_MSG_ERR_OK;
@@ -317,8 +377,11 @@ static uint8_t getReserve8(compMsgDispatcher_t *self, int *numericValue, uint8_t
 // ================================= getOperatingMode ====================================
 
 static uint8_t getOperatingMode(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue) {
+#ifdef OLD
   self->compMsgData->msgValPart->fieldFlags |= COMP_DISP_DESC_VALUE_IS_NUMBER;
   self->compMsgData->msgValPart->fieldValue = compMsgModuleData.operatingMode;
+#endif
+  *numericValue = 0;
   COMP_MSG_DBG(self, "Y", 0, "OperatingMode: 0x%02x", compMsgModuleData.operatingMode);
   *numericValue = compMsgModuleData.operatingMode;
   *stringValue = NULL;
@@ -382,7 +445,9 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
   compMsgDataView_t *dataView;
   uint8_t msgDescPartIdx;
   compMsgField_t *fieldInfo;
+#ifdef OLD
   msgDescPart_t *msgDescPart;
+#endif
   compMsgData_t *compMsgData;
   int numericValue;
   uint8_t valueId;
@@ -396,9 +461,12 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
   dataView = compMsgData->compMsgDataView;
   msgDescPartIdx = 0;
   while (msgDescPartIdx < compMsgData->numFields) {
+#ifdef OLD
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
+#endif
     fieldInfo = &compMsgData->fields[msgDescPartIdx++];
     // check for stop handling fields
+#ifdef OLD
     if ((fieldInfo->fieldNameId == COMP_MSG_SPEC_FIELD_FILLER) || (msgDescPart->fieldNameStr[0] != '@')) {
       userFieldsStarted = false;
     }
@@ -422,6 +490,7 @@ static uint8_t restoreUserData(compMsgDispatcher_t *self) {
       result = self->compMsgDataValue->setFieldValueInfo(self, &fieldValue);
       checkErrOK(result);
     }
+#endif
     // check for start handling fields
     if (fieldInfo->fieldNameId == COMP_MSG_SPEC_FIELD_CMD_KEY) {
       userFieldsStarted = true;

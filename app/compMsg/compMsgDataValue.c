@@ -383,7 +383,7 @@ static uint8_t dumpMsgFieldValues(compMsgDispatcher_t *self) {
   uint8_t *stringValue;
   compMsgTypesAndNames_t *compMsgTypesAndNames;
   compMsgDataValue_t *compMsgDataValue;
-  fieldInfo_t *fieldInfo;
+  fieldDescInfo_t *fieldDescInfo;
   fieldValue_t *fieldValue;
 
   result = COMP_MSG_ERR_OK;
@@ -397,18 +397,18 @@ static uint8_t dumpMsgFieldValues(compMsgDispatcher_t *self) {
       idx++;
       continue;
     }
-    fieldInfo = compMsgTypesAndNames->msgFieldInfos.fieldInfos[idx];
+    fieldDescInfo = compMsgTypesAndNames->msgFieldInfos.fieldDescInfos[idx];
     fieldValue = compMsgDataValue->msgFieldValues.fieldValues[idx];
     result = compMsgTypesAndNames->getFieldNameStrFromId(self, idx, &fieldName);
     checkErrOK(result);
     if (fieldValue == NULL) {
       ets_sprintf(buf, "%3d %-20s empty", idx, fieldName);
     } else {
-      result = compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldInfo->fieldTypeId, &fieldType);
+      result = compMsgTypesAndNames->getFieldTypeStrFromId(self, fieldDescInfo->fieldTypeId, &fieldType);
       checkErrOK(result);
       numericValue = 0;
       stringValue = NULL;
-      switch (fieldInfo->fieldTypeId) {
+      switch (fieldDescInfo->fieldTypeId) {
       case DATA_VIEW_FIELD_NONE:
         break;
       case DATA_VIEW_FIELD_UINT8_T:
@@ -450,26 +450,26 @@ static uint8_t dumpMsgFieldValues(compMsgDispatcher_t *self) {
       default:
         return COMP_MSG_ERR_BAD_FIELD_TYPE;
       }
-      ets_sprintf(buf, "%3d %-20s type: %-10s %d lgth: %3d value: %s %d 0x%08x flags: 0x%04x", idx, fieldName, fieldType, fieldInfo->fieldTypeId, fieldInfo->fieldLgth, stringValue == NULL ? "nil" : (char *)stringValue, numericValue, numericValue, fieldInfo->fieldFlags);
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_WIFI_DATA) {
+      ets_sprintf(buf, "%3d %-20s type: %-10s %d lgth: %3d value: %s %d 0x%08x flags: 0x%04x", idx, fieldName, fieldType, fieldDescInfo->fieldTypeId, fieldDescInfo->fieldLgth, stringValue == NULL ? "nil" : (char *)stringValue, numericValue, numericValue, fieldDescInfo->fieldFlags);
+      if (fieldDescInfo->fieldFlags & COMP_MSG_FIELD_WIFI_DATA) {
         c_strcat(buf, " WIFI_DATA");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_MODULE_DATA) {
+      if (fieldDescInfo->fieldFlags & COMP_MSG_FIELD_MODULE_DATA) {
         c_strcat(buf, " MODULE_DATA");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_TO_SAVE) {
+      if (fieldDescInfo->fieldFlags & COMP_MSG_FIELD_TO_SAVE) {
         c_strcat(buf, " TO_SAVE");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_KEY_VALUE) {
+      if (fieldDescInfo->fieldFlags & COMP_MSG_FIELD_KEY_VALUE) {
         c_strcat(buf, " KEY_VALUE");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER) {
+      if (fieldDescInfo->fieldFlags & COMP_MSG_FIELD_HEADER) {
         c_strcat(buf, " HEADER");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_UNIQUE) {
+      if (fieldDescInfo->fieldFlags & COMP_MSG_FIELD_HEADER_UNIQUE) {
         c_strcat(buf, " HEADER_UNIQUE");
       }
-      if (fieldInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO) {
+      if (fieldDescInfo->fieldFlags & COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO) {
         c_strcat(buf, " HEADER_CHKSUM_NON_ZERO");
       }
     }
@@ -556,8 +556,8 @@ static uint8_t getMsgFieldValue(compMsgDispatcher_t *self, uint8_t idx, fieldVal
 
 // ================================= compareDataValues ====================================
 
-static uint8_t compareDataValues(compMsgDispatcher_t *self, fieldInfo_t *fieldInfo, dataValue_t *dataValue1, dataValue_t *dataValue2) {
-  switch (fieldInfo->fieldTypeId) {
+static uint8_t compareDataValues(compMsgDispatcher_t *self, fieldDescInfo_t *fieldDescInfo, dataValue_t *dataValue1, dataValue_t *dataValue2) {
+  switch (fieldDescInfo->fieldTypeId) {
   case DATA_VIEW_FIELD_UINT8_T:
     break;
   default:

@@ -41,7 +41,7 @@
 #ifndef COMP_MSG_TYPES_AND_NAMES_H
 #define	COMP_MSG_TYPES_AND_NAMES_H
 
-#include "c_types.h"
+#include "compMsg.h"
 
 enum CompMsgFieldType
 {
@@ -74,35 +74,35 @@ enum compMsgSpecialFieldNames
   COMP_MSG_SPEC_FIELD_SEQUENCE_NUM              = 9,
   COMP_MSG_SPEC_FIELD_FILLER                    = 10,
   COMP_MSG_SPEC_FIELD_CRC                       = 11,
-  COMP_MSG_SPEC_FIELD_GUID                      = 12,
-  COMP_MSG_SPEC_FIELD_SRC_ID                    = 13,
-  COMP_MSG_SPEC_FIELD_HDR_FILLER                = 14,
-  COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            = 15,
+  COMP_MSG_SPEC_FIELD_TOTAL_CRC                 = 12,
+  COMP_MSG_SPEC_FIELD_GUID                      = 13,
+  COMP_MSG_SPEC_FIELD_SRC_ID                    = 14,
+  COMP_MSG_SPEC_FIELD_HDR_FILLER                = 15,
+  COMP_MSG_SPEC_FIELD_NUM_KEY_VALUES            = 16,
 
-  COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         = 16,
-  COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         = 17,
-  COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      = 18,
-  COMP_MSG_SPEC_FIELD_CLIENT_SSID               = 19,
-  COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             = 20,
-  COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            = 21,
-  COMP_MSG_SPEC_FIELD_CLIENT_PORT               = 22,
-  COMP_MSG_SPEC_FIELD_CLIENT_STATUS             = 23,
-  COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              = 24,
-  COMP_MSG_SPEC_FIELD_SSDP_PORT                 = 25,
-  COMP_MSG_SPEC_FIELD_SSDP_STATUS               = 26,
-  COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT      = 27,
-  COMP_MSG_SPEC_FIELD_CLOUD_PORT                = 28,
-  COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              = 29,
-  COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              = 30,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        = 31,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        = 32,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     = 33,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        = 34,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        = 35,
-  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     = 36,
-  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        = 37,
-  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        = 38,
-  COMP_MSG_SPEC_FIELD_TOTAL_CRC                 = 39,
+  COMP_MSG_SPEC_FIELD_PROVISIONING_SSID         = 17,
+  COMP_MSG_SPEC_FIELD_PROVISIONING_PORT         = 18,
+  COMP_MSG_SPEC_FIELD_PROVISIONING_IP_ADDR      = 19,
+  COMP_MSG_SPEC_FIELD_CLIENT_SSID               = 20,
+  COMP_MSG_SPEC_FIELD_CLIENT_PASSWD             = 21,
+  COMP_MSG_SPEC_FIELD_CLIENT_IP_ADDR            = 22,
+  COMP_MSG_SPEC_FIELD_CLIENT_PORT               = 23,
+  COMP_MSG_SPEC_FIELD_CLIENT_STATUS             = 24,
+  COMP_MSG_SPEC_FIELD_SSDP_IP_ADDR              = 25,
+  COMP_MSG_SPEC_FIELD_SSDP_PORT                 = 26,
+  COMP_MSG_SPEC_FIELD_SSDP_STATUS               = 27,
+  COMP_MSG_SPEC_FIELD_CLOUD_SECURE_CONNECT      = 28,
+  COMP_MSG_SPEC_FIELD_CLOUD_PORT                = 29,
+  COMP_MSG_SPEC_FIELD_CLOUD_HOST_1              = 30,
+  COMP_MSG_SPEC_FIELD_CLOUD_HOST_2              = 31,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_1        = 32,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_1_PART_2        = 33,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_1     = 34,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_1        = 35,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_2_PART_2        = 36,
+  COMP_MSG_SPEC_FIELD_CLOUD_URL_TENANT_ID_2     = 37,
+  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_1        = 38,
+  COMP_MSG_SPEC_FIELD_CLOUD_NODE_TOKEN_2        = 39,
   COMP_MSG_SPEC_FIELD_OTA_PORT                  = 40,
   COMP_MSG_SPEC_FIELD_OTA_ROM_PATH              = 41,
   COMP_MSG_SPEC_FIELD_OTA_FS_PATH               = 42,
@@ -150,8 +150,9 @@ enum compMsgFieldGroups
 #define COMP_MSG_FIELD_TO_SAVE                 0x04
 #define COMP_MSG_FIELD_KEY_VALUE               0x08
 #define COMP_MSG_FIELD_HEADER                  0x10
-#define COMP_MSG_FIELD_HEADER_UNIQUE           0x20
-#define COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO  0x40
+#define COMP_MSG_FIELD_HEADER_VALUE            0x20
+#define COMP_MSG_FIELD_HEADER_UNIQUE           0x40
+#define COMP_MSG_FIELD_HEADER_CHKSUM_NON_ZERO  0x80
 
 typedef struct str2id {
   uint8_t *str;
@@ -172,17 +173,27 @@ typedef struct fieldNames {
 
 typedef struct keyValueDesc keyValueDesc_t;
 
-typedef struct fieldInfo {
+typedef struct fieldDescInfo {
   uint32_t fieldFlags;
   uint8_t fieldTypeId;
   uint16_t fieldLgth;
   uint16_t fieldOffset;
   keyValueDesc_t *keyValueDesc;
-} fieldInfo_t;
+} fieldDescInfo_t;
+
+typedef struct dataValue dataValue_t;
+
+typedef struct fieldValInfo {
+  uint32_t fieldFlags;
+  dataValue_t *dataValue;
+  fieldValueCallback_t fieldValueCallback;
+} fieldValInfo_t;
 
 typedef struct msgFieldInfos {
-  uint16_t numMsgFields;
-  fieldInfo_t **fieldInfos;
+  uint16_t numMsgDescFields;
+  fieldDescInfo_t **fieldDescInfos;
+  uint16_t numMsgValFields;
+  fieldValInfo_t **fieldValInfos;
 } msgFieldInfos_t;
 
 typedef struct compMsgDispatcher compMsgDispatcher_t;
@@ -194,10 +205,14 @@ typedef uint8_t (* getFieldNameIdFromStr_t)(compMsgDispatcher_t *self, const uin
 typedef uint8_t (* getFieldNameStrFromId_t)(compMsgDispatcher_t *self, uint8_t fieldNameId, uint8_t **fieldName);
 typedef uint8_t (* getFileNameTokenIdFromStr_t)(compMsgDispatcher_t *self, const uint8_t *fileNameTokenStr, uint8_t *fileNameTokenId);
 
-typedef uint8_t (* dumpMsgFieldInfos_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* addMsgFieldInfos_t)(compMsgDispatcher_t *self, uint8_t numEntries);
-typedef uint8_t (* setMsgFieldInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldInfo_t *fieldInfo);
-typedef uint8_t (* getMsgFieldInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldInfo_t *fieldInfo);
+typedef uint8_t (* dumpMsgFieldDescInfos_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* dumpMsgFieldValInfos_t)(compMsgDispatcher_t *self);
+typedef uint8_t (* addMsgFieldDescInfos_t)(compMsgDispatcher_t *self, uint8_t numEntries);
+typedef uint8_t (* setMsgFieldDescInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldDescInfo_t *fieldDescInfo);
+typedef uint8_t (* getMsgFieldDescInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldDescInfo_t *fieldDescInfo);
+typedef uint8_t (* addMsgFieldValInfos_t)(compMsgDispatcher_t *self, uint8_t numEntries);
+typedef uint8_t (* setMsgFieldValInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValInfo_t *fieldValInfo);
+typedef uint8_t (* getMsgFieldValInfo_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValInfo_t *fieldValInfo);
 
 typedef uint8_t (* freeCompMsgTypesAndNames_t)(compMsgDispatcher_t *self);
 
@@ -216,10 +231,14 @@ typedef struct compMsgTypesAndNames {
 
   getFileNameTokenIdFromStr_t getFileNameTokenIdFromStr;
 
-  dumpMsgFieldInfos_t dumpMsgFieldInfos;
-  addMsgFieldInfos_t addMsgFieldInfos;
-  getMsgFieldInfo_t getMsgFieldInfo;
-  setMsgFieldInfo_t setMsgFieldInfo;
+  dumpMsgFieldDescInfos_t dumpMsgFieldDescInfos;
+  dumpMsgFieldValInfos_t dumpMsgFieldValInfos;
+  addMsgFieldDescInfos_t addMsgFieldDescInfos;
+  getMsgFieldDescInfo_t getMsgFieldDescInfo;
+  setMsgFieldDescInfo_t setMsgFieldDescInfo;
+  addMsgFieldValInfos_t addMsgFieldValInfos;
+  getMsgFieldValInfo_t getMsgFieldValInfo;
+  setMsgFieldValInfo_t setMsgFieldValInfo;
 
   freeCompMsgTypesAndNames_t freeCompMsgTypesAndNames;
 } compMsgTypesAndNames_t;

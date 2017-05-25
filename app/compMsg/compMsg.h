@@ -60,11 +60,11 @@ typedef struct compMsgDispatcher compMsgDispatcher_t;
 
 #include "dataView.h"
 #include "compMsgErrorCodes.h"
+#include "compMsgDataView.h"
+#include "compMsgDataValue.h"
 #include "compMsgTypesAndNames.h"
 #include "compMsgUtil.h"
-#include "compMsgDataView.h"
 #include "compMsgTimer.h"
-#include "compMsgDataValue.h"
 #include "compMsgFile.h"
 #include "compMsgMsgDesc.h"
 #include "compMsgAction.h"
@@ -125,9 +125,11 @@ typedef uint8_t (* resetMsgInfo_t)(compMsgDispatcher_t *self, msgParts_t *parts)
 typedef struct dispatcherCommon {
   uint8_t operatingMode;
   uint8_t webSocketError;
+#ifdef NOTDEF
   msgKeyValueDescPart_t *msgKeyValueDescParts;
   size_t numMsgKeyValueDescParts;
   size_t maxMsgKeyValueDescParts;
+#endif
   uint16_t runningModeFlags;
   bool stopAccessPoint;
   bssScanInfos_t *bssScanInfos;

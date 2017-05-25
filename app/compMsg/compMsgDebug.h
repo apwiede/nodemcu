@@ -79,8 +79,8 @@ typedef uint8_t (* setDebugFlags_t)(compMsgDispatcher_t *self, uint8_t *dbgChars
 typedef uint8_t (* dumpMsgParts_t)(compMsgDispatcher_t *self, msgParts_t *msgParts);
 typedef uint8_t (* dumpMsgHeaderInfos_t)(compMsgDispatcher_t *self, msgHeaderInfos_t *hdrInfos);
 typedef uint8_t (* dumpHeaderPart_t)(compMsgDispatcher_t *self, headerPart_t *hdr);
-typedef uint8_t (* dumpMsgDescPart_t)(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart);
-typedef uint8_t (* dumpMsgValPart_t)(compMsgDispatcher_t *self, msgValPart_t *msgValPart);
+//typedef uint8_t (* dumpMsgDescPart_t)(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart);
+//typedef uint8_t (* dumpMsgValPart_t)(compMsgDispatcher_t *self, msgValPart_t *msgValPart);
 typedef uint8_t (* compMsgDebugInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgDebug {
@@ -96,8 +96,8 @@ typedef struct compMsgDebug {
   dumpMsgParts_t dumpMsgParts;
   dumpMsgHeaderInfos_t dumpMsgHeaderInfos;
   dumpHeaderPart_t dumpHeaderPart;
-  dumpMsgDescPart_t dumpMsgDescPart;
-  dumpMsgValPart_t dumpMsgValPart;
+//  dumpMsgDescPart_t dumpMsgDescPart;
+//  dumpMsgValPart_t dumpMsgValPart;
   compMsgDebugInit_t compMsgDebugInit;
 } compMsgDebug_t;
 

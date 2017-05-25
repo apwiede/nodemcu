@@ -420,40 +420,6 @@ typedef struct msgParts {
 } msgParts_t;
 
 
-typedef struct msgDescPart {
-  uint8_t *fieldNameStr;
-  uint8_t fieldNameId;
-  uint8_t *fieldTypeStr;
-  uint8_t fieldTypeId;
-  uint8_t fieldLgth;
-  uint8_t fieldType;
-  uint8_t fieldRW;
-  uint16_t fieldKey;
-  uint16_t fieldSize;
-  uint16_t fieldNumValues;
-  fieldValueCallback_t fieldSizeCallback;
-  uint8_t fieldValueCallbackType;
-  uint8_t *fieldValueActionCb; // the name of a callback to run an action
-} msgDescPart_t;
-
-typedef struct msgValPart {
-  uint8_t *fieldNameStr;
-  uint8_t fieldNameId;
-  uint8_t *fieldValueStr;    // the value or the callback for getting the value
-  uint8_t *fieldKeyValueStr; // the value for a string
-  uint32_t fieldValue;       // the value for an integer
-  uint8_t fieldFlags;
-  uint8_t fieldValueCallbackType;
-  fieldValueCallback_t fieldValueCallback;
-} msgValPart_t;
-
-typedef struct msgKeyValueDescPart {
-  uint8_t *keyNameStr;
-  uint16_t keyId;
-  uint8_t keyType;
-  uint8_t keyLgth;
-} msgKeyValueDescPart_t;
-
 typedef struct fieldsToSave {
   uint8_t *fieldNameStr;
   uint8_t fieldNameId;

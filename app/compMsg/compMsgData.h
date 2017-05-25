@@ -116,17 +116,21 @@ typedef struct compMsgData {
   msgParts_t received;
   msgParts_t toSend;
 
+#ifdef NOTDEF
   msgDescPart_t *msgDescParts;
   size_t numMsgDescParts;
   size_t maxMsgDescParts;
   msgValPart_t *msgValParts;
   size_t numMsgValParts;
   size_t maxMsgValParts;
+#endif
   uint8_t *prepareValuesCbName;
   
   socketUserData_t *sud;
+#ifdef NOTDEF
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
+#endif
   headerPart_t *currHdr;
 
   // normalMsg

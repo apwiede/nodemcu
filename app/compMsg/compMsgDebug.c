@@ -409,6 +409,7 @@ static uint8_t dumpMsgParts(compMsgDispatcher_t *self, msgParts_t *msgParts) {
   return COMP_MSG_ERR_OK;
 }
 
+#ifdef NOTDEF
 // ================================= dumpMsgDescPart ====================================
 
 static uint8_t dumpMsgDescPart(compMsgDispatcher_t *self, msgDescPart_t *msgDescPart) {
@@ -450,6 +451,7 @@ static uint8_t dumpMsgValPart(compMsgDispatcher_t *self, msgValPart_t *msgValPar
   }
   return COMP_MSG_ERR_OK;
 }
+#endif
 
 // ================================= compMsgDebugInit ====================================
 
@@ -472,8 +474,8 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   compMsgDebug->dumpMsgParts = &dumpMsgParts;
   compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
   compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
-  compMsgDebug->dumpMsgDescPart = &dumpMsgDescPart;
-  compMsgDebug->dumpMsgValPart = &dumpMsgValPart;
+//  compMsgDebug->dumpMsgDescPart = &dumpMsgDescPart;
+//  compMsgDebug->dumpMsgValPart = &dumpMsgValPart;
   compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
   compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
 compMsgDebug->setDebugFlags(self, "BdDEHISw");

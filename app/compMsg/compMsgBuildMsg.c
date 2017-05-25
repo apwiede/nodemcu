@@ -46,8 +46,11 @@ static uint8_t createMsgFromHeaderPart (compMsgDispatcher_t *self, msgDescriptio
   uint8_t result;
   int idx;
   bool isEnd;
+#ifdef OLD
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
+#endif
+        // key value field !!
 
   COMP_MSG_DBG(self, "B", 2, "createMsgFromHeaderPart1");
 #ifdef OLD
@@ -105,9 +108,12 @@ static uint8_t ICACHE_FLASH_ATTR fixOffsetsForKeyValues(compMsgDispatcher_t *sel
   uint8_t *stringValue;
   int numericValue;
   compMsgField_t *fieldInfo;
+#ifdef OLD
   msgDescPart_t *msgDescPart;
-  compMsgData_t *compMsgData;
   msgKeyValueDescPart_t *msgKeyValueDescPart;
+#endif
+  compMsgData_t *compMsgData;
+        // key value field !!
   bool found;
 
   compMsgData = self->compMsgData;
@@ -116,6 +122,7 @@ static uint8_t ICACHE_FLASH_ATTR fixOffsetsForKeyValues(compMsgDispatcher_t *sel
   COMP_MSG_DBG(self, "B", 2, "fixOffsetsForKeyValues: numFields: %d!", compMsgData->numFields);
   while (fieldIdx < compMsgData->numFields) {
     fieldInfo = &compMsgData->fields[fieldIdx];
+#ifdef OLD
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;
     msgKeyValueDescPart = NULL;
@@ -160,6 +167,8 @@ static uint8_t ICACHE_FLASH_ATTR fixOffsetsForKeyValues(compMsgDispatcher_t *sel
         fieldInfo->fieldLgth = msgDescPart->fieldSize + 2 * sizeof(uint16_t) + sizeof(uint8_t); // for key, type and lgth in front of value!!
       }
     }
+#endif
+        // key value field !!
     msgDescPartIdx++;
     fieldIdx++;
   }
@@ -183,8 +192,11 @@ static uint8_t ICACHE_FLASH_ATTR setFieldValue(compMsgDispatcher_t *self, uint8_
   int numericValue;
   compMsgData_t *compMsgData;
 
+#ifdef OLD
   COMP_MSG_DBG(self, "B", 2, "setFieldValue: %s %s\n", self->compMsgData->msgValPart->fieldNameStr, self->compMsgData->msgValPart->fieldValueStr);
+#endif
   compMsgData = self->compMsgData;
+#ifdef OLD
   if (ets_strncmp(self->compMsgData->msgValPart->fieldValueStr, "@get", 4) == 0) {
     // call the callback function for the field!!
     COMP_MSG_DBG(self, "B", 2, "setFieldValue:cb %s!%p!size: %d", self->compMsgData->msgValPart->fieldValueStr, self->compMsgData->msgValPart->fieldValueCallback, self->compMsgData->msgDescPart->fieldSize);
@@ -237,6 +249,7 @@ static uint8_t ICACHE_FLASH_ATTR setFieldValue(compMsgDispatcher_t *self, uint8_
     }
     checkErrOK(result);
   }
+#endif
   COMP_MSG_DBG(self, "B", 2, "setFieldValue: done");
   return COMP_MSG_ERR_OK;
 }
@@ -256,8 +269,11 @@ static uint8_t ICACHE_FLASH_ATTR setMsgValues(compMsgDispatcher_t *self) {
   uint8_t msgDescPartIdx;
   uint8_t msgValPartIdx;
   compMsgField_t *fieldInfo;
+#ifdef OLD
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
+#endif
+        // key value field !!
   compMsgData_t *compMsgData;
   uint8_t *handle;
   int numericValue;
@@ -271,14 +287,18 @@ static uint8_t ICACHE_FLASH_ATTR setMsgValues(compMsgDispatcher_t *self) {
   // loop over MSG Fields, to check if we eventually have table rows!!
   msgDescPartIdx = 0;
   msgValPartIdx = 0;
+#ifdef OLD
   msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
   COMP_MSG_DBG(self, "B", 2, "numFields: %d numMsgValParts: %d", compMsgData->numFields, self->compMsgData->numMsgValParts);
+#endif
+#ifdef OLD
   while ((msgDescPartIdx < compMsgData->numFields) && (msgValPartIdx <= self->compMsgData->numMsgValParts)) {
     msgDescPart = &self->compMsgData->msgDescParts[msgDescPartIdx];
     self->compMsgData->msgDescPart = msgDescPart;
     msgValPart = &self->compMsgData->msgValParts[msgValPartIdx];
     self->compMsgData->msgValPart = msgValPart;
     COMP_MSG_DBG(self, "B", 2, "setMsgValues: %s descIdx: %d valIdx: %d", msgDescPart->fieldNameStr, msgDescPartIdx, msgValPartIdx);
+        // key value field !!
     fieldInfo = &compMsgData->fields[msgDescPartIdx++];
     COMP_MSG_DBG(self, "B", 2, "default fieldNameId: %d\n", fieldInfo->fieldNameId);
     if (fieldInfo->fieldNameId == msgValPart->fieldNameId) {
@@ -287,6 +307,7 @@ static uint8_t ICACHE_FLASH_ATTR setMsgValues(compMsgDispatcher_t *self) {
       msgValPartIdx++;
     }
   }
+#endif
   numericValue = compMsgData->currHdr->hdrU16CmdKey;
   stringValue = NULL;
   COMP_MSG_DBG(self, "B", 2, "cmdKey value: 0x%04x", numericValue);

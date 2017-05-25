@@ -400,8 +400,10 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
   uint8_t *stringValue;
   msgHeaderInfos_t *hdrInfos;
   headerPart_t *hdr;
+#ifdef OLD
   msgDescPart_t *msgDescPart;
   msgValPart_t *msgValPart;
+#endif
   fieldsToSave_t *fieldsToSave;
   action_t actionCallback;
   compMsgField_t *fieldInfo;
@@ -424,9 +426,9 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
   result = self->compMsgMsgDesc->getMsgPartsFromHeaderPart(self, hdr, &handle);
 //ets_printf("storeReceivedMsg3: heap: %d\n", system_get_free_heap_size());
   checkErrOK(result);
-#endif
   result = self->compMsgData->createMsg(self, self->compMsgData->numMsgDescParts);
   checkErrOK(result);
+#endif
 //ets_printf("storeReceivedMsg4: heap: %d\n", system_get_free_heap_size());
 //ets_printf("data fields11: %p\n", self->compMsgData->fields);
   self->compMsgData->compMsgDataView = newCompMsgDataView(received->buf, received->totalLgth);
@@ -443,6 +445,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
     fieldsToSave = &self->dispatcherCommon->fieldsToSave[fieldToSaveIdx];
     COMP_MSG_DBG(self, "I", 2, "fieldsToSave: %s!\n", fieldsToSave->fieldNameStr);
     idx = 0;
+#ifdef OLD
     while (idx < self->compMsgData->numMsgDescParts) {
       msgDescPart = &self->compMsgData->msgDescParts[idx];
       fieldInfo = &self->compMsgData->fields[idx];
@@ -464,12 +467,14 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
       }
       idx++;
     }
+#endif
     fieldToSaveIdx++;
   }
 //ets_printf("data fields14: %p\n", self->compMsgData->fields);
 //ets_printf("storeReceivedMsg7: heap: %d\n", system_get_free_heap_size());
   idx = 0;
   hadActionCb = false;
+#ifdef OLD
   while (idx < self->compMsgData->numMsgDescParts) {
     msgDescPart = &self->compMsgData->msgDescParts[idx];
     if (msgDescPart->fieldValueActionCb != NULL) {
@@ -487,6 +492,7 @@ static uint8_t storeReceivedMsg(compMsgDispatcher_t *self, msgParts_t *received)
     }
     idx++;
   }
+#endif
   if (!hadActionCb) {
 //ets_printf("data fields15: %p\n", self->compMsgData->fields);
     self->compMsgData->deleteMsg(self);
