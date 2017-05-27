@@ -39,25 +39,25 @@ puts stderr "getMachineState: value: $value!"
   return $::COMP_MSG_ERR_OK
 }
 
-# ====================== getAPSsid ===================
+# ====================== getClientSsid ===================
 
-proc ::getAPSsid {compMsgDispatcherVar valueVar} {
+proc ::getClientSsid {compMsgDispatcherVar valueVar} {
   upvar $compMsgDispatcherVar compMsgDispatcher
   upvar $valueVar value
 
   set value [dict get $compMsgDispatcher clientSsid]
-puts stderr "getAPSsid: value: $value!"
+puts stderr "getClientSsid: value: $value!"
   return $::COMP_MSG_ERR_OK
 }
 
-# ====================== getAPPassword ===================
+# ====================== getClientPasswd ===================
 
-proc ::getAPPassword {compMsgDispatcherVar valueVar} {
+proc ::getClientPasswd {compMsgDispatcherVar valueVar} {
   upvar $compMsgDispatcherVar compMsgDispatcher
   upvar $valueVar value
 
-  set value [dict get $compMsgDispatcher clientPassword]
-puts stderr "getAPPassword: value: $value!"
+  set value [dict get $compMsgDispatcher clientPasswd]
+puts stderr "getClientPasswd: value: $value!"
   return $::COMP_MSG_ERR_OK
 }
 
