@@ -128,7 +128,7 @@ namespace eval compMsg {
     namespace export getLineFields getIntFieldValue getStringFieldValue addFieldGroup
     namespace export handleMsgFileInternal handleMsgFile handleMsgFileNameLine handleMsgCommonLine
     namespace export handleMsgFieldsToSaveLine handleMsgActionsLine handleMsgValuesLine
-    namespace export handleMsgValHeaderLine handleMsgFieldGroupLine handleMsgHeadsLine
+    namespace export handleMsgFieldGroupLine handleMsgHeadsLine
     namespace export readHeadersAndSetFlags dumpHeaderPart getMsgDescriptionFromUniqueFields
     namespace export getMsgPartsFromHeaderPart getWifiKeyValueKeys readActions
     namespace export resetMsgDescPart resetMsgValPart dumpMsgDescPart dumpMsgValPart
@@ -571,36 +571,36 @@ puts stderr "headerFlag: $fieldName: $fieldInfo!"
       switch $fieldGroupId {
         COMP_MSG_DESC_HEADER_FIELD_GROUP {
 #puts stderr "HEADER: fieldInfo: $fieldInfo!"
-          set result [::compMsg compMsgTypesAndNames setMsgFieldInfo compMsgDispatcher $fieldNameId fieldInfo]
+          set result [::compMsg compMsgTypesAndNames setMsgFieldDescInfo compMsgDispatcher $fieldNameId fieldInfo]
           checkErrOK $result
         }
         COMP_MSG_DESC_MID_PART_FIELD_GROUP {
           dict set fieldInfo fieldOffset [expr {[dict get $compMsgMsgDesc msgHeaderInfo headerLgth] + [dict get $compMsgMsgDesc msgMidPartInfo midPartLgth]}]
           set result [::compMsg compMsgMsgDesc addMidPartInfo compMsgDispatcher [dict get $fieldInfo fieldLgth] $fieldNameId]
           checkErrOK $result
-          set result [::compMsg compMsgTypesAndNames setMsgFieldInfo compMsgDispatcher $fieldNameId fieldInfo]
+          set result [::compMsg compMsgTypesAndNames setMsgFieldDescInfo compMsgDispatcher $fieldNameId fieldInfo]
           checkErrOK $result
         }
         COMP_MSG_DESC_TRAILER_FIELD_GROUP {
           # FIXME need to set fieldOffset here !!!
           set result [::compMsg compMsgMsgDesc addTrailerInfo compMsgDispatcher [dict get $fieldInfo fieldLgth] $fieldNameId]
           checkErrOK $result
-          set result [::compMsg compMsgTypesAndNames setMsgFieldInfo compMsgDispatcher $fieldNameId fieldInfo]
+          set result [::compMsg compMsgTypesAndNames setMsgFieldDescInfo compMsgDispatcher $fieldNameId fieldInfo]
           checkErrOK $result
         }
         COMP_MSG_DESC_KEY_VALUE_FIELD_GROUP {
-          set result [::compMsg compMsgTypesAndNames setMsgFieldInfo compMsgDispatcher $fieldNameId fieldInfo]
+          set result [::compMsg compMsgTypesAndNames setMsgFieldDescInfo compMsgDispatcher $fieldNameId fieldInfo]
           checkErrOK $result
         }
         COMP_MSG_DESC_FIELD_GROUP {
-          set result [::compMsg compMsgTypesAndNames setMsgFieldInfo compMsgDispatcher $fieldNameId fieldInfo]
+          set result [::compMsg compMsgTypesAndNames setMsgFieldDescInfo compMsgDispatcher $fieldNameId fieldInfo]
           checkErrOK $result
         }
       }
       # add description infos
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
       if {$fieldGroupId eq "COMP_MSG_DESC_FIELD_GROUP"} {
         set msgDescriptionInfos [dict get $compMsgMsgDesc msgDescriptionInfos]
         set descIdx 0
@@ -624,7 +624,7 @@ puts stderr "keys: [dict keys $msgDescription]!"
             dict lappend msgDescription fieldSequence [lindex $headerFieldIds $headerIdx]
             dict lappend msgDescription fieldOffset [dict get $msgDescription lastFieldOffset]
             set fieldId2 [lindex [dict get $msgDescription fieldSequence] end]
-            set fieldInfo2 [lindex $fieldInfos $fieldId2]
+            set fieldInfo2 [lindex $fieldDescInfos $fieldId2]
             dict incr msgDescription lastFieldOffset [dict get $fieldInfo2 fieldLgth]
             dict incr msgDescription numFields
             incr headerIdx
@@ -643,7 +643,7 @@ puts stderr "fldId: $fldId!$fieldName!"
                 dict lappend msgDescription fieldSequence $fldId
                 dict lappend msgDescription fieldOffset [dict get $msgDescription lastFieldOffset]
                 set fieldId2 [lindex [dict get $msgDescription fieldSequence] end]
-                set fieldInfo2 [lindex $fieldInfos $fieldId2]
+                set fieldInfo2 [lindex $fieldDescInfos $fieldId2]
                 dict incr msgDescription lastFieldOffset [dict get $fieldInfo2 fieldLgth]
                 dict incr msgDescription numFields
               }
@@ -651,7 +651,7 @@ puts stderr "fldId: $fldId!$fieldName!"
               dict lappend msgDescription fieldSequence $fldId
               dict lappend msgDescription fieldOffset [dict get $msgDescription lastFieldOffset]
               set fieldId2 [lindex [dict get $msgDescription fieldSequence] end]
-              set fieldInfo2 [lindex $fieldInfos $fieldId2]
+              set fieldInfo2 [lindex $fieldDescInfos $fieldId2]
               dict incr msgDescription lastFieldOffset [dict get $fieldInfo2 fieldLgth]
               dict incr msgDescription numFields
             }
@@ -661,7 +661,7 @@ puts stderr "fldId: $fldId!$fieldName!"
         dict lappend msgDescription fieldSequence [dict get $fieldInfo fieldNameId]
         dict lappend msgDescription fieldOffset [dict get $msgDescription lastFieldOffset]
         set fieldId2 [lindex [dict get $msgDescription fieldSequence] end]
-        set fieldInfo2 [lindex $fieldInfos $fieldId2]
+        set fieldInfo2 [lindex $fieldDescInfos $fieldId2]
         dict incr msgDescription lastFieldOffset [dict get $fieldInfo2 fieldLgth]
         dict incr msgDescription numFields
         if {[dict get $compMsgMsgDesc expectedLines] == [dict get $compMsgMsgDesc currLineNo]} {
@@ -679,7 +679,7 @@ puts stderr "trailer fldId: $fldId!$fieldName!"
                 dict lappend msgDescription fieldSequence $fldId
                 dict lappend msgDescription fieldOffset [dict get $msgDescription lastFieldOffset]
                 set fieldId2 [lindex [dict get $msgDescription fieldSequence] end]
-                set fieldInfo2 [lindex $fieldInfos $fieldId2]
+                set fieldInfo2 [lindex $fieldDescInfos $fieldId2]
                 dict incr msgDescription lastFieldOffset [dict get $fieldInfo2 fieldLgth]
                 dict incr msgDescription numFields
               }
@@ -689,7 +689,7 @@ puts stderr "trailer fldId: $fldId!$fieldName!"
                   dict lappend msgDescription fieldSequence $fldId
                   dict lappend msgDescription fieldOffset [dict get $msgDescription lastFieldOffset]
                   set fieldId2 [lindex [dict get $msgDescription fieldSequence] end]
-                  set fieldInfo2 [lindex $fieldInfos $fieldId2]
+                  set fieldInfo2 [lindex $fieldDescInfos $fieldId2]
                   dict incr msgDescription lastFieldOffset [dict get $fieldInfo2 fieldLgth]
                   dict incr msgDescription numFields
                 }
@@ -697,7 +697,7 @@ puts stderr "trailer fldId: $fldId!$fieldName!"
                 dict lappend msgDescription fieldSequence $fldId
                 dict lappend msgDescription fieldOffset [dict get $msgDescription lastFieldOffset]
                 set fieldId2 [lindex [dict get $msgDescription fieldSequence] end]
-                set fieldInfo2 [lindex $fieldInfos $fieldId2]
+                set fieldInfo2 [lindex $fieldDescInfos $fieldId2]
                 dict incr msgDescription lastFieldOffset [dict get $fieldInfo2 fieldLgth]
                 dict incr msgDescription numFields
               }
@@ -798,10 +798,16 @@ puts stderr [format "%s: id: %d val: %s" $fieldName $fieldNameId $fieldValue]
       }
 #puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
       set lineFields [dict get $compMsgMsgDesc lineFields]
+
       #field name
       set token [lindex $lineFields 0]
       set result [::compMsg compMsgTypesAndNames getFieldNameIdFromStr compMsgDispatcher $token fieldNameId $::COMP_MSG_INCR]
       checkErrOK $result
+      # get the fieldDescInfo for the name to eventually set fieldFlags or other info.
+      set result [::compMsg compMsgTypesAndNames getMsgFieldDescInfo compMsgDispatcher $fieldNameId fieldDescInfo]
+      checkErrOK(result);
+
+
       #field value
       set value [lindex $lineFields 1]
       set stringValue ""
@@ -861,49 +867,6 @@ puts stderr "token: $token fieldNameId: $fieldNameId!callback: [dict get $dataVa
       return [checkErrOK OK]
     }
 
-   #  ================================= handleMsgValHeaderLine ====================================
-
-    proc xhandleMsgValHeaderLine {compMsgDispatcherVar} {
-      upvar $compMsgDispatcherVar compMsgDispatcher
-
-puts stderr "handleMsgValHeaderLine"
-      set result OK
-      set result [checkMsgFieldVal compMsgDispatcher 2]
-      checkErrOK $result
-      set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
-      set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
-      set fieldGroupId [dict get $compMsgMsgDesc currFieldGroupId]
-      set cmkdKey [dict get $compMsgMsgDesc currCmdKey]
-      set msgFieldGroupInfo [dict get $msgFieldGroupInfos $fieldGroupId $cmdKey]
-      set valIdx [dict get $msgFieldGroupInfo numMsgFieldVal]
-      set msgFieldVals [dict get $msgFieldGroupInfo msgFieldVals]
-      set msgFieldVal [lindex $msgFieldVals $valIdx]
-      # field name
-      set fieldName [lindex [dict get $compMsgMsgDesc lineFields] 0]
-      set result [::compMsg compMsgTypesAndNames getFieldNameIdFromStr compMsgDispatcher $fieldName fieldNameId $::COMP_MSG_INCR]
-      checkErrOK $result
-      # field value
-      set fieldValue [lindex [dict get $compMsgMsgDesc lineFields] 1]
-puts stderr "fieldValue: $fieldValue!valIdx: $valIdx!"
-      if {[string range $fieldValue 0 0] eq "\""} {
-        set result [getStringFieldValue compMsgDispatcher $fieldValue stringVal]
-        dict set msgFieldVal value $stringVal
-puts stderr [format "%s: id: %s val: %s!" $fieldName $fieldNameId [dict get $msgFieldVal value]]
-      } else {
-        set result [getIntFieldValue compMsgDispatcher $fieldValue value]
-        dict set msgFieldVal value $value 
-puts stderr [format "%s: id: %s %s" $fieldName $fieldNameId [dict get $msgFieldVal value]]
-      }
-      checkErrOK $result
-      dict incr msgFieldGroupInfo numMsgFieldVal
-      set msgFieldVals [lreplace $msgFieldVals $valIdx $valIdx $msgFieldVal]
-      dict set msgFieldGroupInfo msgFieldVals $msgFieldVals
-      dict set msgFieldGroupInfos $fieldGroupId $msgFieldGroupInfo
-      dict set compMsgMsgDesc msgFieldGroupInfos $msgFieldGroupInfos
-      dict set compMsgDispatcher compMsgMsgDesc $compMsgMsgDesc
-      return [checkErrOK OK]
-    }
-
     # ================================= handleMsgFieldGroupLine ====================================
 
     proc handleMsgFieldGroupLine {compMsgDispatcherVar} {
@@ -933,10 +896,6 @@ puts stderr [format "%s: id: %s %s" $fieldName $fieldNameId [dict get $msgFieldV
           set result [handleMsgActionsLine compMsgDispatcher]
           checkErrOK $result
         }
-        COMP_MSG_VAL_HEADER_FIELD_GROUP {
-          set result [handleMsgValHeaderLine compMsgDispatcher]
-          checkErrOK $result
-        }
         COMP_MSG_HEADS_FIELD_GROUP {
           set result [handleMsgHeadsLine compMsgDispatcher]
           checkErrOK $result
@@ -949,13 +908,13 @@ puts stderr [format "%s: id: %s %s" $fieldName $fieldNameId [dict get $msgFieldV
           set result [handleMsgValuesLine compMsgDispatcher]
           checkErrOK $result
         }
-        COMP_MSG_HEADER_VAL_FIELD_GROUP -
-        COMP_MSG_VAL_FIELD_GROUP {
-          set result [handleMsgValuesLine compMsgDispatcher]
-          checkErrOK $result
-        }
         COMP_MSG_DESC_FIELD_GROUP {
           set result [handleMsgCommonLine compMsgDispatcher]
+          checkErrOK $result
+        }
+        COMP_MSG_VAL_HEADER_FIELD_GROUP -
+        COMP_MSG_VAL_FIELD_GROUP {
+          set result [handleMsgValuesLine compMsgDispatcher]
           checkErrOK $result
         }
         default {
@@ -996,9 +955,9 @@ puts stderr [format "%s: id: %s %s" $fieldName $fieldNameId [dict get $msgFieldV
       set fieldIdx 1
       set headerFieldIdx 0
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
       while {$fieldIdx < [dict get $compMsgTypesAndNames numSpecFieldIds]} {
-        set fieldInfo [lindex $fieldInfos $fieldIdx]
+        set fieldInfo [lindex $fieldDescInfos $fieldIdx]
         if {$fieldInfo eq [list]} {
           incr fieldIdx
           continue
@@ -1204,7 +1163,7 @@ puts stderr "getHeaderFromUniqueFields"
       set msgDescriptions [dict get $msgDescriptionInfos msgDescriptions]
 puts stderr "headerValueInfos!$headerValueInfos!"
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
       set idx 0
       while {$idx < [dict get $msgDescriptionInfos numMsgDescriptions]} {
         set valIdx 0
@@ -1224,7 +1183,7 @@ puts stderr "headerValueInfos!$headerValueInfos!"
           }
 puts stderr "fieldName: $fieldName!fieldNameId: $fieldNameId!"
 #puts stderr "fieldName: $fieldName fieldNameId: $fieldNameId msgDescription: $msgDescription!"
-          set fieldInfo [lindex $fieldInfos $fieldNameId]
+          set fieldInfo [lindex $fieldDescInfos $fieldNameId]
 #puts stderr "fieldInfo: $fieldInfo!"
           if {[lsearch [dict get $fieldInfo fieldFlags] COMP_MSG_FIELD_HEADER_UNIQUE] >= 0} {
             set result [::compMsg compMsgDataView getIdFieldValue compMsgDispatcher $fieldNameId checkValue 0]
