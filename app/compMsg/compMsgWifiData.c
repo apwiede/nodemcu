@@ -1139,6 +1139,7 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   fieldValue_t fieldValue;
   compMsgWifiData_t *compMsgWifiData;
   compMsgDataValue_t *compMsgDataValue;
+  msgFieldValue_t *msgFieldValue;
 
 //ets_printf("wifi 01 heap: %d\n", system_get_free_heap_size());
   compMsgWifiData = self->compMsgWifiData;
@@ -1185,17 +1186,15 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
   checkErrOK(result);
 #endif
 
-ets_printf("set calllbacks: %p\n", compMsgDataValue->setFieldValueInfo);
+  result = compMsgDataValue->getMsgFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, &msgFieldValue);
+  checkErrOK(result);
   c_memset(&fieldValue, 0, sizeof(fieldValue_t));
   fieldValue.fieldValueFlags = COMP_MSG_FIELD_IS_NUMERIC;
   fieldValue.dataValue.value.numericValue = (int)(&netSocketSSDPReceived);
   fieldValue.fieldNameId = COMP_MSG_WIFI_SSDPReceivedCallback;
   fieldValue.fieldValueCallbackId = 0;
   fieldValue.fieldValueCallback = NULL;
-ets_printf("set calllbacks2 %p %p fieldValue: %p\n", self, compMsgDataValue, &fieldValue);
-ets_printf("set calllbacks2a %p\n", compMsgDataValue->setFieldValueInfo);
-  result = compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_SSDPReceivedCallback, &fieldValue);
-ets_printf("set calllbacks3 %d\n", result);
+  result = compMsgDataValue->setMsgFieldValueInfo(self, msgFieldValue, &fieldValue);
   checkErrOK(result);
 
   c_memset(&fieldValue, 0, sizeof(fieldValue_t));
@@ -1204,7 +1203,7 @@ ets_printf("set calllbacks3 %d\n", result);
   fieldValue.fieldNameId = COMP_MSG_WIFI_SSDPToSendCallback;
   fieldValue.fieldValueCallbackId = 0;
   fieldValue.fieldValueCallback = NULL;
-  result = compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_SSDPToSendCallback, &fieldValue);
+  result = compMsgDataValue->setMsgFieldValueInfo(self, msgFieldValue, &fieldValue);
   checkErrOK(result);
 
   c_memset(&fieldValue, 0, sizeof(fieldValue_t));
@@ -1213,7 +1212,7 @@ ets_printf("set calllbacks3 %d\n", result);
   fieldValue.fieldNameId = COMP_MSG_WIFI_NetReceivedCallback;
   fieldValue.fieldValueCallbackId = 0;
   fieldValue.fieldValueCallback = NULL;
-  result = compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_NetReceivedCallback, &fieldValue);
+  result = compMsgDataValue->setMsgFieldValueInfo(self, msgFieldValue, &fieldValue);
   checkErrOK(result);
 
   c_memset(&fieldValue, 0, sizeof(fieldValue_t));
@@ -1222,7 +1221,7 @@ ets_printf("set calllbacks3 %d\n", result);
   fieldValue.fieldNameId = COMP_MSG_WIFI_NetToSendCallback;
   fieldValue.fieldValueCallbackId = 0;
   fieldValue.fieldValueCallback = NULL;
-  result = compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_NetToSendCallback, &fieldValue);
+  result = compMsgDataValue->setMsgFieldValueInfo(self, msgFieldValue, &fieldValue);
   checkErrOK(result);
 
   c_memset(&fieldValue, 0, sizeof(fieldValue_t));
@@ -1231,7 +1230,7 @@ ets_printf("set calllbacks3 %d\n", result);
   fieldValue.fieldNameId = COMP_MSG_WIFI_WebBinaryReceivedCallback;
   fieldValue.fieldValueCallbackId = 0;
   fieldValue.fieldValueCallback = NULL;
-  result = compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_WebBinaryReceivedCallback, &fieldValue);
+  result = compMsgDataValue->setMsgFieldValueInfo(self, msgFieldValue, &fieldValue);
   checkErrOK(result);
 
   c_memset(&fieldValue, 0, sizeof(fieldValue_t));
@@ -1240,7 +1239,7 @@ ets_printf("set calllbacks3 %d\n", result);
   fieldValue.fieldNameId = COMP_MSG_WIFI_WebTextReceivedCallback;
   fieldValue.fieldValueCallbackId = 0;
   fieldValue.fieldValueCallback = NULL;
-  result = compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_WebTextReceivedCallback, &fieldValue);
+  result = compMsgDataValue->setMsgFieldValueInfo(self, msgFieldValue, &fieldValue);
   checkErrOK(result);
 
   compMsgUtil = self->compMsgUtil;

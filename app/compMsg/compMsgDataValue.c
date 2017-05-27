@@ -317,7 +317,6 @@ static uint8_t setMsgFieldValueInfo(compMsgDispatcher_t *self, msgFieldValue_t *
   fieldValue_t *freeFieldValue;
   compMsgDataValue_t *compMsgDataValue;
 
-ets_printf("1\n");
   result = COMP_MSG_ERR_OK;
   fieldValueIdx = 0;
   found = false;
@@ -325,10 +324,8 @@ ets_printf("1\n");
   compMsgDataValue = self->compMsgDataValue;
 //ets_printf("setMsgFieldValueInfo: numFieldValues: %d\n", msgFieldValue->numFieldValues);
   // first check if this entry exists, if not take the first unused one
-ets_printf("2\n");
   while (fieldValueIdx < msgFieldValue->numFieldValues) { 
     myFieldValue = &msgFieldValue->fieldValues[fieldValueIdx];
-ets_printf("3\n");
     if (myFieldValue->fieldNameId == 0) {
       if (freeFieldValue == NULL) {
         freeFieldValue = myFieldValue;
@@ -341,7 +338,6 @@ ets_printf("3\n");
     }
     fieldValueIdx++;
   }
-ets_printf("4 found: %d\n", found);
   if (found) {
 ets_printf("setMsgFieldValueInfo: duplicate entry for: %d\n", fieldValue->fieldNameId);
       return COMP_MSG_ERR_DUPLICATE_FIELD_VALUE_ENTRY;
@@ -351,9 +347,7 @@ ets_printf("setMsgFieldValueInfo: duplicate entry for: %d\n", fieldValue->fieldN
 int numericValue;
 uint8_t *stringValue;
 uint8_t *fieldName;
-ets_printf("5\n");
 result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, fieldValue->fieldNameId, &fieldName);
-ets_printf("6 %d\n", result);
 checkErrOK(result);
 if (fieldValue->fieldValueFlags & COMP_MSG_FIELD_IS_STRING) {
   stringValue = fieldValue->dataValue.value.stringValue;
@@ -362,20 +356,17 @@ if (fieldValue->fieldValueFlags & COMP_MSG_FIELD_IS_STRING) {
   stringValue = "nil";
   numericValue = fieldValue->dataValue.value.numericValue;
 }
-ets_printf("7\n");
 //ets_printf("found free %s flags: 0x%08x fieldNameId: %d %s 0x%04x %d callbackId: %d\n", fieldName, fieldValue->fieldValueFlags, fieldValue->fieldNameId, stringValue, numericValue, numericValue, fieldValue->fieldValueCallbackId);
       myFieldValue->fieldNameId = fieldValue->fieldNameId;
       myFieldValue->fieldValueFlags = fieldValue->fieldValueFlags;
       myFieldValue->dataValue.value = fieldValue->dataValue.value;
       myFieldValue->fieldValueCallbackId = fieldValue->fieldValueCallbackId;
       myFieldValue->fieldValueCallback = fieldValue->fieldValueCallback;
-ets_printf("8\n");
     } else {
 ets_printf("setMsgFieldValueInfo: not found too many entries\n");
       return COMP_MSG_ERR_TOO_MANY_FIELD_VALUE_ENTRIES;
     }
   }
-ets_printf("9\n");
   return result;
 }
  
@@ -534,7 +525,7 @@ static uint8_t getFieldValueInfo(compMsgDispatcher_t *self, uint16_t cmdKey, uin
   fieldValue_t *myFieldValue;
   int idx;
 
-//COMP_MSG_DBG(self, "E", 1, "getFieldValueInfo: %p %d 0x%04x", fieldValue, fieldNameId, cmdKey);
+COMP_MSG_DBG(self, "E", 2, "getFieldValueInfo: %p %d 0x%04x", fieldValue, fieldNameId, cmdKey);
   result = COMP_MSG_ERR_OK;
   compMsgDataValue = self->compMsgDataValue;
   msgFieldValueInfos = &compMsgDataValue->msgFieldValueInfos;
@@ -542,6 +533,7 @@ static uint8_t getFieldValueInfo(compMsgDispatcher_t *self, uint16_t cmdKey, uin
   while (cmdKeyIdx < msgFieldValueInfos->numMsgFieldValues) {
     msgFieldValue = &msgFieldValueInfos->msgFieldValues[cmdKeyIdx];
     if (msgFieldValue->cmdKey == cmdKey) {
+      idx = 0;
       while (idx < msgFieldValue->numFieldValues) {
         myFieldValue = &msgFieldValue->fieldValues[idx];
         if ((myFieldValue->fieldNameId == fieldNameId)) {

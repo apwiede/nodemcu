@@ -724,7 +724,6 @@ static void startAccessPoint(void *arg) {
 sud->urls[0] = "/getaplist";
 sud->urls[1] = "/getapdeflist";
 sud->num_urls = 2;
-ets_printf("before binary callbacks2\n");
   result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_WebBinaryReceivedCallback, &fieldValuePtr);
   COMP_MSG_DBG(self, "W", 1, "binaryCallback: %p!result: %d!\n", fieldValue.dataValue.value.numericValue, result);
   sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)fieldValuePtr->dataValue.value.numericValue;
