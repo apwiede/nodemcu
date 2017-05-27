@@ -140,6 +140,7 @@ void dbgPrintf(void *selfParam, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *
   uint8_t *cp;
   size_t lgth;
   bool useUart;
+  bool noPrefix;
   compMsgDispatcher_t *self;
 
   if (selfParam == NULL) {
@@ -151,9 +152,10 @@ void dbgPrintf(void *selfParam, uint8_t *dbgChars, uint8_t debugLevel, uint8_t *
   }
   uartId = self->compMsgDebug->debugUartId;
   useUart = self->compMsgDebug->useUart;
+  noPrefix = self->compMsgDebug->noPrefix;
   flags = self->compMsgDebug->getDebugFlags(self, dbgChars);
   if (flags && (debugLevel <= self->compMsgDebug->debugLevel)) {
-    if (useUart) {
+    if (useUart && !noPrefix) {
       cp = "%==DBG: ";
       while (*cp != '\0') {
         platform_uart_send(uartId, *cp);
@@ -183,7 +185,7 @@ ets_printf("ERROR DBG_STR too long\n");
         }
       }
       va_end(arglist);
-      if (useUart) {
+      if (useUart && !noPrefix) {
         cp = "%";
         while (*cp != '\0') {
           platform_uart_send(uartId, *cp++);
@@ -464,6 +466,7 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   compMsgDebug->currDebugFlags = DEBUG_COMP_MSG_WEB_SOCKET;
   compMsgDebug->addEol = true;
   compMsgDebug->useUart = true;
+  compMsgDebug->noPrefix = false;
   compMsgDebug->debugLevel = 1;
   compMsgDebug->debugUartId = 0;
 //  compMsgDebug->debugUartId = 1;
@@ -474,8 +477,6 @@ uint8_t compMsgDebugInit(compMsgDispatcher_t *self) {
   compMsgDebug->dumpMsgParts = &dumpMsgParts;
   compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
   compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
-//  compMsgDebug->dumpMsgDescPart = &dumpMsgDescPart;
-//  compMsgDebug->dumpMsgValPart = &dumpMsgValPart;
   compMsgDebug->dumpHeaderPart = &dumpHeaderPart;
   compMsgDebug->dumpMsgHeaderInfos = &dumpMsgHeaderInfos;
 compMsgDebug->setDebugFlags(self, "BdDEHISw");

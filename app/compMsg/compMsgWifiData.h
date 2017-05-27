@@ -98,47 +98,54 @@
 #define KEY_VALUE_KEY_CASING_STATISTIC_LIST  26
 #define KEY_VALUE_KEY_DAT_AND_TIME           27
 
-#define COMP_MSG_WIFI_AP_BssidSize           1
-#define COMP_MSG_WIFI_AP_BssidStrSize        2
-#define COMP_MSG_WIFI_AP_SsidSize            3
-#define COMP_MSG_WIFI_AP_Ssid_lenSize        4
-#define COMP_MSG_WIFI_AP_ChannelSize         5
-#define COMP_MSG_WIFI_AP_RssiSize            6
-#define COMP_MSG_WIFI_AP_AuthmodeSize        7
-#define COMP_MSG_WIFI_AP_Is_hiddenSize       8
-#define COMP_MSG_WIFI_AP_Freq_offsetSize     9
-#define COMP_MSG_WIFI_AP_Freqcal_valSize     10
+#define COMP_MSG_WIFI_AP_BssidSize              1
+#define COMP_MSG_WIFI_AP_BssidStrSize           2
+#define COMP_MSG_WIFI_AP_SsidSize               3
+#define COMP_MSG_WIFI_AP_Ssid_lenSize           4
+#define COMP_MSG_WIFI_AP_ChannelSize            5
+#define COMP_MSG_WIFI_AP_RssiSize               6
+#define COMP_MSG_WIFI_AP_AuthmodeSize           7
+#define COMP_MSG_WIFI_AP_Is_hiddenSize          8
+#define COMP_MSG_WIFI_AP_Freq_offsetSize        9
+#define COMP_MSG_WIFI_AP_Freqcal_valSize        10
 
-#define COMP_MSG_WIFI_AP_Bssids              11
-#define COMP_MSG_WIFI_AP_BssidStrs           12
-#define COMP_MSG_WIFI_AP_Ssids               13
-#define COMP_MSG_WIFI_AP_Ssid_lens           14
-#define COMP_MSG_WIFI_AP_Channels            15
-#define COMP_MSG_WIFI_AP_Rssis               16
-#define COMP_MSG_WIFI_AP_Authmodes           17
-#define COMP_MSG_WIFI_AP_Is_hiddens          18
-#define COMP_MSG_WIFI_AP_Freq_offsets        19
-#define COMP_MSG_WIFI_AP_Freqcal_vals        20
+#define COMP_MSG_WIFI_AP_Bssids                 11
+#define COMP_MSG_WIFI_AP_BssidStrs              12
+#define COMP_MSG_WIFI_AP_Ssids                  13
+#define COMP_MSG_WIFI_AP_Ssid_lens              14
+#define COMP_MSG_WIFI_AP_Channels               15
+#define COMP_MSG_WIFI_AP_Rssis                  16
+#define COMP_MSG_WIFI_AP_Authmodes              17
+#define COMP_MSG_WIFI_AP_Is_hiddens             18
+#define COMP_MSG_WIFI_AP_Freq_offsets           19
+#define COMP_MSG_WIFI_AP_Freqcal_vals           20
 
-#define COMP_MSG_WIFI_ProvisioningSsid       21
-#define COMP_MSG_WIFI_ProvisioningPort       22
+#define COMP_MSG_WIFI_ProvisioningSsid          21
+#define COMP_MSG_WIFI_ProvisioningPort          22
 
-#define COMP_MSG_WIFI_ClientSsid             23
-#define COMP_MSG_WIFI_ClientPasswd           24
-#define COMP_MSG_WIFI_ClientIPAddr           25
-#define COMP_MSG_WIFI_ClientPort             26
-#define COMP_MSG_WIFI_ClientStatus           28
-#define COMP_MSG_WIFI_ClientSsidSize         29
-#define COMP_MSG_WIFI_ClientPasswdSize       30
-#define COMP_MSG_WIFI_ClientIPAddrSize       31
-#define COMP_MSG_WIFI_ClientPortSize         32
-#define COMP_MSG_WIFI_ClientStatusSize       33
-#define COMP_MSG_WIFI_ClientSequenceNumSize  34
-#define COMP_MSG_WIFI_ClientSequenceNum      35
+#define COMP_MSG_WIFI_ClientSsid                23
+#define COMP_MSG_WIFI_ClientPasswd              24
+#define COMP_MSG_WIFI_ClientIPAddr              25
+#define COMP_MSG_WIFI_ClientPort                26
+#define COMP_MSG_WIFI_ClientStatus              28
+#define COMP_MSG_WIFI_ClientSsidSize            29
+#define COMP_MSG_WIFI_ClientPasswdSize          30
+#define COMP_MSG_WIFI_ClientIPAddrSize          31
+#define COMP_MSG_WIFI_ClientPortSize            32
+#define COMP_MSG_WIFI_ClientStatusSize          33
+#define COMP_MSG_WIFI_ClientSequenceNumSize     34
+#define COMP_MSG_WIFI_ClientSequenceNum         35
 
-#define COMP_MSG_WIFI_SSDPIPAddr             36
-#define COMP_MSG_WIFI_SSDPPort               37
-#define COMP_MSG_WIFI_SSDPStatus             38
+#define COMP_MSG_WIFI_SSDPIPAddr                36
+#define COMP_MSG_WIFI_SSDPPort                  37
+#define COMP_MSG_WIFI_SSDPStatus                38
+
+#define COMP_MSG_WIFI_SSDPReceivedCallback      39
+#define COMP_MSG_WIFI_SSDPToSendCallback        40
+#define COMP_MSG_WIFI_NetReceivedCallback       41
+#define COMP_MSG_WIFI_NetToSendCallback         42
+#define COMP_MSG_WIFI_WebBinaryReceivedCallback 43
+#define COMP_MSG_WIFI_WebTextReceivedCallback   44
 
 #define WIFI_USE_SAVED_SEQUENCE_NUM          0x01
 
@@ -266,6 +273,7 @@ typedef struct keyValueInfo {
 typedef uint8_t (*bssStr2BssInfoId_t)(uint8_t *fieldName, uint8_t *fieldId);
 typedef uint8_t (* keyValueStr2KeyValueId_t)(uint8_t *fieldName, uint16_t *fieldId);
 typedef uint8_t (* callbackStr2CallbackId_t)(uint8_t *callbackName, uint16_t *callbackId);
+typedef uint8_t (* callbackId2CallbackStr_t)(uint16_t callbackId, uint8_t **callbackName);
 typedef uint8_t (* getBssScanInfo_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* connectToAP_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* startStationCb_t)(compMsgDispatcher_t *self);
@@ -337,6 +345,7 @@ typedef struct compMsgWifiData {
   bssScanInfos_t bssScanInfos;
   keyValueStr2KeyValueId_t keyValueStr2KeyValueId;
   callbackStr2CallbackId_t callbackStr2CallbackId;
+  callbackId2CallbackStr_t callbackId2CallbackStr;
   getBssScanInfo_t getBssScanInfo;
   getWifiValue_t getWifiValue;
   getWifiConfig_t getWifiConfig;

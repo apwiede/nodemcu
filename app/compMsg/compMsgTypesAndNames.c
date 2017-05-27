@@ -420,7 +420,7 @@ static uint8_t dumpMsgFieldValInfos(compMsgDispatcher_t *self) {
         stringValue = "nil";
         numericValue = fieldValInfo->dataValue.value.numericValue;
       }
-      ets_sprintf(buf, "%3d %-20s fieldCallbackId: %d value: %s 0x%08x %d flags: 0x%04x", idx, fieldName, fieldValInfo->fieldCallbackId, stringValue, numericValue, numericValue, fieldValInfo->fieldFlags);
+      ets_sprintf(buf, "%3d %-20s fieldValueCallbackId: %d value: %s 0x%08x %d flags: 0x%04x", idx, fieldName, fieldValInfo->fieldValueCallbackId, stringValue, numericValue, numericValue, fieldValInfo->fieldFlags);
       if (fieldValInfo->fieldFlags & COMP_MSG_FIELD_HAS_CALLBACK) {
         c_strcat(buf, " HAS_CALLBACK");
       }
@@ -574,7 +574,7 @@ static uint8_t getMsgFieldValInfo(compMsgDispatcher_t *self, uint8_t idx, fieldV
     entry = msgFieldInfos->fieldValInfos[idx];
   }
   fieldValInfo->fieldFlags = entry->fieldFlags;
-  fieldValInfo->fieldCallbackId = entry->fieldCallbackId;
+  fieldValInfo->fieldValueCallbackId = entry->fieldValueCallbackId;
   fieldValInfo->dataValue = entry->dataValue;
   return result;
 }
@@ -599,11 +599,11 @@ static uint8_t setMsgFieldValInfo(compMsgDispatcher_t *self, uint8_t idx, fieldV
     entry = msgFieldInfos->fieldValInfos[idx];
   }
   entry->fieldFlags = fieldValInfo->fieldFlags;
-  entry->fieldCallbackId = fieldValInfo->fieldCallbackId;
+  entry->fieldValueCallbackId = fieldValInfo->fieldValueCallbackId;
   entry->dataValue = fieldValInfo->dataValue;
   result = self->compMsgTypesAndNames->getFieldNameStrFromId(self, idx, &fieldName);
   checkErrOK(result);
-  COMP_MSG_DBG(self, "E", 2, "setMsgFieldValInfo: %s idx: %d fieldFlags: 0x%08x fieldCallbackId: %d", fieldName, idx, entry->fieldFlags, entry->fieldCallbackId);
+  COMP_MSG_DBG(self, "E", 2, "setMsgFieldValInfo: %s idx: %d fieldFlags: 0x%08x fieldValueCallbackId: %d", fieldName, idx, entry->fieldFlags, entry->fieldValueCallbackId);
   return result;
 }
 

@@ -45,35 +45,35 @@
 
 #define MODULE_INFO_MODULE            (1 << 0)
 
-// the defines have to be bigger then the max of COMP_MSG_WIFI_ defines in compMsgWifiData.h!!
-#define COMP_MSG_MODULE_MACAddr             60
-#define COMP_MSG_MODULE_IPAddr              61
-#define COMP_MSG_MODULE_FirmwareVersion     62
-#define COMP_MSG_MODULE_RSSI                63
-#define COMP_MSG_MODULE_RSSIMax             64
-#define COMP_MSG_MODULE_ConnectionState     65
-#define COMP_MSG_MODULE_ConnectedUsers      66
-#define COMP_MSG_MODULE_IPProtocol          67
-#define COMP_MSG_MODULE_ErrorMain           68
-#define COMP_MSG_MODULE_ErrorSub            69
-#define COMP_MSG_MODULE_DateAndTime         70
-#define COMP_MSG_MODULE_SSIDs               71
+// the defines have to be bigger then the max of COMP_MSG_WIFI_ defines in compMsgWifiData.h and compMsgWifiDataCustom.h!!
+#define COMP_MSG_MODULE_MACAddr             80
+#define COMP_MSG_MODULE_IPAddr              81
+#define COMP_MSG_MODULE_FirmwareVersion     82
+#define COMP_MSG_MODULE_RSSI                83
+#define COMP_MSG_MODULE_RSSIMax             84
+#define COMP_MSG_MODULE_ConnectionState     85
+#define COMP_MSG_MODULE_ConnectedUsers      86
+#define COMP_MSG_MODULE_IPProtocol          87
+#define COMP_MSG_MODULE_ErrorMain           88
+#define COMP_MSG_MODULE_ErrorSub            89
+#define COMP_MSG_MODULE_DateAndTime         90
+#define COMP_MSG_MODULE_SSIDs               91
 
-#define COMP_MSG_MODULE_OperatingMode       72
-#define COMP_MSG_MODULE_OtaHost             73
-#define COMP_MSG_MODULE_OtaRomPath          74
-#define COMP_MSG_MODULE_OtaFsPath           75
-#define COMP_MSG_MODULE_OtaPort             76
-#define COMP_MSG_MODULE_CryptKey            77
+#define COMP_MSG_MODULE_OperatingMode       92
+#define COMP_MSG_MODULE_OtaHost             93
+#define COMP_MSG_MODULE_OtaRomPath          94
+#define COMP_MSG_MODULE_OtaFsPath           95
+#define COMP_MSG_MODULE_OtaPort             96
+#define COMP_MSG_MODULE_CryptKey            97
 
-#define COMP_MSG_MODULE_Reserve1            78
-#define COMP_MSG_MODULE_Reserve2            79
-#define COMP_MSG_MODULE_Reserve3            80
-#define COMP_MSG_MODULE_Reserve4            81
-#define COMP_MSG_MODULE_Reserve5            82
-#define COMP_MSG_MODULE_Reserve6            83
-#define COMP_MSG_MODULE_Reserve7            84
-#define COMP_MSG_MODULE_Reserve8            85
+#define COMP_MSG_MODULE_Reserve1            98
+#define COMP_MSG_MODULE_Reserve2            99
+#define COMP_MSG_MODULE_Reserve3            100
+#define COMP_MSG_MODULE_Reserve4            101
+#define COMP_MSG_MODULE_Reserve5            102
+#define COMP_MSG_MODULE_Reserve6            103
+#define COMP_MSG_MODULE_Reserve7            104
+#define COMP_MSG_MODULE_Reserve8            105
 
 #define MODULE_OPERATING_MODE_START              0x20
 #define MODULE_OPERATING_MODE_LIGHT_SLEEP        0x21
@@ -89,6 +89,7 @@ typedef struct compMsgModuleDataName2Value {
 } compMsgModuleDataName2Value_t;
 
 typedef uint8_t (* callbackStr2CallbackId_t)(uint8_t *callbackName, uint16_t *callbackId);
+typedef uint8_t (* callbackId2CallbackStr_t)(uint16_t callbackId, uint8_t **callbackName);
 typedef uint8_t (* getOtaHost_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getOtaRomPath_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
 typedef uint8_t (* getOtaFsPath_t)(compMsgDispatcher_t *self, int *numericValue, uint8_t **stringValue);
@@ -145,6 +146,7 @@ typedef struct compMsgModuleData {
   uint16_t myU8SaveUserDataCmdKey;
 
   callbackStr2CallbackId_t callbackStr2CallbackId;
+  callbackId2CallbackStr_t callbackId2CallbackStr;
   getOtaHost_t getOtaHost;
   getOtaRomPath_t getOtaRomPath;
   getOtaFsPath_t getOtaFsPath;

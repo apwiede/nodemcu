@@ -98,13 +98,11 @@ static uint8_t setOperatingMode(compMsgDispatcher_t *self, int *numericValue, ui
   int result;
   fieldValue_t fieldValue;
 
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
+  fieldValue.fieldValueFlags = COMP_MSG_FIELD_IS_NUMERIC;
   fieldValue.dataValue.value.numericValue = self->dispatcherCommon->operatingMode;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_operatingMode;
+  fieldValue.fieldNameId = COMP_MSG_WIFI_VALUE_ID_operatingMode;
   fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->setFieldValueInfo(self, &fieldValue);
+  result = self->compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_VALUE_ID_operatingMode, &fieldValue);
   return COMP_MSG_ERR_OK;
 }
 

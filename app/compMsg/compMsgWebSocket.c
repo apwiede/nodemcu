@@ -569,6 +569,7 @@ static void startWebClientMode(void *arg) {
   char temp[64];
   fieldValInfo_t fieldValInfo;
   fieldValue_t fieldValue;
+  fieldValue_t *fieldValuePtr;
   uint8_t valueId;
 
   compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
@@ -621,24 +622,12 @@ static void startWebClientMode(void *arg) {
 sud->urls[0] = "/callmcu";
 sud->num_urls = 1;
 ets_printf("before callbacks\n");
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_binaryCallback;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  numericValue = fieldValue.dataValue.value.numericValue;
+  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_WebBinaryReceivedCallback, &fieldValuePtr);
+  numericValue = fieldValuePtr->dataValue.value.numericValue;
   COMP_MSG_DBG(self, "W", 2, "binaryCallback: %p!%d!\n", numericValue, result);
   sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)numericValue;
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_textCallback;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  numericValue = fieldValue.dataValue.value.numericValue;
+  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_WebTextReceivedCallback, &fieldValuePtr);
+  numericValue = fieldValuePtr->dataValue.value.numericValue;
   COMP_MSG_DBG(self, "W", 2, "textCallback: %p!%d!\n", numericValue, result);
   sud->webSocketTextReceived = (webSocketTextReceived_t)numericValue;
   sud->compMsgDispatcher = self;
@@ -697,6 +686,7 @@ static void startAccessPoint(void *arg) {
   socketUserData_t *sud;
   fieldValInfo_t fieldValInfo;
   fieldValue_t fieldValue;
+  fieldValue_t *fieldValuePtr;
   compMsgTimerSlot_t *compMsgTimerSlot;
 
   compMsgTimerSlot = (compMsgTimerSlot_t *)arg;
@@ -734,25 +724,13 @@ static void startAccessPoint(void *arg) {
 sud->urls[0] = "/getaplist";
 sud->urls[1] = "/getapdeflist";
 sud->num_urls = 2;
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_binaryCallback;
-  fieldValue.fieldValueCallback = NULL;
 ets_printf("before binary callbacks2\n");
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
+  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_WebBinaryReceivedCallback, &fieldValuePtr);
   COMP_MSG_DBG(self, "W", 1, "binaryCallback: %p!result: %d!\n", fieldValue.dataValue.value.numericValue, result);
-  sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)fieldValue.dataValue.value.numericValue;
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_textCallback;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  COMP_MSG_DBG(self, "W", 1, "textCallback: %p!result: %d!\n", fieldValue.dataValue.value.numericValue, result);
-  sud->webSocketTextReceived = (webSocketTextReceived_t)fieldValue.dataValue.value.numericValue;
+  sud->webSocketBinaryReceived = (webSocketBinaryReceived_t)fieldValuePtr->dataValue.value.numericValue;
+  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_WebTextReceivedCallback, &fieldValuePtr);
+  COMP_MSG_DBG(self, "W", 1, "textCallback: %p!result: %d!\n", fieldValuePtr->dataValue.value.numericValue, result);
+  sud->webSocketTextReceived = (webSocketTextReceived_t)fieldValuePtr->dataValue.value.numericValue;
   sud->compMsgDispatcher = self;
 
   pesp_conn = (struct espconn *)os_zalloc(sizeof(struct espconn));

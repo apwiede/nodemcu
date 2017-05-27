@@ -463,7 +463,7 @@ typedef struct compMsgMsgDesc {
   msgHeaderInfo_t msgHeaderInfo;
   msgMidPartInfo_t msgMidPartInfo;
   msgTrailerInfo_t msgTrailerInfo;
-  msgFieldValues_t msgFieldValues;
+//  msgFieldValues_t msgFieldValues;
 
   getHeaderChksumKey_t getHeaderChksumKey;
   addHeaderInfo_t addHeaderInfo;

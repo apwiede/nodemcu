@@ -157,6 +157,7 @@ static uint8_t openSSDPSocket(compMsgDispatcher_t *self, char *domain, socketUse
   socketUserData_t *sud;
   uint8_t flags;
   fieldValue_t fieldValue;
+  fieldValue_t *fieldValuePtr;
   fieldValueCallback_t callback;
 
   pesp_conn = NULL;
@@ -172,23 +173,11 @@ static uint8_t openSSDPSocket(compMsgDispatcher_t *self, char *domain, socketUse
   sud->connectionType = NET_SOCKET_TYPE_SSDP;
 
   // the following 2 calls deliver a callback function address in numericValue !!
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_SSDPReceivedCallback;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  numericValue = fieldValue.dataValue.value.numericValue;
+  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_SSDPReceivedCallback, &fieldValuePtr);
+  numericValue = fieldValuePtr->dataValue.value.numericValue;
   sud->netSocketReceived = (netSocketReceived_t)numericValue;
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_SSDPToSendCallback;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
-  numericValue = fieldValue.dataValue.value.numericValue;
+  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_SSDPToSendCallback, &fieldValuePtr);
+  numericValue = fieldValuePtr->dataValue.value.numericValue;
   sud->netSocketToSend = (netSocketToSend_t)numericValue;
   sud->compMsgDispatcher = self;
   COMP_MSG_DBG(self, "N", 2, "callback netSocketSSDPReceived: %p callback netSocketSSDPToSend: %p", sud->netSocketReceived, sud->netSocketToSend);
@@ -290,6 +279,7 @@ static void sendSSDPInfo(void *arg) {
   uint8_t flags;
   uint8_t *strValue;
   fieldValue_t fieldValue;
+  fieldValue_t *fieldValuePtr;
   fieldValueCallback_t callback;
 
 //ets_printf("free heap 5: %d\n", system_get_free_heap_size());
@@ -313,15 +303,9 @@ if (numNotifies > 10) {
 //  checkErrOK(result);
   }
 //ets_printf("sendSSDPInfo local_ip: %d.%d.%d.%d remote_ip: %d.%d.%d.%d\n", IP2STR(self->ssdpSud->pesp_conn->proto.udp->local_ip), IP2STR(self->ssdpSud->pesp_conn->proto.udp->remote_ip));
-  fieldValue.flags = COMP_MSG_FIELD_IS_NUMERIC;
-  fieldValue.dataValue.value.numericValue = 0;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientPort;
-  fieldValue.fieldValueCallback = NULL;
-  result = self->compMsgDataValue->getFieldValueInfo(self, &fieldValue, &strValue);
+  result = self->compMsgDataValue->getFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_ClientPort, &fieldValuePtr);
 //  checkErrOK(result);
-  port = fieldValue.dataValue.value.numericValue;
+  port = fieldValuePtr->dataValue.value.numericValue;
   wifi_get_ip_info(STATION_IF, &pTempIp);
   if(pTempIp.ip.addr==0){
 //ets_printf("sendSSDPInfo: after openSSDPSocket: CANNOT_GET_IP\n");
@@ -363,22 +347,18 @@ ets_printf("startSenSSDPInfo connectStatus: %d\n", status);
   boolResult = wifi_station_disconnect();
   COMP_MSG_DBG(self, "N", 1, "wifi_station_disconnect: boolResult: %d", boolResult);
 ssid = "Wiedemann3";
-  fieldValue.flags = COMP_MSG_FIELD_IS_STRING;
+  fieldValue.fieldValueFlags = COMP_MSG_FIELD_IS_STRING;
   fieldValue.dataValue.value.stringValue = ssid;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientSsid;
+  fieldValue.fieldNameId = COMP_MSG_WIFI_ClientSsid;
   fieldValue.fieldValueCallback = NULL;
-result = self->compMsgDataValue->setFieldValueInfo(self, &fieldValue);
+result = self->compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_ClientSsid, &fieldValue);
 checkErrOK(result);
 passwd = "123";
-  fieldValue.flags = COMP_MSG_FIELD_IS_STRING;
+  fieldValue.fieldValueFlags = COMP_MSG_FIELD_IS_STRING;
   fieldValue.dataValue.value.stringValue = passwd;
-  fieldValue.cmdKey = COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL;
-  fieldValue.fieldNameId = 0;
-  fieldValue.fieldValueId = COMP_MSG_WIFI_VALUE_ID_clientPasswd;
+  fieldValue.fieldNameId = COMP_MSG_WIFI_ClientSsid;
   fieldValue.fieldValueCallback = NULL;
-result = self->compMsgDataValue->setFieldValueInfo(self, &fieldValue);
+result = self->compMsgDataValue->setFieldValueInfo(self, COMP_MSG_DATA_VALUE_CMD_KEY_SPECIAL, COMP_MSG_WIFI_ClientPasswd, &fieldValue);
 checkErrOK(result);
 self->compMsgSendReceive->startSendMsg = NULL;
   wifi_set_opmode(STATION_MODE);

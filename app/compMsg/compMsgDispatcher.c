@@ -362,14 +362,14 @@ ets_printf("msgData: %p\n", &msgData);
 ets_printf("WWWAAA: %p\n", &WWWAAA);
 ets_printf("dispInit1\n");
 #endif
-//COMP_MSG_DBG(self, "Y", 0, "call DescInit");
+COMP_MSG_DBG(self, "Y", 0, "call DescInit");
 ets_printf("0 heap: %d\n", system_get_free_heap_size());
   result = self->compMsgUtil->compMsgUtilInit(self);
   checkErrOK(result);
-//ets_printf("1 heap: %d\n", system_get_free_heap_size());
+ets_printf("1 heap: %d\n", system_get_free_heap_size());
   result = compMsgTypesAndNamesInit(self);
   checkErrOK(result);
-  // must be aufter TypesAndNames!
+  // has to be called after compMsgTypesAndNamesInit for needed ids
   result = self->compMsgDataValue->compMsgDataValueInit(self);
   checkErrOK(result);
   result = self->compMsgFile->compMsgFileInit(self);
@@ -414,10 +414,6 @@ ets_printf("9 heap: %d\n", system_get_free_heap_size());
 #ifdef GDB_STUB
 ets_printf("dispInit2\n");
 #endif
-#ifdef OLD
-  result = self->compMsgMsgDesc->getMsgKeyValueDescParts(self, KEY_VALUE_DESC_PARTS_FILE);
-#endif
-
 ets_printf("10 heap: %d\n", system_get_free_heap_size());
   if (typelen > 0) {
     switch(type[0]) {

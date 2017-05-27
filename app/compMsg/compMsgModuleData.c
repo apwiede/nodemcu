@@ -74,6 +74,7 @@ const static str2id_t callbackStr2CallbackIds [] = {
 
 #include "compMsgModuleDataCustom.h"
 
+  { NULL,         0},
 };
 
 // ================================= callbackStr2CallbackId ====================================
@@ -83,10 +84,31 @@ static uint8_t callbackStr2CallbackId(uint8_t *callbackName, uint16_t *callbackI
   const str2id_t *entry;
 
   idx = 0;
+  *callbackId = 0xFF;
   entry = &callbackStr2CallbackIds[idx];
   while (entry->str != NULL) {
     if (c_strcmp(entry->str, callbackName) == 0) {
       *callbackId = entry->id;
+      return COMP_MSG_ERR_OK;
+    }
+    idx++;
+    entry = &callbackStr2CallbackIds[idx];
+  }
+  return COMP_MSG_ERR_CALLBACK_NAME_NOT_FOUND;
+}
+
+// ================================= callbackId2CallbackStr ====================================
+
+static uint8_t callbackId2CallbackStr(uint16_t callbackId, uint8_t **callbackName) {
+  int idx;
+  const str2id_t *entry;
+
+  idx = 0;
+  *callbackName = NULL;
+  entry = &callbackStr2CallbackIds[idx];
+  while (entry->str != NULL) {
+    if (entry->id == callbackId) {
+      *callbackName = entry->str;
       return COMP_MSG_ERR_OK;
     }
     idx++;
@@ -518,7 +540,6 @@ static uint8_t compMsgModuleDataInit(compMsgDispatcher_t *self) {
   compMsgUtil_t *compMsgUtil;
 
   compMsgModuleData = self->compMsgModuleData;
-  compMsgModuleData->callbackStr2CallbackId = &callbackStr2CallbackId;
   compMsgModuleData->updateModuleValues = &updateModuleValues;
   compMsgModuleData->getOtaHost = &getOtaHost;
   compMsgModuleData->getOtaRomPath = &getOtaRomPath;
@@ -602,5 +623,7 @@ compMsgModuleData_t *newCompMsgModuleData() {
     return NULL;
   }
   compMsgModuleData->compMsgModuleDataInit = &compMsgModuleDataInit;
+  compMsgModuleData->callbackStr2CallbackId = &callbackStr2CallbackId;
+  compMsgModuleData->callbackId2CallbackStr = &callbackId2CallbackStr;
   return compMsgModuleData;
 }
