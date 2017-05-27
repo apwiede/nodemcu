@@ -3,5 +3,5 @@
 #,4
 @numKeyValues,3
 @#sequenceNum,@getClientSequenceNum
-@#clientSsid,@getAPSssid
-@#clientPasswd,@getAPPassword
+@#clientSsid,@getClientSsid
+@#clientPasswd,@getClientPasswd
