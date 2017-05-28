@@ -124,7 +124,8 @@ puts stderr "compMsgMsgDesc keys:[dict keys [dict get $compMsgDispatcher compMsg
       set numEntries [dict get $msgDescription numFields]
       puts stderr "  fields:"
       set idx 0
-      set fieldDescInfos [dict get $compMsgData fieldDescInfos]
+      set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
       set fieldSequence [dict get $msgDescription fieldSequence]
       while {$idx < $numEntries} {
         set fieldNameId [lindex $fieldSequence $idx]
@@ -133,7 +134,7 @@ puts stderr "compMsgMsgDesc keys:[dict keys [dict get $compMsgDispatcher compMsg
         checkErrOK $result
         set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgDispatcher $fieldNameId fieldName]
         checkErrOK $result
-        puts stderr [format "    idx %d: key: %-20s type: %-8s lgth: %.5d offset: %.3d flags: %s" $idx $fieldName $fieldType [dict get $fieldDescInfo fieldLgth] [dict get $fieldDescInfo fieldOffset] [dict get $fieldDescInfo fieldFlags]]
+        puts stderr [format "    idx %2d: key: %-20s type: %-8s lgth: %.5d offset: %.3d flags: %s" $idx $fieldName $fieldType [dict get $fieldDescInfo fieldLgth] [dict get $fieldDescInfo fieldOffset] [dict get $fieldDescInfo fieldFlags]]
         if {[lsearch [dict get $fieldDescInfo fieldFlags] "COMP_MSG_FIELD_IS_SET"] >= 0} {
           set result [::compMsg compMsgDataView getFieldValue $fieldDescInfo value 0]
           checkErrOK $result
@@ -535,102 +536,15 @@ puts stderr "bad default type for $fieldName: [dict get $msgDescPart fieldTypeId
       checkErrOK FIELD_NOT_FOUND
     }
     
-    # ================================= prepareMsg ====================================
-    
-    proc prepareMsg {compMsgDispatcherVar msgDescription} {
-      upvar $compMsgDispatcherVar compMsgDispatcher
-
-      set compMsgData [dict get $compMsgDispatcher compMsgData]
-      if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
-        checkErrOK NOT_YET_INITTED
-      }
-      # create the values which are different for each message!!
-      set numEntries [dict get $msgDescription numFields]
-      set idx 0
-      set fieldSequence [dict get $msgDescription fieldSequence]
-      set fieldOffsets [dict get $msgDescription fieldOffsets]
-      set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
-      set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      while {$idx < $numEntries} {
-        set fieldNameIdInt [lindex $fieldSequence $idx]
-        set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
-        set fieldDescInfo [lindex $fieldDescInfos $fieldNameIdInt]
-        set result [::compMsg compMsgTypesAndNames getFieldNameIdFromInt compMsgDispatcher $fieldNameIdInt fieldNameId]
-        checkErrOK $result
-        switch $fieldNameId {
-          COMP_MSG_SPEC_FIELD_RANDOM_NUM {
-            set result [::compMsg compMsgDataView setRandomNum $fieldDescInfo]
-            checkErrOK $result
-            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
-          }
-          COMP_MSG_SPEC_FIELD_SEQUENCE_NUM {
-            set result [::compMsg compMsgDataView setSequenceNum $fieldDescInfo]
-            checkErrOK $result
-            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
-          }
-          COMP_MSG_SPEC_FIELD_HDR_FILLER {
-            set result [::compMsg compMsgDataView setFiller $fieldDescInfo]
-            checkErrOK $result
-            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
-          }
-          COMP_MSG_SPEC_FIELD_FILLER {
-            set result [::compMsg compMsgDataView setFiller $fieldDescInfo]
-            checkErrOK $result
-            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
-          }
-          COMP_MSG_SPEC_FIELD_CRC {
-            set startOffset 0
-puts stderr "crc flags: [dict get $compMsgData flags]!"
-puts stderr "crc2 msgDesc: [dict keys $msgDescription]!"
-            if {[lsearch [dict get $compMsgData flags] COMP_MSG_CRC_USE_HEADER_LGTH] >= 0} {
-                set startOffset [dict get $compMsgData headerLgth]
-            }
-puts stderr "fieldOffsets: $fieldOffsets!"
-            if {[lsearch [dict get $msgDescription fieldFlags] COMP_MSG_TOTAL_CRC] >= 0} {
-              set startOffset [dict get $compMsgData headerLgth]
-              # lgth is needed without totalCrc
-              switch [lindex $fieldSequence end] {
-                COMP_DISP_U8_TOTAL_CRC {
-                  set lgth [expr {[dict get $compMsgData totalLgth] - 1}]
-                }
-                COMP_DISP_U16_TOTAL_CRC {
-                  set lgth [expr {[dict get $compMsgData totalLgth] - 2}]
-                }
-              }
-            } else {
-              set lgth [dict get $compMsgData totalLgth]
-            }
-            set result [::compMsg compMsgDataView setCrc $fieldDescInfo $startOffset $lgth]
-            checkErrOK $result
-            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
-          }
-          COMP_MSG_SPEC_FIELD_TOTAL_CRC {
-#            set result [::compMsg compMsgDataView setTotalCrc $fieldDescInfo]
-#            checkErrOK $result
-            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
-          }
-        }
-        set fieldDescInfos [lreplace $fieldDescInfos $idx $idx $fieldDescInfo]
-        incr idx
-      }
-      dict set msgFieldInfos fieldDescInfos $fieldDescInfos
-      dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos
-      dict set compMsgDispatcher compMsgTypesAndNames $compMsgTypesAndNames
-      dict lappend compMsgData flags COMP_MSG_IS_PREPARED
-      dict set compMsgDispatcher compMsgData $compMsgData
-      return [checkErrOK OK]
-    }
-    
     # ================================= initMsg ====================================
     
     proc initMsg {compMsgDispatcherVar msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-puts stderr "initMsg: $msgDescription!"
+puts stderr "initMsg: msgDescription: $msgDescription!"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
-pdict $compMsgData
       # initialize field offsets for each field
-      # initialize totalLgth, headerLgth, cmdLgth
+      # initialize totalLgth and cmdLgth
       if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] >= 0} {
         return [checkErrOK ALREADY_INITTED]
       }
@@ -644,9 +558,14 @@ pdict $compMsgData
 puts stderr "numEntries: $numEntries!"
       set fieldSequence [dict get $msgDescription fieldSequence]
       while {$idx < $numEntries} {
-        set fieldNameId [lindex $fieldSequence $idx]
-        set fieldDescInfo [lindex $fieldDescInfos $fieldNameId]
-        dict set fieldDescInfo fieldOffset [dict get $compMsgData fieldOffset]
+        set fieldNameIntId [lindex $fieldSequence $idx]
+        set fieldDescInfo [lindex $fieldDescInfos $fieldNameIntId]
+        set result [::compMsg compMsgTypesAndNames getFieldNameIdFromInt compMsgDispatcher $fieldNameIntId fieldNameId]
+        checkErrOK $result
+        set fieldOffset [dict get $compMsgData fieldOffset]
+        dict set fieldDescInfo fieldOffset $fieldOffset
+        set fieldLgth [dict get $fieldDescInfo fieldLgth]
+puts stderr "init: $fieldNameId!$fieldOffset!$fieldLgth!"
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_SRC -
           COMP_MSG_SPEC_FIELD_DST -
@@ -654,43 +573,37 @@ puts stderr "numEntries: $numEntries!"
           COMP_MSG_SPEC_FIELD_GUID -
           COMP_MSG_SPEC_FIELD_SRC_ID -
           COMP_MSG_SPEC_FIELD_HDR_FILLER {
-            dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldDescInfo fieldLgth]}]
+            dict set compMsgData totalLgth [expr {$fieldOffset + $fieldLgth}]
           }
           COMP_MSG_SPEC_FIELD_FILLER {
             set fillerLgth 0
-            set crcLgth 0
-            if {[lsearch [dict get $compMsgData flags] COMP_MSG_HAS_CRC] >= 0} {
-              if {[lsearch [dict get $compMsgData flags] COMP_MSG_UINT8_CRC] >= 0} {
-                set crcLgth 1
-              } else {
-                set crcLgth 2
-              }
-            }
-            set myLgth [expr {[dict get $compMsgData fieldOffset] + $crcLgth - [dict get $compMsgData headerLgth]}]
+            set result [::compMsg compMsgDataView getCrcLgth compMsgDispatcher $msgDescription crcLgth]
+            checkErrOK $result
+            set myLgth [expr {$fieldOffset + $crcLgth - [dict get $compMsgData headerLgth]}]
             while {[expr {$myLgth % 16}] != 0} {
               incr myLgth
               incr fillerLgth
             }
             dict set fieldDescInfo fieldLgth $fillerLgth
-            set fields [lreplace $fields $idx $idx $fieldDescInfo]
-            dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + $fillerLgth + $crcLgth}]
+            set fieldDescInfos [lreplace $fieldDescInfos $fieldNameIntId $fieldNameIntId $fieldDescInfo]
+            dict set compMsgData totalLgth [expr {$fieldOffset + $fillerLgth + $crcLgth}]
             dict set compMsgData cmdLgth [expr {[dict get $compMsgData totalLgth] - [dict get $compMsgData headerLgth]}]
           }
           default {
-            dict set compMsgData totalLgth [expr {[dict get $compMsgData fieldOffset] + [dict get $fieldDescInfo fieldLgth]}]
+            dict set compMsgData totalLgth [expr {$fieldOffset + [dict get $fieldDescInfo fieldLgth]}]
             dict set compMsgData cmdLgth [expr {[dict get $compMsgData totalLgth] - [dict get $compMsgData headerLgth]}]
           }
         }
-        set fieldDescInfos [lreplace $fieldDescInfos $fieldNameId $fieldNameId $fieldDescInfo]
+        set fieldDescInfos [lreplace $fieldDescInfos $fieldNameIntId $fieldNameIntId $fieldDescInfo]
         dict set compMsgTypesAndNames fieldDescInfos $fieldDescInfos
         dict incr compMsgData fieldOffset [dict get $fieldDescInfo fieldLgth]
+        set totalLgth [dict get $compMsgData totalLgth]
         incr idx
       }
       if {[dict get $compMsgData totalLgth] == 0} {
         checkErrOK [FIELD_TOTAL_LGTH_MISSING]
       }
       set totalLgth [dict get $compMsgData totalLgth]
-puts stderr "compMsgData3 setDataViewData: totalLgth: $totalLgth!"
       set result [::compMsg dataView setDataViewData [string repeat "\x00" $totalLgth] $totalLgth]
       checkErrOK $result
       dict lappend compMsgData flags COMP_MSG_IS_INITTED
@@ -698,8 +611,10 @@ puts stderr "compMsgData3 setDataViewData: totalLgth: $totalLgth!"
       set idx 0
       set numEntries [dict get $msgDescription numFields]
       while {$idx < $numEntries} {
-        set fieldNameId [lindex $fieldSequence $idx]
-        set fieldDescInfo [lindex $fieldDescInfos $fieldNameId]
+        set fieldNameIntId [lindex $fieldSequence $idx]
+        set fieldDescInfo [lindex $fieldDescInfos $fieldNameIntId]
+        set result [::compMsg compMsgTypesAndNames getFieldNameIdFromInt compMsgDispatcher $fieldNameIntId fieldNameId]
+        checkErrOK $result
         switch $fieldNameId {
           COMP_MSG_SPEC_FIELD_TOTAL_LGTH {
             set result [::compMsg compMsgDataView setFieldValue $fieldDescInfo [dict get $compMsgData totalLgth] 0]
@@ -712,10 +627,11 @@ puts stderr "compMsgData3 setDataViewData: totalLgth: $totalLgth!"
             dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
           }
         }
-        set fieldDescInfos [lreplace $fieldDescInfos $fieldNameId $fieldNameId $fieldDescInfo]
+        set fieldDescInfos [lreplace $fieldDescInfos $fieldNameIntId $fieldNameIntId $fieldDescInfo]
         incr idx
       }
-      dict set compMsgData fieldDescInfos $fieldDescInfos
+      dict set msgFieldInfos fieldDescInfos $fieldDescInfos
+      dict set compMsgDispatcher compMsgTypesAndNames msgFieldInfos $msgFieldInfos
       dict set compMsgDispatcher compMsgData $compMsgData
       return [checkErrOK OK]
     }
@@ -829,6 +745,91 @@ puts stderr "size: $value offset: $offset!"
 #::compMsg compMsgData dumpMsg compMsgDispatcher
 #puts stderr "hexDump"
 #::compMsg dataView dumpBinary $::compMsg::dataView::data $::compMsg::dataView::lgth "MSG_AA"
+      return [checkErrOK OK]
+    }
+ 
+    # ================================= prepareMsg ====================================
+    
+    proc prepareMsg {compMsgDispatcherVar msgDescription} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+
+      set compMsgData [dict get $compMsgDispatcher compMsgData]
+      if {[lsearch [dict get $compMsgData flags] COMP_MSG_IS_INITTED] < 0} {
+        checkErrOK NOT_YET_INITTED
+      }
+puts stderr "prepareMsg:!"
+      # create the values which are different for each message!!
+      set numEntries [dict get $msgDescription numFields]
+      set idx 0
+      set fieldSequence [dict get $msgDescription fieldSequence]
+      set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+      set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
+      while {$idx < $numEntries} {
+        set fieldNameIntId [lindex $fieldSequence $idx]
+        set fieldDescInfo [lindex $fieldDescInfos $fieldNameIntId]
+        set result [::compMsg compMsgTypesAndNames getFieldNameIdFromInt compMsgDispatcher $fieldNameIntId fieldNameId]
+        checkErrOK $result
+puts stderr "field: $fieldNameId!"
+        switch $fieldNameId {
+          COMP_MSG_SPEC_FIELD_RANDOM_NUM {
+            set result [::compMsg compMsgDataView setRandomNum $fieldDescInfo]
+            checkErrOK $result
+            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+          COMP_MSG_SPEC_FIELD_SEQUENCE_NUM {
+            set result [::compMsg compMsgDataView setSequenceNum $fieldDescInfo]
+            checkErrOK $result
+            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+          COMP_MSG_SPEC_FIELD_HDR_FILLER {
+            set result [::compMsg compMsgDataView setFiller $fieldDescInfo]
+            checkErrOK $result
+            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+          COMP_MSG_SPEC_FIELD_FILLER {
+            set result [::compMsg compMsgDataView setFiller $fieldDescInfo]
+            checkErrOK $result
+            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+          COMP_MSG_SPEC_FIELD_CRC {
+            set startOffset 0
+puts stderr "crc flags: [dict get $compMsgData flags]!"
+puts stderr "crc2 msgDesc: [dict keys $msgDescription]!"
+            if {[lsearch [dict get $compMsgData flags] COMP_MSG_CRC_USE_HEADER_LGTH] >= 0} {
+                set startOffset [dict get $compMsgData headerLgth]
+            }
+puts stderr "crc: flags: [dict get $msgDescription fieldFlags]!"
+            if {[lsearch [dict get $msgDescription fieldFlags] COMP_MSG_HAS_TOTAL_CRC] >= 0} {
+puts stderr "desc  keys: [dict keys [dict get $compMsgDispatcher compMsgMsgDesc]]!"
+              set startOffset [dict get $compMsgDispatcher compMsgMsgDesc msgHeaderInfo headerLgth]
+              # lgth is needed without totalCrc
+              set totalCrcIdx 0
+              set result [::compMsg compMsgDataView getTotalCrcLgth compMsgDispatcher $msgDescription totalCrcLgth]
+              checkErrOK $result
+              set lgth [expr {[dict get $compMsgData totalLgth] - $totalCrcLgth}]
+            } else {
+              set lgth [dict get $compMsgData totalLgth]
+            }
+puts stderr "setCrc: $fieldDescInfo!startOffset: $startOffset!lgth: $lgth!"
+            set result [::compMsg compMsgDataView setCrc $fieldDescInfo $startOffset $lgth]
+            checkErrOK $result
+            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+          COMP_MSG_SPEC_FIELD_TOTAL_CRC {
+#            set result [::compMsg compMsgDataView setTotalCrc $fieldDescInfo]
+#            checkErrOK $result
+            dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+        }
+        set fieldDescInfos [lreplace $fieldDescInfos $idx $idx $fieldDescInfo]
+        incr idx
+      }
+      dict set msgFieldInfos fieldDescInfos $fieldDescInfos
+      dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos
+      dict set compMsgDispatcher compMsgTypesAndNames $compMsgTypesAndNames
+      dict lappend compMsgData flags COMP_MSG_IS_PREPARED
+      dict set compMsgDispatcher compMsgData $compMsgData
       return [checkErrOK OK]
     }
     

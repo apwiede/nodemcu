@@ -57,6 +57,7 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export setMsgValues buildMsg buildMsgFromHeaderPart createMsgFromHeaderPart
+    namespace export setMsgFieldValue
 
     variable buildMsgInfos
 
@@ -195,10 +196,20 @@ puts stderr "fieldLgth2: [dict get $fieldInfo fieldLgth]!"
     
     # ================================= setMsgFieldValue ====================================
     
-    proc setMsgFieldValue {compMsgDispatcherVar} {
+    proc setMsgFieldValue {compMsgDispatcherVar fieldIdx msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
       set compMsgData [dict get $compMsgDispatcher compMsgData]
+      set fieldSequence [dict get $msgDescription fieldSequence]
+      set fieldId [lindex $fieldSequence $fieldIdx]
+      set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
+      set fieldDescInfo [lindex $fieldDescInfos $fieldId]
+set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId ::compMsgDispatcher $fieldId fieldName]
+checkErrOK $result
+puts stderr "setMsgFieldValue: fieldName: $fieldName!$fieldDescInfo!"
+
+if {0} {
       set fieldValueStr [dict get $compMsgDispatcher msgValPart fieldValueStr]
       set fieldNameStr [dict get $compMsgDispatcher msgValPart fieldNameStr]
       if {[string range $fieldValueStr 0 3] eq "@get"} {
@@ -245,6 +256,7 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
         }
         checkErrOK $result
       }
+}
 #puts stderr "setMsgFieldValue: done\n"
       return $::COMP_MSG_ERR_OK
     }
@@ -270,27 +282,29 @@ puts stderr "keys: [dict keys [dict get $compMsgMsgDesc msgHeaderInfo]]!\nkeys2:
 puts stderr "val1: $val1!$val2!headerLgth: [dict get $compMsgMsgDesc msgHeaderInfo headerLgth]!"
       set msgFieldGroupInfo [dict get $msgFieldGroupInfos COMP_MSG_VAL_FIELD_GROUP "${val1}${val2}"]
 puts stderr "numMsgFieldVal: [dict get $msgFieldGroupInfo numMsgFieldVal]!"
-      set numHeaderFields [dict get $compMsgMsgDesc msgHeaderInfo numHeaderFields]
-      set result [::compMsg dataView setDataViewData [dict get $msgDescription headerFieldValues] [dict get $compMsgMsgDesc msgHeaderInfo headerLgth]]
-      checkErrOK $result
+      set numFields [dict get $msgDescription numFields]
       set fieldIdx 0
-      while {$fieldIdx < $numHeaderFields} {
+puts stderr "numFields: $numFields!"
+      while {$fieldIdx < $numFields} {
         set fieldId [lindex $fieldSequence $fieldIdx]
         set fieldDescInfo [lindex $fieldDescInfos $fieldId]
 set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId ::compMsgDispatcher $fieldId fieldName]
 checkErrOK $result
 puts stderr "fieldName: $fieldName!"
-        set result [::compMsg compMsgDataView getIdFieldValue compMsgDispatcher $fieldId dataValue 0]
+        set result [::compMsg compMsgBuildMsg setMsgFieldValue compMsgDispatcher $fieldIdx $msgDescription]
         checkErrOK $result
-puts stderr "val: $dataValue!"
 if {0} {
-        if {$found} {
-          dict set compMsgDispatcher msgKeyValueDescPart $msgKeyValueDescPart
+        if {[lsearch [dict get $fieldDescInfo fieldFlags] COMP_MSG_FIELD_HEADER_UNIQUE] >= 0} {
+          # need to get these value form msgDescription headerFieldValues!!
+puts stderr "unique field: $fieldName!"
         } else {
-          dict set compMsgDispatcher msgKeyValueDescPart [list]
-        }
-        set msgValPart [lindex $msgValParts $msgValPartIdx]
-        dict set compMsgDispatcher msgValPart $msgValPart
+          set result [::compMsg compMsgDataView getIdFieldValue compMsgDispatcher $fieldId dataValue 0]
+          checkErrOK $result
+}
+puts stderr "val: $dataValue!"
+          set result [setMsgFieldValue compMsgDispatcher msgDescription]
+          checkErrOK $result
+
         set fields [dict get $compMsgData fields]
         set fieldInfo [lindex $fields $msgDescPartIdx]
         set fieldNameId [dict get $fieldInfo fieldNameId]
@@ -351,18 +365,18 @@ puts stderr "buildMsg: msgDescription: $msgDescription!"
       checkErrOK $result
 #::compMsg compMsgData dumpMsg compMsgDispatcher
 #::compMsg compMsgData dataView $msgData $msgLgth "msgData"
-      if {[dict get $compMsgDispatcher currHdr hdrEncryption] eq "E"} {
+      if {[dict get $msgDescription encrypted] eq "E"} {
         set cryptKey "a1b2c3d4e5f6g7h8"
         set ivlen 16
         set klen 16
     
 puts stderr "need to encrypt message!"
-        set headerLgth [dict get $compMsgDispatcher compMsgData headerLgth]
+        set headerLgth [dict get $compMsgDispatcher compMsgMsgDesc msgHeaderInfo headerLgth]
         set totalCrcOffset 0
         set totalCrc ""
         set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth}]
         set hdr [dict get $compMsgDispatcher currHdr]
-        if {[lsearch [dict get $hdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+        if {[lsearch [dict get $msgDescription fieldFlags] COMP_MSG_HAS_TOTAL_CRC] >= 0} {
           if {[lsearch [dict get $hdr fieldSequence] COMP_DISP_U8_TOTAL_CRC] >= 0} {
             set totalCrcOffset 1
             incr mlen -1

@@ -52,7 +52,7 @@ namespace eval ::compMsg {
     namespace export setFieldValue getFieldValue
     namespace export setRandomNum getRandomNum setSequenceNum getSequenceNum
     namespace export setFiller getFiller setCrc getCrc setTotalCrc getTotalCrc
-    namespace export getIdFieldValue setIdFieldValue
+    namespace export getIdFieldValue setIdFieldValue getCrcLgth getTotalCrcLgth
 
     dict set ::compMsg(fieldNameDefinitions) numDefinitions 0
 
@@ -209,7 +209,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
       set crcLgth [dict get $fieldDescInfo fieldLgth]
 #puts stderr "setCrc: startOffset: $startOffset size: $size!"
       set size [expr {$size - $crcLgth}]
-#set ::crcDebug true
+set ::crcDebug true
 set cnt 0
       set crc  0
       set offset $startOffset
@@ -247,6 +247,35 @@ puts stderr "crc11: $crc![format 0x%04x $crc]![format 0x%02x [expr {$crc & 0xFF}
       return [checkErrOK OK]
     }
     
+    # ================================= getCrcLgth ====================================
+
+    proc getCrcLgth {compMsgDispatcherVar msgDescription crcLgthVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $crcLgthVar crcLgth
+
+      set crcLgth 0
+      set numEntries [dict get $msgDescription numFields]
+      if {[lsearch [dict get $msgDescription fieldFlags] COMP_MSG_HAS_CRC] >= 0} {
+        set crcIdx 0
+        set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+        set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
+        set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
+        set fieldSequence [dict get $msgDescription fieldSequence]
+        while {$crcIdx < $numEntries} {
+          set fieldNameIntId [lindex $fieldSequence $crcIdx]
+          set result [::compMsg compMsgTypesAndNames getFieldNameIdFromInt compMsgDispatcher $fieldNameIntId fieldNameId]
+          checkErrOK $result
+          if {$fieldNameId eq "COMP_MSG_SPEC_FIELD_CRC"} {
+            set fieldDescInfo [lindex $fieldDescInfos $fieldNameIntId]
+            set crcLgth [dict get $fieldDescInfo fieldLgth]
+            return $::COMP_MSG_ERR_OK
+          }
+          incr crcIdx
+        }
+      }
+      return [checkErrOK FIELD_NOT_FOUND]
+    }
+ 
     # ================================= getTotalCrc ====================================
     
     proc getTotalCrc {fielDescdInfo valueVar} {
@@ -348,6 +377,35 @@ puts stderr "crc11: $crc![format 0x%04x $crc]!"
       return [checkErrOK OK]
     }
     
+    # ================================= getTotalCrcLgth ====================================
+
+    proc getTotalCrcLgth {compMsgDispatcherVar msgDescription totalCrcLgthVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $totalCrcLgthVar totalCrcLgth
+
+      set totalCrcLgth 0
+      set numEntries [dict get $msgDescription numFields]
+      if {[lsearch [dict get $msgDescription fieldFlags] COMP_MSG_HAS_TOTAL_CRC] >= 0} {
+        set totalCrcIdx 0
+        set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+        set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
+        set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
+        set fieldSequence [dict get $msgDescription fieldSequence]
+        while {$totalCrcIdx < $numEntries} {
+          set fieldNameIntId [lindex $fieldSequence $totalCrcIdx]
+          set result [::compMsg compMsgTypesAndNames getFieldNameIdFromInt compMsgDispatcher $fieldNameIntId fieldNameId]
+          checkErrOK $result
+          if {$fieldNameId eq "COMP_MSG_SPEC_FIELD_TOTAL_CRC"} {
+            set fieldDescInfo [lindex $fieldDescInfos $fieldNameIntId]
+            set totalCrcLgth [dict get $fieldDescInfo fieldLgth]
+            return $::COMP_MSG_ERR_OK
+          }
+          incr totalCrcIdx
+        }
+      }
+      return [checkErrOK FIELD_NOT_FOUND]
+    }
+ 
     
     # ================================= getFieldValue ====================================
     
@@ -409,6 +467,7 @@ puts stderr "getFieldValue: $msg!$fieldDescInfo!"
     # ================================= setFieldValue ====================================
     
     proc setFieldValue {fieldDescInfo value fieldIdx} {
+puts stderr "setFieldValue: $fieldDescInfo!$fieldIdx!V: $value!"
       switch [dict get $fieldDescInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           if {($value > -128) && ($value < 128)} {
