@@ -233,14 +233,6 @@ typedef struct msgHeaders {
   msgHeader_t *msgHeaderInfos;
 } msgHeaders_t;
 
-// infos about the fields sequence within a mesgDescription
-
-typedef struct msgFieldSequence {
-  uint16_t fieldId;
-  uint16_t fieldType;
-  uint8_t isJoker;
-} msgFieldSequence_t;
-
 // infos about a message with the message description infos
 
 typedef struct msgDescription {
@@ -305,25 +297,6 @@ typedef struct headerValueInfos {
 
 
 
-typedef struct msgInfo {
-  size_t lgth;
-  uint8_t realLgth;
-  size_t fieldOffset;
-  uint8_t buf[DISP_BUF_LGTH];
-  compMsgDataView_t *compMsgDataView;
-} msgInfo_t;
-
-typedef struct fieldDesc {
-  uint8_t *fieldNameStr;
-  uint8_t fieldNameId;
-  uint8_t *fieldTypeStr;
-  uint8_t fieldTypeId;
-  uint16_t fieldLgth;
-  uint16_t fieldSize;
-  keyValueDesc_t *keyValueDesc;
-  fieldSizeCallback_t fieldSizeCallback;
-} fieldDesc_t;
-
 #define COMP_DISP_HDR_DST              0x01
 #define COMP_DISP_HDR_SRC              0x02
 #define COMP_DISP_HDR_TOTAL_LGTH       0x04
@@ -361,6 +334,7 @@ typedef struct fieldDesc {
 
 #define DISP_GUID_LGTH 16
 #define DISP_MAX_HDR_FILLER_LGTH 40
+
 typedef struct headerPart {
   uint16_t hdrFromPart;
   uint16_t hdrToPart;
@@ -418,7 +392,6 @@ typedef struct msgParts {
   uint8_t buf[DISP_BUF_LGTH];
   compMsgDataView_t *compMsgDataView;
 } msgParts_t;
-
 
 typedef struct fieldsToSave {
   uint8_t *fieldNameStr;
