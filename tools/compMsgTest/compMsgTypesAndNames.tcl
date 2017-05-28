@@ -50,7 +50,7 @@ namespace eval ::compMsg {
     namespace export compMsgTypesAndNames freeCompMsgTypesAndNames getFieldNameIdFromStr
     namespace export getFieldNameStrFromId getFileNameTokenIdFromStr getSpecialFieldNameIntFromId
     namespace export compMsgTypesAndNamesInit addMsgFieldDescInfos getMsgFieldDescInfo setMsgFieldDescInfo
-    namespace export addMsgFieldValInfos getMsgFieldValInfo setMsgFieldValInfo
+    namespace export addMsgFieldValInfos getMsgFieldValInfo setMsgFieldValInfo getFieldNameIdFromInt
 
     variable specialFieldNames2Ids
     set specialFieldNames2Ids [dict create]
@@ -442,6 +442,42 @@ puts stderr "field not found: $fieldName!incrVal: $incrVal!"
       checkErrOK FIELD_NOT_FOUND
     }
 
+    # ================================= getFieldNameIdFromInt ====================================
+
+    proc getFieldNameIdFromInt {compMsgDispatcherVar fieldNameIntId fieldNameIdVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $fieldNameIdVar fieldNameId
+      variable specialFieldId2Names
+      variable specialFieldInts2Ids
+
+      if {[string is integer $fieldNameIntId]} {
+        if {[dict exists $specialFieldInts2Ids $fieldNameIntId]} {
+          set fieldNameId [dict get $specialFieldInts2Ids $fieldNameIntId]
+          return [checkErrOK OK]
+        }
+      }
+      # find field name
+      set idx 0
+      # these field names have also ids starting at 1 but for fieldInfo handling we add the numSpecFieldIds to get
+      # unique ids!
+      set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
+#puts stderr "fieldNameId: $fieldNameId![dict get $compMsgTypesAndNames numSpecFieldIds]!"
+      if {![string is integer $fieldNameIntId]} {
+      }
+      set fieldNameId [expr {$fieldNameIntId - [dict get $compMsgTypesAndNames numSpecFieldIds]}]
+      set fieldNameDefinitions $::compMsg(fieldNameDefinitions)
+      set definitions [dict get $fieldNameDefinitions definitions]
+      while {$idx < [dict get $fieldNameDefinitions numDefinitions]} {
+        set nameEntry [lindex  $definitions $idx]
+        if {[dict get $nameEntry id] == $fieldNameId} {
+          set fieldName [dict get $nameEntry fieldName]
+          return [checkErrOK OK]
+        }
+        incr idx
+      }
+      checkErrOK FIELD_NOT_FOUND
+    }
+
     # ================================= getFileNameTokenIdFromStr ====================================
 
     proc getFileNameTokenIdFromStr {fileNameTokenStr fileNameTokenIdVar} {
@@ -559,7 +595,7 @@ puts stderr "ERROR fileNameTokenStr: $fileNameTokenStr!FILE_NAME_TOKEN_NOT_FOUND
       set result $::COMP_MSG_ERR_OK
       set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
       set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
-      set idx [dict get $msgFieldInfos numMsgDescFields]
+      set idx 0
       while {$idx < $numEntries} {
         set fieldDescInfo [dict create]
         dict set fieldDescInfo fieldFlags [list]
@@ -585,8 +621,8 @@ puts stderr "ERROR fileNameTokenStr: $fileNameTokenStr!FILE_NAME_TOKEN_NOT_FOUND
 
       set result $::COMP_MSG_ERR_OK
       set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
-      if {$idx >= [dict get $msgFieldInfos numMsgFields]} {
-        return $::COMP_MSG_ERR_BAD_MSG_FIELD_INFO_IDX
+      if {$idx >= [dict get $msgFieldInfos numMsgDescFields]} {
+        checkErrOK BAD_MSG_FIELD_INFO_IDX
       }
       set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
       set entry [lindex $fieldDescInfos $idx]
@@ -608,7 +644,6 @@ puts stderr "ERROR fileNameTokenStr: $fileNameTokenStr!FILE_NAME_TOKEN_NOT_FOUND
       set result $::COMP_MSG_ERR_OK
       set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
       if {$idx >= [dict get $msgFieldInfos numMsgDescFields]} {
-puts stderr "idx: $idx numMsgDescFields: [dict get $msgFieldInfos numMsgDescFields]!"
         return [checkErrOK BAD_MSG_FIELD_INFO_IDX]
       }
       set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
@@ -642,7 +677,7 @@ puts stderr "idx: $idx numMsgDescFields: [dict get $msgFieldInfos numMsgDescFiel
       set result $::COMP_MSG_ERR_OK
       set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
       set fieldValInfos [dict get $msgFieldInfos fieldValInfos]
-      set idx [dict get $msgFieldInfos numMsgValFields]
+      set idx 0
       while {$idx < $numEntries} {
         set fieldValInfo [dict create]
         dict set fieldValInfo fieldFlags [list]
@@ -654,7 +689,6 @@ puts stderr "idx: $idx numMsgDescFields: [dict get $msgFieldInfos numMsgDescFiel
 	dict incr msgFieldInfos numMsgValFields
         incr idx
       }
-      puts stderr [format "addMsgFieldValInfos: numEntries: %d, numMsgValFields: %d" $numEntries [dict get $msgFieldInfos numMsgValFields]]
       dict set msgFieldInfos fieldValInfos $fieldValInfos
       dict set compMsgDispatcher compMsgTypesAndNames msgFieldInfos $msgFieldInfos
       return $result
@@ -688,7 +722,7 @@ puts stderr "idx: $idx numMsgDescFields: [dict get $msgFieldInfos numMsgDescFiel
       set result $::COMP_MSG_ERR_OK
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
       if {$idx >= [dict get $msgFieldInfos numMsgValFields]} {
-        return $::COMP_MSG_ERR_BAD_MSG_FIELD_INFO_IDX
+        checkErrOK BAD_MSG_FIELD_INFO_IDX
       }
       set fielValInfo [dict get $msgFieldInfos fieldValInfos]
       set entry [lindex $fieldValInfos $idx]
@@ -697,7 +731,7 @@ puts stderr "idx: $idx numMsgDescFields: [dict get $msgFieldInfos numMsgDescFiel
       dict set entry value [dict get $fieldValInfo dataValue]
       set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgDispacther idx fieldName]
       checkErrOK $(result
-pust stderr [format "setMsgFieldValInfo: %s idx: %d fieldFlags: 0x%08x fieldValueCallbackId: %d" $fieldName $idx [dict get $entry fieldFlags] [dict get $entry fieldValueCallbackId]
+pust stderr [format "setMsgFieldValInfo: %s idx: %d fieldFlags: %s fieldValueCallbackId: %d" $fieldName $idx [dict get $entry fieldFlags] [dict get $entry fieldValueCallbackId]
       set fieldValInfos [lreplace $fieldValInfos $idx $idx $entry]
       dict set msgFieldInfos fieldValInfos $fieldValInfos
       dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos
@@ -717,8 +751,8 @@ pust stderr [format "setMsgFieldValInfo: %s idx: %d fieldFlags: 0x%08x fieldValu
       dict set msgFieldInfos numMsgValFields 0
       dict set msgFieldInfos fieldValInfos [list]
       dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos
-      dict set compMsgTypesAndNames numSpecFieldIds [expr {[llength [dict keys $specialFieldNames2Ids]] + 1}]
-puts stderr "numSpecFieldIds: [dict get $compMsgTypesAndNames numSpecFieldIds]!"
+      # +1 for starting at idx 1 and +1 for starting the additional entries at 1 too
+      dict set compMsgTypesAndNames numSpecFieldIds [expr {[llength [dict keys $specialFieldNames2Ids]] + 1 + 1}]
       dict set compMsgDispatcher compMsgTypesAndNames $compMsgTypesAndNames
       addMsgFieldDescInfos compMsgDispatcher [expr {[dict get $compMsgTypesAndNames numSpecFieldIds] + 1}]
       addMsgFieldValInfos compMsgDispatcher [expr {[dict get $compMsgTypesAndNames numSpecFieldIds] + 1}]

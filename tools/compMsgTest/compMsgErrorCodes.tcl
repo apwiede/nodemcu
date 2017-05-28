@@ -140,6 +140,18 @@ dict set ::COMP_MSG_ERR FUNNY_FIELD_VALUE_START          127
 dict set ::COMP_MSG_ERR EXPECTED_INT_VALUE               126
 dict set ::COMP_MSG_ERR CALLBACK_NAME_NOT_FOUND          125
 dict set ::COMP_MSG_ERR DATA_VALUE_FIELD_NOT_FOUND       124
+dict set ::COMP_MSG_ERR BAD_CMD_KEY_VALUE                123
+dict set ::COMP_MSG_ERR BAD_MSG_FIELD_INFO_IDX           122
+dict set ::COMP_MSG_ERR MSG_FIELD_INFO_IDX_NOT_SET       121
+dict set ::COMP_MSG_ERR NOT_A_STRING                     120
+dict set ::COMP_MSG_ERR BAD_HEADER_FIELD_FLAG            119
+dict set ::COMP_MSG_ERR BAD_FIELD_INFO                   118
+dict set ::COMP_MSG_ERR TOO_MANY_LINE_FIELDS             117
+dict set ::COMP_MSG_ERR DIFFERENT_FIELD_VALUE            116
+dict set ::COMP_MSG_ERR CMD_KEY_NOT_FOUND                115
+dict set ::COMP_MSG_ERR FIELD_VALUE_INFO_NOT_FOUND       114
+dict set ::COMP_MSG_ERR DUPLICATE_FIELD_VALUE_ENTRY      113
+dict set ::COMP_MSG_ERR TOO_MANY_FIELD_VALUE_ENTRIES     112
 
 dict set ::COMP_MSG_ERR CANNOT_CONNECT                   99
 

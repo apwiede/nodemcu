@@ -111,7 +111,7 @@ namespace eval compMsg {
     dict set fieldTypeInts2Ids 12 DATA_VIEW_FIELD_INT32_VECTOR
 
     variable fieldTypeIds2Ints
-    set fieldTypeInts2Ids [dict create]
+    set fieldTypeIds2Ints [dict create]
     dict set fieldTypeIds2Ints DATA_VIEW_FIELD_NONE 0
     dict set fieldTypeIds2Ints DATA_VIEW_FIELD_UINT8_T 1
     dict set fieldTypeIds2Ints DATA_VIEW_FIELD_INT8_T 2

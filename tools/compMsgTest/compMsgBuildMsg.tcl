@@ -108,12 +108,12 @@ puts stderr "==fixOffsetsForKeyValues![dict keys $compMsgDispatcher]!"
       set fieldSequence [dict get $msgDescription fieldSequence]
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
       while {$fieldIdx < $numFields} {
         set fieldId [lindex $fieldSequence $fieldIdx]
-        set fieldInfo [lindex $fieldInfos $fieldId]
+        set fieldDescInfo [lindex $fieldDescInfos $fieldId]
+pdict $fieldDescInfo
 if {0} {
-        set msgKeyValueDescPart [list]
         set fieldNameStr [dict get $msgDescPart fieldNameStr]
         set msgKeyValueDescPartIdx -1
         if {[string range $fieldNameStr 0 0] eq "#"} {
@@ -188,7 +188,6 @@ puts stderr "fieldLgth2: [dict get $fieldInfo fieldLgth]!"
         }
 }
         set compMsgData [dict get $compMsgDispatcher compMsgData]
-#        incr msgDescPartIdx
         incr fieldIdx
       }
       return $::COMP_MSG_ERR_OK
@@ -261,7 +260,7 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
       set fieldSequence [dict get $msgDescription fieldSequence]
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      set fieldInfos [dict get $msgFieldInfos fieldInfos]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
       set compMsgMsgDesc [dict get $compMsgDispatcher compMsgMsgDesc]
       set msgFieldGroupInfos [dict get $compMsgMsgDesc msgFieldGroupInfos]
       set cmdKeyVal [dict get $msgDescription cmdKey]
@@ -277,8 +276,7 @@ puts stderr "numMsgFieldVal: [dict get $msgFieldGroupInfo numMsgFieldVal]!"
       set fieldIdx 0
       while {$fieldIdx < $numHeaderFields} {
         set fieldId [lindex $fieldSequence $fieldIdx]
-puts stderr "fieldId: $fieldIdx!$fieldId!$fieldSequence!"
-        set fieldInfo [lindex $fieldInfos $fieldId]
+        set fieldDescInfo [lindex $fieldDescInfos $fieldId]
 set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId ::compMsgDispatcher $fieldId fieldName]
 checkErrOK $result
 puts stderr "fieldName: $fieldName!"
@@ -315,7 +313,7 @@ if {0} {
       set result [::compMsg compMsgData setFieldValue compMsgDispatcher "@cmdKey" $msgCmdKey]
       checkErrOK $result
 }
-      set result [::compMsg compMsgData prepareMsg compMsgDispatcher]
+      set result [::compMsg compMsgData prepareMsg compMsgDispatcher $msgDescription]
       checkErrOK $result
 puts stderr "setMsgValues end"
 ::compMsg compMsgData dumpMsg compMsgDispatcher

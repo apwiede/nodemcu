@@ -66,46 +66,46 @@ namespace eval ::compMsg {
     
     # ================================= getRandomNum ====================================
     
-    proc getRandomNum {fieldInfo value} {
-      return [::compMsg dataView getUint32 [dict get $fieldInfo fieldOffset] value]
+    proc getRandomNum {fieldIDescnfo value} {
+      return [::compMsg dataView getUint32 [dict get $fieldDescInfo fieldOffset] value]
     }
     
     # ================================= setRandomNum ====================================
     
-    proc setRandomNum {fieldInfo} {
+    proc setRandomNum {fieldDescInfo} {
       set val [getRandom]
-      return [::compMsg dataView setUint32 [dict get $fieldInfo fieldOffset] $val]
+      return [::compMsg dataView setUint32 [dict get $fieldDescInfo fieldOffset] $val]
     }
     
     
     # ================================= getSequenceNum ====================================
     
-    proc getSequenceNum {fieldInfo valueVar} {
+    proc getSequenceNum {fieldDescInfo valueVar} {
       upvar $valueVar value
 
-      return [::compMsg dataView getUint32 [dict get $fieldInfo fieldOffset] value]
+      return [::compMsg dataView getUint32 [dict get $fieldDescInfo fieldOffset] value]
     }
     
     # ================================= setSequenceNum ====================================
     
-    proc setSequenceNum {fieldInfo} {
+    proc setSequenceNum {fieldDescInfo} {
       incr ::sequenceNum
-      return [::compMsg dataView setUint32 [dict get $fieldInfo fieldOffset] $::sequenceNum]
+      return [::compMsg dataView setUint32 [dict get $fieldDescInfo fieldOffset] $::sequenceNum]
     }
     
     # ================================= getFiller ====================================
     
-    proc getFiller {fieldInfo valueVar} {
+    proc getFiller {fieldDescInfo valueVar} {
       upvar $valueVar value
 
-      return [::compMsg dataView getuint8Vector [dict get $fieldInfo fieldOffset] value [dict get $fieldInfo fieldLgth]]
+      return [::compMsg dataView getuint8Vector [dict get $fieldDescInfo fieldOffset] value [dict get $fieldDescInfo fieldLgth]]
     }
     
     # ================================= setFiller ====================================
     
-    proc setFiller {fieldInfo} {
-      set lgth [dict get $fieldInfo fieldLgth]
-      set offset [dict get $fieldInfo fieldOffset]
+    proc setFiller {fieldDescInfo} {
+      set lgth [dict get $fieldDescInfo fieldLgth]
+      set offset [dict get $fieldDescInfo fieldOffset]
       set idx 0
       while {$lgth >= 4} {
         set value ""
@@ -144,11 +144,11 @@ namespace eval ::compMsg {
     
     # ================================= getCrc ====================================
     
-    proc getCrc {fieldInfo valueVar startOffset size} {
+    proc getCrc {fieldDescInfo valueVar startOffset size} {
       upvar $valueVar value
 
 #set ::crcDebug true
-      set crcLgth [dict get $fieldInfo fieldLgth]
+      set crcLgth [dict get $fieldDescInfo fieldLgth]
       set value ""
       set lgth [expr {$size - $crcLgth}]
       set crcVal 0
@@ -172,7 +172,7 @@ incr cnt
 if {$::crcDebug} {
 puts stderr "crcVal end: $crcVal!"
 }
-      set offset [dict get $fieldInfo fieldOffset]
+      set offset [dict get $fieldDescInfo fieldOffset]
       if {$crcLgth == 2} {
         set crcVal [expr {~$crcVal & 0xFFFF}]
         set result [::compMsg dataView getuint16 $offset crc]
@@ -205,8 +205,8 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
     
     # ================================= setCrc ====================================
     
-    proc setCrc {fieldInfo startOffset size} {
-      set crcLgth [dict get $fieldInfo fieldLgth]
+    proc setCrc {fieldDescInfo startOffset size} {
+      set crcLgth [dict get $fieldDescInfo fieldLgth]
 #puts stderr "setCrc: startOffset: $startOffset size: $size!"
       set size [expr {$size - $crcLgth}]
 #set ::crcDebug true
@@ -238,10 +238,10 @@ if {$::crcDebug} {
 puts stderr "crc11: $crc![format 0x%04x $crc]![format 0x%02x [expr {$crc & 0xFF}]]"
 }
       if {$crcLgth == 1} {
-#puts stderr "offset: [dict get $fieldInfo fieldOffset] val: [expr {$crc & 0xFF}]!"
-        set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] [expr {$crc & 0xFF}]]
+#puts stderr "offset: [dict get $fieldDescInfo fieldOffset] val: [expr {$crc & 0xFF}]!"
+        set result [::compMsg dataView setUint8 [dict get $fieldDescInfo fieldOffset] [expr {$crc & 0xFF}]]
       } else {
-        set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]
+        set result [::compMsg dataView setUint16 [dict get $fieldDescInfo fieldOffset] $crc]
       }
       checkErrOK $result
       return [checkErrOK OK]
@@ -249,12 +249,12 @@ puts stderr "crc11: $crc![format 0x%04x $crc]![format 0x%02x [expr {$crc & 0xFF}
     
     # ================================= getTotalCrc ====================================
     
-    proc getTotalCrc {fieldInfo valueVar} {
+    proc getTotalCrc {fielDescdInfo valueVar} {
       upvar $valueVar value
 
-      set crcLgth [dict get $fieldInfo fieldLgth]
+      set crcLgth [dict get $fieldDescInfo fieldLgth]
       set value ""
-      set size [dict get $fieldInfo fieldOffset]
+      set size [dict get $fieldDescInfo fieldOffset]
       set crcVal 0
       set offset 0
 #set ::crcDebug true
@@ -276,7 +276,7 @@ incr cnt
 if {$::crcDebug} {
 puts stderr "crcVal end: $crcVal!"
 }
-      set offset [dict get $fieldInfo fieldOffset]
+      set offset [dict get $fieldDescInfo fieldOffset]
       if {$crcLgth == 2} {
         set crcVal [expr {~$crcVal & 0xFFFF}]
         set result [::compMsg dataView getuint16 $offset crc]
@@ -309,9 +309,9 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
     
     # ================================= setTotalCrc ====================================
     
-    proc setTotalCrc {fieldInfo} {
-      set crcLgth [dict get $fieldInfo fieldLgth]
-      set size [dict get $fieldInfo fieldOffset]
+    proc setTotalCrc {fieldDescInfo} {
+      set crcLgth [dict get $fieldDescInfo fieldLgth]
+      set size [dict get $fieldDescInfo fieldOffset]
 #set ::crcDebug true
 set cnt 0
 #puts stderr "setTotalCrc: $::compMsg::dataView::lgth!$::compMsg::dataView::data!"
@@ -339,10 +339,10 @@ if {$::crcDebug} {
 puts stderr "crc11: $crc![format 0x%04x $crc]!"
 }
       if {$crcLgth == 1} {
-#puts stderr "offset: [dict get $fieldInfo fieldOffset] val: [format 0x%02x [expr {$crc & 0xFF}]]!"
-        set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] [expr {$crc & 0xFF}]]
+#puts stderr "offset: [dict get $fieldDescInfo fieldOffset] val: [format 0x%02x [expr {$crc & 0xFF}]]!"
+        set result [::compMsg dataView setUint8 [dict get $fieldDescInfo fieldOffset] [expr {$crc & 0xFF}]]
       } else {
-        set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $crc]
+        set result [::compMsg dataView setUint16 [dict get $fieldDescInfo fieldOffset] $crc]
       }
       checkErrOK $result
       return [checkErrOK OK]
@@ -351,14 +351,14 @@ puts stderr "crc11: $crc![format 0x%04x $crc]!"
     
     # ================================= getFieldValue ====================================
     
-    proc getFieldValue {fieldInfo valueVar fieldIdx} {
+    proc getFieldValue {fieldDescInfo valueVar fieldIdx} {
       upvar $valueVar value
 
 if {[catch {
       set value ""
-      set offset [dict get $fieldInfo fieldOffset]
+      set offset [dict get $fieldDescInfo fieldOffset]
       set shortOffset [expr {$offset + $fieldIdx}]
-      switch [dict get $fieldInfo fieldTypeId] {
+      switch [dict get $fieldDescInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           set result [::compMsg dataView getInt8 $shortOffset value]
         }
@@ -378,10 +378,10 @@ if {[catch {
           set result [::compMsg dataView getUint32 $shortOffset value]
         }
         DATA_VIEW_FIELD_INT8_VECTOR {
-          set result [::compMsg dataView getInt8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldInfo fieldLgth]]
+          set result [::compMsg dataView getInt8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldDescInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-          set result [::compMsg dataView getUint8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldInfo fieldLgth]]
+          set result [::compMsg dataView getUint8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldDescInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
           set result [::compMsg dataView getInt16 [expr {$offset +fieldIdx*2}] value]
@@ -400,7 +400,7 @@ if {[catch {
         }
       }
 } msg]} {
-puts stderr "getFieldValue: $msg!$fieldInfo!"
+puts stderr "getFieldValue: $msg!$fieldDescInfo!"
 }
       checkErrOK $result
       return [checkErrOK OK]
@@ -408,11 +408,11 @@ puts stderr "getFieldValue: $msg!$fieldInfo!"
     
     # ================================= setFieldValue ====================================
     
-    proc setFieldValue {fieldInfo value fieldIdx} {
-      switch [dict get $fieldInfo fieldTypeId] {
+    proc setFieldValue {fieldDescInfo value fieldIdx} {
+      switch [dict get $fieldDescInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           if {($value > -128) && ($value < 128)} {
-            set result [::compMsg dataView setInt8 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setInt8 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int8 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -423,7 +423,7 @@ puts stderr "compMsgDataView setFieldValue int8 value too big"
           set pch [expr {$pch & 0xFF}]
           set value $pch
           if {($value >= 0) && ($value <= 256)} {
-            set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setUint8 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint8 value too big"
             checkErrOK BAD_VALUE
@@ -431,7 +431,7 @@ puts stderr "compMsgDataView setFieldValue uint8 value too big"
         }
         DATA_VIEW_FIELD_INT16_T {
           if {($value > -32767) && ($value < 32767)} {
-            set result [::compMsg dataView setInt16 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setInt16 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int16 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -443,7 +443,7 @@ puts stderr "compMsgDataView setFieldValue int16 value too big"
             set value $val
           }
           if {($value >= 0) && ($value <= 65535)} {
-            set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setUint16 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint16 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -451,7 +451,7 @@ puts stderr "compMsgDataView setFieldValue uint16 value too big"
         }
         DATA_VIEW_FIELD_INT32_T {
           if {($value > -0x7FFFFFFF) && ($value <= 0x7FFFFFFF)} {
-            set result [::compMsg dataView setInt32 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setInt32 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int32 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -460,33 +460,33 @@ puts stderr "compMsgDataView setFieldValue int32 value too big"
         DATA_VIEW_FIELD_UINT32_T {
           # we have to do the signed check as numericValue is a signed integer!!
           if {($value > -0x7FFFFFFF) && ($value <= 0x7FFFFFFF)} {
-            set result [::compMsg dataView setUint32 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setUint32 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint32 value too big !$value!"
             checkErrOK VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_INT8_VECTOR {
-          set result [::compMsg dataView setInt8Vector [dict get $fieldInfo fieldOffset] $value]
+          set result [::compMsg dataView setInt8Vector [dict get $fieldDescInfo fieldOffset] $value]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-#puts stderr "setUint8Vector: lgth: [dict get $fieldInfo fieldLgth]!offset: [dict get $fieldInfo fieldOffset]!dv lgth: $::compMsg::dataView::lgth!"
-          set result [::compMsg dataView setUint8Vector [dict get $fieldInfo fieldOffset] $value [dict get $fieldInfo fieldLgth]]
+#puts stderr "setUint8Vector: lgth: [dict get $fieldDescInfo fieldLgth]!offset: [dict get $fieldDescInfo fieldOffset]!dv lgth: $::compMsg::dataView::lgth!"
+          set result [::compMsg dataView setUint8Vector [dict get $fieldDescInfo fieldOffset] $value [dict get $fieldDescInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
-          set result [::compMsg dataView setInt16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setInt16Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_UINT16_VECTOR {
-          set result [::compMsg dataView setUint16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setUint16Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_INT32_VECTOR {
-          set result [::compMsg dataView setInt32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setInt32Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_UINT32_VECTOR {
-          set result [::compMsg dataView setUint32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setUint32Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         default {
-puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
+puts stderr "bad type in setFieldValue: [dict get $fieldDescInfo fieldTypeId]"
           checkErrOK BAD_FIELD_TYPE
         }
       }
@@ -502,13 +502,13 @@ puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
 
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      set fieldInfos [dict get $msgFieldInfos fieldInfos]
-      set fieldInfo [lindex $fieldInfos $fieldId]
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
+      set fieldDescInfo [lindex $fieldDescInfos $fieldId]
       set value ""
-      set offset [dict get $fieldInfo fieldOffset]
+      set offset [dict get $fieldDescInfo fieldOffset]
       set shortOffset [expr {$offset + $fieldIdx}]
-puts stderr "getIdFieldValue: $fieldInfo!"
-      switch [dict get $fieldInfo fieldTypeId] {
+puts stderr "getIdFieldValue: $fieldDescInfo!"
+      switch [dict get $fieldDescInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           set result [::compMsg dataView getInt8 $shortOffset value]
         }
@@ -528,10 +528,10 @@ puts stderr "getIdFieldValue: $fieldInfo!"
           set result [::compMsg dataView getUint32 $shortOffset value]
         }
         DATA_VIEW_FIELD_INT8_VECTOR {
-          set result [::compMsg dataView getInt8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldInfo fieldLgth]]
+          set result [::compMsg dataView getInt8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldDescInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-          set result [::compMsg dataView getUint8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldInfo fieldLgth]]
+          set result [::compMsg dataView getUint8Vector [expr {$offset + $fieldIdx}] value [dict get $fieldDescInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
           set result [::compMsg dataView getInt16 [expr {$offset +fieldIdx*2}] value]
@@ -560,12 +560,12 @@ puts stderr "getIdFieldValue: $fieldInfo!"
 
       set compMsgTypesAndNames [dict get $compMsgDispatcher compMsgTypesAndNames]
       set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
-      set fieldInfos [dict get $msgFieldInfos fieldInfos]
-      set fieldInfo [lindex $fieldInfos $fieldId]
-      switch [dict get $fieldInfo fieldTypeId] {
+      set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
+      set fieldDescInfo [lindex $fieldDescInfos $fieldId]
+      switch [dict get $fieldDescInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           if {($value > -128) && ($value < 128)} {
-            set result [::compMsg dataView setInt8 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setInt8 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int8 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -573,7 +573,7 @@ puts stderr "compMsgDataView setFieldValue int8 value too big"
         }
         DATA_VIEW_FIELD_UINT8_T {
           if {($value >= 0) && ($value <= 256)} {
-            set result [::compMsg dataView setUint8 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setUint8 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint8 value too big"
             checkErrOK BAD_VALUE
@@ -581,7 +581,7 @@ puts stderr "compMsgDataView setFieldValue uint8 value too big"
         }
         DATA_VIEW_FIELD_INT16_T {
           if {($value > -32767) && ($value < 32767)} {
-            set result [::compMsg dataView setInt16 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setInt16 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int16 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -593,7 +593,7 @@ puts stderr "compMsgDataView setFieldValue int16 value too big"
             set value $val
           }
           if {($value >= 0) && ($value <= 65535)} {
-            set result [::compMsg dataView setUint16 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setUint16 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint16 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -601,7 +601,7 @@ puts stderr "compMsgDataView setFieldValue uint16 value too big"
         }
         DATA_VIEW_FIELD_INT32_T {
           if {($value > -0x7FFFFFFF) && ($value <= 0x7FFFFFFF)} {
-            set result [::compMsg dataView setInt32 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setInt32 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue int32 value too big"
             checkErrOK VALUE_TOO_BIG
@@ -610,38 +610,38 @@ puts stderr "compMsgDataView setFieldValue int32 value too big"
         DATA_VIEW_FIELD_UINT32_T {
           # we have to do the signed check as numericValue is a signed integer!!
           if {($value > -0x7FFFFFFF) && ($value <= 0x7FFFFFFF)} {
-            set result [::compMsg dataView setUint32 [dict get $fieldInfo fieldOffset] $value]
+            set result [::compMsg dataView setUint32 [dict get $fieldDescInfo fieldOffset] $value]
           } else {
 puts stderr "compMsgDataView setFieldValue uint32 value too big !$value!"
             checkErrOK VALUE_TOO_BIG
           }
         }
         DATA_VIEW_FIELD_INT8_VECTOR {
-          set result [::compMsg dataView setInt8Vector [dict get $fieldInfo fieldOffset] $value]
+          set result [::compMsg dataView setInt8Vector [dict get $fieldDescInfo fieldOffset] $value]
         }
         DATA_VIEW_FIELD_UINT8_VECTOR {
-#puts stderr "setUint8Vector: lgth: [dict get $fieldInfo fieldLgth]!offset: [dict get $fieldInfo fieldOffset]!dv lgth: $::compMsg::dataView::lgth!"
-          set result [::compMsg dataView setUint8Vector [dict get $fieldInfo fieldOffset] $value [dict get $fieldInfo fieldLgth]]
+#puts stderr "setUint8Vector: lgth: [dict get $fieldDescInfo fieldLgth]!offset: [dict get $fieldDescInfo fieldOffset]!dv lgth: $::compMsg::dataView::lgth!"
+          set result [::compMsg dataView setUint8Vector [dict get $fieldDescInfo fieldOffset] $value [dict get $fieldDescInfo fieldLgth]]
         }
         DATA_VIEW_FIELD_INT16_VECTOR {
-          set result [::compMsg dataView setInt16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setInt16Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_UINT16_VECTOR {
-          set result [::compMsg dataView setUint16Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setUint16Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_INT32_VECTOR {
-          set result [::compMsg dataView setInt32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setInt32Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         DATA_VIEW_FIELD_UINT32_VECTOR {
-          set result [::compMsg dataView setUint32Vector [expr {[dict get $fieldInfo fieldOffset] + $fieldIdx*2}] $value]
+          set result [::compMsg dataView setUint32Vector [expr {[dict get $fieldDescInfo fieldOffset] + $fieldIdx*2}] $value]
         }
         default {
-puts stderr "bad type in setFieldValue: [dict get $fieldInfo fieldTypeId]"
+puts stderr "bad type in setFieldValue: [dict get $fieldDescInfo fieldTypeId]"
           checkErrOK BAD_FIELD_TYPE
         }
       }
-      set fieldInfos [lreplace $fieldInfos $fieldId $fieldId $fieldInfo]
-      dict set msgFieldInfos fieldInfos $fieldInfos
+      set fieldDescInfos [lreplace $fieldDescInfos $fieldId $fieldId $fieldDescInfo]
+      dict set msgFieldInfos fieldDescInfos $fieldDescInfos
       dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos
       dict set compMsgDispatcher compMsgTypesAndNames $compMsgTypesAndNames
       checkErrOK $result
