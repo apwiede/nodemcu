@@ -1127,18 +1127,15 @@ static uint8_t compMsgMsgDescInit(compMsgDispatcher_t *self) {
   // get the infos form the message desc and message val files.
   result = self->compMsgMsgDesc->handleMsgFile(self, MSG_FILES_FILE_NAME, self->compMsgMsgDesc->handleMsgFileNameLine);
   checkErrOK(result);
-  ets_printf("desc3\n");
-  uint8_t data[10] = {0x12, 0x2, 0x15, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-  result = self->compMsgMsgDesc->getHeaderChksumKey(self, data);
-  checkErrOK(result);
-  //  result = self->compMsgTypesAndNames->dumpMsgFieldDescInfos(self);
-  //  checkErrOK(result);
-  //  result = self->compMsgTypesAndNames->dumpMsgFieldValInfos(self);
-  //  checkErrOK(result);
-  //  result = self->compMsgDataValue->dumpMsgFieldValues(self);
-  //  checkErrOK(result);
-  result = self->compMsgDataValue->dumpMsgFieldValueInfos(self);
-  checkErrOK(result);
+//  uint8_t data[10] = {0x12, 0x2, 0x15, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+//  result = self->compMsgMsgDesc->getHeaderChksumKey(self, data);
+//  checkErrOK(result);
+  // result = self->compMsgTypesAndNames->dumpMsgFieldDescInfos(self);
+  // checkErrOK(result);
+  // result = self->compMsgTypesAndNames->dumpMsgFieldValInfos(self);
+  // checkErrOK(result);
+  // result = self->compMsgDataValue->dumpMsgFieldValueInfos(self);
+  // checkErrOK(result);
   return COMP_MSG_ERR_OK;
 }
 

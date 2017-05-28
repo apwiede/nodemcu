@@ -138,17 +138,12 @@ typedef uint8_t (* dumpMsgFieldValueInfos_t)(compMsgDispatcher_t *self);
 typedef uint8_t (* setFieldValueInfo_t)(compMsgDispatcher_t *self, uint16_t cmdKey, uint16_t fieldNameId, fieldValue_t *fieldValue);
 typedef uint8_t (* getFieldValueInfo_t)(compMsgDispatcher_t *self, uint16_t cmdKey, uint16_t fieldNameId, fieldValue_t **fieldValue);
 
-typedef uint8_t (* dumpMsgFieldValues_t)(compMsgDispatcher_t *self);
-typedef uint8_t (* addMsgFieldValues_t)(compMsgDispatcher_t *self, uint8_t numEntries);
-typedef uint8_t (* setMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
-typedef uint8_t (* getMsgFieldValue_t)(compMsgDispatcher_t *self, uint8_t idx, fieldValue_t *fieldValue);
 typedef uint8_t (* compareDataValues_t)(compMsgDispatcher_t *self, fieldDescInfo_t *fieldDescInfo, dataValue_t *dataValue1, dataValue_t *dataValue2);
 typedef uint8_t (* compMsgDataValueInit_t)(compMsgDispatcher_t *self);
 
 typedef struct compMsgDataValue {
   int numDataValues;
   int maxDataValues;
-//  fieldValue_t *fieldValues;
   msgFieldValueInfos_t msgFieldValueInfos;
 
   dataValueStr2ValueId_t dataValueStr2ValueId;
@@ -165,10 +160,6 @@ typedef struct compMsgDataValue {
   setFieldValueInfo_t setFieldValueInfo;
   getFieldValueInfo_t getFieldValueInfo;
 
-  dumpMsgFieldValues_t dumpMsgFieldValues;
-  addMsgFieldValues_t addMsgFieldValues;
-  getMsgFieldValue_t getMsgFieldValue;
-  setMsgFieldValue_t setMsgFieldValue;
   compareDataValues_t compareDataValues;
   compMsgDataValueInit_t compMsgDataValueInit;
 } compMsgDataValue_t;

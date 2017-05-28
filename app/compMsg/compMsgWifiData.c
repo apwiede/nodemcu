@@ -1352,11 +1352,9 @@ static uint8_t compMsgWifiDataInit(compMsgDispatcher_t *self) {
 
   bssScanInfos.compMsgDispatcher = self;
   self->dispatcherCommon->bssScanInfos = &bssScanInfos;
-//  result = self->compMsgMsgDesc->readWifiValues(self, COMP_MSG_WIFI_VALUES_FILE_NAME);
-//  checkErrOK(result);
   result = compMsgWifiData->getWifiConfig(self);
   checkErrOK(result);
-ets_printf("wifi 03 heap: %d\n", system_get_free_heap_size());
+//ets_printf("wifi 03 heap: %d\n", system_get_free_heap_size());
   return COMP_MSG_ERR_OK;
 }
 

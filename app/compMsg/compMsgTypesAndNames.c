@@ -546,7 +546,7 @@ static uint8_t addMsgFieldValInfos(compMsgDispatcher_t *self, uint8_t numEntries
   }
   checkAllocOK(msgFieldInfos->fieldValInfos);
   idx = msgFieldInfos->numMsgValFields;
-  COMP_MSG_DBG(self, "E", 2, "addMsgFieldValInfos: numEntries: %d, numMsgValFields: %d", numEntries, msgFieldInfos->numMsgValFields);
+  COMP_MSG_DBG(self, "E", 1, "addMsgFieldValInfos: numEntries: %d, numMsgValFields: %d", numEntries, msgFieldInfos->numMsgValFields);
   while (idx < msgFieldInfos->numMsgValFields + numEntries) {
     msgFieldInfos->fieldValInfos[idx] = (fieldValInfo_t *)NULL;
     idx++;
@@ -659,6 +659,7 @@ uint8_t compMsgTypesAndNamesInit(compMsgDispatcher_t *self) {
   compMsgTypesAndNames->freeCompMsgTypesAndNames = &freeCompMsgTypesAndNames;
 
   compMsgTypesAndNames->numSpecFieldIds = sizeof(specialFieldNames) / sizeof(str2id_t);
+ets_printf("numSpecFieldIds: %d\n", compMsgTypesAndNames->numSpecFieldIds);
   // +1 as the following entries also start at 1!!
   compMsgTypesAndNames->addMsgFieldDescInfos(self, compMsgTypesAndNames->numSpecFieldIds + 1);
   compMsgTypesAndNames->addMsgFieldValInfos(self, compMsgTypesAndNames->numSpecFieldIds + 1);
