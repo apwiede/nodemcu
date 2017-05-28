@@ -720,18 +720,18 @@ puts stderr "ERROR fileNameTokenStr: $fileNameTokenStr!FILE_NAME_TOKEN_NOT_FOUND
       upvar $fieldValInfoVar fieldValInfo
 
       set result $::COMP_MSG_ERR_OK
-      set msgFieldInfos [dict get $compMsgTypesAndNames msgFieldInfos]
+      set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
       if {$idx >= [dict get $msgFieldInfos numMsgValFields]} {
         checkErrOK BAD_MSG_FIELD_INFO_IDX
       }
-      set fielValInfo [dict get $msgFieldInfos fieldValInfos]
+      set fieldValInfos [dict get $msgFieldInfos fieldValInfos]
       set entry [lindex $fieldValInfos $idx]
       dict set entry fieldFlags [dict get $fieldValInfo fieldFlags]
       dict set entry fieldValueCallbackId [dict get $fieldValInfo fieldValueCallbackId]
-      dict set entry value [dict get $fieldValInfo dataValue]
-      set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgDispacther idx fieldName]
-      checkErrOK $(result
-pust stderr [format "setMsgFieldValInfo: %s idx: %d fieldFlags: %s fieldValueCallbackId: %d" $fieldName $idx [dict get $entry fieldFlags] [dict get $entry fieldValueCallbackId]
+      dict set entry value [dict get $fieldValInfo value]
+      set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgDispatcher $idx fieldName]
+      checkErrOK $result
+puts stderr [format "setMsgFieldValInfo: %s idx: %d fieldFlags: %s fieldValueCallbackId: %d" $fieldName $idx [dict get $entry fieldFlags] [dict get $entry fieldValueCallbackId]]
       set fieldValInfos [lreplace $fieldValInfos $idx $idx $entry]
       dict set msgFieldInfos fieldValInfos $fieldValInfos
       dict set compMsgTypesAndNames msgFieldInfos $msgFieldInfos

@@ -792,9 +792,12 @@ puts stderr [format "%s: id: %d val: %s" $fieldName $fieldNameId $fieldValue]
       set fieldGroupId [dict get $compMsgMsgDesc currFieldGroupId]
       set cmdKey [dict get $compMsgMsgDesc currCmdKey]
       set msgFieldGroupInfo [dict get $msgFieldGroupInfos $fieldGroupId $cmdKey]
+      set isCommonValue false
       if {[dict get $compMsgMsgDesc numLineFields] < 2} {
         checkErrOK FIELD_DESC_TOO_FEW_FIELDS
       }
+      set fieldValInfo [dict create]
+      set fieldValue [dict create]
 #puts stderr "handleMsgValuesLine: [dict get $compMsgMsgDesc lineFields]!"
       set lineFields [dict get $compMsgMsgDesc lineFields]
 
@@ -818,48 +821,103 @@ puts stderr [format "%s: id: %d val: %s" $fieldName $fieldNameId $fieldValue]
       set value [lindex $lineFields 1]
       set stringValue ""
       set numericValue 0
-      set dataValue [dict create]
-      dict set dataValue cmdKey $cmdKey
-      dict set dataValue fieldValueId 0
-      dict set dataValue fieldNameId 0
-      dict set dataValue fieldValueCallback [list]
+      if {$fieldGroupId eq "COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP"} {
+        dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_WIFI_DATA
+        set isCommonValue true
+      }
+      if {$fieldGroupId eq "COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP"} {
+        dict lappend fieldDescInfo fieldFlags COMP_MSG_FIELD_MODULE_DATA
+        set isCommonValue true
+      }
+
       if {[string range $value 0 0] eq "\""} {
         set result [getStringFieldValue compMsgDispatcher $value stringValue]
-        dict set dataValue flags FIELD_IS_STRING
-        dict set dataValue value $stringValue
+        checkErrOK $result
+        if {$isCommonValue} {
+          dict lappend fieldValInfo fieldFlags COMP_MSG_FIELD_IS_STRING
+          dict set fieldValInfo fieldValueCallbackId 0
+          dict set fieldValInfo value $stringValue
+        } else {
+          dict set fieldValue fieldValueCallbackId 0
+          dict lappend fieldValue fieldValueFlags COMP_MSG_FIELD_IS_STRING
+          dict set fieldValue value $stringValuex;
+        }
+        if {([dict get $fieldDescInfo fieldTypeId] == 0) && ([dict get $fieldDescInfo fieldLgth] == 0)} {
+          set result [::compMsg dataView getFieldTypeIdFromStr "uint8_t*" fieldTypeId]
+          checkErrOK $result
+          dict set fieldDescInfo fieldTypeId $fieldTypeId
+          dict set fieldDescInfo fieldLgth [string length $stringValue]
+        }
       } else {
         if {[string range $value 0 0] eq "@"} {
-          dict set dataValue flags [list]
-          dict set dataValue value [list]
-          dict set dataValue fieldValueCallback $value
+          set stringValue $value
+          set result [::compMsg compMsgWifiData callbackStr2CallbackId $stringValue callbackId]
+          if {$result != $::COMP_MSG_ERR_OK} {
+            set result [:.compMsg compMsgModuleData callbackStr2CallbackId $stringValue callbackId]
+          }
+          checkErrOK $result
+          dict lappend fieldValInfo fieldFlags COMP_MSG_FIELD_IS_STRING
+          dict lappend fieldValInfo fieldFlags COMP_MSG_FIELD_HAS_CALLBACK
+          dict set fieldValInfo fieldValueCallbackId $callbackId
+          dict set fieldValInfo value [list]
+          if {([dict get $fieldDescInfo fieldTypeId] == 0) && ([dict get $fieldDescInfo fieldLgth] == 0)} {
+            set result [::compMsg dataView getFieldTypeIdFromStr "uint8_t*" fieldTypeId]
+            checkErrOK $result
+            dict set fieldDescInfo fieldTypeId $fieldTypeId
+puts stderr "setting fieldLgth"
+            dict set fieldDescInfofieldLgth [string length $stringValue]
+          }
         } else {
           set result [getIntFieldValue compMsgDispatcher $value numericValue]
-          dict set dataValue flags FIELD_IS_NUMERIC
-          dict set dataValue value $numericValue
+          checkErrOK $result
+          if {$isCommonValue} {
+            dict set fieldValInfo fieldValueCallbackId 0
+            dict lappend fieldValInfo fieldFlags COMP_MSG_FIELD_IS_NUMERIC
+            dict set fieldValInfo value $numericValue
+          } else {
+            dict set fieldValue fieldValueCallbackId 0
+            dict lappend fieldValue fieldValueFlags COMP_MSG_FIELD_IS_NUMERIC
+            dict set fieldValue value $numericValue
+          }
+          if {([dict get $fieldDescInfo fieldTypeId] == 0) && ([dict get $fieldDescInfo fieldLgth] == 0)} {
+            set result [::compMsg dataView getFieldTypeIdFromStr "uint32_t" fieldTypeId]
+            checkErrOK $result
+            dict set fieldDescInfo fieldTypeId $fieldTypeId
+            dict set fieldDescInfo fieldLgth 4
+          }
         }
       }
+      set result [::compMsg compMsgTypesAndNames setMsgFieldDescInfo compMsgDispatcher $fieldNameId fieldDescInfo]
       checkErrOK $result
 #puts stderr [format "%s: id: %s val: %s %d" $token $fieldNameId $stringValue $numericValue]
       switch $fieldGroupId {
         COMP_MSG_WIFI_DATA_VALUES_FIELD_GROUP -
         COMP_MSG_MODULE_DATA_VALUES_FIELD_GROUP {
-          set result [::compMsg compMsgDataValue dataValueStr2ValueId compMsgDispatcher $token fieldValueId]
+          set result [::compMsg compMsgTypesAndNames setMsgFieldValInfo compMsgDispatcher $fieldNameId fieldValInfo]
           checkErrOK $result
-          dict set dataValue fieldValueId $fieldValueId
-          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $dataValue dataValueIdx]
-          checkErrOK $result
-          dict incr msgFieldGroupInfo numMsgFieldVal
-          dict incr msgFieldGroupInfo maxMsgFieldVal
-          dict lappend msgFieldGroupInfo msgFieldVals $dataValueIdx
         }
         COMP_MSG_VAL_HEADER_FIELD_GROUP -
         COMP_MSG_VAL_FIELD_GROUP  {
-          dict set dataValue fieldNameId $fieldNameId
-          set result [::compMsg compMsgDataValue addDataValue compMsgDispatcher $dataValue dataValueIdx]
+          dict set fieldValue fieldNameId $fieldNameId
+          if {[dict get $compMsgMsgDesc currLineNo] == 1} {
+            if {$fieldGroupId eq "COMP_MSG_VAL_HEADER_FIELD_GROUP"} {
+              # FIXME next line +20!!
+              set result [::compMsg compMsgDataValue newMsgFieldValueInfos compMsgDispatcher $cmdKey [expr {[dict get $compMsgMsgDesc expectedLines] + 20}] msgFieldValue]
+            } else {
+              set result [::compMsg compMsgDataValue newMsgFieldValueInfos compMsgDispatcher $cmdKey [dict get $compMsgMsgDesc expectedLines] msgFieldValue]
+            }
+          } else {
+            set result [::compMsg compMsgDataValue getMsgFieldValueInfo compMsgDispatcher $cmdKey msgFieldValue]
+          }
           checkErrOK $result
-          dict incr msgFieldGroupInfo numMsgFieldVal
-          dict incr msgFieldGroupInfo maxMsgFieldVal
-          dict lappend msgFieldGroupInfo msgFieldVals $dataValueIdx
+puts stderr "msgFieldValue: $msgFieldValue!"
+          dict set fieldValue fieldValueFlags [list]
+          dict set fieldValue fieldNameId $fieldNameId
+          dict set fieldValue fieldValueCallbackId $fieldNameId
+          dict set fieldValue dataValue [list]
+          dict set fieldValue fieldValueCallback [list]
+          set result [::compMsg compMsgDataValue setMsgFieldValueInfo compMsgDispatcher $msgFieldValue $fieldValue]
+          checkErrOK $result
         }
         default {
           checkErrOK BAD_DESC_FILE_FIELD_GROUP_TYPE

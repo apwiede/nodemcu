@@ -40,9 +40,55 @@ namespace eval compMsg {
     namespace ensemble create
       
     namespace export compMsgModuleDataInit setModuleValues getModuleValue setModuleValue
-    namespace export getReserve4
+    namespace export getReserve4 callbackStr2CallbackId
 
     variable compMsgModuleData
+    variable callbackStr2CallbackIds
+
+    set callbackStr2CallbackIds [dict create]
+    dict set callbackStr2CallbackIds "@getMACAddr"          COMP_MSG_MODULE_MACAddr
+    dict set callbackStr2CallbackIds "@getIPAddr"           COMP_MSG_MODULE_IPAddr
+    dict set callbackStr2CallbackIds "@getFirmwareVersion"  COMP_MSG_MODULE_FirmwareVersion
+    dict set callbackStr2CallbackIds "@getRSSI"             COMP_MSG_MODULE_RSSI
+    dict set callbackStr2CallbackIds "@getRSSIMax"          COMP_MSG_MODULE_RSSIMax
+    dict set callbackStr2CallbackIds "@getConnectionState"  COMP_MSG_MODULE_ConnectionState
+    dict set callbackStr2CallbackIds "@getConnectedUsers"   COMP_MSG_MODULE_ConnectedUsers
+    dict set callbackStr2CallbackIds "@getIPProtocol"       COMP_MSG_MODULE_IPProtocol
+    dict set callbackStr2CallbackIds "@getErrorMain"        COMP_MSG_MODULE_ErrorMain
+    dict set callbackStr2CallbackIds "@getErrorSub"         COMP_MSG_MODULE_ErrorSub
+    dict set callbackStr2CallbackIds "@getDateAndTime"      COMP_MSG_MODULE_DateAndTime
+    dict set callbackStr2CallbackIds "@getSSIDs"            COMP_MSG_MODULE_SSIDs
+
+    dict set callbackStr2CallbackIds "@getOperatingMode"    COMP_MSG_MODULE_OperatingMode
+    dict set callbackStr2CallbackIds "@getOtaHost"          COMP_MSG_MODULE_OtaHost
+    dict set callbackStr2CallbackIds "@getOtaRomPath"       COMP_MSG_MODULE_OtaRomPath
+    dict set callbackStr2CallbackIds "@getOtaFsPath"        COMP_MSG_MODULE_OtaFsPath
+    dict set callbackStr2CallbackIds "@getOtaPort"          COMP_MSG_MODULE_OtaPort
+    dict set callbackStr2CallbackIds "@getCryptKey"         COMP_MSG_MODULE_CryptKey
+
+    dict set callbackStr2CallbackIds "@getReserve1"         COMP_MSG_MODULE_Reserve1
+    dict set callbackStr2CallbackIds "@getReserve2"         COMP_MSG_MODULE_Reserve2
+    dict set callbackStr2CallbackIds "@getReserve3"         COMP_MSG_MODULE_Reserve3
+    dict set callbackStr2CallbackIds "@getReserve4"         COMP_MSG_MODULE_Reserve4
+    dict set callbackStr2CallbackIds "@getReserve5"         COMP_MSG_MODULE_Reserve5
+    dict set callbackStr2CallbackIds "@getReserve6"         COMP_MSG_MODULE_Reserve6
+    dict set callbackStr2CallbackIds "@getReserve7"         COMP_MSG_MODULE_Reserve7
+    dict set callbackStr2CallbackIds "@getReserve8"         COMP_MSG_MODULE_Reserve8
+
+    # ================================= callbackStr2CallbackId ====================================
+
+    proc callbackStr2CallbackId {callbackName callbackIdVar} {
+      upvar $callbackIdVar callbackId
+      variable callbackStr2CallbackIds
+
+      set idx 0
+      set callbackId 0xFF
+      if {[dict exists $callbackStr2CallbackIds $callbackName]} {
+        set callbackId [dict get $callbackStr2CallbackIds $callbackName]
+        return $::COMP_MSG_ERR_OK
+      }
+      return [checkErrOK CALLBACK_NAME_NOT_FOUND]
+    }
 
     # ================================= getModuleTableFieldValue ====================================
     

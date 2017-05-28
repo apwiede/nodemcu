@@ -93,7 +93,7 @@ namespace eval compMsg {
   namespace eval compMsgWifiData {
     namespace ensemble create
       
-    namespace export bssStr2BssInfoId
+    namespace export bssStr2BssInfoId callbackStr2CallbackId
 
     variable bssScanRunning
     variable bssScanInfos
@@ -118,6 +118,57 @@ namespace eval compMsg {
     dict set bssStr2BssInfoIds freq_offset BSS_INFO_FREQ_OFFSET
     dict set bssStr2BssInfoIds freqcal_val BSS_INFO_FREQ_CAL_VAL
 
+    variable callbackStr2CallbackIds
+    set callbackStr2CallbackIds [dict create]
+    dict set callbackStr2CallbackIds "@getWifiAPBssidSize"           COMP_MSG_WIFI_AP_BssidSize
+    dict set callbackStr2CallbackIds "@getWifiAPBssidStrSize"        COMP_MSG_WIFI_AP_BssidStrSize
+    dict set callbackStr2CallbackIds "@getWifiAPSsidSize"            COMP_MSG_WIFI_AP_SsidSize
+    dict set callbackStr2CallbackIds "@getWifiAPSsid_lenSize"        COMP_MSG_WIFI_AP_Ssid_lenSize
+    dict set callbackStr2CallbackIds "@getWifiAPChannelSize"         COMP_MSG_WIFI_AP_ChannelSize
+    dict set callbackStr2CallbackIds "@getWifiAPRssiSize"            COMP_MSG_WIFI_AP_RssiSize
+    dict set callbackStr2CallbackIds "@getWifiAPAuthmodeSize"        COMP_MSG_WIFI_AP_AuthmodeSize
+    dict set callbackStr2CallbackIds "@getWifiAPIs_hiddenSize"       COMP_MSG_WIFI_AP_Is_hiddenSize
+    dict set callbackStr2CallbackIds "@getWifiAPFreq_offsetSize"     COMP_MSG_WIFI_AP_Freq_offsetSize
+    dict set callbackStr2CallbackIds "@getWifiAPFreqcal_valSize"     COMP_MSG_WIFI_AP_Freqcal_valSize
+
+    dict set callbackStr2CallbackIds "@getWifiAPBssids"              COMP_MSG_WIFI_AP_Bssids
+    dict set callbackStr2CallbackIds "@getWifiAPBssidStrs"           COMP_MSG_WIFI_AP_BssidStrs
+    dict set callbackStr2CallbackIds "@getWifiAPSsids"               COMP_MSG_WIFI_AP_Ssids
+    dict set callbackStr2CallbackIds "@getWifiAPSsid_lens"           COMP_MSG_WIFI_AP_Ssid_lens
+    dict set callbackStr2CallbackIds "@getWifiAPChannels"            COMP_MSG_WIFI_AP_Channels
+    dict set callbackStr2CallbackIds "@getWifiAPRssis"               COMP_MSG_WIFI_AP_Rssis
+    dict set callbackStr2CallbackIds "@getWifiAPAuthmodes"           COMP_MSG_WIFI_AP_Authmodes
+    dict set callbackStr2CallbackIds "@getWifiAPIs_hiddens"          COMP_MSG_WIFI_AP_Is_hiddens
+    dict set callbackStr2CallbackIds "@getWifiAPFreq_offsets"        COMP_MSG_WIFI_AP_Freq_offsets
+    dict set callbackStr2CallbackIds "@getWifiAPFreqcal_vals"        COMP_MSG_WIFI_AP_Freqcal_vals
+
+    dict set callbackStr2CallbackIds "@getProvisioningSsid"          COMP_MSG_WIFI_ProvisioningSsid
+    dict set callbackStr2CallbackIds "@getProvisioningPort"          COMP_MSG_WIFI_ProvisioningPort
+
+    dict set callbackStr2CallbackIds "@getClientSsid"                COMP_MSG_WIFI_ClientSsid
+    dict set callbackStr2CallbackIds "@getClientPasswd"              COMP_MSG_WIFI_ClientPasswd
+    dict set callbackStr2CallbackIds "@getClientIPAddr"              COMP_MSG_WIFI_ClientIPAddr
+    dict set callbackStr2CallbackIds "@getClientPort"                COMP_MSG_WIFI_ClientPort
+    dict set callbackStr2CallbackIds "@getClientStatus"              COMP_MSG_WIFI_ClientStatus
+    dict set callbackStr2CallbackIds "@getClientSsidSize"            COMP_MSG_WIFI_ClientSsidSize
+    dict set callbackStr2CallbackIds "@getClientPasswdSize"          COMP_MSG_WIFI_ClientPasswdSize
+    dict set callbackStr2CallbackIds "@getClientIPAddrSize"          COMP_MSG_WIFI_ClientIPAddrSize
+    dict set callbackStr2CallbackIds "@getClientPortSize"            COMP_MSG_WIFI_ClientPortSize
+    dict set callbackStr2CallbackIds "@getClientStatusSize"          COMP_MSG_WIFI_ClientStatusSize
+    dict set callbackStr2CallbackIds "@getClientSequenceNumSize"     COMP_MSG_WIFI_ClientSequenceNumSize
+    dict set callbackStr2CallbackIds "@getClientSequenceNum"         COMP_MSG_WIFI_ClientSequenceNum
+
+    dict set callbackStr2CallbackIds "@getSSDPIPAddr"                COMP_MSG_WIFI_SSDPIPAddr
+    dict set callbackStr2CallbackIds "@getSSDPPort"                  COMP_MSG_WIFI_SSDPPort
+    dict set callbackStr2CallbackIds "@getSSDPStatus"                COMP_MSG_WIFI_SSDPStatus
+
+    dict set callbackStr2CallbackIds "@getSSDPReceivedCallback"      COMP_MSG_WIFI_SSDPReceivedCallback
+    dict set callbackStr2CallbackIds "@getSSDPToSendCallback"        COMP_MSG_WIFI_SSDPToSendCallback
+    dict set callbackStr2CallbackIds "@getNetReceivedCallback"       COMP_MSG_WIFI_NetReceivedCallback
+    dict set callbackStr2CallbackIds "@getNetToSendCallback"         COMP_MSG_WIFI_NetToSendCallback
+    dict set callbackStr2CallbackIds "@getWebBinaryReceivedCallback" COMP_MSG_WIFI_WebBinaryReceivedCallback
+    dict set callbackStr2CallbackIds "@getWebTextReceivedCallback"   COMP_MSG_WIFI_WebTextReceivedCallback
+
     # ================================= bssStr2BssInfoId ====================================
     
     proc bssStr2BssInfoId {fieldName fieldIdVar} {
@@ -130,7 +181,22 @@ namespace eval compMsg {
       }
       checkErrOK FIELD_NOT_FOUND
     }
-    
+
+    # ================================= callbackStr2CallbackId ====================================
+
+    proc callbackStr2CallbackId {callbackName callbackIdVar} {
+      upvar $callbackIdVar callbackId
+      variable callbackStr2CallbackIds
+
+      set idx 0
+      set callbackId 0xFF
+      if {[dict exists $callbackStr2CallbackIds $callbackName]} {
+        set callbackId [dict get $callbackStr2CallbackIds $callbackName]
+        return $::COMP_MSG_ERR_OK
+      }
+      return [checkErrOK CALLBACK_NAME_NOT_FOUND]
+    }
+
     # ================================= websocketBinaryReceived ====================================
     
     proc websocketBinaryReceived {arg wud pdata len} {

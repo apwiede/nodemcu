@@ -209,7 +209,7 @@ puts stderr "crcVal: [format 0x%02x [expr {$crcVal & 0xFF}]]!offset: $offset!crc
       set crcLgth [dict get $fieldDescInfo fieldLgth]
 #puts stderr "setCrc: startOffset: $startOffset size: $size!"
       set size [expr {$size - $crcLgth}]
-set ::crcDebug true
+#set ::crcDebug true
 set cnt 0
       set crc  0
       set offset $startOffset
@@ -467,7 +467,7 @@ puts stderr "getFieldValue: $msg!$fieldDescInfo!"
     # ================================= setFieldValue ====================================
     
     proc setFieldValue {fieldDescInfo value fieldIdx} {
-puts stderr "setFieldValue: $fieldDescInfo!$fieldIdx!V: $value!"
+#puts stderr "setFieldValue: $fieldDescInfo!$fieldIdx!V: $value!"
       switch [dict get $fieldDescInfo fieldTypeId] {
         DATA_VIEW_FIELD_INT8_T {
           if {($value > -128) && ($value < 128)} {
@@ -478,9 +478,6 @@ puts stderr "compMsgDataView setFieldValue int8 value too big"
           }
         }
         DATA_VIEW_FIELD_UINT8_T {
-          binary scan $value c pch
-          set pch [expr {$pch & 0xFF}]
-          set value $pch
           if {($value >= 0) && ($value <= 256)} {
             set result [::compMsg dataView setUint8 [dict get $fieldDescInfo fieldOffset] $value]
           } else {

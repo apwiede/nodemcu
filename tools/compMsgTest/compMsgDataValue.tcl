@@ -42,6 +42,8 @@ namespace eval ::compMsg {
     namespace export dataValueStr2ValueId dataValueId2ValueStr addDataValue
     namespace export setDataValue getDataValue compMsgDataValueInit
     namespace export addMsgFieldValues setMsgFieldValue getMsgFieldValue
+    namespace export newMsgFieldValueInfos getMsgFieldValueInfo setMsgFieldValueInfo 
+    namespace export dumpMsgFieldValueInfos setFieldValueInfo getFieldValueInfo
 
     variable dataValueStr2ValueIds 
     set dataValueStr2ValueIds [dict create]
@@ -193,16 +195,16 @@ namespace eval ::compMsg {
 
     # ================================= getDataValue ====================================
 
-#*
-# * \brief get value from data area
-# * \param self The dispatcher struct
-# * \param cmdKey Cmd key of the value
-# * \param fieldId Value id of the value
-# * \param fieldValueCallback The field value callback, if there exists one
-# * \param numericValue The value if it is a numeric one
-# * \param stringValue The value if it is a character string
-# * \return Error code or ErrorOK
-# *
+    #*
+    # * \brief get value from data area
+    # * \param self The dispatcher struct
+    # * \param cmdKey Cmd key of the value
+    # * \param fieldId Value id of the value
+    # * \param fieldValueCallback The field value callback, if there exists one
+    # * \param numericValue The value if it is a numeric one
+    # * \param stringValue The value if it is a character string
+    # * \return Error code or ErrorOK
+    # *
 
     proc getDataValue {compMsgDispatcherVar cmdKey valueId flagsVar fieldValueCallbackVar numericValueVar stringValueVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
@@ -245,66 +247,291 @@ namespace eval ::compMsg {
       checkErrOK DATA_VALUE_FIELD_NOT_FOUND
     }
 
-    # ================================= addMsgFieldValues ====================================
+    # ================================= newMsgFieldValueInfos ====================================
 
-    proc addMsgFieldValues {compMsgDispatcherVar numEntries} {
+    proc newMsgFieldValueInfos {compMsgDispatcherVar cmdKey numEntries msgFieldValueVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $msgFieldValueVar msgFieldValue
+
+      set result $::COMP_MSG_ERR_OK
+      set found false
+      set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
+      set msgFieldValueInfos [dict get $compMsgDataValue msgFieldValueInfos]
+      set cmdKeyIdx 0
+puts stderr [format "newMsgFieldValueInfos: cmdKey: %s numMsgFieldValues: %d" $cmdKey [dict get $msgFieldValueInfos numMsgFieldValues]]
+      while {$cmdKeyIdx < [dict get $msgFieldValueInfos numMsgFieldValues]} {
+        set msgFieldValues [dict get $msgFieldValueInfos msgFieldValues]
+        set msgFieldValue [lindex $msgFieldValues $cmdKeyIdx]
+        if {[dict get $msgFieldValue cmdKey] eq $cmdKey} {
+          set found true
+          break
+        }
+        incr cmdKeyIdx
+      }
+      if {!$found} {
+        if {[dict get $msgFieldValueInfos numMsgFieldValues] >= [dict get $msgFieldValueInfos maxMsgFieldValues]} {
+          if {[dict get $msgFieldValueInfos maxMsgFieldValues] == 0} {
+            dict set msgFieldValueInfos maxMsgFieldValues 5
+            dict set msgFieldValueInfos msgFieldValues [list]
+          } else {
+            dict incr msgFieldValueInfos maxMsgFieldValues 2
+          }
+          set idx [dict get $msgFieldValueInfos numMsgFieldValues]
+          while {$idx < [dict get $msgFieldValueInfos maxMsgFieldValues]} {
+            dict lappend msgFieldValueInfos msgFieldValues [list]
+            incr idx
+          }
+        }
+        set msgFieldValues [dict get $msgFieldValueInfos msgFieldValues]
+puts stderr "numMsgFieldValues: [dict get $msgFieldValueInfos numMsgFieldValues]!"
+        set msgFieldValueIdx [dict get $msgFieldValueInfos numMsgFieldValues]
+        set msgFieldValue  [lindex $msgFieldValues $msgFieldValueIdx]
+        dict incr msgFieldValueInfos numMsgFieldValues
+        dict set msgFieldValue cmdKey $cmdKey
+        dict set msgFieldValue numFieldValues $numEntries
+        set idx 0
+        dict set msgFieldValue fieldValues [list]
+        set myDict [dict create]
+        dict set myDict fieldValueFlags [list]
+        dict set myDict fieldNameId 0
+        dict set myDict fieldValueCallbackId 0
+        dict set myDict dataValue [list]
+        dict set myDict fieldValueCallback [list]
+        while {$idx < $numEntries} {
+          dict lappend msgFieldValue fieldValues $myDict
+          incr idx
+        }
+        set msgFieldValues [lreplace $msgFieldValues $msgFieldValueIdx $msgFieldValueIdx $msgFieldValue]
+        dict set msgFieldValueInfos msgFieldValues $msgFieldValues
+        dict set compMsgDataValue msgFieldValueInfos $msgFieldValueInfos
+puts stderr "compMsgDataValue: $compMsgDataValue!"
+        dict set compMsgDispatcher compMsgDataValue $compMsgDataValue
+      }
+      return $result
+    }
+ 
+    # ================================= getMsgFieldValueInfo ====================================
+
+    proc getMsgFieldValueInfo {compMsgDispatcherVar cmdKey msgFieldValueVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $msgFieldValueVar msgFieldValue
+
+      set result $::COMP_MSG_ERR_OK
+      set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
+      set msgFieldValueInfos [dict get $compMsgDataValue msgFieldValueInfos]
+      set cmdKeyIdx 0
+      set msgFieldValues [dict get $msgFieldValueInfos msgFieldValues]
+      while {$cmdKeyIdx < [dict get $msgFieldValueInfos numMsgFieldValues]} {
+        set msgFieldValue [lindex $msgFieldValues $cmdKeyIdx]
+puts stderr "cmdKey: $cmdKey!$msgFieldValue!"
+        if {[dict get $msgFieldValue cmdKey] eq $cmdKey} {
+          return $::COMP_MSG_ERR_OK
+        }
+        incr cmdKeyIdx
+      }
+      return [checkErrOK FIELD_VALUE_INFO_NOT_FOUND]
+    }
+ 
+    # ================================= setMsgFieldValueInfo ====================================
+
+    proc setMsgFieldValueInfo {compMsgDispatcherVar msgFieldValue fieldValue} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
       set result $::COMP_MSG_ERR_OK
-      set msgFieldValues [dict get $compMsgDispatcher compMsgDataValue msgFieldValues]
-      if {[dict get $msgFieldValues numMsgFields] == 0} {       
-        set fieldValues [list]
+      set fieldValueIdx 0
+      set found false
+      set freeFieldValue [list]
+      set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
+#ets_printf("setMsgFieldValueInfo: numFieldValues: %d\n", msgFieldValue->numFieldValues);
+      # first check if this entry exists, if not take the first unused one
+      while {$fieldValueIdx < [dict get $msgFieldValue numFieldValues]} { 
+        set fieldValues [dict get $msgFieldValue fieldValues]
+        set myFieldValue [lindex $fieldValues $fieldValueIdx]
+        if {[dict get $myFieldValue fieldNameId] == 0} {
+          if {$freeFieldValue eq [list]} {
+            set freeFieldValue $myFieldValue
+          }
+        } else {
+          if {[dict get $myFieldValue fieldNameId] == [dict get $fieldValue fieldNameId]} {
+            set found true
+            break
+          }
+        }
+        incr fieldValueIdx
+      }
+      if {$found} {
+#ets_printf("setMsgFieldValueInfo: duplicate entry for: %d\n", fieldValue->fieldNameId);
+          return [checkErrOK DUPLICATE_FIELD_VALUE_ENTRY]
       } else {
-        set fieldValues [dict get $msgFieldValues fieldValues]
+        if {$freeFieldValue ne [list]} {
+          set myFieldValue $freeFieldValue
+set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgDispatcher [dict get $fieldValue fieldNameId] fieldName]
+checkErrOK $result
+puts stderr "fieldValue: $fieldValue!"
+set value [dict get $fieldValue dataValue]
+#ets_printf("found free %s flags: 0x%08x fieldNameId: %d %s 0x%04x %d callbackId: %d\n", fieldName, fieldValue->fieldValueFlags, fieldValue->fieldNameId, stringValue, numericValue, numericValue, fieldValue->fieldValueCallbackId);
+          dict set myFieldValue fieldNameId [dict get $fieldValue fieldNameId]
+          dict set myFieldValue fieldValueFlags [dict get $fieldValue fieldValueFlags]
+          dict set myFieldValue DataValue [dict get $fieldValue dataValue]
+          dict set myFieldValue fieldValueCallbackId [dict get $fieldValue fieldValueCallbackId]
+          dict set myFieldValue fieldValueCallback [dict get $fieldValue fieldValueCallback]
+        } else {
+#ets_printf("setMsgFieldValueInfo: not found too many entries\n");
+          return [checkErrOK TOO_MANY_FIELD_VALUE_ENTRIES]
+        }
       }
-      set idx [dict get $msgFieldValues numMsgFields]
-      while {$idx < [expr {[dict get $msgFieldValues numMsgFields] + $numEntries}]} {
-        lappend fieldValues [list]
-        incr idx
-      }
-      dict set msgFieldValues fieldValues $fieldValues
-      dict incr msgFieldValues numMsgFields $numEntries
-      dict set compMsgDispatcher compMsgDataValue msgFieldValues $msgFieldValues
       return $result
     }
+ 
+    # ================================= dumpMsgFieldValueInfos ====================================
 
-    # ================================= setMsgFieldValue ====================================
-
-    proc setMsgFieldValue {compMsgDispatcherVar idx fieldValue} {
+    proc dumpMsgFieldValueInfos {compMsgDispatcherVar} {
       upvar $compMsgDispatcherVar compMsgDispatcher
 
-      set result $::COMP_MSG_ERR_OK
-      set msgFieldValues [dict get $compMsgDispatcher compMsgDataValue msgFieldValues]
-      if {$idx >= [dict get $msgFieldValues numMsgFields]} {
-        checkErrOK BAD_MSG_FIELD_INFO_IDX
+      result = COMP_MSG_ERR_OK;
+      noPrefix = self->compMsgDebug->noPrefix;
+      self->compMsgDebug->noPrefix = true;
+      compMsgTypesAndNames = self->compMsgTypesAndNames;
+      compMsgDataValue = self->compMsgDataValue;
+      COMP_MSG_DBG(self, "d", 1, "dumpMsgFieldValueInfos");
+      msgFieldValueInfos = &compMsgDataValue->msgFieldValueInfos;
+      // entry 0 is not used, fieldNameIds start at 1!
+      cmdKeyIdx = 0;
+      while (cmdKeyIdx < msgFieldValueInfos->numMsgFieldValues) {
+        msgFieldValue = &msgFieldValueInfos->msgFieldValues[cmdKeyIdx];
+        ets_sprintf(buf, "  %02d cmdKey: 0x%04x\n", cmdKeyIdx, msgFieldValue->cmdKey);
+        COMP_MSG_DBG(self, "d", 1, "%s", buf);
+        buf[0] = '\0';
+        fieldValueIdx = 0;
+        while (fieldValueIdx < msgFieldValue->numFieldValues) {
+          fieldValue = &msgFieldValue->fieldValues[fieldValueIdx];
+          if (fieldValue->fieldNameId == 0) {
+          } else {
+            result = compMsgTypesAndNames->getFieldNameStrFromId(self, fieldValue->fieldNameId, &fieldName);
+            if (fieldValue->fieldValueFlags & COMP_MSG_FIELD_IS_STRING) {
+              numericValue = 0;
+              stringValue = fieldValue->dataValue.value.stringValue;
+              if (stringValue == NULL) {
+                stringValue = "nil";
+              }
+            } else {
+              numericValue = fieldValue->dataValue.value.numericValue;
+              stringValue = "nil";
+            }
+            if (fieldValue->fieldValueCallbackId == 0) {
+              callbackName = "nil";
+            } else {
+              result = self->compMsgWifiData->callbackId2CallbackStr(fieldValue->fieldValueCallbackId, &callbackName);
+    ets_printf("id: %d result: %d\n", fieldValue->fieldValueCallbackId, result);
+              if (result != COMP_MSG_ERR_OK) {
+                result = self->compMsgModuleData->callbackId2CallbackStr(fieldValue->fieldValueCallbackId, &callbackName);
+    ets_printf("id2: %d result: %d\n", fieldValue->fieldValueCallbackId, result);
+              }
+            }
+            ets_sprintf(buf, "    %-20s: id: %d value: %-15s 0x%08x %6d callback: %-20s %3d flags: 0x%04x\n", fieldName, fieldValue->fieldNameId, stringValue, numericValue, numericValue, callbackName, fieldValue->fieldValueCallbackId, fieldValue->fieldValueFlags);
+            if (fieldValue->fieldValueFlags & COMP_MSG_FIELD_IS_STRING) {
+              c_strcat(buf, " IS_STRING");
+            }
+            if (fieldValue->fieldValueFlags & COMP_MSG_FIELD_IS_NUMERIC) {
+              c_strcat(buf, " IS_NUMERIC");
+            }
+            if (fieldValue->fieldValueFlags & COMP_MSG_FIELD_HAS_CALLBACK) {
+              c_strcat(buf, " HAS_CALLBACK");
+            }
+            COMP_MSG_DBG(self, "d", 1, "%s", buf);
+          }
+          fieldValueIdx++;
+        }
+        cmdKeyIdx++;
       }
-      set fieldValues [dict get $msgFieldValues fieldValues]
-      set entry [lindex $fieldValues $idx]
-      dict set entry flags [ðict get $fieldValue flags]
-#      COMP_MSG_DBG(self, "E", 0, "setMsgFieldValues: idx: %d fieldValueFlags: 0x%08x", idx, entry->flags);
-      return $result
+      self->compMsgDebug->noPrefix = noPrefix;
+      return result;
     }
 
-    #  ================================= getMsgFieldValue ====================================
+    # ================================= setFieldValueInfo ====================================
 
-    proc getMsgFieldValue {compMsgDispatcherVar idx fieldValueVar} {
+    proc setFieldValueInfo {compMsgDispatcherVar cmdKey fieldNameId fieldValue} {
       upvar $compMsgDispatcherVar compMsgDispatcher
-      upvar $fieldValueVar fieldValue
 
-      set result $::COMP_MSG_ERR_OK
-      set msgFieldValues [dict get $compMsgDispatcher compMsgDataValue msgFieldValues]
-      if {$idx >= [dict get $msgFieldValues numMsgFields]} {
-        checkErrOK BAD_MSG_FIELD_INFO_IDX
+      result = COMP_MSG_ERR_OK;
+      found = false;
+      compMsgDataValue = self->compMsgDataValue;
+      msgFieldValueInfos = &compMsgDataValue->msgFieldValueInfos;
+      idx = 0;
+      while (idx < msgFieldValueInfos->numMsgFieldValues) {
+        msgFieldValue = &msgFieldValueInfos->msgFieldValues[idx];
+        if (msgFieldValue->cmdKey == cmdKey) {
+          fieldIdx = 0;
+          while (fieldIdx < msgFieldValue->numFieldValues) {
+            myFieldValue = &msgFieldValue->fieldValues[fieldIdx];
+            if ((myFieldValue->fieldNameId == fieldNameId)) {
+              if ((myFieldValue->fieldValueFlags & COMP_MSG_FIELD_IS_STRING) && (myFieldValue->dataValue.value.stringValue != NULL)) {
+                os_free(myFieldValue->dataValue.value.stringValue);
+              }
+              myFieldValue->fieldValueFlags = fieldValue->fieldValueFlags;
+              if (fieldValue->fieldValueFlags & COMP_MSG_FIELD_IS_NUMERIC) {
+                myFieldValue->dataValue.value.numericValue = fieldValue->dataValue.value.numericValue;
+    stringValue = "nil";
+    numericValue = myFieldValue->dataValue.value.numericValue;
+              } else {
+                myFieldValue->fieldValueFlags |= COMP_MSG_FIELD_IS_STRING;
+                myFieldValue->dataValue.value.stringValue = os_zalloc(c_strlen(fieldValue->dataValue.value.stringValue) + 1);
+                c_memcpy(myFieldValue->dataValue.value.stringValue, fieldValue->dataValue.value.stringValue, c_strlen(fieldValue->dataValue.value.stringValue));
+        stringValue = myFieldValue->dataValue.value.stringValue;
+      numericValue = 0;
+              }
+              myFieldValue->fieldValueCallbackId = fieldValue->fieldValueCallbackId;
+              if (fieldValue->fieldValueCallback != NULL) {
+                myFieldValue->fieldValueFlags |= COMP_MSG_FIELD_HAS_CALLBACK;
+                myFieldValue->fieldValueCallback = fieldValue->fieldValueCallback;
+              }
+      ets_printf("setFieldValueInfo: flags: 0x%04x numeric: 0x%04x %d string: %s callback: %p\n", fieldValue->fieldValueFlags, numericValue, numericValue, stringValue, myFieldValue->fieldValueCallback);
+              return result;
+            }
+            idx++;
+          }
+        }
       }
-      set fieldValues [dict get $msgFieldValues fieldValues]
-      set entry [lindex $fieldValues $idx]
-      if {$entry eq [list]} {
-        dict set entry flags [list]
-        dict set entry dataValue [list]
+      return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
+    }
+
+    # ================================= getFieldValueInfo ====================================
+
+    #**
+    # * \brief get value from data area
+    # * \param self The dispatcher struct
+    # * \param cmdKey Message cmdKey
+    # * \param fieldNameId Message fieldNameId within cmdKey
+    # * \param fieldValueInfo FieldValue struct pointer for passing values out
+    # * \return Error code or ErrorOK
+    # *
+    # *
+    proc getFieldValueInfo {compMsgDispatcherVar cmdKey fieldNameId fieldValueVar} {
+      upvar $compMsgDispatcherVar compMsgDispatcher
+      upvar $fieldValueVar fieldValueVar
+
+COMP_MSG_DBG(self, "E", 2, "getFieldValueInfo: %p %d 0x%04x", fieldValue, fieldNameId, cmdKey);
+      result = COMP_MSG_ERR_OK;
+      compMsgDataValue = self->compMsgDataValue;
+      msgFieldValueInfos = &compMsgDataValue->msgFieldValueInfos;
+      cmdKeyIdx = 0;
+      while (cmdKeyIdx < msgFieldValueInfos->numMsgFieldValues) {
+        msgFieldValue = &msgFieldValueInfos->msgFieldValues[cmdKeyIdx];
+        if (msgFieldValue->cmdKey == cmdKey) {
+          idx = 0;
+          while (idx < msgFieldValue->numFieldValues) {
+            myFieldValue = &msgFieldValue->fieldValues[idx];
+            if ((myFieldValue->fieldNameId == fieldNameId)) {
+              *fieldValue = myFieldValue;
+              return result;
+            }
+            idx++;
+          }
+        }
+        cmdKeyIdx++;
       }
-      dict set fieldValue flags [dict get $entry flags]
-      dict set fieldValue dataValue [dict get $entry dataValue]
-      return $result
+      COMP_MSG_DBG(self, "E", 1, "getFieldValueInfo: DATA_VALUE_FIELD_NOT_FOUND: 0x%04x %d", cmdKey, fieldNameId);
+      return COMP_MSG_ERR_DATA_VALUE_FIELD_NOT_FOUND;
     }
 
     # ================================= compMsgDataValueInit ====================================
@@ -317,9 +544,15 @@ namespace eval ::compMsg {
       dict set compMsgDataValue maxDataValues 0
       dict set compMsgDataValue dataValues [list]
 
+      set msgFieldValueInfos [dict create]
+      dict set msgFieldValueInfos numMsgFieldValues 0
+      dict set msgFieldValueInfos maxMsgFieldValues 0
+      dict set msgFieldValueInfos msgFieldValues [list]
+      dict set compMsgDataValue msgFieldValueInfos $msgFieldValueInfos
+
       set msgFieldValues [dict create]
       dict set msgFieldValues numMsgFields 0
-      dict set msgFieldValues fieldValues [list]
+      dict set msgFieldValues msgFieldValues [list]
       dict set compMsgDataValue msgFieldValues $msgFieldValues
 
       dict set compMsgDispatcher compMsgDataValue $compMsgDataValue

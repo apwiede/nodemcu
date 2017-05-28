@@ -129,7 +129,7 @@ puts stderr "compMsgMsgDesc keys:[dict keys [dict get $compMsgDispatcher compMsg
       set fieldSequence [dict get $msgDescription fieldSequence]
       while {$idx < $numEntries} {
         set fieldNameId [lindex $fieldSequence $idx]
-        set fieldDescInfo [lindex $fieldDescInfos $fieldNameId]
+        set fieldDescInfo [lindex $fieldDescInfos $idx]
         set result [::compMsg dataView getFieldTypeStrFromId [dict get $fieldDescInfo fieldTypeId] fieldType]
         checkErrOK $result
         set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId compMsgDispatcher $fieldNameId fieldName]
@@ -138,7 +138,6 @@ puts stderr "compMsgMsgDesc keys:[dict keys [dict get $compMsgDispatcher compMsg
         if {[lsearch [dict get $fieldDescInfo fieldFlags] "COMP_MSG_FIELD_IS_SET"] >= 0} {
           set result [::compMsg compMsgDataView getFieldValue $fieldDescInfo value 0]
           checkErrOK $result
-puts stderr "val: $value![dict get $fieldDescInfo fieldTypeId]!"
           switch [dict get $fieldDescInfo fieldTypeId] {
             DATA_VIEW_FIELD_UINT8_T {
               puts stderr [format "      value: 0x%02x %d" $value $value]
@@ -210,102 +209,6 @@ puts stderr "val: $value![dict get $fieldDescInfo fieldTypeId]!"
       checkErrOK [checkErrOK FIELD_NOT_FOUND]
     }
  
-    # ============================= addHandle ========================
-    
-    proc addHandle {handle headerVar} {
-      variable compMsgData
-      variable compMsgHandles
-      upvar $headerVar header
-    
-      if {[llength [dict get $compMsgHandles handles]] eq 0} {
-        set handleDict [dict create]
-        dict set handleDict handle $handle
-        dict set handleDict compMsgData $compMsgData
-        dict set handleDict header [list]
-        dict lappend compMsgHandles handles $handleDict
-        dict incr compMsgHandles numHandles 1
-        set header [list]
-        return [checkErrOK OK]
-      } else {
-        # check for unused slot first
-        set idx 0
-        set handles [dict get $compMsgHandles handles]
-        while {$idx < [dict get $compMsgHandles numHandles]} {
-           set handleDict [lindex $handles $idx]
-          if {[dict get $handleDict handle] eq [list]} {
-            set handles [dict get $compMsgHandles handles]
-            set entry [lindex $handles $idx]
-            dict set entry handle $handle
-            dict set entry compMsgData $compMsgData
-            set handles [lreplace $handles $idx $idx $entry]
-            dict set compMsgHandles handles $handles
-            set header [list]
-            return [checkErrOK OK]
-          }
-          incr idx
-        }
-        set entry [dict create]
-        dict set entry handle $handle
-        dict set entry compMsgData $compMsgData
-        dict lappend compMsgHandles handles $entry
-        set header [list]
-        dict incr compMsgHandles numHandles 1
-      }
-      return [checkErrOK OK]
-    }
-    
-    # ============================= deleteHandle ========================
-    
-    proc deleteHandle {handle} {
-      if {compMsgHandles.handles == NULL} {
-        checkErrOK HANDLE_NOT_FOUND
-      }
-      found = 0
-      idx = 0
-      numUsed = 0
-      while {idx < compMsgHandles.numHandles} {
-        if {(compMsgHandles.handles[idx].handle != NULL} && (c_strcmp(compMsgHandles.handles[idx].handle, handle) == 0)) {
-          compMsgHandles.handles[idx].handle = NULL
-          found++
-        } else {
-          if {compMsgHandles.handles[idx].handle != NULL} {
-            numUsed++
-          }
-        }
-        idx++
-      }
-      if {numUsed == 0} {
-        os_free{compMsgHandles.handles}
-        compMsgHandles.handles = NULL
-      }
-      if {$found} {
-          return [checkErrOK OK]
-      }
-      checkErrOK [checkErrOK HANDLE_NOT_FOUND]
-    }
-    
-    # ============================= checkHandle ========================
-    
-    proc checkHandle {handle compMsgData} {
-      variable compMsgHandles
-      variable compMsgData
-    
-      if {[dict get $compMsgHandles handles] eq [list]} {
-        checkErrOK [checkErrOK HANDLE_NOT_FOUND]
-      }
-      set idx 0
-      set handles [dict get compMsgHandles handles]
-      while {$idx < [dict get $compMsgHandles numHandles]} {
-        set entry [lindex $handles $idx]
-        if {([dict get $entry handle] ne [list]) && ([dict get $entry handle] eq $handle)} {
-          set compMsgData [dict get $entry compMsgData]
-          return [checkErrOK OK]
-        }
-        incr idx
-      }
-      checkErrOK [checkErrOK HANDLE_NOT_FOUND]
-    }
-    
     # ============================= getMsgData ========================
     
     proc getMsgData {compMsgDispatcherVar dataVar lgthVar} {
@@ -633,6 +536,7 @@ puts stderr "init: $fieldNameId!$fieldOffset!$fieldLgth!"
       dict set msgFieldInfos fieldDescInfos $fieldDescInfos
       dict set compMsgDispatcher compMsgTypesAndNames msgFieldInfos $msgFieldInfos
       dict set compMsgDispatcher compMsgData $compMsgData
+puts stderr "initMsg done"
       return [checkErrOK OK]
     }
     

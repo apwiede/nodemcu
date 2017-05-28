@@ -76,11 +76,12 @@ namespace eval compMsg {
     
     # ================================= sendMsg ====================================
     
-    proc sendMsg {compMsgDispatcherVar msgData msgLgth} {
+    proc sendMsg {compMsgDispatcherVar msgData msgLgth msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-      set handleType [dict get $compMsgDispatcher currHdr hdrHandleType]
-      set encryption [dict get $compMsgDispatcher currHdr hdrEncryption]
+puts stderr "sendMsg keys: [dict keys $msgDescription]!"
+      set handleType [dict get $msgDescription handleType]
+      set encryption [dict get $msgDescription encrypted]
 #puts stderr "sendMsg: handleType: $handleType!"
       switch $handleType {
         "A" {

@@ -201,17 +201,84 @@ puts stderr "fieldLgth2: [dict get $fieldInfo fieldLgth]!"
     
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set fieldSequence [dict get $msgDescription fieldSequence]
-      set fieldId [lindex $fieldSequence $fieldIdx]
+      set fieldNameIntId [lindex $fieldSequence $fieldIdx]
       set msgFieldInfos [dict get $compMsgDispatcher compMsgTypesAndNames msgFieldInfos]
       set fieldDescInfos [dict get $msgFieldInfos fieldDescInfos]
-      set fieldDescInfo [lindex $fieldDescInfos $fieldId]
-set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId ::compMsgDispatcher $fieldId fieldName]
+      set fieldDescInfo [lindex $fieldDescInfos $fieldNameIntId]
+      set result [::compMsg compMsgTypesAndNames getFieldNameIdFromInt compMsgDispatcher $fieldNameIntId fieldNameId]
+      checkErrOK $result
+set result [::compMsg compMsgTypesAndNames getFieldNameStrFromId ::compMsgDispatcher $fieldNameIntId fieldName]
 checkErrOK $result
-puts stderr "setMsgFieldValue: fieldName: $fieldName!$fieldDescInfo!"
+puts stderr "setMsgFieldValue: fieldName: $fieldName!id: $fieldNameIntId!$fieldNameId!\n  $fieldDescInfo!"
+# FIXME TEMPORARY!
+set cmdKey P1
+      switch $fieldNameId {
+        COMP_MSG_SPEC_FIELD_TOTAL_LGTH -
+        COMP_MSG_SPEC_FIELD_CMD_LGTH -
+        COMP_MSG_SPEC_FIELD_FILLER -
+        COMP_MSG_SPEC_FIELD_HDR_FILLER -
+        COMP_MSG_SPEC_FIELD_CRC -
+        COMP_MSG_SPEC_FIELD_TOTAL_CRC -
+        COMP_MSG_SPEC_FIELD_RANDOM_NUM -
+        COMP_MSG_SPEC_FIELD_SEQUENCE_NUM {
+          # these cannot be set manually!
+puts stderr "no setting  field"
+          return $::COMP_MSG_ERR_OK
+        }
+      }
+      if {[lsearch [dict get $fieldDescInfo fieldFlags] COMP_MSG_FIELD_KEY_VALUE] >= 0} {
+puts stderr "keyValue field"
+        # special handling for buildning key value fields!
+      } else {
+        if {[lsearch [dict get $fieldDescInfo fieldFlags] COMP_MSG_FIELD_HEADER_UNIQUE] >= 0} {
+puts stderr "unique header field!"
+          # we get the appropriate value from the msgDescription headerValues
+          set result [::compMsg dataView getDataViewData savedData savedLgth]
+          checkErrOK $result
+          set result [::compMsg dataView setDataViewData [dict get $msgDescription headerFieldValues] [dict get $compMsgDispatcher compMsgMsgDesc msgHeaderInfo headerLgth]]
+          checkErrOK $result
+          set result [::compMsg compMsgDataView getFieldValue $fieldDescInfo value 0]
+puts stderr "get: value: $value!$fieldDescInfo!"
+          checkErrOK $result
+          set result [::compMsg dataView setDataViewData $savedData $savedLgth]
+          checkErrOK $result
+          set result [::compMsg compMsgDataView setFieldValue $fieldDescInfo $value 0]
+          checkErrOK $result
+          dict lappend  fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+        } else {
+          if {[lsearch [dict get $fieldDescInfo fieldFlags] COMP_MSG_FIELD_HEADER] >= 0} {
+puts stderr "header field"
+          } else {
+puts stderr "normal field"
+            # we get the appropriate value in checking if there is a fieldValueCallback or from the fieldValueInfos
+            # for that cmdKey
+            set compMsgDataValue [dict get $compMsgDispatcher compMsgDataValue]
+            set dataValues [dict get $compMsgDataValue dataValues]
+            set idx 0
+            set found false
+            while {$idx < [dict get $compMsgDataValue numDataValues]} {
+               set dataValue [lindex $dataValues $idx]
+               if {[dict get $dataValue cmdKey] eq $cmdKey} {
+                 set found true
+puts stderr "dataValue: $cmdKey!$dataValue!"
+                 break
+               }
+               incr idx
+            }
+            if {!$found} {
+              checkErrOK DATA_VALUE_CMD_KEY_NOT_FOUND
+            }
+            set result [::compMsg compMsgDataView setFieldValue $fieldDescInfo [dict get $dataValue value] 0]
+            checkErrOK $result
+            dict lappend  fieldDescInfo fieldFlags COMP_MSG_FIELD_IS_SET
+          }
+        }
+        set fieldDescInfos [lreplace $fieldDescInfos $fieldNameIntId $fieldNameIntId $fieldDescInfo]
+      }
+      dict set msgFieldInfos fieldDescInfos $fieldDescInfos
+      dict set compMsgDispatcher compMsgTypesAndNames msgFieldInfos $msgFieldInfos
 
 if {0} {
-      set fieldValueStr [dict get $compMsgDispatcher msgValPart fieldValueStr]
-      set fieldNameStr [dict get $compMsgDispatcher msgValPart fieldNameStr]
       if {[string range $fieldValueStr 0 3] eq "@get"} {
         # call the callback function for the field!!
         set callback [dict get $compMsgDispatcher msgValPart fieldValueCallback]
@@ -232,12 +299,6 @@ set value2 "???"
 set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr value2]
 #puts stderr "value2: $value2!"
       } else {
-        set msgValPart [dict get $compMsgDispatcher msgValPart]
-        if {[lsearch [dict get $msgValPart fieldFlags] COMP_DISP_DESC_VALUE_IS_NUMBER] >= 0} {
-          set value [dict get $msgValPart fieldValue]
-        } else {
-          set value [dict get $msgValPart fieldValueStr]
-        }
 #puts stderr "setMsgFieldValue2: $fieldNameStr!$value!"
         switch [dict get $msgValPart fieldNameId] {
           COMP_MSG_SPEC_FIELD_DST {
@@ -266,7 +327,7 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
     proc setMsgValues {compMsgDispatcherVar msgDescription} {
       upvar $compMsgDispatcherVar compMsgDispatcher
     
-#puts stderr "setMsgValues"
+puts stderr "setMsgValues"
       set compMsgData [dict get $compMsgDispatcher compMsgData]
       set numEntries [dict get $msgDescription numFields]
       set fieldSequence [dict get $msgDescription fieldSequence]
@@ -278,10 +339,7 @@ set result [::compMsg compMsgData getFieldValue compMsgDispatcher $fieldNameStr 
       set cmdKeyVal [dict get $msgDescription cmdKey]
       set val1 [format %c [expr {$cmdKeyVal >> 8}]]
       set val2 [format %c [expr {$cmdKeyVal & 0xFF}]]
-puts stderr "keys: [dict keys [dict get $compMsgMsgDesc msgHeaderInfo]]!\nkeys2: [dict keys $msgDescription]!"
-puts stderr "val1: $val1!$val2!headerLgth: [dict get $compMsgMsgDesc msgHeaderInfo headerLgth]!"
       set msgFieldGroupInfo [dict get $msgFieldGroupInfos COMP_MSG_VAL_FIELD_GROUP "${val1}${val2}"]
-puts stderr "numMsgFieldVal: [dict get $msgFieldGroupInfo numMsgFieldVal]!"
       set numFields [dict get $msgDescription numFields]
       set fieldIdx 0
 puts stderr "numFields: $numFields!"
@@ -293,33 +351,7 @@ checkErrOK $result
 puts stderr "fieldName: $fieldName!"
         set result [::compMsg compMsgBuildMsg setMsgFieldValue compMsgDispatcher $fieldIdx $msgDescription]
         checkErrOK $result
-if {0} {
-        if {[lsearch [dict get $fieldDescInfo fieldFlags] COMP_MSG_FIELD_HEADER_UNIQUE] >= 0} {
-          # need to get these value form msgDescription headerFieldValues!!
-puts stderr "unique field: $fieldName!"
-        } else {
-          set result [::compMsg compMsgDataView getIdFieldValue compMsgDispatcher $fieldId dataValue 0]
-          checkErrOK $result
-}
-puts stderr "val: $dataValue!"
-          set result [setMsgFieldValue compMsgDispatcher msgDescription]
-          checkErrOK $result
 
-        set fields [dict get $compMsgData fields]
-        set fieldInfo [lindex $fields $msgDescPartIdx]
-        set fieldNameId [dict get $fieldInfo fieldNameId]
-        set fieldNameStr [dict get $msgDescPart fieldNameStr]
-        if {($msgValPart ne [list]) && ([dict get $fieldInfo fieldNameId] eq [dict get $msgValPart fieldNameId])} {
-#puts stderr [format "default fieldNameId: %s buildMsgInfo fieldNameId: %s" [dict get $fieldInfo fieldNameId] [dict get $msgValPart fieldNameId]]
-          set result [setMsgFieldValue compMsgDispatcher]
-          checkErrOK $result
-          set msgValParts [dict get $compMsgDispatcher compMsgData msgValParts]
-          set msgValPart [dict get $compMsgDispatcher msgValPart]
-          set msgValParts [lreplace $msgValParts $msgValPartIdx $msgValPartIdx $msgValPart]
-          dict set compMsgDispatcher compMsgData msgValParts $msgValParts
-          incr msgValPartIdx
-        }
-}
         incr fieldIdx
       }
 if {0} {
@@ -375,43 +407,32 @@ puts stderr "need to encrypt message!"
         set totalCrcOffset 0
         set totalCrc ""
         set mlen [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $headerLgth}]
-        set hdr [dict get $compMsgDispatcher currHdr]
         if {[lsearch [dict get $msgDescription fieldFlags] COMP_MSG_HAS_TOTAL_CRC] >= 0} {
-          if {[lsearch [dict get $hdr fieldSequence] COMP_DISP_U8_TOTAL_CRC] >= 0} {
-            set totalCrcOffset 1
-            incr mlen -1
+          set result [::compMsg compMsgDataView getTotalCrcLgth compMsgDispatcher $msgDescription totalCrcLgth]
+          checkErrOK $result
+          set mlen [expr {$mlen - $totalCrcLgth}]
+          if {$totalCrcLgth == 1} {
             set totalCrc [string range $msgData end end]
           } else {
             set totalCrc [string range $msgData end-1 end]
-            incr totalCrcOffset 2
-            incr mlen -2
           }
         }
-        set endIdx [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $totalCrcOffset - 1}]
+        set endIdx [expr {[dict get $compMsgDispatcher compMsgData totalLgth] - $totalCrcLgth - 1}]
 puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
         set toCrypt [string range $msgData [dict get $compMsgDispatcher compMsgData headerLgth] $endIdx]
         set header [string range $msgData 0 [expr {$headerLgth - 1}]]
-        set result [::compMsg compMsgDispatcher encryptMsg $toCrypt $mlen $cryptKey $klen $cryptKey $ivlen encryptedMsgData encryptedMsgDataLgth]
+        set result [::compMsg compMsgUtil encryptMsg $toCrypt $mlen $cryptKey $klen $cryptKey $ivlen encryptedMsgData encryptedMsgDataLgth]
         checkErrOK $result
         set msgData "${header}${encryptedMsgData}${totalCrc}"
 #puts stderr [format "crypted: len: %d!mlen: %d!msgData lgth! %d" $encryptedMsgDataLgth $mlen [string length $msgData]]
       }
       set compMsgData [dict get $compMsgDispatcher compMsgData]
-      if {[lsearch [dict get $compMsgDispatcher currHdr hdrFlags] COMP_DISP_TOTAL_CRC] >= 0} {
+      if {[lsearch [dict get $msgDescription fieldFlags] COMP_MSG_HAS_TOTAL_CRC] >= 0} {
         set startOffset [dict get $compMsgData headerLgth]
+        set result [::compMsg compMsgDataView getTotalCrcLgth compMsgDispatcher $msgDescription totalCrcLgth]
+        checkErrOK $result
         # lgth is needed without totalCrc
-        set fieldSequence [dict get $compMsgDispatcher currHdr fieldSequence]
-        set totalCrcLgth 0
-        switch [lindex $fieldSequence end] {
-          COMP_DISP_U8_TOTAL_CRC {
-            set totalCrcLgth 1
-            set totalCrcOffset [expr {[dict get $compMsgData totalLgth] - $totalCrcLgth}]
-          }
-          COMP_DISP_U16_TOTAL_CRC {
-            set totalCrcLgth 2
-            set totalCrcOffset [expr {[dict get $compMsgData totalLgth] - $totalCrcLgth}]
-          }
-        }
+        set totalCrcOffset [expr {[dict get $compMsgData totalLgth] - $totalCrcLgth}]
       } else {
         set totalCrcOffset [dict get $compMsgData totalLgth]
       }
@@ -427,16 +448,10 @@ puts stderr "headerLgth!$headerLgth!mlen!$mlen!"
         
 #::compMsg dataView dumpBinary $msgData [string length $msgData] "msgData"
       # here we need to decide where and how to send the message!!
-      # from currHdr we can see the handle type and - if needed - the @dst
+      # from msgDescription we can see the handle type and - if needed - the @dst
       # that is now done in sendMsg!
-#set handleType [dict get $compMsgDispatcher currHdr hdrHandleType]
-#set toPart [dict get $compMsgDispatcher currHdr hdrToPart]
 #puts stderr [format "transferType: %s dst: 0x%04x" $handleType $toPart]
-      set result [::compMsg compMsgSendReceive sendMsg compMsgDispatcher $msgData $msgLgth]
-#set fd [open "ADRequest.txt" w]
-#puts $fd $msgData
-#flush $fd
-#close $fd
+      set result [::compMsg compMsgSendReceive sendMsg compMsgDispatcher $msgData $msgLgth $msgDescription]
 #puts stderr [format "buildMsg sendMsg has been called result: %d" $result]
       checkErrOK $result
       return $result
